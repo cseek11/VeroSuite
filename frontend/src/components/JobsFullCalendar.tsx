@@ -2,8 +2,7 @@ import React, { useRef, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import '@fullcalendar/common/main.css';
-import '@fullcalendar/daygrid/main.css';
+
 
 const mockJobs = [
   { id: '1', title: 'Job 1', date: '2025-08-17' },
