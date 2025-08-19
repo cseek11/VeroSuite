@@ -12,7 +12,6 @@ export default function Login() {
 
   // Debug environment variables
   const debugEnv = {
-    VITE_API_BASE: import.meta.env.VITE_API_BASE,
     VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL ? 'Set' : 'Not Set',
     VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Set' : 'Not Set',
   };
@@ -27,7 +26,7 @@ export default function Login() {
       window.location.href = '/';
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.message || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -40,7 +39,6 @@ export default function Login() {
         
         {/* Debug info - remove this in production */}
         <div className="bg-gray-100 p-2 rounded text-xs">
-          <div>API Base: {debugEnv.VITE_API_BASE || 'Not Set'}</div>
           <div>Supabase URL: {debugEnv.VITE_SUPABASE_URL}</div>
           <div>Supabase Key: {debugEnv.VITE_SUPABASE_ANON_KEY}</div>
         </div>
