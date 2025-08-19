@@ -1,4 +1,4 @@
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate, Link } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { Spinner } from '@/ui/Spinner';
@@ -9,6 +9,7 @@ const JobsPage = lazy(() => import('@/routes/Jobs'));
 const CustomersPage = lazy(() => import('@/routes/Customers'));
 const RoutingPage = lazy(() => import('@/routes/Routing'));
 const UploadsPage = lazy(() => import('@/routes/Uploads'));
+const DispatcherDashboard = lazy(() => import('@/components/DispatcherDashboard'));
 
 function PrivateRoute({ children, roles }: { children: JSX.Element; roles?: string[] }) {
   const token = useAuthStore((s) => s.token);
@@ -21,6 +22,16 @@ function PrivateRoute({ children, roles }: { children: JSX.Element; roles?: stri
 export default function App() {
   return (
     <Suspense fallback={<Spinner />}>
+      <nav className="bg-white shadow mb-6">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex gap-6 items-center">
+          <Link to="/" className="font-bold text-blue-700">Dashboard</Link>
+          <Link to="/dispatcher" className="text-gray-700 hover:text-blue-700">Dispatcher Dashboard</Link>
+          <Link to="/jobs" className="text-gray-700 hover:text-blue-700">Jobs</Link>
+          <Link to="/customers" className="text-gray-700 hover:text-blue-700">Customers</Link>
+          <Link to="/routing" className="text-gray-700 hover:text-blue-700">Routing</Link>
+          <Link to="/uploads" className="text-gray-700 hover:text-blue-700">Uploads</Link>
+        </div>
+      </nav>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route
@@ -28,6 +39,14 @@ export default function App() {
           element={
             <PrivateRoute>
               <DashboardPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/dispatcher"
+          element={
+            <PrivateRoute roles={["admin", "dispatcher"]}>
+              <DispatcherDashboard />
             </PrivateRoute>
           }
         />
