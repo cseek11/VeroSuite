@@ -1,3 +1,13 @@
+const JobsFullCalendar = lazy(() => import('@/components/JobsFullCalendar'));
+          <Link to="/jobs-fullcalendar" className="text-gray-700 hover:text-blue-700">Jobs FullCalendar</Link>
+        <Route
+          path="/jobs-fullcalendar"
+          element={
+            <PrivateRoute>
+              <JobsFullCalendar />
+            </PrivateRoute>
+          }
+        />
 const JobsScheduler = lazy(() => import('@/components/JobsScheduler'));
 import { Route, Routes, Navigate, Link, useNavigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
@@ -32,27 +42,21 @@ export default function App() {
   };
   return (
     <Suspense fallback={<Spinner />}>
-      <nav className="bg-white shadow mb-6">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex gap-6 items-center">
-          <Link to="/" className="font-bold text-blue-700">Dashboard</Link>
-          <Link to="/dispatcher" className="text-gray-700 hover:text-blue-700">Dispatcher Dashboard</Link>
-          <Link to="/jobs" className="text-gray-700 hover:text-blue-700">Jobs</Link>
-          <Link to="/jobs-calendar" className="text-gray-700 hover:text-blue-700">Jobs Calendar</Link>
-          <Link to="/jobs-scheduler" className="text-gray-700 hover:text-blue-700">Jobs Scheduler</Link>
-        <Route
-          path="/jobs-scheduler"
-          element={
-            <PrivateRoute>
-              <JobsScheduler />
-            </PrivateRoute>
-          }
-        />
-          <Link to="/customers" className="text-gray-700 hover:text-blue-700">Customers</Link>
-          <Link to="/routing" className="text-gray-700 hover:text-blue-700">Routing</Link>
-          <Link to="/uploads" className="text-gray-700 hover:text-blue-700">Uploads</Link>
-          <button onClick={handleLogout} className="ml-auto bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Logout</button>
-        </div>
-      </nav>
+        <nav className="bg-white shadow mb-6">
+          <div className="max-w-7xl mx-auto px-4 py-3 flex gap-6 items-center">
+            <>
+              <Link to="/" className="font-bold text-blue-700">Dashboard</Link>
+              <Link to="/dispatcher" className="text-gray-700 hover:text-blue-700">Dispatcher Dashboard</Link>
+              <Link to="/jobs" className="text-gray-700 hover:text-blue-700">Jobs</Link>
+              <Link to="/jobs-calendar" className="text-gray-700 hover:text-blue-700">Jobs Calendar</Link>
+              <Link to="/jobs-scheduler" className="text-gray-700 hover:text-blue-700">Jobs Scheduler</Link>
+              <Link to="/customers" className="text-gray-700 hover:text-blue-700">Customers</Link>
+              <Link to="/routing" className="text-gray-700 hover:text-blue-700">Routing</Link>
+              <Link to="/uploads" className="text-gray-700 hover:text-blue-700">Uploads</Link>
+              <button onClick={handleLogout} className="ml-auto bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Logout</button>
+            </>
+          </div>
+        </nav>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route
@@ -84,6 +88,14 @@ export default function App() {
           element={
             <PrivateRoute>
               <JobsCalendar />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/jobs-scheduler"
+          element={
+            <PrivateRoute>
+              <JobsScheduler />
             </PrivateRoute>
           }
         />
