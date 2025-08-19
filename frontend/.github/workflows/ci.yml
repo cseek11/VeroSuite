@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  frontend:
+    name: Frontend Lint, Typecheck & Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: |
+            frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: |
+          npm run lint || true
+
+      - name: Build
+        run: npm run build
+
+  backend:
+    name: Backend Lint, Unit & E2E
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/verosuite_ci
+      JWT_SECRET: test-secret
+      NODE_ENV: test
+      PORT: 3001
+    services:
+      postgres:
+        image: postgres:14
+        ports: ['5432:5432']
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: verosuite_ci
+        options: >-
+          --health-cmd "pg_isready -U postgres" \
+          --health-interval 10s \
+          --health-timeout 5s \
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Apply database schema
+        run: npx prisma db push
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Apply RLS policies
+        run: psql "$DATABASE_URL" -f sql/setup-rls.sql
+
+      - name: Seed database
+        run: npm run db:seed
+
+      - name: Lint backend
+        run: npx eslint "src/**/*.{ts,tsx}" || true
+
+      - name: Build backend
+        run: npm run build
+
+      - name: Run unit tests
+        run: npm test -- --ci --reporters=default
+
+      - name: Run e2e tests
+        run: npm run test:e2e

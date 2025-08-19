@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VeroSuite Technician Mobile (Standalone)</title>
+  <style>
+    body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; background-color: #f0f2f5; }
+    .max-w-sm{max-width:24rem}.mx-auto{margin-left:auto;margin-right:auto}
+    .rounded-lg{border-radius:.5rem}.rounded{border-radius:.25rem}
+    .border{border:1px solid #e5e7eb}.border-b{border-bottom:1px solid #e5e7eb}
+    .shadow-2xl{box-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25)}
+    .bg-white{background:#fff}.bg-blue-600{background:#2563eb}.text-white{color:#fff}
+    .text-blue-100{color:#dbeafe}.text-blue-600{color:#2563eb}
+    .p-4{padding:1rem}.p-3{padding:.75rem}.p-2{padding:.5rem}
+    .text-lg{font-size:1.125rem}.text-sm{font-size:.875rem}.text-xs{font-size:.75rem}
+    .font-semibold{font-weight:600}.font-bold{font-weight:700}.font-medium{font-weight:500}
+    .grid{display:grid}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.gap-2{gap:.5rem}
+    .flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.items-start{align-items:flex-start}.justify-between{justify-content:space-between}
+    .overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}
+    .border-l-4{border-left-width:4px}
+    .bg-orange-50{background:#fff7ed}
+    .rounded-lg{border-radius:.5rem}
+    .mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}
+    .mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}
+  </style>
+  <!-- React, ReactDOM, Babel -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Minimal icon shims for standalone (emoji-based)
+    const Icons = {
+      Calendar: (p)=> <span {...p}>📅</span>,
+      MapPin: (p)=> <span {...p}>📍</span>,
+      Clock: (p)=> <span {...p}>⏱</span>,
+      User: (p)=> <span {...p}>👤</span>,
+      Phone: (p)=> <span {...p}>📞</span>,
+      Camera: (p)=> <span {...p}>📷</span>,
+      CheckCircle: (p)=> <span {...p}>✔️</span>,
+      Play: (p)=> <span {...p}>▶️</span>,
+      Square: (p)=> <span {...p}>⏹️</span>,
+      Navigation: (p)=> <span {...p}>🧭</span>,
+      Droplets: (p)=> <span {...p}>💧</span>,
+      FileText: (p)=> <span {...p}>📄</span>,
+      Upload: (p)=> <span {...p}>⤴️</span>,
+      Wifi: (p)=> <span {...p}>📶</span>,
+      WifiOff: (p)=> <span {...p}>📴</span>,
+      RotateCcw: (p)=> <span {...p}>🔄</span>,
+      Battery: (p)=> <span {...p}>🔋</span>,
+      Zap: (p)=> <span {...p}>⚡</span>
+    };
+
+    const mockOfflineStorage = { jobs: [], pendingSync: [], photos: [], signatures: [] };
+    const mockGPS = { latitude: 40.4406, longitude: -79.9959, accuracy: 5 };
+
+    const mockApiResponses = { todaysJobs: [
+      { id:'job1', status:'scheduled', priority:'high', scheduled_date:'2025-08-18', time_window:{start:'09:00', end:'11:00'}, customer:{ id:'account1', name:'Downtown Restaurant Group', type:'commercial' }, location:{ id:'location1', name:'Main Street Location', address:'123 Main St, Pittsburgh, PA 15222', coordinates:{ lat:40.4406, lng:-79.9959 } }, service:{ type:'Monthly Service', description:'Interior and exterior pest control treatment', estimated_duration:90, price:185.00, special_instructions:'Kitchen treatment required - restaurant opens at 11 AM. Use low-odor chemicals.' }, technician_id:'tech1', actual_times:{ started_at:null, completed_at:null }, completion_data:{ notes:null, signature:null, photos:[], chemicals_used:[] } },
+      { id:'job2', status:'scheduled', priority:'medium', scheduled_date:'2025-08-18', time_window:{start:'13:30', end:'15:30'}, customer:{ id:'account2', name:'Office Complex LLC', type:'commercial' }, location:{ id:'location2', name:'Corporate Plaza', address:'789 Liberty Ave, Pittsburgh, PA 15222', coordinates:{ lat:40.4417, lng:-79.9901 } }, service:{ type:'Quarterly Service', description:'Comprehensive building treatment', estimated_duration:120, price:325.00, special_instructions:'Basement and parking garage treatment. Contact security desk on arrival.' }, technician_id:'tech1', actual_times:{ started_at:null, completed_at:null }, completion_data:{ notes:null, signature:null, photos:[], chemicals_used:[] } },
+      { id:'job3', status:'completed', priority:'high', scheduled_date:'2025-08-18', time_window:{start:'07:30', end:'09:30'}, customer:{ id:'account3', name:'Westfield Apartments', type:'residential' }, location:{ id:'location3', name:'Building A', address:'321 Fifth Ave, Pittsburgh, PA 15222', coordinates:{ lat:40.4472, lng:-79.9473 } }, service:{ type:'Bed Bug Treatment', description:'Heat treatment and chemical application', estimated_duration:180, price:850.00, special_instructions:'Units 2A, 2B, 3C - residents relocated. Use heat treatment protocol.' }, technician_id:'tech1', actual_times:{ started_at:'2025-08-18T07:45:00Z', completed_at:'2025-08-18T10:30:00Z' }, completion_data:{ notes:'Heat treatment successful. All units treated according to protocol. Recommended follow-up in 2 weeks.', signature:'signature_url_123.png', photos:['before_photo_1.jpg','after_photo_1.jpg','treatment_photo_1.jpg'], chemicals_used:[{ product_id:'chem1', name:'Temprid FX', epa_reg_no:'264-1025', amount_used:1.5, concentration:'0.25%', application_method:'spray', target_pest:'bed_bugs' }] } }
+    ]};
+
+    function VeroSuiteMobileApp(){
+      const [currentScreen, setCurrentScreen] = useState('jobList');
+      const [selectedJob, setSelectedJob] = useState(null);
+      const [jobs, setJobs] = useState([]);
+      const [isOnline, setIsOnline] = useState(true);
+      const [syncStatus, setSyncStatus] = useState('synced');
+      const [currentLocation, setCurrentLocation] = useState(mockGPS);
+      const [jobTimer, setJobTimer] = useState(null);
+      const [capturedPhotos, setCapturedPhotos] = useState([]);
+      const [completionForm, setCompletionForm] = useState({ notes:'', signature:null, chemicals_used:[], work_performed:'' });
+
+      useEffect(()=>{ const it = setInterval(()=>{ if (Math.random() < 0.05) setIsOnline(p=>!p); }, 1000); return ()=>clearInterval(it); },[]);
+      useEffect(()=>{ loadTodaysJobs(); },[]);
+      useEffect(()=>{ let t; if(jobTimer){ t=setInterval(()=>{ setJobTimer(prev=>({...prev, elapsed: Date.now()-prev.startTime})); },1000);} return ()=>clearInterval(t); },[jobTimer]);
+
+      const loadTodaysJobs = async () => {
+        try {
+          if (isOnline){
+            const response = mockApiResponses.todaysJobs; setJobs(response); mockOfflineStorage.jobs = response; setSyncStatus('synced');
+          } else { setJobs(mockOfflineStorage.jobs); setSyncStatus('offline'); }
+        } catch (e) { console.error('Failed to load jobs:', e); setJobs(mockOfflineStorage.jobs); setSyncStatus('error'); }
+      };
+
+      const startJob = async (job) => {
+        const startTime = Date.now();
+        const updatedJob = { ...job, status:'in_progress', actual_times: { ...job.actual_times, started_at: new Date().toISOString() } };
+        setJobs(jobs.map(j=> j.id===job.id? updatedJob: j));
+        setSelectedJob(updatedJob);
+        setJobTimer({ jobId: job.id, startTime, elapsed: 0 });
+        if (!isOnline) { mockOfflineStorage.pendingSync.push({ action:'start_job', jobId: job.id, data:{ started_at: updatedJob.actual_times.started_at }, timestamp: Date.now() }); setSyncStatus('pending'); }
+        setCurrentScreen('jobDetails');
+      };
+
+      const completeJob = async (job, completionData) => {
+        const completedJob = { ...job, status:'completed', actual_times: { ...job.actual_times, completed_at: new Date().toISOString() }, completion_data: { ...completionData, photos: capturedPhotos } };
+        setJobs(jobs.map(j=> j.id===job.id? completedJob: j));
+        setJobTimer(null); setCapturedPhotos([]); setCompletionForm({ notes:'', signature:null, chemicals_used:[], work_performed:'' });
+        if (!isOnline) { mockOfflineStorage.pendingSync.push({ action:'complete_job', jobId: job.id, data: completedJob.completion_data, timestamp: Date.now() }); setSyncStatus('pending'); }
+        setCurrentScreen('jobList');
+      };
+
+      const addChemicalUsage = (chemical, amount, concentration, method) => {
+        const usage = { product_id: chemical.id, name: chemical.name, epa_reg_no: chemical.epa_reg_no, amount_used: parseFloat(amount), concentration, application_method: method, timestamp: Date.now() };
+        setCompletionForm(prev => ({ ...prev, chemicals_used: [...prev.chemicals_used, usage] }));
+      };
+
+      const capturePhoto = (type='service') => {
+        const photo = { id: `photo_${Date.now()}`, type, timestamp: Date.now(), location: currentLocation, url: `mock_photo_${Date.now()}.jpg` };
+        setCapturedPhotos(prev=>[...prev, photo]); mockOfflineStorage.photos.push(photo);
+      };
+
+      const syncPendingData = async () => { if (!isOnline || mockOfflineStorage.pendingSync.length===0) return; setSyncStatus('syncing'); setTimeout(()=>{ mockOfflineStorage.pendingSync = []; setSyncStatus('synced'); }, 2000); };
+
+      const formatTime = (ms) => { const totalSeconds = Math.floor(ms/1000); const h = Math.floor(totalSeconds/3600); const m = Math.floor((totalSeconds%3600)/60); const s = totalSeconds%60; return h>0? `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}` : `${m}:${s.toString().padStart(2,'0')}` };
+
+      const getStatusColor = (status) => ({ scheduled: 'background:#dbeafe;color:#1d4ed8', in_progress:'background:#ffedd5;color:#c2410c', completed:'background:#dcfce7;color:#166534' }[status] || 'background:#f3f4f6;color:#374151');
+      const getPriorityColor = (priority) => ({ urgent: '#dc2626', high: '#ea580c', medium:'#ca8a04', low:'#16a34a' }[priority] || '#4b5563');
+
+      const StatusBar = () => (
+        <div className="flex items-center justify-between p-2" style={{background:'#111827', color:'#fff'}}>
+          <div className="flex items-center" style={{gap:'.5rem'}}>
+            <span>9:41 AM</span>
+            <span>{isOnline ? '📶' : '📴'}</span>
+            <span>⚡</span>
+            <span>🔋</span>
+          </div>
+          <div className="flex items-center" style={{gap:'.5rem'}}>
+            {syncStatus === 'pending' && (<button onClick={syncPendingData} className="flex items-center"><span className="mr-1">🔄</span><span>Sync</span></button>)}
+            {syncStatus === 'syncing' && (<div className="flex items-center"><span className="mr-1">⏳</span><span>Syncing...</span></div>)}
+            {syncStatus === 'synced' && isOnline && (<div className="flex items-center" style={{color:'#4ade80'}}><span className="mr-1">✔</span><span>Synced</span></div>)}
+            {!isOnline && (<div className="flex items-center" style={{color:'#f87171'}}><span className="mr-1">📴</span><span>Offline</span></div>)}
+          </div>
+        </div>
+      );
+
+      return (
+        <div className="max-w-sm mx-auto bg-white shadow-2xl rounded-lg overflow-hidden" style={{ height: '800px' }}>
+          <StatusBar />
+
+          {currentScreen === 'jobList' && (
+            <div className="flex flex-col" style={{height:'100%'}}>
+              <div className="bg-blue-600 text-white p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-lg font-semibold">Today's Jobs</h1>
+                    <p className="text-sm text-blue-100">John Smith • Technician</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm">{new Date().toLocaleDateString()}</p>
+                    <p className="text-xs text-blue-100">{jobs.length} jobs</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2 mt-4 text-center">
+                  <div className="rounded p-2" style={{background:'#1d4ed8'}}>
+                    <p className="text-xs">Completed</p>
+                    <p className="text-lg font-bold">{jobs.filter(j=>j.status==='completed').length}</p>
+                  </div>
+                  <div className="rounded p-2" style={{background:'#1d4ed8'}}>
+                    <p className="text-xs">In Progress</p>
+                    <p className="text-lg font-bold">{jobs.filter(j=>j.status==='in_progress').length}</p>
+                  </div>
+                  <div className="rounded p-2" style={{background:'#1d4ed8'}}>
+                    <p className="text-xs">Scheduled</p>
+                    <p className="text-lg font-bold">{jobs.filter(j=>j.status==='scheduled').length}</p>
+                  </div>
+                </div>
+              </div>
+
+              {jobTimer && (
+                <div className="bg-orange-50 border-l-4 p-3" style={{borderColor:'#fb923c'}}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center"><span className="mr-2">▶️</span><span className="text-sm font-medium">Job in progress</span></div>
+                    <div className="text-lg font-bold" style={{color:'#ea580c'}}>{formatTime(jobTimer.elapsed)}</div>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex-1 overflow-y-auto">
+                {jobs.map(job => (
+                  <div key={job.id} className="border-b p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center" style={{gap:'.5rem', marginBottom:'.5rem'}}>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium" style={parseStyle(getStatusColor(job.status))}>{job.status.replace('_',' ')}</span>
+                          <span className="text-sm font-medium" style={{color:getPriorityColor(job.priority)}}>{job.priority}</span>
+                        </div>
+                        <h3 className="font-medium">{job.customer.name}</h3>
+                        <p className="text-sm" style={{color:'#4b5563'}}>{job.location.name}</p>
+                        <p className="text-xs" style={{color:'#6b7280'}}>{job.location.address}</p>
+                        <div className="flex items-center" style={{gap:'1rem', marginTop:'.5rem', color:'#4b5563'}}>
+                          <div className="flex items-center"><span className="mr-1">⏱</span>{job.time_window.start}-{job.time_window.end}</div>
+                          <div className="flex items-center"><span className="mr-1">📍</span>{job.service.estimated_duration}min</div>
+                        </div>
+                      </div>
+                      <button onClick={()=>{ setSelectedJob(job); setCurrentScreen('jobDetails'); }} className="ml-2 px-3 py-1 text-white text-xs rounded" style={{background:'#2563eb'}}>View</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t p-2">
+                <div className="grid grid-cols-3 gap-2">
+                  <button className="flex flex-col items-center p-2" style={{color:'#2563eb'}}><span>📅</span><span className="text-xs mt-1">Jobs</span></button>
+                  <button onClick={()=>setCurrentScreen('map')} className="flex flex-col items-center p-2" style={{color:'#6b7280'}}><span>🧭</span><span className="text-xs mt-1">Map</span></button>
+                  <button onClick={()=>setCurrentScreen('profile')} className="flex flex-col items-center p-2" style={{color:'#6b7280'}}><span>👤</span><span className="text-xs mt-1">Profile</span></button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Job Details Screen */}
+          {currentScreen === 'jobDetails' && selectedJob && (
+            <div className="flex flex-col" style={{height:'100%'}}>
+              <div className="bg-white border-b p-4">
+                <div className="flex items-center justify-between">
+                  <button onClick={()=>setCurrentScreen('jobList')} className="text-blue-600 text-sm">← Back</button>
+                  <h1 className="text-lg font-semibold">Job Details</h1>
+                  <div className="w-12" />
+                </div>
+              </div>
+
+              <div className="overflow-y-auto p-4" style={{flex:1}}>
+                <div className="rounded-lg p-4" style={{background:'#f3f4f6'}}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="inline-flex items-center px-3 py-1 rounded text-sm font-medium" style={parseStyle(getStatusColor(selectedJob.status))}>{selectedJob.status.replace('_',' ')}</span>
+                    <span className="text-sm font-medium" style={{color:getPriorityColor(selectedJob.priority)}}>{selectedJob.priority} priority</span>
+                  </div>
+                  {jobTimer && jobTimer.jobId === selectedJob.id && (
+                    <div className="flex items-center justify-between" style={{background:'#ffedd5', borderRadius:6, padding:8, marginTop:8}}>
+                      <span className="text-sm font-medium">Time on job:</span>
+                      <span className="text-lg font-bold" style={{color:'#ea580c'}}>{formatTime(jobTimer.elapsed)}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-white border rounded-lg p-4 mt-3">
+                  <h3 className="font-medium mb-3">Customer Information</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center"><span className="mr-2">👤</span><span className="text-sm">{selectedJob.customer.name}</span></div>
+                    <div className="flex items-start"><span className="mr-2 mt-0.5">📍</span><div><p className="text-sm font-medium">{selectedJob.location.name}</p><p className="text-xs" style={{color:'#4b5563'}}>{selectedJob.location.address}</p></div></div>
+                    <div className="flex items-center"><span className="mr-2">⏱</span><span className="text-sm">{selectedJob.time_window.start} - {selectedJob.time_window.end}</span></div>
+                  </div>
+                </div>
+
+                <div className="bg-white border rounded-lg p-4 mt-3">
+                  <h3 className="font-medium mb-3">Service Details</h3>
+                  <div className="space-y-2">
+                    <div><p className="text-sm font-medium">{selectedJob.service.type}</p><p className="text-xs" style={{color:'#4b5563'}}>{selectedJob.service.description}</p></div>
+                    <div className="flex justify-between text-sm"><span>Duration:</span><span>{selectedJob.service.estimated_duration} minutes</span></div>
+                    <div className="flex justify-between text-sm"><span>Value:</span><span className="font-medium">${selectedJob.service.price.toFixed(2)}</span></div>
+                  </div>
+                  {selectedJob.service.special_instructions && (
+                    <div className="mt-3 p-2" style={{background:'#fffbeb', borderLeft:'4px solid #f59e0b', borderRadius:6}}>
+                      <p className="text-xs font-medium" style={{color:'#92400e'}}>Special Instructions:</p>
+                      <p className="text-xs" style={{color:'#92400e', marginTop:4}}>{selectedJob.service.special_instructions}</p>
+                    </div>
+                  )}
+                </div>
+
+                {selectedJob.status === 'scheduled' && (
+                  <button onClick={()=>startJob(selectedJob)} className="w-full text-white py-3 rounded-lg font-medium mt-3" style={{background:'#16a34a'}}>▶️ Start Job</button>
+                )}
+
+                {selectedJob.status === 'in_progress' && (
+                  <div className="mt-3" style={{display:'grid', gap:8}}>
+                    <button onClick={()=>setCurrentScreen('photoCapture')} className="w-full text-white py-2 rounded-lg font-medium" style={{background:'#2563eb'}}>📷 Take Photos ({capturedPhotos.length})</button>
+                    <button onClick={()=>setCurrentScreen('chemicalUsage')} className="w-full text-white py-2 rounded-lg font-medium" style={{background:'#7c3aed'}}>💧 Log Chemicals</button>
+                    <button onClick={()=>setCurrentScreen('jobCompletion')} className="w-full text-white py-3 rounded-lg font-medium" style={{background:'#ea580c'}}>⏹️ Complete Job</button>
+                  </div>
+                )}
+
+                {selectedJob.status === 'completed' && selectedJob.completion_data && (
+                  <div className="bg-green-50 border rounded-lg p-4 mt-3" style={{borderColor:'#86efac'}}>
+                    <h3 className="font-medium" style={{color:'#065f46', marginBottom:12}}>Job Completed</h3>
+                    <div className="text-sm" style={{display:'grid', gap:6}}>
+                      <div className="flex justify-between"><span>Started:</span><span>{new Date(selectedJob.actual_times.started_at).toLocaleTimeString()}</span></div>
+                      <div className="flex justify-between"><span>Completed:</span><span>{new Date(selectedJob.actual_times.completed_at).toLocaleTimeString()}</span></div>
+                      <div className="flex justify-between"><span>Duration:</span><span>{Math.round((new Date(selectedJob.actual_times.completed_at) - new Date(selectedJob.actual_times.started_at)) / 60000)} minutes</span></div>
+                      {selectedJob.completion_data.photos.length > 0 && (<div className="flex justify-between"><span>Photos:</span><span>{selectedJob.completion_data.photos.length} captured</span></div>)}
+                      {selectedJob.completion_data.chemicals_used.length > 0 && (<div className="flex justify-between"><span>Chemicals:</span><span>{selectedJob.completion_data.chemicals_used.length} products used</span></div>)}
+                    </div>
+                    {selectedJob.completion_data.notes && (<div className="mt-3"><p className="text-sm font-medium" style={{color:'#065f46'}}>Service Notes:</p><p className="text-sm" style={{color:'#065f46', marginTop:4}}>{selectedJob.completion_data.notes}</p></div>)}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Photo Capture Screen */}
+          {currentScreen === 'photoCapture' && (
+            <div className="flex flex-col" style={{height:'100%'}}>
+              <div className="bg-white border-b p-4">
+                <div className="flex items-center justify-between"><button onClick={()=>setCurrentScreen('jobDetails')} className="text-blue-600 text-sm">← Back</button><h1 className="text-lg font-semibold">Photo Capture</h1><div className="w-12" /></div>
+              </div>
+              <div className="p-4" style={{flex:1}}>
+                <div className="grid" style={{gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:12, marginBottom:24}}>
+                  <button onClick={()=>capturePhoto('before')} className="flex flex-col items-center p-4" style="border:2px dashed #d1d5db; border-radius:8px;">
+                    <span className="mb-2">📷</span>
+                    <span className="text-sm font-medium">Before Photos</span>
+                    <span className="text-xs" style={{color:'#6b7280'}}>{capturedPhotos.filter(p=>p.type==='before').length} captured</span>
+                  </button>
+                  <button onClick={()=>capturePhoto('after')} className="flex flex-col items-center p-4" style="border:2px dashed #d1d5db; border-radius:8px;">
+                    <span className="mb-2">📷</span>
+                    <span className="text-sm font-medium">After Photos</span>
+                    <span className="text-xs" style={{color:'#6b7280'}}>{capturedPhotos.filter(p=>p.type==='after').length} captured</span>
+                  </button>
+                </div>
+                <div className="grid" style={{gridTemplateColumns:'repeat(2,minmax(0,1fr))', gap:12}}>
+                  <button onClick={()=>capturePhoto('service')} className="px-4 py-3 rounded" style={{background:'#2563eb', color:'#fff'}}>Capture Service</button>
+                  <button onClick={()=>capturePhoto('damage')} className="px-4 py-3 rounded" style={{background:'#ef4444', color:'#fff'}}>Capture Damage</button>
+                </div>
+                <div className="mt-3 text-sm">Captured: {capturedPhotos.length}</div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+
+      function parseStyle(styleString){
+        const o={}; styleString.split(';').forEach(kv=>{ const [k,v]=kv.split(':'); if(k&&v) o[k.trim()] = v.trim(); }); return o;
+      }
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<VeroSuiteMobileApp />);
+  </script>
+</body>
+</html>
