@@ -64,7 +64,7 @@ export default function App() {
           <Route
             path="/jobs"
             element={
-              <PrivateRoute roles={["dispatcher", "technician"]}>
+              <PrivateRoute>
                 <JobsCalendar />
               </PrivateRoute>
             }
@@ -72,7 +72,7 @@ export default function App() {
           <Route
             path="/customers"
             element={
-              <PrivateRoute roles={["dispatcher", "accountant", "tenant_admin"]}>
+              <PrivateRoute>
                 <CustomersPage />
               </PrivateRoute>
             }
@@ -80,7 +80,7 @@ export default function App() {
           <Route
             path="/routing"
             element={
-              <PrivateRoute roles={["dispatcher", "tenant_admin"]}>
+              <PrivateRoute>
                 <RoutingPage />
               </PrivateRoute>
             }
@@ -88,7 +88,7 @@ export default function App() {
           <Route
             path="/uploads"
             element={
-              <PrivateRoute roles={["dispatcher", "technician", "tenant_admin"]}>
+              <PrivateRoute>
                 <UploadsPage />
               </PrivateRoute>
             }
