@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { UserManagementForm } from './UserManagementForm';
-import { getJobs, getAccounts, getRoutes } from '../api';
+import { jobsApi, crmApi, routingApi } from '../lib/api';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -39,13 +39,13 @@ export function DispatcherDashboard() {
       setLoading(true);
       try {
         const [jobsData, accountsData, routesData] = await Promise.all([
-          getJobs(),
-          getAccounts(),
-          getRoutes(),
+          jobsApi.today(),
+          crmApi.accounts(),
+          routingApi.optimize(new Date().toISOString().split('T')[0]),
         ]);
         setJobs(jobsData || []);
         setAccounts(accountsData || []);
-        setRoutes(routesData || []);
+        setRoutes(Array.isArray(routesData) ? routesData : []);
       } catch (err) {
         // handle error
       }

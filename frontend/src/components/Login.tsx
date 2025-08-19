@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { login } from '../api';
+import { login } from '../lib/api';
 
 export function Login() {
   const [email, setEmail] = useState('');

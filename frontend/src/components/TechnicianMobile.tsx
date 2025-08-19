@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getJobs } from '../api';
+import { jobsApi } from '../lib/api';
 
 export function TechnicianMobile() {
   const [jobs, setJobs] = useState<any[]>([]);
@@ -10,7 +10,7 @@ export function TechnicianMobile() {
     async function fetchJobs() {
       setLoading(true);
       try {
-        const jobsData = await getJobs();
+        const jobsData = await jobsApi.today(user.id);
         // Filter jobs assigned to this technician
         setJobs((jobsData || []).filter((job: any) => job.technician_id === user.id));
       } catch (err) {
