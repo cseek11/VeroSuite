@@ -1,4 +1,4 @@
-import { Route, Routes, Navigate, Link } from 'react-router-dom';
+import { Route, Routes, Navigate, Link, useNavigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { Spinner } from '@/ui/Spinner';
@@ -20,6 +20,14 @@ function PrivateRoute({ children, roles }: { children: JSX.Element; roles?: stri
 }
 
 export default function App() {
+  const navigate = useNavigate();
+  const clearAuth = useAuthStore((s) => s.clear);
+  const handleLogout = () => {
+    clearAuth();
+    localStorage.removeItem('user');
+    localStorage.removeItem('jwt');
+    navigate('/login');
+  };
   return (
     <Suspense fallback={<Spinner />}>
       <nav className="bg-white shadow mb-6">
@@ -30,6 +38,7 @@ export default function App() {
           <Link to="/customers" className="text-gray-700 hover:text-blue-700">Customers</Link>
           <Link to="/routing" className="text-gray-700 hover:text-blue-700">Routing</Link>
           <Link to="/uploads" className="text-gray-700 hover:text-blue-700">Uploads</Link>
+          <button onClick={handleLogout} className="ml-auto bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Logout</button>
         </div>
       </nav>
       <Routes>
@@ -45,7 +54,7 @@ export default function App() {
         <Route
           path="/dispatcher"
           element={
-            <PrivateRoute roles={["admin", "dispatcher"]}>
+            <PrivateRoute>
               <DispatcherDashboard />
             </PrivateRoute>
           }
