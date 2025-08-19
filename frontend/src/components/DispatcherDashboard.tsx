@@ -7,7 +7,7 @@ import { KPI } from './KPI';
 import { CheckCircle, Clock, Calendar, Zap } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
-export function DispatcherDashboard() {
+export default function DispatcherDashboard() {
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
