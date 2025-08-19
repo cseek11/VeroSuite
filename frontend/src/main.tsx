@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './routes/App';
 import './index.css';
+import './custom-calendar.css';
 
 
 const queryClient = new QueryClient();
