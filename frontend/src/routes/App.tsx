@@ -5,8 +5,8 @@ import { Spinner } from '@/ui/Spinner';
 
 const LoginPage = lazy(() => import('@/routes/Login'));
 const DashboardPage = lazy(() => import('@/routes/Dashboard'));
+const JobsCalendar = lazy(() => import('@/components/JobsCalendar'));
 const CustomersPage = lazy(() => import('@/components/CustomersPage'));
-const JobsCalendar = lazy(() => import('@/components/JobsFullCalendar'));
 const RoutingPage = lazy(() => import('@/routes/Routing'));
 const UploadsPage = lazy(() => import('@/routes/Uploads'));
 const DispatcherDashboard = lazy(() => import('@/components/DispatcherDashboard'));

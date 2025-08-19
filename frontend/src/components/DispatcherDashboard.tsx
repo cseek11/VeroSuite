@@ -4,7 +4,7 @@ import { jobsApi, crmApi, routingApi } from '../lib/api';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { KPI } from './KPI';
-import { CheckCircle, Clock, Calendar, Zap } from 'lucide-react';
+import { CheckCircle, Clock, Zap } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 export default function DispatcherDashboard() {
@@ -81,7 +81,6 @@ export default function DispatcherDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
               <KPI icon={<CheckCircle className="h-6 w-6" />} label="Completed Today" value={jobs.filter(j=>j.status==='completed').length} color="#22c55e" tooltip="Jobs completed today" />
               <KPI icon={<Clock className="h-6 w-6" />} label="In Progress" value={jobs.filter(j=>j.status==='in_progress').length} color="#f59e42" tooltip="Jobs currently in progress" />
-              <KPI icon={<Calendar className="h-6 w-6" />} label="Scheduled" value={jobs.filter(j=>j.status==='scheduled').length} color="#3b82f6" tooltip="Jobs scheduled for today" />
               <KPI icon={<Zap className="h-6 w-6" />} label="Unassigned" value={jobs.filter(j=>j.status==='unassigned').length} color="#eab308" tooltip="Jobs not yet assigned" />
             </div>
 
