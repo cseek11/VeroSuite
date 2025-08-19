@@ -6,7 +6,8 @@ import { Spinner } from '@/ui/Spinner';
 const LoginPage = lazy(() => import('@/routes/Login'));
 const DashboardPage = lazy(() => import('@/routes/Dashboard'));
 const JobsPage = lazy(() => import('@/routes/Jobs'));
-const CustomersPage = lazy(() => import('@/routes/Customers'));
+const CustomersPage = lazy(() => import('@/components/CustomersPage'));
+const JobsCalendar = lazy(() => import('@/components/JobsCalendar'));
 const RoutingPage = lazy(() => import('@/routes/Routing'));
 const UploadsPage = lazy(() => import('@/routes/Uploads'));
 const DispatcherDashboard = lazy(() => import('@/components/DispatcherDashboard'));
@@ -35,6 +36,7 @@ export default function App() {
           <Link to="/" className="font-bold text-blue-700">Dashboard</Link>
           <Link to="/dispatcher" className="text-gray-700 hover:text-blue-700">Dispatcher Dashboard</Link>
           <Link to="/jobs" className="text-gray-700 hover:text-blue-700">Jobs</Link>
+          <Link to="/jobs-calendar" className="text-gray-700 hover:text-blue-700">Jobs Calendar</Link>
           <Link to="/customers" className="text-gray-700 hover:text-blue-700">Customers</Link>
           <Link to="/routing" className="text-gray-700 hover:text-blue-700">Routing</Link>
           <Link to="/uploads" className="text-gray-700 hover:text-blue-700">Uploads</Link>
@@ -64,6 +66,14 @@ export default function App() {
           element={
             <PrivateRoute roles={["dispatcher", "technician"]}>
               <JobsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/jobs-calendar"
+          element={
+            <PrivateRoute>
+              <JobsCalendar />
             </PrivateRoute>
           }
         />
