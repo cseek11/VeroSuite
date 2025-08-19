@@ -14,6 +14,8 @@ The demo includes:
 - API endpoint preview
 - Database schema summary with RLS snippet
 
+- Initial commit
+
 ## Repository Structure
 
 - `demov1.htm` — Self-contained browser demo with tabs (Architecture, Branding, API, Database). No build needed.
