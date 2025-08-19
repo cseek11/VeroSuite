@@ -14,6 +14,8 @@ const mockJobs = [
 ];
 
 export default function JobsCalendar() {
+  console.log('JobsCalendar component rendering...');
+  
   const [events, setEvents] = useState(mockJobs.map(job => ({
     id: job.id,
     title: job.title,
@@ -24,6 +26,8 @@ export default function JobsCalendar() {
       status: job.status
     }
   })));
+
+  console.log('Events loaded:', events);
 
   const handleEventDrop = (info: any) => {
     setEvents(events.map(event => 
@@ -124,6 +128,26 @@ export default function JobsCalendar() {
           <p><strong>Debug:</strong> Calendar component loaded</p>
           <p><strong>Events:</strong> {events.length} jobs loaded</p>
           <p><strong>Time:</strong> {new Date().toLocaleTimeString()}</p>
+          <p><strong>FullCalendar plugins:</strong> {dayGridPlugin ? 'Loaded' : 'Not loaded'}</p>
+          <p><strong>Component rendered:</strong> Yes</p>
+        </div>
+        
+        {/* Fallback jobs list in case calendar doesn't render */}
+        <div className="mt-4 p-4 bg-blue-50 rounded">
+          <h3 className="font-semibold mb-2">Jobs List (Fallback):</h3>
+          <div className="space-y-2">
+            {events.map(event => (
+              <div key={event.id} className="p-2 bg-white border rounded">
+                <div className="font-medium">{event.title}</div>
+                <div className="text-sm text-gray-600">
+                  {new Date(event.start).toLocaleDateString()} - {new Date(event.start).toLocaleTimeString()}
+                </div>
+                <div className="text-sm text-gray-500">
+                  Technician: {event.extendedProps.technician} | Status: {event.extendedProps.status}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
