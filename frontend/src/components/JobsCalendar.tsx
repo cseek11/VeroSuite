@@ -6,28 +6,29 @@ import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 
 const mockJobs = [
-  { id: '1', title: 'Pest Control - Office Building', start: '2025-01-17T09:00:00', end: '2025-01-17T11:00:00', technician: 'John Smith', status: 'scheduled' },
-  { id: '2', title: 'Termite Inspection - Residential', start: '2025-01-18T13:00:00', end: '2025-01-18T15:00:00', technician: 'Sarah Johnson', status: 'in-progress' },
-  { id: '3', title: 'Rodent Control - Restaurant', start: '2025-01-19T10:00:00', end: '2025-01-19T12:00:00', technician: 'Mike Davis', status: 'completed' },
-  { id: '4', title: 'Bed Bug Treatment - Hotel', start: '2025-01-20T08:00:00', end: '2025-01-20T16:00:00', technician: 'Lisa Wilson', status: 'scheduled' },
-  { id: '5', title: 'General Pest Control - Warehouse', start: '2025-01-21T14:00:00', end: '2025-01-21T16:00:00', technician: 'Tom Brown', status: 'scheduled' },
+  { id: '1', title: 'Pest Control - Office Building', start: '2025-01-17T09:00:00', end: '2025-01-17T11:00:00', technician: 'John Smith', status: 'scheduled', color: '#3b82f6' },
+  { id: '2', title: 'Termite Inspection - Residential', start: '2025-01-18T13:00:00', end: '2025-01-18T15:00:00', technician: 'Sarah Johnson', status: 'in-progress', color: '#f59e0b' },
+  { id: '3', title: 'Rodent Control - Restaurant', start: '2025-01-19T10:00:00', end: '2025-01-19T12:00:00', technician: 'Mike Davis', status: 'completed', color: '#10b981' },
+  { id: '4', title: 'Bed Bug Treatment - Hotel', start: '2025-01-20T08:00:00', end: '2025-01-20T16:00:00', technician: 'Lisa Wilson', status: 'scheduled', color: '#8b5cf6' },
+  { id: '5', title: 'General Pest Control - Warehouse', start: '2025-01-21T14:00:00', end: '2025-01-21T16:00:00', technician: 'Tom Brown', status: 'scheduled', color: '#ef4444' },
+  { id: '6', title: 'All-Day Event - Annual Inspection', start: '2025-01-22', allDay: true, technician: 'Team A', status: 'scheduled', color: '#06b6d4' },
+  { id: '7', title: 'Multi-Day Treatment', start: '2025-01-23T08:00:00', end: '2025-01-25T17:00:00', technician: 'Specialist Team', status: 'scheduled', color: '#84cc16' },
+  { id: '8', title: 'Emergency Call - Bee Removal', start: '2025-01-24T14:30:00', end: '2025-01-24T16:30:00', technician: 'Emergency Team', status: 'urgent', color: '#dc2626' },
 ];
 
 export default function JobsCalendar() {
-  console.log('JobsCalendar component rendering...');
-  
   const [events, setEvents] = useState(mockJobs.map(job => ({
     id: job.id,
     title: job.title,
     start: job.start,
     end: job.end,
+    allDay: job.allDay || false,
+    color: job.color,
     extendedProps: {
       technician: job.technician,
       status: job.status
     }
   })));
-
-  console.log('Events loaded:', events);
 
   const handleEventDrop = (info: any) => {
     setEvents(events.map(event => 
@@ -66,6 +67,7 @@ export default function JobsCalendar() {
         start: selectInfo.startStr,
         end: selectInfo.endStr,
         allDay: selectInfo.allDay,
+        color: '#3b82f6',
         extendedProps: {
           technician: 'Unassigned',
           status: 'scheduled'
@@ -98,7 +100,7 @@ export default function JobsCalendar() {
             headerToolbar={{
               left: 'prev,next today',
               center: 'title',
-              right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+              right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek,listMonth'
             }}
             initialView="dayGridMonth"
             editable={true}
@@ -111,8 +113,7 @@ export default function JobsCalendar() {
             eventClick={handleEventClick}
             eventDrop={handleEventDrop}
             eventResize={handleEventResize}
-            height="600px"
-            eventColor="#3b82f6"
+            height="700px"
             eventTextColor="#ffffff"
             eventDisplay="block"
             eventTimeFormat={{
@@ -120,34 +121,30 @@ export default function JobsCalendar() {
               minute: '2-digit',
               meridiem: 'short'
             }}
+            slotMinTime="06:00:00"
+            slotMaxTime="20:00:00"
+            slotDuration="00:30:00"
+            slotLabelInterval="01:00:00"
+            businessHours={{
+              daysOfWeek: [1, 2, 3, 4, 5], // Monday - Friday
+              startTime: '08:00',
+              endTime: '18:00',
+            }}
+            nowIndicator={true}
+            scrollTime="08:00:00"
+            eventConstraint="businessHours"
+            eventOverlap={false}
+            eventDidMount={(info) => {
+              // Add custom styling based on status
+              const status = info.event.extendedProps.status;
+              if (status === 'urgent') {
+                info.el.style.border = '2px solid #dc2626';
+                info.el.style.fontWeight = 'bold';
+              } else if (status === 'completed') {
+                info.el.style.opacity = '0.7';
+              }
+            }}
           />
-        </div>
-        
-        {/* Debug info to verify component is loading */}
-        <div className="mt-4 p-3 bg-gray-100 rounded text-sm">
-          <p><strong>Debug:</strong> Calendar component loaded</p>
-          <p><strong>Events:</strong> {events.length} jobs loaded</p>
-          <p><strong>Time:</strong> {new Date().toLocaleTimeString()}</p>
-          <p><strong>FullCalendar plugins:</strong> {dayGridPlugin ? 'Loaded' : 'Not loaded'}</p>
-          <p><strong>Component rendered:</strong> Yes</p>
-        </div>
-        
-        {/* Fallback jobs list in case calendar doesn't render */}
-        <div className="mt-4 p-4 bg-blue-50 rounded">
-          <h3 className="font-semibold mb-2">Jobs List (Fallback):</h3>
-          <div className="space-y-2">
-            {events.map(event => (
-              <div key={event.id} className="p-2 bg-white border rounded">
-                <div className="font-medium">{event.title}</div>
-                <div className="text-sm text-gray-600">
-                  {new Date(event.start).toLocaleDateString()} - {new Date(event.start).toLocaleTimeString()}
-                </div>
-                <div className="text-sm text-gray-500">
-                  Technician: {event.extendedProps.technician} | Status: {event.extendedProps.status}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>
