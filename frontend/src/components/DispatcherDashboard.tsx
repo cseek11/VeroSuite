@@ -37,23 +37,18 @@ export default function DispatcherDashboard() {
   const [assignStatus, setAssignStatus] = useState<string>('');
 
   useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      try {
-        const [jobsData, accountsData, routesData] = await Promise.all([
-          jobsApi.today(),
-          crmApi.accounts(),
-          routingApi.optimize(new Date().toISOString().split('T')[0]),
-        ]);
-        setJobs(jobsData || []);
-        setAccounts(accountsData || []);
-        setRoutes(Array.isArray(routesData) ? routesData : []);
-      } catch (err) {
-        // handle error
-      }
-      setLoading(false);
-    }
-    fetchData();
+    // MOCK DATA for demonstration
+    const mockJobs = [
+      { id: '1', status: 'completed', scheduled_date: '2025-08-17', location: { name: 'Site A', coordinates: { lat: 40.44, lng: -79.99 } }, technician_id: 'tech1' },
+      { id: '2', status: 'completed', scheduled_date: '2025-08-18', location: { name: 'Site B', coordinates: { lat: 40.45, lng: -79.98 } }, technician_id: 'tech2' },
+      { id: '3', status: 'in_progress', scheduled_date: '2025-08-18', location: { name: 'Site C', coordinates: { lat: 40.46, lng: -79.97 } }, technician_id: 'tech1' },
+      { id: '4', status: 'scheduled', scheduled_date: '2025-08-19', location: { name: 'Site D', coordinates: { lat: 40.47, lng: -79.96 } }, technician_id: null },
+      { id: '5', status: 'unassigned', scheduled_date: '2025-08-19', location: { name: 'Site E', coordinates: { lat: 40.48, lng: -79.95 } }, technician_id: null },
+    ];
+    setJobs(mockJobs);
+    setAccounts([]);
+    setRoutes([]);
+    setLoading(false);
   }, []);
 
   async function handleAssignJob(e: React.FormEvent) {
