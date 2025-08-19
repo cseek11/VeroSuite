@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, Clock, Calendar, Zap } from 'lucide-react';
+import { CheckCircle, Clock, Zap } from 'lucide-react';
 
 export interface KPIProps {
   icon: React.ReactNode;
