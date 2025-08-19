@@ -83,34 +83,48 @@ export default function JobsCalendar() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Jobs Calendar</h1>
       <div className="bg-white rounded-lg shadow p-4">
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-          }}
-          initialView="dayGridMonth"
-          editable={true}
-          selectable={true}
-          selectMirror={true}
-          dayMaxEvents={true}
-          weekends={true}
-          events={events}
-          select={handleDateSelect}
-          eventClick={handleEventClick}
-          eventDrop={handleEventDrop}
-          eventResize={handleEventResize}
-          height="auto"
-          eventColor="#3b82f6"
-          eventTextColor="#ffffff"
-          eventDisplay="block"
-          eventTimeFormat={{
-            hour: 'numeric',
-            minute: '2-digit',
-            meridiem: 'short'
-          }}
-        />
+        <div style={{ 
+          minHeight: '600px',
+          border: '1px solid #e5e7eb',
+          borderRadius: '8px',
+          overflow: 'hidden'
+        }}>
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+            }}
+            initialView="dayGridMonth"
+            editable={true}
+            selectable={true}
+            selectMirror={true}
+            dayMaxEvents={true}
+            weekends={true}
+            events={events}
+            select={handleDateSelect}
+            eventClick={handleEventClick}
+            eventDrop={handleEventDrop}
+            eventResize={handleEventResize}
+            height="600px"
+            eventColor="#3b82f6"
+            eventTextColor="#ffffff"
+            eventDisplay="block"
+            eventTimeFormat={{
+              hour: 'numeric',
+              minute: '2-digit',
+              meridiem: 'short'
+            }}
+          />
+        </div>
+        
+        {/* Debug info to verify component is loading */}
+        <div className="mt-4 p-3 bg-gray-100 rounded text-sm">
+          <p><strong>Debug:</strong> Calendar component loaded</p>
+          <p><strong>Events:</strong> {events.length} jobs loaded</p>
+          <p><strong>Time:</strong> {new Date().toLocaleTimeString()}</p>
+        </div>
       </div>
     </div>
   );
