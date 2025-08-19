@@ -14,6 +14,20 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
     if (tenantId) config.headers['x-tenant-id'] = tenantId;
   }
+  
+  // Add Supabase credentials if available
+  if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+    if (!config.headers) {
+      config.headers = {} as any;
+    }
+    config.headers['x-supabase-url'] = import.meta.env.VITE_SUPABASE_URL;
+    config.headers['x-supabase-key'] = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    // Alternative header names that might be expected
+    config.headers['supabase-url'] = import.meta.env.VITE_SUPABASE_URL;
+    config.headers['supabase-key'] = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    config.headers['x-api-key'] = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  }
+  
   return config;
 });
 
