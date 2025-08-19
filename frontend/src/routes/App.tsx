@@ -1,11 +1,11 @@
 import { Route, Routes, Navigate, Link, useNavigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
+import JobsFullCalendar from '@/components/JobsFullCalendar';
 import { useAuthStore } from '@/stores/auth';
 import { Spinner } from '@/ui/Spinner';
 
 const LoginPage = lazy(() => import('@/routes/Login'));
 const DashboardPage = lazy(() => import('@/routes/Dashboard'));
-const JobsCalendar = lazy(() => import('@/components/JobsCalendar'));
 const CustomersPage = lazy(() => import('@/components/CustomersPage'));
 const RoutingPage = lazy(() => import('@/routes/Routing'));
 const UploadsPage = lazy(() => import('@/routes/Uploads'));
@@ -65,7 +65,7 @@ export default function App() {
             path="/jobs"
             element={
               <PrivateRoute roles={["dispatcher", "technician"]}>
-                <JobsCalendar />
+                <JobsFullCalendar />
               </PrivateRoute>
             }
           />
