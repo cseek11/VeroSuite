@@ -4,10 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
-import '../node_modules/@fullcalendar/common/main.css';
-import '../node_modules/@fullcalendar/daygrid/main.css';
-import '../node_modules/@fullcalendar/timegrid/main.css';
-import '../node_modules/@fullcalendar/list/main.css';
+// FullCalendar CSS imports removed for Vite compatibility. Import these in global CSS or main.tsx if needed.
 
 const mockJobs = [
   { id: '1', title: 'Pest Control - Office Building', date: '2025-01-17', start: '2025-01-17T09:00:00', end: '2025-01-17T11:00:00', technician: 'John Smith', status: 'scheduled' },
