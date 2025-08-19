@@ -10,12 +10,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Debug environment variables
-  const debugEnv = {
-    VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL ? 'Set' : 'Not Set',
-    VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Set' : 'Not Set',
-  };
-
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -36,12 +30,6 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <form onSubmit={submit} className="bg-white shadow rounded p-6 w-full max-w-sm space-y-4">
         <h1 className="text-xl font-semibold">VeroSuite Login</h1>
-        
-        {/* Debug info - remove this in production */}
-        <div className="bg-gray-100 p-2 rounded text-xs">
-          <div>Supabase URL: {debugEnv.VITE_SUPABASE_URL}</div>
-          <div>Supabase Key: {debugEnv.VITE_SUPABASE_ANON_KEY}</div>
-        </div>
         
         <div>
           <label className="text-sm text-gray-600">Email</label>

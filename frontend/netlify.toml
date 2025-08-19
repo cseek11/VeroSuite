@@ -12,9 +12,9 @@
   status = 200
 
 [context.production.environment]
-  VITE_SUPABASE_URL = "your-supabase-url"
-  VITE_SUPABASE_ANON_KEY = "your-supabase-anon-key"
+  VITE_SUPABASE_URL = "https://iehzwglvmbtrlhdgofew.supabase.co"
+  VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllaHp3Z2x2bWJ0cmxoZGdvZmV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NzIxNDUsImV4cCI6MjA3MTE0ODE0NX0.WOa5cSZhiBbbIdzQJAqJG9hZZiWQNcMoUpXL3rRLQp8"
 
 [context.deploy-preview.environment]
-  VITE_SUPABASE_URL = "your-supabase-url"
-  VITE_SUPABASE_ANON_KEY = "your-supabase-anon-key"
+  VITE_SUPABASE_URL = "https://iehzwglvmbtrlhdgofew.supabase.co"
+  VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllaHp3Z2x2bWJ0cmxoZGdvZmV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NzIxNDUsImV4cCI6MjA3MTE0ODE0NX0.WOa5cSZhiBbbIdzQJAqJG9hZZiWQNcMoUpXL3rRLQp8"
