@@ -5,3 +5,18 @@
 [build.environment]
   NODE_VERSION = "22.18.0"
   NPM_VERSION = "10.9.3"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[context.production.environment]
+  VITE_API_BASE = "https://your-backend-url.com"
+  VITE_SUPABASE_URL = "your-supabase-url"
+  VITE_SUPABASE_ANON_KEY = "your-supabase-anon-key"
+
+[context.deploy-preview.environment]
+  VITE_API_BASE = "https://your-backend-url.com"
+  VITE_SUPABASE_URL = "your-supabase-url"
+  VITE_SUPABASE_ANON_KEY = "your-supabase-anon-key"
