@@ -1,3 +1,4 @@
+const JobsScheduler = lazy(() => import('@/components/JobsScheduler'));
 import { Route, Routes, Navigate, Link, useNavigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { useAuthStore } from '@/stores/auth';
@@ -37,6 +38,15 @@ export default function App() {
           <Link to="/dispatcher" className="text-gray-700 hover:text-blue-700">Dispatcher Dashboard</Link>
           <Link to="/jobs" className="text-gray-700 hover:text-blue-700">Jobs</Link>
           <Link to="/jobs-calendar" className="text-gray-700 hover:text-blue-700">Jobs Calendar</Link>
+          <Link to="/jobs-scheduler" className="text-gray-700 hover:text-blue-700">Jobs Scheduler</Link>
+        <Route
+          path="/jobs-scheduler"
+          element={
+            <PrivateRoute>
+              <JobsScheduler />
+            </PrivateRoute>
+          }
+        />
           <Link to="/customers" className="text-gray-700 hover:text-blue-700">Customers</Link>
           <Link to="/routing" className="text-gray-700 hover:text-blue-700">Routing</Link>
           <Link to="/uploads" className="text-gray-700 hover:text-blue-700">Uploads</Link>
