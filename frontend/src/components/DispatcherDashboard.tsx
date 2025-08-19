@@ -65,6 +65,17 @@ export function DispatcherDashboard() {
     }, 1000);
   }
 
+  // Helper function for chart data
+  function getJobsPerDayData(jobs: any[]) {
+    // Group jobs by scheduled_date
+    const counts: Record<string, number> = {};
+    jobs.forEach(job => {
+      const date = job.scheduled_date || 'Unknown';
+      counts[date] = (counts[date] || 0) + 1;
+    });
+    return Object.entries(counts).map(([date, count]) => ({ date, count }));
+  }
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-blue-700">Dispatcher Dashboard</h1>
@@ -92,16 +103,6 @@ export function DispatcherDashboard() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-// Helper function for chart data
-function getJobsPerDayData(jobs: any[]) {
-  // Group jobs by scheduled_date
-  const counts: Record<string, number> = {};
-  jobs.forEach(job => {
-    const date = job.scheduled_date || 'Unknown';
-    counts[date] = (counts[date] || 0) + 1;
-  });
-  return Object.entries(counts).map(([date, count]) => ({ date, count }));
-}
             <h2 className="text-xl font-semibold mb-2">Jobs</h2>
             <div className="space-y-4">
               {Array.isArray(jobs) && jobs.map((job) => (
