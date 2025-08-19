@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { UserManagementForm } from './UserManagementForm';
 import { jobsApi, crmApi, routingApi } from '../lib/api';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { KPI } from './KPI';
+import { CheckCircle, Clock, Calendar, Zap } from 'lucide-react';
 
 export function DispatcherDashboard() {
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
@@ -69,6 +70,13 @@ export function DispatcherDashboard() {
       {loading ? <div className="text-lg">Loading...</div> : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
+            {/* KPI Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+              <KPI icon={<CheckCircle className="h-6 w-6" />} label="Completed Today" value={jobs.filter(j=>j.status==='completed').length} color="#22c55e" tooltip="Jobs completed today" />
+              <KPI icon={<Clock className="h-6 w-6" />} label="In Progress" value={jobs.filter(j=>j.status==='in_progress').length} color="#f59e42" tooltip="Jobs currently in progress" />
+              <KPI icon={<Calendar className="h-6 w-6" />} label="Scheduled" value={jobs.filter(j=>j.status==='scheduled').length} color="#3b82f6" tooltip="Jobs scheduled for today" />
+              <KPI icon={<Zap className="h-6 w-6" />} label="Unassigned" value={jobs.filter(j=>j.status==='unassigned').length} color="#eab308" tooltip="Jobs not yet assigned" />
+            </div>
             <h2 className="text-xl font-semibold mb-2">Jobs</h2>
             <div className="space-y-4">
               {Array.isArray(jobs) && jobs.map((job) => (
@@ -89,7 +97,6 @@ export function DispatcherDashboard() {
               ))}
               {assignStatus && <div className="text-green-600 mt-2">{assignStatus}</div>}
             </div>
-            {/* ...existing code for accounts and routes... */}
             {user.roles && user.roles.includes('admin') && (
               <>
                 <div className="mt-8">
