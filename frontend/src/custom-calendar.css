@@ -2,7 +2,7 @@
 
 .fc {
   font-family: 'Inter', Arial, sans-serif;
-  background: #f8f9fa;
+  background: #000000;
 }
 .fc-header-toolbar {
   display: none;
@@ -69,7 +69,7 @@
   padding: 4px 4px 6px !important;
   overflow-y: auto;
   max-height: 50vh;
-  background-color: #fff;
+  background-color: #c71818;
 }
 .fc-daygrid-event-harness {
   margin-top: 2px;
