@@ -84,3 +84,12 @@ export const crmApi = {
 export const routingApi = {
   optimize: async (date: string) => (await api.get('/v1/routing/optimize', { params: { date } })).data,
 };
+
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
+
+export default supabase;
