@@ -1,46 +1,119 @@
-import React, { useState } from 'react';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-
-const localizer = momentLocalizer(moment);
+import React, { useRef, useState } from 'react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
+import interactionPlugin from '@fullcalendar/interaction';
 
 const mockJobs = [
-  { id: '1', title: 'Job 1', start: new Date(2025, 7, 17, 9, 0), end: new Date(2025, 7, 17, 11, 0), technician: 'tech1' },
-  { id: '2', title: 'Job 2', start: new Date(2025, 7, 18, 13, 0), end: new Date(2025, 7, 18, 15, 0), technician: 'tech2' },
-  { id: '3', title: 'Job 3', start: new Date(2025, 7, 19, 10, 0), end: new Date(2025, 7, 19, 12, 0), technician: 'tech1' }
+  { id: '1', title: 'Pest Control - Office Building', date: '2025-01-17', start: '2025-01-17T09:00:00', end: '2025-01-17T11:00:00', technician: 'John Smith', status: 'scheduled' },
+  { id: '2', title: 'Termite Inspection - Residential', date: '2025-01-18', start: '2025-01-18T13:00:00', end: '2025-01-18T15:00:00', technician: 'Sarah Johnson', status: 'in-progress' },
+  { id: '3', title: 'Rodent Control - Restaurant', date: '2025-01-19', start: '2025-01-19T10:00:00', end: '2025-01-19T12:00:00', technician: 'Mike Davis', status: 'completed' },
+  { id: '4', title: 'Bed Bug Treatment - Hotel', date: '2025-01-20', start: '2025-01-20T08:00:00', end: '2025-01-20T16:00:00', technician: 'Lisa Wilson', status: 'scheduled' },
+  { id: '5', title: 'General Pest Control - Warehouse', date: '2025-01-21', start: '2025-01-21T14:00:00', end: '2025-01-21T16:00:00', technician: 'Tom Brown', status: 'scheduled' },
 ];
 
 export default function JobsCalendar() {
-  const [jobs, setJobs] = useState(mockJobs);
-  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [events, setEvents] = useState(mockJobs.map(j => ({ 
+    id: j.id, 
+    title: j.title, 
+    start: j.start, 
+    end: j.end,
+    extendedProps: {
+      technician: j.technician,
+      status: j.status
+    }
+  })));
+  const calendarRef = useRef(null);
 
-  const handleSelectEvent = (event: any) => {
-    setSelectedJob(event);
+  const handleEventDrop = (info: any) => {
+    setEvents(events.map(e => 
+      e.id === info.event.id 
+        ? { 
+            ...e, 
+            start: info.event.startStr, 
+            end: info.event.endStr 
+          } 
+        : e
+    ));
   };
 
-  // Drag-and-drop and assignment logic can be expanded here
+  const handleEventResize = (info: any) => {
+    setEvents(events.map(e => 
+      e.id === info.event.id 
+        ? { 
+            ...e, 
+            start: info.event.startStr, 
+            end: info.event.endStr 
+          } 
+        : e
+    ));
+  };
+
+  const handleDateSelect = (selectInfo: any) => {
+    const title = window.prompt('Please enter a name for your job');
+    const calendarApi = selectInfo.view.calendar;
+
+    calendarApi.unselect(); // clear date selection
+
+    if (title) {
+      const newEvent = {
+        id: Date.now().toString(),
+        title,
+        start: selectInfo.startStr,
+        end: selectInfo.endStr,
+        allDay: selectInfo.allDay,
+        extendedProps: {
+          technician: 'Unassigned',
+          status: 'scheduled'
+        }
+      };
+      
+      setEvents([...events, newEvent]);
+    }
+  };
+
+  const handleEventClick = (clickInfo: any) => {
+    if (window.confirm(`Are you sure you want to delete the job '${clickInfo.event.title}'`)) {
+      clickInfo.event.remove();
+      setEvents(events.filter(e => e.id !== clickInfo.event.id));
+    }
+  };
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Jobs Calendar</h1>
-      <Calendar
-        localizer={localizer}
-        events={jobs}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: 500 }}
-        onSelectEvent={handleSelectEvent}
-      />
-      {selectedJob && (
-        <div className="mt-4 p-4 bg-white rounded shadow">
-          <h2 className="text-lg font-semibold mb-2">{selectedJob.title}</h2>
-          <p>Technician: {selectedJob.technician}</p>
-          <p>Start: {selectedJob.start.toString()}</p>
-          <p>End: {selectedJob.end.toString()}</p>
-          <button className="bg-gray-400 text-white px-4 py-2 rounded mt-2" onClick={() => setSelectedJob(null)}>Close</button>
-        </div>
-      )}
+      <div className="bg-white rounded-lg shadow">
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+          }}
+          initialView="dayGridMonth"
+          editable={true}
+          selectable={true}
+          selectMirror={true}
+          dayMaxEvents={true}
+          weekends={true}
+          events={events}
+          select={handleDateSelect}
+          eventClick={handleEventClick}
+          eventDrop={handleEventDrop}
+          eventResize={handleEventResize}
+          height="auto"
+          eventColor="#3b82f6"
+          eventTextColor="#ffffff"
+          eventDisplay="block"
+          eventTimeFormat={{
+            hour: 'numeric',
+            minute: '2-digit',
+            meridiem: 'short'
+          }}
+        />
+      </div>
     </div>
   );
 }
