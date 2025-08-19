@@ -7,12 +7,54 @@ import './index.css';
 
 const queryClient = new QueryClient();
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </QueryClientProvider>
-  </React.StrictMode>
-);
+// Error boundary for initialization errors
+function ErrorFallback({ error }: { error: Error }) {
+  return (
+    <div style={{ 
+      padding: '20px', 
+      textAlign: 'center', 
+      fontFamily: 'Arial, sans-serif',
+      backgroundColor: '#f8f9fa',
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      <div style={{ maxWidth: '500px' }}>
+        <h1 style={{ color: '#dc3545', marginBottom: '20px' }}>Configuration Error</h1>
+        <p style={{ marginBottom: '15px', color: '#6c757d' }}>
+          The application failed to initialize due to a configuration issue.
+        </p>
+        <div style={{ 
+          backgroundColor: '#fff', 
+          padding: '15px', 
+          borderRadius: '5px', 
+          border: '1px solid #dee2e6',
+          textAlign: 'left',
+          fontSize: '14px'
+        }}>
+          <strong>Error:</strong> {error.message}
+        </div>
+        <p style={{ marginTop: '15px', fontSize: '14px', color: '#6c757d' }}>
+          Please check your environment variables and try refreshing the page.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+try {
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </React.StrictMode>
+  );
+} catch (error) {
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <ErrorFallback error={error as Error} />
+  );
+}
