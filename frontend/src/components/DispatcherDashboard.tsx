@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
 import { KPI } from './KPI';
 import { CheckCircle, Clock, Calendar, Zap } from 'lucide-react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 export function DispatcherDashboard() {
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
@@ -77,6 +78,30 @@ export function DispatcherDashboard() {
               <KPI icon={<Calendar className="h-6 w-6" />} label="Scheduled" value={jobs.filter(j=>j.status==='scheduled').length} color="#3b82f6" tooltip="Jobs scheduled for today" />
               <KPI icon={<Zap className="h-6 w-6" />} label="Unassigned" value={jobs.filter(j=>j.status==='unassigned').length} color="#eab308" tooltip="Jobs not yet assigned" />
             </div>
+
+            {/* Jobs Per Day Chart */}
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <h3 className="text-lg font-semibold mb-2">Jobs Per Day</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={getJobsPerDayData(jobs)}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#3b82f6" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+// Helper function for chart data
+function getJobsPerDayData(jobs: any[]) {
+  // Group jobs by scheduled_date
+  const counts: Record<string, number> = {};
+  jobs.forEach(job => {
+    const date = job.scheduled_date || 'Unknown';
+    counts[date] = (counts[date] || 0) + 1;
+  });
+  return Object.entries(counts).map(([date, count]) => ({ date, count }));
+}
             <h2 className="text-xl font-semibold mb-2">Jobs</h2>
             <div className="space-y-4">
               {Array.isArray(jobs) && jobs.map((job) => (
