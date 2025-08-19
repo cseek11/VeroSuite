@@ -53,14 +53,6 @@ export async function presignUpload(filename: string, content_type: string) {
 
 // Jobs
 export const jobsApi = {
-
-export async function login(email: string, password: string) {
-  const res = await api.post('/auth/login', { email, password });
-  return res.data;
-}
-
-// Jobs
-export const jobsApi = {
   today: async (technician_id?: string) => {
     const res = await api.get('/v1/jobs/today', { params: { technician_id } });
     return res.data;
