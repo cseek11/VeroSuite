@@ -40,6 +40,35 @@ const Dashboard = () => {
   const [currentPhoto, setCurrentPhoto] = useState(0);
   const threeRef = useRef();
 
+  // Mock Jobs Data
+  const mockJobs = [
+    { id: '1', title: 'Pest Control - Office Building', start: '2025-01-17T09:00:00', end: '2025-01-17T11:00:00', technician: 'John Smith', status: 'scheduled', color: '#3b82f6' },
+    { id: '2', title: 'Termite Inspection - Residential', start: '2025-01-18T13:00:00', end: '2025-01-18T15:00:00', technician: 'Sarah Johnson', status: 'in-progress', color: '#f59e0b' },
+    { id: '3', title: 'Rodent Control - Restaurant', start: '2025-01-19T10:00:00', end: '2025-01-19T12:00:00', technician: 'Mike Davis', status: 'completed', color: '#10b981' },
+    { id: '4', title: 'Bed Bug Treatment - Hotel', start: '2025-01-20T08:00:00', end: '2025-01-20T16:00:00', technician: 'Lisa Wilson', status: 'scheduled', color: '#8b5cf6' },
+    { id: '5', title: 'General Pest Control - Warehouse', start: '2025-01-21T14:00:00', end: '2025-01-21T16:00:00', technician: 'Tom Brown', status: 'scheduled', color: '#ef4444' },
+    { id: '6', title: 'All-Day Event - Annual Inspection', start: '2025-01-22', allDay: true, technician: 'Team A', status: 'scheduled', color: '#06b6d4' },
+    { id: '7', title: 'Multi-Day Treatment', start: '2025-01-23T08:00:00', end: '2025-01-25T17:00:00', technician: 'Specialist Team', status: 'scheduled', color: '#84cc16' },
+    { id: '8', title: 'Emergency Call - Bee Removal', start: '2025-01-24T14:30:00', end: '2025-01-24T16:30:00', technician: 'Emergency Team', status: 'urgent', color: '#dc2626' },
+  ];
+
+  const [jobsEvents, setJobsEvents] = useState(mockJobs.map(job => ({
+    id: job.id,
+    title: job.title,
+    start: job.start,
+    end: job.end,
+    allDay: job.allDay || false,
+    color: job.color,
+    extendedProps: {
+      technician: job.technician,
+      status: job.status
+    }
+  })));
+
+  // Resizable calendar state
+  const [calendarWidth, setCalendarWidth] = useState(600);
+  const [isResizing, setIsResizing] = useState(false);
+
   // Logout handler
   const handleLogout = () => {
     clearAuth();
@@ -237,35 +266,6 @@ const Dashboard = () => {
     backgroundPattern: 'none',
     glassEffect: false
   });
-
-  // Mock Jobs Data
-  const mockJobs = [
-    { id: '1', title: 'Pest Control - Office Building', start: '2025-01-17T09:00:00', end: '2025-01-17T11:00:00', technician: 'John Smith', status: 'scheduled', color: '#3b82f6' },
-    { id: '2', title: 'Termite Inspection - Residential', start: '2025-01-18T13:00:00', end: '2025-01-18T15:00:00', technician: 'Sarah Johnson', status: 'in-progress', color: '#f59e0b' },
-    { id: '3', title: 'Rodent Control - Restaurant', start: '2025-01-19T10:00:00', end: '2025-01-19T12:00:00', technician: 'Mike Davis', status: 'completed', color: '#10b981' },
-    { id: '4', title: 'Bed Bug Treatment - Hotel', start: '2025-01-20T08:00:00', end: '2025-01-20T16:00:00', technician: 'Lisa Wilson', status: 'scheduled', color: '#8b5cf6' },
-    { id: '5', title: 'General Pest Control - Warehouse', start: '2025-01-21T14:00:00', end: '2025-01-21T16:00:00', technician: 'Tom Brown', status: 'scheduled', color: '#ef4444' },
-    { id: '6', title: 'All-Day Event - Annual Inspection', start: '2025-01-22', allDay: true, technician: 'Team A', status: 'scheduled', color: '#06b6d4' },
-    { id: '7', title: 'Multi-Day Treatment', start: '2025-01-23T08:00:00', end: '2025-01-25T17:00:00', technician: 'Specialist Team', status: 'scheduled', color: '#84cc16' },
-    { id: '8', title: 'Emergency Call - Bee Removal', start: '2025-01-24T14:30:00', end: '2025-01-24T16:30:00', technician: 'Emergency Team', status: 'urgent', color: '#dc2626' },
-  ];
-
-  const [jobsEvents, setJobsEvents] = useState(mockJobs.map(job => ({
-    id: job.id,
-    title: job.title,
-    start: job.start,
-    end: job.end,
-    allDay: job.allDay || false,
-    color: job.color,
-    extendedProps: {
-      technician: job.technician,
-      status: job.status
-    }
-  })));
-
-  // Resizable calendar state
-  const [calendarWidth, setCalendarWidth] = useState(600);
-  const [isResizing, setIsResizing] = useState(false);
 
   // Sample data
   const salesData = [
