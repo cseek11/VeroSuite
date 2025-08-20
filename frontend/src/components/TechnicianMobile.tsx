@@ -24,19 +24,19 @@ export function TechnicianMobile() {
   // Placeholder handlers for job actions
   function handleStartJob(jobId: string) {
     // TODO: Call backend to start job
-    alert('Start job ' + jobId);
+    alert(`Start job ${  jobId}`);
   }
   function handleCompleteJob(jobId: string) {
     // TODO: Call backend to complete job
-    alert('Complete job ' + jobId);
+    alert(`Complete job ${  jobId}`);
   }
   function handlePhotoUpload(jobId: string, files: FileList | null) {
     // TODO: Upload photos to backend
-    alert('Upload photos for job ' + jobId);
+    alert(`Upload photos for job ${  jobId}`);
   }
   function handleChemicalLog(jobId: string) {
     // TODO: Log chemicals used
-    alert('Log chemicals for job ' + jobId);
+    alert(`Log chemicals for job ${  jobId}`);
   }
 
   return (
