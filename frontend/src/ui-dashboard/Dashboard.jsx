@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import SettingsPage from '../routes/Settings';
 import { 
   ChevronDown, Bell, Search, Menu, X, Home, BarChart3, Users, ShoppingCart, 
   CreditCard, Settings, User, TrendingUp, TrendingDown, Eye, Heart, MessageCircle,
@@ -828,7 +829,6 @@ const Dashboard = () => {
             { id: 'jobs', label: 'Jobs', icon: Briefcase },
             { id: 'analytics', label: 'Analytics', icon: BarChart3 },
             { id: 'customers', label: 'Customers', icon: Users },
-            { id: 'orders', label: 'Orders', icon: ShoppingCart },
             { id: 'payments', label: 'Payments', icon: CreditCard },
             { id: 'calendar', label: 'Calendar', icon: Calendar },
             { id: 'settings', label: 'Settings', icon: Settings }
@@ -1162,9 +1162,7 @@ const Dashboard = () => {
               </Card>
             )}
             {activeTab === 'settings' && (
-              <Card title="Settings">
-                <p>Settings content goes here...</p>
-              </Card>
+              <SettingsPage />
             )}
             {activeTab === 'profile' && (
               <Card title="Profile">
