@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { login } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
 import { Eye, EyeOff, Mail, Lock, Building, Loader2 } from 'lucide-react';
 
 export default function Login() {
+  const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
   const [email, setEmail] = useState('dispatcher@acepest.com');
   const [password, setPassword] = useState('password123');
@@ -18,8 +20,10 @@ export default function Login() {
     setError(null);
     try {
       const res = await login(email, password);
+      console.log('Login successful:', res);
       setAuth({ token: res.access_token, tenantId, user: res.user });
-      window.location.href = '/';
+      console.log('Auth set, navigating to dashboard');
+      navigate('/dashboard');
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'Login failed');
