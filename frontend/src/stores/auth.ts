@@ -12,7 +12,14 @@ function loadPersisted(): Pick<AuthState, 'token' | 'tenantId' | 'user'> {
   try {
     const raw = localStorage.getItem('verosuite_auth');
     if (!raw) return { token: null, tenantId: null, user: null } as any;
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    
+    // Validate that we have both token and user
+    if (!parsed.token || !parsed.user) {
+      return { token: null, tenantId: null, user: null } as any;
+    }
+    
+    return parsed;
   } catch {
     return { token: null, tenantId: null, user: null } as any;
   }
@@ -21,11 +28,19 @@ function loadPersisted(): Pick<AuthState, 'token' | 'tenantId' | 'user'> {
 export const useAuthStore = create<AuthState>((set) => ({
   ...loadPersisted(),
   setAuth: ({ token, tenantId, user }) => {
+    // Validate required fields
+    if (!token || !user) {
+      console.error('setAuth: Missing required fields');
+      return;
+    }
+    
     localStorage.setItem('verosuite_auth', JSON.stringify({ token, tenantId, user }));
     set({ token, tenantId, user });
   },
   clear: () => {
     localStorage.removeItem('verosuite_auth');
+    localStorage.removeItem('user');
+    localStorage.removeItem('jwt');
     set({ token: null, tenantId: null, user: null });
   },
 }));

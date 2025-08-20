@@ -9,7 +9,14 @@ const LoginPage = lazy(() => import('@/routes/Login'));
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const token = useAuthStore((s) => s.token);
-  if (!token) return <Navigate to="/login" replace />;
+  const user = useAuthStore((s) => s.user);
+  
+  // More strict authentication check
+  if (!token || !user) {
+    console.log('PrivateRoute: No token or user, redirecting to login');
+    return <Navigate to="/login" replace />;
+  }
+  
   return children;
 }
 
@@ -29,20 +36,32 @@ function DashboardFallback() {
 
 export default function App() {
   const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
   const clearAuth = useAuthStore((s) => s.clear);
 
   // Force clear auth on app start to ensure proper login
   useEffect(() => {
-    console.log('Forcing logout on app start');
+    console.log('App mounted - forcing logout');
+    console.log('Initial token:', token);
+    console.log('Initial user:', user);
+    
+    // Clear all possible auth data
     clearAuth();
-    localStorage.removeItem('verosuite_auth');
-    localStorage.removeItem('user');
-    localStorage.removeItem('jwt');
+    localStorage.clear(); // Clear all localStorage
+    sessionStorage.clear(); // Clear all sessionStorage
+    
     // Force redirect to login
-    if (window.location.pathname !== '/login') {
-      window.location.href = '/login';
-    }
+    setTimeout(() => {
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }, 100);
   }, []);
+
+  // Check if user is properly authenticated
+  const isAuthenticated = token && user;
+  
+  console.log('App render - token:', token, 'user:', user, 'isAuthenticated:', isAuthenticated);
 
   return (
     <Suspense fallback={<Spinner />}>
@@ -50,7 +69,9 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route 
           path="/" 
-          element={<Navigate to="/login" replace />}
+          element={
+            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+          }
         />
         <Route
           path="/*"
