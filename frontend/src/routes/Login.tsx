@@ -1,27 +1,39 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { login } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
+import { loginSchema, type LoginFormData } from '@/lib/validation';
 import { Eye, EyeOff, Mail, Lock, Building, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
-  const [email, setEmail] = useState('dispatcher@acepest.com');
-  const [password, setPassword] = useState('password123');
-  const [tenantId, setTenantId] = useState('11111111-1111-1111-1111-111111111111');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      tenantId: '',
+    },
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await login(email, password);
+      const res = await login(data.email, data.password);
       console.log('Login successful:', res);
-      setAuth({ token: res.access_token, tenantId, user: res.user });
+      setAuth({ token: res.access_token, tenantId: data.tenantId, user: res.user });
       console.log('Auth set, navigating to dashboard');
       navigate('/dashboard');
     } catch (err: any) {
@@ -53,10 +65,10 @@ export default function Login() {
 
         {/* Login Form */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-          <form onSubmit={submit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address
               </label>
               <div className="relative">
@@ -64,19 +76,27 @@ export default function Login() {
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
+                  id="email"
                   type="email"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
+                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                    errors.email ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  {...register('email')}
+                  aria-invalid={errors.email ? 'true' : 'false'}
+                  aria-describedby={errors.email ? 'email-error' : undefined}
                 />
               </div>
+              {errors.email && (
+                <p id="email-error" className="text-sm text-red-600 mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
               <div className="relative">
@@ -84,17 +104,21 @@ export default function Login() {
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
+                  id="password"
                   type={showPassword ? 'text' : 'password'}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
+                  className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                    errors.password ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
+                  {...register('password')}
+                  aria-invalid={errors.password ? 'true' : 'false'}
+                  aria-describedby={errors.password ? 'password-error' : undefined}
                 />
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -103,11 +127,16 @@ export default function Login() {
                   )}
                 </button>
               </div>
+              {errors.password && (
+                <p id="password-error" className="text-sm text-red-600 mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             {/* Tenant ID Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="tenantId" className="block text-sm font-medium text-gray-700 mb-2">
                 Tenant ID
               </label>
               <div className="relative">
@@ -115,14 +144,22 @@ export default function Login() {
                   <Building className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
+                  id="tenantId"
                   type="text"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
+                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                    errors.tenantId ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Enter tenant ID"
-                  value={tenantId}
-                  onChange={(e) => setTenantId(e.target.value)}
-                  required
+                  {...register('tenantId')}
+                  aria-invalid={errors.tenantId ? 'true' : 'false'}
+                  aria-describedby={errors.tenantId ? 'tenantId-error' : undefined}
                 />
               </div>
+              {errors.tenantId && (
+                <p id="tenantId-error" className="text-sm text-red-600 mt-1">
+                  {errors.tenantId.message}
+                </p>
+              )}
               <p className="text-xs text-gray-500 mt-2">
                 Use Tenant A: <code className="bg-gray-100 px-1 rounded">11111111-1111-1111-1111-111111111111</code> or 
                 Tenant B: <code className="bg-gray-100 px-1 rounded">22222222-2222-2222-2222-222222222222</code>
@@ -131,7 +168,7 @@ export default function Login() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4" role="alert">
                 <div className="flex">
                   <div className="flex-shrink-0">
                     <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
