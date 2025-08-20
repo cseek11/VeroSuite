@@ -181,19 +181,32 @@ const Dashboard = () => {
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
+      /* FullCalendar Base Styles */
       .fc {
         font-family: 'Inter', sans-serif;
+        background: white;
+        border-radius: 0.5rem;
+        overflow: hidden;
       }
+      
       .fc-toolbar {
         background: white;
         border-bottom: 1px solid #e5e7eb;
         padding: 1rem;
         border-radius: 0.75rem 0.75rem 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
       }
+      
       .fc-toolbar-title {
         font-weight: 600;
         color: #374151;
+        font-size: 1.25rem;
       }
+      
       .fc-button {
         background: #f3f4f6 !important;
         border: 1px solid #d1d5db !important;
@@ -202,43 +215,100 @@ const Dashboard = () => {
         border-radius: 0.5rem !important;
         padding: 0.5rem 1rem !important;
         transition: all 0.2s !important;
+        cursor: pointer !important;
+        font-size: 0.875rem !important;
       }
+      
       .fc-button:hover {
         background: #e5e7eb !important;
         border-color: #9ca3af !important;
       }
+      
       .fc-button-active {
-        background: #cb0c9f !important;
-        border-color: #cb0c9f !important;
+        background: #8b5cf6 !important;
+        border-color: #8b5cf6 !important;
         color: white !important;
       }
+      
       .fc-daygrid-day {
         border: 1px solid #f3f4f6 !important;
+        min-height: 100px !important;
       }
+      
       .fc-daygrid-day:hover {
         background: #f9fafb !important;
       }
+      
       .fc-day-today {
         background: #fef3c7 !important;
       }
+      
       .fc-event {
         border-radius: 0.375rem !important;
         border: none !important;
         font-weight: 500 !important;
         font-size: 0.875rem !important;
+        padding: 0.25rem 0.5rem !important;
+        margin: 0.125rem !important;
+        cursor: pointer !important;
       }
+      
       .fc-event:hover {
         transform: translateY(-1px);
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       }
+      
       .fc-timegrid-slot {
         border: 1px solid #f3f4f6 !important;
       }
+      
       .fc-col-header-cell {
         background: #f9fafb !important;
         border: 1px solid #e5e7eb !important;
         font-weight: 600 !important;
         color: #374151 !important;
+        padding: 0.5rem !important;
+      }
+      
+      .fc-daygrid-day-number {
+        color: #374151 !important;
+        font-weight: 500 !important;
+        padding: 0.5rem !important;
+      }
+      
+      .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+        background: #fbbf24 !important;
+        color: white !important;
+        border-radius: 50% !important;
+        width: 2rem !important;
+        height: 2rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+      
+      .fc-list-event {
+        border-radius: 0.375rem !important;
+        margin: 0.25rem 0 !important;
+        padding: 0.5rem !important;
+      }
+      
+      .fc-list-event:hover {
+        background: #f3f4f6 !important;
+      }
+      
+      .fc-list-event-dot {
+        border-radius: 50% !important;
+      }
+      
+      .fc-timegrid-now-indicator-line {
+        border-color: #ef4444 !important;
+        border-width: 2px !important;
+      }
+      
+      .fc-timegrid-now-indicator-arrow {
+        border-color: #ef4444 !important;
+        border-width: 5px !important;
       }
     `;
     document.head.appendChild(style);
@@ -966,6 +1036,7 @@ const Dashboard = () => {
             {activeTab === 'dashboard' && <DashboardContent />}
             {activeTab === 'jobs' && (
               <div className="space-y-4">
+                {console.log('Jobs tab selected, rendering calendar with', jobsEvents.length, 'events')}
                 <div className="flex items-center justify-between">
                   <h1 className="text-xl font-bold text-gray-900">Jobs Management</h1>
                   <Button icon={Plus} onClick={() => setActiveTab('jobs')}>
@@ -976,11 +1047,15 @@ const Dashboard = () => {
                 <div className="flex gap-4 h-[calc(100vh-180px)]">
                   {/* Resizable Calendar Panel */}
                   <div 
-                    className="flex-shrink-0 relative"
+                    className="flex-shrink-0 relative bg-white border border-gray-200 rounded-lg"
                     style={{ width: `${calendarWidth}px` }}
                   >
                     <Card title="Jobs Calendar" className="h-full">
-                      <div className="h-full">
+                      <div className="h-full p-4" style={{ minHeight: '600px', backgroundColor: '#f9fafb' }}>
+                        {console.log('Rendering FullCalendar with width:', calendarWidth, 'and events:', jobsEvents.length)}
+                        <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
+                          Debug: Calendar should render here with {jobsEvents.length} events
+                        </div>
                         <FullCalendar
                           plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
                           headerToolbar={{
@@ -999,7 +1074,8 @@ const Dashboard = () => {
                           eventClick={handleJobEventClick}
                           eventDrop={handleJobEventDrop}
                           eventResize={handleJobEventResize}
-                          height="100%"
+                          height="auto"
+                          aspectRatio={1.35}
                           eventTextColor="#ffffff"
                           eventDisplay="block"
                           eventTimeFormat={{
@@ -1021,6 +1097,7 @@ const Dashboard = () => {
                           eventConstraint="businessHours"
                           eventOverlap={false}
                           eventDidMount={(info) => {
+                            console.log('Event mounted:', info.event.title);
                             // Add custom styling based on status
                             const status = info.event.extendedProps.status;
                             if (status === 'urgent') {
@@ -1031,6 +1108,9 @@ const Dashboard = () => {
                             }
                           }}
                         />
+                        <div className="mt-4 p-2 bg-green-50 border border-green-200 rounded text-sm">
+                          Debug: Calendar rendered successfully
+                        </div>
                       </div>
                     </Card>
                   </div>
