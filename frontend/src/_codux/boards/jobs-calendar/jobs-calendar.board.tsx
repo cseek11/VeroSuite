@@ -5,6 +5,6 @@ export default createBoard({
   name: 'JobsCalendar',
   Board: () => <JobsCalendar />,
   environmentProps: {
-    windowWidth: 770.3333333333334,
+    windowWidth: 757.6666666666666,
   },
 });
