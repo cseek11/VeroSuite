@@ -8,13 +8,12 @@ export default createBoard({
       open={true}
       onClose={() => console.log('Modal closed')}
       title='Sample Modal'
+      children={<div>Modal Content</div>}
       size='md'
       closeOnOverlayClick={true}
       closeOnEscape={true}
       showCloseButton={true}
       className='custom-modal-class'
-    >
-      <div>Modal Content</div>
-    </Modal>
+    />
   ),
 });
