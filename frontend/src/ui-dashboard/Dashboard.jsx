@@ -69,6 +69,8 @@ const Dashboard = () => {
   // Resizable calendar state
   const [calendarWidth, setCalendarWidth] = useState(500);
   const [isResizing, setIsResizing] = useState(false);
+  const [calendarLoaded, setCalendarLoaded] = useState(false);
+  const [calendarError, setCalendarError] = useState(null);
 
   // Logout handler
   const handleLogout = () => {
@@ -177,16 +179,53 @@ const Dashboard = () => {
     }
   }, [isResizing]);
 
+  // Auto-set calendar as loaded after delay (fallback)
+  useEffect(() => {
+    if (activeTab === 'jobs' && !calendarLoaded) {
+      const timer = setTimeout(() => {
+        console.log('Auto-setting calendar as loaded (fallback)');
+        setCalendarLoaded(true);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab, calendarLoaded]);
+
   // Add custom calendar styles
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
-      /* FullCalendar Base Styles */
+      /* FullCalendar Base Styles - Essential for rendering */
       .fc {
         font-family: 'Inter', sans-serif;
         background: white;
         border-radius: 0.5rem;
         overflow: hidden;
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
+      
+      .fc-view-harness {
+        height: 100% !important;
+        min-height: 400px !important;
+      }
+      
+      .fc-scroller {
+        overflow: auto !important;
+      }
+      
+      .fc-scroller-liquid {
+        height: 100% !important;
+      }
+      
+      .fc-daygrid-body {
+        width: 100% !important;
+        min-height: 400px !important;
+      }
+      
+      .fc-daygrid-day-frame {
+        min-height: 100px !important;
       }
       
       .fc-toolbar {
@@ -1055,61 +1094,119 @@ const Dashboard = () => {
                         {console.log('Rendering FullCalendar with width:', calendarWidth, 'and events:', jobsEvents.length)}
                         <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
                           Debug: Calendar should render here with {jobsEvents.length} events
+                          <br />
+                          FullCalendar imported: {typeof FullCalendar !== 'undefined' ? 'Yes' : 'No'}
+                          <br />
+                          Plugins loaded: {dayGridPlugin ? 'Yes' : 'No'}
                         </div>
-                        <FullCalendar
-                          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-                          headerToolbar={{
-                            left: 'prev,next today',
-                            center: 'title',
-                            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek,listMonth'
-                          }}
-                          initialView="dayGridMonth"
-                          editable={true}
-                          selectable={true}
-                          selectMirror={true}
-                          dayMaxEvents={true}
-                          weekends={true}
-                          events={jobsEvents}
-                          select={handleJobDateSelect}
-                          eventClick={handleJobEventClick}
-                          eventDrop={handleJobEventDrop}
-                          eventResize={handleJobEventResize}
-                          height="auto"
-                          aspectRatio={1.35}
-                          eventTextColor="#ffffff"
-                          eventDisplay="block"
-                          eventTimeFormat={{
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            meridiem: 'short'
-                          }}
-                          slotMinTime="06:00:00"
-                          slotMaxTime="20:00:00"
-                          slotDuration="00:30:00"
-                          slotLabelInterval="01:00:00"
-                          businessHours={{
-                            daysOfWeek: [1, 2, 3, 4, 5], // Monday - Friday
-                            startTime: '08:00',
-                            endTime: '18:00',
-                          }}
-                          nowIndicator={true}
-                          scrollTime="08:00:00"
-                          eventConstraint="businessHours"
-                          eventOverlap={false}
-                          eventDidMount={(info) => {
-                            console.log('Event mounted:', info.event.title);
-                            // Add custom styling based on status
-                            const status = info.event.extendedProps.status;
-                            if (status === 'urgent') {
-                              info.el.style.border = '2px solid #dc2626';
-                              info.el.style.fontWeight = 'bold';
-                            } else if (status === 'completed') {
-                              info.el.style.opacity = '0.7';
-                            }
-                          }}
-                        />
+                        
+                        {calendarError ? (
+                          <div className="p-8 text-center">
+                            <div className="text-red-500 mb-4">
+                              <AlertTriangle className="w-12 h-12 mx-auto" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Calendar Error</h3>
+                            <p className="text-gray-600 mb-4">{calendarError}</p>
+                            <button 
+                              onClick={() => {
+                                setCalendarError(null);
+                                setCalendarLoaded(false);
+                              }}
+                              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                            >
+                              Retry
+                            </button>
+                          </div>
+                        ) : !calendarLoaded ? (
+                          <div className="p-8 text-center">
+                            <div className="text-blue-500 mb-4">
+                              <Calendar className="w-12 h-12 mx-auto animate-spin" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Calendar...</h3>
+                            <p className="text-gray-600">Please wait while the calendar loads</p>
+                          </div>
+                        ) : (
+                          <div onError={(error) => {
+                            console.error('FullCalendar error:', error);
+                            setCalendarError('Failed to load calendar: ' + error.message);
+                          }}>
+                            <FullCalendar
+                              plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+                              headerToolbar={{
+                                left: 'prev,next today',
+                                center: 'title',
+                                right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek,listMonth'
+                              }}
+                              initialView="dayGridMonth"
+                              editable={true}
+                              selectable={true}
+                              selectMirror={true}
+                              dayMaxEvents={true}
+                              weekends={true}
+                              events={jobsEvents}
+                              select={handleJobDateSelect}
+                              eventClick={handleJobEventClick}
+                              eventDrop={handleJobEventDrop}
+                              eventResize={handleJobEventResize}
+                              height="auto"
+                              aspectRatio={1.35}
+                              eventTextColor="#ffffff"
+                              eventDisplay="block"
+                              eventTimeFormat={{
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                meridiem: 'short'
+                              }}
+                              slotMinTime="06:00:00"
+                              slotMaxTime="20:00:00"
+                              slotDuration="00:30:00"
+                              slotLabelInterval="01:00:00"
+                              businessHours={{
+                                daysOfWeek: [1, 2, 3, 4, 5], // Monday - Friday
+                                startTime: '08:00',
+                                endTime: '18:00',
+                              }}
+                              nowIndicator={true}
+                              scrollTime="08:00:00"
+                              eventConstraint="businessHours"
+                              eventOverlap={false}
+                              eventDidMount={(info) => {
+                                console.log('Event mounted:', info.event.title);
+                                setCalendarLoaded(true);
+                                // Add custom styling based on status
+                                const status = info.event.extendedProps.status;
+                                if (status === 'urgent') {
+                                  info.el.style.border = '2px solid #dc2626';
+                                  info.el.style.fontWeight = 'bold';
+                                } else if (status === 'completed') {
+                                  info.el.style.opacity = '0.7';
+                                }
+                              }}
+                              eventDidUnmount={() => {
+                                console.log('Event unmounted');
+                              }}
+                              datesSet={() => {
+                                console.log('Calendar dates set');
+                                setCalendarLoaded(true);
+                              }}
+                              loading={(isLoading) => {
+                                console.log('Calendar loading:', isLoading);
+                              }}
+                              eventContent={(arg) => {
+                                console.log('Event content:', arg.event.title);
+                                return (
+                                  <div className="p-1">
+                                    <div className="font-medium text-xs">{arg.event.title}</div>
+                                    <div className="text-xs opacity-75">{arg.event.extendedProps.technician}</div>
+                                  </div>
+                                );
+                              }}
+                            />
+                          </div>
+                        )}
+                        
                         <div className="mt-4 p-2 bg-green-50 border border-green-200 rounded text-sm">
-                          Debug: Calendar rendered successfully
+                          Debug: Calendar rendered successfully - Loaded: {calendarLoaded ? 'Yes' : 'No'}
                         </div>
                       </div>
                     </Card>
