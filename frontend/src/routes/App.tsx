@@ -31,14 +31,16 @@ export default function App() {
   const token = useAuthStore((s) => s.token);
   const clearAuth = useAuthStore((s) => s.clear);
 
-  // Clear any existing auth on app start to ensure fresh login
+  // Force clear auth on app start to ensure proper login
   useEffect(() => {
-    // Only clear if there's no valid token
-    if (!token) {
-      clearAuth();
-      localStorage.removeItem('verosuite_auth');
-      localStorage.removeItem('user');
-      localStorage.removeItem('jwt');
+    console.log('Forcing logout on app start');
+    clearAuth();
+    localStorage.removeItem('verosuite_auth');
+    localStorage.removeItem('user');
+    localStorage.removeItem('jwt');
+    // Force redirect to login
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login';
     }
   }, []);
 
@@ -48,9 +50,7 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route 
           path="/" 
-          element={
-            token ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
-          }
+          element={<Navigate to="/login" replace />}
         />
         <Route
           path="/*"
