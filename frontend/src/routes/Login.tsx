@@ -54,7 +54,7 @@ const Login: React.FC = () => {
       <div className="w-full max-w-md">
         {/* Logo and Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-tl from-blue-500 to-violet-500 rounded-2xl shadow-soft-xl mb-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-tl from-blue-500 to-violet-500 rounded-2xl shadow-xl mb-4">
             <span className="text-white text-2xl font-bold">V</span>
           </div>
           <h1 className="text-3xl font-bold text-slate-700 mb-2">Welcome back</h1>
@@ -62,7 +62,7 @@ const Login: React.FC = () => {
         </div>
 
         {/* Login Form */}
-        <SoftCard className="shadow-soft-xl">
+        <SoftCard className="shadow-xl">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email Field */}
             <SoftInput

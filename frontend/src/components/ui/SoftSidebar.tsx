@@ -84,9 +84,9 @@ const SoftSidebar: React.FC<SoftSidebarProps> = ({
       )}
 
       {/* Sidebar */}
-      <aside className={`max-w-62.5 ease-nav-brand z-990 fixed inset-y-0 my-4 ml-4 block w-full -translate-x-full flex-wrap items-center justify-between overflow-y-auto rounded-2xl border-0 bg-white p-0 antialiased shadow-none transition-transform duration-200 xl:left-0 xl:translate-x-0 xl:bg-transparent ${isOpen ? 'translate-x-0' : ''} ${className}`}>
+      <aside className={`w-64 fixed inset-y-0 my-4 ml-4 block -translate-x-full flex-wrap items-center justify-between overflow-y-auto rounded-2xl border-0 bg-white p-0 antialiased shadow-none transition-transform duration-200 xl:left-0 xl:translate-x-0 xl:bg-transparent z-50 ${isOpen ? 'translate-x-0' : ''} ${className}`}>
         {/* Brand */}
-        <div className="h-19.5">
+        <div className="h-20">
           <button
             onClick={closeSidebar}
             className="absolute top-0 right-0 p-4 opacity-50 cursor-pointer text-slate-400 xl:hidden"
@@ -119,7 +119,7 @@ const SoftSidebar: React.FC<SoftSidebarProps> = ({
         <hr className="h-px mt-0 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent" />
 
         {/* Navigation */}
-        <div className="items-center block w-auto max-h-screen overflow-auto h-sidenav grow basis-full">
+        <div className="items-center block w-auto max-h-screen overflow-auto grow basis-full" style={{ height: 'calc(100vh - 7.5rem)' }}>
           <ul className="flex flex-col pl-0 mb-0">
             {items.map((item, index) => {
               const Icon = item.icon;

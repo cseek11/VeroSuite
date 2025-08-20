@@ -56,7 +56,7 @@ const SoftNavbar: React.FC<SoftNavbarProps> = ({
   ];
 
   return (
-    <nav className={`relative z-40 flex h-20 items-center justify-between rounded-xl bg-white bg-clip-border p-4 shadow-soft-xl shadow-soft-xl ${className}`}>
+    <nav className={`relative z-40 flex h-20 items-center justify-between rounded-xl bg-white bg-clip-border p-4 shadow-lg ${className}`}>
       {/* Left side - Title and Breadcrumb */}
       <div className="flex items-center">
         {title && (
@@ -112,7 +112,7 @@ const SoftNavbar: React.FC<SoftNavbarProps> = ({
 
             {/* Notifications Dropdown */}
             {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-soft-xl border border-gray-200 z-50">
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
                 <div className="p-4 border-b border-gray-200">
                   <h3 className="text-sm font-semibold text-slate-700">Notifications</h3>
                 </div>
@@ -168,7 +168,7 @@ const SoftNavbar: React.FC<SoftNavbarProps> = ({
 
             {/* User Dropdown */}
             {isUserMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-soft-xl border border-gray-200 z-50">
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
                 <div className="py-1">
                   <button className="flex items-center w-full px-4 py-2 text-sm text-slate-700 hover:bg-gray-100">
                     <User className="w-4 h-4 mr-3" />

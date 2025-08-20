@@ -28,7 +28,7 @@ const SoftButton: React.FC<SoftButtonProps> = ({
   fullWidth = false,
   rounded = false
 }) => {
-  const baseClasses = 'inline-block font-bold text-center uppercase align-middle transition-all rounded-lg cursor-pointer leading-pro ease-soft-in tracking-tight-soft shadow-soft-md bg-150 bg-x-25 hover:scale-102 hover:shadow-soft-xs active:opacity-85 hover:-translate-y-px disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:-translate-y-0';
+  const baseClasses = 'inline-block font-bold text-center uppercase align-middle transition-all rounded-lg cursor-pointer shadow-md hover:scale-105 active:opacity-85 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:translate-y-0';
   
   const variantClasses = {
     primary: 'bg-gradient-to-tl from-blue-500 to-violet-500 text-white',
