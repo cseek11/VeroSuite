@@ -14,6 +14,8 @@ function PrivateRoute({ children }: { children: JSX.Element }) {
 }
 
 export default function App() {
+  const token = useAuthStore((s) => s.token);
+
   return (
     <Suspense fallback={<Spinner />}>
       <Routes>
@@ -25,6 +27,13 @@ export default function App() {
               <Dashboard />
             </PrivateRoute>
           }
+        />
+        {/* Redirect root to login if not authenticated, otherwise to dashboard */}
+        <Route 
+          path="/" 
+          element={
+            token ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+          } 
         />
       </Routes>
     </Suspense>
