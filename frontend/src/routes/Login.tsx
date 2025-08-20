@@ -40,7 +40,12 @@ export default function Login() {
         position: 'relative',
       }}
     >
-      <img
+      
+      <div className="w-full max-w-md">
+        {/* Logo and Brand */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-lg mb-4 opacity-75">
+            <span className="text-2xl"> <img
         src="/branding/veropest_logo.png"
         alt="VeroPest Logo"
         style={{
@@ -53,12 +58,7 @@ export default function Login() {
           opacity: 0.9,
           pointerEvents: 'none',
         }}
-      />
-      <div className="w-full max-w-md">
-        {/* Logo and Brand */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-lg mb-4">
-            <span className="text-2xl">🚀</span>
+      /></span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">VeroSuite</h1>
           <p className="text-gray-600">Sign in to your account</p>
