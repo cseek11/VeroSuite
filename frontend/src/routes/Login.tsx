@@ -33,34 +33,21 @@ export default function Login() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center w-full"
-      style={{
-        background: `url('/branding/crm_bg.png') center center / cover no-repeat fixed`,
-        position: 'relative',
-      }}
-    >
-      
+    <div className="min-h-screen flex items-center justify-center" style={{
+      background: `url('/branding/crm_bg.png') center center / cover no-repeat fixed`,
+      position: 'relative',
+    }}>
       <div className="w-full max-w-md">
         {/* Logo and Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-lg mb-4 opacity-75">
-            <span className="text-2xl"> <img
-        src="/branding/veropest_logo.png"
-        alt="VeroPest Logo"
-        style={{
-          position: 'fixed',
-          top: 24,
-          left: 24,
-          width: 64,
-          height: 64,
-          zIndex: 100,
-          opacity: 0.9,
-          pointerEvents: 'none',
-        }}
-      /></span>
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-lg mb-4 p-2">
+            <img 
+              src="/branding/veropest_logo.png" 
+              alt="VeroPest Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">VeroSuite</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">VeroPest Suite</h1>
           <p className="text-gray-600">Sign in to your account</p>
         </div>
 
@@ -190,7 +177,7 @@ export default function Login() {
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-sm text-gray-500">
-            © 2024 VeroSuite. All rights reserved.
+            © 2024 VeroPest Suite. All rights reserved.
           </p>
         </div>
       </div>
