@@ -1,6 +1,6 @@
 
 import { Route, Routes, Navigate } from 'react-router-dom';
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { Spinner } from '@/ui/Spinner';
 import Dashboard from '../ui-dashboard/Dashboard';
@@ -38,24 +38,33 @@ export default function App() {
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
   const clearAuth = useAuthStore((s) => s.clear);
+  const hasInitialized = useRef(false);
 
-  // Force clear auth on app start to ensure proper login
+  // Force clear auth only once on app start
   useEffect(() => {
-    console.log('App mounted - forcing logout');
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+    
+    console.log('App mounted - initial cleanup');
     console.log('Initial token:', token);
     console.log('Initial user:', user);
     
-    // Clear all possible auth data
-    clearAuth();
-    localStorage.clear(); // Clear all localStorage
-    sessionStorage.clear(); // Clear all sessionStorage
-    
-    // Force redirect to login
-    setTimeout(() => {
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
-    }, 100);
+    // Only clear if there's no valid authentication
+    if (!token || !user) {
+      console.log('No valid auth found, clearing all data');
+      clearAuth();
+      localStorage.clear(); // Clear all localStorage
+      sessionStorage.clear(); // Clear all sessionStorage
+      
+      // Force redirect to login
+      setTimeout(() => {
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+      }, 100);
+    } else {
+      console.log('Valid auth found, keeping user logged in');
+    }
   }, []);
 
   // Check if user is properly authenticated
