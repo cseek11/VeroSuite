@@ -1,15 +1,15 @@
-@import url("https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700");
 
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Base styles */
+
+/* Soft UI Dashboard Tailwind base styles */
 @layer base {
   html {
     font-family: "Open Sans", ui-sans-serif, system-ui, sans-serif;
   }
-
   body {
     margin: 0;
     font-family: "Open Sans", ui-sans-serif, system-ui, sans-serif;
@@ -23,44 +23,34 @@
   }
 }
 
-/* Custom utilities */
+
+/* Soft UI Dashboard Tailwind utilities */
 @layer utilities {
-  /* Custom shadows */
   .shadow-soft-xl {
     box-shadow: 0 20px 27px 0 rgba(0, 0, 0, 0.05);
   }
-
   .shadow-soft-2xl {
     box-shadow: 0 0.3125rem 0.9375rem 0 rgba(0, 0, 0, 0.15);
   }
-
   .shadow-soft-3xl {
     box-shadow: 0 0.625rem 1.875rem 0 rgba(0, 0, 0, 0.15);
   }
-
-  /* Custom spacing */
   .max-w-62\.5 {
     max-width: 15.625rem;
   }
-
   .h-19\.5 {
     height: 4.875rem;
   }
-
   .h-sidenav {
     height: calc(100vh - 7.5rem);
   }
-
-  /* Custom z-index */
   .z-990 {
     z-index: 990;
   }
-
-  /* Custom transitions */
   .ease-nav-brand {
     transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
-
+}
   .ease-soft {
     transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
