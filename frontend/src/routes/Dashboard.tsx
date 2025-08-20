@@ -1,372 +1,273 @@
-import React, { useState, useEffect, Suspense } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/stores/auth';
+import React from 'react';
 import { useTodayJobs } from '@/hooks/useJobs';
-import { LoadingSpinner, PageLoader } from '@/components/LoadingSpinner';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import DashboardMetrics from '@/components/dashboard/DashboardMetrics';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
-import JobsCalendar from '@/components/JobsCalendar';
-import EnhancedCard from '@/components/ui/EnhancedCard';
-import ProgressBar from '@/components/ui/ProgressBar';
-import Alert from '@/components/ui/Alert';
-import Chart from '@/components/ui/Chart';
-import { DashboardMetric, Job } from '@/types';
+import { 
+  SoftCard, 
+  SoftButton, 
+  SoftSidebar, 
+  SoftNavbar,
+  ProgressBar,
+  Alert,
+  Chart
+} from '@/components/ui';
 import { 
   Users, 
   TrendingUp, 
-  ShoppingCart, 
-  Eye, 
-  Calendar,
-  BarChart3,
-  Settings,
-  LogOut,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
+  Calendar, 
   MapPin,
-  Star,
-  Zap
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Plus
 } from 'lucide-react';
 
-// Mock data for development
-const mockJobs: Job[] = [
-  {
-    id: '1',
-    title: 'Pest Control - Downtown Office',
-    start: new Date().toISOString(),
-    end: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-    status: 'scheduled',
-    technician: 'John Smith',
-    location: '123 Main St, Downtown',
-    description: 'Regular pest control service'
-  },
-  {
-    id: '2',
-    title: 'Termite Inspection - Warehouse',
-    start: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
-    end: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString(),
-    status: 'in-progress',
-    technician: 'Sarah Johnson',
-    location: '456 Industrial Blvd',
-    description: 'Annual termite inspection'
-  },
-  {
-    id: '3',
-    title: 'Rodent Control - Restaurant',
-    start: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
-    end: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
-    status: 'scheduled',
-    technician: 'Mike Wilson',
-    location: '789 Food Court',
-    description: 'Emergency rodent control service'
-  }
-];
-
-// Chart data
-const chartData = [
-  { name: 'Jan', value: 4000 },
-  { name: 'Feb', value: 3000 },
-  { name: 'Mar', value: 2000 },
-  { name: 'Apr', value: 2780 },
-  { name: 'May', value: 1890 },
-  { name: 'Jun', value: 2390 },
-];
-
 const Dashboard: React.FC = () => {
-  const navigate = useNavigate();
-  const { user, clear: clearAuth } = useAuthStore();
   const { data: jobs, isLoading: jobsLoading, error: jobsError } = useTodayJobs();
-  
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [showAlert, setShowAlert] = useState(true);
 
-  // Use mock data if API fails, otherwise use real data
-  const displayJobs = jobsError ? mockJobs : (jobs || []);
-  const isUsingMockData = !!jobsError;
+  // Mock data for demo
+  const mockJobs = [
+    { id: 1, title: 'Pest Control - Downtown Office', status: 'in-progress', progress: 65, technician: 'John Smith', location: '123 Main St', time: '2:30 PM' },
+    { id: 2, title: 'Termite Inspection - Residential', status: 'scheduled', progress: 0, technician: 'Sarah Johnson', location: '456 Oak Ave', time: '4:00 PM' },
+    { id: 3, title: 'Rodent Control - Warehouse', status: 'completed', progress: 100, technician: 'Mike Wilson', location: '789 Industrial Blvd', time: '1:15 PM' },
+  ];
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!user) {
-      navigate('/login');
-    }
-  }, [user, navigate]);
+  const displayJobs = jobsError ? mockJobs : jobs || mockJobs;
 
-  // Mock metrics data - in real app, this would come from API
-  const metrics: DashboardMetric[] = [
+  const metrics = [
     {
       title: 'Total Jobs',
-      value: displayJobs.length,
+      value: '24',
       change: 12,
-      changeType: 'increase',
+      changeType: 'increase' as const,
       icon: Calendar,
       color: '#3b82f6'
     },
     {
       title: 'Active Technicians',
-      value: 8,
+      value: '8',
       change: 5,
-      changeType: 'increase',
+      changeType: 'increase' as const,
       icon: Users,
       color: '#10b981'
     },
     {
-      title: 'Revenue',
-      value: '$45,231',
-      change: 20.1,
-      changeType: 'increase',
-      icon: TrendingUp,
-      color: '#f59e0b'
+      title: 'Completed Today',
+      value: '16',
+      change: 8,
+      changeType: 'increase' as const,
+      icon: CheckCircle,
+      color: '#8b5cf6'
     },
     {
-      title: 'Customer Satisfaction',
-      value: '98%',
-      change: 2.1,
-      changeType: 'increase',
-      icon: Eye,
-      color: '#8b5cf6'
+      title: 'Pending Jobs',
+      value: '3',
+      change: 2,
+      changeType: 'decrease' as const,
+      icon: Clock,
+      color: '#f59e0b'
     }
   ];
 
-  const handleLogout = () => {
-    clearAuth();
-    navigate('/login');
-  };
+  const chartData = [
+    { name: 'Mon', value: 4 },
+    { name: 'Tue', value: 6 },
+    { name: 'Wed', value: 8 },
+    { name: 'Thu', value: 5 },
+    { name: 'Fri', value: 7 },
+    { name: 'Sat', value: 3 },
+    { name: 'Sun', value: 2 }
+  ];
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    if (tab === 'jobs') {
-      navigate('/jobs');
-    } else if (tab === 'customers') {
-      navigate('/customers');
-    } else if (tab === 'settings') {
-      navigate('/settings');
-    }
-  };
-
-  if (!user) {
-    return <PageLoader text="Loading dashboard..." />;
-  }
+  const recentActivity = [
+    { id: 1, action: 'Job completed', description: 'Pest control service at Downtown Office', time: '2 min ago', type: 'success' },
+    { id: 2, action: 'New job assigned', description: 'Termite inspection at Oak Street', time: '15 min ago', type: 'info' },
+    { id: 3, action: 'Technician arrived', description: 'Mike Wilson arrived at Industrial Blvd', time: '1 hour ago', type: 'info' },
+    { id: 4, action: 'Customer feedback', description: '5-star rating received', time: '2 hours ago', type: 'success' },
+  ];
 
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <DashboardHeader 
-          user={user}
-          sidebarOpen={sidebarOpen}
-          onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
-          onLogout={handleLogout}
-        />
+    <div className="relative h-full max-h-screen transition-all duration-200 xl:ml-68 rounded-xl">
+      <div className="relative flex h-full max-h-screen overflow-hidden">
+        {/* Sidebar */}
+        <SoftSidebar />
 
-        <div className="flex">
-          {/* Sidebar */}
-          <DashboardSidebar
-            isOpen={sidebarOpen}
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            onClose={() => setSidebarOpen(false)}
+        {/* Main Content */}
+        <div className="relative h-full w-full overflow-y-auto bg-gray-50">
+          {/* Navbar */}
+          <SoftNavbar 
+            title="Dashboard"
+            subtitle="Welcome back! Here's what's happening today."
           />
 
-          {/* Main Content */}
-          <div className="flex-1 p-6">
-            <div className="max-w-7xl mx-auto">
-              {/* Welcome Section */}
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">
-                  Welcome back, {user.first_name}!
-                </h1>
-                <p className="text-gray-600 mt-2">
-                  Here's what's happening with your pest control operations today.
-                </p>
-                {isUsingMockData && (
-                  <Alert
-                    type="warning"
-                    title="Demo Mode"
-                    onClose={() => setShowAlert(false)}
-                    dismissible
-                    className="mt-4"
-                  >
-                    Using demo data. Configure your Supabase connection to see real data.
-                  </Alert>
-                )}
-              </div>
+          {/* Content */}
+          <div className="p-6">
+            {/* Demo Mode Alert */}
+            {jobsError && (
+              <Alert 
+                type="warning" 
+                title="Demo Mode"
+                className="mb-6"
+              >
+                You're viewing demo data. Connect your backend to see real data.
+              </Alert>
+            )}
 
-              {/* Metrics Cards */}
-              <div className="mb-8">
-                <DashboardMetrics metrics={metrics} />
-              </div>
-
-              {/* Main Dashboard Content */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Jobs Calendar */}
-                <div className="lg:col-span-2">
-                  <EnhancedCard
-                    title="Today's Jobs"
-                    variant="elevated"
-                    headerActions={[
-                      <button
-                        key="view-all"
-                        onClick={() => navigate('/jobs')}
-                        className="text-purple-600 hover:text-purple-700 text-sm font-medium"
-                      >
-                        View All
-                      </button>
-                    ]}
-                  >
-                    <Suspense fallback={<LoadingSpinner text="Loading calendar..." />}>
-                      {jobsLoading ? (
-                        <LoadingSpinner text="Loading jobs..." />
-                      ) : (
-                        <JobsCalendar 
-                          events={displayJobs}
-                          height="400px"
-                          view="timeGridDay"
-                        />
+            {/* Metrics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+              {metrics.map((metric, index) => (
+                <SoftCard key={index} size="sm">
+                  <div className="flex items-center">
+                    <div
+                      className="p-3 rounded-full bg-opacity-20"
+                      style={{ backgroundColor: metric.color }}
+                    >
+                      {(() => {
+                        const IconComponent = metric.icon;
+                        return <IconComponent className="w-6 h-6" />;
+                      })()}
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">{metric.title}</p>
+                      <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
+                      {metric.change !== undefined && (
+                        <div className="flex items-center mt-1">
+                          {metric.changeType === 'increase' ? (
+                            <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
+                          ) : (
+                            <TrendingUp className="w-4 h-4 text-red-500 mr-1 transform rotate-180" />
+                          )}
+                          <span
+                            className={`text-sm font-medium ${
+                              metric.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
+                            }`}
+                          >
+                            {metric.change > 0 ? '+' : ''}{metric.change}%
+                          </span>
+                        </div>
                       )}
-                    </Suspense>
-                  </EnhancedCard>
-                </div>
-
-                {/* Quick Stats */}
-                <div className="space-y-6">
-                  {/* Performance Chart */}
-                  <EnhancedCard title="Performance Overview" variant="elevated">
-                    <Chart
-                      data={chartData}
-                      type="line"
-                      height={200}
-                      color="#8b5cf6"
-                    />
-                  </EnhancedCard>
-
-                  {/* Progress Indicators */}
-                  <EnhancedCard title="Team Progress" variant="elevated">
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium text-gray-700">Jobs Completed</span>
-                          <span className="text-sm text-gray-500">75%</span>
-                        </div>
-                        <ProgressBar value={75} color="green" animated />
-                      </div>
-                      
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium text-gray-700">Customer Satisfaction</span>
-                          <span className="text-sm text-gray-500">98%</span>
-                        </div>
-                        <ProgressBar value={98} color="purple" striped />
-                      </div>
-                      
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium text-gray-700">Response Time</span>
-                          <span className="text-sm text-gray-500">85%</span>
-                        </div>
-                        <ProgressBar value={85} color="blue" />
-                      </div>
                     </div>
-                  </EnhancedCard>
+                  </div>
+                </SoftCard>
+              ))}
+            </div>
 
-                  {/* Quick Actions */}
-                  <EnhancedCard title="Quick Actions" variant="elevated">
-                    <div className="space-y-3">
-                      <button
-                        onClick={() => navigate('/jobs/new')}
-                        className="w-full flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        <Calendar className="w-5 h-5 text-purple-600 mr-3" />
-                        <div className="text-left">
-                          <p className="font-medium text-gray-900">Create Job</p>
-                          <p className="text-sm text-gray-500">Schedule new service</p>
-                        </div>
-                      </button>
-
-                      <button
-                        onClick={() => navigate('/customers/new')}
-                        className="w-full flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        <Users className="w-5 h-5 text-blue-600 mr-3" />
-                        <div className="text-left">
-                          <p className="font-medium text-gray-900">Add Customer</p>
-                          <p className="text-sm text-gray-500">New customer account</p>
-                        </div>
-                      </button>
-
-                      <button
-                        onClick={() => navigate('/reports')}
-                        className="w-full flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        <BarChart3 className="w-5 h-5 text-green-600 mr-3" />
-                        <div className="text-left">
-                          <p className="font-medium text-gray-900">View Reports</p>
-                          <p className="text-sm text-gray-500">Analytics & insights</p>
-                        </div>
-                      </button>
-                    </div>
-                  </EnhancedCard>
-                </div>
-              </div>
-
-              {/* Recent Activity */}
-              <div className="mt-8">
-                <EnhancedCard title="Recent Activity" variant="elevated">
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Jobs Calendar */}
+              <div className="lg:col-span-2">
+                <SoftCard 
+                  title="Today's Jobs"
+                  subtitle="Real-time job tracking and management"
+                  headerActions={[
+                    <SoftButton key="add" size="sm" icon={Plus}>
+                      Add Job
+                    </SoftButton>
+                  ]}
+                >
                   <div className="space-y-4">
-                    {displayJobs.slice(0, 5).map((job: Job) => (
-                      <div key={job.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <div className="flex-shrink-0">
-                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                            <Calendar className="w-4 h-4 text-purple-600" />
+                    {displayJobs.map((job) => (
+                      <div key={job.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex-shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-tl from-blue-500 to-violet-500 flex items-center justify-center">
+                              <Calendar className="w-5 h-5 text-white" />
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-sm font-semibold text-gray-900">{job.title}</h4>
+                            <div className="flex items-center space-x-4 mt-1">
+                              <div className="flex items-center text-xs text-gray-500">
+                                <Users className="w-3 h-3 mr-1" />
+                                {job.technician}
+                              </div>
+                              <div className="flex items-center text-xs text-gray-500">
+                                <MapPin className="w-3 h-3 mr-1" />
+                                {job.location}
+                              </div>
+                              <div className="flex items-center text-xs text-gray-500">
+                                <Clock className="w-3 h-3 mr-1" />
+                                {job.time}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {job.title}
-                          </p>
-                          <div className="flex items-center space-x-4 text-sm text-gray-500">
-                            <span className="flex items-center">
-                              <Users className="w-3 h-3 mr-1" />
-                              {job.technician}
-                            </span>
-                            <span className="flex items-center">
-                              <MapPin className="w-3 h-3 mr-1" />
-                              {job.location}
-                            </span>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-24">
+                            <ProgressBar 
+                              value={job.progress} 
+                              size="sm" 
+                              showLabel={false}
+                              color={job.status === 'completed' ? 'green' : job.status === 'in-progress' ? 'blue' : 'yellow'}
+                            />
                           </div>
-                        </div>
-                        <div className="flex-shrink-0">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            job.status === 'completed' ? 'bg-green-100 text-green-800' :
-                            job.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                            job.status === 'scheduled' ? 'bg-gray-100 text-gray-800' :
-                            'bg-red-100 text-red-800'
+                          <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                            job.status === 'completed' 
+                              ? 'bg-green-100 text-green-800' 
+                              : job.status === 'in-progress' 
+                              ? 'bg-blue-100 text-blue-800' 
+                              : 'bg-yellow-100 text-yellow-800'
                           }`}>
                             {job.status}
                           </span>
                         </div>
                       </div>
                     ))}
-                    
-                    {displayJobs.length === 0 && (
-                      <div className="text-center py-8">
-                        <Calendar className="mx-auto h-12 w-12 text-gray-400" />
-                        <h3 className="mt-2 text-sm font-medium text-gray-900">No jobs today</h3>
-                        <p className="mt-1 text-sm text-gray-500">
-                          All caught up! No jobs scheduled for today.
-                        </p>
-                      </div>
-                    )}
                   </div>
-                </EnhancedCard>
+                </SoftCard>
+              </div>
+
+              {/* Sidebar Content */}
+              <div className="space-y-6">
+                {/* Weekly Overview Chart */}
+                <SoftCard title="Weekly Overview" subtitle="Jobs completed this week">
+                  <Chart 
+                    data={chartData} 
+                    type="bar" 
+                    height={200}
+                    color="#3b82f6"
+                  />
+                </SoftCard>
+
+                {/* Recent Activity */}
+                <SoftCard title="Recent Activity" subtitle="Latest updates and events">
+                  <div className="space-y-3">
+                    {recentActivity.map((activity) => (
+                      <div key={activity.id} className="flex items-start space-x-3">
+                        <div className={`w-2 h-2 rounded-full mt-2 ${
+                          activity.type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+                        }`} />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">{activity.action}</p>
+                          <p className="text-xs text-gray-500">{activity.description}</p>
+                          <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </SoftCard>
+
+                {/* Quick Actions */}
+                <SoftCard title="Quick Actions" subtitle="Common tasks and shortcuts">
+                  <div className="space-y-3">
+                    <SoftButton variant="primary" size="sm" fullWidth icon={Plus}>
+                      Create New Job
+                    </SoftButton>
+                    <SoftButton variant="info" size="sm" fullWidth icon={Users}>
+                      Assign Technician
+                    </SoftButton>
+                    <SoftButton variant="success" size="sm" fullWidth icon={MapPin}>
+                      View Routes
+                    </SoftButton>
+                    <SoftButton variant="secondary" size="sm" fullWidth icon={Calendar}>
+                      Schedule Jobs
+                    </SoftButton>
+                  </div>
+                </SoftCard>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </ErrorBoundary>
+    </div>
   );
 };
 
