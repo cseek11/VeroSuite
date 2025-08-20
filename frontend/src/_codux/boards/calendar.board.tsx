@@ -3,9 +3,5 @@ import JobsCalendar from '../../components/JobsCalendar';
 
 export default createBoard({
   name: 'Calendar',
-  Board: () => (
-    <div>
-      <JobsCalendar />
-    </div>
-  ),
+  Board: () => <JobsCalendar events={[]} />,
 });

@@ -4,6 +4,7 @@ import { lazy, Suspense, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { Spinner } from '@/ui/Spinner';
 import Dashboard from './Dashboard';
+import EnhancedDashboard from './EnhancedDashboard';
 
 const LoginPage = lazy(() => import('@/routes/Login'));
 
@@ -87,6 +88,26 @@ export default function App() {
               path="/" 
               element={
                 isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<DashboardFallback />}>
+                    <Dashboard />
+                  </Suspense>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/enhanced-dashboard"
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<DashboardFallback />}>
+                    <EnhancedDashboard />
+                  </Suspense>
+                </PrivateRoute>
               }
             />
             <Route
