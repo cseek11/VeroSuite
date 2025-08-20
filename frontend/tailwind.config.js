@@ -2,8 +2,7 @@
 export default {
   content: [
     "./index.html",
-    "./src/**/*.{ts,tsx,js,jsx}",
-    "./src/ui-dashboard/**/*.{js,jsx,ts,tsx}"
+    "./src/**/*.{ts,tsx,js,jsx}"
   ],
   theme: { extend: {} },
   plugins: [],

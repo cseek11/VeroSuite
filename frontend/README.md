@@ -71,7 +71,7 @@ src/
 ├── types/              # TypeScript type definitions
 ├── utils/              # Utility functions
 ├── ui/                 # Basic UI components
-└── ui-dashboard/       # Dashboard-specific components
+└── components/dashboard/ # Dashboard-specific components
 ```
 
 ## 🔐 Authentication
