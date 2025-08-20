@@ -3,7 +3,7 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { Spinner } from '@/ui/Spinner';
-import Dashboard from '../ui-dashboard/Dashboard';
+import Dashboard from './Dashboard';
 
 const LoginPage = lazy(() => import('@/routes/Login'));
 
