@@ -104,6 +104,120 @@ const Dashboard = () => {
     }
   };
 
+  // Resize handlers
+  const handleResizeStart = (e) => {
+    setIsResizing(true);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  };
+
+  const handleResizeMove = (e) => {
+    if (!isResizing) return;
+    
+    const container = e.currentTarget.closest('.flex');
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const newWidth = e.clientX - containerRect.left;
+    
+    // Constrain width between 400px and 1200px
+    const constrainedWidth = Math.max(400, Math.min(1200, newWidth));
+    setCalendarWidth(constrainedWidth);
+  };
+
+  const handleResizeEnd = () => {
+    setIsResizing(false);
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  };
+
+  // Add global mouse event listeners for resizing
+  useEffect(() => {
+    if (isResizing) {
+      const handleMouseMove = (e) => handleResizeMove(e);
+      const handleMouseUp = () => handleResizeEnd();
+      
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isResizing]);
+
+  // Add custom calendar styles
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .fc {
+        font-family: 'Inter', sans-serif;
+      }
+      .fc-toolbar {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1rem;
+        border-radius: 0.75rem 0.75rem 0 0;
+      }
+      .fc-toolbar-title {
+        font-weight: 600;
+        color: #374151;
+      }
+      .fc-button {
+        background: #f3f4f6 !important;
+        border: 1px solid #d1d5db !important;
+        color: #374151 !important;
+        font-weight: 500 !important;
+        border-radius: 0.5rem !important;
+        padding: 0.5rem 1rem !important;
+        transition: all 0.2s !important;
+      }
+      .fc-button:hover {
+        background: #e5e7eb !important;
+        border-color: #9ca3af !important;
+      }
+      .fc-button-active {
+        background: #cb0c9f !important;
+        border-color: #cb0c9f !important;
+        color: white !important;
+      }
+      .fc-daygrid-day {
+        border: 1px solid #f3f4f6 !important;
+      }
+      .fc-daygrid-day:hover {
+        background: #f9fafb !important;
+      }
+      .fc-day-today {
+        background: #fef3c7 !important;
+      }
+      .fc-event {
+        border-radius: 0.375rem !important;
+        border: none !important;
+        font-weight: 500 !important;
+        font-size: 0.875rem !important;
+      }
+      .fc-event:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+      .fc-timegrid-slot {
+        border: 1px solid #f3f4f6 !important;
+      }
+      .fc-col-header-cell {
+        background: #f9fafb !important;
+        border: 1px solid #e5e7eb !important;
+        font-weight: 600 !important;
+        color: #374151 !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   const [customization, setCustomization] = useState({
     primaryColor: '#cb0c9f',
     secondaryColor: '#8392ab',
@@ -148,6 +262,10 @@ const Dashboard = () => {
       status: job.status
     }
   })));
+
+  // Resizable calendar state
+  const [calendarWidth, setCalendarWidth] = useState(600);
+  const [isResizing, setIsResizing] = useState(false);
 
   // Sample data
   const salesData = [
@@ -846,70 +964,176 @@ const Dashboard = () => {
             {activeTab === 'jobs' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-gray-900">Jobs Calendar</h1>
+                  <h1 className="text-2xl font-bold text-gray-900">Jobs Management</h1>
                   <Button icon={Plus} onClick={() => setActiveTab('jobs')}>
                     Add New Job
                   </Button>
                 </div>
-                <Card>
-                  <div style={{ 
-                    minHeight: '600px',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                    overflow: 'hidden'
-                  }}>
-                    <FullCalendar
-                      plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-                      headerToolbar={{
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek,listMonth'
-                      }}
-                      initialView="dayGridMonth"
-                      editable={true}
-                      selectable={true}
-                      selectMirror={true}
-                      dayMaxEvents={true}
-                      weekends={true}
-                      events={jobsEvents}
-                      select={handleJobDateSelect}
-                      eventClick={handleJobEventClick}
-                      eventDrop={handleJobEventDrop}
-                      eventResize={handleJobEventResize}
-                      height="700px"
-                      eventTextColor="#ffffff"
-                      eventDisplay="block"
-                      eventTimeFormat={{
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        meridiem: 'short'
-                      }}
-                      slotMinTime="06:00:00"
-                      slotMaxTime="20:00:00"
-                      slotDuration="00:30:00"
-                      slotLabelInterval="01:00:00"
-                      businessHours={{
-                        daysOfWeek: [1, 2, 3, 4, 5], // Monday - Friday
-                        startTime: '08:00',
-                        endTime: '18:00',
-                      }}
-                      nowIndicator={true}
-                      scrollTime="08:00:00"
-                      eventConstraint="businessHours"
-                      eventOverlap={false}
-                      eventDidMount={(info) => {
-                        // Add custom styling based on status
-                        const status = info.event.extendedProps.status;
-                        if (status === 'urgent') {
-                          info.el.style.border = '2px solid #dc2626';
-                          info.el.style.fontWeight = 'bold';
-                        } else if (status === 'completed') {
-                          info.el.style.opacity = '0.7';
-                        }
-                      }}
-                    />
+                
+                <div className="flex gap-6 h-[calc(100vh-200px)]">
+                  {/* Resizable Calendar Panel */}
+                  <div 
+                    className="flex-shrink-0 relative"
+                    style={{ width: `${calendarWidth}px` }}
+                  >
+                    <Card title="Jobs Calendar" className="h-full">
+                      <div className="h-full">
+                        <FullCalendar
+                          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+                          headerToolbar={{
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek,listMonth'
+                          }}
+                          initialView="dayGridMonth"
+                          editable={true}
+                          selectable={true}
+                          selectMirror={true}
+                          dayMaxEvents={true}
+                          weekends={true}
+                          events={jobsEvents}
+                          select={handleJobDateSelect}
+                          eventClick={handleJobEventClick}
+                          eventDrop={handleJobEventDrop}
+                          eventResize={handleJobEventResize}
+                          height="100%"
+                          eventTextColor="#ffffff"
+                          eventDisplay="block"
+                          eventTimeFormat={{
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            meridiem: 'short'
+                          }}
+                          slotMinTime="06:00:00"
+                          slotMaxTime="20:00:00"
+                          slotDuration="00:30:00"
+                          slotLabelInterval="01:00:00"
+                          businessHours={{
+                            daysOfWeek: [1, 2, 3, 4, 5], // Monday - Friday
+                            startTime: '08:00',
+                            endTime: '18:00',
+                          }}
+                          nowIndicator={true}
+                          scrollTime="08:00:00"
+                          eventConstraint="businessHours"
+                          eventOverlap={false}
+                          eventDidMount={(info) => {
+                            // Add custom styling based on status
+                            const status = info.event.extendedProps.status;
+                            if (status === 'urgent') {
+                              info.el.style.border = '2px solid #dc2626';
+                              info.el.style.fontWeight = 'bold';
+                            } else if (status === 'completed') {
+                              info.el.style.opacity = '0.7';
+                            }
+                          }}
+                        />
+                      </div>
+                    </Card>
                   </div>
-                </Card>
+
+                  {/* Resize Handle */}
+                  <div 
+                    className="w-1 bg-gray-200 hover:bg-purple-400 cursor-col-resize transition-colors relative group"
+                    onMouseDown={handleResizeStart}
+                  >
+                    <div className="absolute inset-y-0 -left-1 -right-1 bg-transparent" />
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1 h-8 bg-purple-400 rounded opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+
+                  {/* Right Panel - Job Details & Actions */}
+                  <div className="w-80 flex-shrink-0">
+                    <div className="space-y-6">
+                      {/* Quick Stats */}
+                      <Card title="Quick Stats">
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Total Jobs</span>
+                            <Badge variant="primary">{jobsEvents.length}</Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Scheduled</span>
+                            <Badge variant="default">{jobsEvents.filter(e => e.extendedProps.status === 'scheduled').length}</Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">In Progress</span>
+                            <Badge variant="warning">{jobsEvents.filter(e => e.extendedProps.status === 'in-progress').length}</Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Completed</span>
+                            <Badge variant="success">{jobsEvents.filter(e => e.extendedProps.status === 'completed').length}</Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Urgent</span>
+                            <Badge variant="danger">{jobsEvents.filter(e => e.extendedProps.status === 'urgent').length}</Badge>
+                          </div>
+                        </div>
+                      </Card>
+
+                      {/* Recent Jobs */}
+                      <Card title="Recent Jobs">
+                        <div className="space-y-3">
+                          {jobsEvents.slice(0, 5).map((job) => (
+                            <div key={job.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                              <div 
+                                className="w-3 h-3 rounded-full" 
+                                style={{ backgroundColor: job.color }}
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                  {job.title}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {job.extendedProps.technician}
+                                </p>
+                              </div>
+                              <Badge 
+                                variant={
+                                  job.extendedProps.status === 'completed' ? 'success' :
+                                  job.extendedProps.status === 'urgent' ? 'danger' :
+                                  job.extendedProps.status === 'in-progress' ? 'warning' : 'default'
+                                }
+                                size="sm"
+                              >
+                                {job.extendedProps.status}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </Card>
+
+                      {/* Quick Actions */}
+                      <Card title="Quick Actions">
+                        <div className="space-y-3">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full justify-start"
+                            icon={Plus}
+                          >
+                            Create New Job
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full justify-start"
+                            icon={Filter}
+                          >
+                            Filter Jobs
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full justify-start"
+                            icon={Download}
+                          >
+                            Export Schedule
+                          </Button>
+                        </div>
+                      </Card>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
             {activeTab === 'analytics' && (
