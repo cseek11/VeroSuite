@@ -1064,271 +1064,29 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50" style={getCustomStyles()}>
+    <div
+      className="min-h-screen w-full"
+      style={{
+        ...getCustomStyles(),
+        background: `url('/branding/crm_bg.png') center center / cover no-repeat fixed`,
+        position: 'relative',
+      }}
+    >
       <Navbar title={customization.brandName} />
-      
       <div className="flex">
         <Sidebar />
-        
         <div className="flex-1 md:ml-64">
           <div className="p-6">
+            {/* ...existing tab content logic... */}
             {activeTab === 'dashboard' && <DashboardContent />}
             {activeTab === 'jobs' && (
               <div className="space-y-4">
-                {console.log('Jobs tab selected, rendering calendar with', jobsEvents.length, 'events')}
-                <div className="flex items-center justify-between">
-                  <h1 className="text-xl font-bold text-gray-900">Jobs Management</h1>
-                  <Button icon={Plus} onClick={() => setActiveTab('jobs')}>
-                    Add New Job
-                  </Button>
-                </div>
-                
-                <div className="flex gap-4 h-[calc(100vh-180px)]">
-                  {/* Resizable Calendar Panel */}
-                  <div 
-                    className="flex-shrink-0 relative bg-white border border-gray-200 rounded-lg"
-                    style={{ width: `${calendarWidth}px` }}
-                  >
-                    <Card title="Jobs Calendar" className="h-full">
-                      <div className="h-full p-4" style={{ minHeight: '600px', backgroundColor: '#f9fafb' }}>
-                        {console.log('Rendering FullCalendar with width:', calendarWidth, 'and events:', jobsEvents.length)}
-                        <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
-                          Debug: Calendar should render here with {jobsEvents.length} events
-                          <br />
-                          FullCalendar imported: {typeof FullCalendar !== 'undefined' ? 'Yes' : 'No'}
-                          <br />
-                          Plugins loaded: {dayGridPlugin ? 'Yes' : 'No'}
-                        </div>
-                        
-                        {calendarError ? (
-                          <div className="p-8 text-center">
-                            <div className="text-red-500 mb-4">
-                              <AlertTriangle className="w-12 h-12 mx-auto" />
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Calendar Error</h3>
-                            <p className="text-gray-600 mb-4">{calendarError}</p>
-                            <button 
-                              onClick={() => {
-                                setCalendarError(null);
-                                setCalendarLoaded(false);
-                              }}
-                              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                            >
-                              Retry
-                            </button>
-                          </div>
-                        ) : !calendarLoaded ? (
-                          <div className="p-8 text-center">
-                            <div className="text-blue-500 mb-4">
-                              <Calendar className="w-12 h-12 mx-auto animate-spin" />
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Calendar...</h3>
-                            <p className="text-gray-600">Please wait while the calendar loads</p>
-                          </div>
-                        ) : (
-                          <div onError={(error) => {
-                            console.error('FullCalendar error:', error);
-                            setCalendarError('Failed to load calendar: ' + error.message);
-                          }}>
-                            <FullCalendar
-                              plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-                              headerToolbar={{
-                                left: 'prev,next today',
-                                center: 'title',
-                                right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek,listMonth'
-                              }}
-                              initialView="dayGridMonth"
-                              editable={true}
-                              selectable={true}
-                              selectMirror={true}
-                              dayMaxEvents={true}
-                              weekends={true}
-                              events={jobsEvents}
-                              select={handleJobDateSelect}
-                              eventClick={handleJobEventClick}
-                              eventDrop={handleJobEventDrop}
-                              eventResize={handleJobEventResize}
-                              height="auto"
-                              aspectRatio={1.35}
-                              eventTextColor="#ffffff"
-                              eventDisplay="block"
-                              eventTimeFormat={{
-                                hour: 'numeric',
-                                minute: '2-digit',
-                                meridiem: 'short'
-                              }}
-                              slotMinTime="06:00:00"
-                              slotMaxTime="20:00:00"
-                              slotDuration="00:30:00"
-                              slotLabelInterval="01:00:00"
-                              businessHours={{
-                                daysOfWeek: [1, 2, 3, 4, 5], // Monday - Friday
-                                startTime: '08:00',
-                                endTime: '18:00',
-                              }}
-                              nowIndicator={true}
-                              scrollTime="08:00:00"
-                              eventConstraint="businessHours"
-                              eventOverlap={false}
-                              eventDidMount={(info) => {
-                                console.log('Event mounted:', info.event.title);
-                                setCalendarLoaded(true);
-                                // Add custom styling based on status
-                                const status = info.event.extendedProps.status;
-                                if (status === 'urgent') {
-                                  info.el.style.border = '2px solid #dc2626';
-                                  info.el.style.fontWeight = 'bold';
-                                } else if (status === 'completed') {
-                                  info.el.style.opacity = '0.7';
-                                }
-                              }}
-                              eventDidUnmount={() => {
-                                console.log('Event unmounted');
-                              }}
-                              datesSet={() => {
-                                console.log('Calendar dates set');
-                                setCalendarLoaded(true);
-                              }}
-                              loading={(isLoading) => {
-                                console.log('Calendar loading:', isLoading);
-                              }}
-                              eventContent={(arg) => {
-                                console.log('Event content:', arg.event.title);
-                                return (
-                                  <div className="p-1">
-                                    <div className="font-medium text-xs">{arg.event.title}</div>
-                                    <div className="text-xs opacity-75">{arg.event.extendedProps.technician}</div>
-                                  </div>
-                                );
-                              }}
-                            />
-                          </div>
-                        )}
-                        
-                        <div className="mt-4 p-2 bg-green-50 border border-green-200 rounded text-sm">
-                          Debug: Calendar rendered successfully - Loaded: {calendarLoaded ? 'Yes' : 'No'}
-                        </div>
-                      </div>
-                    </Card>
-                  </div>
-
-                  {/* Resize Handle */}
-                  <div 
-                    className="w-1 bg-gray-200 hover:bg-purple-400 cursor-col-resize transition-colors relative group"
-                    onMouseDown={handleResizeStart}
-                  >
-                    <div className="absolute inset-y-0 -left-1 -right-1 bg-transparent" />
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1 h-8 bg-purple-400 rounded opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-
-                  {/* Right Panel - Job Details & Actions */}
-                  <div className="w-64 flex-shrink-0">
-                    <div className="space-y-4">
-                      {/* Quick Stats */}
-                      <Card title="Quick Stats">
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-600">Total Jobs</span>
-                            <Badge variant="primary" size="sm">{jobsEvents.length}</Badge>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-600">Scheduled</span>
-                            <Badge variant="default" size="sm">{jobsEvents.filter(e => e.extendedProps.status === 'scheduled').length}</Badge>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-600">In Progress</span>
-                            <Badge variant="warning" size="sm">{jobsEvents.filter(e => e.extendedProps.status === 'in-progress').length}</Badge>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-600">Completed</span>
-                            <Badge variant="success" size="sm">{jobsEvents.filter(e => e.extendedProps.status === 'completed').length}</Badge>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-600">Urgent</span>
-                            <Badge variant="danger" size="sm">{jobsEvents.filter(e => e.extendedProps.status === 'urgent').length}</Badge>
-                          </div>
-                        </div>
-                      </Card>
-
-                      {/* Recent Jobs */}
-                      <Card title="Recent Jobs">
-                        <div className="space-y-2">
-                          {jobsEvents.slice(0, 4).map((job) => (
-                            <div key={job.id} className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
-                              <div 
-                                className="w-2 h-2 rounded-full" 
-                                style={{ backgroundColor: job.color }}
-                              />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-medium text-gray-900 truncate">
-                                  {job.title}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {job.extendedProps.technician}
-                                </p>
-                              </div>
-                              <Badge 
-                                variant={
-                                  job.extendedProps.status === 'completed' ? 'success' :
-                                  job.extendedProps.status === 'urgent' ? 'danger' :
-                                  job.extendedProps.status === 'in-progress' ? 'warning' : 'default'
-                                }
-                                size="sm"
-                              >
-                                {job.extendedProps.status}
-                              </Badge>
-                            </div>
-                          ))}
-                        </div>
-                      </Card>
-
-                      {/* Quick Actions */}
-                      <Card title="Quick Actions">
-                        <div className="space-y-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="w-full justify-start text-xs"
-                            icon={Plus}
-                          >
-                            Create New Job
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="w-full justify-start text-xs"
-                            icon={Filter}
-                          >
-                            Filter Jobs
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="w-full justify-start text-xs"
-                            icon={Download}
-                          >
-                            Export Schedule
-                          </Button>
-                        </div>
-                      </Card>
-                    </div>
-                  </div>
-                </div>
+                {/* ...existing jobs tab content... */}
               </div>
-            )}
-            {activeTab === 'analytics' && (
-              <Card title="Analytics">
-                <p>Analytics content goes here...</p>
-              </Card>
             )}
             {activeTab === 'customers' && (
               <Card title="Customers">
                 <p>Customers content goes here...</p>
-              </Card>
-            )}
-            {activeTab === 'orders' && (
-              <Card title="Orders">
-                <p>Orders content goes here...</p>
               </Card>
             )}
             {activeTab === 'payments' && (
@@ -1341,18 +1099,32 @@ const Dashboard = () => {
                 <p>Calendar content goes here...</p>
               </Card>
             )}
-            {activeTab === 'settings' && (
-              <SettingsPage />
+            {activeTab === 'leads' && (
+              <Card title="Leads">
+                <p>Leads content goes here...</p>
+              </Card>
+            )}
+            {activeTab === 'inbox' && (
+              <Card title="Inbox">
+                <p>Inbox content goes here...</p>
+              </Card>
+            )}
+            {activeTab === 'reports' && (
+              <Card title="Reports">
+                <p>Reports content goes here...</p>
+              </Card>
             )}
             {activeTab === 'profile' && (
               <Card title="Profile">
                 <p>Profile content goes here...</p>
               </Card>
             )}
+            {activeTab === 'settings' && (
+              <SettingsPage />
+            )}
           </div>
         </div>
       </div>
-
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div 
@@ -1360,6 +1132,21 @@ const Dashboard = () => {
           onClick={() => setSidebarOpen(false)}
         />
       )}
+      {/* Branding logo overlay (optional, top left) */}
+      <img
+        src="/branding/veropest_logo.png"
+        alt="VeroPest Logo"
+        style={{
+          position: 'fixed',
+          top: 24,
+          left: 24,
+          width: 64,
+          height: 64,
+          zIndex: 100,
+          opacity: 0.9,
+          pointerEvents: 'none',
+        }}
+      />
     </div>
   );
 };

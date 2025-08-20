@@ -72,27 +72,53 @@ export default function App() {
   
   console.log('App render - token:', token, 'user:', user, 'isAuthenticated:', isAuthenticated);
 
-  return (
-    <Suspense fallback={<Spinner />}>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route 
-          path="/" 
-          element={
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
-          }
-        />
-        <Route
-          path="/*"
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<DashboardFallback />}>
-                <Dashboard />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-      </Routes>
-    </Suspense>
+    return (
+      <BrowserRouter>
+        <AuthProvider>
+          <div
+            className="min-h-screen w-full"
+            style={{
+              background: `url('/branding/crm_bg.png') center center / cover no-repeat fixed`,
+              position: 'relative',
+            }}
+          >
+            <img
+              src="/branding/veropest_logo.png"
+              alt="VeroPest Logo"
+              style={{
+                position: 'fixed',
+                top: 24,
+                left: 24,
+                width: 64,
+                height: 64,
+                zIndex: 100,
+                opacity: 0.9,
+                pointerEvents: 'none',
+              }}
+            />
+            <Suspense fallback={<Spinner />}>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route 
+                  path="/" 
+                  element={
+                    isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+                  }
+                />
+                <Route
+                  path="/*"
+                  element={
+                    <PrivateRoute>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <Dashboard />
+                      </Suspense>
+                    </PrivateRoute>
+                  }
+                />
+              </Routes>
+            </Suspense>
+          </div>
+        </AuthProvider>
+      </BrowserRouter>
   );
 }

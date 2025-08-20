@@ -33,7 +33,27 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 p-4">
+    <div
+      className="min-h-screen flex items-center justify-center w-full"
+      style={{
+        background: `url('/branding/crm_bg.png') center center / cover no-repeat fixed`,
+        position: 'relative',
+      }}
+    >
+      <img
+        src="/branding/veropest_logo.png"
+        alt="VeroPest Logo"
+        style={{
+          position: 'fixed',
+          top: 24,
+          left: 24,
+          width: 64,
+          height: 64,
+          zIndex: 100,
+          opacity: 0.9,
+          pointerEvents: 'none',
+        }}
+      />
       <div className="w-full max-w-md">
         {/* Logo and Brand */}
         <div className="text-center mb-8">
