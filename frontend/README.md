@@ -1,78 +1,182 @@
-# VeroSuite
+# VeroPest Suite Frontend
 
-Multi-tenant pest control operations platform demo. This repository contains interactive browser demos and technical design documents spanning frontend, mobile, backend, database, and multi-tenant security (RLS) concepts.
+A modern React-based frontend for the VeroPest Suite, a comprehensive pest control management system.
 
-## Quickstart
+## 🚀 Features
 
-- Open the system architecture demo directly in your browser:
-  - Windows: double-click `demov1.htm` or run `start "" "c:\\Users\\ashse\\Documents\\Training\\Calude_VeroSuite\\demov1.htm"`
-  - macOS: open with your browser of choice
+- **Multi-tenant Architecture**: Secure tenant isolation with Row Level Security (RLS)
+- **Real-time Dashboard**: Interactive charts and metrics
+- **Job Management**: Calendar-based scheduling with drag-and-drop
+- **Customer Management**: Complete CRM functionality
+- **Mobile Responsive**: Optimized for desktop and mobile devices
+- **Modern UI**: Built with Tailwind CSS and Lucide React icons
 
-The demo includes:
-- System Architecture overview (frontend, backend, data, integrations)
-- Interactive Multi-tenant Branding engine
-- API endpoint preview
-- Database schema summary with RLS snippet
+## 🛠️ Tech Stack
 
-## Repository Structure
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand
+- **Routing**: React Router DOM
+- **Backend**: Supabase (PostgreSQL + Auth + Storage)
+- **Charts**: Recharts
+- **Calendar**: FullCalendar
+- **Icons**: Lucide React
 
-- `demov1.htm` — Self-contained browser demo with tabs (Architecture, Branding, API, Database). No build needed.
-- `Frontend.htm` — React component (dispatcher dashboard) written as JSX module code; not directly runnable without a build or HTML wrapper.
-- `Frontend.txt` — Duplicate of `Frontend.htm` (same content) for reference.
-- `techapp.txt` — React component representing a technician mobile app demo (offline-first, photos, chemical logs). Needs a wrapper/build to run in the browser.
-- `v2.txt` — Backend architecture/design (NestJS + Prisma), including JWT auth, tenant middleware, RLS policies, job lifecycle, CRM, routing, audit logging, and testing notes.
-- `Database Schema.txt` — Minimal RLS snippet (to be expanded in DATABASE.md).
-- `Tenant Middleware.txt` — Truncated code snippet (to be replaced by TENANT_CONTEXT.md with full guidance).
+## 📋 Prerequisites
 
-## What’s included (conceptually)
+- Node.js 18+ 
+- npm or yarn
+- Supabase account and project
 
-- Multi-tenant security model: Postgres Row Level Security (RLS) + request-scoped session variables
-- Backend domain modules: Auth, CRM, Jobs, Routing, Audit
-- Frontend dispatcher dashboard: jobs, customers, route overview
-- Technician mobile flow: job start/complete, photos, chemicals, offline sync queue
+## 🔧 Installation
 
-## Next documents to be added
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd VeroSuite/frontend
+   ```
 
-The following documentation files will be created to formalize the design and usage:
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-- `TENANT_CONTEXT.md` — How tenant context is set per request and enforced by RLS; recommended DB role setup; middleware lifecycle.
-- `DATABASE.md` — Logical schema overview (tenants, accounts, locations, work_orders, jobs, audit_logs), indices, RLS policies, and example SQL.
-- `API.md` — API endpoints by module (CRM, Scheduling/Jobs, Field, Billing, Branding), authentication (JWT), and example payloads.
+3. **Set up environment variables**
+   Create a `.env` file in the frontend directory:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   VITE_APP_NAME=VeroPest Suite
+   VITE_ENABLE_ANALYTICS=false
+   VITE_ENABLE_DEBUG_MODE=false
+   ```
 
-## Standalone frontend/mobile demos to be added
+4. **Start development server**
+   ```bash
+   npm run dev
+   ```
 
-To make the JSX components runnable without a Node.js toolchain, two self-contained HTML wrappers will be added:
+5. **Open your browser**
+   Navigate to `http://localhost:5173`
 
-- `FrontendStandalone.html` — Wraps the dispatcher dashboard using React/ReactDOM from CDNs and in-browser Babel.
-- `MobileStandalone.html` — Wraps the technician mobile app demo similarly for a live, click-through experience.
+## 🏗️ Project Structure
 
-Both will:
-- Import React and ReactDOM via CDN
-- Transpile JSX in-browser with Babel (development/demo only)
-- Mount the exported components and provide minimal styles
+```
+src/
+├── components/          # Reusable UI components
+├── routes/             # Page components and routing
+├── stores/             # Zustand state management
+├── lib/                # API clients and utilities
+├── types/              # TypeScript type definitions
+├── utils/              # Utility functions
+├── ui/                 # Basic UI components
+└── ui-dashboard/       # Dashboard-specific components
+```
 
-## Running the demos (current state)
+## 🔐 Authentication
 
-- Architecture/Branding/API/DB demo: open `demov1.htm` in a browser.
-- Dispatcher dashboard and mobile app demos: pending creation of standalone wrappers (see items above). The raw component source is available in `Frontend.*` and `techapp.txt`.
+The application uses Supabase Auth with JWT tokens. Users must provide:
+- Email address
+- Password
+- Tenant ID (for multi-tenant isolation)
 
-## Security highlights (from backend design)
+## 🎨 Customization
 
-- Strict tenant isolation via Postgres RLS on tenant-scoped tables
-- Per-request `SET LOCAL app.tenant_id` and limited DB role
-- JWT auth with roles/permissions
-- Audit logging of sensitive actions
-- Input validation and DTOs across endpoints
+### Branding
+- Logo: Place your logo in `public/branding/`
+- Colors: Modify Tailwind config in `tailwind.config.js`
+- Theme: Update CSS variables in `src/index.css`
 
-## Roadmap
+### Styling
+- Primary color: Purple (#8b5cf6)
+- Secondary color: Gray (#6b7280)
+- Accent color: Pink (#ec4899)
 
-1. Add TENANT_CONTEXT.md, DATABASE.md, API.md
-2. Create FrontendStandalone.html and MobileStandalone.html
-3. Optional: Scaffold a minimal NestJS + Prisma project matching `v2.txt` design
-4. Optional: Integrate a map/route mock in the dispatcher demo
-5. Optional: Add CI checks and formatting configs
+## 📱 Mobile Support
 
-## Notes
+The application is fully responsive and includes:
+- Touch-friendly interfaces
+- Mobile-optimized navigation
+- Responsive data tables
+- Mobile calendar views
 
-- Files ending in `.txt` are source/reference material; they will be formalized into proper docs or runnable demos as noted above.
-- The browser demos are meant for illustration and validation of UX/architecture; they are not production builds.
+## 🧪 Testing
+
+```bash
+# Run tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run e2e tests
+npm run test:e2e
+```
+
+## 🏭 Production Build
+
+```bash
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## 🔍 Code Quality
+
+```bash
+# Lint code
+npm run lint
+
+# Format code
+npm run format
+
+# Type check
+npm run typecheck
+```
+
+## 🐛 Debugging
+
+Enable debug mode by setting `VITE_ENABLE_DEBUG_MODE=true` in your `.env` file.
+
+## 📊 Performance
+
+- Code splitting with React.lazy()
+- Optimized bundle size
+- Lazy loading of components
+- Efficient state management
+
+## 🔒 Security
+
+- Environment variable validation
+- Input sanitization
+- XSS protection
+- CSRF protection via Supabase
+- Secure authentication flow
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+For support, please contact the development team or create an issue in the repository.
+
+## 🔄 Changelog
+
+### v1.0.0
+- Initial release
+- Multi-tenant architecture
+- Job management system
+- Customer management
+- Dashboard with analytics

@@ -1,13 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import App from './routes/App';
+import { queryClient } from './lib/queryClient';
+import { config } from './lib/config';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
 import './custom-calendar.css';
-
-
-const queryClient = new QueryClient();
 
 // Error boundary for initialization errors
 function ErrorFallback({ error }: { error: Error }) {
@@ -48,11 +49,14 @@ function ErrorFallback({ error }: { error: Error }) {
 try {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </QueryClientProvider>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+          {config.features.enableDebugMode && <ReactQueryDevtools initialIsOpen={false} />}
+        </QueryClientProvider>
+      </ErrorBoundary>
     </React.StrictMode>
   );
 } catch (error) {
