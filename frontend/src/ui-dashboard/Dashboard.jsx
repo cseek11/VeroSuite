@@ -827,10 +827,13 @@ const Dashboard = () => {
           {[
             { id: 'dashboard', label: 'Dashboard', icon: Home },
             { id: 'jobs', label: 'Jobs', icon: Briefcase },
-            { id: 'analytics', label: 'Analytics', icon: BarChart3 },
             { id: 'customers', label: 'Customers', icon: Users },
-            { id: 'payments', label: 'Payments', icon: CreditCard },
             { id: 'calendar', label: 'Calendar', icon: Calendar },
+            { id: 'leads', label: 'Leads', icon: User },
+            { id: 'inbox', label: 'Inbox', icon: Mail },
+            { id: 'payments', label: 'Payments', icon: CreditCard },
+            { id: 'reports', label: 'Reports', icon: BarChart3 },
+            { id: 'profile', label: 'Profile', icon: User },
             { id: 'settings', label: 'Settings', icon: Settings }
           ].map((item) => (
             <button
