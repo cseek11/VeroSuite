@@ -27,14 +27,28 @@ const SoftCard: React.FC<SoftCardProps> = ({
   onClose,
   showCloseButton = false
 }) => {
-  const baseClasses = 'relative flex flex-col min-w-0 break-words bg-white bg-clip-border rounded-xl shadow-soft-xl shadow-soft-xl';
+  const baseClasses = 'relative flex flex-col min-w-0 break-words bg-white bg-clip-border rounded-xl shadow-lg';
   
   const variantClasses = {
     default: 'bg-white border-0',
-    gradient: `bg-gradient-to-tl from-${color}-500 to-${color === 'primary' ? 'violet' : color === 'secondary' ? 'slate' : color}-400 text-white`,
+    gradient: getGradientClass(color),
     glass: 'bg-white bg-opacity-20 backdrop-blur-lg border border-white border-opacity-20',
-    elevated: 'bg-white border-0 shadow-soft-2xl'
+    elevated: 'bg-white border-0 shadow-xl'
   };
+
+  function getGradientClass(color: string) {
+    const gradients = {
+      primary: 'bg-gradient-to-tl from-blue-500 to-violet-500 text-white',
+      secondary: 'bg-gradient-to-tl from-slate-600 to-slate-400 text-white',
+      info: 'bg-gradient-to-tl from-blue-500 to-cyan-400 text-white',
+      success: 'bg-gradient-to-tl from-emerald-500 to-teal-400 text-white',
+      warning: 'bg-gradient-to-tl from-orange-500 to-yellow-500 text-white',
+      error: 'bg-gradient-to-tl from-red-500 to-pink-500 text-white',
+      dark: 'bg-gradient-to-tl from-slate-800 to-slate-600 text-white',
+      light: 'bg-gradient-to-tl from-gray-100 to-gray-200 text-slate-700'
+    };
+    return gradients[color as keyof typeof gradients] || gradients.primary;
+  }
 
   const sizeClasses = {
     sm: 'p-4',

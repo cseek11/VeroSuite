@@ -85,13 +85,12 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="relative h-full max-h-screen transition-all duration-200 xl:ml-68 rounded-xl">
-      <div className="relative flex h-full max-h-screen overflow-hidden">
-        {/* Sidebar */}
-        <SoftSidebar />
+    <div className="min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <SoftSidebar />
 
-        {/* Main Content */}
-        <div className="relative h-full w-full overflow-y-auto bg-gray-50">
+      {/* Main Content */}
+      <div className="relative h-full w-full overflow-y-auto bg-gray-50 xl:ml-64 transition-all duration-200">
           {/* Navbar */}
           <SoftNavbar 
             title="Dashboard"
@@ -266,7 +265,6 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };
