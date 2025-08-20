@@ -67,7 +67,7 @@ const Dashboard = () => {
   })));
 
   // Resizable calendar state
-  const [calendarWidth, setCalendarWidth] = useState(600);
+  const [calendarWidth, setCalendarWidth] = useState(500);
   const [isResizing, setIsResizing] = useState(false);
 
   // Logout handler
@@ -150,8 +150,8 @@ const Dashboard = () => {
     const containerRect = container.getBoundingClientRect();
     const newWidth = e.clientX - containerRect.left;
     
-    // Constrain width between 400px and 1200px
-    const constrainedWidth = Math.max(400, Math.min(1200, newWidth));
+    // Constrain width between 350px and 800px
+    const constrainedWidth = Math.max(350, Math.min(800, newWidth));
     setCalendarWidth(constrainedWidth);
   };
 
@@ -791,10 +791,10 @@ const Dashboard = () => {
                 <div className="flex items-center space-x-2 cursor-pointer">
                   <Avatar 
                     src={user?.avatar} 
-                    alt={user?.name || 'User'} 
-                    fallback={user?.name?.charAt(0) || 'U'} 
+                    alt={user?.name || 'Account'} 
+                    fallback={user?.name?.charAt(0) || 'A'} 
                   />
-                  <span className="text-sm font-medium text-gray-700">{user?.name || 'User'}</span>
+                  <span className="text-sm font-medium text-gray-700">{user?.name || 'Account'}</span>
                   <ChevronDown className="w-4 h-4 text-gray-400" />
                 </div>
               }
@@ -965,15 +965,15 @@ const Dashboard = () => {
           <div className="p-6">
             {activeTab === 'dashboard' && <DashboardContent />}
             {activeTab === 'jobs' && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-gray-900">Jobs Management</h1>
+                  <h1 className="text-xl font-bold text-gray-900">Jobs Management</h1>
                   <Button icon={Plus} onClick={() => setActiveTab('jobs')}>
                     Add New Job
                   </Button>
                 </div>
                 
-                <div className="flex gap-6 h-[calc(100vh-200px)]">
+                <div className="flex gap-4 h-[calc(100vh-180px)]">
                   {/* Resizable Calendar Panel */}
                   <div 
                     className="flex-shrink-0 relative"
@@ -1045,45 +1045,45 @@ const Dashboard = () => {
                   </div>
 
                   {/* Right Panel - Job Details & Actions */}
-                  <div className="w-80 flex-shrink-0">
-                    <div className="space-y-6">
+                  <div className="w-64 flex-shrink-0">
+                    <div className="space-y-4">
                       {/* Quick Stats */}
                       <Card title="Quick Stats">
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Total Jobs</span>
-                            <Badge variant="primary">{jobsEvents.length}</Badge>
+                            <span className="text-xs text-gray-600">Total Jobs</span>
+                            <Badge variant="primary" size="sm">{jobsEvents.length}</Badge>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Scheduled</span>
-                            <Badge variant="default">{jobsEvents.filter(e => e.extendedProps.status === 'scheduled').length}</Badge>
+                            <span className="text-xs text-gray-600">Scheduled</span>
+                            <Badge variant="default" size="sm">{jobsEvents.filter(e => e.extendedProps.status === 'scheduled').length}</Badge>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">In Progress</span>
-                            <Badge variant="warning">{jobsEvents.filter(e => e.extendedProps.status === 'in-progress').length}</Badge>
+                            <span className="text-xs text-gray-600">In Progress</span>
+                            <Badge variant="warning" size="sm">{jobsEvents.filter(e => e.extendedProps.status === 'in-progress').length}</Badge>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Completed</span>
-                            <Badge variant="success">{jobsEvents.filter(e => e.extendedProps.status === 'completed').length}</Badge>
+                            <span className="text-xs text-gray-600">Completed</span>
+                            <Badge variant="success" size="sm">{jobsEvents.filter(e => e.extendedProps.status === 'completed').length}</Badge>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Urgent</span>
-                            <Badge variant="danger">{jobsEvents.filter(e => e.extendedProps.status === 'urgent').length}</Badge>
+                            <span className="text-xs text-gray-600">Urgent</span>
+                            <Badge variant="danger" size="sm">{jobsEvents.filter(e => e.extendedProps.status === 'urgent').length}</Badge>
                           </div>
                         </div>
                       </Card>
 
                       {/* Recent Jobs */}
                       <Card title="Recent Jobs">
-                        <div className="space-y-3">
-                          {jobsEvents.slice(0, 5).map((job) => (
-                            <div key={job.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="space-y-2">
+                          {jobsEvents.slice(0, 4).map((job) => (
+                            <div key={job.id} className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
                               <div 
-                                className="w-3 h-3 rounded-full" 
+                                className="w-2 h-2 rounded-full" 
                                 style={{ backgroundColor: job.color }}
                               />
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 truncate">
+                                <p className="text-xs font-medium text-gray-900 truncate">
                                   {job.title}
                                 </p>
                                 <p className="text-xs text-gray-500">
@@ -1107,11 +1107,11 @@ const Dashboard = () => {
 
                       {/* Quick Actions */}
                       <Card title="Quick Actions">
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="w-full justify-start"
+                            className="w-full justify-start text-xs"
                             icon={Plus}
                           >
                             Create New Job
@@ -1119,7 +1119,7 @@ const Dashboard = () => {
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="w-full justify-start"
+                            className="w-full justify-start text-xs"
                             icon={Filter}
                           >
                             Filter Jobs
@@ -1127,7 +1127,7 @@ const Dashboard = () => {
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="w-full justify-start"
+                            className="w-full justify-start text-xs"
                             icon={Download}
                           >
                             Export Schedule
