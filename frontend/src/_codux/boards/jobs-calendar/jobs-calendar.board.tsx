@@ -3,7 +3,7 @@ import JobsCalendar from '../../../components/JobsCalendar';
 
 export default createBoard({
   name: 'JobsCalendar',
-  Board: () => <JobsCalendar />,
+  Board: () => <JobsCalendar events={[]} />,
   environmentProps: {
     windowWidth: 1024,
     windowHeight: 768,

@@ -105,6 +105,7 @@ export const invalidateQueries = {
   accounts: () => queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
   locations: () => queryClient.invalidateQueries({ queryKey: queryKeys.locations.all }),
   users: () => queryClient.invalidateQueries({ queryKey: queryKeys.users.all }),
-  dashboard: () => queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all }),
+  dashboard: () => queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.metrics }),
+  uploads: () => queryClient.invalidateQueries({ queryKey: queryKeys.uploads.all }),
   all: () => queryClient.invalidateQueries(),
 };
