@@ -1,3 +1,4 @@
+import './JobsCalendar.css';
 import React from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -50,13 +51,13 @@ const JobsCalendar: React.FC<JobsCalendarProps> = ({
   };
 
   return (
-    <div className="jobs-calendar">
+    <div className='jobs-calendar JobsCalendar_div2'>
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+          right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
         }}
         initialView={view}
         height={height}
@@ -70,22 +71,22 @@ const JobsCalendar: React.FC<JobsCalendarProps> = ({
         eventDrop={handleEventDrop}
         eventResize={handleEventResize}
         select={handleDateSelect}
-        eventContent={(arg) => (
-          <div className="p-1">
-            <div className="text-xs font-medium truncate">
+        eventContent={arg => (
+          <div className='p-1'>
+            <div className='text-xs font-medium truncate'>
               {arg.event.title}
             </div>
             {arg.event.extendedProps.technician && (
-              <div className="text-xs text-gray-500 truncate">
+              <div className='text-xs text-gray-500 truncate'>
                 {arg.event.extendedProps.technician}
               </div>
             )}
           </div>
         )}
-        eventClassNames={(arg) => {
+        eventClassNames={arg => {
           const status = arg.event.extendedProps.status;
           const baseClasses = 'cursor-pointer';
-          
+
           switch (status) {
             case 'completed':
               return `${baseClasses} bg-green-500 border-green-600`;
@@ -98,11 +99,11 @@ const JobsCalendar: React.FC<JobsCalendarProps> = ({
               return `${baseClasses} bg-purple-500 border-purple-600`;
           }
         }}
-        slotMinTime="06:00:00"
-        slotMaxTime="20:00:00"
+        slotMinTime='06:00:00'
+        slotMaxTime='20:00:00'
         allDaySlot={false}
-        slotDuration="00:30:00"
-        slotLabelInterval="01:00"
+        slotDuration='00:30:00'
+        slotLabelInterval='01:00'
         expandRows={true}
         stickyHeaderDates={true}
         nowIndicator={true}
