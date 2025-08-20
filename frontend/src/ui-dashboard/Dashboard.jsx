@@ -876,7 +876,14 @@ const Dashboard = () => {
             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden">
               <Menu className="w-6 h-6" />
             </button>
-            <Typography variant="h5" className="ml-4">{title}</Typography>
+            <div className="flex items-center space-x-3 ml-4">
+              <img 
+                src="/branding/veropest_logo.png" 
+                alt="VeroPest Logo" 
+                className="w-6 h-6"
+              />
+              <Typography variant="h5">{title}</Typography>
+            </div>
           </div>
           <div className="flex items-center space-x-4">
             <IconButton icon={Search} />
@@ -909,8 +916,12 @@ const Dashboard = () => {
     <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static md:inset-0`}>
       <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
         <div className="flex items-center space-x-2">
-          <span className="text-2xl">{customization.logo}</span>
-          <Typography variant="h6">{customization.brandName}</Typography>
+          <img 
+            src="/branding/veropest_logo.png" 
+            alt="VeroPest Logo" 
+            className="w-8 h-8"
+          />
+          <Typography variant="h6">VeroPest Suite</Typography>
         </div>
         <button onClick={() => setSidebarOpen(false)} className="md:hidden">
           <X className="w-6 h-6" />
@@ -1050,20 +1061,14 @@ const Dashboard = () => {
   );
 
   return (
-    <div
-      className="min-h-screen w-full"
-      style={{
-        ...getCustomStyles(),
-        background: `url('/branding/crm_bg.png') center center / cover no-repeat fixed`,
-        position: 'relative',
-      }}
-    >
-      <Navbar title={customization.brandName} />
+    <div className="min-h-screen bg-gray-50" style={getCustomStyles()}>
+      <Navbar title="VeroPest Suite" />
+      
       <div className="flex">
         <Sidebar />
+        
         <div className="flex-1 md:ml-64">
           <div className="p-6">
-            {/* ...existing tab content logic... */}
             {activeTab === 'dashboard' && <DashboardContent />}
             {activeTab === 'jobs' && (
               <div className="space-y-4">

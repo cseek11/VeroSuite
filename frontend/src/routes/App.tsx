@@ -80,20 +80,6 @@ export default function App() {
           position: 'relative',
         }}
       >
-        <img
-          src="/branding/veropest_logo.png"
-          alt="VeroPest Logo"
-          style={{
-            position: 'fixed',
-            top: 24,
-            left: 24,
-            width: 64,
-            height: 64,
-            zIndex: 100,
-            opacity: 0.9,
-            pointerEvents: 'none',
-          }}
-        />
         <Suspense fallback={<Spinner />}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
