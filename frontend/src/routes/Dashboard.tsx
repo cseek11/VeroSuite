@@ -8,6 +8,10 @@ import DashboardMetrics from '@/components/dashboard/DashboardMetrics';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import JobsCalendar from '@/components/JobsCalendar';
+import EnhancedCard from '@/components/ui/EnhancedCard';
+import ProgressBar from '@/components/ui/ProgressBar';
+import Alert from '@/components/ui/Alert';
+import Chart from '@/components/ui/Chart';
 import { DashboardMetric, Job } from '@/types';
 import { 
   Users, 
@@ -18,8 +22,57 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  AlertTriangle
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  MapPin,
+  Star,
+  Zap
 } from 'lucide-react';
+
+// Mock data for development
+const mockJobs: Job[] = [
+  {
+    id: '1',
+    title: 'Pest Control - Downtown Office',
+    start: new Date().toISOString(),
+    end: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+    status: 'scheduled',
+    technician: 'John Smith',
+    location: '123 Main St, Downtown',
+    description: 'Regular pest control service'
+  },
+  {
+    id: '2',
+    title: 'Termite Inspection - Warehouse',
+    start: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
+    end: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString(),
+    status: 'in-progress',
+    technician: 'Sarah Johnson',
+    location: '456 Industrial Blvd',
+    description: 'Annual termite inspection'
+  },
+  {
+    id: '3',
+    title: 'Rodent Control - Restaurant',
+    start: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
+    end: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+    status: 'scheduled',
+    technician: 'Mike Wilson',
+    location: '789 Food Court',
+    description: 'Emergency rodent control service'
+  }
+];
+
+// Chart data
+const chartData = [
+  { name: 'Jan', value: 4000 },
+  { name: 'Feb', value: 3000 },
+  { name: 'Mar', value: 2000 },
+  { name: 'Apr', value: 2780 },
+  { name: 'May', value: 1890 },
+  { name: 'Jun', value: 2390 },
+];
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -28,6 +81,11 @@ const Dashboard: React.FC = () => {
   
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showAlert, setShowAlert] = useState(true);
+
+  // Use mock data if API fails, otherwise use real data
+  const displayJobs = jobsError ? mockJobs : (jobs || []);
+  const isUsingMockData = !!jobsError;
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -40,7 +98,7 @@ const Dashboard: React.FC = () => {
   const metrics: DashboardMetric[] = [
     {
       title: 'Total Jobs',
-      value: jobs?.length || 0,
+      value: displayJobs.length,
       change: 12,
       changeType: 'increase',
       icon: Calendar,
@@ -92,30 +150,6 @@ const Dashboard: React.FC = () => {
     return <PageLoader text="Loading dashboard..." />;
   }
 
-  if (jobsError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-            <AlertTriangle className="h-6 w-6 text-red-600" />
-          </div>
-          <h1 className="text-lg font-semibold text-gray-900 mb-2">
-            Error Loading Dashboard
-          </h1>
-          <p className="text-sm text-gray-600 mb-6">
-            {jobsError instanceof Error ? jobsError.message : 'Failed to load dashboard data'}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50">
@@ -147,6 +181,17 @@ const Dashboard: React.FC = () => {
                 <p className="text-gray-600 mt-2">
                   Here's what's happening with your pest control operations today.
                 </p>
+                {isUsingMockData && (
+                  <Alert
+                    type="warning"
+                    title="Demo Mode"
+                    onClose={() => setShowAlert(false)}
+                    dismissible
+                    className="mt-4"
+                  >
+                    Using demo data. Configure your Supabase connection to see real data.
+                  </Alert>
+                )}
               </div>
 
               {/* Metrics Cards */}
@@ -155,42 +200,122 @@ const Dashboard: React.FC = () => {
               </div>
 
               {/* Main Dashboard Content */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Jobs Calendar */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900">
-                      Today's Jobs
-                    </h2>
-                    <button
-                      onClick={() => navigate('/jobs')}
-                      className="text-purple-600 hover:text-purple-700 text-sm font-medium"
-                    >
-                      View All
-                    </button>
-                  </div>
-                  
-                  <Suspense fallback={<LoadingSpinner text="Loading calendar..." />}>
-                    {jobsLoading ? (
-                      <LoadingSpinner text="Loading jobs..." />
-                    ) : (
-                      <JobsCalendar 
-                        events={jobs || []}
-                        height="400px"
-                        view="timeGridDay"
-                      />
-                    )}
-                  </Suspense>
+                <div className="lg:col-span-2">
+                  <EnhancedCard
+                    title="Today's Jobs"
+                    variant="elevated"
+                    headerActions={[
+                      <button
+                        key="view-all"
+                        onClick={() => navigate('/jobs')}
+                        className="text-purple-600 hover:text-purple-700 text-sm font-medium"
+                      >
+                        View All
+                      </button>
+                    ]}
+                  >
+                    <Suspense fallback={<LoadingSpinner text="Loading calendar..." />}>
+                      {jobsLoading ? (
+                        <LoadingSpinner text="Loading jobs..." />
+                      ) : (
+                        <JobsCalendar 
+                          events={displayJobs}
+                          height="400px"
+                          view="timeGridDay"
+                        />
+                      )}
+                    </Suspense>
+                  </EnhancedCard>
                 </div>
 
-                {/* Recent Activity */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                    Recent Activity
-                  </h2>
-                  
+                {/* Quick Stats */}
+                <div className="space-y-6">
+                  {/* Performance Chart */}
+                  <EnhancedCard title="Performance Overview" variant="elevated">
+                    <Chart
+                      data={chartData}
+                      type="line"
+                      height={200}
+                      color="#8b5cf6"
+                    />
+                  </EnhancedCard>
+
+                  {/* Progress Indicators */}
+                  <EnhancedCard title="Team Progress" variant="elevated">
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium text-gray-700">Jobs Completed</span>
+                          <span className="text-sm text-gray-500">75%</span>
+                        </div>
+                        <ProgressBar value={75} color="green" animated />
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium text-gray-700">Customer Satisfaction</span>
+                          <span className="text-sm text-gray-500">98%</span>
+                        </div>
+                        <ProgressBar value={98} color="purple" striped />
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium text-gray-700">Response Time</span>
+                          <span className="text-sm text-gray-500">85%</span>
+                        </div>
+                        <ProgressBar value={85} color="blue" />
+                      </div>
+                    </div>
+                  </EnhancedCard>
+
+                  {/* Quick Actions */}
+                  <EnhancedCard title="Quick Actions" variant="elevated">
+                    <div className="space-y-3">
+                      <button
+                        onClick={() => navigate('/jobs/new')}
+                        className="w-full flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <Calendar className="w-5 h-5 text-purple-600 mr-3" />
+                        <div className="text-left">
+                          <p className="font-medium text-gray-900">Create Job</p>
+                          <p className="text-sm text-gray-500">Schedule new service</p>
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={() => navigate('/customers/new')}
+                        className="w-full flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <Users className="w-5 h-5 text-blue-600 mr-3" />
+                        <div className="text-left">
+                          <p className="font-medium text-gray-900">Add Customer</p>
+                          <p className="text-sm text-gray-500">New customer account</p>
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={() => navigate('/reports')}
+                        className="w-full flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <BarChart3 className="w-5 h-5 text-green-600 mr-3" />
+                        <div className="text-left">
+                          <p className="font-medium text-gray-900">View Reports</p>
+                          <p className="text-sm text-gray-500">Analytics & insights</p>
+                        </div>
+                      </button>
+                    </div>
+                  </EnhancedCard>
+                </div>
+              </div>
+
+              {/* Recent Activity */}
+              <div className="mt-8">
+                <EnhancedCard title="Recent Activity" variant="elevated">
                   <div className="space-y-4">
-                    {jobs?.slice(0, 5).map((job: Job) => (
+                    {displayJobs.slice(0, 5).map((job: Job) => (
                       <div key={job.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                         <div className="flex-shrink-0">
                           <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
@@ -201,9 +326,16 @@ const Dashboard: React.FC = () => {
                           <p className="text-sm font-medium text-gray-900 truncate">
                             {job.title}
                           </p>
-                          <p className="text-sm text-gray-500">
-                            {job.technician} • {job.status}
-                          </p>
+                          <div className="flex items-center space-x-4 text-sm text-gray-500">
+                            <span className="flex items-center">
+                              <Users className="w-3 h-3 mr-1" />
+                              {job.technician}
+                            </span>
+                            <span className="flex items-center">
+                              <MapPin className="w-3 h-3 mr-1" />
+                              {job.location}
+                            </span>
+                          </div>
                         </div>
                         <div className="flex-shrink-0">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -218,7 +350,7 @@ const Dashboard: React.FC = () => {
                       </div>
                     ))}
                     
-                    {(!jobs || jobs.length === 0) && (
+                    {displayJobs.length === 0 && (
                       <div className="text-center py-8">
                         <Calendar className="mx-auto h-12 w-12 text-gray-400" />
                         <h3 className="mt-2 text-sm font-medium text-gray-900">No jobs today</h3>
@@ -228,60 +360,7 @@ const Dashboard: React.FC = () => {
                       </div>
                     )}
                   </div>
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                  Quick Actions
-                </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <button
-                    onClick={() => navigate('/jobs/new')}
-                    className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <Calendar className="w-6 h-6 text-purple-600 mr-3" />
-                    <div className="text-left">
-                      <p className="font-medium text-gray-900">Create Job</p>
-                      <p className="text-sm text-gray-500">Schedule new service</p>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => navigate('/customers/new')}
-                    className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <Users className="w-6 h-6 text-blue-600 mr-3" />
-                    <div className="text-left">
-                      <p className="font-medium text-gray-900">Add Customer</p>
-                      <p className="text-sm text-gray-500">New customer account</p>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => navigate('/reports')}
-                    className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <BarChart3 className="w-6 h-6 text-green-600 mr-3" />
-                    <div className="text-left">
-                      <p className="font-medium text-gray-900">View Reports</p>
-                      <p className="text-sm text-gray-500">Analytics & insights</p>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => navigate('/settings')}
-                    className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <Settings className="w-6 h-6 text-gray-600 mr-3" />
-                    <div className="text-left">
-                      <p className="font-medium text-gray-900">Settings</p>
-                      <p className="text-sm text-gray-500">Configure system</p>
-                    </div>
-                  </button>
-                </div>
+                </EnhancedCard>
               </div>
             </div>
           </div>
