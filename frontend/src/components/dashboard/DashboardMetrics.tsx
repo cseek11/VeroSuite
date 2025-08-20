@@ -14,20 +14,20 @@ const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ metrics }) => {
         <Card key={index}>
           <div className="flex items-center">
             <div 
-              className="p-3 rounded-full"
-              style={{ backgroundColor: `${metric.color}20` }}
+              className="p-3 rounded-full bg-opacity-20"
+              style={{ backgroundColor: metric.color }}
             >
-              <metric.icon 
-                className="w-6 h-6" 
-                style={{ color: metric.color }}
-              />
+              {(() => {
+                const IconComponent = metric.icon;
+                return <IconComponent className="w-6 h-6" />;
+              })()}
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">{metric.title}</p>
               <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
               {metric.change !== undefined && (
                 <div className="flex items-center mt-1">
-                  <metric.changeType === 'increase' ? (
+                  {metric.changeType === 'increase' ? (
                     <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
                   ) : (
                     <TrendingUp className="w-4 h-4 text-red-500 mr-1 transform rotate-180" />
