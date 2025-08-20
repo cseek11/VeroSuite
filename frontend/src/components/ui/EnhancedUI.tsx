@@ -1,0 +1,523 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  ChevronDown, Bell, Search, Menu, X, Home, BarChart3, Users, ShoppingCart, 
+  CreditCard, Settings, User, TrendingUp, TrendingDown, Eye, Heart, MessageCircle,
+  Calendar, Globe, Mail, Phone, Plus, Edit, Trash2, Filter, Upload, Download,
+  Check, AlertTriangle, Info, XCircle, ChevronRight, ChevronLeft, Star,
+  Play, Pause, SkipForward, Volume2, Camera, Image, FileText, Zap,
+  Layers, Grid, List, MoreVertical, RefreshCw, Save, Copy, Share2, Maximize2,
+  Moon, Sun, Palette, Type, Layout, Sliders as SlidersIcon, LogOut
+} from 'lucide-react';
+
+// Types for enhanced UI components
+interface AlertProps {
+  type?: 'info' | 'success' | 'warning' | 'danger';
+  title?: string;
+  children: React.ReactNode;
+  onClose?: () => void;
+  className?: string;
+}
+
+interface AvatarProps {
+  src?: string;
+  alt?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  fallback?: string;
+  className?: string;
+}
+
+interface ButtonProps {
+  children: React.ReactNode;
+  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
+  disabled?: boolean;
+  onClick?: () => void;
+  className?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+}
+
+interface IconButtonProps {
+  icon: React.ComponentType<{ className?: string }>;
+  onClick?: () => void;
+  variant?: 'default' | 'primary' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+}
+
+interface CardProps {
+  title?: string;
+  children: React.ReactNode;
+  className?: string;
+  actions?: React.ReactNode[];
+  glass?: boolean;
+}
+
+interface CheckboxProps {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label?: string;
+  className?: string;
+}
+
+interface ChipProps {
+  children: React.ReactNode;
+  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
+  onRemove?: () => void;
+  className?: string;
+}
+
+interface CollapseProps {
+  title: string;
+  children: React.ReactNode;
+  open: boolean;
+  onToggle: () => void;
+}
+
+interface DropdownItem {
+  label?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  onClick?: () => void;
+  divider?: boolean;
+}
+
+interface DropdownProps {
+  trigger: React.ReactNode;
+  items: DropdownItem[];
+  className?: string;
+}
+
+interface InputProps {
+  label?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  type?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  error?: string;
+  className?: string;
+}
+
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: string;
+  children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  className?: string;
+}
+
+interface ProgressBarProps {
+  value: number;
+  max?: number;
+  size?: 'sm' | 'md' | 'lg';
+  color?: 'primary' | 'success' | 'warning' | 'danger';
+  showLabel?: boolean;
+  className?: string;
+}
+
+interface TabsProps {
+  tabs: Array<{
+    id: string;
+    label: string;
+    icon?: React.ComponentType<{ className?: string }>;
+  }>;
+  active: string;
+  onTabChange: (id: string) => void;
+  variant?: 'default' | 'pills';
+}
+
+interface TextareaProps {
+  label?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  rows?: number;
+  error?: string;
+  className?: string;
+}
+
+interface TooltipProps {
+  content: string;
+  children: React.ReactNode;
+  position?: 'top' | 'bottom' | 'left' | 'right';
+}
+
+interface TypographyProps {
+  variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'body1' | 'body2' | 'caption';
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface NavbarProps {
+  title?: string;
+  user?: {
+    name: string;
+    avatar?: string;
+  };
+  onSidebarToggle?: () => void;
+  onLogout?: () => void;
+}
+
+// Enhanced UI Components
+export const Alert: React.FC<AlertProps> = ({ type = 'info', title, children, onClose, className = '' }) => {
+  const icons = { info: Info, success: Check, warning: AlertTriangle, danger: XCircle };
+  const colors = {
+    info: 'bg-blue-50 text-blue-800 border-blue-200',
+    success: 'bg-green-50 text-green-800 border-green-200',
+    warning: 'bg-yellow-50 text-yellow-800 border-yellow-200',
+    danger: 'bg-red-50 text-red-800 border-red-200'
+  };
+  const Icon = icons[type];
+  
+  return (
+    <div className={`p-4 rounded-xl border ${colors[type]} ${className}`}>
+      <div className="flex items-start">
+        <Icon className="w-5 h-5 mr-3 mt-0.5" />
+        <div className="flex-1">
+          {title && <h4 className="font-semibold mb-1">{title}</h4>}
+          <div>{children}</div>
+        </div>
+        {onClose && (
+          <button onClick={onClose} className="ml-3">
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const Avatar: React.FC<AvatarProps> = ({ src, alt, size = 'md', fallback, className = '' }) => {
+  const sizes = { sm: 'w-8 h-8 text-sm', md: 'w-10 h-10 text-base', lg: 'w-12 h-12 text-lg', xl: 'w-16 h-16 text-xl' };
+  return (
+    <div className={`${sizes[size]} rounded-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 text-white font-medium ${className}`}>
+      {src ? (
+        <img src={src} alt={alt} className="w-full h-full rounded-full object-cover" />
+      ) : (
+        <span>{fallback || alt?.charAt(0) || 'U'}</span>
+      )}
+    </div>
+  );
+};
+
+export const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', size = 'md', disabled = false, onClick, className = '', icon: Icon }) => {
+  const variants = {
+    primary: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600',
+    secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+    success: 'bg-green-500 text-white hover:bg-green-600',
+    danger: 'bg-red-500 text-white hover:bg-red-600',
+    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+  };
+  const sizes = { sm: 'px-3 py-1.5 text-sm', md: 'px-4 py-2 text-base', lg: 'px-6 py-3 text-lg' };
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 ${variants[variant]} ${sizes[size]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+    >
+      {Icon && <Icon className="w-4 h-4 mr-2" />}
+      {children}
+    </button>
+  );
+};
+
+export const IconButton: React.FC<IconButtonProps> = ({ icon: Icon, onClick, variant = 'default', size = 'md', className = '' }) => {
+  const variants = {
+    default: 'text-gray-600 hover:text-gray-800 hover:bg-gray-100',
+    primary: 'text-purple-600 hover:text-purple-800 hover:bg-purple-100',
+    danger: 'text-red-600 hover:text-red-800 hover:bg-red-100'
+  };
+  const sizes = { sm: 'p-1', md: 'p-2', lg: 'p-3' };
+
+  return (
+    <button onClick={onClick} className={`rounded-lg transition-colors ${variants[variant]} ${sizes[size]} ${className}`}>
+      <Icon className="w-5 h-5" />
+    </button>
+  );
+};
+
+export const Card: React.FC<CardProps> = ({ title, children, className = '', actions, glass = false }) => (
+  <div className={`${glass ? 'bg-white bg-opacity-20 backdrop-blur-lg' : 'bg-white'} rounded-2xl shadow-lg border border-gray-100 ${className}`}>
+    {title && (
+      <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+        {actions && <div className="flex space-x-2">{actions}</div>}
+      </div>
+    )}
+    <div className="p-6">{children}</div>
+  </div>
+);
+
+export const Checkbox: React.FC<CheckboxProps> = ({ checked, onChange, label, className = '' }) => (
+  <label className={`flex items-center cursor-pointer ${className}`}>
+    <div className="relative">
+      <input 
+        type="checkbox" 
+        checked={checked} 
+        onChange={(e) => onChange(e.target.checked)} 
+        className="sr-only" 
+      />
+      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+        checked ? 'bg-purple-500 border-purple-500' : 'border-gray-300 hover:border-purple-400'
+      }`}>
+        {checked && <Check className="w-3 h-3 text-white" />}
+      </div>
+    </div>
+    {label && <span className="ml-3 text-gray-700">{label}</span>}
+  </label>
+);
+
+export const Chip: React.FC<ChipProps> = ({ children, variant = 'default', onRemove, className = '' }) => {
+  const variants = {
+    default: 'bg-gray-100 text-gray-700',
+    primary: 'bg-purple-100 text-purple-700',
+    success: 'bg-green-100 text-green-700',
+    warning: 'bg-yellow-100 text-yellow-700',
+    danger: 'bg-red-100 text-red-700'
+  };
+
+  return (
+    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${variants[variant]} ${className}`}>
+      {children}
+      {onRemove && (
+        <button onClick={onRemove} className="ml-2 hover:bg-black hover:bg-opacity-10 rounded-full p-0.5">
+          <X className="w-3 h-3" />
+        </button>
+      )}
+    </span>
+  );
+};
+
+export const Collapse: React.FC<CollapseProps> = ({ title, children, open, onToggle }) => (
+  <div className="border border-gray-200 rounded-xl overflow-hidden">
+    <button onClick={onToggle} className="w-full px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 flex items-center justify-between">
+      <span className="font-medium">{title}</span>
+      <ChevronRight className={`w-4 h-4 transition-transform ${open ? 'rotate-90' : ''}`} />
+    </button>
+    {open && (
+      <div className="px-4 py-3 bg-white">
+        {children}
+      </div>
+    )}
+  </div>
+);
+
+export const Dropdown: React.FC<DropdownProps> = ({ trigger, items, className = '' }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className={`relative ${className}`}>
+      <div onClick={() => setIsOpen(!isOpen)}>
+        {trigger}
+      </div>
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50">
+          {items.map((item, index) => (
+            <div key={index}>
+              {item.divider ? (
+                <div className="border-t border-gray-200 my-1" />
+              ) : (
+                <button
+                  onClick={() => {
+                    item.onClick?.();
+                    setIsOpen(false);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                >
+                  {item.icon && <item.icon className="w-4 h-4 mr-3" />}
+                  {item.label}
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const Input: React.FC<InputProps> = ({ label, value, onChange, placeholder, type = 'text', icon: Icon, error, className = '' }) => (
+  <div className={className}>
+    {label && <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>}
+    <div className="relative">
+      {Icon && (
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Icon className="h-5 w-5 text-gray-400" />
+        </div>
+      )}
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={`w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent ${Icon ? 'pl-10' : ''} ${error ? 'border-red-500' : ''}`}
+      />
+    </div>
+    {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+  </div>
+);
+
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md', className = '' }) => {
+  const sizes = {
+    sm: 'max-w-md',
+    md: 'max-w-lg',
+    lg: 'max-w-2xl',
+    xl: 'max-w-4xl'
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className={`bg-white rounded-2xl shadow-xl ${sizes[size]} w-full mx-4 ${className}`}>
+        {title && (
+          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+        )}
+        <div className="p-6">{children}</div>
+      </div>
+    </div>
+  );
+};
+
+export const ProgressBar: React.FC<ProgressBarProps> = ({ value, max = 100, size = 'md', color = 'primary', showLabel = false, className = '' }) => {
+  const sizes = { sm: 'h-1', md: 'h-2', lg: 'h-3' };
+  const colors = {
+    primary: 'bg-purple-500',
+    success: 'bg-green-500',
+    warning: 'bg-yellow-500',
+    danger: 'bg-red-500'
+  };
+  const percentage = Math.min((value / max) * 100, 100);
+
+  return (
+    <div className={className}>
+      {showLabel && (
+        <div className="flex justify-between text-sm text-gray-600 mb-1">
+          <span>Progress</span>
+          <span>{Math.round(percentage)}%</span>
+        </div>
+      )}
+      <div className={`w-full bg-gray-200 rounded-full ${sizes[size]}`}>
+        <div 
+          className={`${colors[color]} rounded-full transition-all duration-300 ${sizes[size]}`}
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  );
+};
+
+export const Tabs: React.FC<TabsProps> = ({ tabs, active, onTabChange, variant = 'default' }) => (
+  <div className={variant === 'pills' ? '' : 'border-b border-gray-200'}>
+    <nav className={variant === 'pills' ? 'flex space-x-2' : '-mb-px flex space-x-8'}>
+      {tabs.map((tab) => (
+        <button
+          key={tab.id}
+          onClick={() => onTabChange(tab.id)}
+          className={`${variant === 'pills' 
+            ? `px-4 py-2 rounded-xl font-medium text-sm transition-colors ${
+                active === tab.id ? 'bg-purple-500 text-white' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+              }`
+            : `py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                active === tab.id
+                  ? 'border-purple-500 text-purple-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`
+          }`}
+        >
+          {tab.icon && <tab.icon className="w-4 h-4 mr-2 inline" />}
+          {tab.label}
+        </button>
+      ))}
+    </nav>
+  </div>
+);
+
+export const Textarea: React.FC<TextareaProps> = ({ label, value, onChange, placeholder, rows = 4, error, className = '' }) => (
+  <div className={className}>
+    {label && <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>}
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={rows}
+      className={`w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none ${error ? 'border-red-500' : ''}`}
+    />
+    {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+  </div>
+);
+
+export const Tooltip: React.FC<TooltipProps> = ({ content, children, position = 'top' }) => {
+  const [visible, setVisible] = useState(false);
+  const positions = {
+    top: 'bottom-full left-1/2 transform -translate-x-1/2 mb-2',
+    bottom: 'top-full left-1/2 transform -translate-x-1/2 mt-2',
+    left: 'right-full top-1/2 transform -translate-y-1/2 mr-2',
+    right: 'left-full top-1/2 transform -translate-y-1/2 ml-2'
+  };
+
+  return (
+    <div 
+      className="relative inline-block"
+      onMouseEnter={() => setVisible(true)}
+      onMouseLeave={() => setVisible(false)}
+    >
+      {children}
+      {visible && (
+        <div className={`absolute ${positions[position]} z-50 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg whitespace-nowrap`}>
+          {content}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const Typography: React.FC<TypographyProps> = ({ variant = 'body1', children, className = '' }) => {
+  const variants = {
+    h1: 'text-4xl font-bold',
+    h2: 'text-3xl font-bold',
+    h3: 'text-2xl font-bold',
+    h4: 'text-xl font-bold',
+    h5: 'text-lg font-bold',
+    h6: 'text-base font-bold',
+    body1: 'text-base',
+    body2: 'text-sm',
+    caption: 'text-xs text-gray-500'
+  };
+  const Component = variant.startsWith('h') ? variant : 'p';
+  return React.createElement(Component, { className: `${variants[variant]} ${className}` }, children);
+};
+
+export const Navbar: React.FC<NavbarProps> = ({ title = "Dashboard", user = { name: "John Doe", avatar: "" }, onSidebarToggle, onLogout }) => (
+  <nav className="bg-white shadow-lg border-b border-gray-100">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex justify-between h-16">
+        <div className="flex items-center">
+          <button onClick={onSidebarToggle} className="md:hidden">
+            <Menu className="w-6 h-6" />
+          </button>
+          <Typography variant="h5" className="ml-4">{title}</Typography>
+        </div>
+        <div className="flex items-center space-x-4">
+          <IconButton icon={Search} />
+          <IconButton icon={Bell} />
+          <Dropdown
+            trigger={<Avatar src={user.avatar} alt={user.name} size="sm" />}
+            items={[
+              { label: 'Profile', icon: User },
+              { label: 'Settings', icon: Settings },
+              { divider: true },
+              { label: 'Logout', icon: LogOut, onClick: onLogout }
+            ]}
+          />
+        </div>
+      </div>
+    </div>
+  </nav>
+);
