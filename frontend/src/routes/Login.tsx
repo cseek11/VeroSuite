@@ -59,13 +59,16 @@ export default function Login() {
               className="w-full h-full object-contain"
             />
           </div>
-          <h1 className="text-3xl font-bold text-gray-950 mb-2">VeroPest Suite</h1>
-          <p className="text-gray-800">Sign in to your account</p>
+          
         </div>
 
         {/* Login Form */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 opacity-95">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
+          <h1 className="text-3xl font-bold text-gray-950 mb-2">VeroPest Suite</h1>
+          <p className="text-gray-800">Sign in to your account</p>
+
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
