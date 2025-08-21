@@ -52,19 +52,19 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Logo and Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-1215 h-214  bg-white rounded-2xl shadow-lg mb-4 p-2">
+          <div className="inline-flex items-center justify-center w-1215 h-214 rounded-2xl shadow-lg mb-4 p-2">
             <img 
               src="/branding/veropest_logo.png" 
               alt="VeroPest Logo" 
               className="w-full h-full object-contain"
             />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">VeroPest Suite</h1>
-          <p className="text-gray-600">Sign in to your account</p>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">VeroPest Suite</h1>
+          <p className="text-gray-500">Sign in to your account</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 opacity-75">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email Field */}
             <div>
