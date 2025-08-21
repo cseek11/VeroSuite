@@ -52,7 +52,7 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Logo and Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-1215 h-214 rounded-2xl shadow-lg mb-4 p-2">
+          <div className="inline-flex items-center justify-center w-1215 h-214 rounded-2xl mb-4 p-2">
             <img 
               src="/branding/veropest_logo.png" 
               alt="VeroPest Logo" 
@@ -60,11 +60,11 @@ export default function Login() {
             />
           </div>
           <h1 className="text-3xl font-bold text-gray-950 mb-2">VeroPest Suite</h1>
-          <p className="text-gray-700">Sign in to your account</p>
+          <p className="text-gray-800">Sign in to your account</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 opacity-90">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 opacity-95">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email Field */}
             <div>
@@ -78,7 +78,7 @@ export default function Login() {
                 <input
                   id="email"
                   type="email"
-                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-colors ${
+                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-zinc-950 focus:border-transparent transition-colors ${
                     errors.email ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="Enter your email"
@@ -160,10 +160,7 @@ export default function Login() {
                   {errors.tenantId.message}
                 </p>
               )}
-              <p className="text-xs text-gray-500 mt-2">
-                Use Tenant A: <code className="bg-gray-100 px-1 rounded">11111111-1111-1111-1111-111111111111</code> or 
-                Tenant B: <code className="bg-gray-100 px-1 rounded">22222222-2222-2222-2222-222222222222</code>
-              </p>
+           
             </div>
 
             {/* Error Message */}
