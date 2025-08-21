@@ -46,7 +46,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center" style={{
-      background: `url('/branding/crm_bg.png') center center / cover no-repeat fixed`,
+      background: `url('/branding/crm_BG_V2.png') center center / cover no-repeat fixed`,
       position: 'relative',
     }}>
       <div className="w-full max-w-md">
@@ -63,10 +63,9 @@ export default function Login() {
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 opacity-95">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-5 opacity-95">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-
-          <h1 className="text-3xl font-bold text-gray-950 mb-2">VeroPest Suite</h1>
+          <h1 className="inline-flex items-center justify-center text-3xl font-bold text-gray-950 mb-2">VeroPest Suite</h1>
           <p className="text-gray-800">Sign in to your account</p>
 
             {/* Email Field */}
