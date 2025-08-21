@@ -52,7 +52,7 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Logo and Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 opacity-75 bg-white rounded-2xl shadow-lg mb-4 p-2">
+          <div className="inline-flex items-center justify-center w-1215 h-214  bg-white rounded-2xl shadow-lg mb-4 p-2">
             <img 
               src="/branding/veropest_logo.png" 
               alt="VeroPest Logo" 
