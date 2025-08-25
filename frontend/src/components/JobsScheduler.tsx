@@ -1,34 +1,7 @@
 import React, { useState } from 'react';
 
-const mockJobs = [
-  { 
-    id: '1', 
-    title: 'Job 1 - Site A', 
-    start: '2025-08-17T09:00:00', 
-    end: '2025-08-17T11:00:00', 
-    technician: 'tech1',
-    color: '#3b82f6'
-  },
-  { 
-    id: '2', 
-    title: 'Job 2 - Site B', 
-    start: '2025-08-18T13:00:00', 
-    end: '2025-08-18T15:00:00', 
-    technician: 'tech2',
-    color: '#10b981'
-  },
-  { 
-    id: '3', 
-    title: 'Job 3 - Site C', 
-    start: '2025-08-19T10:00:00', 
-    end: '2025-08-19T12:00:00', 
-    technician: 'tech1',
-    color: '#f59e0b'
-  },
-];
-
 export default function JobsScheduler() {
-  const [jobs, setJobs] = useState(mockJobs);
+  const [jobs, setJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [currentDate, setCurrentDate] = useState(new Date(2025, 7, 1));
 

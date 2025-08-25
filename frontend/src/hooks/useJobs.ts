@@ -7,8 +7,19 @@ import { Job, JobEvent } from '@/types';
 export const useTodayJobs = (technicianId?: string) => {
   return useQuery({
     queryKey: queryKeys.jobs.today(technicianId),
-    queryFn: () => jobsApi.today(technicianId),
+    queryFn: async () => {
+      console.log('Fetching today\'s jobs...');
+      try {
+        const result = await jobsApi.today(technicianId);
+        console.log('Jobs fetched successfully:', result);
+        return result;
+      } catch (error) {
+        console.error('Error fetching jobs:', error);
+        throw error;
+      }
+    },
     staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 1,
   });
 };
 

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   ChevronDown, Bell, Search, Menu, X, Home, BarChart3, Users, ShoppingCart, 
   CreditCard, Settings, User, TrendingUp, TrendingDown, Eye, Heart, MessageCircle,
@@ -154,6 +155,7 @@ interface NavbarProps {
     name: string;
     avatar?: string;
   };
+  sidebarCollapsed?: boolean;
   onSidebarToggle?: () => void;
   onLogout?: () => void;
 }
@@ -202,19 +204,23 @@ export const Avatar: React.FC<AvatarProps> = ({ src, alt, size = 'md', fallback,
 
 export const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', size = 'md', disabled = false, onClick, className = '', icon: Icon }) => {
   const variants = {
-    primary: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600',
-    secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
-    success: 'bg-green-500 text-white hover:bg-green-600',
-    danger: 'bg-red-500 text-white hover:bg-red-600',
-    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+    primary: 'crm-btn-primary',
+    secondary: 'crm-btn-secondary',
+    success: 'crm-btn-success',
+    danger: 'crm-btn-danger',
+    outline: 'crm-btn-outline'
   };
-  const sizes = { sm: 'px-3 py-1.5 text-sm', md: 'px-4 py-2 text-base', lg: 'px-6 py-3 text-lg' };
+  const sizes = { 
+    sm: 'crm-btn-sm', 
+    md: 'crm-btn-md', 
+    lg: 'crm-btn-lg' 
+  };
 
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 ${variants[variant]} ${sizes[size]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+      className={`crm-btn ${variants[variant]} ${sizes[size]} ${className}`}
     >
       {Icon && <Icon className="w-4 h-4 mr-2" />}
       {children}
@@ -238,14 +244,14 @@ export const IconButton: React.FC<IconButtonProps> = ({ icon: Icon, onClick, var
 };
 
 export const Card: React.FC<CardProps> = ({ title, children, className = '', actions, glass = false }) => (
-  <div className={`${glass ? 'bg-white bg-opacity-20 backdrop-blur-lg' : 'bg-white'} rounded-2xl shadow-lg border border-gray-100 ${className}`}>
+  <div className={`crm-card ${glass ? 'bg-white bg-opacity-20 backdrop-blur-lg' : ''} ${className}`}>
     {title && (
-      <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-        <h3 className="text-lg font-bold text-gray-900">{title}</h3>
-        {actions && <div className="flex space-x-2">{actions}</div>}
+      <div className="crm-card-header flex items-center justify-between">
+        <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+        {actions && <div className="flex gap-2">{actions}</div>}
       </div>
     )}
-    <div className="p-6">{children}</div>
+    <div className="crm-card-body">{children}</div>
   </div>
 );
 
@@ -256,15 +262,15 @@ export const Checkbox: React.FC<CheckboxProps> = ({ checked, onChange, label, cl
         type="checkbox" 
         checked={checked} 
         onChange={(e) => onChange(e.target.checked)} 
-        className="sr-only" 
+        className="crm-checkbox" 
       />
-      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-        checked ? 'bg-purple-500 border-purple-500' : 'border-gray-300 hover:border-purple-400'
+      <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+        checked ? 'bg-purple-500 border-purple-500' : 'border-gray-200 hover:border-purple-400 bg-white'
       }`}>
-        {checked && <Check className="w-3 h-3 text-white" />}
+        {checked && <Check className="w-2.5 h-2.5 text-white" />}
       </div>
     </div>
-    {label && <span className="ml-3 text-gray-700">{label}</span>}
+    {label && <span className="ml-2 text-sm text-gray-700">{label}</span>}
   </label>
 );
 
@@ -305,9 +311,26 @@ export const Collapse: React.FC<CollapseProps> = ({ title, children, open, onTog
 
 export const Dropdown: React.FC<DropdownProps> = ({ trigger, items, className = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   return (
-    <div className={`relative ${className}`}>
+    <div ref={dropdownRef} className={`relative ${className}`}>
       <div onClick={() => setIsOpen(!isOpen)}>
         {trigger}
       </div>
@@ -338,12 +361,12 @@ export const Dropdown: React.FC<DropdownProps> = ({ trigger, items, className = 
 };
 
 export const Input: React.FC<InputProps> = ({ label, value, onChange, placeholder, type = 'text', icon: Icon, error, className = '' }) => (
-  <div className={className}>
-    {label && <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>}
+  <div className={`crm-field ${className}`}>
+    {label && <label className="crm-label">{label}</label>}
     <div className="relative">
       {Icon && (
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icon className="h-5 w-5 text-gray-400" />
+          <Icon className="h-4 w-4 text-gray-500" />
         </div>
       )}
       <input
@@ -351,10 +374,10 @@ export const Input: React.FC<InputProps> = ({ label, value, onChange, placeholde
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent ${Icon ? 'pl-10' : ''} ${error ? 'border-red-500' : ''}`}
+        className={`crm-input ${Icon ? 'pl-10' : ''} ${error ? 'crm-input-error' : ''}`}
       />
     </div>
-    {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+    {error && <p className="crm-error">{error}</p>}
   </div>
 );
 
@@ -440,16 +463,16 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, active, onTabChange, variant =
 );
 
 export const Textarea: React.FC<TextareaProps> = ({ label, value, onChange, placeholder, rows = 4, error, className = '' }) => (
-  <div className={className}>
-    {label && <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>}
+  <div className={`crm-field ${className}`}>
+    {label && <label className="crm-label">{label}</label>}
     <textarea
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className={`w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none ${error ? 'border-red-500' : ''}`}
+      className={`crm-textarea ${error ? 'crm-input-error' : ''}`}
     />
-    {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+    {error && <p className="crm-error">{error}</p>}
   </div>
 );
 
@@ -480,44 +503,131 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children, position = 
 
 export const Typography: React.FC<TypographyProps> = ({ variant = 'body1', children, className = '' }) => {
   const variants = {
-    h1: 'text-4xl font-bold',
-    h2: 'text-3xl font-bold',
-    h3: 'text-2xl font-bold',
-    h4: 'text-xl font-bold',
-    h5: 'text-lg font-bold',
-    h6: 'text-base font-bold',
-    body1: 'text-base',
-    body2: 'text-sm',
+    h1: 'text-2xl font-bold text-gray-900 mb-4',
+    h2: 'text-xl font-semibold text-gray-900 mb-3',
+    h3: 'text-lg font-semibold text-gray-900 mb-2',
+    h4: 'text-base font-medium text-gray-900 mb-2',
+    h5: 'text-sm font-medium text-gray-900 mb-1',
+    h6: 'text-xs font-medium text-gray-900 mb-1',
+    body1: 'text-sm text-gray-700 leading-relaxed',
+    body2: 'text-xs text-gray-600 leading-tight',
     caption: 'text-xs text-gray-500'
   };
   const Component = variant.startsWith('h') ? variant : 'p';
   return React.createElement(Component, { className: `${variants[variant]} ${className}` }, children);
 };
 
-export const Navbar: React.FC<NavbarProps> = ({ title = "Dashboard", user = { name: "John Doe", avatar: "" }, onSidebarToggle, onLogout }) => (
-  <nav className="bg-white shadow-lg border-b border-gray-100">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between h-16">
-        <div className="flex items-center">
-          <button onClick={onSidebarToggle} className="md:hidden">
-            <Menu className="w-6 h-6" />
-          </button>
-          <Typography variant="h5" className="ml-4">{title}</Typography>
-        </div>
-        <div className="flex items-center space-x-4">
-          <IconButton icon={Search} />
-          <IconButton icon={Bell} />
-          <Dropdown
-            trigger={<Avatar src={user.avatar} alt={user.name} size="sm" />}
-            items={[
-              { label: 'Profile', icon: User },
-              { label: 'Settings', icon: Settings },
-              { divider: true },
-              { label: 'Logout', icon: LogOut, onClick: onLogout }
-            ]}
-          />
+export const Navbar: React.FC<NavbarProps> = ({ title = "Dashboard", user = { name: "John Doe", avatar: "" }, sidebarCollapsed = false, onSidebarToggle, onLogout }) => {
+  const navigate = useNavigate();
+  
+  return (
+    <nav className="bg-[url('/branding/crm_BG_small.png')] bg-cover bg-center shadow-sm border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16 gap-4">
+          {/* Left side - Logo and Branding */}
+          <div className="flex items-center">
+            <button
+              onClick={onSidebarToggle}
+              className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 lg:hidden"
+            >
+              <Settings className="h-6 w-6" />
+            </button>
+            
+            <img 
+              src="/branding/vero_small.png" 
+              alt="VeroPest Suite" 
+              className={`h-8 w-auto transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-100' : 'opacity-0'}`} 
+            />
+          </div>
+          {/* Center - Global Search */}
+          <div className="flex-1 max-w-2xl mx-4 lg:mx-8 min-w-0">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search customers, jobs, invoices, technicians..."
+                className="pl-10 pr-16 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+              />
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
+                <Filter className="h-4 w-4 text-gray-400" />
+                <span className="text-xs text-gray-500 hidden sm:inline">⌘K</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right side - Notifications and Actions */}
+          <div className="flex items-center space-x-2 lg:space-x-4 flex-shrink-0">
+            {/* Dashboard Toggle */}
+            <div className="hidden sm:flex items-center bg-gray-100 rounded-lg p-1 h-9">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className={`px-3 h-7 text-xs font-medium rounded-md transition-colors flex items-center ${
+                  window.location.pathname === '/dashboard'
+                    ? 'bg-white text-purple-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                VeroDash
+              </button>
+              <button
+                onClick={() => navigate('/resizable-dashboard')}
+                className={`px-3 h-7 text-xs font-medium rounded-md transition-colors flex items-center ${
+                  window.location.pathname === '/resizable-dashboard'
+                    ? 'bg-white text-purple-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                VeroCards
+              </button>
+            </div>
+
+            {/* Quick Actions Dropdown */}
+            <Dropdown
+              trigger={
+                <Button variant="outline" className="flex items-center space-x-2 bg-white border-gray-300 hover:bg-gray-50 h-9">
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Quick Actions</span>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              }
+              items={[
+                { label: 'Create Work Order', icon: Plus, onClick: () => navigate('/jobs/new') },
+                { label: 'Schedule Job', icon: Calendar, onClick: () => navigate('/jobs/new') },
+                { label: 'Add Customer', icon: User, onClick: () => navigate('/customers/new') },
+                { label: 'View Reports', icon: BarChart3, onClick: () => navigate('/reports') }
+              ]}
+            />
+
+            {/* Notifications Center */}
+            <div className="relative">
+              <button className="relative w-9 h-9 rounded-md text-gray-400 hover:text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 flex items-center justify-center">
+                <Bell className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* User Menu */}
+            <div className="relative">
+              <Dropdown
+                trigger={
+                  <div className="flex items-center space-x-3 cursor-pointer px-3 py-2 rounded-md bg-white border border-gray-200 hover:bg-gray-50 h-9">
+                    <Avatar size="sm" fallback={user.name?.charAt(0) || 'U'} />
+                    <div className="hidden md:block text-left">
+                      <p className="text-sm font-medium text-gray-900">
+                        {user.name || 'User'}
+                      </p>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                  </div>
+                }
+                items={[
+                  { label: 'Profile Settings', icon: Settings, onClick: () => navigate('/settings') },
+                  { label: 'Logout', icon: LogOut, onClick: onLogout }
+                ]}
+              />
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </nav>
-);
+    </nav>
+  );
+};

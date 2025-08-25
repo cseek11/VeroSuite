@@ -7,6 +7,7 @@ import App from './routes/App';
 import { queryClient } from './lib/queryClient';
 import { config } from './lib/config';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import KeyboardNavigationProvider from './components/KeyboardNavigationProvider';
 import './index.css';
 import './custom-calendar.css';
 
@@ -52,7 +53,9 @@ try {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
-            <App />
+            <KeyboardNavigationProvider>
+              <App />
+            </KeyboardNavigationProvider>
           </BrowserRouter>
           {config.features.enableDebugMode && <ReactQueryDevtools initialIsOpen={false} />}
         </QueryClientProvider>

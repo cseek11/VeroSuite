@@ -83,7 +83,7 @@ export class CrmService {
       where: { id, tenant_id: tenantId },
       include: {
         locations: true,
-        work_orders: {
+        workOrders: {
           include: {
             jobs: { where: { status: { in: ['scheduled', 'in_progress'] } }, orderBy: { scheduled_date: 'asc' }, take: 5 },
           },
