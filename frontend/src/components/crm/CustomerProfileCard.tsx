@@ -219,35 +219,35 @@ export default function CustomerProfileCard({ customer }: CustomerProfileCardPro
                     <Input
                       label="Email"
                       value={editedCustomer.email || ''}
-                      onChange={(e) => setEditedCustomer({
+                      onChange={(value) => setEditedCustomer({
                         ...editedCustomer,
-                        email: e.target.value
+                        email: value
                       })}
                       icon={Mail}
                     />
                     <Input
                       label="Phone"
                       value={editedCustomer.phone || ''}
-                      onChange={(e) => setEditedCustomer({
+                      onChange={(value) => setEditedCustomer({
                         ...editedCustomer,
-                        phone: e.target.value
+                        phone: value
                       })}
                       icon={Phone}
                     />
                     <Input
                       label="Emergency Contact"
                       value={editedCustomer.emergency_contact || ''}
-                      onChange={(e) => setEditedCustomer({
+                      onChange={(value) => setEditedCustomer({
                         ...editedCustomer,
-                        emergency_contact: e.target.value
+                        emergency_contact: value
                       })}
                     />
                     <Input
                       label="Preferred Contact Method"
                       value={editedCustomer.preferred_contact_method || ''}
-                      onChange={(e) => setEditedCustomer({
+                      onChange={(value) => setEditedCustomer({
                         ...editedCustomer,
-                        preferred_contact_method: e.target.value
+                        preferred_contact_method: value
                       })}
                     />
                   </div>
@@ -296,9 +296,9 @@ export default function CustomerProfileCard({ customer }: CustomerProfileCardPro
                     <Input
                       label="Address"
                       value={editedCustomer.address || ''}
-                      onChange={(e) => setEditedCustomer({
+                      onChange={(value) => setEditedCustomer({
                         ...editedCustomer,
-                        address: e.target.value
+                        address: value
                       })}
                       icon={MapPin}
                     />
@@ -306,51 +306,51 @@ export default function CustomerProfileCard({ customer }: CustomerProfileCardPro
                       <Input
                         label="City"
                         value={editedCustomer.city || ''}
-                        onChange={(e) => setEditedCustomer({
+                        onChange={(value) => setEditedCustomer({
                           ...editedCustomer,
-                          city: e.target.value
+                          city: value
                         })}
                       />
                       <Input
                         label="State"
                         value={editedCustomer.state || ''}
-                        onChange={(e) => setEditedCustomer({
+                        onChange={(value) => setEditedCustomer({
                           ...editedCustomer,
-                          state: e.target.value
+                          state: value
                         })}
                       />
                       <Input
                         label="ZIP"
                         value={editedCustomer.zip_code || ''}
-                        onChange={(e) => setEditedCustomer({
+                        onChange={(value) => setEditedCustomer({
                           ...editedCustomer,
-                          zip_code: e.target.value
+                          zip_code: value
                         })}
                       />
                     </div>
                     <Input
                       label="Property Type"
                       value={editedCustomer.property_type || ''}
-                      onChange={(e) => setEditedCustomer({
+                      onChange={(value) => setEditedCustomer({
                         ...editedCustomer,
-                        property_type: e.target.value
+                        property_type: value
                       })}
                       icon={Building}
                     />
                     <Input
                       label="Property Size"
                       value={editedCustomer.property_size || ''}
-                      onChange={(e) => setEditedCustomer({
+                      onChange={(value) => setEditedCustomer({
                         ...editedCustomer,
-                        property_size: e.target.value
+                        property_size: value
                       })}
                     />
                     <Input
                       label="Access Instructions"
                       value={editedCustomer.access_instructions || ''}
-                      onChange={(e) => setEditedCustomer({
+                      onChange={(value) => setEditedCustomer({
                         ...editedCustomer,
-                        access_instructions: e.target.value
+                        access_instructions: value
                       })}
                       multiline
                     />
