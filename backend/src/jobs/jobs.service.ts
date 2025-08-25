@@ -16,7 +16,7 @@ export class JobsService {
         scheduled_date: { equals: new Date(today) },
         ...(technicianId ? { technician_id: technicianId } : {}),
       },
-      include: { work_order: { include: { account: true, location: true } } },
+      include: { workOrder: { include: { account: true, location: true } } },
       orderBy: [{ priority: 'desc' }, { scheduled_start_time: 'asc' }],
     });
 
@@ -26,19 +26,19 @@ export class JobsService {
       priority: job.priority,
       scheduled_date: job.scheduled_date,
       time_window: { start: job.scheduled_start_time, end: job.scheduled_end_time },
-      customer: { id: job.work_order.account.id, name: job.work_order.account.name, type: job.work_order.account.account_type },
+      customer: { id: job.workOrder.account.id, name: job.workOrder.account.name, type: job.workOrder.account.account_type },
       location: {
-        id: job.work_order.location.id,
-        name: job.work_order.location.name,
-        address: `${job.work_order.location.address_line1}, ${job.work_order.location.city}, ${job.work_order.location.state}`,
-        coordinates: { lat: job.work_order.location.latitude, lng: job.work_order.location.longitude },
+        id: job.workOrder.location.id,
+        name: job.workOrder.location.name,
+        address: `${job.workOrder.location.address_line1}, ${job.workOrder.location.city}, ${job.workOrder.location.state}`,
+        coordinates: { lat: job.workOrder.location.latitude, lng: job.workOrder.location.longitude },
       },
       service: {
-        type: job.work_order.service_type,
-        description: job.work_order.description,
-        estimated_duration: job.work_order.estimated_duration,
-        price: job.work_order.service_price,
-        special_instructions: job.work_order.special_instructions,
+        type: job.workOrder.service_type,
+        description: job.workOrder.description,
+        estimated_duration: job.workOrder.estimated_duration,
+        price: job.workOrder.service_price,
+        special_instructions: job.workOrder.special_instructions,
       },
       technician_id: job.technician_id,
       actual_times: { started_at: job.actual_start_time, completed_at: job.actual_end_time },
@@ -49,7 +49,7 @@ export class JobsService {
   async getJobById(jobId: string, tenantId: string) {
     const job = await this.db.job.findFirst({
       where: { id: jobId, tenant_id: tenantId },
-      include: { work_order: { include: { account: true, location: true } } },
+      include: { workOrder: { include: { account: true, location: true } } },
     });
     if (!job) throw new NotFoundException('Job not found');
     return job;
@@ -71,7 +71,7 @@ export class JobsService {
         scheduled_end_time: dto.time_window_end,
         updated_at: new Date(),
       },
-      include: { work_order: { include: { account: true, location: true } } },
+      include: { workOrder: { include: { account: true, location: true } } },
     });
 
     await this.audit.log({
@@ -103,7 +103,7 @@ export class JobsService {
         technician_id: dto.technician_id,
         status: dto.technician_id ? JobStatus.SCHEDULED : JobStatus.UNASSIGNED,
       },
-      include: { work_order: { include: { account: true, location: true } } },
+      include: { workOrder: { include: { account: true, location: true } } },
     });
 
     await this.audit.log({

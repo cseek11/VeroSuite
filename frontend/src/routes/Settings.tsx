@@ -1,4 +1,22 @@
 import React, { useState } from 'react';
+import LayoutWrapper from '@/components/LayoutWrapper';
+import {
+  Typography,
+  Button,
+  Card,
+  Input,
+  Checkbox
+} from '@/components/ui/EnhancedUI';
+import {
+  Settings as SettingsIcon,
+  Palette,
+  Layout,
+  Bell,
+  Shield,
+  Globe,
+  Save,
+  RotateCcw
+} from 'lucide-react';
 
 const defaultSettings = {
   // Branding & Appearance
@@ -47,258 +65,300 @@ const defaultSettings = {
 
 export default function Settings() {
   const [settings, setSettings] = useState(defaultSettings);
+  const [hasChanges, setHasChanges] = useState(false);
 
-  // ...UI for each setting (inputs, toggles, dropdowns, etc.)...
-  // For brevity, only a few examples are shown below
+  const handleSettingChange = (key: string, value: any) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+    setHasChanges(true);
+  };
+
+  const handleSave = () => {
+    // Save settings logic here
+    setHasChanges(false);
+  };
+
+  const handleReset = () => {
+    setSettings(defaultSettings);
+    setHasChanges(false);
+  };
 
   return (
-    <div className="max-w-3xl mx-auto p-8">
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
-      <form className="space-y-6">
-        {/* Branding & Appearance */}
-        <section>
-          <h2 className="text-lg font-semibold mb-2">Branding & Appearance</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1">Primary Color</label>
-              <input type="color" value={settings.primaryColor} onChange={e => setSettings({ ...settings, primaryColor: e.target.value })} />
+    <LayoutWrapper>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <Typography variant="h1" className="text-gray-900">
+            Settings
+          </Typography>
+          <Typography variant="body1" className="text-gray-600 mt-2">
+            Configure your VeroPest Suite preferences and system settings.
+          </Typography>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-4 mb-6">
+          <Button
+            variant="primary"
+            onClick={handleSave}
+            disabled={!hasChanges}
+            className="flex items-center gap-2"
+          >
+            <Save className="h-4 w-4" />
+            Save Changes
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleReset}
+            className="flex items-center gap-2"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Reset to Defaults
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Branding & Appearance */}
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Palette className="h-5 w-5 text-purple-500" />
+              <Typography variant="h6" className="text-gray-900">
+                Branding & Appearance
+              </Typography>
             </div>
-            <div>
-              <label className="block mb-1">Secondary Color</label>
-              <input type="color" value={settings.secondaryColor} onChange={e => setSettings({ ...settings, secondaryColor: e.target.value })} />
-            </div>
-            <div>
-              <label className="block mb-1">Accent Color</label>
-              <input type="color" value={settings.accentColor} onChange={e => setSettings({ ...settings, accentColor: e.target.value })} />
-            </div>
-            <div>
-              <label className="block mb-1">Logo</label>
-              <input type="text" value={settings.logo} onChange={e => setSettings({ ...settings, logo: e.target.value })} placeholder="Emoji or image URL" />
-            </div>
-            <div>
-              <label className="block mb-1">Brand Name</label>
-              <input type="text" value={settings.brandName} onChange={e => setSettings({ ...settings, brandName: e.target.value })} />
-            </div>
-            <div>
-              <label className="block mb-1">Font Family</label>
-              <select value={settings.fontFamily} onChange={e => setSettings({ ...settings, fontFamily: e.target.value })}>
-                <option value="Inter">Inter</option>
-                <option value="Roboto">Roboto</option>
-                <option value="Arial">Arial</option>
-                <option value="Montserrat">Montserrat</option>
-              </select>
-            </div>
-            <div>
-              <label className="block mb-1">Font Size</label>
-              <select value={settings.fontSize} onChange={e => setSettings({ ...settings, fontSize: e.target.value })}>
-                <option value="small">Small</option>
-                <option value="medium">Medium</option>
-                <option value="large">Large</option>
-              </select>
-            </div>
-            <div>
-              <label className="block mb-1">Border Radius</label>
-              <select value={settings.borderRadius} onChange={e => setSettings({ ...settings, borderRadius: e.target.value })}>
-                <option value="none">None</option>
-                <option value="small">Small</option>
-                <option value="medium">Medium</option>
-                <option value="large">Large</option>
-              </select>
-            </div>
-            <div>
-              <label className="block mb-1">Shadow Intensity</label>
-              <select value={settings.shadowIntensity} onChange={e => setSettings({ ...settings, shadowIntensity: e.target.value })}>
-                <option value="none">None</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-            <div>
-              <label className="block mb-1">Background Pattern</label>
-              <select value={settings.backgroundPattern} onChange={e => setSettings({ ...settings, backgroundPattern: e.target.value })}>
-                <option value="none">None</option>
-                <option value="stripes">Stripes</option>
-                <option value="dots">Dots</option>
-                <option value="custom">Custom Upload</option>
-              </select>
-            </div>
-            <div>
-              <label className="block mb-1">Glass Effect</label>
-              <input type="checkbox" checked={settings.glassEffect} onChange={e => setSettings({ ...settings, glassEffect: e.target.checked })} />
-            </div>
-            <div>
-              <label className="block mb-1">Dark Mode</label>
-              <input type="checkbox" checked={settings.darkMode} onChange={e => setSettings({ ...settings, darkMode: e.target.checked })} />
-            </div>
-            <div>
-              <label className="block mb-1">Sidebar Width</label>
-              <select value={settings.sidebarWidth} onChange={e => setSettings({ ...settings, sidebarWidth: e.target.value })}>
-                <option value="compact">Compact</option>
-                <option value="normal">Normal</option>
-                <option value="wide">Wide</option>
-              </select>
-            </div>
-            <div>
-              <label className="block mb-1">Header Height</label>
-              <select value={settings.headerHeight} onChange={e => setSettings({ ...settings, headerHeight: e.target.value })}>
-                <option value="short">Short</option>
-                <option value="normal">Normal</option>
-                <option value="tall">Tall</option>
-              </select>
-            </div>
-            <div className="col-span-2">
-              <label className="block mb-1">Custom CSS</label>
-              <textarea value={settings.customCSS} onChange={e => setSettings({ ...settings, customCSS: e.target.value })} className="w-full h-20" />
-            </div>
-          </div>
-        </section>
-        {/* Layout & Navigation */}
-        <section>
-          <h2 className="text-lg font-semibold mb-2 mt-6">Layout & Navigation</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1">Show Navigation Bar</label>
-              <input type="checkbox" checked={settings.showNavBar} onChange={e => setSettings({ ...settings, showNavBar: e.target.checked })} />
-            </div>
-            <div>
-              <label className="block mb-1">Show Sidebar</label>
-              <input type="checkbox" checked={settings.showSidebar} onChange={e => setSettings({ ...settings, showSidebar: e.target.checked })} />
-            </div>
-            <div>
-              <label className="block mb-1">Sidebar Position</label>
-              <select value={settings.sidebarPosition} onChange={e => setSettings({ ...settings, sidebarPosition: e.target.value })}>
-                <option value="left">Left</option>
-                <option value="right">Right</option>
-              </select>
-            </div>
-            <div>
-              <label className="block mb-1">Default Landing Page</label>
-              <select value={settings.defaultLandingPage} onChange={e => setSettings({ ...settings, defaultLandingPage: e.target.value })}>
-                <option value="dashboard">Dashboard</option>
-                <option value="jobs">Jobs</option>
-                <option value="customers">Customers</option>
-                <option value="routing">Routing</option>
-                <option value="uploads">Uploads</option>
-              </select>
-            </div>
-            <div>
-              <label className="block mb-1">Page Transitions/Animations</label>
-              <input type="checkbox" checked={settings.pageTransitions} onChange={e => setSettings({ ...settings, pageTransitions: e.target.checked })} />
-            </div>
-          </div>
-        </section>
-        {/* Calendar & Jobs */}
-        <section>
-          <h2 className="text-lg font-semibold mb-2 mt-6">Calendar & Jobs</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1">Default Calendar View</label>
-              <select value={settings.defaultCalendarView} onChange={e => setSettings({ ...settings, defaultCalendarView: e.target.value })}>
-                <option value="month">Month</option>
-                <option value="week">Week</option>
-                <option value="day">Day</option>
-                <option value="list">List</option>
-              </select>
-            </div>
-            <div>
-              <label className="block mb-1">Business Hours Start</label>
-              <input type="time" value={settings.businessHours.start} onChange={e => setSettings({ ...settings, businessHours: { ...settings.businessHours, start: e.target.value } })} />
-            </div>
-            <div>
-              <label className="block mb-1">Business Hours End</label>
-              <input type="time" value={settings.businessHours.end} onChange={e => setSettings({ ...settings, businessHours: { ...settings.businessHours, end: e.target.value } })} />
-            </div>
-            <div>
-              <label className="block mb-1">Business Days</label>
-              <input type="text" value={settings.businessHours.daysOfWeek.join(',')} onChange={e => setSettings({ ...settings, businessHours: { ...settings.businessHours, daysOfWeek: e.target.value.split(',').map(Number) } })} placeholder="e.g. 1,2,3,4,5" />
-            </div>
-            <div>
-              <label className="block mb-1">Event Color Mapping</label>
-              <select value={settings.eventColorMapping} onChange={e => setSettings({ ...settings, eventColorMapping: e.target.value })}>
-                <option value="status">Status</option>
-                <option value="technician">Technician</option>
-              </select>
-            </div>
-            <div>
-              <label className="block mb-1">Enable Event Drag & Drop</label>
-              <input type="checkbox" checked={settings.eventDragDrop} onChange={e => setSettings({ ...settings, eventDragDrop: e.target.checked })} />
-            </div>
-            <div>
-              <label className="block mb-1">Enable Event Resizing</label>
-              <input type="checkbox" checked={settings.eventResizing} onChange={e => setSettings({ ...settings, eventResizing: e.target.checked })} />
-            </div>
-            <div>
-              <label className="block mb-1">Notification Settings</label>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Primary Color
+                  </label>
+                  <input 
+                    type="color" 
+                    value={settings.primaryColor} 
+                    onChange={e => handleSettingChange('primaryColor', e.target.value)}
+                    className="w-full h-10 rounded border"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Secondary Color
+                  </label>
+                  <input 
+                    type="color" 
+                    value={settings.secondaryColor} 
+                    onChange={e => handleSettingChange('secondaryColor', e.target.value)}
+                    className="w-full h-10 rounded border"
+                  />
+                </div>
+              </div>
+              
               <div>
-                <label><input type="checkbox" checked={settings.notificationSettings.email} onChange={e => setSettings({ ...settings, notificationSettings: { ...settings.notificationSettings, email: e.target.checked } })} /> Email</label>
-                <label className="ml-4"><input type="checkbox" checked={settings.notificationSettings.sms} onChange={e => setSettings({ ...settings, notificationSettings: { ...settings.notificationSettings, sms: e.target.checked } })} /> SMS</label>
-                <label className="ml-4"><input type="checkbox" checked={settings.notificationSettings.inApp} onChange={e => setSettings({ ...settings, notificationSettings: { ...settings.notificationSettings, inApp: e.target.checked } })} /> In-App</label>
+                <Input
+                  label="Brand Name"
+                  value={settings.brandName}
+                  onChange={(value) => handleSettingChange('brandName', value)}
+                  placeholder="Enter brand name"
+                  className="w-full"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Font Family
+                </label>
+                <select 
+                  value={settings.fontFamily} 
+                  onChange={e => handleSettingChange('fontFamily', e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="Inter">Inter</option>
+                  <option value="Roboto">Roboto</option>
+                  <option value="Arial">Arial</option>
+                  <option value="Montserrat">Montserrat</option>
+                </select>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={settings.darkMode}
+                  onChange={(checked) => handleSettingChange('darkMode', checked)}
+                />
+                <label className="text-sm font-medium text-gray-700">
+                  Enable Dark Mode
+                </label>
               </div>
             </div>
-          </div>
-        </section>
-        {/* User & Security */}
-        <section>
-          <h2 className="text-lg font-semibold mb-2 mt-6">User & Security</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1">Require Login</label>
-              <input type="checkbox" checked={settings.requireLogin} onChange={e => setSettings({ ...settings, requireLogin: e.target.checked })} />
+          </Card>
+
+          {/* Layout & Navigation */}
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Layout className="h-5 w-5 text-blue-500" />
+              <Typography variant="h6" className="text-gray-900">
+                Layout & Navigation
+              </Typography>
             </div>
-            <div>
-              <label className="block mb-1">Password Min Length</label>
-              <input type="number" min={4} max={32} value={settings.passwordPolicy.minLength} onChange={e => setSettings({ ...settings, passwordPolicy: { ...settings.passwordPolicy, minLength: Number(e.target.value) } })} />
+            
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={settings.showNavBar}
+                  onChange={(checked) => handleSettingChange('showNavBar', checked)}
+                />
+                <label className="text-sm font-medium text-gray-700">
+                  Show Navigation Bar
+                </label>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={settings.showSidebar}
+                  onChange={(checked) => handleSettingChange('showSidebar', checked)}
+                />
+                <label className="text-sm font-medium text-gray-700">
+                  Show Sidebar
+                </label>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Default Landing Page
+                </label>
+                <select 
+                  value={settings.defaultLandingPage} 
+                  onChange={e => handleSettingChange('defaultLandingPage', e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="dashboard">Dashboard</option>
+                  <option value="jobs">Jobs</option>
+                  <option value="customers">Customers</option>
+                  <option value="reports">Reports</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label className="block mb-1">Password Complexity</label>
-              <select value={settings.passwordPolicy.complexity} onChange={e => setSettings({ ...settings, passwordPolicy: { ...settings.passwordPolicy, complexity: e.target.value } })}>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
+          </Card>
+
+          {/* Notifications */}
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Bell className="h-5 w-5 text-yellow-500" />
+              <Typography variant="h6" className="text-gray-900">
+                Notifications
+              </Typography>
             </div>
-            <div>
-              <label className="block mb-1">Session Timeout (minutes)</label>
-              <input type="number" min={5} max={120} value={settings.sessionTimeout} onChange={e => setSettings({ ...settings, sessionTimeout: Number(e.target.value) })} />
+            
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={settings.notificationSettings.email}
+                  onChange={(checked) => handleSettingChange('notificationSettings', { ...settings.notificationSettings, email: checked })}
+                />
+                <label className="text-sm font-medium text-gray-700">
+                  Email Notifications
+                </label>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={settings.notificationSettings.sms}
+                  onChange={(checked) => handleSettingChange('notificationSettings', { ...settings.notificationSettings, sms: checked })}
+                />
+                <label className="text-sm font-medium text-gray-700">
+                  SMS Notifications
+                </label>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={settings.notificationSettings.inApp}
+                  onChange={(checked) => handleSettingChange('notificationSettings', { ...settings.notificationSettings, inApp: checked })}
+                />
+                <label className="text-sm font-medium text-gray-700">
+                  In-App Notifications
+                </label>
+              </div>
             </div>
-            <div>
-              <label className="block mb-1">Two-Factor Authentication</label>
-              <input type="checkbox" checked={settings.twoFactorAuth} onChange={e => setSettings({ ...settings, twoFactorAuth: e.target.checked })} />
+          </Card>
+
+          {/* Security */}
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Shield className="h-5 w-5 text-red-500" />
+              <Typography variant="h6" className="text-gray-900">
+                Security
+              </Typography>
             </div>
-            <div>
-              <label className="block mb-1">Allowed Roles</label>
-              <input type="text" value={settings.allowedRoles.join(',')} onChange={e => setSettings({ ...settings, allowedRoles: e.target.value.split(',') })} placeholder="e.g. admin,dispatcher,technician" />
+            
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={settings.requireLogin}
+                  onChange={(checked) => handleSettingChange('requireLogin', checked)}
+                />
+                <label className="text-sm font-medium text-gray-700">
+                  Require Login
+                </label>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={settings.twoFactorAuth}
+                  onChange={(checked) => handleSettingChange('twoFactorAuth', checked)}
+                />
+                <label className="text-sm font-medium text-gray-700">
+                  Two-Factor Authentication
+                </label>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Session Timeout (minutes)
+                </label>
+                <input 
+                  type="number" 
+                  value={settings.sessionTimeout} 
+                  onChange={e => handleSettingChange('sessionTimeout', parseInt(e.target.value))}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  min="5"
+                  max="480"
+                />
+              </div>
             </div>
-          </div>
-        </section>
-        {/* Integrations */}
-        <section>
-          <h2 className="text-lg font-semibold mb-2 mt-6">Integrations</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1">Supabase API Key</label>
-              <input type="text" value={settings.apiKeys.supabase} onChange={e => setSettings({ ...settings, apiKeys: { ...settings.apiKeys, supabase: e.target.value } })} />
+          </Card>
+
+          {/* Integrations */}
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Globe className="h-5 w-5 text-green-500" />
+              <Typography variant="h6" className="text-gray-900">
+                Integrations
+              </Typography>
             </div>
-            <div>
-              <label className="block mb-1">FullCalendar API Key</label>
-              <input type="text" value={settings.apiKeys.fullcalendar} onChange={e => setSettings({ ...settings, apiKeys: { ...settings.apiKeys, fullcalendar: e.target.value } })} />
+            
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={settings.thirdPartyIntegrations.google}
+                  onChange={(checked) => handleSettingChange('thirdPartyIntegrations', { ...settings.thirdPartyIntegrations, google: checked })}
+                />
+                <label className="text-sm font-medium text-gray-700">
+                  Google Calendar Integration
+                </label>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={settings.thirdPartyIntegrations.slack}
+                  onChange={(checked) => handleSettingChange('thirdPartyIntegrations', { ...settings.thirdPartyIntegrations, slack: checked })}
+                />
+                <label className="text-sm font-medium text-gray-700">
+                  Slack Notifications
+                </label>
+              </div>
             </div>
-            <div className="col-span-2">
-              <label className="block mb-1">Webhook URLs</label>
-              <textarea value={settings.webhookURLs.join('\n')} onChange={e => setSettings({ ...settings, webhookURLs: e.target.value.split('\n') })} className="w-full h-20" placeholder="One URL per line" />
-            </div>
-            <div className="col-span-2">
-              <label className="block mb-1">Third-Party Integrations</label>
-              <label><input type="checkbox" checked={settings.thirdPartyIntegrations.google} onChange={e => setSettings({ ...settings, thirdPartyIntegrations: { ...settings.thirdPartyIntegrations, google: e.target.checked } })} /> Google</label>
-              <label className="ml-4"><input type="checkbox" checked={settings.thirdPartyIntegrations.slack} onChange={e => setSettings({ ...settings, thirdPartyIntegrations: { ...settings.thirdPartyIntegrations, slack: e.target.checked } })} /> Slack</label>
-            </div>
-          </div>
-        </section>
-        <div className="mt-8">
-          <button type="button" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold">Save Settings</button>
+          </Card>
         </div>
-      </form>
-    </div>
+      </div>
+    </LayoutWrapper>
   );
 }

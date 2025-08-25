@@ -3,8 +3,18 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { Spinner } from '@/ui/Spinner';
+import SkipLink from '@/components/SkipLink';
 import Dashboard from './Dashboard';
 import EnhancedDashboard from './EnhancedDashboard';
+import ResizableDashboard from './ResizableDashboard';
+import SchedulerPage from './Scheduler';
+import JobsPage from './Jobs';
+import CustomersPage from '@/components/CustomersPage';
+import Customers from './Customers';
+import RoutingPage from './Routing';
+import ReportsPage from './Reports';
+import UploadsPage from './Uploads';
+import SettingsPage from './Settings';
 
 const LoginPage = lazy(() => import('@/routes/Login'));
 
@@ -81,8 +91,10 @@ export default function App() {
           position: 'relative',
         }}
       >
-        <Suspense fallback={<Spinner />}>
-          <Routes>
+        <SkipLink />
+        <main id="main-content" tabIndex={-1}>
+          <Suspense fallback={<Spinner />}>
+            <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route 
               path="/" 
@@ -111,6 +123,96 @@ export default function App() {
               }
             />
             <Route
+              path="/resizable-dashboard"
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<DashboardFallback />}>
+                    <ResizableDashboard />
+                  </Suspense>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/scheduler"
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<DashboardFallback />}>
+                    <SchedulerPage />
+                  </Suspense>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/jobs"
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<DashboardFallback />}>
+                    <JobsPage />
+                  </Suspense>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/customers"
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<DashboardFallback />}>
+                    <CustomersPage />
+                  </Suspense>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/customers-old"
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<DashboardFallback />}>
+                    <CustomersPage />
+                  </Suspense>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/routing"
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<DashboardFallback />}>
+                    <RoutingPage />
+                  </Suspense>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<DashboardFallback />}>
+                    <ReportsPage />
+                  </Suspense>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/uploads"
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<DashboardFallback />}>
+                    <UploadsPage />
+                  </Suspense>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <PrivateRoute>
+                  <Suspense fallback={<DashboardFallback />}>
+                    <SettingsPage />
+                  </Suspense>
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/*"
               element={
                 <PrivateRoute>
@@ -122,6 +224,7 @@ export default function App() {
             />
           </Routes>
         </Suspense>
+        </main>
       </div>
   );
 }

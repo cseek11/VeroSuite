@@ -82,86 +82,16 @@ import {
   Heart
 } from 'lucide-react';
 
-// Mock data for development
-const mockJobs: Job[] = [
-  {
-    id: '1',
-    title: 'Pest Control - Downtown Office',
-    start: new Date().toISOString(),
-    end: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-    status: 'scheduled',
-    technician: 'John Smith',
-    location: '123 Main St, Downtown',
-    description: 'Regular pest control service'
-  },
-  {
-    id: '2',
-    title: 'Termite Inspection - Warehouse',
-    start: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
-    end: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString(),
-    status: 'in-progress',
-    technician: 'Sarah Johnson',
-    location: '456 Industrial Blvd',
-    description: 'Annual termite inspection'
-  },
-  {
-    id: '3',
-    title: 'Rodent Control - Restaurant',
-    start: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
-    end: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
-    status: 'scheduled',
-    technician: 'Mike Wilson',
-    location: '789 Food Court',
-    description: 'Emergency rodent control service'
-  }
-];
+// Empty mock data - will be populated from API
+const mockJobs: Job[] = [];
 
-// Sample data for charts and advanced features
-const salesData = [
-  { name: 'Jan', sales: 4000, revenue: 2400, users: 240 },
-  { name: 'Feb', sales: 3000, revenue: 1398, users: 139 },
-  { name: 'Mar', sales: 2000, revenue: 9800, users: 980 },
-  { name: 'Apr', sales: 2780, revenue: 3908, users: 390 },
-  { name: 'May', sales: 1890, revenue: 4800, users: 480 },
-  { name: 'Jun', sales: 2390, revenue: 3800, users: 380 },
-];
-
-const kanbanData = {
-  todo: [
-    { id: 1, title: 'Design new landing page', priority: 'high', assignee: 'John Doe' },
-    { id: 2, title: 'Update user documentation', priority: 'medium', assignee: 'Jane Smith' }
-  ],
-  inProgress: [
-    { id: 3, title: 'Implement authentication', priority: 'high', assignee: 'Bob Johnson' }
-  ],
-  done: [
-    { id: 4, title: 'Setup CI/CD pipeline', priority: 'low', assignee: 'Alice Brown' }
-  ]
-};
-
-const calendarEvents = [
-  { date: '2024-08-20', title: 'Team Meeting', type: 'meeting' },
-  { date: '2024-08-22', title: 'Product Launch', type: 'event' },
-  { date: '2024-08-25', title: 'Client Review', type: 'review' }
-];
-
-const photos = [
-  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
-  'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800',
-  'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800'
-];
-
-const wizardSteps = [
-  { title: 'Personal Info', description: 'Enter your basic information' },
-  { title: 'Preferences', description: 'Set your preferences' },
-  { title: 'Review', description: 'Review and confirm' }
-];
-
-const choiceOptions = [
-  { value: 'option1', label: 'First Option' },
-  { value: 'option2', label: 'Second Option' },
-  { value: 'option3', label: 'Third Option' }
-];
+// Empty sample data - will be populated from API
+const salesData = [];
+const kanbanData = { todo: [], inProgress: [], done: [] };
+const calendarEvents = [];
+const photos = [];
+const wizardSteps = [];
+const choiceOptions = [];
 
 const EnhancedDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -169,6 +99,7 @@ const EnhancedDashboard: React.FC = () => {
   const { data: jobs, isLoading: jobsLoading, error: jobsError } = useTodayJobs();
   
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [modalOpen, setModalOpen] = useState(false);
   const [alertVisible, setAlertVisible] = useState(true);
@@ -236,36 +167,36 @@ const EnhancedDashboard: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Mock metrics data - in real app, this would come from API
+  // Metrics data - will be populated from API
   const metrics: DashboardMetric[] = [
     {
       title: 'Total Jobs',
       value: displayJobs.length,
-      change: 12,
+      change: 0,
       changeType: 'increase',
       icon: Calendar,
       color: '#3b82f6'
     },
     {
       title: 'Active Technicians',
-      value: 8,
-      change: 5,
+      value: 0,
+      change: 0,
       changeType: 'increase',
       icon: Users,
       color: '#10b981'
     },
     {
       title: 'Revenue',
-      value: '$45,231',
-      change: 20.1,
+      value: '$0',
+      change: 0,
       changeType: 'increase',
       icon: TrendingUp,
       color: '#f59e0b'
     },
     {
       title: 'Customer Satisfaction',
-      value: '98%',
-      change: 2.1,
+      value: '0%',
+      change: 0,
       changeType: 'increase',
       icon: Eye,
       color: '#8b5cf6'
@@ -299,6 +230,7 @@ const EnhancedDashboard: React.FC = () => {
         <Navbar 
           title="VeroPest Suite Dashboard"
           user={{ name: user.first_name, avatar: user.avatar }}
+          sidebarCollapsed={sidebarCollapsed}
           onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
           onLogout={handleLogout}
         />
@@ -307,9 +239,9 @@ const EnhancedDashboard: React.FC = () => {
           {/* Sidebar */}
           <DashboardSidebar
             isOpen={sidebarOpen}
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
             onClose={() => setSidebarOpen(false)}
+            isCollapsed={sidebarCollapsed}
+            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
           />
 
           {/* Main Content */}

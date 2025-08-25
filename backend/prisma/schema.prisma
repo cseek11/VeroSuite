@@ -4,25 +4,24 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("postgresql://postgres:[XJ1k0R2E1WQOYcZQ]@db.iehzwglvmbtrlhdgofew.supabase.co:5432/postgres") // Supabase PostgreSQL connection string
+  url      = env("DATABASE_URL")
 }
 
 model Tenant {
-  id                 String   @id @default(uuid()) @db.Uuid
-  name               String   @db.VarChar(255)
-  domain             String?  @unique @db.VarChar(100)
-  status             String   @default("active") @db.VarChar(20)
-  subscription_tier  String   @default("basic") @db.VarChar(20)
-  created_at         DateTime @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime @updatedAt @db.Timestamptz(6)
+  id                String          @id @default(uuid()) @db.Uuid
+  name              String          @db.VarChar(255)
+  domain            String?         @unique @db.VarChar(100)
+  status            String          @default("active") @db.VarChar(20)
+  subscription_tier String          @default("basic") @db.VarChar(20)
+  created_at        DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime        @updatedAt @db.Timestamptz(6)
+  accounts          Account[]
+  jobs              Job[]
+  tenantBranding    TenantBranding?
+  users             User[]
+  workOrders        WorkOrder[]
 
-  users           User[]
-  accounts        Account[]
-  work_orders     WorkOrder[]
-  jobs            Job[]
-  tenant_branding TenantBranding?
-
-  @@map("tenants")
+  @@map("tenant")
 }
 
 model User {
@@ -37,53 +36,72 @@ model User {
   status        String   @default("active") @db.VarChar(20)
   created_at    DateTime @default(now()) @db.Timestamptz(6)
   updated_at    DateTime @updatedAt @db.Timestamptz(6)
-
-  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  tenant        Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@map("users")
 }
 
 model Account {
-  id            String   @id @default(uuid()) @db.Uuid
-  tenant_id     String   @db.Uuid
-  name          String   @db.VarChar(255)
-  account_type  String   @default("commercial") @db.VarChar(20)
-  status        String   @default("active") @db.VarChar(20)
-  phone         String?  @db.VarChar(20)
-  email         String?  @db.VarChar(255)
-  billing_address Json?
-  ar_balance    Decimal  @default(0) @db.Decimal(10,2)
-  created_at    DateTime @default(now()) @db.Timestamptz(6)
-  updated_at    DateTime @updatedAt @db.Timestamptz(6)
-
-  tenant    Tenant     @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  locations Location[]
-  work_orders WorkOrder[]
+  id                       String                  @id @default(uuid()) @db.Uuid
+  tenant_id                String                  @db.Uuid
+  name                     String                  @db.VarChar(255)
+  account_type             String                  @default("commercial") @db.VarChar(20)
+  status                   String                  @default("active") @db.VarChar(20)
+  phone                    String?                 @db.VarChar(20)
+  email                    String?                 @db.VarChar(255)
+  address                  String?
+  city                     String?                 @db.VarChar(100)
+  state                    String?                 @db.VarChar(20)
+  zip_code                 String?                 @db.VarChar(20)
+  billing_address          Json?
+  payment_method           String?                 @db.VarChar(50)
+  billing_cycle            String?                 @db.VarChar(20)
+  property_type            String?                 @db.VarChar(50)
+  property_size            String?                 @db.VarChar(50)
+  access_instructions      String?
+  emergency_contact        String?                 @db.VarChar(100)
+  preferred_contact_method String?                 @db.VarChar(20)
+  ar_balance               Decimal                 @default(0) @db.Decimal(10, 2)
+  created_at               DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime                @updatedAt @db.Timestamptz(6)
+  tenant                   Tenant                  @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  businessAnalytics        BusinessAnalytics[]
+  chemicalUsage            ChemicalUsageLog[]
+  communicationLogs        CommunicationLog[]
+  complianceTracking       ComplianceTracking[]
+  contracts                ContractsSubscription[]
+  customerDocuments        CustomerDocument[]
+  customerNotes            CustomerNote[]
+  customerPhotos           CustomerPhoto[]
+  jobs                     Job[]
+  locations                Location[]
+  pestActivity             PestActivityTracking[]
+  serviceHistory           ServiceHistory[]
+  workOrders               WorkOrder[]
 
   @@unique([tenant_id, id])
   @@map("accounts")
 }
 
 model Location {
-  id         String   @id @default(uuid()) @db.Uuid
-  tenant_id  String   @db.Uuid
-  account_id String   @db.Uuid
-  name       String   @db.VarChar(255)
-  address_line1 String @db.VarChar(255)
-  address_line2 String? @db.VarChar(255)
-  city       String   @db.VarChar(100)
-  state      String   @db.VarChar(20)
-  postal_code String  @db.VarChar(20)
-  country    String   @default("US") @db.VarChar(10)
-  latitude   Decimal? @db.Decimal(10,8)
-  longitude  Decimal? @db.Decimal(11,8)
-  service_area_id String? @db.Uuid
-  created_at DateTime @default(now()) @db.Timestamptz(6)
-  updated_at DateTime @updatedAt @db.Timestamptz(6)
-
-  account    Account   @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
-  work_orders WorkOrder[]
-  jobs       Job[]
+  id              String      @id @default(uuid()) @db.Uuid
+  tenant_id       String      @db.Uuid
+  account_id      String      @db.Uuid
+  name            String      @db.VarChar(255)
+  address_line1   String      @db.VarChar(255)
+  address_line2   String?     @db.VarChar(255)
+  city            String      @db.VarChar(100)
+  state           String      @db.VarChar(20)
+  postal_code     String      @db.VarChar(20)
+  country         String      @default("US") @db.VarChar(10)
+  latitude        Decimal?    @db.Decimal(10, 8)
+  longitude       Decimal?    @db.Decimal(11, 8)
+  service_area_id String?     @db.Uuid
+  created_at      DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime    @updatedAt @db.Timestamptz(6)
+  jobs            Job[]
+  account         Account     @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
+  workOrders      WorkOrder[]
 
   @@unique([tenant_id, id])
   @@map("locations")
@@ -95,19 +113,18 @@ model WorkOrder {
   account_id           String   @db.Uuid
   location_id          String   @db.Uuid
   service_type         String   @db.VarChar(100)
-  description          String?  @db.Text
+  description          String?
   recurrence_rule      String?  @db.VarChar(255)
   estimated_duration   Int      @default(60)
-  service_price        Decimal  @db.Decimal(8,2)
-  special_instructions String?  @db.Text
+  service_price        Decimal  @db.Decimal(8, 2)
+  special_instructions String?
   status               String   @default("active") @db.VarChar(20)
   created_at           DateTime @default(now()) @db.Timestamptz(6)
   updated_at           DateTime @updatedAt @db.Timestamptz(6)
-
-  tenant   Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  account  Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id])
-  location Location @relation(fields: [tenant_id, location_id], references: [tenant_id, id])
-  jobs     Job[]
+  jobs                 Job[]
+  account              Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id])
+  tenant               Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  location             Location @relation(fields: [tenant_id, location_id], references: [tenant_id, id])
 
   @@unique([tenant_id, id])
   @@map("work_orders")
@@ -127,23 +144,238 @@ model Job {
   scheduled_end_time   String?   @db.VarChar(8)
   actual_start_time    DateTime? @db.Timestamptz(6)
   actual_end_time      DateTime? @db.Timestamptz(6)
-  completion_notes     String?   @db.Text
+  completion_notes     String?
   customer_signature   String?   @db.VarChar(500)
   photos               String[]  @default([])
   chemicals_used       Json[]    @default([])
   created_at           DateTime  @default(now()) @db.Timestamptz(6)
   updated_at           DateTime  @updatedAt @db.Timestamptz(6)
-
-  tenant     Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  work_order WorkOrder @relation(fields: [tenant_id, work_order_id], references: [tenant_id, id])
-  account    Account   @relation(fields: [tenant_id, account_id], references: [tenant_id, id])
-  location   Location  @relation(fields: [tenant_id, location_id], references: [tenant_id, id])
+  account              Account   @relation(fields: [tenant_id, account_id], references: [tenant_id, id])
+  tenant               Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  location             Location  @relation(fields: [tenant_id, location_id], references: [tenant_id, id])
+  workOrder            WorkOrder @relation(fields: [tenant_id, work_order_id], references: [tenant_id, id])
 
   @@unique([tenant_id, id])
   @@index([tenant_id, technician_id, scheduled_date])
   @@index([tenant_id, account_id])
   @@index([tenant_id, status, scheduled_date])
   @@map("jobs")
+}
+
+model ServiceHistory {
+  id                 String   @id @default(uuid()) @db.Uuid
+  tenant_id          String   @db.Uuid
+  customer_id        String   @db.Uuid
+  service_date       DateTime @db.Date
+  service_type       String   @db.VarChar(100)
+  treatments_applied String?
+  technician_id      String?  @db.Uuid
+  technician_notes   String?
+  before_photos      Json?
+  after_photos       Json?
+  cost               Decimal  @db.Decimal(10, 2)
+  status             String   @default("completed") @db.VarChar(20)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  account            Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
+
+  @@unique([tenant_id, id])
+  @@map("service_history")
+}
+
+model ContractsSubscription {
+  id                String    @id @default(uuid()) @db.Uuid
+  tenant_id         String    @db.Uuid
+  customer_id       String    @db.Uuid
+  contract_type     String    @db.VarChar(50)
+  service_frequency String    @db.VarChar(50)
+  start_date        DateTime  @db.Date
+  end_date          DateTime? @db.Date
+  auto_renewal      Boolean   @default(true)
+  contract_value    Decimal   @db.Decimal(10, 2)
+  payment_schedule  String?   @db.VarChar(50)
+  terms_conditions  String?
+  signed_date       DateTime? @db.Date
+  status            String    @default("active") @db.VarChar(20)
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  account           Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
+
+  @@unique([tenant_id, id])
+  @@map("contracts_subscriptions")
+}
+
+model CommunicationLog {
+  id                 String    @id @default(uuid()) @db.Uuid
+  tenant_id          String    @db.Uuid
+  customer_id        String    @db.Uuid
+  communication_type String    @db.VarChar(50)
+  direction          String    @db.VarChar(20)
+  subject            String?   @db.VarChar(255)
+  message_content    String?
+  staff_member       String?   @db.VarChar(100)
+  timestamp          DateTime  @default(now()) @db.Timestamptz(6)
+  follow_up_required Boolean   @default(false)
+  follow_up_date     DateTime? @db.Date
+  account            Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
+
+  @@unique([tenant_id, id])
+  @@map("communication_logs")
+}
+
+model CustomerNote {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenant_id       String   @db.Uuid
+  customer_id     String   @db.Uuid
+  note_type       String   @db.VarChar(50)
+  note_source     String   @db.VarChar(50)
+  note_content    String
+  created_by      String   @db.VarChar(100)
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  priority        String   @default("low") @db.VarChar(20)
+  is_alert        Boolean  @default(false)
+  is_internal     Boolean  @default(false)
+  technician_id   String?  @db.Uuid
+  work_order_id   String?  @db.Uuid
+  location_coords String?  @db.VarChar(100)
+  account         Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
+
+  @@unique([tenant_id, id])
+  @@map("customer_notes")
+}
+
+model PestActivityTracking {
+  id                   String   @id @default(uuid()) @db.Uuid
+  tenant_id            String   @db.Uuid
+  customer_id          String   @db.Uuid
+  pest_type            String   @db.VarChar(100)
+  severity_level       Int
+  location_on_property String?  @db.VarChar(255)
+  weather_conditions   String?  @db.VarChar(100)
+  temperature          Decimal? @db.Decimal(5, 2)
+  humidity             Decimal? @db.Decimal(5, 2)
+  season               String?  @db.VarChar(20)
+  treatment_applied    String?  @db.VarChar(255)
+  effectiveness_score  Int?
+  recorded_by          String?  @db.VarChar(100)
+  recorded_at          DateTime @default(now()) @db.Timestamptz(6)
+  gps_coordinates      String?  @db.VarChar(100)
+  photo_evidence_ids   Json?
+  account              Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
+
+  @@unique([tenant_id, id])
+  @@map("pest_activity_tracking")
+}
+
+model ComplianceTracking {
+  id                String    @id @default(uuid()) @db.Uuid
+  tenant_id         String    @db.Uuid
+  customer_id       String    @db.Uuid
+  compliance_type   String    @db.VarChar(50)
+  requirement       String    @db.VarChar(255)
+  due_date          DateTime  @db.Date
+  completion_date   DateTime? @db.Date
+  status            String    @default("pending") @db.VarChar(20)
+  assigned_to       String?   @db.VarChar(100)
+  notes             String?
+  documentation_url String?   @db.VarChar(500)
+  account           Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
+
+  @@unique([tenant_id, id])
+  @@map("compliance_tracking")
+}
+
+model TechnicianCertification {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  technician_id         String   @db.Uuid
+  certification_type    String   @db.VarChar(100)
+  issuing_authority     String   @db.VarChar(100)
+  issue_date            DateTime @db.Date
+  expiration_date       DateTime @db.Date
+  status                String   @default("active") @db.VarChar(20)
+  renewal_reminder_sent Boolean  @default(false)
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, id])
+  @@map("technician_certifications")
+}
+
+model ChemicalUsageLog {
+  id                 String   @id @default(uuid()) @db.Uuid
+  tenant_id          String   @db.Uuid
+  customer_id        String   @db.Uuid
+  service_id         String?  @db.Uuid
+  chemical_name      String   @db.VarChar(255)
+  epa_number         String?  @db.VarChar(50)
+  application_rate   Decimal? @db.Decimal(8, 4)
+  total_amount_used  Decimal? @db.Decimal(8, 4)
+  application_method String?  @db.VarChar(100)
+  target_pest        String?  @db.VarChar(100)
+  technician_id      String?  @db.Uuid
+  application_date   DateTime @default(now()) @db.Timestamptz(6)
+  weather_conditions String?  @db.VarChar(100)
+  safety_precautions String?
+  account            Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
+
+  @@unique([tenant_id, id])
+  @@map("chemical_usage_log")
+}
+
+model CustomerPhoto {
+  id                 String   @id @default(uuid()) @db.Uuid
+  tenant_id          String   @db.Uuid
+  customer_id        String   @db.Uuid
+  photo_type         String   @db.VarChar(50)
+  photo_category     String   @db.VarChar(50)
+  file_url           String   @db.VarChar(500)
+  thumbnail_url      String?  @db.VarChar(500)
+  file_size          Int?
+  taken_by           String?  @db.VarChar(100)
+  taken_at           DateTime @default(now()) @db.Timestamptz(6)
+  work_order_id      String?  @db.Uuid
+  location_coords    String?  @db.VarChar(100)
+  description        String?
+  is_before_photo    Boolean  @default(false)
+  is_customer_facing Boolean  @default(true)
+  pest_type          String?  @db.VarChar(100)
+  treatment_area     String?  @db.VarChar(255)
+  account            Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
+
+  @@unique([tenant_id, id])
+  @@map("customer_photos")
+}
+
+model BusinessAnalytics {
+  id                    String    @id @default(uuid()) @db.Uuid
+  tenant_id             String    @db.Uuid
+  customer_id           String    @db.Uuid
+  metric_type           String    @db.VarChar(50)
+  metric_value          Decimal   @db.Decimal(10, 4)
+  calculated_date       DateTime  @default(now()) @db.Timestamptz(6)
+  factors               Json?
+  prediction_confidence Decimal?  @db.Decimal(5, 4)
+  next_review_date      DateTime? @db.Date
+  account               Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
+
+  @@unique([tenant_id, id])
+  @@map("business_analytics")
+}
+
+model CustomerDocument {
+  id            String    @id @default(uuid()) @db.Uuid
+  tenant_id     String    @db.Uuid
+  customer_id   String    @db.Uuid
+  document_type String    @db.VarChar(50)
+  document_name String    @db.VarChar(255)
+  file_url      String    @db.VarChar(500)
+  file_size     Int?
+  mime_type     String?   @db.VarChar(100)
+  uploaded_by   String?   @db.VarChar(100)
+  uploaded_at   DateTime  @default(now()) @db.Timestamptz(6)
+  document_date DateTime? @db.Date
+  account       Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
+
+  @@unique([tenant_id, id])
+  @@map("customer_documents")
 }
 
 model TenantBranding {
@@ -155,8 +387,7 @@ model TenantBranding {
   status     String   @default("published") @db.VarChar(20)
   created_at DateTime @default(now()) @db.Timestamptz(6)
   updated_at DateTime @updatedAt @db.Timestamptz(6)
-
-  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  tenant     Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@map("tenant_branding")
 }
@@ -172,7 +403,7 @@ model AuditLog {
   after_state   Json?
   request_id    String   @db.Uuid
   ip_address    String?  @db.Inet
-  user_agent    String?  @db.Text
+  user_agent    String?
   timestamp     DateTime @default(now()) @db.Timestamptz(6)
 
   @@index([tenant_id, timestamp(sort: Desc)])
