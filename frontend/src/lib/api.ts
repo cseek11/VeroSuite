@@ -539,6 +539,121 @@ export const crmApi = {
     
     return 0; // Not overdue
   },
+
+  // Get customer by ID
+  getCustomer: async (customerId: string) => {
+    const { data, error } = await supabase
+      .from('accounts')
+      .select('*')
+      .eq('id', customerId)
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  // Get service history for a customer
+  getServiceHistory: async (customerId: string) => {
+    const { data, error } = await supabase
+      .from('jobs')
+      .select(`
+        *,
+        work_orders (
+          service_type,
+          description,
+          service_price
+        )
+      `)
+      .eq('account_id', customerId)
+      .order('scheduled_date', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Get contracts for a customer
+  getContracts: async (customerId: string) => {
+    const { data, error } = await supabase
+      .from('agreements')
+      .select('*')
+      .eq('account_id', customerId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Get customer notes
+  getCustomerNotes: async (customerId: string) => {
+    // Mock data for now - would need a notes table
+    return [
+      {
+        id: '1',
+        note_type: 'internal',
+        note_source: 'office',
+        note_content: 'Customer prefers morning appointments',
+        created_by: 'John Smith',
+        created_at: '2024-01-15T10:00:00Z',
+        priority: 'low',
+        is_alert: false,
+        is_internal: true
+      },
+      {
+        id: '2',
+        note_type: 'technician',
+        note_source: 'field',
+        note_content: 'Applied perimeter treatment and interior bait stations',
+        created_by: 'Mike Johnson',
+        created_at: '2024-01-10T14:30:00Z',
+        priority: 'medium',
+        is_alert: false,
+        is_internal: false
+      }
+    ];
+  },
+
+  // Get customer photos
+  getCustomerPhotos: async (customerId: string) => {
+    // Mock data for now - would need a photos table
+    return [
+      {
+        id: '1',
+        photo_type: 'property',
+        photo_category: 'profile',
+        file_url: '/api/photos/1.jpg',
+        thumbnail_url: '/api/photos/1-thumb.jpg',
+        file_size: 1024000,
+        taken_by: 'John Smith',
+        taken_at: '2024-01-15T10:00:00Z',
+        description: 'Front entrance',
+        is_before_photo: false,
+        is_customer_facing: true
+      }
+    ];
+  },
+
+  // Update customer
+  updateCustomer: async (customerId: string, updates: any) => {
+    const { data, error } = await supabase
+      .from('accounts')
+      .update(updates)
+      .eq('id', customerId)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  // Upload customer photo
+  uploadCustomerPhoto: async (customerId: string, file: File) => {
+    // Mock implementation - would need proper file upload handling
+    console.log('Uploading photo for customer:', customerId, file.name);
+    return {
+      id: Date.now().toString(),
+      customer_id: customerId,
+      url: URL.createObjectURL(file),
+      description: file.name,
+      uploaded_at: new Date().toISOString(),
+      uploaded_by: 'Current User'
+    };
+  },
 };
 
 // File upload using Supabase Storage

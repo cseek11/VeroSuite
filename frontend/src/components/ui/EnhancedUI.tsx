@@ -12,7 +12,7 @@ import {
 
 // Types for enhanced UI components
 interface AlertProps {
-  type?: 'info' | 'success' | 'warning' | 'danger';
+  type?: 'info' | 'success' | 'warning' | 'danger' | 'error';
   title?: string;
   children: React.ReactNode;
   onClose?: () => void;
@@ -29,10 +29,10 @@ interface AvatarProps {
 
 interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'outline';
+  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'outline' | 'ghost' | 'default';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
-  onClick?: () => void;
+  onClick?: (event?: any) => void;
   className?: string;
   icon?: React.ComponentType<{ className?: string }>;
 }
@@ -54,15 +54,18 @@ interface CardProps {
 }
 
 interface CheckboxProps {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onChange?: (checked: boolean) => void;
   label?: string;
   className?: string;
 }
 
 interface ChipProps {
   children: React.ReactNode;
-  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
+  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'outline';
+  color?: string;
+  size?: string;
   onRemove?: () => void;
   className?: string;
 }
@@ -90,12 +93,14 @@ interface DropdownProps {
 interface InputProps {
   label?: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
   placeholder?: string;
   type?: string;
   icon?: React.ComponentType<{ className?: string }>;
   error?: string;
   className?: string;
+  disabled?: boolean;
+  multiline?: boolean;
 }
 
 interface ModalProps {
@@ -111,20 +116,24 @@ interface ProgressBarProps {
   value: number;
   max?: number;
   size?: 'sm' | 'md' | 'lg';
-  color?: 'primary' | 'success' | 'warning' | 'danger';
+  color?: 'primary' | 'success' | 'warning' | 'danger' | 'green' | 'blue' | 'yellow' | 'amber' | 'red';
   showLabel?: boolean;
   className?: string;
 }
 
 interface TabsProps {
-  tabs: Array<{
+  tabs?: Array<{
     id: string;
     label: string;
     icon?: React.ComponentType<{ className?: string }>;
   }>;
-  active: string;
-  onTabChange: (id: string) => void;
+  active?: string;
+  onTabChange?: (id: string) => void;
   variant?: 'default' | 'pills';
+  children?: React.ReactNode;
+  value?: string;
+  onValueChange?: (value: string) => void;
+  className?: string;
 }
 
 interface TextareaProps {
@@ -162,12 +171,13 @@ interface NavbarProps {
 
 // Enhanced UI Components
 export const Alert: React.FC<AlertProps> = ({ type = 'info', title, children, onClose, className = '' }) => {
-  const icons = { info: Info, success: Check, warning: AlertTriangle, danger: XCircle };
+  const icons = { info: Info, success: Check, warning: AlertTriangle, danger: XCircle, error: XCircle };
   const colors = {
     info: 'bg-blue-50 text-blue-800 border-blue-200',
     success: 'bg-green-50 text-green-800 border-green-200',
     warning: 'bg-yellow-50 text-yellow-800 border-yellow-200',
-    danger: 'bg-red-50 text-red-800 border-red-200'
+    danger: 'bg-red-50 text-red-800 border-red-200',
+    error: 'bg-red-50 text-red-800 border-red-200'
   };
   const Icon = icons[type];
   
@@ -208,7 +218,9 @@ export const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', s
     secondary: 'crm-btn-secondary',
     success: 'crm-btn-success',
     danger: 'crm-btn-danger',
-    outline: 'crm-btn-outline'
+    outline: 'crm-btn-outline',
+    ghost: 'crm-btn-ghost',
+    default: 'crm-btn-default'
   };
   const sizes = { 
     sm: 'crm-btn-sm', 
@@ -255,36 +267,50 @@ export const Card: React.FC<CardProps> = ({ title, children, className = '', act
   </div>
 );
 
-export const Checkbox: React.FC<CheckboxProps> = ({ checked, onChange, label, className = '' }) => (
-  <label className={`flex items-center cursor-pointer ${className}`}>
-    <div className="relative">
-      <input 
-        type="checkbox" 
-        checked={checked} 
-        onChange={(e) => onChange(e.target.checked)} 
-        className="crm-checkbox" 
-      />
-      <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-        checked ? 'bg-purple-500 border-purple-500' : 'border-gray-200 hover:border-purple-400 bg-white'
-      }`}>
-        {checked && <Check className="w-2.5 h-2.5 text-white" />}
-      </div>
-    </div>
-    {label && <span className="ml-2 text-sm text-gray-700">{label}</span>}
-  </label>
-);
+export const Checkbox: React.FC<CheckboxProps> = ({ checked, defaultChecked, onChange, label, className = '' }) => {
+  const [internalChecked, setInternalChecked] = useState(defaultChecked || checked || false);
+  
+  const handleChange = (newChecked: boolean) => {
+    setInternalChecked(newChecked);
+    onChange?.(newChecked);
+  };
 
-export const Chip: React.FC<ChipProps> = ({ children, variant = 'default', onRemove, className = '' }) => {
+  const isChecked = checked !== undefined ? checked : internalChecked;
+
+  return (
+    <label className={`flex items-center cursor-pointer ${className}`}>
+      <div className="relative">
+        <input 
+          type="checkbox" 
+          checked={isChecked} 
+          onChange={(e) => handleChange(e.target.checked)} 
+          className="crm-checkbox" 
+        />
+        <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+          isChecked ? 'bg-purple-500 border-purple-500' : 'border-gray-200 hover:border-purple-400 bg-white'
+        }`}>
+          {isChecked && <Check className="w-2.5 h-2.5 text-white" />}
+        </div>
+      </div>
+      {label && <span className="ml-2 text-sm text-gray-700">{label}</span>}
+    </label>
+  );
+};
+
+export const Chip: React.FC<ChipProps> = ({ children, variant = 'default', color, size, onRemove, className = '' }) => {
   const variants = {
     default: 'bg-gray-100 text-gray-700',
     primary: 'bg-purple-100 text-purple-700',
     success: 'bg-green-100 text-green-700',
     warning: 'bg-yellow-100 text-yellow-700',
-    danger: 'bg-red-100 text-red-700'
+    danger: 'bg-red-100 text-red-700',
+    outline: 'bg-transparent border border-gray-300 text-gray-700'
   };
 
+  const sizeClasses = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-3 py-1 text-sm';
+
   return (
-    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${variants[variant]} ${className}`}>
+    <span className={`inline-flex items-center rounded-full font-medium ${variants[variant]} ${sizeClasses} ${className}`} style={color ? { backgroundColor: color, color: 'white' } : undefined}>
       {children}
       {onRemove && (
         <button onClick={onRemove} className="ml-2 hover:bg-black hover:bg-opacity-10 rounded-full p-0.5">
@@ -360,26 +386,45 @@ export const Dropdown: React.FC<DropdownProps> = ({ trigger, items, className = 
   );
 };
 
-export const Input: React.FC<InputProps> = ({ label, value, onChange, placeholder, type = 'text', icon: Icon, error, className = '' }) => (
-  <div className={`crm-field ${className}`}>
-    {label && <label className="crm-label">{label}</label>}
-    <div className="relative">
-      {Icon && (
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icon className="h-4 w-4 text-gray-500" />
-        </div>
-      )}
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className={`crm-input ${Icon ? 'pl-10' : ''} ${error ? 'crm-input-error' : ''}`}
-      />
+export const Input: React.FC<InputProps> = ({ label, value, onChange, placeholder, type = 'text', icon: Icon, error, className = '', disabled, multiline }) => {
+  if (multiline) {
+    return (
+      <div className={`crm-field ${className}`}>
+        {label && <label className="crm-label">{label}</label>}
+        <textarea
+          value={value}
+          onChange={(e) => onChange?.(e.target.value)}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={`crm-textarea ${error ? 'crm-input-error' : ''} ${disabled ? 'crm-input-disabled' : ''}`}
+        />
+        {error && <p className="crm-error">{error}</p>}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`crm-field ${className}`}>
+      {label && <label className="crm-label">{label}</label>}
+      <div className="relative">
+        {Icon && (
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Icon className="h-4 w-4 text-gray-500" />
+          </div>
+        )}
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange?.(e.target.value)}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={`crm-input ${Icon ? 'pl-10' : ''} ${error ? 'crm-input-error' : ''} ${disabled ? 'crm-input-disabled' : ''}`}
+        />
+      </div>
+      {error && <p className="crm-error">{error}</p>}
     </div>
-    {error && <p className="crm-error">{error}</p>}
-  </div>
-);
+  );
+};
 
 export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md', className = '' }) => {
   const sizes = {
@@ -414,7 +459,12 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ value, max = 100, size
     primary: 'bg-purple-500',
     success: 'bg-green-500',
     warning: 'bg-yellow-500',
-    danger: 'bg-red-500'
+    danger: 'bg-red-500',
+    green: 'bg-green-500',
+    blue: 'bg-blue-500',
+    yellow: 'bg-yellow-500',
+    amber: 'bg-amber-500',
+    red: 'bg-red-500'
   };
   const percentage = Math.min((value / max) * 100, 100);
 
@@ -436,31 +486,48 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ value, max = 100, size
   );
 };
 
-export const Tabs: React.FC<TabsProps> = ({ tabs, active, onTabChange, variant = 'default' }) => (
-  <div className={variant === 'pills' ? '' : 'border-b border-gray-200'}>
-    <nav className={variant === 'pills' ? 'flex space-x-2' : '-mb-px flex space-x-8'}>
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => onTabChange(tab.id)}
-          className={`${variant === 'pills' 
-            ? `px-4 py-2 rounded-xl font-medium text-sm transition-colors ${
-                active === tab.id ? 'bg-purple-500 text-white' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-              }`
-            : `py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                active === tab.id
-                  ? 'border-purple-500 text-purple-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`
-          }`}
-        >
-          {tab.icon && <tab.icon className="w-4 h-4 mr-2 inline" />}
-          {tab.label}
-        </button>
-      ))}
-    </nav>
-  </div>
-);
+export const Tabs: React.FC<TabsProps> = ({ tabs, active, onTabChange, variant = 'default', children, value, onValueChange, className = '' }) => {
+  const currentValue = value || active;
+  const handleChange = onValueChange || onTabChange;
+
+  if (children) {
+    return (
+      <div className={`${variant === 'pills' ? '' : 'border-b border-gray-200'} ${className}`}>
+        {children}
+      </div>
+    );
+  }
+
+  if (!tabs || !handleChange) {
+    return <div className={className}>{children}</div>;
+  }
+
+  return (
+    <div className={`${variant === 'pills' ? '' : 'border-b border-gray-200'} ${className}`}>
+      <nav className={variant === 'pills' ? 'flex space-x-2' : '-mb-px flex space-x-8'}>
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => handleChange(tab.id)}
+            className={`${variant === 'pills' 
+              ? `px-4 py-2 rounded-xl font-medium text-sm transition-colors ${
+                  currentValue === tab.id ? 'bg-purple-500 text-white' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                }`
+              : `py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  currentValue === tab.id
+                    ? 'border-purple-500 text-purple-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`
+            }`}
+          >
+            {tab.icon && <tab.icon className="w-4 h-4 mr-2 inline" />}
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+    </div>
+  );
+};
 
 export const Textarea: React.FC<TextareaProps> = ({ label, value, onChange, placeholder, rows = 4, error, className = '' }) => (
   <div className={`crm-field ${className}`}>

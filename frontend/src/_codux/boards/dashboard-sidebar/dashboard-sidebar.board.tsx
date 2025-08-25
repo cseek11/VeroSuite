@@ -6,8 +6,6 @@ export default createBoard({
   Board: () => (
     <DashboardSidebar
       isOpen={true}
-      activeTab='dashboard'
-      onTabChange={tab => console.log(`Tab changed to: ${tab}`)}
       onClose={() => console.log('Sidebar closed')}
     />
   ),

@@ -8,7 +8,7 @@ import DashboardMetrics from '@/components/dashboard/DashboardMetrics';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import JobsCalendar from '@/components/JobsCalendar';
-import { DashboardMetric, Job } from '@/types';
+import { DashboardMetric, Job, JobEvent } from '@/types';
 import {
   Alert,
   Avatar,
@@ -316,7 +316,22 @@ const EnhancedDashboard: React.FC = () => {
                             <LoadingSpinner text="Loading jobs..." />
                           ) : (
                             <JobsCalendar 
-                              events={displayJobs}
+                              events={displayJobs.map(job => ({
+                                id: job.id,
+                                title: job.title,
+                                start: job.start_time,
+                                end: job.end_time,
+                                color: job.status === 'completed' ? '#82d616' :
+                                       job.status === 'in-progress' ? '#17c1e8' :
+                                       '#f59e0b',
+                                extendedProps: {
+                                  status: job.status,
+                                  technician: job.technician,
+                                  customer: job.customer,
+                                  address: job.address,
+                                  notes: job.notes
+                                }
+                              }))}
                               height="400px"
                               view="timeGridDay"
                             />

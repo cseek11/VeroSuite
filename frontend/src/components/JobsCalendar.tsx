@@ -27,10 +27,10 @@ const JobsCalendar: React.FC<JobsCalendarProps> = ({
     title: event.title,
     start: event.start,
     end: event.end,
-    resourceId: event.technician || 'unassigned',
+    resourceId: event.extendedProps?.technician || 'unassigned',
     color: event.color,
-    location: event.location,
-    notes: event.description
+    location: event.extendedProps?.location || '',
+    notes: event.extendedProps?.description || ''
   }));
 
   // Custom resources for technicians

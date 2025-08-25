@@ -48,6 +48,8 @@ export interface JobEvent {
   extendedProps: {
     technician: string;
     status: string;
+    location?: string;
+    description?: string;
   };
 }
 

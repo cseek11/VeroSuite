@@ -224,6 +224,7 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({
       service_type: 'inspection',
       scheduled_date: '2024-02-01T14:00:00Z',
       technician: 'Sarah Wilson',
+      outcome: 'Scheduled for inspection',
       amount: 75.00,
       status: 'scheduled'
     }
@@ -606,9 +607,8 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({
                   {isEditing && (
                     <div className="flex gap-2">
                       <Input
-                        placeholder="Add tag"
                         value={newTag}
-                        onChange={(e) => setNewTag(e.target.value)}
+                        onChange={(value) => setNewTag(value)}
                         className="flex-1"
                       />
                       <Button size="sm" onClick={() => {
@@ -723,7 +723,7 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({
                   <Input
                     placeholder="Search notes..."
                     value={noteSearch}
-                    onChange={(e) => setNoteSearch(e.target.value)}
+                    onChange={(value) => setNoteSearch(value)}
                     icon={Search}
                     className="w-64"
                   />
@@ -745,7 +745,7 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({
                                                     <Textarea
                      placeholder="Add a new note..."
                      value={newNote}
-                     onChange={(e) => setNewNote(e.target.value)}
+                     onChange={(value) => setNewNote(value)}
                      className="w-full mb-3"
                      rows={3}
                    />
@@ -930,14 +930,14 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({
                                                             <Input
                        placeholder="Subject"
                        value={messageSubject}
-                       onChange={(e) => setMessageSubject(e.target.value)}
+                       onChange={(value) => setMessageSubject(value)}
                        className="w-full"
                      />
                  )}
                  <Textarea
                    placeholder={`Type your ${messageType} message...`}
                    value={messageContent}
-                   onChange={(e) => setMessageContent(e.target.value)}
+                   onChange={(value) => setMessageContent(value)}
                    className="w-full"
                    rows={3}
                  />
