@@ -5,9 +5,9 @@ import { useAuthStore } from '@/stores/auth';
 import { Spinner } from '@/ui/Spinner';
 import SkipLink from '@/components/SkipLink';
 import LayoutSelector from '@/components/LayoutSelector';
-import Dashboard from './Dashboard';
-import EnhancedDashboard from './EnhancedDashboard';
-import ResizableDashboard from './ResizableDashboard';
+import LegacyDashboard from './LegacyDashboard';
+import LegacyEnhancedDashboard from './LegacyEnhancedDashboard';
+import LegacyResizableDashboard from './LegacyResizableDashboard';
 import V4Dashboard from './V4Dashboard';
 import V4Test from './V4Test';
 import SchedulerPage from './Scheduler';
@@ -123,7 +123,7 @@ export default function App() {
                 <PrivateRoute>
                   <LayoutSelector>
                     <Suspense fallback={<DashboardFallback />}>
-                      <EnhancedDashboard />
+                      <LegacyEnhancedDashboard />
                     </Suspense>
                   </LayoutSelector>
                 </PrivateRoute>
@@ -135,7 +135,7 @@ export default function App() {
                 <PrivateRoute>
                   <LayoutSelector>
                     <Suspense fallback={<DashboardFallback />}>
-                      <ResizableDashboard showHeader={false} />
+                      <LegacyResizableDashboard showHeader={false} />
                     </Suspense>
                   </LayoutSelector>
                 </PrivateRoute>
@@ -267,7 +267,7 @@ export default function App() {
                 <PrivateRoute>
                   <LayoutSelector>
                     <Suspense fallback={<DashboardFallback />}>
-                      <Dashboard />
+                      <LegacyDashboard />
                     </Suspense>
                   </LayoutSelector>
                 </PrivateRoute>
