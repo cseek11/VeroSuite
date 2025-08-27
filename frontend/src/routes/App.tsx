@@ -111,7 +111,7 @@ export default function App() {
                 <PrivateRoute>
                   <LayoutSelector>
                     <Suspense fallback={<DashboardFallback />}>
-                      <Dashboard />
+                      <V4Dashboard />
                     </Suspense>
                   </LayoutSelector>
                 </PrivateRoute>
@@ -135,7 +135,7 @@ export default function App() {
                 <PrivateRoute>
                   <LayoutSelector>
                     <Suspense fallback={<DashboardFallback />}>
-                      <ResizableDashboard />
+                      <ResizableDashboard showHeader={false} />
                     </Suspense>
                   </LayoutSelector>
                 </PrivateRoute>
