@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import LayoutWrapper from '@/components/LayoutWrapper';
 import './CompactLayout.css';
 import CustomerListView from './CustomerListView';
 import {
@@ -167,42 +166,37 @@ export default function CustomersPage() {
 
   if (isLoading) {
     return (
-      <LayoutWrapper>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <Typography variant="body1" className="text-gray-600">
-                Loading customers...
-              </Typography>
-            </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <Typography variant="body1" className="text-gray-600">
+              Loading customers...
+            </Typography>
           </div>
         </div>
-      </LayoutWrapper>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <LayoutWrapper>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Alert className="mb-6 bg-red-50 border-red-200 text-red-800">
-            <Typography variant="body1">
-              Failed to load customers. Please try again.
-            </Typography>
-            <Button variant="outline" onClick={() => refetch()} className="mt-2">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Retry
-            </Button>
-          </Alert>
-        </div>
-      </LayoutWrapper>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Alert className="mb-6 bg-red-50 border-red-200 text-red-800">
+          <Typography variant="body1">
+            Failed to load customers. Please try again.
+          </Typography>
+          <Button variant="outline" onClick={() => refetch()} className="mt-2">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </Alert>
+      </div>
     );
   }
 
   return (
-    <LayoutWrapper>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
@@ -230,7 +224,7 @@ export default function CustomersPage() {
         </div>
 
         {/* Customers List */}
-        <div className="mb-6">
+      <div className="mb-6">
           {filteredCustomers.length === 0 ? (
             <Card className="p-8 text-center">
               <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -271,7 +265,7 @@ export default function CustomersPage() {
               style={{ height: '500px', width: '100%' }}
               className="rounded-lg"
             >
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               {customers
                 .filter((customer: any) => selectedCustomers.has(customer.id))
                 .map((customer:any) => {
@@ -294,10 +288,10 @@ export default function CustomersPage() {
                           <p className="text-sm text-gray-600">{customer.address}, {customer.city}, {customer.state}</p>
                         </div>
                       </Popup>
-                    </Marker>
+            </Marker>
                   );
                 })}
-            </MapContainer>
+        </MapContainer>
           </Card>
         )}
 
@@ -452,7 +446,7 @@ export default function CustomersPage() {
                       className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Emergency contact information"
                     />
-                  </div>
+      </div>
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Contact Method</label>
@@ -465,8 +459,8 @@ export default function CustomersPage() {
                       <option value="phone">Phone</option>
                       <option value="text">Text</option>
                     </select>
-                  </div>
                 </div>
+            </div>
                 
                 <div className="flex gap-3 mt-6">
                   <Button 
@@ -487,14 +481,14 @@ export default function CustomersPage() {
                   <Button variant="outline" onClick={() => setShowForm(false)}>
                     Cancel
                   </Button>
-                </div>
-              </div>
-            </Card>
+            </div>
           </div>
-        )}
+            </Card>
+        </div>
+      )}
 
         {/* View History Modal */}
-        {showHistory && selectedCustomer && (
+      {showHistory && selectedCustomer && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
               <div className="p-6">
@@ -569,12 +563,11 @@ export default function CustomersPage() {
                   <Button variant="outline" onClick={() => setShowHistory(false)}>
                     Close
                   </Button>
-                </div>
+          </div>
               </div>
             </Card>
-          </div>
-        )}
-      </div>
-    </LayoutWrapper>
+        </div>
+      )}
+    </div>
   );
 }

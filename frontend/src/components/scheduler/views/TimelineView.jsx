@@ -39,13 +39,13 @@ export default function TimelineView({ days, events, resources, onEdit, onMove, 
   return (
     <div className="timeline-root h-full flex flex-col overflow-hidden">
       <div className="flex border-b border-gray-200">
-        <div style={{ width: 200 }} className="border-r border-gray-200 bg-gray-50 p-3 font-medium text-gray-700">
+        <div style={{ width: 200 }} className="border-r border-gray-200 bg-gray-50/50 p-3 font-medium text-gray-700">
           Resource
         </div>
         <div className="flex-1 overflow-x-auto">
           <div style={{ width: days.length * 110 }} className="grid grid-cols-14">
             {days.map((d, i) => (
-              <div key={i} className="p-3 border-r border-gray-200 text-center bg-gray-50">
+              <div key={i} className="p-3 border-r border-gray-200 text-center bg-gray-50/50">
                 <div className="text-sm font-medium text-gray-700">
                   {d.toLocaleDateString('en-US', { weekday: 'short' })}
                 </div>
@@ -60,8 +60,8 @@ export default function TimelineView({ days, events, resources, onEdit, onMove, 
       
       <div className="flex-1 overflow-auto">
         {resources.map(r => (
-          <div key={r.id} className="flex border-b border-gray-200 hover:bg-gray-50">
-            <div style={{ width: 200 }} className="border-r border-gray-200 p-3 font-medium text-gray-700 bg-gray-50">
+          <div key={r.id} className="flex border-b border-gray-200 hover:bg-gray-50/50">
+            <div style={{ width: 200 }} className="border-r border-gray-200 p-3 font-medium text-gray-700 bg-gray-50/50">
               {r.name}
             </div>
             <div className="flex-1 overflow-x-auto relative" onDoubleClick={(ev) => onCreate && onCreate(days[0], 8, r.id)}>

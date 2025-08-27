@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { useNavigate } from 'react-router-dom';
 import { PageLoader } from '@/components/LoadingSpinner';
-import LayoutWrapper from '@/components/LayoutWrapper';
+
 import {
   Typography,
   Button,
@@ -225,7 +225,7 @@ const Reports: React.FC = () => {
   };
 
   return (
-    <LayoutWrapper title="Reports & Analytics" description="Generate and view comprehensive reports for your pest control operations.">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Header with Search and Controls */}
@@ -581,7 +581,7 @@ const Reports: React.FC = () => {
           </div>
         </div>
       </div>
-    </LayoutWrapper>
+    </div>
   );
 };
 

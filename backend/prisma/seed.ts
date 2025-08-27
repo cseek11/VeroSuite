@@ -16,7 +16,7 @@ async function main() {
     {
       name: 'Downtown Pittsburgh Office Complex',
       email: 'sarah.johnson@downtownoffice.com',
-      phone: '(412) 555-0123',
+        phone: '(412) 555-0123',
       address: '500 Grant St',
       city: 'Pittsburgh',
       state: 'PA',
@@ -78,8 +78,8 @@ async function main() {
       email: 'dthompson@email.com',
       phone: '(412) 555-0321',
       address: '321 Murray Ave',
-      city: 'Pittsburgh',
-      state: 'PA',
+        city: 'Pittsburgh',
+        state: 'PA',
       zip_code: '15217',
       billing_address: '321 Murray Ave, Pittsburgh, PA 15217',
       payment_method: 'credit_card',
@@ -184,7 +184,7 @@ async function main() {
       billing_address: '100 Apartment Dr, Washington, PA 15301',
       payment_method: 'credit_card',
       billing_cycle: 'quarterly',
-      status: 'active',
+        status: 'active',
       property_type: 'apartment_complex',
       property_size: 'large',
       access_instructions: 'Maintenance entrance, call ahead',
@@ -231,8 +231,8 @@ async function main() {
 main()
   .catch((e) => {
     console.error('❌ Error seeding database:', e);
-    process.exit(1);
+  process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
-  });
+  await prisma.$disconnect();
+});

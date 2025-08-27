@@ -130,6 +130,7 @@ interface TabsProps {
   active?: string;
   onTabChange?: (id: string) => void;
   variant?: 'default' | 'pills';
+  size?: 'sm' | 'md' | 'lg';
   children?: React.ReactNode;
   value?: string;
   onValueChange?: (value: string) => void;
@@ -486,9 +487,29 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ value, max = 100, size
   );
 };
 
-export const Tabs: React.FC<TabsProps> = ({ tabs, active, onTabChange, variant = 'default', children, value, onValueChange, className = '' }) => {
+export const Tabs: React.FC<TabsProps> = ({ tabs, active, onTabChange, variant = 'default', size = 'md', children, value, onValueChange, className = '' }) => {
   const currentValue = value || active;
   const handleChange = onValueChange || onTabChange;
+
+  const sizeClasses = {
+    sm: {
+      container: 'space-x-4',
+      button: 'py-1 px-1 text-xs',
+      icon: 'w-3 h-3 mr-1'
+    },
+    md: {
+      container: 'space-x-8',
+      button: 'py-2 px-1 text-sm',
+      icon: 'w-4 h-4 mr-2'
+    },
+    lg: {
+      container: 'space-x-10',
+      button: 'py-3 px-2 text-base',
+      icon: 'w-5 h-5 mr-3'
+    }
+  };
+
+  const currentSize = sizeClasses[size];
 
   if (children) {
     return (
@@ -504,23 +525,23 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, active, onTabChange, variant =
 
   return (
     <div className={`${variant === 'pills' ? '' : 'border-b border-gray-200'} ${className}`}>
-      <nav className={variant === 'pills' ? 'flex space-x-2' : '-mb-px flex space-x-8'}>
+      <nav className={variant === 'pills' ? `flex ${currentSize.container}` : `-mb-px flex ${currentSize.container}`}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => handleChange(tab.id)}
             className={`${variant === 'pills' 
-              ? `px-4 py-2 rounded-xl font-medium text-sm transition-colors ${
+              ? `px-3 ${currentSize.button} rounded-xl font-medium transition-colors ${
                   currentValue === tab.id ? 'bg-purple-500 text-white' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                 }`
-              : `py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              : `${currentSize.button} border-b-2 font-medium transition-colors ${
                   currentValue === tab.id
                     ? 'border-purple-500 text-purple-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`
             }`}
           >
-            {tab.icon && <tab.icon className="w-4 h-4 mr-2 inline" />}
+            {tab.icon && <tab.icon className={`${currentSize.icon} inline`} />}
             {tab.label}
           </button>
         ))}
