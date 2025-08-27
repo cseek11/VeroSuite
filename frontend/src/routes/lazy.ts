@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 
 // Lazy load route components
-export const LegacyDashboard = lazy(() => import('./LegacyDashboard'));
+// LegacyDashboard removed as part of V4 migration
 export const Jobs = lazy(() => import('./Jobs'));
 export const Customers = lazy(() => import('./Customers'));
 export const Settings = lazy(() => import('./Settings'));
