@@ -25,13 +25,9 @@ CORS_ORIGIN="http://localhost:5173,http://localhost:3000"
     Write-Host ".env file already exists." -ForegroundColor Yellow
 }
 
-# Start PostgreSQL with Docker
-Write-Host "Starting PostgreSQL database..." -ForegroundColor Yellow
-docker-compose up -d postgres
-
-# Wait for database to be ready
-Write-Host "Waiting for database to be ready..." -ForegroundColor Yellow
-Start-Sleep -Seconds 10
+# Note: PostgreSQL should be running locally or via your preferred method
+Write-Host "Please ensure PostgreSQL is running on localhost:5432" -ForegroundColor Yellow
+Write-Host "You can start it manually or use your preferred database setup method" -ForegroundColor Yellow
 
 # Generate Prisma client
 Write-Host "Generating Prisma client..." -ForegroundColor Yellow

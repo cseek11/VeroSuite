@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 
 // Lazy load route components
-export const Dashboard = lazy(() => import('./Dashboard'));
+export const LegacyDashboard = lazy(() => import('./LegacyDashboard'));
 export const Jobs = lazy(() => import('./Jobs'));
 export const Customers = lazy(() => import('./Customers'));
 export const Settings = lazy(() => import('./Settings'));
