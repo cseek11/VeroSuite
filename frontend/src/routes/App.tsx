@@ -4,12 +4,17 @@ import { lazy, Suspense, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { Spinner } from '@/ui/Spinner';
 import SkipLink from '@/components/SkipLink';
-import LayoutSelector from '@/components/LayoutSelector';
+
+import LayoutWrapper from '@/components/LayoutWrapper';
+import V4Layout from '@/components/layout/V4Layout';
 import LegacyDashboard from './LegacyDashboard';
 import LegacyEnhancedDashboard from './LegacyEnhancedDashboard';
 import LegacyResizableDashboard from './LegacyResizableDashboard';
 import V4Dashboard from './V4Dashboard';
 import V4Test from './V4Test';
+import CommunicationsPage from './Communications';
+import FinancePage from './Finance';
+import KnowledgePage from './Knowledge';
 import SchedulerPage from './Scheduler';
 import JobsPage from './Jobs';
 import CustomersPage from '@/components/CustomersPage';
@@ -109,11 +114,11 @@ export default function App() {
               path="/dashboard"
               element={
                 <PrivateRoute>
-                  <LayoutSelector>
+                  <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <V4Dashboard />
                     </Suspense>
-                  </LayoutSelector>
+                  </V4Layout>
                 </PrivateRoute>
               }
             />
@@ -121,11 +126,11 @@ export default function App() {
               path="/enhanced-dashboard"
               element={
                 <PrivateRoute>
-                  <LayoutSelector>
+                  <LayoutWrapper>
                     <Suspense fallback={<DashboardFallback />}>
                       <LegacyEnhancedDashboard />
                     </Suspense>
-                  </LayoutSelector>
+                  </LayoutWrapper>
                 </PrivateRoute>
               }
             />
@@ -133,11 +138,11 @@ export default function App() {
               path="/resizable-dashboard"
               element={
                 <PrivateRoute>
-                  <LayoutSelector>
+                  <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <LegacyResizableDashboard showHeader={false} />
                     </Suspense>
-                  </LayoutSelector>
+                  </V4Layout>
                 </PrivateRoute>
               }
             />
@@ -145,11 +150,11 @@ export default function App() {
               path="/v4-dashboard"
               element={
                 <PrivateRoute>
-                  <LayoutSelector>
+                  <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <V4Dashboard />
                     </Suspense>
-                  </LayoutSelector>
+                  </V4Layout>
                 </PrivateRoute>
               }
             />
@@ -157,11 +162,11 @@ export default function App() {
               path="/v4-test"
               element={
                 <PrivateRoute>
-                  <LayoutSelector>
+                  <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <V4Test />
                     </Suspense>
-                  </LayoutSelector>
+                  </V4Layout>
                 </PrivateRoute>
               }
             />
@@ -169,11 +174,11 @@ export default function App() {
               path="/scheduler"
               element={
                 <PrivateRoute>
-                  <LayoutSelector>
+                  <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <SchedulerPage />
                     </Suspense>
-                  </LayoutSelector>
+                  </V4Layout>
                 </PrivateRoute>
               }
             />
@@ -181,11 +186,11 @@ export default function App() {
               path="/jobs"
               element={
                 <PrivateRoute>
-                  <LayoutSelector>
+                  <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <JobsPage />
                     </Suspense>
-                  </LayoutSelector>
+                  </V4Layout>
                 </PrivateRoute>
               }
             />
@@ -193,11 +198,11 @@ export default function App() {
               path="/customers"
               element={
                 <PrivateRoute>
-                  <LayoutSelector>
+                  <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <CustomersPage />
                     </Suspense>
-                  </LayoutSelector>
+                  </V4Layout>
                 </PrivateRoute>
               }
             />
@@ -205,11 +210,11 @@ export default function App() {
               path="/customers-old"
               element={
                 <PrivateRoute>
-                  <LayoutSelector>
+                  <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <CustomersPage />
                     </Suspense>
-                  </LayoutSelector>
+                  </V4Layout>
                 </PrivateRoute>
               }
             />
@@ -217,11 +222,11 @@ export default function App() {
               path="/routing"
               element={
                 <PrivateRoute>
-                  <LayoutSelector>
+                  <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <RoutingPage />
                     </Suspense>
-                  </LayoutSelector>
+                  </V4Layout>
                 </PrivateRoute>
               }
             />
@@ -229,11 +234,11 @@ export default function App() {
               path="/reports"
               element={
                 <PrivateRoute>
-                  <LayoutSelector>
+                  <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <ReportsPage />
                     </Suspense>
-                  </LayoutSelector>
+                  </V4Layout>
                 </PrivateRoute>
               }
             />
@@ -241,11 +246,11 @@ export default function App() {
               path="/uploads"
               element={
                 <PrivateRoute>
-                  <LayoutSelector>
+                  <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <UploadsPage />
                     </Suspense>
-                  </LayoutSelector>
+                  </V4Layout>
                 </PrivateRoute>
               }
             />
@@ -253,11 +258,47 @@ export default function App() {
               path="/settings"
               element={
                 <PrivateRoute>
-                  <LayoutSelector>
+                  <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <SettingsPage />
                     </Suspense>
-                  </LayoutSelector>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/communications"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <CommunicationsPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/finance"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <FinancePage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/knowledge"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <KnowledgePage />
+                    </Suspense>
+                  </V4Layout>
                 </PrivateRoute>
               }
             />
@@ -265,11 +306,11 @@ export default function App() {
               path="/*"
               element={
                 <PrivateRoute>
-                  <LayoutSelector>
+                  <LayoutWrapper>
                     <Suspense fallback={<DashboardFallback />}>
                       <LegacyDashboard />
                     </Suspense>
-                  </LayoutSelector>
+                  </LayoutWrapper>
                 </PrivateRoute>
               }
             />

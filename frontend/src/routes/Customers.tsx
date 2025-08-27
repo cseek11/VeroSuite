@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import InputMask from 'react-input-mask';
-import LayoutWrapper from '@/components/LayoutWrapper';
+
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import CustomerDashboard from '@/components/crm/CustomerDashboard';
 import {
@@ -231,8 +231,7 @@ export default function Customers() {
   // If a customer is selected, show the detailed dashboard
   if (selectedCustomerId) {
     return (
-      <LayoutWrapper>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-6">
             <Button
               variant="outline"
@@ -245,13 +244,11 @@ export default function Customers() {
           </div>
           <CustomerDashboard customerId={selectedCustomerId} />
         </div>
-      </LayoutWrapper>
     );
   }
 
   return (
-    <LayoutWrapper>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
           {/* Header */}
           <div className="mb-8">
@@ -519,6 +516,5 @@ export default function Customers() {
           )}
         </div>
       </div>
-    </LayoutWrapper>
   );
 }
