@@ -59,18 +59,6 @@ const KeyboardNavigationProvider: React.FC<KeyboardNavigationProviderProps> = ({
           </div>
         </div>
       )}
-
-      {/* Keyboard Shortcuts Button (floating) */}
-      <button
-        onClick={() => setShortcutsModalOpen(true)}
-        className="fixed bottom-4 left-4 z-40 p-3 bg-purple-600 text-white rounded-full shadow-lg hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-        title="Keyboard Shortcuts (?)"
-        aria-label="Show keyboard shortcuts"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-        </svg>
-      </button>
     </>
   );
 };

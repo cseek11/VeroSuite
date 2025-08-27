@@ -6,6 +6,7 @@ interface JobsCalendarProps {
   events: JobEvent[];
   height?: string;
   view?: string;
+  onViewChange?: (view: string) => void;
   onEventClick?: (event: any) => void;
   onEventDrop?: (info: any) => void;
   onEventResize?: (info: any) => void;
@@ -16,6 +17,7 @@ const JobsCalendar: React.FC<JobsCalendarProps> = ({
   events = [],
   height = '400px',
   view = 'month',
+  onViewChange,
   onEventClick,
   onEventDrop,
   onEventResize,
@@ -42,13 +44,16 @@ const JobsCalendar: React.FC<JobsCalendarProps> = ({
   ];
 
   return (
-    <div className="h-full w-full">
+    <div className="w-full" style={{ height: height }}>
       <SchedulerPro
         initialView={view}
+        view={view}
+        onViewChange={onViewChange}
         resources={resources}
         dataAdapter={{
           source: schedulerEvents
         }}
+        hideToolbar={true}
       />
     </div>
   );

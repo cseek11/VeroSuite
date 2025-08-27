@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VeroSuite - Enhanced V3</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    html, body { height: 100%; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    /* VeroPest Background */
+    .vero-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    }
+    
+    /* Collapsible Sidebar */
+    .sidebar-collapsed { width: 64px; }
+    .sidebar-expanded { width: 240px; }
+    .sidebar-transition { transition: width 0.3s ease; }
+    
+    /* Enhanced Cards */
+    .vero-card {
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .vero-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
+    
+    /* Drag and Drop */
+    .draggable { cursor: grab; }
+    .dragging { cursor: grabbing; opacity: 0.8; transform: rotate(2deg); }
+    .drop-zone { border: 2px dashed #cbd5e0; border-radius: 8px; }
+    .drop-zone.drag-over { border-color: #4299e1; background: rgba(66, 153, 225, 0.1); }
+    
+    /* Mobile Enhancements */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.mobile-open { transform: translateX(0); }
+      .main-content { margin-left: 0; }
+      .activity-panel { display: none; }
+    }
+    
+    /* Enhanced Animations */
+    .fade-in { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* Real-time Indicators */
+    .pulse { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+    
+    /* Enhanced Navigation */
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin: 4px 8px;
+      transition: all 0.2s ease;
+      color: #a0aec0;
+      text-decoration: none;
+    }
+    
+    .nav-item:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+    
+    .nav-item.active {
+      background: #4299e1;
+      color: white;
+    }
+    
+    .nav-icon { width: 20px; margin-right: 12px; }
+    
+    /* Enhanced Status Indicators */
+    .status-online { background: #48bb78; }
+    .status-busy { background: #ed8936; }
+    .status-away { background: #ecc94b; }
+    .status-offline { background: #a0aec0; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div class="flex h-screen" id="app-container">
+    <!-- Collapsible Sidebar -->
+    <aside class="vero-bg sidebar-collapsed sidebar-transition flex flex-col relative" id="sidebar">
+      <!-- Toggle Button -->
+      <button class="absolute -right-3 top-6 w-6 h-6 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors" onclick="toggleSidebar()">
+        <i class="fa-solid fa-chevron-left text-xs" id="toggle-icon"></i>
+      </button>
+      
+      <!-- Logo -->
+      <div class="p-4 flex items-center justify-center border-b border-white/20">
+        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white font-bold">
+          <i class="fa-solid fa-bug"></i>
+        </div>
+        <span class="ml-3 text-white font-semibold hidden sidebar-text">VeroSuite</span>
+      </div>
+      
+      <!-- Navigation -->
+      <nav class="flex-1 p-2 overflow-y-auto">
+        <div class="space-y-1">
+          <a href="#dashboard" class="nav-item active" data-target="dashboard">
+            <i class="fa-solid fa-gauge-high nav-icon"></i>
+            <span class="sidebar-text">Dashboard</span>
+          </a>
+          
+          <a href="#crm" class="nav-item" data-target="crm">
+            <i class="fa-regular fa-address-card nav-icon"></i>
+            <span class="sidebar-text">CRM</span>
+            <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full hidden sidebar-text">2.1k</span>
+          </a>
+          
+          <a href="#scheduling" class="nav-item" data-target="scheduling">
+            <i class="fa-solid fa-calendar-days nav-icon"></i>
+            <span class="sidebar-text">Scheduling</span>
+            <span class="ml-auto bg-orange-500 text-white text-xs px-2 py-1 rounded-full hidden sidebar-text">47</span>
+          </a>
+          
+          <a href="#finance" class="nav-item" data-target="finance">
+            <i class="fa-solid fa-chart-line nav-icon"></i>
+            <span class="sidebar-text">Finance</span>
+            <span class="ml-auto bg-green-500 text-white text-xs px-2 py-1 rounded-full hidden sidebar-text">$45k</span>
+          </a>
+          
+          <a href="#reports" class="nav-item" data-target="reports">
+            <i class="fa-solid fa-chart-bar nav-icon"></i>
+            <span class="sidebar-text">Reports</span>
+          </a>
+          
+          <a href="#communications" class="nav-item" data-target="communications">
+            <i class="fa-regular fa-comments nav-icon"></i>
+            <span class="sidebar-text">Communications</span>
+            <span class="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full hidden sidebar-text">3</span>
+          </a>
+          
+          <a href="#knowledge" class="nav-item" data-target="knowledge">
+            <i class="fa-solid fa-book-open nav-icon"></i>
+            <span class="sidebar-text">Knowledge</span>
+          </a>
+          
+          <a href="#settings" class="nav-item" data-target="settings">
+            <i class="fa-solid fa-gear nav-icon"></i>
+            <span class="sidebar-text">Settings</span>
+          </a>
+        </div>
+      </nav>
+      
+      <!-- User Profile -->
+      <div class="p-4 border-t border-white/20">
+        <div class="flex items-center">
+          <div class="relative">
+            <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white text-sm font-semibold">
+              KD
+            </div>
+            <div class="absolute -bottom-1 -right-1 w-3 h-3 status-online rounded-full border-2 border-white"></div>
+          </div>
+          <div class="ml-3 hidden sidebar-text">
+            <div class="text-white text-sm font-medium">Kevin Davis</div>
+            <div class="text-white/70 text-xs">Admin</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Enhanced Top Bar -->
+      <header class="vero-bg text-white shadow-lg">
+        <div class="px-6 py-4 flex items-center gap-4">
+          <!-- Mobile Menu -->
+          <button class="md:hidden p-2 rounded-lg hover:bg-white/10" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          
+          <!-- Search -->
+          <div class="relative flex-1 max-w-2xl">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-white/70"></i>
+            <input class="w-full pl-10 pr-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg text-white placeholder-white/70 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50" placeholder="Search customers, jobs, invoices...">
+          </div>
+          
+          <!-- Quick Actions -->
+          <div class="flex items-center gap-3">
+            <button class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+              <i class="fa-solid fa-plus mr-2"></i>Quick Add
+            </button>
+            <button class="p-2 rounded-lg hover:bg-white/10 relative">
+              <i class="fa-regular fa-bell"></i>
+              <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">59</span>
+            </button>
+            <button class="p-2 rounded-lg hover:bg-white/10">
+              <i class="fa-solid fa-question"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Workspace -->
+      <div class="flex-1 flex overflow-hidden">
+        <!-- Content Area -->
+        <main class="flex-1 overflow-y-auto">
+          <!-- Dashboard -->
+          <div id="dashboard" class="p-6 space-y-6 fade-in">
+            <div class="flex items-center justify-between">
+              <div>
+                <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
+                <p class="text-gray-600">Welcome back, Kevin! Here's your pest control overview.</p>
+              </div>
+              <div class="flex gap-3">
+                <button class="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                  <i class="fa-solid fa-plus mr-2"></i>New Job
+                </button>
+                <button class="bg-white text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors border">
+                  <i class="fa-solid fa-download mr-2"></i>Export
+                </button>
+              </div>
+            </div>
+
+            <!-- Enhanced KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div class="vero-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="text-sm text-gray-500">Today's Revenue</div>
+                  <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-dollar-sign text-purple-600"></i>
+                  </div>
+                </div>
+                <div class="text-3xl font-bold text-gray-800 mb-2">$18,240</div>
+                <div class="text-sm text-green-600">
+                  <i class="fa-solid fa-arrow-up mr-1"></i>+12.5% vs yesterday
+                </div>
+              </div>
+              
+              <div class="vero-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="text-sm text-gray-500">Jobs Completed</div>
+                  <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-check-circle text-green-600"></i>
+                  </div>
+                </div>
+                <div class="text-3xl font-bold text-gray-800 mb-2">47/52</div>
+                <div class="text-sm text-green-600">90.4% completion rate</div>
+              </div>
+              
+              <div class="vero-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="text-sm text-gray-500">AR Aging</div>
+                  <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-clock text-orange-600"></i>
+                  </div>
+                </div>
+                <div class="text-3xl font-bold text-gray-800 mb-2">$12,670</div>
+                <div class="text-sm text-red-600">
+                  <i class="fa-solid fa-arrow-up mr-1"></i>+8.3% overdue
+                </div>
+              </div>
+              
+              <div class="vero-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="text-sm text-gray-500">Customer Satisfaction</div>
+                  <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-star text-yellow-600"></i>
+                  </div>
+                </div>
+                <div class="text-3xl font-bold text-gray-800 mb-2">4.8/5.0</div>
+                <div class="text-sm text-green-600">+0.2 this month</div>
+              </div>
+            </div>
+
+            <!-- Enhanced Schedule -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div class="lg:col-span-2 vero-card">
+                <div class="p-6 border-b border-gray-200">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-gray-800">Today's Schedule</h3>
+                    <div class="flex gap-2">
+                      <button class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                        <i class="fa-solid fa-plus mr-1"></i>Add Job
+                      </button>
+                      <button class="px-4 py-2 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors">
+                        <i class="fa-solid fa-route mr-1"></i>Optimize Route
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="p-6">
+                  <div class="space-y-4" id="schedule-container">
+                    <!-- Draggable Job Cards -->
+                    <div class="draggable vero-card p-4 cursor-move" draggable="true" data-job-id="1">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                          <div class="flex gap-1">
+                            <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                            <span class="w-3 h-3 bg-purple-500 rounded-full"></span>
+                          </div>
+                          <div>
+                            <div class="font-semibold text-gray-800">Johnson Family Residence</div>
+                            <div class="text-sm text-gray-600">General Pest Control • 9:00 AM</div>
+                          </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <span class="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">A. Davis</span>
+                          <div class="flex gap-1">
+                            <button class="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                              <i class="fa-solid fa-phone"></i>
+                            </button>
+                            <button class="p-2 text-gray-400 hover:text-green-600 transition-colors">
+                              <i class="fa-solid fa-envelope"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="draggable vero-card p-4 cursor-move border-l-4 border-red-500" draggable="true" data-job-id="2">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                          <div class="flex gap-1">
+                            <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                          </div>
+                          <div>
+                            <div class="font-semibold text-gray-800">Acme Corporation</div>
+                            <div class="text-sm text-gray-600">Termite Inspection • 10:30 AM</div>
+                            <div class="text-xs text-red-600 mt-1">
+                              <i class="fa-solid fa-exclamation-triangle mr-1"></i>Overdue by 2 days
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <span class="px-3 py-1 bg-red-100 text-red-700 text-sm rounded-full">Unassigned</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Activity Feed -->
+              <div class="vero-card">
+                <div class="p-6 border-b border-gray-200">
+                  <h3 class="text-xl font-semibold text-gray-800">Activity Feed</h3>
+                </div>
+                <div class="p-6">
+                  <div class="space-y-4">
+                    <div class="flex items-start gap-3">
+                      <div class="w-2 h-2 bg-green-500 rounded-full mt-2 pulse"></div>
+                      <div class="flex-1">
+                        <div class="text-sm text-gray-800">Payment received from Johnson Family</div>
+                        <div class="text-xs text-gray-500">$156.00 • 2 minutes ago</div>
+                      </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-3">
+                      <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                      <div class="flex-1">
+                        <div class="text-sm text-gray-800">New job scheduled for Acme Corp</div>
+                        <div class="text-xs text-gray-500">Termite inspection • 5 minutes ago</div>
+                      </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-3">
+                      <div class="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
+                      <div class="flex-1">
+                        <div class="text-sm text-gray-800">Customer complaint logged</div>
+                        <div class="text-xs text-gray-500">Maria Lopez • 15 minutes ago</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enhanced Scheduling Module -->
+          <div id="scheduling" class="p-6 space-y-6 fade-in hidden">
+            <div class="flex items-center justify-between">
+              <div>
+                <h1 class="text-3xl font-bold text-gray-800">Job Scheduling</h1>
+                <p class="text-gray-600">Manage your team's schedule and optimize routes</p>
+              </div>
+              <div class="flex gap-3">
+                <button class="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                  <i class="fa-solid fa-plus mr-2"></i>New Schedule
+                </button>
+                <button class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                  <i class="fa-solid fa-route mr-2"></i>Optimize Routes
+                </button>
+              </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div class="vero-card p-6">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold text-gray-800">Weekly Schedule</h3>
+                <div class="flex gap-2">
+                  <button class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                    <i class="fa-solid fa-chevron-left mr-1"></i>Previous
+                  </button>
+                  <button class="px-4 py-2 text-sm bg-purple-100 text-purple-700 rounded-lg">
+                    May 6-12, 2024
+                  </button>
+                  <button class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                    Next<i class="fa-solid fa-chevron-right ml-1"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Calendar Grid -->
+              <div class="grid grid-cols-7 gap-4">
+                <div class="text-center font-semibold text-gray-600">Mon</div>
+                <div class="text-center font-semibold text-gray-600">Tue</div>
+                <div class="text-center font-semibold text-gray-600">Wed</div>
+                <div class="text-center font-semibold text-gray-600">Thu</div>
+                <div class="text-center font-semibold text-gray-600">Fri</div>
+                <div class="text-center font-semibold text-gray-600">Sat</div>
+                <div class="text-center font-semibold text-gray-600">Sun</div>
+                
+                <!-- Calendar Days -->
+                <div class="drop-zone min-h-32 p-2 border-2 border-dashed border-gray-200 rounded-lg">
+                  <div class="text-sm text-gray-500 mb-2">6</div>
+                  <div class="space-y-1">
+                    <div class="bg-blue-100 text-blue-800 text-xs p-1 rounded">Johnson Family</div>
+                    <div class="bg-green-100 text-green-800 text-xs p-1 rounded">Acme Corp</div>
+                  </div>
+                </div>
+                
+                <div class="drop-zone min-h-32 p-2 border-2 border-dashed border-gray-200 rounded-lg">
+                  <div class="text-sm text-gray-500 mb-2">7</div>
+                  <div class="space-y-1">
+                    <div class="bg-purple-100 text-purple-800 text-xs p-1 rounded">Maria Lopez</div>
+                  </div>
+                </div>
+                
+                <div class="drop-zone min-h-32 p-2 border-2 border-dashed border-gray-200 rounded-lg">
+                  <div class="text-sm text-gray-500 mb-2">8</div>
+                </div>
+                
+                <div class="drop-zone min-h-32 p-2 border-2 border-dashed border-gray-200 rounded-lg">
+                  <div class="text-sm text-gray-500 mb-2">9</div>
+                  <div class="space-y-1">
+                    <div class="bg-orange-100 text-orange-800 text-xs p-1 rounded">Baker Residence</div>
+                  </div>
+                </div>
+                
+                <div class="drop-zone min-h-32 p-2 border-2 border-dashed border-gray-200 rounded-lg">
+                  <div class="text-sm text-gray-500 mb-2">10</div>
+                </div>
+                
+                <div class="drop-zone min-h-32 p-2 border-2 border-dashed border-gray-200 rounded-lg">
+                  <div class="text-sm text-gray-500 mb-2">11</div>
+                </div>
+                
+                <div class="drop-zone min-h-32 p-2 border-2 border-dashed border-gray-200 rounded-lg">
+                  <div class="text-sm text-gray-500 mb-2">12</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enhanced Finance Module -->
+          <div id="finance" class="p-6 space-y-6 fade-in hidden">
+            <div class="flex items-center justify-between">
+              <div>
+                <h1 class="text-3xl font-bold text-gray-800">Finance Dashboard</h1>
+                <p class="text-gray-600">Track revenue, AR aging, and financial performance</p>
+              </div>
+              <div class="flex gap-3">
+                <button class="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                  <i class="fa-solid fa-plus mr-2"></i>New Invoice
+                </button>
+                <button class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                  <i class="fa-solid fa-download mr-2"></i>Export Report
+                </button>
+              </div>
+            </div>
+
+            <!-- Financial KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="vero-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="text-sm text-gray-500">Monthly Revenue</div>
+                  <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-dollar-sign text-green-600"></i>
+                  </div>
+                </div>
+                <div class="text-3xl font-bold text-gray-800 mb-2">$124,580</div>
+                <div class="text-sm text-green-600">
+                  <i class="fa-solid fa-arrow-up mr-1"></i>+18.2% vs last month
+                </div>
+              </div>
+              
+              <div class="vero-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="text-sm text-gray-500">AR Aging (30+ days)</div>
+                  <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-clock text-red-600"></i>
+                  </div>
+                </div>
+                <div class="text-3xl font-bold text-gray-800 mb-2">$23,450</div>
+                <div class="text-sm text-red-600">
+                  <i class="fa-solid fa-arrow-up mr-1"></i>+5.3% vs last month
+                </div>
+              </div>
+              
+              <div class="vero-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="text-sm text-gray-500">Collection Rate</div>
+                  <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-percentage text-blue-600"></i>
+                  </div>
+                </div>
+                <div class="text-3xl font-bold text-gray-800 mb-2">94.2%</div>
+                <div class="text-sm text-green-600">
+                  <i class="fa-solid fa-arrow-up mr-1"></i>+2.1% vs last month
+                </div>
+              </div>
+            </div>
+
+            <!-- AR Aging Chart -->
+            <div class="vero-card p-6">
+              <h3 class="text-xl font-semibold text-gray-800 mb-6">AR Aging Analysis</h3>
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="text-center p-4 bg-green-50 rounded-lg">
+                  <div class="text-2xl font-bold text-green-600">$156,230</div>
+                  <div class="text-sm text-gray-600">Current (0-30 days)</div>
+                </div>
+                <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                  <div class="text-2xl font-bold text-yellow-600">$12,450</div>
+                  <div class="text-sm text-gray-600">31-60 days</div>
+                </div>
+                <div class="text-center p-4 bg-orange-50 rounded-lg">
+                  <div class="text-2xl font-bold text-orange-600">$8,670</div>
+                  <div class="text-sm text-gray-600">61-90 days</div>
+                </div>
+                <div class="text-center p-4 bg-red-50 rounded-lg">
+                  <div class="text-2xl font-bold text-red-600">$2,310</div>
+                  <div class="text-sm text-gray-600">90+ days</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enhanced Reports Module -->
+          <div id="reports" class="p-6 space-y-6 fade-in hidden">
+            <div class="flex items-center justify-between">
+              <div>
+                <h1 class="text-3xl font-bold text-gray-800">Reports & Analytics</h1>
+                <p class="text-gray-600">Comprehensive business intelligence and insights</p>
+              </div>
+              <div class="flex gap-3">
+                <button class="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                  <i class="fa-solid fa-chart-line mr-2"></i>Generate Report
+                </button>
+                <button class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                  <i class="fa-solid fa-download mr-2"></i>Export All
+                </button>
+              </div>
+            </div>
+
+            <!-- Report Categories -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div class="vero-card p-6 hover:scale-105 transition-transform cursor-pointer">
+                <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                  <i class="fa-solid fa-chart-line text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Revenue Analytics</h3>
+                <p class="text-gray-600 text-sm mb-4">Track revenue trends, growth patterns, and performance metrics</p>
+                <button class="text-blue-600 hover:text-blue-700 font-semibold text-sm">
+                  View Report <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+              </div>
+              
+              <div class="vero-card p-6 hover:scale-105 transition-transform cursor-pointer">
+                <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                  <i class="fa-solid fa-users text-green-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Customer Insights</h3>
+                <p class="text-gray-600 text-sm mb-4">Analyze customer behavior, satisfaction, and retention rates</p>
+                <button class="text-green-600 hover:text-green-700 font-semibold text-sm">
+                  View Report <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+              </div>
+              
+              <div class="vero-card p-6 hover:scale-105 transition-transform cursor-pointer">
+                <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                  <i class="fa-solid fa-route text-purple-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Operational Efficiency</h3>
+                <p class="text-gray-600 text-sm mb-4">Monitor job completion rates, route optimization, and technician performance</p>
+                <button class="text-purple-600 hover:text-purple-700 font-semibold text-sm">
+                  View Report <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+              </div>
+              
+              <div class="vero-card p-6 hover:scale-105 transition-transform cursor-pointer">
+                <div class="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
+                  <i class="fa-solid fa-flask text-orange-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Chemical Usage</h3>
+                <p class="text-gray-600 text-sm mb-4">Track chemical consumption, costs, and regulatory compliance</p>
+                <button class="text-orange-600 hover:text-orange-700 font-semibold text-sm">
+                  View Report <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+              </div>
+              
+              <div class="vero-card p-6 hover:scale-105 transition-transform cursor-pointer">
+                <div class="w-16 h-16 bg-red-100 rounded-xl flex items-center justify-center mb-4">
+                  <i class="fa-solid fa-exclamation-triangle text-red-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Risk Assessment</h3>
+                <p class="text-gray-600 text-sm mb-4">Identify potential issues, overdue accounts, and compliance risks</p>
+                <button class="text-red-600 hover:text-red-700 font-semibold text-sm">
+                  View Report <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+              </div>
+              
+              <div class="vero-card p-6 hover:scale-105 transition-transform cursor-pointer">
+                <div class="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                  <i class="fa-solid fa-chart-pie text-indigo-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Market Analysis</h3>
+                <p class="text-gray-600 text-sm mb-4">Compare performance against competitors and market trends</p>
+                <button class="text-indigo-600 hover:text-indigo-700 font-semibold text-sm">
+                  View Report <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Other Modules -->
+          <div id="crm" class="p-6 fade-in hidden">
+            <div class="vero-card p-6">
+              <h3 class="text-xl font-semibold text-gray-800 mb-4">CRM Module</h3>
+              <p class="text-gray-600">Enhanced customer relationship management with Kanban boards and timeline views.</p>
+            </div>
+          </div>
+
+          <div id="communications" class="p-6 fade-in hidden">
+            <div class="vero-card p-6">
+              <h3 class="text-xl font-semibold text-gray-800 mb-4">Communications Hub</h3>
+              <p class="text-gray-600">Unified inbox for calls, SMS, email, and chat communications with AI copilot.</p>
+            </div>
+          </div>
+
+          <div id="knowledge" class="p-6 fade-in hidden">
+            <div class="vero-card p-6">
+              <h3 class="text-xl font-semibold text-gray-800 mb-4">Knowledge Base</h3>
+              <p class="text-gray-600">SOPs, training materials, pest identification guides, and compliance documentation.</p>
+            </div>
+          </div>
+
+          <div id="settings" class="p-6 fade-in hidden">
+            <div class="vero-card p-6">
+              <h3 class="text-xl font-semibold text-gray-800 mb-4">Settings</h3>
+              <p class="text-gray-600">System configuration, user preferences, and tenant management.</p>
+            </div>
+          </div>
+        </main>
+
+        <!-- Right Activity Panel (Hidden on Mobile) -->
+        <aside class="w-80 bg-white border-l border-gray-200 hidden lg:flex flex-col">
+          <div class="p-6 border-b border-gray-200">
+            <h3 class="font-semibold text-gray-800">Activity Panel</h3>
+          </div>
+          <div class="flex-1 overflow-y-auto p-6">
+            <div class="space-y-4">
+              <div class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer">
+                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                  <i class="fa-solid fa-bell text-red-600"></i>
+                </div>
+                <div class="flex-1">
+                  <div class="text-sm font-medium text-gray-800">New notification</div>
+                  <div class="text-xs text-gray-500">2 minutes ago</div>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <i class="fa-solid fa-envelope text-blue-600"></i>
+                </div>
+                <div class="flex-1">
+                  <div class="text-sm font-medium text-gray-800">New email</div>
+                  <div class="text-xs text-gray-500">5 minutes ago</div>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer">
+                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                  <i class="fa-solid fa-user text-green-600"></i>
+                </div>
+                <div class="flex-1">
+                  <div class="text-sm font-medium text-gray-800">User activity</div>
+                  <div class="text-xs text-gray-500">10 minutes ago</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sidebar Toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const toggleIcon = document.getElementById('toggle-icon');
+      const sidebarTexts = document.querySelectorAll('.sidebar-text');
+      
+      if (sidebar.classList.contains('sidebar-collapsed')) {
+        sidebar.classList.remove('sidebar-collapsed');
+        sidebar.classList.add('sidebar-expanded');
+        toggleIcon.classList.remove('fa-chevron-left');
+        toggleIcon.classList.add('fa-chevron-right');
+        sidebarTexts.forEach(el => el.classList.remove('hidden'));
+      } else {
+        sidebar.classList.remove('sidebar-expanded');
+        sidebar.classList.add('sidebar-collapsed');
+        toggleIcon.classList.remove('fa-chevron-right');
+        toggleIcon.classList.add('fa-chevron-left');
+        sidebarTexts.forEach(el => el.classList.add('hidden'));
+      }
+    }
+
+    // Mobile Menu Toggle
+    function toggleMobileMenu() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('mobile-open');
+    }
+
+    // Navigation
+    document.querySelectorAll('[data-target]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Update active nav
+        document.querySelectorAll('[data-target]').forEach(l => {
+          l.classList.remove('active');
+        });
+        link.classList.add('active');
+        
+        // Show target content
+        const target = link.getAttribute('data-target');
+        document.querySelectorAll('main > div[id]').forEach(div => {
+          div.classList.add('hidden');
+        });
+        document.getElementById(target).classList.remove('hidden');
+      });
+    });
+
+    // Drag and Drop Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const draggables = document.querySelectorAll('.draggable');
+      const dropZones = document.querySelectorAll('.drop-zone');
+
+      draggables.forEach(draggable => {
+        draggable.addEventListener('dragstart', () => {
+          draggable.classList.add('dragging');
+        });
+
+        draggable.addEventListener('dragend', () => {
+          draggable.classList.remove('dragging');
+        });
+      });
+
+      dropZones.forEach(zone => {
+        zone.addEventListener('dragover', e => {
+          e.preventDefault();
+          zone.classList.add('drag-over');
+        });
+
+        zone.addEventListener('dragleave', () => {
+          zone.classList.remove('drag-over');
+        });
+
+        zone.addEventListener('drop', e => {
+          e.preventDefault();
+          zone.classList.remove('drag-over');
+          const draggable = document.querySelector('.dragging');
+          if (draggable) {
+            zone.appendChild(draggable);
+          }
+        });
+      });
+    });
+
+    // Real-time Updates Simulation
+    setInterval(() => {
+      const activityItems = document.querySelectorAll('.pulse');
+      activityItems.forEach(item => {
+        if (Math.random() > 0.7) {
+          item.classList.remove('pulse');
+          setTimeout(() => item.classList.add('pulse'), 100);
+        }
+      });
+    }, 3000);
+
+    // Enhanced Mobile Experience
+    if (window.innerWidth <= 768) {
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('#sidebar') && !e.target.closest('[onclick*="toggleMobileMenu"]')) {
+          document.getElementById('sidebar').classList.remove('mobile-open');
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+

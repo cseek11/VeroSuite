@@ -24,8 +24,13 @@ export default function SchedulerPro({
   resources = DEFAULT_RESOURCES,
   dataAdapter,
   timeZone,
+  hideToolbar = false,
+  view: externalView,
+  onViewChange,
 }) {
-  const [view, setView] = useState(initialView);
+  const [internalView, setInternalView] = useState(initialView);
+  const view = externalView !== undefined ? externalView : internalView;
+  const setView = onViewChange || setInternalView;
   const [cursor, setCursor] = useState(initialDate ? new Date(initialDate) : new Date());
   const [editing, setEditing] = useState(null);
   const [events, setEvents] = useState(() => {
@@ -47,14 +52,15 @@ export default function SchedulerPro({
 
   return (
     <div className="scheduler-root h-full w-full flex-basis: 0%; flex flex-col">
-      <div className="scheduler-toolbar p-2 border-b border-gray-200 bg-white flex items-center justify-between flex-shrink-0">
+      {!hideToolbar && (
+        <div className="scheduler-toolbar p-2 border-b border-gray-200 bg-white flex items-center justify-between flex-shrink-0">
         <div className="flex space-x-1">
           <button 
             onClick={() => setView("day")}
             className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
               view === "day" 
                 ? "bg-blue-600 text-white" 
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                : "bg-gray-100/10 text-gray-700 hover:bg-gray-200/75"
             }`}
           >
             Day
@@ -90,23 +96,11 @@ export default function SchedulerPro({
             Timeline
           </button>
         </div>
-        <div className="flex space-x-1">
-          <button 
-            onClick={() => { exportCsv(events); }}
-            className="px-2 py-1 bg-green-600 text-white rounded text-xs font-medium hover:bg-green-700 transition-colors"
-          >
-            Export CSV
-          </button>
-          <button 
-            onClick={() => { downloadIcs(events); }}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
-          >
-            Export ICS
-          </button>
-        </div>
+        
       </div>
+      )}
 
-      <div className="scheduler-body flex-1 overflow-hidden bg-white">
+      <div className="scheduler-body flex-1 overflow-hidden bg-transparent">
         {view === "week" && (
           <WeekView
             days={/* compute week days */ Array.from({length:7},(_,i)=>{const d=new Date(cursor); const diff = (i - d.getDay()); d.setDate(d.getDate()+diff); return d;})}

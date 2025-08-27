@@ -117,3 +117,4 @@ The Compact Layout Mode is a feature that significantly increases information de
 For issues or questions about the compact layout feature, please refer to the development team or create an issue in the project repository.
 
 
+
