@@ -5,9 +5,9 @@ import { useTodayJobs } from '@/hooks/useJobs';
 import { LoadingSpinner, PageLoader } from '@/components/LoadingSpinner';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import DashboardMetrics from '@/components/dashboard/DashboardMetrics';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
-import JobsCalendar from '@/components/JobsCalendar';
+// DashboardHeader removed as part of V4 migration
+// DashboardSidebar removed as part of V4 migration
+
 import { DashboardMetric, Job } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 import { routingApi } from '@/lib/api';
@@ -1775,16 +1775,7 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
 
         <div className="flex">
           {/* Sidebar */}
-          {showHeader && (
-            <DashboardSidebar
-              isOpen={sidebarOpen}
-              onClose={() => setSidebarOpen(false)}
-              isCollapsed={sidebarCollapsed}
-              onToggleCollapse={toggleSidebar}
-              onAddCustomCard={addCustomCard}
-              onResetLayout={resetLayout}
-            />
-          )}
+          {/* DashboardSidebar removed as part of V4 migration */}
 
                     {/* Main Content */}
           <div 
@@ -2049,11 +2040,9 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
                              {jobsLoading ? (
                                <LoadingSpinner text="Loading jobs..." />
                              ) : (
-                               <JobsCalendar 
-                                 events={displayJobs as any}
-                                 height="100%"
-                                 view="timeGridDay"
-                               />
+                               <div className="p-4 bg-gray-100 rounded-lg">
+                                 <p className="text-gray-600">Calendar component removed - using SchedulerPro instead</p>
+                               </div>
                              )}
                            </Suspense>
                          )}
