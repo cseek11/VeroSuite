@@ -5,11 +5,11 @@ import { useAuthStore } from '@/stores/auth';
 import { Spinner } from '@/ui/Spinner';
 import SkipLink from '@/components/SkipLink';
 
-import LayoutWrapper from '@/components/LayoutWrapper';
+// LayoutWrapper removed as part of V4 migration
 import V4Layout from '@/components/layout/V4Layout';
-import LegacyDashboard from './LegacyDashboard';
-import LegacyEnhancedDashboard from './LegacyEnhancedDashboard';
-import LegacyResizableDashboard from './LegacyResizableDashboard';
+// LegacyDashboard removed as part of V4 migration
+// LegacyEnhancedDashboard removed as part of V4 migration
+import VeroCards from './VeroCards';
 import V4Dashboard from './V4Dashboard';
 import V4Test from './V4Test';
 import CommunicationsPage from './Communications';
@@ -126,11 +126,11 @@ export default function App() {
               path="/enhanced-dashboard"
               element={
                 <PrivateRoute>
-                  <LayoutWrapper>
+                  <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
-                      <LegacyEnhancedDashboard />
+                      <V4Dashboard />
                     </Suspense>
-                  </LayoutWrapper>
+                  </V4Layout>
                 </PrivateRoute>
               }
             />
@@ -140,7 +140,7 @@ export default function App() {
                 <PrivateRoute>
                   <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
-                      <LegacyResizableDashboard showHeader={false} />
+                      <VeroCards showHeader={false} />
                     </Suspense>
                   </V4Layout>
                 </PrivateRoute>
@@ -318,11 +318,11 @@ export default function App() {
               path="/*"
               element={
                 <PrivateRoute>
-                  <LayoutWrapper>
+                  <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
-                      <LegacyDashboard />
+                      <V4Dashboard />
                     </Suspense>
-                  </LayoutWrapper>
+                  </V4Layout>
                 </PrivateRoute>
               }
             />
