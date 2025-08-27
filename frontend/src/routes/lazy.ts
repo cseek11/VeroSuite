@@ -9,4 +9,3 @@ export const Uploads = lazy(() => import('./Uploads'));
 export const Routing = lazy(() => import('./Routing'));
 
 // Lazy load complex components
-export const JobsCalendar = lazy(() => import('../components/JobsCalendar'));

@@ -207,6 +207,18 @@ export default function App() {
               }
             />
             <Route
+              path="/customers/new"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <CustomersPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/customers-old"
               element={
                 <PrivateRoute>

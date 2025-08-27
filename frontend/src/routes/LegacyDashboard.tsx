@@ -5,7 +5,7 @@ import { useTodayJobs } from '@/hooks/useJobs';
 import { LoadingSpinner, PageLoader } from '@/components/LoadingSpinner';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import DashboardMetrics from '@/components/dashboard/DashboardMetrics';
-import JobsCalendar from '@/components/JobsCalendar';
+
 import TodaysOperations from '@/components/dashboard/TodaysOperations';
 import CustomerExperiencePanel from '@/components/dashboard/CustomerExperiencePanel';
 import TechnicianDispatchPanel from '@/components/dashboard/TechnicianDispatchPanel';
@@ -425,22 +425,9 @@ const EnhancedDashboard: React.FC = () => {
                                 </div>
                               ) : (
                                 <div className="p-2">
-                                  <JobsCalendar 
-                                    events={displayJobs.map(job => ({
-                                      id: job.id,
-                                      title: job.title,
-                                      start: job.start,
-                                      end: job.end,
-                                      color: job.color || '#3b82f6',
-                                      extendedProps: {
-                                        technician: job.technician || '',
-                                        status: job.status
-                                      }
-                                    }))}
-                                    height="440px"
-                                    view={calendarView}
-                                    onViewChange={setCalendarView}
-                                  />
+                                  <div className="p-4 bg-gray-100 rounded-lg">
+                                    <p className="text-gray-600">Calendar component removed - using SchedulerPro instead</p>
+                                  </div>
                                 </div>
                               )}
                             </Suspense>
@@ -621,22 +608,9 @@ const EnhancedDashboard: React.FC = () => {
                                 </div>
                               ) : (
                                 <div className="p-2">
-                                  <JobsCalendar 
-                                    events={displayJobs.map(job => ({
-                                      id: job.id,
-                                      title: job.title,
-                                      start: job.start,
-                                      end: job.end,
-                                      color: job.color || '#3b82f6',
-                                      extendedProps: {
-                                        technician: job.technician || '',
-                                        status: job.status
-                                      }
-                                    }))}
-                                    height={`${calendarSize.height - 60}px`}
-                                    view={calendarView}
-                                    onViewChange={setCalendarView}
-                                  />
+                                  <div className="p-4 bg-gray-100 rounded-lg">
+                                    <p className="text-gray-600">Calendar component removed - using SchedulerPro instead</p>
+                                  </div>
                                 </div>
                               )}
                             </Suspense>

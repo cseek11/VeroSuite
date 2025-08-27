@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
+// DashboardHeader removed as part of V4 migration
+// DashboardSidebar removed as part of V4 migration
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 interface LayoutWrapperProps {
@@ -53,25 +53,12 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50">
         {/* Sidebar */}
-        <DashboardSidebar
-          isOpen={sidebarOpen}
-          onClose={handleSidebarClose}
-          isCollapsed={sidebarCollapsed}
-          onToggleCollapse={handleToggleCollapse}
-          compactMode={compactMode}
-        />
+        {/* DashboardSidebar removed as part of V4 migration */}
 
         {/* Main content area */}
         <div className={`transition-all duration-300 ${mainMargin}`}>
           {/* Header */}
-          <DashboardHeader
-            user={user}
-            sidebarOpen={sidebarOpen}
-            sidebarCollapsed={sidebarCollapsed}
-            onSidebarToggle={handleSidebarToggle}
-            onLogout={handleLogout}
-            compactMode={compactMode}
-          />
+          {/* DashboardHeader removed as part of V4 migration */}
 
           {/* Page content */}
           <main className="flex-1">
