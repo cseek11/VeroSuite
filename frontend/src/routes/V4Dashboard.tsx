@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth';
-// import V4Layout from '@/components/layout/V4Layout';
+import { Tabs } from '@/components/ui/EnhancedUI';
 import MigrationStatus from '@/components/MigrationStatus';
 import { 
   DollarSign, 
@@ -21,7 +21,11 @@ import {
   Check,
   TrendingUp,
   MapPin,
-  ChevronDown
+  ChevronDown,
+  Users,
+  BarChart3,
+  Settings,
+  Calendar
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -152,6 +156,9 @@ export default function V4Dashboard() {
   const [calendarView, setCalendarView] = useState('week');
   const [mapInteracting, setMapInteracting] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  
+  // Tab state
+  const [tabsActive, setTabsActive] = useState('overview');
 
   const handleAddJob = () => {
     navigate('/jobs/new');
@@ -180,497 +187,763 @@ export default function V4Dashboard() {
     return <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">{technician}</span>;
   };
 
-       return (
-      <div className="space-y-3">
-        {/* Migration Status - Only show in development */}
-        {/* {import.meta.env.DEV && <MigrationStatus showDetails={true} />} */}
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-            <p className="text-gray-600">Overview of your pest control operations</p>
-          </div>
-          <div className="flex gap-3">
-            <button 
-              className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition-colors flex items-center gap-2"
-              onClick={handleAddJob}
-            >
-              <Plus className="w-4 h-4" />
-              ADD
-            </button>
-            <button className="bg-white text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 transition-colors border">
-              VERO PEST 2.1k
-            </button>
-          </div>
+  return (
+    <div className="space-y-3">
+      {/* Migration Status - Only show in development */}
+      {/* {import.meta.env.DEV && <MigrationStatus showDetails={true} />} */}
+      
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+          <p className="text-gray-600">Overview of your pest control operations</p>
         </div>
-
-                 {/* KPIs Grid */}
-         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {mockKPIs.map((kpi) => {
-            const Icon = kpi.icon;
-            return (
-                             <div key={kpi.id} className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-2 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-sm text-gray-500">{kpi.label}</div>
-                  <Icon className={`w-5 h-5 ${kpi.iconColor}`} />
-                </div>
-                                 <div className="text-xl font-bold text-gray-800">{kpi.value}</div>
-                <div className={`text-xs mt-1 flex items-center gap-1 ${
-                  kpi.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  <TrendingUp className="w-3 h-3" />
-                  {kpi.change}
-                </div>
-              </div>
-            );
-          })}
+        <div className="flex gap-3">
+          <button 
+            className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition-colors flex items-center gap-2"
+            onClick={handleAddJob}
+          >
+            <Plus className="w-4 h-4" />
+            ADD
+          </button>
+          <button className="bg-white text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 transition-colors border">
+            VERO PEST 2.1k
+          </button>
         </div>
+      </div>
 
-        {/* Dashboard Overview Section */}
-        <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200">
-          <div className="p-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800">Dashboard Overview</h3>
-            <p className="text-sm text-gray-600">Key metrics and performance indicators</p>
-          </div>
-          <div className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Overview Cards */}
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-blue-700">Total Jobs</p>
-                    <p className="text-2xl font-bold text-blue-900">{mockJobs.length}</p>
-                    <p className="text-xs text-blue-600">This week</p>
+      {/* Tabs */}
+      <div className="flex-shrink-0 overflow-hidden">
+        <Tabs
+          size="sm"
+          tabs={[
+            { id: 'overview', label: 'Overview', icon: Home },
+            { id: 'crm-operations', label: 'Today\'s Operations', icon: Calendar },
+            { id: 'crm-customers', label: 'Customer Experience', icon: Users },
+            { id: 'crm-technicians', label: 'Technician & Dispatch', icon: Users },
+            { id: 'crm-financial', label: 'Financial', icon: TrendingUp },
+            { id: 'crm-inventory', label: 'Inventory & Compliance', icon: TrendingUp },
+            { id: 'jobs', label: 'Jobs', icon: Calendar },
+            { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+            { id: 'customization', label: 'Customization', icon: Settings }
+          ]}
+          active={tabsActive}
+          onTabChange={setTabsActive}
+        />
+      </div>
+
+      {/* Tab Content */}
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        
+        {tabsActive === 'overview' && (
+          <div className="space-y-3">
+            {/* KPIs Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {mockKPIs.map((kpi) => {
+                const Icon = kpi.icon;
+                return (
+                  <div key={kpi.id} className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-2 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-sm text-gray-500">{kpi.label}</div>
+                      <Icon className={`w-5 h-5 ${kpi.iconColor}`} />
+                    </div>
+                    <div className="text-xl font-bold text-gray-800">{kpi.value}</div>
+                    <div className={`text-xs mt-1 flex items-center gap-1 ${
+                      kpi.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      <TrendingUp className="w-3 h-3" />
+                      {kpi.change}
+                    </div>
                   </div>
-                  <div className="p-2 bg-blue-200 rounded-lg">
-                    <CheckCircle className="w-6 h-6 text-blue-700" />
+                );
+              })}
+            </div>
+
+            {/* Dashboard Overview Section */}
+            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200">
+              <div className="p-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800">Dashboard Overview</h3>
+                <p className="text-sm text-gray-600">Key metrics and performance indicators</p>
+              </div>
+              <div className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Overview Cards */}
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-blue-700">Total Jobs</p>
+                        <p className="text-2xl font-bold text-blue-900">{mockJobs.length}</p>
+                        <p className="text-xs text-blue-600">This week</p>
+                      </div>
+                      <div className="p-2 bg-blue-200 rounded-lg">
+                        <CheckCircle className="w-6 h-6 text-blue-700" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-green-700">Completed</p>
+                        <p className="text-2xl font-bold text-green-900">
+                          {mockJobs.filter(job => job.status === 'completed').length}
+                        </p>
+                        <p className="text-xs text-green-600">Today</p>
+                      </div>
+                      <div className="p-2 bg-green-200 rounded-lg">
+                        <Check className="w-6 h-6 text-green-700" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-orange-700">In Progress</p>
+                        <p className="text-2xl font-bold text-orange-900">
+                          {mockJobs.filter(job => job.status === 'scheduled').length}
+                        </p>
+                        <p className="text-xs text-orange-600">Active</p>
+                      </div>
+                      <div className="p-2 bg-orange-200 rounded-lg">
+                        <Clock className="w-6 h-6 text-orange-700" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-red-700">Overdue</p>
+                        <p className="text-2xl font-bold text-red-900">
+                          {mockJobs.filter(job => job.overdue).length}
+                        </p>
+                        <p className="text-xs text-red-600">Requires attention</p>
+                      </div>
+                      <div className="p-2 bg-red-200 rounded-lg">
+                        <AlertTriangle className="w-6 h-6 text-red-700" />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-green-700">Completed</p>
-                    <p className="text-2xl font-bold text-green-900">
-                      {mockJobs.filter(job => job.status === 'completed').length}
-                    </p>
-                    <p className="text-xs text-green-600">Today</p>
+                {/* Performance Metrics */}
+                <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-800 mb-3">Performance Summary</h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Completion Rate</span>
+                        <span className="text-sm font-medium text-green-600">94.2%</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Average Response Time</span>
+                        <span className="text-sm font-medium text-blue-600">2.3 hours</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Customer Satisfaction</span>
+                        <span className="text-sm font-medium text-purple-600">4.8/5.0</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="p-2 bg-green-200 rounded-lg">
-                    <Check className="w-6 h-6 text-green-700" />
-                  </div>
-                </div>
-              </div>
 
-              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-orange-700">In Progress</p>
-                    <p className="text-2xl font-bold text-orange-900">
-                      {mockJobs.filter(job => job.status === 'scheduled').length}
-                    </p>
-                    <p className="text-xs text-orange-600">Active</p>
-                  </div>
-                  <div className="p-2 bg-orange-200 rounded-lg">
-                    <Clock className="w-6 h-6 text-orange-700" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-red-700">Overdue</p>
-                    <p className="text-2xl font-bold text-red-900">
-                      {mockJobs.filter(job => job.overdue).length}
-                    </p>
-                    <p className="text-xs text-red-600">Requires attention</p>
-                  </div>
-                  <div className="p-2 bg-red-200 rounded-lg">
-                    <AlertTriangle className="w-6 h-6 text-red-700" />
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-800 mb-3">Quick Actions</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button 
+                        className="p-2 bg-purple-100 text-purple-700 rounded text-sm font-medium hover:bg-purple-200 transition-colors flex items-center gap-1"
+                        onClick={handleAddJob}
+                      >
+                        <Plus className="w-3 h-3" />
+                        Add Job
+                      </button>
+                      <button 
+                        className="p-2 bg-blue-100 text-blue-700 rounded text-sm font-medium hover:bg-blue-200 transition-colors flex items-center gap-1"
+                        onClick={handleOptimizeRoute}
+                      >
+                        <Route className="w-3 h-3" />
+                        Optimize
+                      </button>
+                      <button 
+                        className="p-2 bg-green-100 text-green-700 rounded text-sm font-medium hover:bg-green-200 transition-colors flex items-center gap-1"
+                      >
+                        <Phone className="w-3 h-3" />
+                        Call Center
+                      </button>
+                      <button 
+                        className="p-2 bg-orange-100 text-orange-700 rounded text-sm font-medium hover:bg-orange-200 transition-colors flex items-center gap-1"
+                      >
+                        <Mail className="w-3 h-3" />
+                        Messages
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Performance Metrics */}
-            <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-gray-800 mb-3">Performance Summary</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Completion Rate</span>
-                    <span className="text-sm font-medium text-green-600">94.2%</span>
+            {/* Map and Calendar Overview */}
+            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200">
+              <div className="p-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800">Operations Overview</h3>
+                    <p className="text-sm text-gray-600">Map view with calendar overlay</p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Average Response Time</span>
-                    <span className="text-sm font-medium text-blue-600">2.3 hours</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Customer Satisfaction</span>
-                    <span className="text-sm font-medium text-purple-600">4.8/5.0</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-gray-800 mb-3">Quick Actions</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  <button 
-                    className="p-2 bg-purple-100 text-purple-700 rounded text-sm font-medium hover:bg-purple-200 transition-colors flex items-center gap-1"
-                    onClick={handleAddJob}
-                  >
-                    <Plus className="w-3 h-3" />
-                    Add Job
-                  </button>
-                  <button 
-                    className="p-2 bg-blue-100 text-blue-700 rounded text-sm font-medium hover:bg-blue-200 transition-colors flex items-center gap-1"
-                    onClick={handleOptimizeRoute}
-                  >
-                    <Route className="w-3 h-3" />
-                    Optimize
-                  </button>
-                  <button 
-                    className="p-2 bg-green-100 text-green-700 rounded text-sm font-medium hover:bg-green-200 transition-colors flex items-center gap-1"
-                  >
-                    <Phone className="w-3 h-3" />
-                    Call Center
-                  </button>
-                  <button 
-                    className="p-2 bg-orange-100 text-orange-700 rounded text-sm font-medium hover:bg-orange-200 transition-colors flex items-center gap-1"
-                  >
-                    <Mail className="w-3 h-3" />
-                    Messages
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Map and Calendar Overview */}
-        <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200">
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">Operations Overview</h3>
-                <p className="text-sm text-gray-600">Map view with calendar overlay</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setIsFullScreen(!isFullScreen)}
-                  className="bg-purple-500 text-white px-3 py-1.5 rounded-lg font-medium hover:bg-purple-600 transition-colors flex items-center gap-1"
-                >
-                  <MapPin className="w-4 h-4" />
-                  {isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          <div className="relative" style={{ height: '600px' }}>
-            {/* Map Background */}
-            <div className="absolute inset-0 z-0">
-              <Suspense fallback={
-                <div className="w-full h-full flex items-center justify-center bg-blue-100 text-blue-600">
-                  <div className="text-center">
-                    <MapPin className="mx-auto h-12 w-12 mb-4" />
-                    <p className="text-lg font-medium">Loading Map...</p>
-                    <p className="text-sm">Pittsburgh, PA</p>
-                  </div>
-                </div>
-              }>
-                <MapContainer 
-                  center={[40.44, -79.99]} 
-                  zoom={windowWidth < 768 ? 10 : windowWidth < 1024 ? 11 : 12}
-                  className="h-full w-full"
-                  style={{ height: '100%', minHeight: '600px' }}
-                >
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  
-                  {/* Job Locations */}
-                  {mockJobs.map((job) => (
-                    <Marker 
-                      key={job.id} 
-                      position={[
-                        40.44 + (Math.random() - 0.5) * 0.1, 
-                        -79.99 + (Math.random() - 0.5) * 0.1
-                      ]}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setIsFullScreen(!isFullScreen)}
+                      className="bg-purple-500 text-white px-3 py-1.5 rounded-lg font-medium hover:bg-purple-600 transition-colors flex items-center gap-1"
                     >
-                      <Popup>
-                        <div className="p-2">
-                          <div className="font-medium text-sm">
-                            {job.customer}
-                          </div>
-                          <div className="text-gray-500 text-xs">
-                            {job.technician || 'Unassigned'} • {job.status}
-                          </div>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-                  
-                  {/* Sample Route Lines */}
-                  {mockJobs.length > 1 && (
-                    <Polyline
-                      positions={[
-                        [40.44, -79.99],
-                        [40.45, -79.98],
-                        [40.46, -79.97],
-                        [40.47, -79.96]
-                      ]}
-                      color="blue"
-                      weight={3}
-                      opacity={0.7}
-                    />
-                  )}
-                </MapContainer>
-              </Suspense>
-            </div>
-
-            {/* Calendar Overlay */}
-            <div 
-              className={`absolute z-10 bg-white/30 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300 ${mapInteracting ? 'opacity-0' : 'opacity-100'}`}
-              style={{ 
-                top: '20px',
-                left: '20px',
-                width: '400px', 
-                height: '500px',
-                minWidth: '400px',
-                minHeight: '500px',
-                maxWidth: '600px',
-                maxHeight: '700px'
-              }}
-            >
-              <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-gray-50/30">
-                <div className="flex items-center space-x-1">
-                  <button 
-                    onClick={() => setCalendarView('day')}
-                    className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
-                      calendarView === 'day' 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    Day
-                  </button>
-                  <button 
-                    onClick={() => setCalendarView('week')}
-                    className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
-                      calendarView === 'week' 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    Week
-                  </button>
-                  <button 
-                    onClick={() => setCalendarView('month')}
-                    className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
-                      calendarView === 'month' 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    Month
-                  </button>
-                  <button 
-                    onClick={() => setCalendarView('timeline')}
-                    className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
-                      calendarView === 'timeline' 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    Timeline
-                  </button>
-                </div>
-                <div className="flex space-x-1">
-                  <button 
-                    className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
-                    onClick={() => setMapInteracting(!mapInteracting)}
-                  >
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
+                      <MapPin className="w-4 h-4" />
+                      {isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
+                    </button>
+                  </div>
                 </div>
               </div>
               
-              <div className="h-full">
-                <SchedulerPro
-                  initialView={calendarView}
-                  resources={[
-                    { id: "unassigned", name: "Unassigned", color: "#9CA3AF" },
-                    { id: "ashley", name: "Ashley", color: "#60A5FA" },
-                    { id: "john", name: "John", color: "#34D399" },
-                    { id: "sarah", name: "Sarah", color: "#F59E0B" },
-                  ]}
-                  dataAdapter={{
-                    source: mockJobs.map(job => ({
-                      id: job.id.toString(),
-                      title: job.customer,
-                      start: new Date().toISOString(),
-                      end: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-                      resourceId: job.technician || 'unassigned',
-                      color: job.status === 'completed' ? '#22c55e' :
-                             job.status === 'overdue' ? '#ef4444' :
-                             '#3b82f6',
-                      status: job.status,
-                      service: job.service
-                    }))
-                  }}
-                  hideToolbar={true}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          {/* Today's Schedule */}
-                                <div className="lg:col-span-2 bg-white/90 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200">
-             <div className="p-2 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-800">Today's Schedule</h3>
-                <div className="flex gap-2">
-                  <button 
-                    className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
-                    onClick={handleAddJob}
-                  >
-                    <Plus className="w-3 h-3" />
-                    Add Job
-                  </button>
-                  <button 
-                    className="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors flex items-center gap-1"
-                    onClick={handleOptimizeRoute}
-                  >
-                    <Route className="w-3 h-3" />
-                    Optimize Route
-                  </button>
+              <div className="relative" style={{ height: '600px' }}>
+                {/* Map Background */}
+                <div className="absolute inset-0 z-0">
+                  <Suspense fallback={
+                    <div className="w-full h-full flex items-center justify-center bg-blue-100 text-blue-600">
+                      <div className="text-center">
+                        <MapPin className="mx-auto h-12 w-12 mb-4" />
+                        <p className="text-lg font-medium">Loading Map...</p>
+                        <p className="text-sm">Pittsburgh, PA</p>
+                      </div>
+                    </div>
+                  }>
+                    <MapContainer 
+                      center={[40.44, -79.99]} 
+                      zoom={windowWidth < 768 ? 10 : windowWidth < 1024 ? 11 : 12}
+                      className="h-full w-full"
+                      style={{ height: '100%', minHeight: '600px' }}
+                    >
+                      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                      
+                      {/* Job Locations */}
+                      {mockJobs.map((job) => (
+                        <Marker 
+                          key={job.id} 
+                          position={[
+                            40.44 + (Math.random() - 0.5) * 0.1, 
+                            -79.99 + (Math.random() - 0.5) * 0.1
+                          ]}
+                        >
+                          <Popup>
+                            <div className="p-2">
+                              <div className="font-medium text-sm">
+                                {job.customer}
+                              </div>
+                              <div className="text-gray-500 text-xs">
+                                {job.technician || 'Unassigned'} • {job.status}
+                              </div>
+                            </div>
+                          </Popup>
+                        </Marker>
+                      ))}
+                      
+                      {/* Sample Route Lines */}
+                      {mockJobs.length > 1 && (
+                        <Polyline
+                          positions={[
+                            [40.44, -79.99],
+                            [40.45, -79.98],
+                            [40.46, -79.97],
+                            [40.47, -79.96]
+                          ]}
+                          color="blue"
+                          weight={3}
+                          opacity={0.7}
+                        />
+                      )}
+                    </MapContainer>
+                  </Suspense>
                 </div>
-              </div>
-                         </div>
-                           <div className="p-2">
+
+                {/* Calendar Overlay */}
                 <div 
-                  className="space-y-1 max-h-64"
-                  style={{
-                    marginRight: '15px',
-                    scrollbarGutter: 'stable',
-                    overflowY: 'auto',
-                    overflowX: 'hidden',
-                    scrollbarWidth: 'thin',
-                    msOverflowStyle: 'none'
+                  className={`absolute z-10 bg-white/30 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300 ${mapInteracting ? 'opacity-0' : 'opacity-100'}`}
+                  style={{ 
+                    top: '20px',
+                    left: '20px',
+                    width: '400px', 
+                    height: '500px',
+                    minWidth: '400px',
+                    minHeight: '500px',
+                    maxWidth: '600px',
+                    maxHeight: '700px'
                   }}
                 >
-                  {mockJobs.map((job) => (
-                                     <div 
-                     key={job.id}
-                     className={`bg-white rounded-lg border border-gray-200 p-1 hover:shadow-md transition-all cursor-pointer ${
-                       getStatusColor(job.status)
-                     } border-l-4`}
-                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex gap-1">
-                          {job.agreements.map((agreement) => {
-                            const { icon: Icon, color } = agreementIcons[agreement as keyof typeof agreementIcons];
-                            return (
-                              <span key={agreement} className={`w-3.5 h-3.5 rounded-full ${color} flex items-center justify-center`}>
-                                <Icon className="w-2 h-2 text-white" />
-                              </span>
-                            );
-                          })}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-800">{job.customer}</div>
-                          <div className="text-sm text-gray-600">{job.service} • {job.time}</div>
-                          {job.overdue && (
-                            <div className="text-xs text-red-600 mt-1 flex items-center gap-1">
-                              <AlertTriangle className="w-3 h-3" />
-                              Overdue by {job.overdueDays} days
-                            </div>
-                          )}
-                          {job.status === 'completed' && (
-                            <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                              <Check className="w-3 h-3" />
-                              Completed
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {getStatusBadge(job.status, job.technician)}
-                        <div className="flex gap-1">
-                          <button className="p-1 text-gray-400 hover:text-blue-600 transition-colors">
-                            <Phone className="w-4 h-4" />
-                          </button>
-                          <button className="p-1 text-gray-400 hover:text-green-600 transition-colors">
-                            <Mail className="w-4 h-4" />
-                          </button>
-                          <button className="p-1 text-gray-400 hover:text-purple-600 transition-colors">
-                            <MessageCircle className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
+                  <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-gray-50/30">
+                    <div className="flex items-center space-x-1">
+                      <button 
+                        onClick={() => setCalendarView('day')}
+                        className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
+                          calendarView === 'day' 
+                            ? 'bg-blue-600 text-white' 
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        Day
+                      </button>
+                      <button 
+                        onClick={() => setCalendarView('week')}
+                        className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
+                          calendarView === 'week' 
+                            ? 'bg-blue-600 text-white' 
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        Week
+                      </button>
+                      <button 
+                        onClick={() => setCalendarView('month')}
+                        className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
+                          calendarView === 'month' 
+                            ? 'bg-blue-600 text-white' 
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        Month
+                      </button>
+                      <button 
+                        onClick={() => setCalendarView('timeline')}
+                        className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
+                          calendarView === 'timeline' 
+                            ? 'bg-blue-600 text-white' 
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        Timeline
+                      </button>
                     </div>
-                                         <div className="mt-1 pt-1 border-t border-gray-100">
-                      <div className="flex items-center justify-between">
-                        <div className="text-xs text-gray-500">
-                          Activities
-                          {job.status === 'overdue' && (
-                            <span className="bg-red-100 text-red-700 px-1 rounded ml-1">1</span>
-                          )}
-                          {job.status === 'completed' && (
-                            <span className="bg-green-100 text-green-700 px-1 rounded ml-1">2</span>
-                          )}
+                    <div className="flex space-x-1">
+                      <button 
+                        className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
+                        onClick={() => setMapInteracting(!mapInteracting)}
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="h-full">
+                    <SchedulerPro
+                      initialView={calendarView}
+                      resources={[
+                        { id: "unassigned", name: "Unassigned", color: "#9CA3AF" },
+                        { id: "ashley", name: "Ashley", color: "#60A5FA" },
+                        { id: "john", name: "John", color: "#34D399" },
+                        { id: "sarah", name: "Sarah", color: "#F59E0B" },
+                      ]}
+                      dataAdapter={{
+                        source: mockJobs.map(job => ({
+                          id: job.id.toString(),
+                          title: job.customer,
+                          start: new Date().toISOString(),
+                          end: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+                          resourceId: job.technician || 'unassigned',
+                          color: job.status === 'completed' ? '#22c55e' :
+                                 job.status === 'overdue' ? '#ef4444' :
+                                 '#3b82f6',
+                          status: job.status,
+                          service: job.service
+                        }))
+                      }}
+                      hideToolbar={true}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+              {/* Today's Schedule */}
+              <div className="lg:col-span-2 bg-white/90 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200">
+                <div className="p-2 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-800">Today's Schedule</h3>
+                    <div className="flex gap-2">
+                      <button 
+                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
+                        onClick={handleAddJob}
+                      >
+                        <Plus className="w-3 h-3" />
+                        Add Job
+                      </button>
+                      <button 
+                        className="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors flex items-center gap-1"
+                        onClick={handleOptimizeRoute}
+                      >
+                        <Route className="w-3 h-3" />
+                        Optimize Route
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-2">
+                  <div 
+                    className="space-y-1 max-h-64"
+                    style={{
+                      marginRight: '15px',
+                      scrollbarGutter: 'stable',
+                      overflowY: 'auto',
+                      overflowX: 'hidden',
+                      scrollbarWidth: 'thin',
+                      msOverflowStyle: 'none'
+                    }}
+                  >
+                    {mockJobs.map((job) => (
+                      <div 
+                        key={job.id}
+                        className={`bg-white rounded-lg border border-gray-200 p-1 hover:shadow-md transition-all cursor-pointer ${
+                          getStatusColor(job.status)
+                        } border-l-4`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex gap-1">
+                              {job.agreements.map((agreement) => {
+                                const { icon: Icon, color } = agreementIcons[agreement as keyof typeof agreementIcons];
+                                return (
+                                  <span key={agreement} className={`w-3.5 h-3.5 rounded-full ${color} flex items-center justify-center`}>
+                                    <Icon className="w-2 h-2 text-white" />
+                                  </span>
+                                );
+                              })}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-gray-800">{job.customer}</div>
+                              <div className="text-sm text-gray-600">{job.service} • {job.time}</div>
+                              {job.overdue && (
+                                <div className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                                  <AlertTriangle className="w-3 h-3" />
+                                  Overdue by {job.overdueDays} days
+                                </div>
+                              )}
+                              {job.status === 'completed' && (
+                                <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                                  <Check className="w-3 h-3" />
+                                  Completed
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {getStatusBadge(job.status, job.technician)}
+                            <div className="flex gap-1">
+                              <button className="p-1 text-gray-400 hover:text-blue-600 transition-colors">
+                                <Phone className="w-4 h-4" />
+                              </button>
+                              <button className="p-1 text-gray-400 hover:text-green-600 transition-colors">
+                                <Mail className="w-4 h-4" />
+                              </button>
+                              <button className="p-1 text-gray-400 hover:text-purple-600 transition-colors">
+                                <MessageCircle className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                        <button className="text-xs text-purple-600 hover:text-purple-700 flex items-center gap-1">
-                          <Plus className="w-3 h-3" />
-                          Schedule
-                        </button>
+                        <div className="mt-1 pt-1 border-t border-gray-100">
+                          <div className="flex items-center justify-between">
+                            <div className="text-xs text-gray-500">
+                              Activities
+                              {job.status === 'overdue' && (
+                                <span className="bg-red-100 text-red-700 px-1 rounded ml-1">1</span>
+                              )}
+                              {job.status === 'completed' && (
+                                <span className="bg-green-100 text-green-700 px-1 rounded ml-1">2</span>
+                              )}
+                            </div>
+                            <button className="text-xs text-purple-600 hover:text-purple-700 flex items-center gap-1">
+                              <Plus className="w-3 h-3" />
+                              Schedule
+                            </button>
+                          </div>
+                        </div>
                       </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Activity Feed */}
+              <div className="bg-white/50 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200">
+                <div className="p-2 border-b border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-800">Activity Feed</h3>
+                </div>
+                <div className="p-2">
+                  <div 
+                    className="space-y-1 max-h-64"
+                    style={{
+                      marginRight: '15px',
+                      scrollbarGutter: 'stable',
+                      overflowY: 'auto',
+                      overflowX: 'hidden',
+                      scrollbarWidth: 'thin',
+                      msOverflowStyle: 'none'
+                    }}
+                  >
+                    {mockActivityFeed.map((activity) => (
+                      <div key={activity.id} className="flex items-start gap-3">
+                        <div className={`w-2 h-2 rounded-full mt-2 ${activity.color}`}></div>
+                        <div className="flex-1">
+                          <div className="text-sm text-gray-800">{activity.message}</div>
+                          <div className="text-xs text-gray-500">
+                            {activity.amount && `${activity.amount} • `}
+                            {activity.detail && `${activity.detail} • `}
+                            {activity.time}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tabsActive === 'crm-operations' && (
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Today's Operations</h3>
+              <div className="space-y-3">
+                {mockJobs.map((job) => (
+                  <div key={job.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <div className="font-medium text-gray-800">{job.customer}</div>
+                      <div className="text-sm text-gray-600">{job.service} • {job.time}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        job.status === 'completed' ? 'bg-green-100 text-green-700' :
+                        job.status === 'overdue' ? 'bg-red-100 text-red-700' :
+                        'bg-blue-100 text-blue-700'
+                      }`}>
+                        {job.status}
+                      </span>
+                      <span className="text-sm text-gray-500">{job.technician || 'Unassigned'}</span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-          
-                     {/* Activity Feed */}
-                     <div className="bg-white/50 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200">
-            <div className="p-2 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">Activity Feed</h3>
+        )}
+
+        {tabsActive === 'crm-customers' && (
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Customer Experience</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-green-50 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-green-600">4.8/5.0</div>
+                  <div className="text-sm text-green-700">Customer Satisfaction</div>
+                </div>
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-blue-600">156</div>
+                  <div className="text-sm text-blue-700">Active Customers</div>
+                </div>
+                <div className="bg-purple-50 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-purple-600">23</div>
+                  <div className="text-sm text-purple-700">New This Month</div>
+                </div>
+              </div>
             </div>
-                                      <div className="p-2">
-               <div 
-                 className="space-y-1 max-h-64"
-                 style={{
-                   marginRight: '15px',
-                   scrollbarGutter: 'stable',
-                   overflowY: 'auto',
-                   overflowX: 'hidden',
-                   scrollbarWidth: 'thin',
-                   msOverflowStyle: 'none'
-                 }}
-               >
-                 {mockActivityFeed.map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-3">
-                    <div className={`w-2 h-2 rounded-full mt-2 ${activity.color}`}></div>
+          </div>
+        )}
+
+        {tabsActive === 'crm-technicians' && (
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Technician & Dispatch</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="font-medium text-gray-800">Ashley Davis</div>
+                    <div className="text-sm text-gray-600">Available • 3 jobs today</div>
+                  </div>
+                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Available</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="font-medium text-gray-800">John Smith</div>
+                    <div className="text-sm text-gray-600">On Job • 2 jobs today</div>
+                  </div>
+                  <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">On Job</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="font-medium text-gray-800">Sarah Wilson</div>
+                    <div className="text-sm text-gray-600">Available • 4 jobs today</div>
+                  </div>
+                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Available</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tabsActive === 'crm-financial' && (
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Financial Overview</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-green-50 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-green-600">$18,240</div>
+                  <div className="text-sm text-green-700">Today's Revenue</div>
+                </div>
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-blue-600">$124,750</div>
+                  <div className="text-sm text-blue-700">This Month</div>
+                </div>
+                <div className="bg-orange-50 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-orange-600">$23,400</div>
+                  <div className="text-sm text-orange-700">Outstanding AR</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tabsActive === 'crm-inventory' && (
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Inventory & Compliance</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="font-medium text-gray-800">Pest Control Chemicals</div>
+                    <div className="text-sm text-gray-600">85% in stock</div>
+                  </div>
+                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Good</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="font-medium text-gray-800">Safety Equipment</div>
+                    <div className="text-sm text-gray-600">All compliant</div>
+                  </div>
+                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Compliant</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="font-medium text-gray-800">Vehicle Maintenance</div>
+                    <div className="text-sm text-gray-600">2 vehicles due</div>
+                  </div>
+                  <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">Due Soon</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tabsActive === 'jobs' && (
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Job Progress</h3>
+              <div className="space-y-3">
+                {mockJobs.map((job) => (
+                  <div key={job.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex-1">
-                      <div className="text-sm text-gray-800">{activity.message}</div>
-                      <div className="text-xs text-gray-500">
-                        {activity.amount && `${activity.amount} • `}
-                        {activity.detail && `${activity.detail} • `}
-                        {activity.time}
+                      <div className="font-medium text-gray-800">{job.customer}</div>
+                      <div className="text-sm text-gray-600">{job.service} • {job.technician || 'Unassigned'}</div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-24">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full ${
+                              job.status === 'completed' ? 'bg-green-500' :
+                              job.status === 'overdue' ? 'bg-red-500' :
+                              'bg-blue-500'
+                            }`}
+                            style={{ 
+                              width: job.status === 'completed' ? '100%' :
+                                     job.status === 'overdue' ? '0%' : '50%'
+                            }}
+                          ></div>
+                        </div>
                       </div>
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        job.status === 'completed' ? 'bg-green-100 text-green-700' :
+                        job.status === 'overdue' ? 'bg-red-100 text-red-700' :
+                        'bg-blue-100 text-blue-700'
+                      }`}>
+                        {job.status}
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {tabsActive === 'analytics' && (
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Analytics</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <h4 className="font-medium text-blue-800 mb-2">Revenue Analytics</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-blue-700">This Week</span>
+                      <span className="text-sm font-medium text-blue-800">$45,600</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-blue-700">Last Week</span>
+                      <span className="text-sm font-medium text-blue-800">$42,300</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-blue-700">Growth</span>
+                      <span className="text-sm font-medium text-green-600">+7.8%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-purple-50 rounded-lg p-4">
+                  <h4 className="font-medium text-purple-800 mb-2">Live Statistics</h4>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-purple-600">1,247</div>
+                    <div className="text-sm text-purple-700">Total Operations</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tabsActive === 'customization' && (
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Customization</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Primary Color</label>
+                  <input 
+                    type="text" 
+                    defaultValue="#cb0c9f"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Brand Name</label>
+                  <input 
+                    type="text" 
+                    defaultValue="VeroPest Suite"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
+    </div>
   );
 }
