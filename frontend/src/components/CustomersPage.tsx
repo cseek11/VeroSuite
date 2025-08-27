@@ -153,8 +153,9 @@ export default function CustomersPage() {
 
   // Filter customers based on search and type
   const filteredCustomers = customers.filter(customer => {
-    const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (customer.email && customer.email.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesSearch = (customer.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (customer.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (customer.phone?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || customer.account_type === filterType;
     return matchesSearch && matchesType;
   });
@@ -197,6 +198,7 @@ export default function CustomersPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
@@ -568,6 +570,7 @@ export default function CustomersPage() {
             </Card>
         </div>
       )}
+      </div>
     </div>
   );
 }

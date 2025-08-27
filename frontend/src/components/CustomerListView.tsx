@@ -233,9 +233,9 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
   // Filter customers based on search and type
   const filteredCustomers = useMemo(() => {
     return customers.filter(customer => {
-      const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           customer.phone.includes(searchTerm);
+      const matchesSearch = (customer.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                           (customer.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                           (customer.phone?.toLowerCase() || '').includes(searchTerm.toLowerCase());
       const matchesType = filterType === 'all' || customer.account_type === filterType;
       return matchesSearch && matchesType;
     });

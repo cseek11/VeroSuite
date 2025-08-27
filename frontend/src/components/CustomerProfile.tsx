@@ -298,8 +298,8 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({
     
     if (noteSearch) {
       filtered = filtered.filter(note => 
-        note.content.toLowerCase().includes(noteSearch.toLowerCase()) ||
-        note.author.toLowerCase().includes(noteSearch.toLowerCase())
+        (note.content?.toLowerCase() || '').includes(noteSearch.toLowerCase()) ||
+        (note.author?.toLowerCase() || '').includes(noteSearch.toLowerCase())
       );
     }
     

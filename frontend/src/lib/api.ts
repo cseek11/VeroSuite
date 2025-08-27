@@ -142,16 +142,29 @@ export const jobsApi = {
     // Transform data to match expected format
     return data?.map(job => ({
       id: job.id,
-      title: job.work_orders?.service_type || 'Unknown Service',
-      start: job.scheduled_date,
-      end: job.scheduled_date, // You might want to calculate this based on estimated_duration
       status: job.status,
-      technician: job.technician_id,
-      location: job.locations?.address_line1 || 'Unknown Location',
-      description: job.work_orders?.description || '',
-      color: job.status === 'completed' ? '#10b981' : 
-             job.status === 'in-progress' ? '#3b82f6' : 
-             job.status === 'scheduled' ? '#f59e0b' : '#6b7280'
+      priority: job.priority,
+      scheduled_date: job.scheduled_date,
+      time_window: { 
+        start: job.scheduled_start_time, 
+        end: job.scheduled_end_time 
+      },
+      customer: { 
+        id: job.accounts?.id, 
+        name: job.accounts?.name || 'Unknown Customer', 
+        type: job.accounts?.account_type 
+      },
+      location: {
+        id: job.locations?.id,
+        name: job.locations?.name || 'Unknown Location',
+        address: `${job.locations?.address_line1 || ''}, ${job.locations?.city || ''}, ${job.locations?.state || ''}`,
+      },
+      service: {
+        type: job.work_orders?.service_type || 'Unknown Service',
+        description: job.work_orders?.description || '',
+        price: job.work_orders?.service_price,
+      },
+      technician_id: job.technician_id,
     })) || [];
   },
   

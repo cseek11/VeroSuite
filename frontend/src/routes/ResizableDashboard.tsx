@@ -1775,19 +1775,21 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
 
         <div className="flex">
           {/* Sidebar */}
-          <DashboardSidebar
-            isOpen={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-            isCollapsed={sidebarCollapsed}
-            onToggleCollapse={toggleSidebar}
-            onAddCustomCard={addCustomCard}
-            onResetLayout={resetLayout}
-          />
+          {showHeader && (
+            <DashboardSidebar
+              isOpen={sidebarOpen}
+              onClose={() => setSidebarOpen(false)}
+              isCollapsed={sidebarCollapsed}
+              onToggleCollapse={toggleSidebar}
+              onAddCustomCard={addCustomCard}
+              onResetLayout={resetLayout}
+            />
+          )}
 
                     {/* Main Content */}
           <div 
             className="flex-1 p-1 transition-all duration-300"
-            style={{ marginLeft: sidebarCollapsed ? '6px' : '6px' }}
+            style={{ marginLeft: showHeader ? (sidebarCollapsed ? '6px' : '6px') : '0px' }}
           >
             <div className="max-w-7xl mx-auto">
               {/* Layout Mode Indicator and Settings */}

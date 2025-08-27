@@ -52,6 +52,7 @@ const AgreementIndicator = ({ agreementType }: { agreementType: AgreementType })
       <div className={`w-4 h-4 rounded-full ${config.color} flex items-center justify-center shadow-sm`}>
         <Shield className="w-3 h-3 text-white" />
       </div>
+      
     </Tooltip>
   );
 };
@@ -251,212 +252,183 @@ export default function Customers() {
   return (
     <LayoutWrapper>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Typography variant="h1" className="text-gray-900">
-            Customers
-          </Typography>
-          <Typography variant="body1" className="text-gray-600 mt-2">
-            Manage your customer accounts and locations
-          </Typography>
-        </div>
-
-        {/* Search and Actions Bar */}
-        <div className={`flex flex-col sm:flex-row gap-4 mb-6 ${isCompactMode ? 'mb-4' : 'mb-6'}`}>
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search customers..."
-                value={search}
-                onChange={setSearch}
-                className={`pl-10 ${isCompactMode ? 'h-9 px-3 text-sm' : ''}`}
-              />
-            </div>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size={isCompactMode ? "sm" : "md"}
-              onClick={() => setIsCompactMode(!isCompactMode)}
-              className={`flex items-center gap-2 ${isCompactMode ? 'h-9 px-3 text-sm' : ''}`}
-            >
-              {isCompactMode ? 'Standard View' : 'Compact View'}
-            </Button>
-
-            <Button
-              variant="primary"
-              size={isCompactMode ? "sm" : "md"}
-              className={`flex items-center gap-2 ${isCompactMode ? 'h-10 px-4 text-sm' : ''}`}
-            >
-              <UserPlus className="h-4 w-4" />
-              New Customer
-            </Button>
-          </div>
-        </div>
-
-        {/* New Account Form */}
-        <Card className="p-6 mb-6">
-          <Typography variant="h6" className="text-gray-900 mb-4">
-            New Account
-          </Typography>
-          
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Account Name
-                </label>
-                <input
-                  {...register('name')}
-                  placeholder="Enter account name"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                {errors.name && (
-                  <p className="text-sm text-red-600 mt-1">{errors.name.message}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Account Type
-                </label>
-                <select 
-                  {...register('account_type')}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="commercial">Commercial</option>
-                  <option value="residential">Residential</option>
-                </select>
-                {errors.account_type && (
-                  <p className="text-sm text-red-600 mt-1">{errors.account_type.message as string}</p>
-                )}
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number
-                </label>
-                <InputMask 
-                  mask="(999) 999-9999" 
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="(555) 123-4567"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Postal Code
-                </label>
-                <InputMask 
-                  mask="99999" 
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="15222"
-                />
-              </div>
-            </div>
-            
-            <Button
-              variant="primary"
-              disabled={isSubmitting}
-              onClick={handleSubmit(onSubmit)}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              {isSubmitting ? 'Creating...' : 'Create Account'}
-            </Button>
-          </form>
-        </Card>
-
-        {/* Loading State */}
-        {isLoading && (
-          <div className="flex justify-center py-8">
-            <LoadingSpinner text="Loading customers..." />
-          </div>
-        )}
-
-        {/* Error State */}
-        {isError && (
-          <Alert type="danger" className="mb-6">
-            <Typography variant="body2">
-              Failed to load customers
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+          {/* Header */}
+          <div className="mb-8">
+            <Typography variant="h1" className="text-gray-900">
+              Customers
             </Typography>
-          </Alert>
-        )}
+            <Typography variant="body1" className="text-gray-600 mt-2">
+              Manage your customer accounts and locations
+            </Typography>
+          </div>
 
-        {/* Customers List */}
-        {!isLoading && Array.isArray(data) && (
-          <div className={isCompactMode ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3" : "space-y-4"}>
-            {data.length === 0 ? (
-              <Card className={isCompactMode ? "p-4 text-center" : "p-8 text-center"}>
-                <Users className={`${isCompactMode ? 'h-8 w-8' : 'h-12 w-12'} text-gray-400 mx-auto mb-4`} />
-                <Typography variant={isCompactMode ? "body1" : "h6"} className="text-gray-900 mb-2">
-                  No Customers Found
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
-                  {search ? 'No customers match your search criteria.' : 'No customers have been added yet.'}
-                </Typography>
-              </Card>
-            ) : (
-              data.map((acc: any) => {
-                const isOverdue = (acc.overdue_days || 0) > 30;
-                
-                return (
-                  <Card 
-                    key={acc.id} 
-                    className={`${isCompactMode ? 'py-3 px-4' : 'p-6'} hover:shadow-lg transition-shadow relative ${
-                      isOverdue ? 'border-2 border-red-500' : ''
-                    }`}
+          {/* Search and Actions Bar */}
+          <div className={`flex flex-col sm:flex-row gap-4 mb-6 ${isCompactMode ? 'mb-4' : 'mb-6'}`}>
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search customers..."
+                  value={search}
+                  onChange={setSearch}
+                  className={`pl-10 ${isCompactMode ? 'h-9 px-3 text-sm' : ''}`}
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size={isCompactMode ? "sm" : "md"}
+                onClick={() => setIsCompactMode(!isCompactMode)}
+                className={`flex items-center gap-2 ${isCompactMode ? 'h-9 px-3 text-sm' : ''}`}
+              >
+                {isCompactMode ? 'Standard View' : 'Compact View'}
+              </Button>
+
+              <Button
+                variant="primary"
+                size={isCompactMode ? "sm" : "md"}
+                className={`flex items-center gap-2 ${isCompactMode ? 'h-10 px-4 text-sm' : ''}`}
+              >
+                <UserPlus className="h-4 w-4" />
+                New Customer
+              </Button>
+            </div>
+          </div>
+
+          {/* New Account Form */}
+          <Card className="p-6 mb-6">
+            <Typography variant="h6" className="text-gray-900 mb-4">
+              New Account
+            </Typography>
+            
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Account Name
+                  </label>
+                  <input
+                    {...register('name')}
+                    placeholder="Enter account name"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  {errors.name && (
+                    <p className="text-sm text-red-600 mt-1">{errors.name.message}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Account Type
+                  </label>
+                  <select 
+                    {...register('account_type')}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <AgreementIndicators customer={acc} />
-                    
-                    {isCompactMode ? (
-                      // Compact Layout
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Building className="h-4 w-4 text-blue-500" />
-                          <Typography variant="body1" className="text-gray-900 font-semibold truncate">
-                            {acc.name}
-                          </Typography>
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-xs text-gray-600">
-                            <MapPin className="h-3 w-3" />
-                            <span>{acc.locations?.length || 0} locations</span>
-                          </div>
-                          
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            acc.account_type === 'commercial' 
-                              ? 'bg-blue-100 text-blue-800' 
-                              : 'bg-green-100 text-green-800'
-                          }`}>
-                            {acc.account_type}
-                          </span>
-                        </div>
-                        
-                        <div className="flex gap-1">
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => setSelectedCustomerId(acc.id)}
-                            className="flex items-center gap-1 h-8 px-2 text-xs"
-                          >
-                            <Eye className="h-3 w-3" />
-                            View
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      // Standard Layout
-                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <Building className="h-5 w-5 text-blue-500" />
-                            <Typography variant="h6" className="text-gray-900">
+                    <option value="commercial">Commercial</option>
+                    <option value="residential">Residential</option>
+                  </select>
+                  {errors.account_type && (
+                    <p className="text-sm text-red-600 mt-1">{errors.account_type.message as string}</p>
+                  )}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number
+                  </label>
+                  <InputMask 
+                    mask="(999) 999-9999" 
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Postal Code
+                  </label>
+                  <InputMask 
+                    mask="99999" 
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="15222"
+                  />
+                </div>
+              </div>
+              
+              <Button
+                variant="primary"
+                disabled={isSubmitting}
+                onClick={handleSubmit(onSubmit)}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                {isSubmitting ? 'Creating...' : 'Create Account'}
+              </Button>
+            </form>
+          </Card>
+
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex justify-center py-8">
+              <LoadingSpinner text="Loading customers..." />
+            </div>
+          )}
+
+          {/* Error State */}
+          {isError && (
+            <Alert type="danger" className="mb-6">
+              <Typography variant="body2">
+                Failed to load customers
+              </Typography>
+            </Alert>
+          )}
+
+          {/* Customers List */}
+          {!isLoading && Array.isArray(data) && (
+            <div className={isCompactMode ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3" : "space-y-4"}>
+              {data.length === 0 ? (
+                <Card className={isCompactMode ? "p-4 text-center" : "p-8 text-center"}>
+                  <Users className={`${isCompactMode ? 'h-8 w-8' : 'h-12 w-12'} text-gray-400 mx-auto mb-4`} />
+                  <Typography variant={isCompactMode ? "body1" : "h6"} className="text-gray-900 mb-2">
+                    No Customers Found
+                  </Typography>
+                  <Typography variant="body2" className="text-gray-600">
+                    {search ? 'No customers match your search criteria.' : 'No customers have been added yet.'}
+                  </Typography>
+                </Card>
+              ) : (
+                data.map((acc: any) => {
+                  const isOverdue = (acc.overdue_days || 0) > 30;
+                  
+                  return (
+                    <Card 
+                      key={acc.id} 
+                      className={`${isCompactMode ? 'py-3 px-4' : 'p-6'} hover:shadow-lg transition-shadow relative ${
+                        isOverdue ? 'border-2 border-red-500' : ''
+                      }`}
+                    >
+                      <AgreementIndicators customer={acc} />
+                      
+                      {isCompactMode ? (
+                        // Compact Layout
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Building className="h-4 w-4 text-blue-500" />
+                            <Typography variant="body1" className="text-gray-900 font-semibold truncate">
                               {acc.name}
                             </Typography>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <MapPin className="h-3 w-3" />
+                              <span>{acc.locations?.length || 0} locations</span>
+                            </div>
+                            
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                               acc.account_type === 'commercial' 
                                 ? 'bg-blue-100 text-blue-800' 
@@ -466,55 +438,86 @@ export default function Customers() {
                             </span>
                           </div>
                           
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4" />
-                              <span>{acc.locations?.length || 0} locations</span>
-                            </div>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              onClick={() => setSelectedCustomerId(acc.id)}
+                              className="flex items-center gap-1 h-8 px-2 text-xs"
+                            >
+                              <Eye className="h-3 w-3" />
+                              View
+                            </Button>
                           </div>
                         </div>
+                      ) : (
+                        // Standard Layout
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <Building className="h-5 w-5 text-blue-500" />
+                              <Typography variant="h6" className="text-gray-900">
+                                {acc.name}
+                              </Typography>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                acc.account_type === 'commercial' 
+                                  ? 'bg-blue-100 text-blue-800' 
+                                  : 'bg-green-100 text-green-800'
+                              }`}>
+                                {acc.account_type}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4" />
+                                <span>{acc.locations?.length || 0} locations</span>
+                              </div>
+                            </div>
+                          </div>
 
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => setSelectedCustomerId(acc.id)}
-                            className="flex items-center gap-2"
-                          >
-                            <Eye className="h-4 w-4" />
-                            View Details
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => qc.invalidateQueries({ queryKey: ['crm', 'account', acc.id, 'locations'] })}
-                          >
-                            Refresh Locations
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => createLocation.mutate({ 
-                              account_id: acc.id, 
-                              name: 'New Site', 
-                              address_line1: '100 Test St', 
-                              city: 'Pittsburgh', 
-                              state: 'PA', 
-                              postal_code: '15222' 
-                            })}
-                            disabled={createLocation.isPending}
-                          >
-                            {createLocation.isPending ? 'Adding...' : '+ Location'}
-                          </Button>
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              onClick={() => setSelectedCustomerId(acc.id)}
+                              className="flex items-center gap-2"
+                            >
+                              <Eye className="h-4 w-4" />
+                              View Details
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => qc.invalidateQueries({ queryKey: ['crm', 'account', acc.id, 'locations'] })}
+                            >
+                              Refresh Locations
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => createLocation.mutate({ 
+                                account_id: acc.id, 
+                                name: 'New Site', 
+                                address_line1: '100 Test St', 
+                                city: 'Pittsburgh', 
+                                state: 'PA', 
+                                postal_code: '15222' 
+                              })}
+                              disabled={createLocation.isPending}
+                            >
+                              {createLocation.isPending ? 'Adding...' : '+ Location'}
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </Card>
-                );
-              })
-            )}
-          </div>
-        )}
+                      )}
+                    </Card>
+                  );
+                })
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </LayoutWrapper>
   );

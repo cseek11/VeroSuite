@@ -285,7 +285,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({ checked, defaultChecked, onC
           type="checkbox" 
           checked={isChecked} 
           onChange={(e) => handleChange(e.target.checked)} 
-          className="crm-checkbox" 
+          className="absolute opacity-0 w-4 h-4 cursor-pointer" 
         />
         <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-200 ${
           isChecked ? 'bg-purple-500 border-purple-500' : 'border-gray-200 hover:border-purple-400 bg-white'

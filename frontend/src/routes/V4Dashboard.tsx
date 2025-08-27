@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth';
-import V4Layout from '@/components/layout/V4Layout';
+// import V4Layout from '@/components/layout/V4Layout';
+import MigrationStatus from '@/components/MigrationStatus';
 import { 
   DollarSign, 
   CheckCircle, 
@@ -18,8 +19,13 @@ import {
   Mouse,
   AlertTriangle,
   Check,
-  TrendingUp
+  TrendingUp,
+  MapPin,
+  ChevronDown
 } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import SchedulerPro from '@/components/scheduler/SchedulerPro';
 
 // Mock data - will be replaced with real API calls
 const mockKPIs = [
@@ -140,6 +146,12 @@ const agreementIcons = {
 export default function V4Dashboard() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  
+  // Map and Calendar state
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [calendarView, setCalendarView] = useState('week');
+  const [mapInteracting, setMapInteracting] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const handleAddJob = () => {
     navigate('/jobs/new');
@@ -168,9 +180,10 @@ export default function V4Dashboard() {
     return <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">{technician}</span>;
   };
 
-     return (
-     <V4Layout>
-       <div className="space-y-3">
+       return (
+      <div className="space-y-3">
+        {/* Migration Status - Only show in development */}
+        {/* {import.meta.env.DEV && <MigrationStatus showDetails={true} />} */}
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -213,8 +226,308 @@ export default function V4Dashboard() {
           })}
         </div>
 
-                 {/* Main Content Grid */}
-         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        {/* Dashboard Overview Section */}
+        <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200">
+          <div className="p-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800">Dashboard Overview</h3>
+            <p className="text-sm text-gray-600">Key metrics and performance indicators</p>
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Overview Cards */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-700">Total Jobs</p>
+                    <p className="text-2xl font-bold text-blue-900">{mockJobs.length}</p>
+                    <p className="text-xs text-blue-600">This week</p>
+                  </div>
+                  <div className="p-2 bg-blue-200 rounded-lg">
+                    <CheckCircle className="w-6 h-6 text-blue-700" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-green-700">Completed</p>
+                    <p className="text-2xl font-bold text-green-900">
+                      {mockJobs.filter(job => job.status === 'completed').length}
+                    </p>
+                    <p className="text-xs text-green-600">Today</p>
+                  </div>
+                  <div className="p-2 bg-green-200 rounded-lg">
+                    <Check className="w-6 h-6 text-green-700" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-orange-700">In Progress</p>
+                    <p className="text-2xl font-bold text-orange-900">
+                      {mockJobs.filter(job => job.status === 'scheduled').length}
+                    </p>
+                    <p className="text-xs text-orange-600">Active</p>
+                  </div>
+                  <div className="p-2 bg-orange-200 rounded-lg">
+                    <Clock className="w-6 h-6 text-orange-700" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-red-700">Overdue</p>
+                    <p className="text-2xl font-bold text-red-900">
+                      {mockJobs.filter(job => job.overdue).length}
+                    </p>
+                    <p className="text-xs text-red-600">Requires attention</p>
+                  </div>
+                  <div className="p-2 bg-red-200 rounded-lg">
+                    <AlertTriangle className="w-6 h-6 text-red-700" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Performance Metrics */}
+            <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-gray-800 mb-3">Performance Summary</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Completion Rate</span>
+                    <span className="text-sm font-medium text-green-600">94.2%</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Average Response Time</span>
+                    <span className="text-sm font-medium text-blue-600">2.3 hours</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Customer Satisfaction</span>
+                    <span className="text-sm font-medium text-purple-600">4.8/5.0</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-gray-800 mb-3">Quick Actions</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <button 
+                    className="p-2 bg-purple-100 text-purple-700 rounded text-sm font-medium hover:bg-purple-200 transition-colors flex items-center gap-1"
+                    onClick={handleAddJob}
+                  >
+                    <Plus className="w-3 h-3" />
+                    Add Job
+                  </button>
+                  <button 
+                    className="p-2 bg-blue-100 text-blue-700 rounded text-sm font-medium hover:bg-blue-200 transition-colors flex items-center gap-1"
+                    onClick={handleOptimizeRoute}
+                  >
+                    <Route className="w-3 h-3" />
+                    Optimize
+                  </button>
+                  <button 
+                    className="p-2 bg-green-100 text-green-700 rounded text-sm font-medium hover:bg-green-200 transition-colors flex items-center gap-1"
+                  >
+                    <Phone className="w-3 h-3" />
+                    Call Center
+                  </button>
+                  <button 
+                    className="p-2 bg-orange-100 text-orange-700 rounded text-sm font-medium hover:bg-orange-200 transition-colors flex items-center gap-1"
+                  >
+                    <Mail className="w-3 h-3" />
+                    Messages
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Map and Calendar Overview */}
+        <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200">
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">Operations Overview</h3>
+                <p className="text-sm text-gray-600">Map view with calendar overlay</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsFullScreen(!isFullScreen)}
+                  className="bg-purple-500 text-white px-3 py-1.5 rounded-lg font-medium hover:bg-purple-600 transition-colors flex items-center gap-1"
+                >
+                  <MapPin className="w-4 h-4" />
+                  {isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div className="relative" style={{ height: '600px' }}>
+            {/* Map Background */}
+            <div className="absolute inset-0 z-0">
+              <Suspense fallback={
+                <div className="w-full h-full flex items-center justify-center bg-blue-100 text-blue-600">
+                  <div className="text-center">
+                    <MapPin className="mx-auto h-12 w-12 mb-4" />
+                    <p className="text-lg font-medium">Loading Map...</p>
+                    <p className="text-sm">Pittsburgh, PA</p>
+                  </div>
+                </div>
+              }>
+                <MapContainer 
+                  center={[40.44, -79.99]} 
+                  zoom={windowWidth < 768 ? 10 : windowWidth < 1024 ? 11 : 12}
+                  className="h-full w-full"
+                  style={{ height: '100%', minHeight: '600px' }}
+                >
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  
+                  {/* Job Locations */}
+                  {mockJobs.map((job) => (
+                    <Marker 
+                      key={job.id} 
+                      position={[
+                        40.44 + (Math.random() - 0.5) * 0.1, 
+                        -79.99 + (Math.random() - 0.5) * 0.1
+                      ]}
+                    >
+                      <Popup>
+                        <div className="p-2">
+                          <div className="font-medium text-sm">
+                            {job.customer}
+                          </div>
+                          <div className="text-gray-500 text-xs">
+                            {job.technician || 'Unassigned'} • {job.status}
+                          </div>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ))}
+                  
+                  {/* Sample Route Lines */}
+                  {mockJobs.length > 1 && (
+                    <Polyline
+                      positions={[
+                        [40.44, -79.99],
+                        [40.45, -79.98],
+                        [40.46, -79.97],
+                        [40.47, -79.96]
+                      ]}
+                      color="blue"
+                      weight={3}
+                      opacity={0.7}
+                    />
+                  )}
+                </MapContainer>
+              </Suspense>
+            </div>
+
+            {/* Calendar Overlay */}
+            <div 
+              className={`absolute z-10 bg-white/30 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300 ${mapInteracting ? 'opacity-0' : 'opacity-100'}`}
+              style={{ 
+                top: '20px',
+                left: '20px',
+                width: '400px', 
+                height: '500px',
+                minWidth: '400px',
+                minHeight: '500px',
+                maxWidth: '600px',
+                maxHeight: '700px'
+              }}
+            >
+              <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-gray-50/30">
+                <div className="flex items-center space-x-1">
+                  <button 
+                    onClick={() => setCalendarView('day')}
+                    className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
+                      calendarView === 'day' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    Day
+                  </button>
+                  <button 
+                    onClick={() => setCalendarView('week')}
+                    className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
+                      calendarView === 'week' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    Week
+                  </button>
+                  <button 
+                    onClick={() => setCalendarView('month')}
+                    className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
+                      calendarView === 'month' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    Month
+                  </button>
+                  <button 
+                    onClick={() => setCalendarView('timeline')}
+                    className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
+                      calendarView === 'timeline' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    Timeline
+                  </button>
+                </div>
+                <div className="flex space-x-1">
+                  <button 
+                    className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
+                    onClick={() => setMapInteracting(!mapInteracting)}
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="h-full">
+                <SchedulerPro
+                  initialView={calendarView}
+                  resources={[
+                    { id: "unassigned", name: "Unassigned", color: "#9CA3AF" },
+                    { id: "ashley", name: "Ashley", color: "#60A5FA" },
+                    { id: "john", name: "John", color: "#34D399" },
+                    { id: "sarah", name: "Sarah", color: "#F59E0B" },
+                  ]}
+                  dataAdapter={{
+                    source: mockJobs.map(job => ({
+                      id: job.id.toString(),
+                      title: job.customer,
+                      start: new Date().toISOString(),
+                      end: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+                      resourceId: job.technician || 'unassigned',
+                      color: job.status === 'completed' ? '#22c55e' :
+                             job.status === 'overdue' ? '#ef4444' :
+                             '#3b82f6',
+                      status: job.status,
+                      service: job.service
+                    }))
+                  }}
+                  hideToolbar={true}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           {/* Today's Schedule */}
                                 <div className="lg:col-span-2 bg-white/90 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200">
              <div className="p-2 border-b border-gray-200">
@@ -246,7 +559,7 @@ export default function V4Dashboard() {
                     scrollbarGutter: 'stable',
                     overflowY: 'auto',
                     overflowX: 'hidden',
-                    scrollbarWidth: '8px',
+                    scrollbarWidth: 'thin',
                     msOverflowStyle: 'none'
                   }}
                 >
@@ -337,7 +650,7 @@ export default function V4Dashboard() {
                    scrollbarGutter: 'stable',
                    overflowY: 'auto',
                    overflowX: 'hidden',
-                   scrollbarWidth: '8px',
+                   scrollbarWidth: 'thin',
                    msOverflowStyle: 'none'
                  }}
                >
@@ -359,6 +672,5 @@ export default function V4Dashboard() {
           </div>
         </div>
       </div>
-    </V4Layout>
   );
 }
