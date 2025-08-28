@@ -226,19 +226,19 @@ export default function SmartScheduler({ customerId }: SmartSchedulerProps) {
           <div className="mt-4 space-y-2">
             <div className="flex items-center gap-2">
               <Route className="h-4 w-4 text-blue-500" />
-              <Typography variant="body2" className="text-gray-700">
+              <Typography variant="body2" className="text-gray-900">
                 {aiRecommendations.routeOptimization}
               </Typography>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-500" />
-              <Typography variant="body2" className="text-gray-700">
+              <Typography variant="body2" className="text-gray-900">
                 {aiRecommendations.weatherForecast}
               </Typography>
             </div>
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-orange-500" />
-              <Typography variant="body2" className="text-gray-700">
+              <Typography variant="body2" className="text-gray-900">
                 {aiRecommendations.seasonalFactors}
               </Typography>
             </div>
@@ -348,13 +348,13 @@ export default function SmartScheduler({ customerId }: SmartSchedulerProps) {
         <div className="space-y-6">
           {/* Service Type Selection */}
           <div>
-            <Typography variant="body2" className="text-gray-600 mb-2">
+            <Typography variant="body2" className="crm-label !mb-1">
               Service Type
             </Typography>
             <select
               value={selectedService}
               onChange={(e) => setSelectedService(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="crm-select"
             >
               <option value="">Select service type</option>
               {serviceTypes.map((service: ServiceType) => (
@@ -367,26 +367,26 @@ export default function SmartScheduler({ customerId }: SmartSchedulerProps) {
 
           {/* Date Selection */}
           <div>
-            <Typography variant="body2" className="text-gray-600 mb-2">
+            <Typography variant="body2" className="crm-label !mb-1">
               Date
             </Typography>
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="crm-input"
             />
           </div>
 
           {/* Time Selection */}
           <div>
-            <Typography variant="body2" className="text-gray-600 mb-2">
+            <Typography variant="body2" className="crm-label !mb-1">
               Time
             </Typography>
             <select
               value={selectedTime}
               onChange={(e) => setSelectedTime(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="crm-select"
             >
               <option value="">Select time</option>
               {availableTimeSlots.map((time) => (
@@ -399,13 +399,13 @@ export default function SmartScheduler({ customerId }: SmartSchedulerProps) {
 
           {/* Technician Selection */}
           <div>
-            <Typography variant="body2" className="text-gray-600 mb-2">
+            <Typography variant="body2" className="crm-label !mb-1">
               Technician
             </Typography>
             <select
               value={selectedTechnician}
               onChange={(e) => setSelectedTechnician(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="crm-select"
             >
               <option value="">Select technician</option>
               {technicians.map((tech: Technician) => (

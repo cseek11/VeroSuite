@@ -249,7 +249,7 @@ export default function Customers() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+        <div className="crm-card">
           {/* Header */}
           <div className="mb-8">
             <Typography variant="h1" className="text-gray-900">
@@ -264,12 +264,12 @@ export default function Customers() {
           <div className={`flex flex-col sm:flex-row gap-4 mb-6 ${isCompactMode ? 'mb-4' : 'mb-6'}`}>
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-500 z-10" />
+                <input
                   placeholder="Search customers..."
                   value={search}
-                  onChange={setSearch}
-                  className={`pl-10 ${isCompactMode ? 'h-9 px-3 text-sm' : ''}`}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className={`crm-input pl-10 ${isCompactMode ? 'h-9 px-3 text-sm' : ''}`}
                 />
               </div>
             </div>
@@ -304,53 +304,53 @@ export default function Customers() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="crm-label">
                     Account Name
                   </label>
                   <input
                     {...register('name')}
                     placeholder="Enter account name"
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="crm-input"
                   />
                   {errors.name && (
-                    <p className="text-sm text-red-600 mt-1">{errors.name.message}</p>
+                    <p className="crm-error">{errors.name.message}</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="crm-label">
                     Account Type
                   </label>
                   <select 
                     {...register('account_type')}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="crm-select"
                   >
                     <option value="commercial">Commercial</option>
                     <option value="residential">Residential</option>
                   </select>
                   {errors.account_type && (
-                    <p className="text-sm text-red-600 mt-1">{errors.account_type.message as string}</p>
+                    <p className="crm-error">{errors.account_type.message as string}</p>
                   )}
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="crm-label">
                     Phone Number
                   </label>
                   <InputMask 
                     mask="(999) 999-9999" 
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="crm-input"
                     placeholder="(555) 123-4567"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="crm-label">
                     Postal Code
                   </label>
                   <InputMask 
                     mask="99999" 
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="crm-input"
                     placeholder="15222"
                   />
                 </div>

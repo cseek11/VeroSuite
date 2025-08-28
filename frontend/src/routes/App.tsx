@@ -23,6 +23,7 @@ import RoutingPage from './Routing';
 import ReportsPage from './Reports';
 import UploadsPage from './Uploads';
 import SettingsPage from './Settings';
+import CRMDemo from './CRMDemo';
 
 const LoginPage = lazy(() => import('@/routes/Login'));
 
@@ -273,6 +274,18 @@ export default function App() {
                   <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <SettingsPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/crm-demo"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <CRMDemo />
                     </Suspense>
                   </V4Layout>
                 </PrivateRoute>

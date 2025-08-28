@@ -1,3 +1,0 @@
-// Sets PostgreSQL session variable for RLS
-await this.databaseService.query(
-  `SET

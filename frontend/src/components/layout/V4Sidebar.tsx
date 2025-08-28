@@ -58,6 +58,15 @@ export default function V4Sidebar({ collapsed, onToggle, mobileOpen, onMobileClo
     onMobileClose();
   };
 
+  // Calculate the exact position for the sliding indicator
+  const getIndicatorPosition = () => {
+    const itemHeight = 44; // Standard height: py-2 (8px) + content (~28px) + space-y-1 (4px) + padding (4px)
+    const itemSpacing = 4; // space-y-1
+    const topPadding = 12; // nav padding
+    const activeIndex = navigationItems.findIndex(item => item.id === activeTab);
+    return topPadding + (activeIndex * (itemHeight + itemSpacing));
+  };
+
   return (
     <>
       {/* Mobile backdrop */}
@@ -103,7 +112,8 @@ export default function V4Sidebar({ collapsed, onToggle, mobileOpen, onMobileClo
         
                  {/* Navigation Icons */}
          <nav className="p-3 overflow-y-auto grow">
-                       <div className="space-y-2">
+                       <div className="space-y-1">
+             
              {navigationItems.map((item) => {
                const Icon = item.icon;
                const isActive = activeTab === item.id;
@@ -112,9 +122,9 @@ export default function V4Sidebar({ collapsed, onToggle, mobileOpen, onMobileClo
                  <div key={item.id} className="relative">
                    <button
                                            className={`
-                        w-full flex items-center gap-3 px-2 py-1.5 rounded-lg transition-all duration-200
+                        w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-all duration-200 relative h-11
                        ${isActive 
-                         ? 'bg-green-500 text-white' 
+                         ? 'bg-green-500/20 text-green-400 border-l-4 border-green-500' 
                          : 'text-gray-400 hover:bg-white/10 hover:text-white'
                        }
                      `}

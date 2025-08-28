@@ -6,6 +6,8 @@ import { login } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
 import { loginSchema, type LoginFormData } from '@/lib/validation';
 import { Eye, EyeOff, Mail, Lock, Building, Loader2 } from 'lucide-react';
+import { Button, Input, Card, Typography } from '@/components/ui/EnhancedUI';
+import { BackgroundBeams } from '@/components/ui/background-beams';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -17,6 +19,8 @@ export default function Login() {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -26,6 +30,8 @@ export default function Login() {
       tenantId: '',
     },
   });
+
+  const watchedValues = watch();
 
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
@@ -45,11 +51,15 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{
       background: `url('/branding/crm_BG_V2.png') center center / cover no-repeat fixed`,
       position: 'relative',
     }}>
-      <div className="w-full max-w-md">
+      {/* Background Beams Effect */}
+      <BackgroundBeams />
+      
+      {/* Content Container */}
+      <div className="relative z-10 w-full max-w-md">
         {/* Logo and Brand */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-1215 h-214 rounded-2xl mb-4 p-2">
@@ -59,115 +69,81 @@ export default function Login() {
               className="w-full h-full object-contain"
             />
           </div>
-          
+          <h1 className="text-3xl font-bold login-text mb-2">Welcome Back</h1>
+          <p className="login-subtitle">Sign in to your VeroPest Suite account</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-5 opacity-95">
+        <Card className="login-form-card p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <h1 className="inline-flex items-center justify-center text-3xl font-bold text-gray-950 mb-2">VeroPest Suite</h1>
-          <p className="text-gray-800">Sign in to your account</p>
 
             {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="space-y-2">
+              <label htmlFor="email" className="block text-sm font-medium login-text">
                 Email Address
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300 h-4 w-4" />
                 <input
-                  id="email"
                   type="email"
-                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-zinc-950 focus:border-transparent transition-colors ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className="login-gradient-input pl-10 w-full"
                   placeholder="Enter your email"
                   {...register('email')}
-                  aria-invalid={errors.email ? 'true' : 'false'}
-                  aria-describedby={errors.email ? 'email-error' : undefined}
                 />
               </div>
               {errors.email && (
-                <p id="email-error" className="text-sm text-red-600 mt-1">
-                  {errors.email.message}
-                </p>
+                <p className="text-red-300 text-sm">{errors.email.message}</p>
               )}
             </div>
 
             {/* Password Field */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="space-y-2">
+              <label htmlFor="password" className="block text-sm font-medium login-text">
                 Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300 h-4 w-4" />
                 <input
-                  id="password"
                   type={showPassword ? 'text' : 'password'}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className="login-gradient-input pl-10 pr-10 w-full"
                   placeholder="Enter your password"
                   {...register('password')}
-                  aria-invalid={errors.password ? 'true' : 'false'}
-                  aria-describedby={errors.password ? 'password-error' : undefined}
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-300 hover:text-purple-200"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               {errors.password && (
-                <p id="password-error" className="text-sm text-red-600 mt-1">
-                  {errors.password.message}
-                </p>
+                <p className="text-red-300 text-sm">{errors.password.message}</p>
               )}
             </div>
 
             {/* Tenant ID Field */}
-            <div>
-              <label htmlFor="tenantId" className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="space-y-2">
+              <label htmlFor="tenantId" className="block text-sm font-medium login-text">
                 Tenant ID
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Building className="h-5 w-5 text-gray-400" />
-                </div>
+                <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300 h-4 w-4" />
                 <input
-                  id="tenantId"
                   type="text"
-                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
-                    errors.tenantId ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Enter tenant ID"
+                  className="login-gradient-input pl-10 w-full"
+                  placeholder="Enter your tenant ID"
                   {...register('tenantId')}
-                  aria-invalid={errors.tenantId ? 'true' : 'false'}
-                  aria-describedby={errors.tenantId ? 'tenantId-error' : undefined}
                 />
               </div>
               {errors.tenantId && (
-                <p id="tenantId-error" className="text-sm text-red-600 mt-1">
-                  {errors.tenantId.message}
-                </p>
+                <p className="text-red-300 text-sm">{errors.tenantId.message}</p>
               )}
-           
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4" role="alert">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4" role="alert">
                 <div className="flex">
                   <div className="flex-shrink-0">
                     <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -181,40 +157,32 @@ export default function Login() {
               </div>
             )}
 
+            {/* Extra spacing before submit button */}
+            <div className="mt-8"></div>
+
             {/* Submit Button */}
             <button
               type="submit"
+              className="login-button w-full"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-4 rounded-xl font-medium hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
             >
               {loading ? (
-                <div className="flex items-center justify-center">
-                  <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5" />
-                  Signing in...
-                </div>
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing In...
+                </>
               ) : (
                 'Sign In'
               )}
             </button>
           </form>
-
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-xl">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Demo Credentials</h3>
-            <div className="text-xs text-gray-600 space-y-1">
-              <p><strong>Email:</strong> dispatcher@acepest.com</p>
-              <p><strong>Password:</strong> password123</p>
-              <p><strong>Tenant A:</strong> 11111111-1111-1111-1111-111111111111</p>
-              <p><strong>Tenant B:</strong> 22222222-2222-2222-2222-222222222222</p>
-            </div>
-          </div>
-        </div>
+        </Card>
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-sm text-gray-500">
-            © 2024 VeroPest Suite. All rights reserved.
-          </p>
+          <Typography variant="body2" className="text-gray-200 drop-shadow-md">
+            © 2025 VeroPest Suite. All rights reserved.
+          </Typography>
         </div>
       </div>
     </div>
