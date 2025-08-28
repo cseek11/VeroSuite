@@ -139,40 +139,40 @@ const ChartsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
       {/* Header with Filters */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6 mb-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
               Analytics Dashboard
             </h1>
-            <p className="text-slate-600 text-base">
+            <p className="text-slate-600 text-sm">
               Executive insights and performance metrics across all departments
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-4 py-2 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-medium">
-              <Download className="h-4 w-4" />
+          <div className="flex items-center gap-2">
+            <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-medium text-sm">
+              <Download className="h-3 w-3" />
               Export
             </button>
-            <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 font-medium">
-              <Plus className="h-4 w-4" />
+            <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 font-medium text-sm">
+              <Plus className="h-3 w-3" />
               New Report
             </button>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-indigo-100 rounded-md">
-              <Calendar className="h-4 w-4 text-indigo-600" />
+            <div className="p-1 bg-indigo-100 rounded-md">
+              <Calendar className="h-3 w-3 text-indigo-600" />
             </div>
             <select 
               value={dateRange} 
               onChange={(e) => setDateRange(e.target.value)}
-              className="border border-slate-200 rounded-lg px-3 py-2 min-w-[150px] bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+              className="border border-slate-200 rounded-lg px-2 py-1.5 min-w-[120px] bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
             >
               <option value="7d">Last 7 Days</option>
               <option value="30d">Last 30 Days</option>
@@ -181,13 +181,13 @@ const ChartsPage: React.FC = () => {
             </select>
           </div>
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-emerald-100 rounded-md">
-              <Users className="h-4 w-4 text-emerald-600" />
+            <div className="p-1 bg-emerald-100 rounded-md">
+              <Users className="h-3 w-3 text-emerald-600" />
             </div>
             <select 
               value={teamFilter} 
               onChange={(e) => setTeamFilter(e.target.value)}
-              className="border border-slate-200 rounded-lg px-3 py-2 min-w-[150px] bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+              className="border border-slate-200 rounded-lg px-2 py-1.5 min-w-[120px] bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm"
             >
               <option value="all">All Teams</option>
               <option value="sales">Sales Team</option>
@@ -199,26 +199,26 @@ const ChartsPage: React.FC = () => {
       </div>
 
       {/* Top KPI Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 mb-4">
         {/* Monthly Revenue */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-xl p-4 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12"></div>
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 bg-white/20 rounded-lg">
-                <DollarSign className="h-6 w-6" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-1.5 bg-white/20 rounded-lg">
+                <DollarSign className="h-5 w-5" />
               </div>
               <div className="flex items-center gap-2">
                 {getDeltaIcon(mockData.kpis.deltas.revenue)}
-                <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded-md">
+                <span className="text-xs font-semibold bg-white/20 px-1.5 py-0.5 rounded-md">
                   +{mockData.kpis.deltas.revenue}%
                 </span>
               </div>
             </div>
-            <div className="text-2xl font-bold mb-1">
+            <div className="text-xl font-bold mb-1">
               {formatCurrency(mockData.kpis.revenue)}
             </div>
-            <div className="text-blue-100 font-medium text-sm">
+            <div className="text-blue-100 font-medium text-xs">
               Monthly Revenue
             </div>
           </div>
@@ -345,18 +345,18 @@ const ChartsPage: React.FC = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left Column - Sales & Pipeline */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           {/* Revenue Trend */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6">
-            <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <div className="p-1.5 bg-indigo-100 rounded-md">
-                <TrendingUp className="h-5 w-5 text-indigo-600" />
+          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+            <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <div className="p-1 bg-indigo-100 rounded-md">
+                <TrendingUp className="h-4 w-4 text-indigo-600" />
               </div>
               Revenue Trend
             </h2>
-            <div style={{ width: '100%', height: '300px' }}>
+            <div style={{ width: '100%', height: '250px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={mockData.sales.revenueTrend}>
                   <defs>
@@ -392,14 +392,14 @@ const ChartsPage: React.FC = () => {
           </div>
 
           {/* Deals by Sales Rep */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6">
-            <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <div className="p-1.5 bg-emerald-100 rounded-md">
-                <BarChart3 className="h-5 w-5 text-emerald-600" />
+          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+            <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <div className="p-1 bg-emerald-100 rounded-md">
+                <BarChart3 className="h-4 w-4 text-emerald-600" />
               </div>
               Deals by Sales Representative
             </h2>
-            <div style={{ width: '100%', height: '300px' }}>
+            <div style={{ width: '100%', height: '250px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={mockData.sales.dealsByRep}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
@@ -424,14 +424,14 @@ const ChartsPage: React.FC = () => {
           </div>
 
           {/* Sales Pipeline */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6">
-            <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <div className="p-1.5 bg-violet-100 rounded-md">
-                <Target className="h-5 w-5 text-violet-600" />
+          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+            <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <div className="p-1 bg-violet-100 rounded-md">
+                <Target className="h-4 w-4 text-violet-600" />
               </div>
               Sales Pipeline
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {mockData.sales.funnel.map((stage, index) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-gradient-to-r from-slate-50 to-white rounded-lg border border-slate-100">
                   <div className="flex items-center gap-3">
@@ -471,14 +471,14 @@ const ChartsPage: React.FC = () => {
           </div>
 
           {/* Support & Service */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6">
-            <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <div className="p-1.5 bg-amber-100 rounded-md">
-                <Activity className="h-5 w-5 text-amber-600" />
+          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+            <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <div className="p-1 bg-amber-100 rounded-md">
+                <Activity className="h-4 w-4 text-amber-600" />
               </div>
               Support & Service Metrics
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h3 className="text-lg font-semibold text-slate-700 mb-3">Resolution Time Trend</h3>
                 <div style={{ width: '100%', height: '200px' }}>
@@ -543,18 +543,18 @@ const ChartsPage: React.FC = () => {
         </div>
 
         {/* Right Column */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Customer Health */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6">
-            <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <div className="p-1.5 bg-emerald-100 rounded-md">
-                <UserCheck className="h-5 w-5 text-emerald-600" />
+          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+            <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <div className="p-1 bg-emerald-100 rounded-md">
+                <UserCheck className="h-4 w-4 text-emerald-600" />
               </div>
               Customer Health
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <h3 className="text-base font-semibold text-slate-700 mb-3">Customer Segments</h3>
+                <h3 className="text-sm font-semibold text-slate-700 mb-2">Customer Segments</h3>
                 <div style={{ width: '100%', height: '150px' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -584,17 +584,17 @@ const ChartsPage: React.FC = () => {
                   </ResponsiveContainer>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
-                  <div className="text-2xl font-bold text-emerald-600 mb-1">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="text-center p-2 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+                  <div className="text-lg font-bold text-emerald-600 mb-1">
                     {mockData.customers.nps}
                   </div>
                   <div className="text-xs font-medium text-emerald-700">
                     NPS Score
                   </div>
                 </div>
-                <div className="text-center p-4 bg-gradient-to-br from-rose-50 to-rose-100 rounded-lg border border-rose-200">
-                  <div className="text-2xl font-bold text-rose-600 mb-1">
+                <div className="text-center p-2 bg-gradient-to-br from-rose-50 to-rose-100 rounded-lg border border-rose-200">
+                  <div className="text-lg font-bold text-rose-600 mb-1">
                     {mockData.customers.atRisk}
                   </div>
                   <div className="text-xs font-medium text-rose-700">
@@ -606,16 +606,16 @@ const ChartsPage: React.FC = () => {
           </div>
 
           {/* Marketing Performance */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6">
-            <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <div className="p-1.5 bg-violet-100 rounded-md">
-                <BarChart3 className="h-5 w-5 text-violet-600" />
+          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+            <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <div className="p-1 bg-violet-100 rounded-md">
+                <BarChart3 className="h-4 w-4 text-violet-600" />
               </div>
               Marketing Performance
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <h3 className="text-base font-semibold text-slate-700 mb-3">Lead Sources</h3>
+                <h3 className="text-sm font-semibold text-slate-700 mb-2">Lead Sources</h3>
                 <div style={{ width: '100%', height: '150px' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={mockData.marketing.leadSources} layout="horizontal">
@@ -658,34 +658,34 @@ const ChartsPage: React.FC = () => {
           </div>
 
           {/* Quick Drilldowns */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6">
-            <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <div className="p-1.5 bg-slate-100 rounded-md">
-                <Search className="h-5 w-5 text-slate-600" />
+          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+            <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <div className="p-1 bg-slate-100 rounded-md">
+                <Search className="h-4 w-4 text-slate-600" />
               </div>
               Quick Drilldowns
             </h2>
-            <div className="space-y-3">
-              <button className="w-full text-left bg-gradient-to-r from-rose-50 to-rose-100 border border-rose-200 text-rose-700 px-3 py-2 rounded-lg hover:from-rose-100 hover:to-rose-200 transition-all duration-200 flex items-center gap-2 font-medium text-sm">
-                <XCircle className="h-4 w-4" />
-                Lost Deals Analysis
-              </button>
-              <button className="w-full text-left bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200 text-amber-700 px-3 py-2 rounded-lg hover:from-amber-100 hover:to-amber-200 transition-all duration-200 flex items-center gap-2 font-medium text-sm">
-                <AlertTriangle className="h-4 w-4" />
-                At-risk Customers
-              </button>
-              <button className="w-full text-left bg-gradient-to-r from-indigo-50 to-indigo-100 border border-indigo-200 text-indigo-700 px-3 py-2 rounded-lg hover:from-indigo-100 hover:to-indigo-200 transition-all duration-200 flex items-center gap-2 font-medium text-sm">
-                <Download className="h-4 w-4" />
-                Export Detailed Report
-              </button>
-              <button className="w-full text-left bg-gradient-to-r from-violet-50 to-violet-100 border border-violet-200 text-violet-700 px-3 py-2 rounded-lg hover:from-violet-100 hover:to-violet-200 transition-all duration-200 flex items-center gap-2 font-medium text-sm">
-                <BarChart3 className="h-4 w-4" />
-                Performance Comparison
-              </button>
-              <button className="w-full text-left bg-gradient-to-r from-emerald-50 to-emerald-100 border border-emerald-200 text-emerald-700 px-3 py-2 rounded-lg hover:from-emerald-100 hover:to-emerald-200 transition-all duration-200 flex items-center gap-2 font-medium text-sm">
-                <TrendingUp className="h-4 w-4" />
-                Growth Opportunities
-              </button>
+            <div className="space-y-2">
+                              <button className="w-full text-left bg-gradient-to-r from-rose-50 to-rose-100 border border-rose-200 text-rose-700 px-2 py-1.5 rounded-lg hover:from-rose-100 hover:to-rose-200 transition-all duration-200 flex items-center gap-2 font-medium text-xs">
+                  <XCircle className="h-3 w-3" />
+                  Lost Deals Analysis
+                </button>
+                <button className="w-full text-left bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200 text-amber-700 px-2 py-1.5 rounded-lg hover:from-amber-100 hover:to-amber-200 transition-all duration-200 flex items-center gap-2 font-medium text-xs">
+                  <AlertTriangle className="h-3 w-3" />
+                  At-risk Customers
+                </button>
+                <button className="w-full text-left bg-gradient-to-r from-indigo-50 to-indigo-100 border border-indigo-200 text-indigo-700 px-2 py-1.5 rounded-lg hover:from-indigo-100 hover:to-indigo-200 transition-all duration-200 flex items-center gap-2 font-medium text-xs">
+                  <Download className="h-3 w-3" />
+                  Export Detailed Report
+                </button>
+                <button className="w-full text-left bg-gradient-to-r from-violet-50 to-violet-100 border border-violet-200 text-violet-700 px-2 py-1.5 rounded-lg hover:from-violet-100 hover:to-violet-200 transition-all duration-200 flex items-center gap-2 font-medium text-xs">
+                  <BarChart3 className="h-3 w-3" />
+                  Performance Comparison
+                </button>
+                <button className="w-full text-left bg-gradient-to-r from-emerald-50 to-emerald-100 border border-emerald-200 text-emerald-700 px-2 py-1.5 rounded-lg hover:from-emerald-100 hover:to-emerald-200 transition-all duration-200 flex items-center gap-2 font-medium text-xs">
+                  <TrendingUp className="h-3 w-3" />
+                  Growth Opportunities
+                </button>
             </div>
             
             {/* Top Issues List */}

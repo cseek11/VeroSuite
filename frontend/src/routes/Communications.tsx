@@ -1,15 +1,4 @@
 import React, { useState } from 'react';
-import { 
-  Card, 
-  Typography, 
-  Button, 
-  Input, 
-  Tabs,
-  Dropdown,
-  Modal,
-  Textarea
-} from '@/components/ui/EnhancedUI';
-import Select from '@/components/ui/Select';
 import {
   MessageCircle,
   Mail,
@@ -42,7 +31,8 @@ import {
   Bell,
   BellOff,
   Lock,
-  Unlock
+  Unlock,
+  X
 } from 'lucide-react';
 
 // Mock data for communications
@@ -191,63 +181,54 @@ const CommunicationsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Communications</h1>
-          <p className="text-gray-600">Manage customer communications and messaging</p>
-        </div>
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={() => setShowTemplateModal(true)}
-            className="flex items-center gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            Templates
-          </Button>
-          <Button
-            variant="primary"
-            onClick={() => setShowNewMessageModal(true)}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            New Message
-          </Button>
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
+              Communications
+            </h1>
+            <p className="text-slate-600 text-sm">
+              Manage customer communications and messaging
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-medium text-sm"
+              onClick={() => setShowTemplateModal(true)}
+            >
+              <FileText className="h-3 w-3" />
+              Templates
+            </button>
+            <button
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 font-medium text-sm"
+              onClick={() => setShowNewMessageModal(true)}
+            >
+              <Plus className="h-3 w-3" />
+              New Message
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center gap-4">
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-slate-400" />
+            <input
               type="text"
               placeholder="Search messages..."
               value={searchQuery}
-              onChange={setSearchQuery}
-              className="pl-10"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
             />
           </div>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              border: '1px solid transparent',
-              backgroundClip: 'padding-box',
-              position: 'relative',
-              borderRadius: '0.5rem',
-              color: 'rgb(30, 41, 59)',
-              backdropFilter: 'blur(4px)',
-              WebkitAppearance: 'none',
-              MozAppearance: 'none',
-              appearance: 'none',
-              boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)'
-            }}
+            className="border border-slate-200 rounded-lg px-2 py-1.5 min-w-[120px] bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
           >
             <option value="all">All Types</option>
             <option value="email">Email</option>
@@ -257,20 +238,7 @@ const CommunicationsPage: React.FC = () => {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              border: '1px solid transparent',
-              backgroundClip: 'padding-box',
-              position: 'relative',
-              borderRadius: '0.5rem',
-              color: 'rgb(30, 41, 59)',
-              backdropFilter: 'blur(4px)',
-              WebkitAppearance: 'none',
-              MozAppearance: 'none',
-              appearance: 'none',
-              boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)'
-            }}
+            className="border border-slate-200 rounded-lg px-2 py-1.5 min-w-[120px] bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
           >
             <option value="all">All Status</option>
             <option value="read">Read</option>
@@ -281,8 +249,8 @@ const CommunicationsPage: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex-shrink-0 overflow-hidden">
-        <div className="flex space-x-4 overflow-x-auto border-b border-gray-200">
+      <div className="flex-shrink-0 overflow-hidden mb-4">
+        <div className="flex space-x-4 overflow-x-auto border-b border-slate-200">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -291,8 +259,8 @@ const CommunicationsPage: React.FC = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-1 py-1 px-1 border-b-2 font-medium text-xs whitespace-nowrap transition-colors duration-200 ${
                   activeTab === tab.id
-                    ? 'border-purple-500 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                 }`}
               >
                 <Icon className="h-3 w-3" />
@@ -324,31 +292,21 @@ const CommunicationsPage: React.FC = () => {
                          </div>
                          <div className="flex items-center gap-2">
                            <StatusIcon className={`h-4 w-4 ${getStatusColor(message.status)}`} />
-                           <Dropdown
-                             trigger={
-                               <Button variant="outline" size="sm">
-                                 <MoreVertical className="h-4 w-4" />
-                               </Button>
-                             }
-                             items={[
-                               { label: 'Reply', onClick: () => {} },
-                               { label: 'Forward', onClick: () => {} },
-                               { label: 'Archive', onClick: () => {} },
-                               { label: 'Delete', onClick: () => {} }
-                             ]}
-                           />
+                           <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded hover:bg-white hover:shadow-lg transition-all duration-200">
+                             <MoreVertical className="h-3 w-3" />
+                           </button>
                          </div>
                        </div>
                        <div className="mb-2">
-                         <Typography variant="h6" className="text-gray-900 mb-1 truncate">
+                         <h3 className="text-sm font-semibold text-slate-900 mb-1 truncate">
                            {message.subject}
-                         </Typography>
-                         <Typography variant="body2" className="text-gray-600 mb-1">
+                         </h3>
+                         <p className="text-xs text-slate-600 mb-1">
                            From: {message.from}
-                         </Typography>
-                         <Typography variant="body2" className="text-gray-600 mb-2">
+                         </p>
+                         <p className="text-xs text-slate-600 mb-2">
                            {message.content.substring(0, 80)}...
-                         </Typography>
+                         </p>
                        </div>
                        <div className="flex items-center justify-between">
                          <span className="text-xs text-gray-500">
@@ -386,30 +344,21 @@ const CommunicationsPage: React.FC = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <StatusIcon className={`h-4 w-4 ${getStatusColor(message.status)}`} />
-                          <Dropdown
-                            trigger={
-                              <Button variant="outline" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            }
-                            items={[
-                              { label: 'Forward', onClick: () => {} },
-                              { label: 'Archive', onClick: () => {} },
-                              { label: 'Delete', onClick: () => {} }
-                            ]}
-                          />
+                          <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded hover:bg-white hover:shadow-lg transition-all duration-200">
+                            <MoreVertical className="h-3 w-3" />
+                          </button>
                         </div>
                       </div>
                       <div className="mb-2">
-                        <Typography variant="h6" className="text-gray-900 mb-1 truncate">
+                        <h3 className="text-sm font-semibold text-slate-900 mb-1 truncate">
                           {message.subject}
-                        </Typography>
-                        <Typography variant="body2" className="text-gray-600 mb-1">
+                        </h3>
+                        <p className="text-xs text-slate-600 mb-1">
                           To: {message.to}
-                        </Typography>
-                        <Typography variant="body2" className="text-gray-600 mb-2">
+                        </p>
+                        <p className="text-xs text-slate-600 mb-2">
                           {message.content.substring(0, 80)}...
-                        </Typography>
+                        </p>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-500">
@@ -430,192 +379,164 @@ const CommunicationsPage: React.FC = () => {
           )}
 
           {activeTab === 'drafts' && (
-            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Card className="p-4 hover:shadow-lg transition-shadow">
+            <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="p-3 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Mail className="h-5 w-5 text-gray-600" />
-                      <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                      <Mail className="h-4 w-4 text-slate-600" />
+                      <span className="px-1.5 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800">
                         Draft
                       </span>
                     </div>
-                    <Dropdown
-                      trigger={
-                        <Button variant="outline" size="sm">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      }
-                      items={[
-                        { label: 'Edit', onClick: () => {} },
-                        { label: 'Send', onClick: () => {} },
-                        { label: 'Delete', onClick: () => {} }
-                      ]}
-                    />
+                    <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded hover:bg-white hover:shadow-lg transition-all duration-200">
+                      <MoreVertical className="h-3 w-3" />
+                    </button>
                   </div>
                   <div className="mb-2">
-                    <Typography variant="h6" className="text-gray-900 mb-1">
+                    <h3 className="text-sm font-semibold text-slate-900 mb-1">
                       Service Follow-up
-                    </Typography>
-                    <Typography variant="body2" className="text-gray-600 mb-1">
+                    </h3>
+                    <p className="text-xs text-slate-600 mb-1">
                       To: customer@example.com
-                    </Typography>
-                    <Typography variant="body2" className="text-gray-600 mb-2">
+                    </p>
+                    <p className="text-xs text-slate-600 mb-2">
                       Thank you for choosing our services. We hope everything...
-                    </Typography>
+                    </p>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-slate-500">
                       Draft saved 2 hours ago
                     </span>
-                    <Button variant="primary" size="sm">
+                    <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-2 py-1 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-xs">
                       Continue Editing
-                    </Button>
+                    </button>
                   </div>
-                </Card>
+                </div>
               </div>
             </div>
           )}
 
           {activeTab === 'archived' && (
-            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Card className="p-4 hover:shadow-lg transition-shadow">
+            <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="p-3 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Mail className="h-5 w-5 text-gray-600" />
-                      <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
+                      <Mail className="h-4 w-4 text-slate-600" />
+                      <span className="px-1.5 py-0.5 text-xs rounded-full bg-slate-100 text-slate-800">
                         Archived
                       </span>
                     </div>
-                    <Dropdown
-                      trigger={
-                        <Button variant="outline" size="sm">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      }
-                      items={[
-                        { label: 'Restore', onClick: () => {} },
-                        { label: 'Delete', onClick: () => {} }
-                      ]}
-                    />
+                    <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded hover:bg-white hover:shadow-lg transition-all duration-200">
+                      <MoreVertical className="h-3 w-3" />
+                    </button>
                   </div>
                   <div className="mb-2">
-                    <Typography variant="h6" className="text-gray-900 mb-1">
+                    <h3 className="text-sm font-semibold text-slate-900 mb-1">
                       Old Service Request
-                    </Typography>
-                    <Typography variant="body2" className="text-gray-600 mb-1">
+                    </h3>
+                    <p className="text-xs text-slate-600 mb-1">
                       From: oldcustomer@example.com
-                    </Typography>
-                    <Typography variant="body2" className="text-gray-600 mb-2">
+                    </p>
+                    <p className="text-xs text-slate-600 mb-2">
                       Previous service request from last month...
-                    </Typography>
+                    </p>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-slate-500">
                       Archived 1 week ago
                     </span>
-                    <Button variant="outline" size="sm">
+                    <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded hover:bg-white hover:shadow-lg transition-all duration-200 text-xs">
                       Restore
-                    </Button>
+                    </button>
                   </div>
-                </Card>
+                </div>
               </div>
             </div>
           )}
 
           {activeTab === 'templates' && (
             <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {mockTemplates.map((template) => (
-                  <Card key={template.id} className="p-4 hover:shadow-lg transition-shadow">
+                  <div key={template.id} className="p-3 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <Typography variant="h6" className="text-gray-900 mb-1">
+                        <h3 className="text-sm font-semibold text-slate-900 mb-1">
                           {template.name}
-                        </Typography>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          template.type === 'email' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                        </h3>
+                        <span className={`px-1.5 py-0.5 text-xs rounded-full ${
+                          template.type === 'email' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
                         }`}>
                           {template.type.toUpperCase()}
                         </span>
                       </div>
-                      <Dropdown
-                        trigger={
-                          <Button variant="outline" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        }
-                        items={[
-                          { label: 'Edit', onClick: () => {} },
-                          { label: 'Duplicate', onClick: () => {} },
-                          { label: 'Delete', onClick: () => {} }
-                        ]}
-                      />
+                      <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded hover:bg-white hover:shadow-lg transition-all duration-200">
+                        <MoreVertical className="h-3 w-3" />
+                      </button>
                     </div>
-                    <Typography variant="body2" className="text-gray-600 mb-3">
+                    <p className="text-xs text-slate-600 mb-3">
                       {template.content.substring(0, 100)}...
-                    </Typography>
+                    </p>
                     <div className="flex gap-2">
-                      <Button
-                        variant="primary"
-                        size="sm"
+                      <button
                         onClick={() => setShowNewMessageModal(true)}
+                        className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-2 py-1 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-xs"
                       >
                         Use Template
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
+                      </button>
+                      <button
                         onClick={() => {}}
+                        className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded hover:bg-white hover:shadow-lg transition-all duration-200 text-xs"
                       >
                         Preview
-                      </Button>
+                      </button>
                     </div>
-                  </Card>
+                  </div>
                 ))}
               </div>
             </div>
           )}
 
           {/* Quick Stats */}
-          <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-            <Typography variant="h3" className="text-gray-900 mb-6">
+          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+            <h2 className="text-lg font-bold text-slate-900 mb-4">
               Communication Statistics
-            </Typography>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card className="p-6 text-center">
-                <Typography variant="h4" className="text-blue-600 font-bold">
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="p-4 text-center border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
+                <h3 className="text-xl font-bold text-blue-600">
                   1,247
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                </h3>
+                <p className="text-xs text-slate-600">
                   Messages This Month
-                </Typography>
-              </Card>
-              <Card className="p-6 text-center">
-                <Typography variant="h4" className="text-green-600 font-bold">
+                </p>
+              </div>
+              <div className="p-4 text-center border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
+                <h3 className="text-xl font-bold text-emerald-600">
                   98.2%
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                </h3>
+                <p className="text-xs text-slate-600">
                   Delivery Rate
-                </Typography>
-              </Card>
-              <Card className="p-6 text-center">
-                <Typography variant="h4" className="text-purple-600 font-bold">
+                </p>
+              </div>
+              <div className="p-4 text-center border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
+                <h3 className="text-xl font-bold text-purple-600">
                   2.3 min
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                </h3>
+                <p className="text-xs text-slate-600">
                   Avg Response Time
-                </Typography>
-              </Card>
-              <Card className="p-6 text-center">
-                <Typography variant="h4" className="text-orange-600 font-bold">
+                </p>
+              </div>
+              <div className="p-4 text-center border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
+                <h3 className="text-xl font-bold text-amber-600">
                   892
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                </h3>
+                <p className="text-xs text-slate-600">
                   Active Conversations
-                </Typography>
-              </Card>
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -623,102 +544,129 @@ const CommunicationsPage: React.FC = () => {
 
       {/* Message Detail Modal */}
       {selectedMessage && (
-        <Modal
-          isOpen={!!selectedMessage}
-          onClose={() => setSelectedMessage(null)}
-          title="Message Details"
-          size="lg"
-        >
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Typography variant="h6" className="text-gray-900">
-                  {selectedMessage.subject}
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
-                  From: {selectedMessage.from}
-                </Typography>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`px-2 py-1 text-xs rounded-full ${getPriorityColor(selectedMessage.priority)}`}>
-                  {selectedMessage.priority}
-                </span>
-                <span className="text-xs text-gray-500">
-                  {new Date(selectedMessage.timestamp).toLocaleString()}
-                </span>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-slate-900">Message Details</h2>
+                <button
+                  onClick={() => setSelectedMessage(null)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
             </div>
-            <div className="border-t border-gray-200 pt-4">
-              <Typography variant="body1" className="text-gray-800">
-                {selectedMessage.content}
-              </Typography>
-            </div>
-            {selectedMessage.attachments.length > 0 && (
-              <div className="border-t border-gray-200 pt-4">
-                <Typography variant="h6" className="text-gray-900 mb-2">
-                  Attachments
-                </Typography>
-                <div className="space-y-2">
-                  {selectedMessage.attachments.map((attachment, index) => (
-                    <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                      <FileText className="h-4 w-4 text-gray-600" />
-                      <span className="text-sm text-gray-700">{attachment}</span>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+            <div className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900">
+                    {selectedMessage.subject}
+                  </h3>
+                  <p className="text-xs text-slate-600">
+                    From: {selectedMessage.from}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-1.5 py-0.5 text-xs rounded-full ${getPriorityColor(selectedMessage.priority)}`}>
+                    {selectedMessage.priority}
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    {new Date(selectedMessage.timestamp).toLocaleString()}
+                  </span>
                 </div>
               </div>
-            )}
+              <div className="border-t border-slate-200 pt-4">
+                <p className="text-sm text-slate-800">
+                  {selectedMessage.content}
+                </p>
+              </div>
+              {selectedMessage.attachments.length > 0 && (
+                <div className="border-t border-slate-200 pt-4">
+                  <h4 className="text-sm font-semibold text-slate-900 mb-2">
+                    Attachments
+                  </h4>
+                  <div className="space-y-2">
+                    {selectedMessage.attachments.map((attachment, index) => (
+                      <div key={index} className="flex items-center gap-2 p-2 bg-slate-50 rounded">
+                        <FileText className="h-4 w-4 text-slate-600" />
+                        <span className="text-xs text-slate-700">{attachment}</span>
+                        <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded hover:bg-white hover:shadow-lg transition-all duration-200">
+                          <Download className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </Modal>
+        </div>
       )}
 
       {/* New Message Modal */}
       {showNewMessageModal && (
-        <Modal
-          isOpen={showNewMessageModal}
-          onClose={() => setShowNewMessageModal(false)}
-          title="New Message"
-          size="lg"
-        >
-          <div className="space-y-4">
-            <Select
-              label="Type"
-              value=""
-              onChange={() => {}}
-              options={[
-                { value: 'email', label: 'Email' },
-                { value: 'sms', label: 'SMS' },
-                { value: 'phone', label: 'Phone Call' },
-              ]}
-            />
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">To</label>
-              <Input placeholder="Enter recipient..." value="" onChange={() => {}} />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-slate-900">New Message</h2>
+                <button
+                  onClick={() => setShowNewMessageModal(false)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-              <Input placeholder="Enter subject..." value="" onChange={() => {}} />
-            </div>
-            <Textarea
-              label="Message"
-              placeholder="Enter your message..."
-              value=""
-              onChange={() => {}}
-              rows={6}
-            />
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setShowNewMessageModal(false)}>
-                Cancel
-              </Button>
-              <Button variant="primary">
-                Send Message
-              </Button>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Type</label>
+                <select className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm">
+                  <option value="">Select type</option>
+                  <option value="email">Email</option>
+                  <option value="sms">SMS</option>
+                  <option value="phone">Phone Call</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">To</label>
+                <input
+                  type="text"
+                  placeholder="Enter recipient..."
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Subject</label>
+                <input
+                  type="text"
+                  placeholder="Enter subject..."
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Message</label>
+                <textarea
+                  placeholder="Enter your message..."
+                  rows={6}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm resize-none"
+                />
+              </div>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowNewMessageModal(false)}
+                  className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm"
+                >
+                  Cancel
+                </button>
+                <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-sm">
+                  Send Message
+                </button>
+              </div>
             </div>
           </div>
-        </Modal>
+        </div>
       )}
     </div>
   );

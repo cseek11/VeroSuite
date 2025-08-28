@@ -1,13 +1,4 @@
 import React, { useState, useEffect, Suspense } from 'react';
-import { 
-  Card, 
-  Typography, 
-  Button, 
-  Input, 
-  Dropdown
-} from '@/components/ui/EnhancedUI';
-import Select from '@/components/ui/Select';
-import { Badge } from '@/components/ui/CRMComponents';
 import SchedulerPro from '../components/scheduler/SchedulerPro';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -214,140 +205,123 @@ const SchedulerPage: React.FC = () => {
     : [40.44, -79.99]; // Default to Pittsburgh
 
   return (
-    <div className="space-y-3">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
       {/* Header */}
-      <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center justify-between">
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <Typography variant="h1" className="text-2xl font-bold text-gray-900 mb-1">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
               Scheduling Dashboard
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </h1>
+            <p className="text-slate-600 text-sm">
               Manage jobs, technicians, and optimize routes for maximum efficiency
-            </Typography>
+            </p>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" className="flex items-center gap-2">
-              <Route className="h-4 w-4" />
+          <div className="flex items-center gap-2">
+            <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-medium text-sm">
+              <Route className="h-3 w-3" />
               Optimize Routes
-            </Button>
-            <Button variant="primary" className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
+            </button>
+            <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 font-medium text-sm">
+              <Plus className="h-3 w-3" />
               New Job
-            </Button>
+            </button>
           </div>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <Typography variant="body2" className="text-blue-600 mb-1">Total Jobs</Typography>
-              <Typography variant="h3" className="text-blue-900">{filteredJobs.length}</Typography>
-              <div className="flex items-center gap-1 mt-1">
-                <Calendar className="h-3 w-3 text-blue-600" />
-                <span className="text-xs text-blue-600">Scheduled today</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-1.5 bg-white/20 rounded-lg">
+                <Calendar className="h-5 w-5" />
               </div>
             </div>
-            <Calendar className="h-8 w-8 text-blue-600" />
+            <div className="text-xl font-bold mb-1">{filteredJobs.length}</div>
+            <div className="text-blue-100 font-medium text-xs">Total Jobs</div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-4 bg-gradient-to-r from-green-50 to-green-100 border-green-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <Typography variant="body2" className="text-green-600 mb-1">Active Technicians</Typography>
-              <Typography variant="h3" className="text-green-900">{mockTechnicians.length - 1}</Typography>
-              <div className="flex items-center gap-1 mt-1">
-                <Users className="h-3 w-3 text-green-600" />
-                <span className="text-xs text-green-600">Available</span>
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-1.5 bg-white/20 rounded-lg">
+                <Users className="h-5 w-5" />
               </div>
             </div>
-            <Users className="h-8 w-8 text-green-600" />
+            <div className="text-xl font-bold mb-1">{mockTechnicians.length - 1}</div>
+            <div className="text-emerald-100 font-medium text-xs">Active Technicians</div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <Typography variant="body2" className="text-purple-600 mb-1">Completed</Typography>
-              <Typography variant="h3" className="text-purple-900">
-                {filteredJobs.filter(job => job.status === 'completed').length}
-              </Typography>
-              <div className="flex items-center gap-1 mt-1">
-                <CheckCircle className="h-3 w-3 text-purple-600" />
-                <span className="text-xs text-purple-600">Today's jobs</span>
+        <div className="bg-gradient-to-br from-violet-500 to-violet-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-1.5 bg-white/20 rounded-lg">
+                <CheckCircle className="h-5 w-5" />
               </div>
             </div>
-            <CheckCircle className="h-8 w-8 text-purple-600" />
+            <div className="text-xl font-bold mb-1">
+              {filteredJobs.filter(job => job.status === 'completed').length}
+            </div>
+            <div className="text-violet-100 font-medium text-xs">Completed</div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-4 bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <Typography variant="body2" className="text-orange-600 mb-1">Overdue</Typography>
-              <Typography variant="h3" className="text-orange-900">
-                {filteredJobs.filter(job => job.status === 'overdue').length}
-              </Typography>
-              <div className="flex items-center gap-1 mt-1">
-                <AlertTriangle className="h-3 w-3 text-orange-600" />
-                <span className="text-xs text-orange-600">Requires attention</span>
+        <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-1.5 bg-white/20 rounded-lg">
+                <AlertTriangle className="h-5 w-5" />
               </div>
             </div>
-            <AlertTriangle className="h-8 w-8 text-orange-600" />
+            <div className="text-xl font-bold mb-1">
+              {filteredJobs.filter(job => job.status === 'overdue').length}
+            </div>
+            <div className="text-amber-100 font-medium text-xs">Overdue</div>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center gap-4">
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-slate-400" />
+            <input
               type="text"
               placeholder="Search jobs, customers, or technicians..."
               value={searchQuery}
-              onChange={(value) => setSearchQuery(value)}
-              className="pl-10"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
             />
           </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="min-w-[150px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              border: '1px solid transparent',
-              backgroundClip: 'padding-box',
-              position: 'relative',
-              borderRadius: '0.5rem',
-              color: 'rgb(30, 41, 59)',
-              backdropFilter: 'blur(4px)',
-              WebkitAppearance: 'none',
-              MozAppearance: 'none',
-              appearance: 'none',
-              boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)'
-            }}
+            className="border border-slate-200 rounded-lg px-2 py-1.5 min-w-[120px] bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
           >
             <option value="all">All Status</option>
             <option value="scheduled">Scheduled</option>
             <option value="completed">Completed</option>
             <option value="overdue">Overdue</option>
           </select>
-          <Button variant="outline" className="flex items-center gap-2">
-            <Filter className="h-4 w-4" />
+          <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-medium text-sm">
+            <Filter className="h-3 w-3" />
             Filters
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex-shrink-0 overflow-hidden">
-        <div className="flex space-x-4 overflow-x-auto border-b border-gray-200">
+      <div className="flex-shrink-0 overflow-hidden mb-4">
+        <div className="flex space-x-4 overflow-x-auto border-b border-slate-200">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -356,8 +330,8 @@ const SchedulerPage: React.FC = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-1 py-1 px-1 border-b-2 font-medium text-xs whitespace-nowrap transition-colors duration-200 ${
                   activeTab === tab.id
-                    ? 'border-purple-500 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                 }`}
               >
                 <Icon className="h-3 w-3" />
@@ -370,25 +344,28 @@ const SchedulerPage: React.FC = () => {
 
       {/* Tab Content */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        <div className="space-y-3">
+        <div className="space-y-4">
           {activeTab === 'overview' && (
             <>
               {/* Map and Calendar Section */}
-              <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <Typography variant="h3" className="text-gray-900">
+              <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <div className="p-1 bg-indigo-100 rounded-md">
+                      <MapPin className="h-4 w-4 text-indigo-600" />
+                    </div>
                     Live Operations Map
-                  </Typography>
+                  </h2>
                   <div className="flex gap-2">
                     <button 
-                      className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
+                      className="px-2 py-1.5 text-xs bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-1"
                       onClick={handleAddJob}
                     >
                       <Plus className="w-3 h-3" />
                       Add Job
                     </button>
                     <button 
-                      className="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors flex items-center gap-1"
+                      className="px-2 py-1.5 text-xs bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors flex items-center gap-1"
                       onClick={handleOptimizeRoute}
                     >
                       <Route className="w-3 h-3" />
@@ -397,7 +374,7 @@ const SchedulerPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="relative" style={{ height: '600px' }}>
+                <div className="relative" style={{ height: '500px' }}>
                   {/* Map Background */}
                   <div className="absolute inset-0 z-0">
                     <Suspense fallback={
@@ -412,8 +389,8 @@ const SchedulerPage: React.FC = () => {
                       <MapContainer 
                         center={mapCenter} 
                         zoom={windowWidth < 768 ? 10 : windowWidth < 1024 ? 11 : 12}
-                        className="h-full w-full"
-                        style={{ height: '100%', minHeight: '600px' }}
+                        className="h-full w-full rounded-lg"
+                        style={{ height: '100%', minHeight: '500px' }}
                       >
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                         
@@ -542,72 +519,65 @@ const SchedulerPage: React.FC = () => {
               </div>
 
               {/* Today's Schedule - Now shows filtered jobs */}
-              <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <Typography variant="h3" className="text-gray-900">
+              <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <div className="p-1 bg-emerald-100 rounded-md">
+                      <Calendar className="h-4 w-4 text-emerald-600" />
+                    </div>
                     Today's Schedule ({filteredJobs.length} jobs)
-                  </Typography>
+                  </h2>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex items-center gap-2">
-                      <Plus className="h-4 w-4" />
+                    <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-medium text-xs">
+                      <Plus className="h-3 w-3" />
                       Add Job
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex items-center gap-2">
-                      <Route className="h-4 w-4" />
+                    </button>
+                    <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-medium text-xs">
+                      <Route className="h-3 w-3" />
                       Optimize Route
-                    </Button>
+                    </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {filteredJobs.map((job) => (
-                    <div key={job.id} className="p-4 hover:shadow-lg transition-shadow border border-gray-200 rounded-lg bg-white">
-                      <div className="flex items-start justify-between mb-3">
+                    <div key={job.id} className="p-3 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
+                      <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <Calendar className="h-5 w-5 text-gray-600" />
-                          <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(job.status)}`}>
+                          <Calendar className="h-4 w-4 text-slate-600" />
+                          <span className={`px-1.5 py-0.5 text-xs rounded-full ${getStatusColor(job.status)}`}>
                             {job.status}
                           </span>
                           {job.overdue && (
-                            <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                            <span className="px-1.5 py-0.5 text-xs rounded-full bg-red-100 text-red-800">
                               {job.overdueDays} days overdue
                             </span>
                           )}
                         </div>
-                        <Dropdown
-                          trigger={
-                            <Button variant="outline" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          }
-                          items={[
-                            { label: 'View Details', onClick: () => {} },
-                            { label: 'Edit', onClick: () => {} },
-                            { label: 'Reassign', onClick: () => {} },
-                            { label: 'Delete', onClick: () => {} }
-                          ]}
-                        />
+                        <button className="p-1 text-slate-400 hover:text-slate-600 transition-colors">
+                          <MoreVertical className="h-3 w-3" />
+                        </button>
                       </div>
-                      <div className="mb-3">
-                        <Typography variant="h6" className="text-gray-900 mb-1">
+                      <div className="mb-2">
+                        <h3 className="text-sm font-semibold text-slate-900 mb-1">
                           {job.customer}
-                        </Typography>
-                        <Typography variant="body2" className="text-gray-600 mb-1">
+                        </h3>
+                        <p className="text-xs text-slate-600 mb-1">
                           {job.service}
-                        </Typography>
-                        <Typography variant="body2" className="text-gray-600 mb-2">
+                        </p>
+                        <p className="text-xs text-slate-600 mb-2">
                           {job.time} • {job.technician || 'Unassigned'}
-                        </Typography>
+                        </p>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           {getStatusIcon(job.status)}
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-slate-500">
                             {job.agreements.join(', ')}
                           </span>
                         </div>
-                        <Button variant="outline" size="sm">
+                        <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-xs">
                           View
-                        </Button>
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -617,51 +587,48 @@ const SchedulerPage: React.FC = () => {
           )}
 
           {activeTab === 'technicians' && (
-            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+              <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <div className="p-1 bg-emerald-100 rounded-md">
+                  <Users className="h-4 w-4 text-emerald-600" />
+                </div>
+                Technicians
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {mockTechnicians.filter(tech => tech.id !== 'unassigned').map((technician) => (
-                  <div key={technician.id} className="p-4 hover:shadow-lg transition-shadow border border-gray-200 rounded-lg bg-white">
-                    <div className="flex items-start justify-between mb-3">
+                  <div key={technician.id} className="p-3 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
+                    <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <Users className="h-5 w-5 text-gray-600" />
-                        <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                        <Users className="h-4 w-4 text-slate-600" />
+                        <span className="px-1.5 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800">
                           Available
                         </span>
                       </div>
-                      <Dropdown
-                        trigger={
-                          <Button variant="outline" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        }
-                        items={[
-                          { label: 'View Schedule', onClick: () => {} },
-                          { label: 'Edit', onClick: () => {} },
-                          { label: 'Assign Jobs', onClick: () => {} }
-                        ]}
-                      />
+                      <button className="p-1 text-slate-400 hover:text-slate-600 transition-colors">
+                        <MoreVertical className="h-3 w-3" />
+                      </button>
                     </div>
-                    <div className="mb-3">
-                      <Typography variant="h6" className="text-gray-900 mb-1">
+                    <div className="mb-2">
+                      <h3 className="text-sm font-semibold text-slate-900 mb-1">
                         {technician.name}
-                      </Typography>
-                      <Typography variant="body2" className="text-gray-600 mb-2">
+                      </h3>
+                      <p className="text-xs text-slate-600 mb-2">
                         {filteredJobs.filter(job => job.technician === technician.name).length} jobs today
-                      </Typography>
+                      </p>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div 
-                          className="w-3 h-3 rounded-full" 
+                          className="w-2 h-2 rounded-full" 
                           style={{ backgroundColor: technician.color }}
                         ></div>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-slate-500">
                           Active
                         </span>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-xs">
                         Schedule
-                      </Button>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -670,35 +637,47 @@ const SchedulerPage: React.FC = () => {
           )}
 
           {activeTab === 'routes' && (
-            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="text-center py-12">
-                <Route className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <Typography variant="h6" className="text-gray-900 mb-2">
+            <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+              <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <div className="p-1 bg-indigo-100 rounded-md">
+                  <Route className="h-4 w-4 text-indigo-600" />
+                </div>
+                Route Optimization
+              </h2>
+              <div className="text-center py-8">
+                <Route className="h-8 w-8 text-slate-400 mx-auto mb-3" />
+                <h3 className="text-base font-semibold text-slate-900 mb-2">
                   Route Optimization
-                </Typography>
-                <Typography variant="body2" className="text-gray-600 mb-4">
+                </h3>
+                <p className="text-sm text-slate-600 mb-4">
                   Optimize technician routes for maximum efficiency
-                </Typography>
-                <Button variant="primary" onClick={handleOptimizeRoute}>
+                </p>
+                <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-sm" onClick={handleOptimizeRoute}>
                   Optimize Routes
-                </Button>
+                </button>
               </div>
             </div>
           )}
 
           {activeTab === 'reports' && (
-            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="text-center py-12">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <Typography variant="h6" className="text-gray-900 mb-2">
+            <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+              <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <div className="p-1 bg-violet-100 rounded-md">
+                  <FileText className="h-4 w-4 text-violet-600" />
+                </div>
+                Scheduling Reports
+              </h2>
+              <div className="text-center py-8">
+                <FileText className="h-8 w-8 text-slate-400 mx-auto mb-3" />
+                <h3 className="text-base font-semibold text-slate-900 mb-2">
                   Scheduling Reports
-                </Typography>
-                <Typography variant="body2" className="text-gray-600 mb-4">
+                </h3>
+                <p className="text-sm text-slate-600 mb-4">
                   Generate reports on scheduling efficiency and technician performance
-                </Typography>
-                <Button variant="primary">
+                </p>
+                <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-sm">
                   Generate Report
-                </Button>
+                </button>
               </div>
             </div>
           )}

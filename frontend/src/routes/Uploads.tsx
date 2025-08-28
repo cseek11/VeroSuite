@@ -1,13 +1,6 @@
 import React, { useState } from 'react';
 import { presignUpload } from '@/lib/api';
-
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import {
-  Typography,
-  Button,
-  Card,
-  Alert
-} from '@/components/ui/EnhancedUI';
 import {
   Upload,
   Image,
@@ -53,32 +46,38 @@ export default function Uploads() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <Typography variant="h1" className="text-gray-900">
-          File Uploads
-        </Typography>
-        <Typography variant="body1" className="text-gray-600 mt-2">
-          Upload and manage images and documents for your pest control operations.
-        </Typography>
-      </div>
-
-      {/* Upload Section */}
-      <Card className="p-6 mb-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Upload className="h-5 w-5 text-blue-500" />
-          <Typography variant="h6" className="text-gray-900">
-            Upload Files
-          </Typography>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
+        {/* Header */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
+                File Uploads
+              </h1>
+              <p className="text-slate-600 text-sm">
+                Upload and manage images and documents for your pest control operations.
+              </p>
+            </div>
+          </div>
         </div>
-        
-        <div className="space-y-4">
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
-            <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <Typography variant="body1" className="text-gray-600 mb-2">
+
+              {/* Upload Section */}
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="p-1 bg-indigo-100 rounded-md">
+            <Upload className="h-4 w-4 text-indigo-600" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-800">
+            Upload Files
+          </h3>
+        </div>
+          
+                  <div className="space-y-4">
+          <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-indigo-400 transition-colors">
+            <Upload className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+            <p className="text-sm text-slate-600 mb-2">
               Drag and drop files here, or click to select
-            </Typography>
+            </p>
             <input
               type="file"
               accept="image/*"
@@ -89,86 +88,82 @@ export default function Uploads() {
             />
             <label
               htmlFor="file-upload"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer disabled:opacity-50 shadow-lg hover:shadow-xl transition-all duration-200"
             >
               {uploading ? 'Uploading...' : 'Select File'}
             </label>
           </div>
-          
-          {uploading && (
-            <div className="flex items-center justify-center py-4">
-              <LoadingSpinner text="Uploading file..." />
-            </div>
-          )}
-          
-          {uploadError && (
-            <Alert type="danger">
-              <Typography variant="body2">
-                {uploadError}
-              </Typography>
-            </Alert>
-          )}
+            
+            {uploading && (
+              <div className="flex items-center justify-center py-4">
+                <LoadingSpinner text="Uploading file..." />
+              </div>
+            )}
+            
+            {uploadError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-800">
+                  {uploadError}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-      </Card>
 
-      {/* Files Grid */}
+              {/* Files Grid */}
       {files.length > 0 && (
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Image className="h-5 w-5 text-green-500" />
-            <Typography variant="h6" className="text-gray-900">
+          <div className="flex items-center gap-3">
+            <div className="p-1 bg-emerald-100 rounded-md">
+              <Image className="h-4 w-4 text-emerald-600" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-800">
               Uploaded Files ({files.length})
-            </Typography>
+            </h3>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {files.map((url, index) => (
-              <Card key={url} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="relative">
-                  <img 
-                    src={url} 
-                    alt={`Uploaded file ${index + 1}`} 
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="absolute top-2 right-2 flex gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
+              <div key={url} className="overflow-hidden hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
+                  <div className="relative">
+                    <img 
+                      src={url} 
+                      alt={`Uploaded file ${index + 1}`} 
+                      className="w-full h-48 object-cover"
+                    />
+                                      <div className="absolute top-2 right-2 flex gap-1">
+                    <button
                       onClick={() => handleCopyUrl(url)}
-                      className="bg-white/90 hover:bg-white"
+                      className="bg-white/90 hover:bg-white border border-slate-200 text-slate-700 px-2 py-1 rounded hover:shadow-lg transition-all duration-200"
                     >
                       <Copy className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
+                    </button>
+                    <button
                       onClick={() => handleRemoveFile(index)}
-                      className="bg-white/90 hover:bg-white text-red-600 hover:text-red-700"
+                      className="bg-white/90 hover:bg-white border border-slate-200 text-red-600 hover:text-red-700 px-2 py-1 rounded hover:shadow-lg transition-all duration-200"
                     >
                       <Trash2 className="h-3 w-3" />
-                    </Button>
+                    </button>
                   </div>
-                </div>
-                <div className="p-4">
+                  </div>
+                                  <div className="p-3">
                   <div className="flex items-center gap-2 mb-2">
-                    <FileText className="h-4 w-4 text-gray-400" />
-                    <Typography variant="body2" className="text-gray-600 truncate">
+                    <FileText className="h-4 w-4 text-slate-400" />
+                    <p className="text-xs text-slate-600 truncate">
                       File {index + 1}
-                    </Typography>
+                    </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
+                    <button
                       onClick={() => window.open(url, '_blank')}
-                      className="flex-1"
+                      className="flex-1 bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded hover:bg-white hover:shadow-lg transition-all duration-200 text-xs flex items-center justify-center gap-1"
                     >
-                      <Download className="h-3 w-3 mr-1" />
+                      <Download className="h-3 w-3" />
                       View
-                    </Button>
+                    </button>
                   </div>
-                </div>
-              </Card>
+                                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -176,15 +171,15 @@ export default function Uploads() {
 
       {/* Empty State */}
       {!uploading && files.length === 0 && (
-        <Card className="p-8 text-center">
-          <Image className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <Typography variant="h6" className="text-gray-900 mb-2">
+        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-8 text-center">
+          <Image className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-slate-900 mb-2">
             No Files Uploaded
-          </Typography>
-          <Typography variant="body2" className="text-gray-600">
+          </h3>
+          <p className="text-sm text-slate-600">
             Upload your first file to get started.
-          </Typography>
-        </Card>
+          </p>
+        </div>
       )}
     </div>
   );
