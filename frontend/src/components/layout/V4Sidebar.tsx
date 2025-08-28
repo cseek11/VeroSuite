@@ -26,7 +26,7 @@ interface V4SidebarProps {
 const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard', badge: null },
   { id: 'crm', label: 'CRM', icon: Users, path: '/customers', badge: '2.1k' },
-  { id: 'scheduling', label: 'Scheduling', icon: Calendar, path: '/jobs', badge: '47' },
+  { id: 'scheduling', label: 'Scheduling', icon: Calendar, path: '/scheduler', badge: '47' },
   { id: 'communications', label: 'Communications', icon: MessageCircle, path: '/communications', badge: '3' },
   { id: 'finance', label: 'Finance', icon: DollarSign, path: '/finance', badge: '$45k' },
   { id: 'reports', label: 'Reports', icon: BarChart3, path: '/reports', badge: null },
@@ -42,7 +42,7 @@ export default function V4Sidebar({ collapsed, onToggle, mobileOpen, onMobileClo
     const path = location.pathname;
     if (path === '/dashboard' || path === '/') return 'dashboard';
     if (path === '/customers') return 'crm';
-    if (path === '/jobs') return 'scheduling';
+    if (path === '/scheduler') return 'scheduling';
     if (path === '/communications') return 'communications';
     if (path === '/finance') return 'finance';
     if (path === '/reports') return 'reports';

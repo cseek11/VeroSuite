@@ -14,6 +14,7 @@ import {
   Tooltip,
   Modal
 } from '@/components/ui/EnhancedUI';
+import Select from '@/components/ui/Select';
 import {
   BarChart3,
   TrendingUp,
@@ -285,43 +286,47 @@ const Reports: React.FC = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
               <div className="flex gap-2">
-                <input
+                <Input
                   type="date"
                   placeholder="Start Date"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  value=""
+                  onChange={() => {}}
+                  className="flex-1"
                 />
-                <input
+                <Input
                   type="date"
                   placeholder="End Date"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  value=""
+                  onChange={() => {}}
+                  className="flex-1"
                 />
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
-              <select
+              <Select
                 value={selectedBranch}
-                onChange={(e) => setSelectedBranch(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-              >
-                <option value="all">All Branches</option>
-                <option value="main">Main Branch</option>
-                <option value="north">North Branch</option>
-                <option value="south">South Branch</option>
-              </select>
+                onChange={(value) => setSelectedBranch(value)}
+                options={[
+                  { value: 'all', label: 'All Branches' },
+                  { value: 'main', label: 'Main Branch' },
+                  { value: 'north', label: 'North Branch' },
+                  { value: 'south', label: 'South Branch' },
+                ]}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Technician</label>
-              <select
+              <Select
                 value={selectedTechnician}
-                onChange={(e) => setSelectedTechnician(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-              >
-                <option value="all">All Technicians</option>
-                <option value="tech1">John Smith</option>
-                <option value="tech2">Jane Doe</option>
-                <option value="tech3">Mike Johnson</option>
-              </select>
+                onChange={(value) => setSelectedTechnician(value)}
+                options={[
+                  { value: 'all', label: 'All Technicians' },
+                  { value: 'tech1', label: 'John Smith' },
+                  { value: 'tech2', label: 'Jane Doe' },
+                  { value: 'tech3', label: 'Mike Johnson' },
+                ]}
+              />
             </div>
           </div>
         </div>

@@ -6,6 +6,7 @@ import {
   Input, 
   Dropdown
 } from '@/components/ui/EnhancedUI';
+import Select from '@/components/ui/Select';
 import { Badge } from '@/components/ui/CRMComponents';
 import { 
   DollarSign, 
@@ -367,7 +368,20 @@ const FinancePage: React.FC = () => {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="min-w-[150px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="min-w-[150px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: '1px solid transparent',
+              backgroundClip: 'padding-box',
+              position: 'relative',
+              borderRadius: '0.5rem',
+              color: 'rgb(30, 41, 59)',
+              backdropFilter: 'blur(4px)',
+              WebkitAppearance: 'none',
+              MozAppearance: 'none',
+              appearance: 'none',
+              boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)'
+            }}
           >
             <option value="all">All Status</option>
             <option value="paid">Paid</option>

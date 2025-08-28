@@ -14,8 +14,11 @@ import {
   Card,
   Input,
   Alert,
-  Tooltip
+  Tooltip,
+  Textarea
 } from '@/components/ui/EnhancedUI';
+import Select from '@/components/ui/Select';
+import MaskedInput from '@/components/ui/MaskedInput';
 import {
   Users,
   Search,
@@ -222,7 +225,7 @@ export default function Customers() {
 
 
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<AccountForm>({
+  const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<AccountForm>({
     resolver: zodResolver(AccountSchema)
   });
 
@@ -263,15 +266,13 @@ export default function Customers() {
           {/* Search and Actions Bar */}
           <div className={`flex flex-col sm:flex-row gap-4 mb-6 ${isCompactMode ? 'mb-4' : 'mb-6'}`}>
             <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-purple-500 z-10" />
-                <input
-                  placeholder="Search customers..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className={`crm-input pl-10 ${isCompactMode ? 'h-9 px-3 text-sm' : ''}`}
-                />
-              </div>
+              <Input
+                placeholder="Search customers..."
+                value={search}
+                onChange={(value) => setSearch(value)}
+                icon={Search}
+                className={isCompactMode ? 'h-9 px-3 text-sm' : ''}
+              />
             </div>
             
             <div className="flex gap-2">
@@ -303,57 +304,41 @@ export default function Customers() {
             
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="crm-label">
-                    Account Name
-                  </label>
-                  <input
-                    {...register('name')}
-                    placeholder="Enter account name"
-                    className="crm-input"
-                  />
-                  {errors.name && (
-                    <p className="crm-error">{errors.name.message}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="crm-label">
-                    Account Type
-                  </label>
-                  <select 
-                    {...register('account_type')}
-                    className="crm-select"
-                  >
-                    <option value="commercial">Commercial</option>
-                    <option value="residential">Residential</option>
-                  </select>
-                  {errors.account_type && (
-                    <p className="crm-error">{errors.account_type.message as string}</p>
-                  )}
-                </div>
+                <Input
+                  label="Account Name"
+                  placeholder="Enter account name"
+                  value={watch('name')}
+                  onChange={(value) => setValue('name', value)}
+                  error={errors.name?.message}
+                />
+                <Select
+                  label="Account Type"
+                  value={watch('account_type') || ''}
+                  onChange={(value) => setValue('account_type', value as 'commercial' | 'residential')}
+                  placeholder="Select account type..."
+                  options={[
+                    { value: 'commercial', label: 'Commercial' },
+                    { value: 'residential', label: 'Residential' },
+                  ]}
+                  error={errors.account_type?.message}
+                />
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="crm-label">
-                    Phone Number
-                  </label>
-                  <InputMask 
-                    mask="(999) 999-9999" 
-                    className="crm-input"
-                    placeholder="(555) 123-4567"
-                  />
-                </div>
-                <div>
-                  <label className="crm-label">
-                    Postal Code
-                  </label>
-                  <InputMask 
-                    mask="99999" 
-                    className="crm-input"
-                    placeholder="15222"
-                  />
-                </div>
+                <MaskedInput
+                  label="Phone Number"
+                  mask="(999) 999-9999"
+                  placeholder="(555) 123-4567"
+                  value=""
+                  onChange={() => {}}
+                />
+                <MaskedInput
+                  label="Postal Code"
+                  mask="99999"
+                  placeholder="15222"
+                  value=""
+                  onChange={() => {}}
+                />
               </div>
               
               <Button

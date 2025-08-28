@@ -355,7 +355,7 @@ export default function CustomersPage() {
                     <select
                       value={formData.account_type}
                       onChange={(e) => setFormData({ ...formData, account_type: e.target.value })}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="crm-select w-full"
                     >
                       <option value="commercial">Commercial</option>
                       <option value="residential">Residential</option>
@@ -455,7 +455,7 @@ export default function CustomersPage() {
                     <select
                       value={formData.preferred_contact_method}
                       onChange={(e) => setFormData({ ...formData, preferred_contact_method: e.target.value })}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="crm-select w-full"
                     >
                       <option value="email">Email</option>
                       <option value="phone">Phone</option>
