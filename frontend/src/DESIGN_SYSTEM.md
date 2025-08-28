@@ -231,3 +231,4 @@ hover:shadow-xl
 - Maintain consistency across similar components
 
 This design system ensures a cohesive, professional appearance across all pages while maintaining the clean, modern aesthetic that users appreciate.
+

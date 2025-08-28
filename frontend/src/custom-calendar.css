@@ -9,38 +9,38 @@
 }
 .fc-daygrid-day-bottom {
   height: 24px;
-  display: flex !important;
+  display: flex;
   font-size: 13px;
   font-weight: 500;
-  border-radius: 4px !important;
-  margin: 2px 0 0 !important;
+  border-radius: 4px;
+  margin: 2px 0 0;
   padding: 0 3px;
-  cursor: pointer !important;
+  cursor: pointer;
   overflow: hidden;
 }
 .fc-event {
-  background: #fff !important;
-  color: #222 !important;
-  border-radius: 4px !important;
+  background: #fff;
+  color: #222;
+  border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   font-weight: 500;
   font-size: 12px;
   line-height: 18px;
-  padding: 8px !important;
+  padding: 8px;
   border: none;
 }
 .fc-event:hover {
   box-shadow: 0 4px 8px 0 #222, 0 2px 4px 0 #eee, 0 1px 2px 0 #eee, 0 0 1px 0 #ccc;
 }
 .fc-day-today {
-  background-color: rgba(30, 126, 247, 0.08) !important;
+  background-color: rgba(30, 126, 247, 0.08);
 }
 .fc-col-header-cell {
-  color: #222 !important;
+  color: #222;
   font-weight: 500;
 }
 .fc-popover {
-  border: none !important;
+  border: none;
   max-width: 600px;
   overflow: hidden;
   border-radius: 4px;
@@ -66,7 +66,7 @@
   border-color: #eee;
 }
 .fc-popover-body {
-  padding: 4px 4px 6px !important;
+  padding: 4px 4px 6px;
   overflow-y: auto;
   max-height: 50vh;
   background-color: #c71818;
@@ -95,7 +95,7 @@
   border-radius: 3px;
 }
 .fc-day-other .fc-daygrid-day-top {
-  opacity: 1 !important;
+  opacity: 1;
 }
 .fc-day-other .day-number {
   opacity: 0.3;

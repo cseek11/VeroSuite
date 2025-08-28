@@ -224,3 +224,4 @@ The dashboard currently uses realistic mock data that represents:
 - Support ticket distribution
 
 All data is configurable and can be easily replaced with real API endpoints.
+

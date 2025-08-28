@@ -944,25 +944,17 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
     const cardWidth = getCardWidth(cardId);
     const cardHeight = getCardHeight(cardId);
     
-    if (isGridMode) {
-      // In grid mode, apply sidebar offset constraints
-      const sidebarOffset = sidebarCollapsed ? 
-        layoutConfig.freehand.sidebarCollapsedOffset : 
-        layoutConfig.freehand.sidebarOffset;
-      
-      // Constrain to stay within boundaries
-      const constrainedX = Math.max(sidebarOffset, position.x);
-      const constrainedY = Math.max(layoutConfig.freehand.headerOffset, position.y);
-      
-      return { x: constrainedX, y: constrainedY };
-    } else {
-      // In freehand mode, allow cards to go to the very edges (just prevent negative values)
-      const constrainedX = Math.max(0, position.x);
-      const constrainedY = Math.max(0, position.y);
-      
-      return { x: constrainedX, y: constrainedY };
-    }
-  }, [sidebarCollapsed, getCardWidth, getCardHeight, isGridMode]);
+    // Get current sidebar offset
+    const sidebarOffset = sidebarCollapsed ? 
+      layoutConfig.freehand.sidebarCollapsedOffset : 
+      layoutConfig.freehand.sidebarOffset;
+    
+    // Constrain to stay within boundaries
+    const constrainedX = Math.max(sidebarOffset, position.x);
+    const constrainedY = Math.max(layoutConfig.freehand.headerOffset, position.y);
+    
+    return { x: constrainedX, y: constrainedY };
+  }, [sidebarCollapsed, getCardWidth, getCardHeight]);
 
   // Find nearest free position for a card
   const findNearestFreePosition = useCallback((cardId: string, desiredPosition: { x: number; y: number }) => {
@@ -1767,7 +1759,9 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
 
   return (
          <ErrorBoundary>
-               <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
+       <div className={`min-h-screen transition-colors duration-200 ${
+         currentTheme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
+       }`}>
         {/* Enhanced Header */}
         {showHeader && (
           <Navbar 
@@ -1791,24 +1785,22 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
             <div className="max-w-7xl mx-auto">
               {/* Layout Mode Indicator and Settings */}
               <div className="mb-8 flex items-start justify-between">
-                {/* Demo Mode Alert */}
+                {/* Enhanced Alert */}
                 {isUsingMockData && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                      <div>
-                        <h3 className="text-sm font-medium text-yellow-800">Demo Mode</h3>
-                        <p className="text-sm text-yellow-700">Using demo data. Configure your Supabase connection to see real data.</p>
-                      </div>
-                    </div>
-                  </div>
+                  <Alert 
+                    type="warning" 
+                    title="Demo Mode"
+                    className="mt-4"
+                  >
+                    Using demo data. Configure your Supabase connection to see real data.
+                  </Alert>
                 )}
 
                 {/* Layout Mode Indicator and Settings */}
                 <div className="flex-shrink-0 flex items-center space-x-4">
                   {/* Layout Mode Indicator */}
-                  <div className="flex items-center gap-2 px-3 py-2 bg-white/60 backdrop-blur-sm rounded-lg border border-slate-200">
-                    <span className="text-sm font-medium text-slate-700">
+                  <div className="flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded-lg">
+                    <span className="text-sm font-medium text-gray-700">
                       {isGridMode ? 'Grid Mode' : 'Freehand Mode'}
                     </span>
                     <div className={`w-2 h-2 rounded-full ${isGridMode ? 'bg-blue-500' : 'bg-green-500'}`}></div>
@@ -1816,7 +1808,7 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
 
                   {/* Swap Mode Indicator */}
                   {swapMode && (
-                    <div className="flex items-center gap-2 px-3 py-2 bg-green-100 rounded-lg border border-green-300">
+                    <div className="flex items-center space-x-2 px-3 py-2 bg-green-100 rounded-lg border border-green-300">
                       <span className="text-sm font-medium text-green-700">
                         Swap Mode Active
                       </span>
@@ -1830,28 +1822,18 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
                     </div>
                   )}
 
-                {/* Add Card Button */}
-                <button
-                  onClick={() => addCustomCard('widget')}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-sm flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Card
-                </button>
-
                 {/* Settings Dropdown */}
                 <Dropdown
                   trigger={
-                    <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm flex items-center gap-2">
-                      <Settings className="h-4 w-4" />
+                    <Button variant="outline" icon={Settings} className="flex items-center space-x-2">
                       <span>Settings</span>
-                    </button>
+                    </Button>
                   }
                   items={[
                     {
                       label: 'Add Custom Card',
                       icon: Plus,
-                      onClick: () => addCustomCard('widget')
+                      onClick: addCustomCard
                     },
                     {
                       label: 'Reset Layout',
@@ -1890,15 +1872,14 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
 
               {/* Resizable Cards Grid */}
                <div 
-                 className="relative bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg border-2 border-dashed border-slate-200"
+                 className="relative"
                  style={{
-                   minHeight: '600px',
-                   height: isGridMode ? 'auto' : `${Math.max(600, canvasHeight)}px`,
-                   transition: 'min-height 0.3s ease-out, height 0.3s ease-out'
+                   minHeight: isGridMode ? 'auto' : `${canvasHeight}px`,
+                   transition: 'min-height 0.3s ease-out'
                  }}
                >
-                 {/* Alignment Guides - Only show in freehand mode */}
-                 {!isGridMode && alignmentGuides.map((guide, index) => (
+                 {/* Alignment Guides */}
+                 {alignmentGuides.map((guide, index) => (
                    <div
                      key={`guide-${index}`}
                      className="absolute pointer-events-none z-50"
@@ -1942,7 +1923,7 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
                      const freePos = cardPositions[cardId];
                      if (!freePos) {
                        // Initialize position if not set
-                       const newPos = { x: 0, y: 0 + cardOrder.indexOf(cardId) * 50 };
+                       const newPos = { x: 20, y: 20 + cardOrder.indexOf(cardId) * 50 };
                        setCardPositions(prev => ({ ...prev, [cardId]: newPos }));
                        pixelPos = newPos;
                      } else {
@@ -1955,19 +1936,21 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
                
 
                   return (
-                    <div
-                      key={cardId}
-                      data-card-id={cardId}
-                      className={`absolute rounded-lg shadow-lg border-2 ${
-                        swapMode && swapSourceCard === cardId 
-                          ? 'bg-green-50/90 backdrop-blur-sm border-green-300' 
-                          : 'bg-white/90 backdrop-blur-sm border-slate-200'
-                      } ${
-                        isDragging ? 'cursor-grabbing shadow-2xl' : 
-                        isCardLocked(cardId) ? 'cursor-not-allowed' : 'cursor-pointer'
-                      } ${isResizing ? 'select-none' : ''} ${
-                        isSelected ? 'ring-2 ring-blue-500 ring-opacity-50' : ''
-                      } ${swapMode && swapSourceCard === cardId ? 'ring-2 ring-green-500 ring-opacity-75' : ''}`}
+                                         <div
+                       key={cardId}
+                       data-card-id={cardId}
+                                               className={`absolute rounded-lg shadow-lg border ${
+                          swapMode && swapSourceCard === cardId 
+                            ? 'bg-green-50 border-green-300' 
+                            : currentTheme === 'dark' 
+                              ? 'bg-gray-800 border-gray-600 text-white' 
+                              : 'bg-white border-gray-200'
+                        } ${
+                          isDragging ? 'cursor-grabbing shadow-2xl' : 
+                          isCardLocked(cardId) ? 'cursor-not-allowed' : 'cursor-pointer'
+                        } ${isResizing ? 'select-none' : ''} ${
+                          isSelected ? 'ring-2 ring-blue-500 ring-opacity-50' : ''
+                        } ${swapMode && swapSourceCard === cardId ? 'ring-2 ring-green-500 ring-opacity-75' : ''}`}
                        style={{
                          left: pixelPos.x,
                          top: pixelPos.y,
@@ -1983,20 +1966,21 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
                      >
                                                                                            {/* Card Header */}
                         <div 
-                          className={`card-header w-full flex items-center justify-between px-2 py-1 border-b ${
-                            swapMode && swapSourceCard === cardId ? 'border-green-300 bg-gradient-to-r from-green-100 to-green-200' : 'border-slate-200 bg-gradient-to-r from-slate-100 to-blue-100'
-                          } rounded-t-lg min-w-full backdrop-blur-sm ${
+                          className={`card-header w-full flex items-center justify-between p-3 border-b ${
+                            swapMode && swapSourceCard === cardId ? 'border-green-300 bg-green-100' : 'border-gray-200 bg-gray-50'
+                          } rounded-t-lg min-w-full ${
                         !isCardLocked(cardId) ? 'cursor-grab' : ''
                           } ${swapMode && swapSourceCard === cardId ? 'ring-2 ring-green-500 ring-opacity-75' : ''}`}
                           style={{ width: '100%', minWidth: '100%' }}
                           onDoubleClick={() => handleCardSwap(cardId)}
                           title={swapMode ? "Double-click to swap with this card" : "Double-click to enter swap mode"}
                         >
-                          <div className="flex items-center gap-1">
-                            <GripVertical className="h-3 w-3 text-slate-500" />
-                            <span className="text-xs font-medium text-slate-900">
-                              {getCardDisplayName(cardId)}
-                            </span>
+                          <div className="flex items-center space-x-2">
+                            <GripVertical className="h-4 w-4 text-gray-400" />
+                                                         <Typography variant="h6" className="text-gray-900">
+                               {getCardDisplayName(cardId)}
+                             </Typography>
+
                           </div>
                                                      <div className="flex items-center space-x-1">
                                                            {/* Change Type Button - always show for custom cards */}
@@ -2047,7 +2031,7 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
                         </div>
 
                       {/* Card Content */}
-                       <div className="p-2 h-full overflow-hidden">
+                       <div className="p-3 h-full overflow-hidden">
                         {cardId === 'metrics' && (
                           <DashboardMetrics metrics={metrics} />
                         )}
