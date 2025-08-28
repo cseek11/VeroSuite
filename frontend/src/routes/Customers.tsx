@@ -235,15 +235,15 @@ export default function Customers() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3" style={{border: '8px solid red', backgroundColor: 'yellow !important'}}>
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4" style={{border: '5px solid blue', backgroundColor: 'orange !important'}}>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1" style={{color: 'red !important', fontSize: '40px !important'}}>
               Customers
             </h1>
-            <p className="text-slate-600 text-sm">
+            <p className="text-slate-600 text-sm" style={{color: 'purple !important', fontSize: '20px !important'}}>
               Manage your customer accounts and locations
             </p>
           </div>
@@ -253,92 +253,106 @@ export default function Customers() {
           {/* Search and Actions Bar */}
           <div className={`flex flex-col sm:flex-row gap-4 mb-6 ${isCompactMode ? 'mb-4' : 'mb-6'}`}>
             <div className="flex-1">
-              <Input
-                placeholder="Search customers..."
-                value={search}
-                onChange={(value) => setSearch(value)}
-                icon={Search}
-                className={isCompactMode ? 'h-9 px-3 text-sm' : ''}
-              />
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search customers..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className={`w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm ${isCompactMode ? 'h-9 px-3 text-sm' : ''}`}
+                />
+              </div>
             </div>
             
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size={isCompactMode ? "sm" : "md"}
+              <button
                 onClick={() => setIsCompactMode(!isCompactMode)}
-                className={`flex items-center gap-2 ${isCompactMode ? 'h-9 px-3 text-sm' : ''}`}
+                className={`bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm flex items-center gap-2 ${isCompactMode ? 'h-9 px-3 text-sm' : ''}`}
               >
                 {isCompactMode ? 'Standard View' : 'Compact View'}
-              </Button>
+              </button>
 
-              <Button
-                variant="primary"
-                size={isCompactMode ? "sm" : "md"}
-                className={`flex items-center gap-2 ${isCompactMode ? 'h-10 px-4 text-sm' : ''}`}
+              <button
+                className={`bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-sm flex items-center gap-2 ${isCompactMode ? 'h-10 px-4 text-sm' : ''}`}
               >
                 <UserPlus className="h-4 w-4" />
                 New Customer
-              </Button>
+              </button>
             </div>
           </div>
 
           {/* New Account Form */}
-          <Card className="p-6 mb-6">
-            <Typography variant="h6" className="text-gray-900 mb-4">
+          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6 mb-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">
               New Account
-            </Typography>
+            </h3>
             
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="Account Name"
-                  placeholder="Enter account name"
-                  value={watch('name')}
-                  onChange={(value) => setValue('name', value)}
-                  error={errors.name?.message}
-                />
-                <Select
-                  label="Account Type"
-                  value={watch('account_type') || ''}
-                  onChange={(value) => setValue('account_type', value as 'commercial' | 'residential')}
-                  placeholder="Select account type..."
-                  options={[
-                    { value: 'commercial', label: 'Commercial' },
-                    { value: 'residential', label: 'Residential' },
-                  ]}
-                  error={errors.account_type?.message}
-                />
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Account Name</label>
+                  <input
+                    type="text"
+                    placeholder="Enter account name"
+                    value={watch('name')}
+                    onChange={(e) => setValue('name', e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
+                  />
+                  {errors.name?.message && (
+                    <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Account Type</label>
+                  <select
+                    value={watch('account_type') || ''}
+                    onChange={(e) => setValue('account_type', e.target.value as 'commercial' | 'residential')}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
+                  >
+                    <option value="">Select account type...</option>
+                    <option value="commercial">Commercial</option>
+                    <option value="residential">Residential</option>
+                  </select>
+                  {errors.account_type?.message && (
+                    <p className="text-red-500 text-xs mt-1">{errors.account_type.message}</p>
+                  )}
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <MaskedInput
-                  label="Phone Number"
-                  mask="(999) 999-9999"
-                  placeholder="(555) 123-4567"
-                  value=""
-                  onChange={() => {}}
-                />
-                <MaskedInput
-                  label="Postal Code"
-                  mask="99999"
-                  placeholder="15222"
-                  value=""
-                  onChange={() => {}}
-                />
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
+                  <InputMask
+                    mask="(999) 999-9999"
+                    placeholder="(555) 123-4567"
+                    value=""
+                    onChange={() => {}}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Postal Code</label>
+                  <InputMask
+                    mask="99999"
+                    placeholder="15222"
+                    value=""
+                    onChange={() => {}}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
+                  />
+                </div>
               </div>
               
-              <Button
-                variant="primary"
+              <button
                 disabled={isSubmitting}
                 onClick={handleSubmit(onSubmit)}
-                className="flex items-center gap-2"
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Plus className="h-4 w-4" />
                 {isSubmitting ? 'Creating...' : 'Create Account'}
-              </Button>
+              </button>
             </form>
-          </Card>
+          </div>
 
           {/* Loading State */}
           {isLoading && (
@@ -349,34 +363,34 @@ export default function Customers() {
 
           {/* Error State */}
           {isError && (
-            <Alert type="danger" className="mb-6">
-              <Typography variant="body2">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <p className="text-red-700 text-sm">
                 Failed to load customers
-              </Typography>
-            </Alert>
+              </p>
+            </div>
           )}
 
           {/* Customers List */}
           {!isLoading && Array.isArray(data) && (
             <div className={isCompactMode ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3" : "space-y-4"}>
               {data.length === 0 ? (
-                <Card className={isCompactMode ? "p-4 text-center" : "p-8 text-center"}>
+                <div className={`bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 ${isCompactMode ? "p-4 text-center" : "p-8 text-center"}`}>
                   <Users className={`${isCompactMode ? 'h-8 w-8' : 'h-12 w-12'} text-gray-400 mx-auto mb-4`} />
-                  <Typography variant={isCompactMode ? "body1" : "h6"} className="text-gray-900 mb-2">
+                  <h3 className={`${isCompactMode ? "text-base" : "text-lg"} font-semibold text-slate-900 mb-2`}>
                     No Customers Found
-                  </Typography>
-                  <Typography variant="body2" className="text-gray-600">
+                  </h3>
+                  <p className="text-slate-600 text-sm">
                     {search ? 'No customers match your search criteria.' : 'No customers have been added yet.'}
-                  </Typography>
-                </Card>
+                  </p>
+                </div>
               ) : (
                 data.map((acc: any) => {
                   const isOverdue = (acc.overdue_days || 0) > 30;
                   
                   return (
-                    <Card 
+                    <div 
                       key={acc.id} 
-                      className={`${isCompactMode ? 'py-3 px-4' : 'p-6'} hover:shadow-lg transition-shadow relative ${
+                      className={`bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 ${isCompactMode ? 'py-3 px-4' : 'p-6'} hover:shadow-lg transition-shadow relative ${
                         isOverdue ? 'border-2 border-red-500' : ''
                       }`}
                     >
@@ -387,9 +401,9 @@ export default function Customers() {
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
                             <Building className="h-4 w-4 text-blue-500" />
-                            <Typography variant="body1" className="text-gray-900 font-semibold truncate">
+                            <p className="text-slate-900 font-semibold truncate text-sm">
                               {acc.name}
-                            </Typography>
+                            </p>
                           </div>
                           
                           <div className="flex items-center justify-between">
@@ -408,15 +422,13 @@ export default function Customers() {
                           </div>
                           
                           <div className="flex gap-1">
-                            <Button
-                              variant="primary"
-                              size="sm"
+                            <button
                               onClick={() => setSelectedCustomerId(acc.id)}
-                              className="flex items-center gap-1 h-8 px-2 text-xs"
+                              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-2 py-1 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-xs flex items-center gap-1 h-8"
                             >
                               <Eye className="h-3 w-3" />
                               View
-                            </Button>
+                            </button>
                           </div>
                         </div>
                       ) : (
@@ -425,9 +437,9 @@ export default function Customers() {
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
                               <Building className="h-5 w-5 text-blue-500" />
-                              <Typography variant="h6" className="text-gray-900">
+                              <h3 className="text-lg font-semibold text-slate-900">
                                 {acc.name}
-                              </Typography>
+                              </h3>
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                 acc.account_type === 'commercial' 
                                   ? 'bg-blue-100 text-blue-800' 
@@ -446,25 +458,20 @@ export default function Customers() {
                           </div>
 
                           <div className="flex flex-col sm:flex-row gap-2">
-                            <Button
-                              variant="primary"
-                              size="sm"
+                            <button
                               onClick={() => setSelectedCustomerId(acc.id)}
-                              className="flex items-center gap-2"
+                              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-sm flex items-center gap-2"
                             >
                               <Eye className="h-4 w-4" />
                               View Details
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
+                            </button>
+                            <button
                               onClick={() => qc.invalidateQueries({ queryKey: ['crm', 'account', acc.id, 'locations'] })}
+                              className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm"
                             >
                               Refresh Locations
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
+                            </button>
+                            <button
                               onClick={() => createLocation.mutate({ 
                                 account_id: acc.id, 
                                 name: 'New Site', 
@@ -474,13 +481,14 @@ export default function Customers() {
                                 postal_code: '15222' 
                               })}
                               disabled={createLocation.isPending}
+                              className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {createLocation.isPending ? 'Adding...' : '+ Location'}
-                            </Button>
+                            </button>
                           </div>
                         </div>
                       )}
-                    </Card>
+                    </div>
                   );
                 })
               )}

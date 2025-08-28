@@ -185,3 +185,4 @@ All existing components using CRM classes will automatically get the new purple 
 4. **Consider Further Customization:** Add more purple variations if needed
 
 The form system now feels much more **consistent and branded** with your purple theme! 🎉
+

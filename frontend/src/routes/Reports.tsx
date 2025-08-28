@@ -3,7 +3,6 @@ import { useAuthStore } from '@/stores/auth';
 import { useNavigate } from 'react-router-dom';
 import { PageLoader } from '@/components/LoadingSpinner';
 
-
 import {
   BarChart3,
   TrendingUp,
@@ -278,72 +277,72 @@ const Reports: React.FC = () => {
 
       {/* Global Filters */}
       {showFilters && (
-        <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-          <Typography variant="h6" className="mb-4">Global Filters</Typography>
+        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Global Filters</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Date Range</label>
               <div className="flex gap-2">
-                <Input
+                <input
                   type="date"
                   placeholder="Start Date"
                   value=""
                   onChange={() => {}}
-                  className="flex-1"
+                  className="flex-1 px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
                 />
-                <Input
+                <input
                   type="date"
                   placeholder="End Date"
                   value=""
                   onChange={() => {}}
-                  className="flex-1"
+                  className="flex-1 px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
-              <Select
+              <label className="block text-sm font-medium text-slate-700 mb-1">Branch</label>
+              <select
                 value={selectedBranch}
-                onChange={(value) => setSelectedBranch(value)}
-                options={[
-                  { value: 'all', label: 'All Branches' },
-                  { value: 'main', label: 'Main Branch' },
-                  { value: 'north', label: 'North Branch' },
-                  { value: 'south', label: 'South Branch' },
-                ]}
-              />
+                onChange={(e) => setSelectedBranch(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
+              >
+                <option value="all">All Branches</option>
+                <option value="main">Main Branch</option>
+                <option value="north">North Branch</option>
+                <option value="south">South Branch</option>
+              </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Technician</label>
-              <Select
+              <label className="block text-sm font-medium text-slate-700 mb-1">Technician</label>
+              <select
                 value={selectedTechnician}
-                onChange={(value) => setSelectedTechnician(value)}
-                options={[
-                  { value: 'all', label: 'All Technicians' },
-                  { value: 'tech1', label: 'John Smith' },
-                  { value: 'tech2', label: 'Jane Doe' },
-                  { value: 'tech3', label: 'Mike Johnson' },
-                ]}
-              />
+                onChange={(e) => setSelectedTechnician(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
+              >
+                <option value="all">All Technicians</option>
+                <option value="tech1">John Smith</option>
+                <option value="tech2">Jane Doe</option>
+                <option value="tech3">Mike Johnson</option>
+              </select>
             </div>
           </div>
         </div>
       )}
 
       {/* Report Categories Tabs */}
-      <div className="flex-shrink-0 overflow-hidden">
-        <div className="flex space-x-4 overflow-x-auto border-b border-gray-200">
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex space-x-4 overflow-x-auto border-b border-slate-200">
           {Object.entries(reportCategories).map(([key, category]) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`flex items-center gap-1 py-1 px-1 border-b-2 font-medium text-xs whitespace-nowrap transition-colors duration-200 ${
+              className={`flex items-center gap-1 py-2 px-3 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${
                 activeTab === key
                   ? 'border-purple-500 text-purple-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
               }`}
             >
-              <category.icon className="h-3 w-3" />
+              <category.icon className="h-4 w-4" />
               {category.name}
             </button>
           ))}
@@ -351,234 +350,204 @@ const Reports: React.FC = () => {
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        <div className="space-y-3">
-          {/* Pinned Reports */}
-          {pinnedReports.length > 0 && (
-            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-              <Typography variant="h5" className="text-gray-900 mb-4 flex items-center gap-2">
-                <Bookmark className="h-5 w-5 text-yellow-500" />
-                Pinned Reports
-              </Typography>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {pinnedReports.map(reportId => {
-                  // Find the report details
-                  let report = null;
-                  for (const category of Object.values(reportCategories)) {
-                    const found = category.reports.find(r => r.id === reportId);
-                    if (found) {
-                      report = { ...found, category: category.name };
-                      break;
-                    }
+      <div className="space-y-4">
+        {/* Pinned Reports */}
+        {pinnedReports.length > 0 && (
+          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <Bookmark className="h-5 w-5 text-yellow-500" />
+              Pinned Reports
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {pinnedReports.map(reportId => {
+                // Find the report details
+                let report = null;
+                for (const category of Object.values(reportCategories)) {
+                  const found = category.reports.find(r => r.id === reportId);
+                  if (found) {
+                    report = { ...found, category: category.name };
+                    break;
                   }
-                  if (!report) return null;
+                }
+                if (!report) return null;
 
-                  return (
-                    <Card key={reportId} className="p-4 border-l-4 border-yellow-400">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <report.icon className="h-5 w-5 text-gray-600" />
-                          <Typography variant="h6" className="text-gray-900">
-                            {report.name}
-                          </Typography>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => togglePinReport(reportId)}
-                        >
-                          <BookmarkPlus className="h-4 w-4 text-yellow-500" />
-                        </Button>
-                      </div>
-                      <Typography variant="body2" className="text-gray-600 mb-3">
-                        {report.description}
-                      </Typography>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() => handleGenerateReport(reportId)}
-                        >
-                          Generate
-                        </Button>
-                        <Dropdown
-                          trigger={
-                            <Button variant="outline" size="sm">
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          }
-                          items={[
-                            { label: 'Export as CSV', onClick: () => handleExportReport(reportId, 'csv') },
-                            { label: 'Export as PDF', onClick: () => handleExportReport(reportId, 'pdf') },
-                            { label: 'Export as Excel', onClick: () => handleExportReport(reportId, 'excel') }
-                          ]}
-                        />
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Reports Grid/List */}
-          <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className={viewMode === 'grid' 
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              : "space-y-4"
-            }>
-              {filteredReports.map((report) => (
-                <Card 
-                  key={report.id} 
-                  className={`p-6 hover:shadow-lg transition-shadow ${
-                    viewMode === 'list' ? 'flex items-center justify-between' : ''
-                  }`}
-                >
-                  {viewMode === 'grid' ? (
-                    <>
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${reportCategories[activeTab as keyof typeof reportCategories].bgColor}`}>
-                            <report.icon className={`h-6 w-6 ${reportCategories[activeTab as keyof typeof reportCategories].color}`} />
-                          </div>
-                          <Typography variant="h6" className="text-gray-900">
-                            {report.name}
-                          </Typography>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => togglePinReport(report.id)}
-                          >
-                            {pinnedReports.includes(report.id) ? (
-                              <Bookmark className="h-4 w-4 text-yellow-500" />
-                            ) : (
-                              <BookmarkPlus className="h-4 w-4 text-gray-400" />
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <Typography variant="body2" className="text-gray-600 mb-4">
-                        {report.description}
-                      </Typography>
-                      
-                      <div className="flex gap-2">
-                        <Button
-                          variant="primary"
-                          className="flex-1"
-                          onClick={() => handleGenerateReport(report.id)}
-                        >
-                          Generate Report
-                        </Button>
-                        <Dropdown
-                          trigger={
-                            <Button variant="outline">
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          }
-                          items={[
-                            { label: 'Export as CSV', onClick: () => handleExportReport(report.id, 'csv') },
-                            { label: 'Export as PDF', onClick: () => handleExportReport(report.id, 'pdf') },
-                            { label: 'Export as Excel', onClick: () => handleExportReport(report.id, 'excel') }
-                          ]}
-                        />
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-lg ${reportCategories[activeTab as keyof typeof reportCategories].bgColor}`}>
-                          <report.icon className={`h-6 w-6 ${reportCategories[activeTab as keyof typeof reportCategories].color}`} />
-                        </div>
-                        <div>
-                          <Typography variant="h6" className="text-gray-900">
-                            {report.name}
-                          </Typography>
-                          <Typography variant="body2" className="text-gray-600">
-                            {report.description}
-                          </Typography>
-                        </div>
-                      </div>
-                      
+                return (
+                  <div key={reportId} className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border-l-4 border-yellow-400 shadow-lg">
+                    <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
+                        <report.icon className="h-5 w-5 text-slate-600" />
+                        <h3 className="font-semibold text-slate-900">
+                          {report.name}
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() => togglePinReport(reportId)}
+                        className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm"
+                      >
+                        <BookmarkPlus className="h-4 w-4 text-yellow-500" />
+                      </button>
+                    </div>
+                    <p className="text-slate-600 text-sm mb-3">
+                      {report.description}
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleGenerateReport(reportId)}
+                        className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-sm flex items-center gap-2"
+                      >
+                        Generate
+                      </button>
+                      <div className="relative">
+                        <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm flex items-center gap-2">
+                          <Download className="h-4 w-4" />
+                          Export
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Reports Grid/List */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+          <div className={viewMode === 'grid' 
+            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            : "space-y-3"
+          }>
+            {filteredReports.map((report) => (
+              <div 
+                key={report.id} 
+                className={`bg-white/60 backdrop-blur-sm rounded-lg p-4 hover:shadow-lg transition-shadow ${
+                  viewMode === 'list' ? 'flex items-center justify-between' : ''
+                }`}
+              >
+                {viewMode === 'grid' ? (
+                  <>
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${reportCategories[activeTab as keyof typeof reportCategories].bgColor}`}>
+                          <report.icon className={`h-5 w-5 ${reportCategories[activeTab as keyof typeof reportCategories].color}`} />
+                        </div>
+                        <h3 className="font-semibold text-slate-900">
+                          {report.name}
+                        </h3>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
                           onClick={() => togglePinReport(report.id)}
+                          className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm"
                         >
                           {pinnedReports.includes(report.id) ? (
                             <Bookmark className="h-4 w-4 text-yellow-500" />
                           ) : (
-                            <BookmarkPlus className="h-4 w-4 text-gray-400" />
+                            <BookmarkPlus className="h-4 w-4 text-slate-400" />
                           )}
-                        </Button>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() => handleGenerateReport(report.id)}
-                        >
-                          Generate
-                        </Button>
-                        <Dropdown
-                          trigger={
-                            <Button variant="outline" size="sm">
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          }
-                          items={[
-                            { label: 'Export as CSV', onClick: () => handleExportReport(report.id, 'csv') },
-                            { label: 'Export as PDF', onClick: () => handleExportReport(report.id, 'pdf') },
-                            { label: 'Export as Excel', onClick: () => handleExportReport(report.id, 'excel') }
-                          ]}
-                        />
+                        </button>
                       </div>
-                    </>
-                  )}
-                </Card>
-              ))}
-            </div>
+                    </div>
+                    
+                    <p className="text-slate-600 text-sm mb-3">
+                      {report.description}
+                    </p>
+                    
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleGenerateReport(report.id)}
+                        className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-sm flex items-center gap-2 flex-1"
+                      >
+                        Generate Report
+                      </button>
+                      <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm flex items-center gap-2">
+                        <Download className="h-4 w-4" />
+                        Export
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-4">
+                      <div className={`p-2 rounded-lg ${reportCategories[activeTab as keyof typeof reportCategories].bgColor}`}>
+                        <report.icon className={`h-5 w-5 ${reportCategories[activeTab as keyof typeof reportCategories].color}`} />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-slate-900">
+                          {report.name}
+                        </h3>
+                        <p className="text-slate-600 text-sm">
+                          {report.description}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => togglePinReport(report.id)}
+                        className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm"
+                      >
+                        {pinnedReports.includes(report.id) ? (
+                          <Bookmark className="h-4 w-4 text-yellow-500" />
+                        ) : (
+                          <BookmarkPlus className="h-4 w-4 text-slate-400" />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => handleGenerateReport(report.id)}
+                        className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-sm flex items-center gap-2"
+                      >
+                        Generate
+                      </button>
+                      <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm flex items-center gap-2">
+                        <Download className="h-4 w-4" />
+                        Export
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
           </div>
+        </div>
 
-          {/* Quick Stats */}
-          <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-            <Typography variant="h3" className="text-gray-900 mb-6">
-              Quick Statistics
-            </Typography>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card className="p-6 text-center">
-                <Typography variant="h4" className="text-blue-600 font-bold">
-                  1,247
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
-                  Jobs This Month
-                </Typography>
-              </Card>
-              <Card className="p-6 text-center">
-                <Typography variant="h4" className="text-green-600 font-bold">
-                  892
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
-                  Active Customers
-                </Typography>
-              </Card>
-              <Card className="p-6 text-center">
-                <Typography variant="h4" className="text-purple-600 font-bold">
-                  94.2%
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
-                  Customer Satisfaction
-                </Typography>
-              </Card>
-              <Card className="p-6 text-center">
-                <Typography variant="h4" className="text-orange-600 font-bold">
-                  $127,450
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
-                  Monthly Revenue
-                </Typography>
-              </Card>
+        {/* Quick Stats */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+          <h2 className="text-xl font-semibold text-slate-900 mb-4">
+            Quick Statistics
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-blue-600">
+                1,247
+              </div>
+              <div className="text-slate-600 text-sm">
+                Jobs This Month
+              </div>
+            </div>
+            <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-green-600">
+                892
+              </div>
+              <div className="text-slate-600 text-sm">
+                Active Customers
+              </div>
+            </div>
+            <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-purple-600">
+                94.2%
+              </div>
+              <div className="text-slate-600 text-sm">
+                Customer Satisfaction
+              </div>
+            </div>
+            <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-orange-600">
+                $127,450
+              </div>
+              <div className="text-slate-600 text-sm">
+                Monthly Revenue
+              </div>
             </div>
           </div>
         </div>

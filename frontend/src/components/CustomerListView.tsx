@@ -5,12 +5,10 @@ import {
   Typography,
   Button,
   Card,
-  Input,
   Chip,
   Checkbox
 } from '@/components/ui/EnhancedUI';
 import {
-  Search,
   Filter,
   Eye,
   Edit,
@@ -24,7 +22,6 @@ import {
   MessageSquare,
   FolderOpen,
   Users,
-  RefreshCw,
   ChevronDown,
   ChevronUp,
   X,
@@ -75,8 +72,6 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
   onViewDetails,
   onSelectionChange
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all');
   const [selectedCustomers, setSelectedCustomers] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -230,16 +225,8 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
     );
   };
 
-  // Filter customers based on search and type
-  const filteredCustomers = useMemo(() => {
-    return customers.filter(customer => {
-      const matchesSearch = (customer.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                           (customer.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                           (customer.phone?.toLowerCase() || '').includes(searchTerm.toLowerCase());
-      const matchesType = filterType === 'all' || customer.account_type === filterType;
-      return matchesSearch && matchesType;
-    });
-  }, [customers, searchTerm, filterType]);
+  // Use customers as they come in (filtering is handled by parent component)
+  const filteredCustomers = customers;
 
   // Handle checkbox selection
   const handleSelectCustomer = (customerId: string, checked: boolean) => {
@@ -313,52 +300,6 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Search and Filters */}
-      <Card className="p-4">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-          <div className="flex-1">
-            <Input
-              placeholder="Search customers..."
-              value={searchTerm}
-              onChange={setSearchTerm}
-              icon={Search}
-              className="w-full h-9"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="crm-select h-9"
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                borderColor: 'rgba(255, 255, 255, 0.2)',
-                color: 'rgb(30, 41, 59)',
-                backdropFilter: 'blur(4px)',
-                WebkitAppearance: 'none',
-                MozAppearance: 'none',
-                appearance: 'none'
-              }}
-
-            >
-              <option value="all">All Types</option>
-              <option value="commercial">Commercial</option>
-              <option value="residential">Residential</option>
-            </select>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSearchTerm('');
-                setFilterType('all');
-              }}
-              className="h-9 px-3 text-sm"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Clear
-            </Button>
-          </div>
-        </div>
-      </Card>
 
       {/* Tabbed Navigation (only shown when customers are selected) */}
       {selectedCustomers.size > 0 && (
@@ -756,7 +697,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
               No Customers Found
             </Typography>
             <Typography variant="body2" className="text-gray-600">
-              {searchTerm || filterType !== 'all' ? 'No customers match your search criteria.' : 'No customers have been added yet.'}
+              No customers have been added yet.
             </Typography>
           </div>
                  )}
