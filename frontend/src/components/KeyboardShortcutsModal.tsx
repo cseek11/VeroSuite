@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Keyboard, Search, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Home, Send as EndIcon, FileText as TabIcon } from 'lucide-react';
+import { X, Keyboard, Search, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Home, End, Tab } from 'lucide-react';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 
 interface KeyboardShortcutsModalProps {

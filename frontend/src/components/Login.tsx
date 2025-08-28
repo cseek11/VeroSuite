@@ -34,7 +34,7 @@ export function Login() {
     <form onSubmit={handleLogin}>
       <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
       <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" />
-      <button type="submit">Login</button>
+      <button type="submit" width="20">Login</button>
       {error && <div>{error}</div>}
     </form>
   );
