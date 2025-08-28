@@ -24,6 +24,8 @@ import ReportsPage from './Reports';
 import UploadsPage from './Uploads';
 import SettingsPage from './Settings';
 import CRMDemo from './CRMDemo';
+import ChartsPage from './Charts';
+import ChartsTestPage from './ChartsTest';
 
 const LoginPage = lazy(() => import('@/routes/Login'));
 
@@ -322,6 +324,30 @@ export default function App() {
                   <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <KnowledgePage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/charts"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <ChartsPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/charts-test"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <ChartsTestPage />
                     </Suspense>
                   </V4Layout>
                 </PrivateRoute>

@@ -12,7 +12,8 @@ import {
   DollarSign,
   BookOpen,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  TrendingUp
 } from 'lucide-react';
 import { BugIcon } from '../icons/BugIcon';
 
@@ -29,6 +30,7 @@ const navigationItems = [
   { id: 'scheduling', label: 'Scheduling', icon: Calendar, path: '/scheduler', badge: '47' },
   { id: 'communications', label: 'Communications', icon: MessageCircle, path: '/communications', badge: '3' },
   { id: 'finance', label: 'Finance', icon: DollarSign, path: '/finance', badge: '$45k' },
+  { id: 'charts', label: 'Analytics', icon: TrendingUp, path: '/charts', badge: '📊' },
   { id: 'reports', label: 'Reports', icon: BarChart3, path: '/reports', badge: null },
   { id: 'knowledge', label: 'Knowledge', icon: BookOpen, path: '/knowledge', badge: null },
   { id: 'settings', label: 'Settings', icon: Settings, path: '/settings', badge: null },
@@ -45,6 +47,7 @@ export default function V4Sidebar({ collapsed, onToggle, mobileOpen, onMobileClo
     if (path === '/scheduler') return 'scheduling';
     if (path === '/communications') return 'communications';
     if (path === '/finance') return 'finance';
+    if (path === '/charts' || path === '/charts-test') return 'charts';
     if (path === '/reports') return 'reports';
     if (path === '/knowledge') return 'knowledge';
     if (path === '/settings') return 'settings';
