@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth';
-import { Tabs } from '@/components/ui/EnhancedUI';
+import { Tabs, Input } from '@/components/ui/EnhancedUI';
 import MigrationStatus from '@/components/MigrationStatus';
 import { 
   DollarSign, 
@@ -922,22 +922,18 @@ export default function V4Dashboard() {
             <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Customization</h3>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Primary Color</label>
-                  <input 
-                    type="text" 
-                    defaultValue="#cb0c9f"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Brand Name</label>
-                  <input 
-                    type="text" 
-                    defaultValue="VeroPest Suite"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  />
-                </div>
+                <Input
+                  label="Primary Color"
+                  type="text"
+                  value="#cb0c9f"
+                  onChange={() => {}}
+                />
+                <Input
+                  label="Brand Name"
+                  type="text"
+                  value="VeroPest Suite"
+                  onChange={() => {}}
+                />
               </div>
             </div>
           </div>

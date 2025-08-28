@@ -330,6 +330,16 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               className="crm-select h-9"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                borderColor: 'rgba(255, 255, 255, 0.2)',
+                color: 'rgb(30, 41, 59)',
+                backdropFilter: 'blur(4px)',
+                WebkitAppearance: 'none',
+                MozAppearance: 'none',
+                appearance: 'none'
+              }}
+
             >
               <option value="all">All Types</option>
               <option value="commercial">Commercial</option>

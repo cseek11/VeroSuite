@@ -6,8 +6,10 @@ import {
   Input, 
   Tabs,
   Dropdown,
-  Modal
+  Modal,
+  Textarea
 } from '@/components/ui/EnhancedUI';
+import Select from '@/components/ui/Select';
 import {
   MessageCircle,
   Mail,
@@ -232,7 +234,20 @@ const CommunicationsPage: React.FC = () => {
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: '1px solid transparent',
+              backgroundClip: 'padding-box',
+              position: 'relative',
+              borderRadius: '0.5rem',
+              color: 'rgb(30, 41, 59)',
+              backdropFilter: 'blur(4px)',
+              WebkitAppearance: 'none',
+              MozAppearance: 'none',
+              appearance: 'none',
+              boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)'
+            }}
           >
             <option value="all">All Types</option>
             <option value="email">Email</option>
@@ -242,7 +257,20 @@ const CommunicationsPage: React.FC = () => {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: '1px solid transparent',
+              backgroundClip: 'padding-box',
+              position: 'relative',
+              borderRadius: '0.5rem',
+              color: 'rgb(30, 41, 59)',
+              backdropFilter: 'blur(4px)',
+              WebkitAppearance: 'none',
+              MozAppearance: 'none',
+              appearance: 'none',
+              boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)'
+            }}
           >
             <option value="all">All Status</option>
             <option value="read">Read</option>
@@ -656,14 +684,16 @@ const CommunicationsPage: React.FC = () => {
           size="lg"
         >
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-                <option value="email">Email</option>
-                <option value="sms">SMS</option>
-                <option value="phone">Phone Call</option>
-              </select>
-            </div>
+            <Select
+              label="Type"
+              value=""
+              onChange={() => {}}
+              options={[
+                { value: 'email', label: 'Email' },
+                { value: 'sms', label: 'SMS' },
+                { value: 'phone', label: 'Phone Call' },
+              ]}
+            />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">To</label>
               <Input placeholder="Enter recipient..." value="" onChange={() => {}} />
@@ -672,14 +702,13 @@ const CommunicationsPage: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
               <Input placeholder="Enter subject..." value="" onChange={() => {}} />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
-              <textarea
-                rows={6}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                placeholder="Enter your message..."
-              />
-            </div>
+            <Textarea
+              label="Message"
+              placeholder="Enter your message..."
+              value=""
+              onChange={() => {}}
+              rows={6}
+            />
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowNewMessageModal(false)}>
                 Cancel

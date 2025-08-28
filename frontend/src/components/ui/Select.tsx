@@ -49,6 +49,17 @@ const Select: React.FC<SelectProps> = ({
         className={`crm-select ${error ? 'crm-input-error' : ''}`}
         aria-invalid={error ? 'true' : 'false'}
         aria-describedby={[errorId, helperId].filter(Boolean).join(' ') || undefined}
+        style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          borderColor: 'rgba(255, 255, 255, 0.3)',
+          color: 'rgb(30, 41, 59)',
+          backdropFilter: 'blur(4px)',
+          WebkitAppearance: 'none',
+          MozAppearance: 'none',
+          appearance: 'none',
+          outline: 'none',
+          transition: 'none'
+        }}
         {...props}
       >
         {placeholder && (

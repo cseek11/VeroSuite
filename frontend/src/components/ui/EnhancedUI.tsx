@@ -279,10 +279,10 @@ export const Checkbox: React.FC<CheckboxProps> = ({ checked, defaultChecked, onC
   const isChecked = checked !== undefined ? checked : internalChecked;
 
   return (
-    <label className={`flex items-center cursor-pointer ${className}`}>
-      <div className="relative">
-        <input 
-          type="checkbox" 
+  <label className={`flex items-center cursor-pointer ${className}`}>
+    <div className="relative">
+      <input 
+        type="checkbox" 
           checked={isChecked} 
           onChange={(e) => handleChange(e.target.checked)} 
           className="absolute opacity-0 w-4 h-4 cursor-pointer" 
@@ -294,8 +294,8 @@ export const Checkbox: React.FC<CheckboxProps> = ({ checked, defaultChecked, onC
         </div>
       </div>
       {label && <span className="ml-2 text-sm text-gray-700">{label}</span>}
-    </label>
-  );
+  </label>
+);
 };
 
 export const Chip: React.FC<ChipProps> = ({ children, variant = 'default', color, size, onRemove, className = '' }) => {
@@ -396,8 +396,14 @@ export const Input: React.FC<InputProps> = ({ label, value, onChange, placeholde
           value={value}
           onChange={(e) => onChange?.(e.target.value)}
           placeholder={placeholder}
-          disabled={disabled}
-          className={`crm-textarea ${error ? 'crm-input-error' : ''} ${disabled ? 'crm-input-disabled' : ''}`}
+          disabled={disabled || false}
+          className={`crm-textarea ${error ? 'crm-input-error' : ''}`}
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: 'rgba(255, 255, 255, 0.2)',
+            color: 'rgb(30, 41, 59)',
+            backdropFilter: 'blur(4px)'
+          }}
         />
         {error && <p className="crm-error">{error}</p>}
       </div>
@@ -407,24 +413,30 @@ export const Input: React.FC<InputProps> = ({ label, value, onChange, placeholde
   return (
     <div className={`crm-field ${className}`}>
       {label && <label className="crm-label">{label}</label>}
-      <div className="relative">
-        {Icon && (
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+    <div className="relative">
+      {Icon && (
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Icon className="h-4 w-4 text-gray-500" />
-          </div>
-        )}
-        <input
-          type={type}
-          value={value}
+        </div>
+      )}
+              <input
+        type={type}
+        value={value}
           onChange={(e) => onChange?.(e.target.value)}
-          placeholder={placeholder}
-          disabled={disabled}
-          className={`crm-input ${Icon ? 'pl-10' : ''} ${error ? 'crm-input-error' : ''} ${disabled ? 'crm-input-disabled' : ''}`}
+        placeholder={placeholder}
+          disabled={disabled || false}
+          className={`crm-input ${Icon ? 'pl-10' : ''} ${error ? 'crm-input-error' : ''}`}
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: 'rgba(255, 255, 255, 0.2)',
+            color: 'rgb(30, 41, 59)',
+            backdropFilter: 'blur(4px)'
+          }}
         />
       </div>
       {error && <p className="crm-error">{error}</p>}
-    </div>
-  );
+  </div>
+);
 };
 
 export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md', className = '' }) => {
@@ -526,28 +538,28 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, active, onTabChange, variant =
   return (
     <div className={`${variant === 'pills' ? '' : 'border-b border-gray-200'} ${className}`}>
       <nav className={variant === 'pills' ? `flex ${currentSize.container}` : `-mb-px flex ${currentSize.container}`}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
+      {tabs.map((tab) => (
+        <button
+          key={tab.id}
             onClick={() => handleChange(tab.id)}
-            className={`${variant === 'pills' 
+          className={`${variant === 'pills' 
               ? `px-3 ${currentSize.button} rounded-xl font-medium transition-colors ${
                   currentValue === tab.id ? 'bg-purple-500 text-white' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                }`
+              }`
               : `${currentSize.button} border-b-2 font-medium transition-colors ${
                   currentValue === tab.id
-                    ? 'border-purple-500 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`
-            }`}
-          >
+                  ? 'border-purple-500 text-purple-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`
+          }`}
+        >
             {tab.icon && <tab.icon className={`${currentSize.icon} inline`} />}
-            {tab.label}
-          </button>
-        ))}
-      </nav>
-    </div>
-  );
+          {tab.label}
+        </button>
+      ))}
+    </nav>
+  </div>
+);
 };
 
 export const Textarea: React.FC<TextareaProps> = ({ label, value, onChange, placeholder, rows = 4, error, className = '' }) => (
@@ -559,6 +571,20 @@ export const Textarea: React.FC<TextareaProps> = ({ label, value, onChange, plac
       placeholder={placeholder}
       rows={rows}
       className={`crm-textarea ${error ? 'crm-input-error' : ''}`}
+      style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderColor: 'rgba(255, 255, 255, 0.2)',
+        color: 'rgb(30, 41, 59)',
+        backdropFilter: 'blur(4px)'
+      }}
+      onFocus={(e) => {
+        e.target.style.boxShadow = '0 0 0 2px rgba(34, 197, 94, 0.3)';
+        e.target.style.borderColor = 'rgba(34, 197, 94, 0.5)';
+      }}
+      onBlur={(e) => {
+        e.target.style.boxShadow = 'none';
+        e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+      }}
     />
     {error && <p className="crm-error">{error}</p>}
   </div>
@@ -610,10 +636,10 @@ export const Navbar: React.FC<NavbarProps> = ({ title = "Dashboard", user = { na
   
   return (
     <nav className="bg-[url('/branding/crm_BG_small.png')] bg-cover bg-center shadow-sm border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 gap-4">
           {/* Left side - Logo and Branding */}
-          <div className="flex items-center">
+        <div className="flex items-center">
             <button
               onClick={onSidebarToggle}
               className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 lg:hidden"
@@ -690,12 +716,12 @@ export const Navbar: React.FC<NavbarProps> = ({ title = "Dashboard", user = { na
             <div className="relative">
               <button className="relative w-9 h-9 rounded-md text-gray-400 hover:text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 flex items-center justify-center">
                 <Bell className="h-6 w-6" />
-              </button>
-            </div>
+          </button>
+        </div>
 
             {/* User Menu */}
             <div className="relative">
-              <Dropdown
+          <Dropdown
                 trigger={
                   <div className="flex items-center space-x-3 cursor-pointer px-3 py-2 rounded-md bg-white border border-gray-200 hover:bg-gray-50 h-9">
                     <Avatar size="sm" fallback={user.name?.charAt(0) || 'U'} />
@@ -707,15 +733,15 @@ export const Navbar: React.FC<NavbarProps> = ({ title = "Dashboard", user = { na
                     <ChevronDown className="h-4 w-4 text-gray-400" />
                   </div>
                 }
-                items={[
+            items={[
                   { label: 'Profile Settings', icon: Settings, onClick: () => navigate('/settings') },
-                  { label: 'Logout', icon: LogOut, onClick: onLogout }
-                ]}
-              />
+              { label: 'Logout', icon: LogOut, onClick: onLogout }
+            ]}
+          />
             </div>
-          </div>
         </div>
       </div>
-    </nav>
-  );
+    </div>
+  </nav>
+);
 };

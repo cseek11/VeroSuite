@@ -18,7 +18,7 @@ import {
 const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', path: '/dashboard' },
   { id: 'crm', label: 'CRM', path: '/customers' },
-  { id: 'scheduling', label: 'Scheduling', path: '/jobs' },
+  { id: 'scheduling', label: 'Scheduling', path: '/scheduler' },
   { id: 'communications', label: 'Communications', path: '/communications' },
   { id: 'finance', label: 'Finance', path: '/finance' },
   { id: 'reports', label: 'Reports', path: '/reports' },
@@ -44,7 +44,7 @@ export default function V4Layout({ children }: V4LayoutProps) {
     const path = location.pathname;
     if (path === '/dashboard' || path === '/') return 'dashboard';
     if (path === '/customers') return 'crm';
-    if (path === '/jobs') return 'scheduling';
+    if (path === '/scheduler') return 'scheduling';
     if (path === '/communications') return 'communications';
     if (path === '/finance') return 'finance';
     if (path === '/reports') return 'reports';
