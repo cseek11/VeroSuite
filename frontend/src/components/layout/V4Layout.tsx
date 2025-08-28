@@ -78,9 +78,15 @@ export default function V4Layout({ children }: V4LayoutProps) {
     return sidebarTopPadding + logoHeight + topPadding + (index * (itemHeight + itemSpacing)) + (itemHeight / 2);
   };
 
-  // Close mobile menu when route changes
+  // Close mobile menu and activity panel when route changes
   useEffect(() => {
     setMobileMenuOpen(false);
+    
+    // Close activity panel on certain pages (like dashboard tabs behavior)
+    const pagesToCloseActivityPanel = ['/reports', '/settings', '/knowledge', '/finance', '/communications'];
+    if (pagesToCloseActivityPanel.includes(location.pathname)) {
+      setActivityPanelCollapsed(true);
+    }
   }, [location.pathname]);
 
   const handleLogout = () => {
@@ -112,10 +118,10 @@ export default function V4Layout({ children }: V4LayoutProps) {
         />
 
                  {/* Main Workspace */}
-        <div className="flex-1 flex min-w-0 overflow-hidden">
+        <div className="flex-1 flex min-w-0 overflow-hidden relative">
           {/* Main Content */}
-          <main className="flex-1 flex flex-col min-w-0 overflow-hidden max-w-full">
-            <section className="flex-1 p-4 pl-4 main-content-area overflow-hidden max-w-full">
+          <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <section className="flex-1 p-4 pl-4 main-content-area overflow-hidden">
               <div className="relative bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50 h-full overflow-hidden">
                 {/* Visual connection to active tab */}
                 <div 

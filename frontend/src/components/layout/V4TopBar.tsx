@@ -285,6 +285,20 @@ export default function V4TopBar({
           >
             <HelpCircle className="w-4 h-4" />
           </button>
+          
+          {/* Activity Panel Toggle */}
+          <button 
+            onClick={onActivityPanelToggle}
+            className={`p-1.5 rounded-lg transition-colors ${
+              activityPanelCollapsed 
+                ? 'hover:bg-white/10' 
+                : 'bg-white/20 hover:bg-white/30'
+            }`}
+            title="Toggle Activity Panel (⌘ + A)"
+          >
+            <Bell className="w-4 h-4" />
+          </button>
+          
           <button className="p-1.5 rounded-lg hover:bg-white/10 transition-colors relative">
             <Bell className="w-4 h-4" />
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">
