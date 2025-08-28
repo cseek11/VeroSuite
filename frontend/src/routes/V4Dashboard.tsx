@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth';
-import { Tabs, Input } from '@/components/ui/EnhancedUI';
 import MigrationStatus from '@/components/MigrationStatus';
 import { 
   DollarSign, 
@@ -188,35 +187,40 @@ export default function V4Dashboard() {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
       {/* Migration Status - Only show in development */}
       {/* {import.meta.env.DEV && <MigrationStatus showDetails={true} />} */}
       
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-          <p className="text-gray-600">Overview of your pest control operations</p>
-        </div>
-        <div className="flex gap-3">
-          <button 
-            className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition-colors flex items-center gap-2"
-            onClick={handleAddJob}
-          >
-            <Plus className="w-4 h-4" />
-            ADD
-          </button>
-          <button className="bg-white text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 transition-colors border">
-            VERO PEST 2.1k
-          </button>
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
+              Dashboard
+            </h1>
+            <p className="text-slate-600 text-sm">
+              Overview of your pest control operations
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button 
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-3 py-1.5 rounded-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-colors flex items-center gap-2 text-sm"
+              onClick={handleAddJob}
+            >
+              <Plus className="w-3 h-3" />
+              ADD
+            </button>
+            <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-semibold hover:bg-white hover:shadow-lg transition-colors text-sm">
+              VERO PEST 2.1k
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex-shrink-0 overflow-hidden">
-        <Tabs
-          size="sm"
-          tabs={[
+      <div className="flex-shrink-0 overflow-hidden mb-4">
+        <div className="flex space-x-4 overflow-x-auto border-b border-slate-200">
+          {[
             { id: 'overview', label: 'Overview', icon: Home },
             { id: 'crm-operations', label: 'Today\'s Operations', icon: Calendar },
             { id: 'crm-customers', label: 'Customer Experience', icon: Users },
@@ -226,10 +230,24 @@ export default function V4Dashboard() {
             { id: 'jobs', label: 'Jobs', icon: Calendar },
             { id: 'analytics', label: 'Analytics', icon: BarChart3 },
             { id: 'customization', label: 'Customization', icon: Settings }
-          ]}
-          active={tabsActive}
-          onTabChange={setTabsActive}
-        />
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setTabsActive(tab.id)}
+                className={`flex items-center gap-1 py-1 px-1 border-b-2 font-medium text-xs whitespace-nowrap transition-colors duration-200 ${
+                  tabsActive === tab.id
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                <Icon className="h-3 w-3" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Tab Content */}
@@ -238,21 +256,26 @@ export default function V4Dashboard() {
         {tabsActive === 'overview' && (
           <div className="space-y-3">
             {/* KPIs Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
               {mockKPIs.map((kpi) => {
                 const Icon = kpi.icon;
                 return (
-                  <div key={kpi.id} className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-2 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-sm text-gray-500">{kpi.label}</div>
-                      <Icon className={`w-5 h-5 ${kpi.iconColor}`} />
-                    </div>
-                    <div className="text-xl font-bold text-gray-800">{kpi.value}</div>
-                    <div className={`text-xs mt-1 flex items-center gap-1 ${
-                      kpi.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      <TrendingUp className="w-3 h-3" />
-                      {kpi.change}
+                  <div key={kpi.id} className="bg-gradient-to-br from-slate-500 to-slate-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+                    <div className="relative z-10">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="p-1.5 bg-white/20 rounded-lg">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="h-3 w-3 text-slate-300" />
+                          <span className="text-xs font-semibold bg-white/20 px-1.5 py-0.5 rounded-md">
+                            {kpi.change}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-xl font-bold mb-1">{kpi.value}</div>
+                      <div className="text-slate-100 font-medium text-xs">{kpi.label}</div>
                     </div>
                   </div>
                 );
@@ -919,21 +942,27 @@ export default function V4Dashboard() {
 
         {tabsActive === 'customization' && (
           <div className="flex-1 min-h-0 overflow-hidden">
-            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Customization</h3>
-              <div className="space-y-4">
-                <Input
-                  label="Primary Color"
-                  type="text"
-                  value="#cb0c9f"
-                  onChange={() => {}}
-                />
-                <Input
-                  label="Brand Name"
-                  type="text"
-                  value="VeroPest Suite"
-                  onChange={() => {}}
-                />
+            <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+              <h3 className="text-lg font-semibold text-slate-800 mb-3">Customization</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Primary Color</label>
+                  <input
+                    type="text"
+                    value="#cb0c9f"
+                    onChange={() => {}}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Brand Name</label>
+                  <input
+                    type="text"
+                    value="VeroPest Suite"
+                    onChange={() => {}}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
+                  />
+                </div>
               </div>
             </div>
           </div>

@@ -8,17 +8,7 @@ import InputMask from 'react-input-mask';
 
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import CustomerDashboard from '@/components/crm/CustomerDashboard';
-import {
-  Typography,
-  Button,
-  Card,
-  Input,
-  Alert,
-  Tooltip,
-  Textarea
-} from '@/components/ui/EnhancedUI';
-import Select from '@/components/ui/Select';
-import MaskedInput from '@/components/ui/MaskedInput';
+
 import {
   Users,
   Search,
@@ -51,12 +41,9 @@ const AgreementIndicator = ({ agreementType }: { agreementType: AgreementType })
   if (!config) return null;
   
   return (
-    <Tooltip content={config.tooltip}>
-      <div className={`w-4 h-4 rounded-full ${config.color} flex items-center justify-center shadow-sm`}>
-        <Shield className="w-3 h-3 text-white" />
-      </div>
-      
-    </Tooltip>
+    <div className={`w-4 h-4 rounded-full ${config.color} flex items-center justify-center shadow-sm`} title={config.tooltip}>
+      <Shield className="w-3 h-3 text-white" />
+    </div>
   );
 };
 
@@ -92,12 +79,10 @@ const AgreementIndicators = ({ customer }: { customer: any }) => {
       
       {/* Overdue Badge */}
       {isOverdue && (
-        <Tooltip content={`${overdueDays} days past due`}>
-          <div className="flex items-center gap-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-            <AlertTriangle className="w-3 h-3" />
-            <span>Overdue</span>
-          </div>
-        </Tooltip>
+        <div className="flex items-center gap-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full" title={`${overdueDays} days past due`}>
+          <AlertTriangle className="w-3 h-3" />
+          <span>Overdue</span>
+        </div>
       )}
     </div>
   );
@@ -234,34 +219,36 @@ export default function Customers() {
   // If a customer is selected, show the detailed dashboard
   if (selectedCustomerId) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-6">
-            <Button
-              variant="outline"
-              onClick={() => setSelectedCustomerId(null)}
-              className="flex items-center gap-2 mb-4"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Customers
-            </Button>
-          </div>
-          <CustomerDashboard customerId={selectedCustomerId} />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
+        <div className="mb-4">
+          <button
+            onClick={() => setSelectedCustomerId(null)}
+            className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Customers
+          </button>
         </div>
+        <CustomerDashboard customerId={selectedCustomerId} />
+      </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="crm-card">
-          {/* Header */}
-          <div className="mb-8">
-            <Typography variant="h1" className="text-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
+      {/* Header */}
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
               Customers
-            </Typography>
-            <Typography variant="body1" className="text-gray-600 mt-2">
+            </h1>
+            <p className="text-slate-600 text-sm">
               Manage your customer accounts and locations
-            </Typography>
+            </p>
           </div>
+        </div>
+      </div>
 
           {/* Search and Actions Bar */}
           <div className={`flex flex-col sm:flex-row gap-4 mb-6 ${isCompactMode ? 'mb-4' : 'mb-6'}`}>

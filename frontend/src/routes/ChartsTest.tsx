@@ -23,34 +23,34 @@ const pieData = [
 
 const ChartsTestPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4">
-      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6 mb-6">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
           Charts Test Page
         </h1>
-        <p className="text-slate-600 text-base mb-4">
+        <p className="text-slate-600 text-sm mb-3">
           Testing basic chart functionality with Recharts
         </p>
         <button 
-          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-sm"
           onClick={() => window.location.href = '/charts'}
         >
           Go to Full Dashboard
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Line Chart Test */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6">
-          <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <div className="p-1.5 bg-indigo-100 rounded-md">
-              <svg className="h-5 w-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+          <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+            <div className="p-1 bg-indigo-100 rounded-md">
+              <svg className="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
               </svg>
             </div>
             Line Chart Test
           </h2>
-          <div style={{ width: '100%', height: '300px' }}>
+          <div style={{ width: '100%', height: '250px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={testData}>
                 <defs>
@@ -84,16 +84,16 @@ const ChartsTestPage: React.FC = () => {
         </div>
 
         {/* Bar Chart Test */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6">
-          <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <div className="p-1.5 bg-emerald-100 rounded-md">
-              <svg className="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+          <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+            <div className="p-1 bg-emerald-100 rounded-md">
+              <svg className="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
             Bar Chart Test
           </h2>
-          <div style={{ width: '100%', height: '300px' }}>
+          <div style={{ width: '100%', height: '250px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={testData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
@@ -125,15 +125,15 @@ const ChartsTestPage: React.FC = () => {
             </div>
             Pie Chart Test
           </h2>
-          <div style={{ width: '100%', height: '300px' }}>
+          <div style={{ width: '100%', height: '250px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={pieData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
+                  innerRadius={50}
+                  outerRadius={80}
                   paddingAngle={6}
                   dataKey="value"
                 >
@@ -156,26 +156,26 @@ const ChartsTestPage: React.FC = () => {
         </div>
 
         {/* KPI Card Test */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6">
-          <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <div className="p-1.5 bg-amber-100 rounded-md">
-              <svg className="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+          <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+            <div className="p-1 bg-amber-100 rounded-md">
+              <svg className="h-4 w-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
             KPI Card Test
           </h2>
-          <div className="space-y-4">
-            <div className="text-center p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200">
-              <div className="text-2xl font-bold text-indigo-600 mb-1">$128,430</div>
+          <div className="space-y-3">
+            <div className="text-center p-2 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200">
+              <div className="text-lg font-bold text-indigo-600 mb-1">$128,430</div>
               <div className="text-xs font-medium text-indigo-700">Monthly Revenue</div>
             </div>
-            <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
-              <div className="text-2xl font-bold text-emerald-600 mb-1">48</div>
+            <div className="text-center p-2 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+              <div className="text-lg font-bold text-emerald-600 mb-1">48</div>
               <div className="text-xs font-medium text-emerald-700">New Customers</div>
             </div>
-            <div className="text-center p-4 bg-gradient-to-br from-violet-50 to-violet-100 rounded-lg border border-violet-200">
-              <div className="text-2xl font-bold text-violet-600 mb-1">92%</div>
+            <div className="text-center p-2 bg-gradient-to-br from-violet-50 to-violet-100 rounded-lg border border-violet-200">
+              <div className="text-lg font-bold text-violet-600 mb-1">92%</div>
               <div className="text-xs font-medium text-violet-700">Retention Rate</div>
             </div>
           </div>
@@ -183,39 +183,39 @@ const ChartsTestPage: React.FC = () => {
       </div>
 
       {/* Test Results */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6 mt-6">
-        <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-          <div className="p-1.5 bg-slate-100 rounded-md">
-            <svg className="h-5 w-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mt-4">
+        <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+          <div className="p-1 bg-slate-100 rounded-md">
+            <svg className="h-4 w-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
           Test Results
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
-            <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-            <span className="font-medium text-emerald-800 text-sm">Recharts library loaded successfully</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+            <span className="font-medium text-emerald-800 text-xs">Recharts library loaded successfully</span>
           </div>
-          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
-            <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-            <span className="font-medium text-emerald-800 text-sm">Line chart component working</span>
+          <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+            <span className="font-medium text-emerald-800 text-xs">Line chart component working</span>
           </div>
-          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
-            <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-            <span className="font-medium text-emerald-800 text-sm">Bar chart component working</span>
+          <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+            <span className="font-medium text-emerald-800 text-xs">Bar chart component working</span>
           </div>
-          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
-            <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-            <span className="font-medium text-emerald-800 text-sm">Pie chart component working</span>
+          <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+            <span className="font-medium text-emerald-800 text-xs">Pie chart component working</span>
           </div>
-          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
-            <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-            <span className="font-medium text-emerald-800 text-sm">ResponsiveContainer working</span>
+          <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+            <span className="font-medium text-emerald-800 text-xs">ResponsiveContainer working</span>
           </div>
-          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
-            <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-            <span className="font-medium text-emerald-800 text-sm">Modern theme applied</span>
+          <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+            <span className="font-medium text-emerald-800 text-xs">Modern theme applied</span>
           </div>
         </div>
       </div>

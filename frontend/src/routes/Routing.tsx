@@ -5,13 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
 
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import {
-  Typography,
-  Button,
-  Card,
-  Input,
-  Alert
-} from '@/components/ui/EnhancedUI';
+
 import {
   Navigation,
   Calendar,
@@ -40,39 +34,42 @@ export default function Routing() {
   }, [data]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
       {/* Header */}
-      <div className="mb-8">
-        <Typography variant="h1" className="text-gray-900">
-          Route Optimization
-        </Typography>
-        <Typography variant="body1" className="text-gray-600 mt-2">
-          Optimize technician routes for maximum efficiency and reduced travel time.
-        </Typography>
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
+              Route Optimization
+            </h1>
+            <p className="text-slate-600 text-sm">
+              Optimize technician routes for maximum efficiency and reduced travel time.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Controls */}
-      <Card className="p-6 mb-6">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
           <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-blue-500" />
-            <Input
+            <Calendar className="h-4 w-4 text-indigo-600" />
+            <input
               type="date"
               value={date}
-              onChange={(value) => setDate(value)}
-              className="w-full md:w-auto"
+              onChange={(e) => setDate(e.target.value)}
+              className="px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
             />
           </div>
-          <Button
-            variant="primary"
+          <button
             onClick={() => refetch()}
-            className="flex items-center gap-2"
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-sm flex items-center gap-2"
           >
             <RefreshCw className="h-4 w-4" />
             Optimize Routes
-          </Button>
+          </button>
         </div>
-      </Card>
+      </div>
 
       {/* Loading State */}
       {isLoading && (
@@ -83,82 +80,82 @@ export default function Routing() {
 
       {/* Error State */}
       {isError && (
-        <Alert type="danger" className="mb-6">
-          <Typography variant="body2">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+          <p className="text-sm text-red-800">
             {(error as any)?.message || 'Failed to optimize routes'}
-          </Typography>
-        </Alert>
+          </p>
+        </div>
       )}
 
       {/* Content */}
       {!isLoading && Array.isArray(data) && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Route List */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Route className="h-5 w-5 text-green-500" />
-              <Typography variant="h6" className="text-gray-900">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 mb-3">
+              <Route className="h-4 w-4 text-emerald-600" />
+              <h2 className="text-lg font-bold text-slate-900">
                 Optimized Routes
-              </Typography>
+              </h2>
             </div>
             
             {data.length === 0 ? (
-              <Card className="p-8 text-center">
-                <Navigation className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <Typography variant="h6" className="text-gray-900 mb-2">
+              <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6 text-center">
+                <Navigation className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                <h3 className="text-lg font-bold text-slate-900 mb-2">
                   No Routes Found
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                </h3>
+                <p className="text-sm text-slate-600">
                   No routes available for the selected date.
-                </Typography>
-              </Card>
+                </p>
+              </div>
             ) : (
               data.map((route: any) => (
-                <Card key={route.technicianId} className="p-6 hover:shadow-lg transition-shadow">
+                <div key={route.technicianId} className="p-4 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
                   <div className="flex items-center gap-3 mb-3">
-                    <Car className="h-5 w-5 text-blue-500" />
-                    <Typography variant="h6" className="text-gray-900">
+                    <Car className="h-4 w-4 text-indigo-600" />
+                    <h3 className="text-sm font-semibold text-slate-900">
                       Technician: {route.technicianId}
-                    </Typography>
+                    </h3>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4 mb-4 text-sm text-gray-600">
+                  <div className="grid grid-cols-2 gap-3 mb-3 text-xs text-slate-600">
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
+                      <MapPin className="h-3 w-3" />
                       <span>{route.totalDistance} miles</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
+                      <Clock className="h-3 w-3" />
                       <span>{route.totalDuration} min</span>
                     </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Typography variant="body2" className="font-medium text-gray-700">
+                    <p className="text-xs font-medium text-slate-700">
                       Stops:
-                    </Typography>
+                    </p>
                     {route.stops.map((s: any) => (
-                      <div key={s.jobId} className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                      <div key={s.jobId} className="text-xs text-slate-600 bg-slate-50 p-2 rounded">
                         <div className="flex justify-between">
                           <span>#{s.order} Job {s.jobId}</span>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-slate-500">
                             {s.estimatedArrival}-{s.estimatedDeparture}
                           </span>
                         </div>
                       </div>
                     ))}
                   </div>
-                </Card>
+                </div>
               ))
             )}
           </div>
 
           {/* Map */}
-          <div className="w-full h-[600px] bg-white shadow-lg rounded-lg overflow-hidden">
-            <div className="p-4 border-b border-gray-200">
-              <Typography variant="h6" className="text-gray-900">
+          <div className="w-full h-[500px] border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm overflow-hidden">
+            <div className="p-3 border-b border-slate-200">
+              <h3 className="text-sm font-semibold text-slate-900">
                 Route Map
-              </Typography>
+              </h3>
             </div>
             <MapContainer 
               center={[40.44, -79.99]} 

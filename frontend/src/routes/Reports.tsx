@@ -3,18 +3,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useNavigate } from 'react-router-dom';
 import { PageLoader } from '@/components/LoadingSpinner';
 
-import {
-  Typography,
-  Button,
-  Card,
-  Input,
-  Chip,
-  Tabs,
-  Dropdown,
-  Tooltip,
-  Modal
-} from '@/components/ui/EnhancedUI';
-import Select from '@/components/ui/Select';
+
 import {
   BarChart3,
   TrendingUp,
@@ -226,54 +215,63 @@ const Reports: React.FC = () => {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Reports & Analytics</h1>
-          <p className="text-gray-600">Generate comprehensive reports to track performance and make data-driven decisions</p>
-        </div>
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2"
-          >
-            <Filter className="h-4 w-4" />
-            Filters
-          </Button>
-          
-          <div className="flex items-center border rounded-lg">
-            <Button
-              variant={viewMode === 'grid' ? 'primary' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="rounded-r-none"
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
+              Reports & Analytics
+            </h1>
+            <p className="text-slate-600 text-sm">
+              Generate comprehensive reports to track performance and make data-driven decisions
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm flex items-center gap-2"
             >
-              <Grid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'primary' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="rounded-l-none"
-            >
-              <List className="h-4 w-4" />
-            </Button>
+              <Filter className="h-4 w-4" />
+              Filters
+            </button>
+            
+            <div className="flex items-center border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`px-3 py-2 text-sm transition-all duration-200 ${
+                  viewMode === 'grid' 
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' 
+                    : 'text-slate-700 hover:bg-white'
+                }`}
+              >
+                <Grid className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-3 py-2 text-sm transition-all duration-200 ${
+                  viewMode === 'list' 
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' 
+                    : 'text-slate-700 hover:bg-white'
+                }`}
+              >
+                <List className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Search Bar */}
-      <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <input
             type="text"
             placeholder="Search reports..."
             value={searchQuery}
-            onChange={setSearchQuery}
-            className="pl-10"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
           />
         </div>
       </div>
