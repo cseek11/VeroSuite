@@ -78,7 +78,7 @@ export default function V4ActivityPanel({ collapsed, onToggle, sidebarCollapsed 
 
   return (
     <aside className={`
-      bg-gradient-to-b from-white/80 via-white/80 to-purple-400/20 border-l border-gray-200 shadow-2xl transition-all duration-300 ease-in-out flex-shrink-0 flex flex-col relative
+      bg-gradient-to-b from-white/80 via-white/80 to-purple-400/20 border-l border-gray-200 shadow-2xl transition-all duration-300 ease-in-out flex-shrink-0 flex flex-col relative z-10
       ${getPanelWidth()}
     `}>
       {/* Activity Panel Toggle Button */}

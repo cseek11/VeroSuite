@@ -225,119 +225,134 @@ const Reports: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Card className="p-6 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="space-y-3">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Reports & Analytics</h1>
+          <p className="text-gray-600">Generate comprehensive reports to track performance and make data-driven decisions</p>
+        </div>
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2"
+          >
+            <Filter className="h-4 w-4" />
+            Filters
+          </Button>
           
-          {/* Header with Search and Controls */}
-          <div className="mb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <div>
-                <Typography variant="h2" className="text-gray-900 mb-2">
-                  Reports & Analytics
-                </Typography>
-                <Typography variant="body1" className="text-gray-600">
-                  Generate comprehensive reports to track performance and make data-driven decisions
-                </Typography>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center gap-2"
-                >
-                  <Filter className="h-4 w-4" />
-                  Filters
-                </Button>
-                
-                <div className="flex items-center border rounded-lg">
-                  <Button
-                    variant={viewMode === 'grid' ? 'primary' : 'outline'}
-                    size="sm"
-                    onClick={() => setViewMode('grid')}
-                    className="rounded-r-none"
-                  >
-                    <Grid className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === 'list' ? 'primary' : 'outline'}
-                    size="sm"
-                    onClick={() => setViewMode('list')}
-                    className="rounded-l-none"
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
-                </div>
+          <div className="flex items-center border rounded-lg">
+            <Button
+              variant={viewMode === 'grid' ? 'primary' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+              className="rounded-r-none"
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'primary' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className="rounded-l-none"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Search reports..."
+            value={searchQuery}
+            onChange={setSearchQuery}
+            className="pl-10"
+          />
+        </div>
+      </div>
+
+      {/* Global Filters */}
+      {showFilters && (
+        <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
+          <Typography variant="h6" className="mb-4">Global Filters</Typography>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  placeholder="Start Date"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                />
+                <input
+                  type="date"
+                  placeholder="End Date"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                />
               </div>
             </div>
-
-            {/* Search Bar */}
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search reports..."
-                value={searchQuery}
-                onChange={setSearchQuery}
-                className="pl-10"
-              />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+              <select
+                value={selectedBranch}
+                onChange={(e) => setSelectedBranch(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              >
+                <option value="all">All Branches</option>
+                <option value="main">Main Branch</option>
+                <option value="north">North Branch</option>
+                <option value="south">South Branch</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Technician</label>
+              <select
+                value={selectedTechnician}
+                onChange={(e) => setSelectedTechnician(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              >
+                <option value="all">All Technicians</option>
+                <option value="tech1">John Smith</option>
+                <option value="tech2">Jane Doe</option>
+                <option value="tech3">Mike Johnson</option>
+              </select>
             </div>
           </div>
+        </div>
+      )}
 
-          {/* Global Filters */}
-          {showFilters && (
-            <Card className="mb-6 p-4">
-              <Typography variant="h6" className="mb-4">Global Filters</Typography>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="date"
-                      placeholder="Start Date"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    />
-                    <input
-                      type="date"
-                      placeholder="End Date"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
-                  <select
-                    value={selectedBranch}
-                    onChange={(e) => setSelectedBranch(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                  >
-                    <option value="all">All Branches</option>
-                    <option value="main">Main Branch</option>
-                    <option value="north">North Branch</option>
-                    <option value="south">South Branch</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Technician</label>
-                  <select
-                    value={selectedTechnician}
-                    onChange={(e) => setSelectedTechnician(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                  >
-                    <option value="all">All Technicians</option>
-                    <option value="tech1">John Smith</option>
-                    <option value="tech2">Jane Doe</option>
-                    <option value="tech3">Mike Johnson</option>
-                  </select>
-                </div>
-              </div>
-            </Card>
-          )}
+      {/* Report Categories Tabs */}
+      <div className="flex-shrink-0 overflow-hidden">
+        <div className="flex space-x-4 overflow-x-auto border-b border-gray-200">
+          {Object.entries(reportCategories).map(([key, category]) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`flex items-center gap-1 py-1 px-1 border-b-2 font-medium text-xs whitespace-nowrap transition-colors duration-200 ${
+                activeTab === key
+                  ? 'border-purple-500 text-purple-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <category.icon className="h-3 w-3" />
+              {category.name}
+            </button>
+          ))}
+        </div>
+      </div>
 
+      {/* Tab Content */}
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className="space-y-3">
           {/* Pinned Reports */}
           {pinnedReports.length > 0 && (
-            <div className="mb-8">
+            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
               <Typography variant="h5" className="text-gray-900 mb-4 flex items-center gap-2">
                 <Bookmark className="h-5 w-5 text-yellow-500" />
                 Pinned Reports
@@ -403,50 +418,88 @@ const Reports: React.FC = () => {
             </div>
           )}
 
-          {/* Report Categories Tabs */}
-          <div className="mb-6 border-b border-gray-200">
-            <div className="flex space-x-8 overflow-x-auto">
-              {Object.entries(reportCategories).map(([key, category]) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveTab(key)}
-                  className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                    activeTab === key
-                      ? 'border-purple-500 text-purple-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          {/* Reports Grid/List */}
+          <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className={viewMode === 'grid' 
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              : "space-y-4"
+            }>
+              {filteredReports.map((report) => (
+                <Card 
+                  key={report.id} 
+                  className={`p-6 hover:shadow-lg transition-shadow ${
+                    viewMode === 'list' ? 'flex items-center justify-between' : ''
                   }`}
                 >
-                  <category.icon className="h-4 w-4" />
-                  {category.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Reports Grid/List */}
-          <div className={viewMode === 'grid' 
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            : "space-y-4"
-          }>
-            {filteredReports.map((report) => (
-              <Card 
-                key={report.id} 
-                className={`p-6 hover:shadow-lg transition-shadow ${
-                  viewMode === 'list' ? 'flex items-center justify-between' : ''
-                }`}
-              >
-                {viewMode === 'grid' ? (
-                  <>
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
+                  {viewMode === 'grid' ? (
+                    <>
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${reportCategories[activeTab as keyof typeof reportCategories].bgColor}`}>
+                            <report.icon className={`h-6 w-6 ${reportCategories[activeTab as keyof typeof reportCategories].color}`} />
+                          </div>
+                          <Typography variant="h6" className="text-gray-900">
+                            {report.name}
+                          </Typography>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => togglePinReport(report.id)}
+                          >
+                            {pinnedReports.includes(report.id) ? (
+                              <Bookmark className="h-4 w-4 text-yellow-500" />
+                            ) : (
+                              <BookmarkPlus className="h-4 w-4 text-gray-400" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <Typography variant="body2" className="text-gray-600 mb-4">
+                        {report.description}
+                      </Typography>
+                      
+                      <div className="flex gap-2">
+                        <Button
+                          variant="primary"
+                          className="flex-1"
+                          onClick={() => handleGenerateReport(report.id)}
+                        >
+                          Generate Report
+                        </Button>
+                        <Dropdown
+                          trigger={
+                            <Button variant="outline">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          }
+                          items={[
+                            { label: 'Export as CSV', onClick: () => handleExportReport(report.id, 'csv') },
+                            { label: 'Export as PDF', onClick: () => handleExportReport(report.id, 'pdf') },
+                            { label: 'Export as Excel', onClick: () => handleExportReport(report.id, 'excel') }
+                          ]}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-4">
                         <div className={`p-2 rounded-lg ${reportCategories[activeTab as keyof typeof reportCategories].bgColor}`}>
                           <report.icon className={`h-6 w-6 ${reportCategories[activeTab as keyof typeof reportCategories].color}`} />
                         </div>
-                        <Typography variant="h6" className="text-gray-900">
-                          {report.name}
-                        </Typography>
+                        <div>
+                          <Typography variant="h6" className="text-gray-900">
+                            {report.name}
+                          </Typography>
+                          <Typography variant="body2" className="text-gray-600">
+                            {report.description}
+                          </Typography>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
+                      
+                      <div className="flex items-center gap-2">
                         <Button
                           variant="outline"
                           size="sm"
@@ -458,91 +511,35 @@ const Reports: React.FC = () => {
                             <BookmarkPlus className="h-4 w-4 text-gray-400" />
                           )}
                         </Button>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleGenerateReport(report.id)}
+                        >
+                          Generate
+                        </Button>
+                        <Dropdown
+                          trigger={
+                            <Button variant="outline" size="sm">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          }
+                          items={[
+                            { label: 'Export as CSV', onClick: () => handleExportReport(report.id, 'csv') },
+                            { label: 'Export as PDF', onClick: () => handleExportReport(report.id, 'pdf') },
+                            { label: 'Export as Excel', onClick: () => handleExportReport(report.id, 'excel') }
+                          ]}
+                        />
                       </div>
-                    </div>
-                    
-                    <Typography variant="body2" className="text-gray-600 mb-4">
-                      {report.description}
-                    </Typography>
-                    
-                    <div className="flex gap-2">
-                      <Button
-                        variant="primary"
-                        className="flex-1"
-                        onClick={() => handleGenerateReport(report.id)}
-                      >
-                        Generate Report
-                      </Button>
-                      <Dropdown
-                        trigger={
-                          <Button variant="outline">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        }
-                        items={[
-                          { label: 'Export as CSV', onClick: () => handleExportReport(report.id, 'csv') },
-                          { label: 'Export as PDF', onClick: () => handleExportReport(report.id, 'pdf') },
-                          { label: 'Export as Excel', onClick: () => handleExportReport(report.id, 'excel') }
-                        ]}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex items-center gap-4">
-                      <div className={`p-2 rounded-lg ${reportCategories[activeTab as keyof typeof reportCategories].bgColor}`}>
-                        <report.icon className={`h-6 w-6 ${reportCategories[activeTab as keyof typeof reportCategories].color}`} />
-                      </div>
-                      <div>
-                        <Typography variant="h6" className="text-gray-900">
-                          {report.name}
-                        </Typography>
-                        <Typography variant="body2" className="text-gray-600">
-                          {report.description}
-                        </Typography>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => togglePinReport(report.id)}
-                      >
-                        {pinnedReports.includes(report.id) ? (
-                          <Bookmark className="h-4 w-4 text-yellow-500" />
-                        ) : (
-                          <BookmarkPlus className="h-4 w-4 text-gray-400" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => handleGenerateReport(report.id)}
-                      >
-                        Generate
-                      </Button>
-                      <Dropdown
-                        trigger={
-                          <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        }
-                        items={[
-                          { label: 'Export as CSV', onClick: () => handleExportReport(report.id, 'csv') },
-                          { label: 'Export as PDF', onClick: () => handleExportReport(report.id, 'pdf') },
-                          { label: 'Export as Excel', onClick: () => handleExportReport(report.id, 'excel') }
-                        ]}
-                      />
-                    </div>
-                  </>
-                )}
-              </Card>
-            ))}
+                    </>
+                  )}
+                </Card>
+              ))}
+            </div>
           </div>
 
           {/* Quick Stats */}
-          <div className="mt-12">
+          <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
             <Typography variant="h3" className="text-gray-900 mb-6">
               Quick Statistics
             </Typography>
@@ -582,7 +579,7 @@ const Reports: React.FC = () => {
             </div>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };
