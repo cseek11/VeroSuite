@@ -8,8 +8,13 @@ import { queryClient } from './lib/queryClient';
 import { config } from './lib/config';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import KeyboardNavigationProvider from './components/KeyboardNavigationProvider';
+import { LayoutProvider } from './context/LayoutContext';
+import { initSentry, SentryErrorBoundary } from './lib/sentry';
 import './index.css';
 import './custom-calendar.css';
+
+// Initialize Sentry for error tracking
+initSentry();
 
 // Error boundary for initialization errors
 function ErrorFallback({ error }: { error: Error }) {
@@ -50,16 +55,20 @@ function ErrorFallback({ error }: { error: Error }) {
 try {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-      <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <KeyboardNavigationProvider>
-              <App />
-            </KeyboardNavigationProvider>
-          </BrowserRouter>
-          {config.features.enableDebugMode && <ReactQueryDevtools initialIsOpen={false} />}
-        </QueryClientProvider>
-      </ErrorBoundary>
+      <SentryErrorBoundary fallback={<ErrorFallback error={new Error('Application Error')} />}>
+        <ErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <KeyboardNavigationProvider>
+                <LayoutProvider>
+                  <App />
+                </LayoutProvider>
+              </KeyboardNavigationProvider>
+            </BrowserRouter>
+            {config.features.enableDebugMode && <ReactQueryDevtools initialIsOpen={false} />}
+          </QueryClientProvider>
+        </ErrorBoundary>
+      </SentryErrorBoundary>
     </React.StrictMode>
   );
 } catch (error) {

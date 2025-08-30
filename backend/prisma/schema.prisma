@@ -37,6 +37,7 @@ model User {
   created_at    DateTime @default(now()) @db.Timestamptz(6)
   updated_at    DateTime @updatedAt @db.Timestamptz(6)
   tenant        Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  assignedWorkOrders WorkOrder[] @relation("WorkOrderAssignedTo")
 
   @@map("users")
 }
@@ -108,25 +109,39 @@ model Location {
 }
 
 model WorkOrder {
-  id                   String   @id @default(uuid()) @db.Uuid
-  tenant_id            String   @db.Uuid
-  account_id           String   @db.Uuid
-  location_id          String   @db.Uuid
-  service_type         String   @db.VarChar(100)
-  description          String?
-  recurrence_rule      String?  @db.VarChar(255)
-  estimated_duration   Int      @default(60)
-  service_price        Decimal  @db.Decimal(8, 2)
-  special_instructions String?
-  status               String   @default("active") @db.VarChar(20)
-  created_at           DateTime @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime @updatedAt @db.Timestamptz(6)
-  jobs                 Job[]
-  account              Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id])
-  tenant               Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  location             Location @relation(fields: [tenant_id, location_id], references: [tenant_id, id])
+  id                String    @id @default(uuid()) @db.Uuid
+  tenant_id         String    @db.Uuid
+  customer_id       String    @db.Uuid
+  assigned_to       String?   @db.Uuid
+  status            String    @default("pending") @db.VarChar(20)
+  priority          String    @default("medium") @db.VarChar(20)
+  scheduled_date    DateTime? @db.Timestamptz(6)
+  completion_date   DateTime? @db.Timestamptz(6)
+  description       String    @db.Text
+  notes             String?   @db.Text
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime  @updatedAt @db.Timestamptz(6)
+  
+  // Legacy fields for backward compatibility
+  account_id        String?   @db.Uuid
+  location_id       String?   @db.Uuid
+  service_type      String?   @db.VarChar(100)
+  recurrence_rule   String?   @db.VarChar(255)
+  estimated_duration Int?     @default(60)
+  service_price     Decimal?  @db.Decimal(8, 2)
+  special_instructions String? @db.Text
+  
+  jobs              Job[]
+  account           Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id])
+  tenant            Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  assignedTechnician User?    @relation("WorkOrderAssignedTo", fields: [assigned_to], references: [id])
+  location          Location? @relation(fields: [tenant_id, location_id], references: [tenant_id, id])
 
   @@unique([tenant_id, id])
+  @@index([tenant_id])
+  @@index([customer_id])
+  @@index([assigned_to])
+  @@index([status])
   @@map("work_orders")
 }
 

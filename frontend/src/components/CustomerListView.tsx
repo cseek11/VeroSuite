@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/api';
-import CustomerProfile from './CustomerProfile';
+import CustomerPagePopup from './CustomerPagePopup';
 
 interface Customer {
   id: string;
@@ -76,7 +76,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [mapPopupCustomerId, setMapPopupCustomerId] = useState<string | null>(null);
-  const [selectedCustomerForProfile, setSelectedCustomerForProfile] = useState<Customer | null>(null);
+  const [selectedCustomerForPopup, setSelectedCustomerForPopup] = useState<string | null>(null);
 
   // Fetch account details (agreements and overdue payments)
   const { data: accountDetails } = useQuery({
@@ -491,7 +491,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
                        </td>
                                                <td>
                           <button
-                            onClick={() => setSelectedCustomerForProfile(customer)}
+                            onClick={() => setSelectedCustomerForPopup(customer.id)}
                             className="text-left hover:text-purple-600 transition-colors"
                           >
                             <div className="flex items-center gap-2">
@@ -703,14 +703,12 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
                  )}
                </Card>
 
-        {/* Customer Profile Popup */}
-        {selectedCustomerForProfile && (
-          <CustomerProfile
-            customer={selectedCustomerForProfile}
-            isOpen={!!selectedCustomerForProfile}
-            onClose={() => setSelectedCustomerForProfile(null)}
-          />
-        )}
+        {/* Customer Page Popup */}
+        <CustomerPagePopup
+          customerId={selectedCustomerForPopup || ''}
+          isOpen={!!selectedCustomerForPopup}
+          onClose={() => setSelectedCustomerForPopup(null)}
+        />
       </div>
     );
   };

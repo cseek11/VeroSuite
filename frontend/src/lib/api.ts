@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { useAuthStore } from '@/stores/auth';
 import { config } from './config';
+import { logger } from './logger';
+import { withPerformanceTracking } from './performance';
 
 // Create Supabase client using validated configuration
 export const supabase = createClient(config.supabase.url, config.supabase.anonKey, {
@@ -595,31 +597,116 @@ export const crmApi = {
 
   // Get customer notes
   getCustomerNotes: async (customerId: string) => {
-    // Mock data for now - would need a notes table
-    return [
-      {
-        id: '1',
-        note_type: 'internal',
-        note_source: 'office',
-        note_content: 'Customer prefers morning appointments',
-        created_by: 'John Smith',
-        created_at: '2024-01-15T10:00:00Z',
-        priority: 'low',
-        is_alert: false,
-        is_internal: true
-      },
-      {
-        id: '2',
-        note_type: 'technician',
-        note_source: 'field',
-        note_content: 'Applied perimeter treatment and interior bait stations',
-        created_by: 'Mike Johnson',
-        created_at: '2024-01-10T14:30:00Z',
-        priority: 'medium',
-        is_alert: false,
-        is_internal: false
+    try {
+      // Get current user session
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Extract tenant_id from JWT token
+      const tenantId = user.user_metadata?.tenant_id;
+      if (!tenantId) throw new Error('Tenant ID not found in user metadata');
+
+      console.log('Fetching notes for customer:', customerId, 'tenant:', tenantId);
+
+      const { data, error } = await supabase
+        .from('customer_notes')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .eq('customer_id', customerId)
+        .eq('is_internal', true)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
       }
-    ];
+      
+      console.log('Notes fetched successfully:', data);
+      return data || [];
+    } catch (error) {
+      console.error('Error in getCustomerNotes:', error);
+      throw error;
+    }
+  },
+
+  // Create new note
+  createCustomerNote: async (customerId: string, noteData: any) => {
+    try {
+      // Get current user session
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Extract tenant_id and user name from JWT token
+      const tenantId = user.user_metadata?.tenant_id;
+      const firstName = user.user_metadata?.first_name;
+      const lastName = user.user_metadata?.last_name;
+      
+      if (!tenantId) throw new Error('Tenant ID not found in user metadata');
+      if (!firstName || !lastName) throw new Error('User name not found in user metadata');
+
+      console.log('Creating note for customer:', customerId, 'tenant:', tenantId);
+      console.log('Note data:', noteData);
+
+      const { data, error } = await supabase
+        .from('customer_notes')
+        .insert({
+          tenant_id: tenantId,
+          customer_id: customerId,
+          note_type: 'internal',
+          note_source: 'office',
+          note_content: noteData.content,
+          created_by: `${firstName} ${lastName}`,
+          priority: noteData.priority || 'low',
+          is_alert: noteData.isAlert || false,
+          is_internal: true,
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Supabase error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
+      
+      console.log('Note created successfully:', data);
+      return data;
+    } catch (error) {
+      console.error('Error in createCustomerNote:', error);
+      throw error;
+    }
+  },
+
+  // Update note
+  updateCustomerNote: async (noteId: string, noteData: any) => {
+    const { data, error } = await supabase
+      .from('customer_notes')
+      .update({
+        note_content: noteData.content,
+        priority: noteData.priority,
+        is_alert: noteData.isAlert,
+      })
+      .eq('id', noteId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Delete note
+  deleteCustomerNote: async (noteId: string) => {
+    const { error } = await supabase
+      .from('customer_notes')
+      .delete()
+      .eq('id', noteId);
+    
+    if (error) throw error;
+    return { success: true };
   },
 
   // Get customer photos

@@ -13,7 +13,7 @@ export class JobsService {
     const jobs = await this.db.job.findMany({
       where: {
         tenant_id: tenantId,
-        scheduled_date: { equals: new Date(today) },
+        scheduled_date: { equals: new Date(today!) },
         ...(technicianId ? { technician_id: technicianId } : {}),
       },
       include: { workOrder: { include: { account: true, location: true } } },
@@ -28,10 +28,10 @@ export class JobsService {
       time_window: { start: job.scheduled_start_time, end: job.scheduled_end_time },
       customer: { id: job.workOrder.account.id, name: job.workOrder.account.name, type: job.workOrder.account.account_type },
       location: {
-        id: job.workOrder.location.id,
-        name: job.workOrder.location.name,
-        address: `${job.workOrder.location.address_line1}, ${job.workOrder.location.city}, ${job.workOrder.location.state}`,
-        coordinates: { lat: job.workOrder.location.latitude, lng: job.workOrder.location.longitude },
+        id: job.workOrder.location?.id || '',
+        name: job.workOrder.location?.name || '',
+        address: job.workOrder.location ? `${job.workOrder.location.address_line1}, ${job.workOrder.location.city}, ${job.workOrder.location.state}` : '',
+        coordinates: { lat: job.workOrder.location?.latitude || 0, lng: job.workOrder.location?.longitude || 0 },
       },
       service: {
         type: job.workOrder.service_type,
@@ -97,10 +97,10 @@ export class JobsService {
         account_id: dto.account_id,
         location_id: dto.location_id,
         scheduled_date: new Date(dto.scheduled_date),
-        scheduled_start_time: dto.scheduled_start_time,
-        scheduled_end_time: dto.scheduled_end_time,
+        scheduled_start_time: dto.scheduled_start_time || null,
+        scheduled_end_time: dto.scheduled_end_time || null,
         priority: dto.priority,
-        technician_id: dto.technician_id,
+        technician_id: dto.technician_id || null,
         status: dto.technician_id ? JobStatus.SCHEDULED : JobStatus.UNASSIGNED,
       },
       include: { workOrder: { include: { account: true, location: true } } },
@@ -181,8 +181,8 @@ export class JobsService {
       data: {
         status: JobStatus.COMPLETED,
         actual_end_time: new Date(),
-        completion_notes: dto.notes,
-        customer_signature: dto.signature_url,
+        completion_notes: dto.notes || null,
+        customer_signature: dto.signature_url || null,
         photos: dto.photos || [],
         chemicals_used: dto.chemicals_used || [],
         updated_at: new Date(),

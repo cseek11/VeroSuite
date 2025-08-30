@@ -25,10 +25,11 @@ import {
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { crmApi } from '@/lib/api';
+import type { Customer, ServiceHistory } from '@/types/customer';
 
 // Mock service history data for demonstration
 // This will be replaced with real API data in Phase 2
-const mockServiceHistory: Record<string, any[]> = {
+const mockServiceHistory: Record<string, ServiceHistory[]> = {
   // Generate service history for any customer ID
   'default': [
     { id: '1', date: '2025-01-15', service: 'Monthly Pest Control', technician: 'John Smith', status: 'completed', notes: 'Routine monthly service completed. No issues found.' },
@@ -40,10 +41,10 @@ const mockServiceHistory: Record<string, any[]> = {
 
 
 export default function CustomersPage() {
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all');
+  const [filterType, setFilterType] = useState<'all' | 'commercial' | 'residential'>('all');
   const [selectedCustomers, setSelectedCustomers] = useState<Set<string>>(new Set());
 
   const queryClient = useQueryClient();
@@ -54,12 +55,12 @@ export default function CustomersPage() {
     queryFn: () => crmApi.accounts(),
   });
 
-  const handleViewHistory = (customer: any) => {
+  const handleViewHistory = (customer: Customer) => {
     setSelectedCustomer(customer);
     setShowHistory(true);
   };
 
-  const filteredCustomers = customers.filter((customer: any) => {
+  const filteredCustomers = customers.filter((customer: Customer) => {
     const matchesSearch = customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          customer.email?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterType === 'all' || customer.account_type === filterType;
@@ -68,19 +69,7 @@ export default function CustomersPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
-              Customers
-            </h1>
-            <p className="text-slate-600 text-sm">
-              Manage customer accounts and locations for pest control services
-            </p>
-          </div>
-        </div>
-      </div>
+
 
       {/* Search and Filter Bar */}
       <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
@@ -100,7 +89,7 @@ export default function CustomersPage() {
           <div className="flex gap-2">
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
+              onChange={(e) => setFilterType(e.target.value as 'all' | 'commercial' | 'residential')}
               className="px-3 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
             >
               <option value="all">All Types</option>
@@ -147,7 +136,7 @@ export default function CustomersPage() {
             </div>
             
             <div className="space-y-3">
-              {mockServiceHistory.default.map((service) => (
+              {mockServiceHistory.default?.map((service) => (
                 <div key={service.id} className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-slate-200">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-semibold text-slate-900">{service.service}</h3>

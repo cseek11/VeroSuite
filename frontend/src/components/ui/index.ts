@@ -1,11 +1,15 @@
 // Export existing EnhancedUI components (excluding duplicates)
 export {
   Alert,
+  AlertDescription,
   Avatar,
+  Button,
+  Card,
   IconButton,
+  Input,
   Modal,
   ProgressBar,
-  Tabs,
+  Textarea,
   Tooltip,
   Typography,
   Navbar,
@@ -20,7 +24,7 @@ export {
   Button as CRMButton,
   Input as CRMInput,
   Textarea as CRMTextarea,
-  Select as CRMSelect,
+  CRMSelect,
   Status,
   Container,
   Grid,
@@ -28,6 +32,22 @@ export {
   Text,
   Badge,
   Divider,
+  Separator,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+  Switch,
   Spinner,
   Skeleton
 } from './CRMComponents';
@@ -36,6 +56,5 @@ export {
 export * from './Form';
 
 // Export individual components
-export { default as Select } from './Select';
 export { default as Checkbox } from './Checkbox';
-export { default as Textarea } from './Textarea';
+export { default as ReusablePopup } from './ReusablePopup';

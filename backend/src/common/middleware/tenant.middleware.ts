@@ -21,7 +21,7 @@ declare global {
 export class TenantMiddleware implements NestMiddleware {
   constructor(private databaseService: DatabaseService) {}
 
-  async use(req: Request, res: Response, next: NextFunction) {
+  async use(req: Request, _res: Response, next: NextFunction) {
     // In a fully implemented app, req.user comes from an auth guard (JWT)
     // For now, support a development override header 'x-tenant-id' for testing
     const tenantId = req.user?.tenantId || (req.headers['x-tenant-id'] as string);

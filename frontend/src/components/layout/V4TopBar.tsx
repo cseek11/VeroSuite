@@ -40,6 +40,7 @@ export default function V4TopBar({
 }: V4TopBarProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+  const [showQuickActionsMenu, setShowQuickActionsMenu] = useState(false);
   const [currentTime] = useState(() => {
     const now = new Date();
     return {
@@ -140,12 +141,29 @@ export default function V4TopBar({
       } else if (event.key === 'Escape') {
         setShowKeyboardShortcuts(false);
         setShowUserMenu(false);
+        setShowQuickActionsMenu(false);
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [navigate, onSidebarToggle, onActivityPanelToggle]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.quick-actions-dropdown')) {
+        setShowQuickActionsMenu(false);
+      }
+      if (!target.closest('.user-menu-dropdown')) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
      return (
        <>
@@ -197,7 +215,7 @@ export default function V4TopBar({
              <div className="font-semibold text-sm">{user?.name || 'Kevin Davis'}</div>
              <div className="text-xs opacity-80">{user?.role || 'Admin'}</div>
            </div>
-           <div className="relative">
+           <div className="relative user-menu-dropdown">
             <button 
               className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors"
               onClick={() => setShowUserMenu(!showUserMenu)}
@@ -262,13 +280,41 @@ export default function V4TopBar({
           </div>
 
           {/* Quick Actions - Icons Only */}
-          <button 
-            onClick={() => navigate('/jobs/new')}
-            className="bg-white/20 hover:bg-white/30 p-1.5 rounded text-xs font-semibold transition-colors flex items-center justify-center"
-            title="New Job"
-          >
-            <Plus className="w-3 h-3" />
-          </button>
+          <div className="relative quick-actions-dropdown">
+            <button 
+              onClick={() => setShowQuickActionsMenu(!showQuickActionsMenu)}
+              className="bg-white/20 hover:bg-white/30 p-1.5 rounded text-xs font-semibold transition-colors flex items-center justify-center"
+              title="Quick Actions"
+            >
+              <Plus className="w-3 h-3" />
+            </button>
+            
+            {/* Quick Actions Dropdown */}
+            {showQuickActionsMenu && (
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <button
+                  onClick={() => {
+                    navigate('/jobs/new');
+                    setShowQuickActionsMenu(false);
+                  }}
+                  className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  New Job
+                </button>
+                <button
+                  onClick={() => {
+                    navigate('/work-orders');
+                    setShowQuickActionsMenu(false);
+                  }}
+                  className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Create Work Order
+                </button>
+              </div>
+            )}
+          </div>
           
           <button 
             onClick={() => navigate('/customers/new')}

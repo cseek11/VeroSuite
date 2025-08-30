@@ -226,7 +226,7 @@ const Reports: React.FC = () => {
               Generate comprehensive reports to track performance and make data-driven decisions
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm flex items-center gap-2"
@@ -330,8 +330,8 @@ const Reports: React.FC = () => {
       )}
 
       {/* Report Categories Tabs */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
-        <div className="flex space-x-4 overflow-x-auto border-b border-slate-200">
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4 overflow-hidden">
+        <div className="flex-1 space-x-4 overflow-hidden border-b border-slate-200">
           {Object.entries(reportCategories).map(([key, category]) => (
             <button
               key={key}

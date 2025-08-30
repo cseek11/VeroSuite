@@ -200,6 +200,14 @@ export const Alert: React.FC<AlertProps> = ({ type = 'info', title, children, on
   );
 };
 
+export const AlertDescription: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => {
+  return (
+    <div className={`text-sm text-gray-600 ${className}`}>
+      {children}
+    </div>
+  );
+};
+
 export const Avatar: React.FC<AvatarProps> = ({ src, alt, size = 'md', fallback, className = '' }) => {
   const sizes = { sm: 'w-8 h-8 text-sm', md: 'w-10 h-10 text-base', lg: 'w-12 h-12 text-lg', xl: 'w-16 h-16 text-xl' };
   return (

@@ -11,6 +11,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { CrmModule } from './crm/crm.module';
 import { RoutingModule } from './routing/routing.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { WorkOrdersModule } from './work-orders/work-orders.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { UploadsModule } from './uploads/uploads.module';
     CrmModule,
     RoutingModule,
     UploadsModule,
+    WorkOrdersModule,
   ],
   providers: [
     DatabaseService,

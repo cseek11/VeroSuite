@@ -12,6 +12,12 @@ interface Config {
     enableAnalytics: boolean;
     enableDebugMode: boolean;
   };
+  monitoring: {
+    sentry: {
+      dsn: string;
+      tracesSampleRate: number;
+    };
+  };
 }
 
 function validateConfig(): Config {
@@ -44,6 +50,12 @@ function validateConfig(): Config {
     features: {
       enableAnalytics: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
       enableDebugMode: import.meta.env.DEV,
+    },
+    monitoring: {
+      sentry: {
+        dsn: import.meta.env.VITE_SENTRY_DSN || '',
+        tracesSampleRate: parseFloat(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE || '0.1'),
+      },
     },
   };
 }

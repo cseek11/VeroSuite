@@ -23,15 +23,15 @@ export class AuditService {
       await this.db.auditLog.create({
         data: {
           tenant_id: entry.tenantId,
-          user_id: entry.userId,
+          user_id: entry.userId || null,
           action: entry.action,
           resource_type: entry.resourceType,
-          resource_id: entry.resourceId,
+          resource_id: entry.resourceId || null,
           before_state: entry.beforeState,
           after_state: entry.afterState,
           request_id: entry.requestId || 'system',
-          ip_address: entry.ipAddress,
-          user_agent: entry.userAgent,
+          ip_address: entry.ipAddress || null,
+          user_agent: entry.userAgent || null,
         },
       });
     } catch (err) {
