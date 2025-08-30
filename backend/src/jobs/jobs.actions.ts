@@ -1,9 +1,9 @@
-import { IsUUID, IsOptional, IsString, IsArray, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class StartJobDto {
   @ApiProperty({ description: 'GPS location', example: { lat: 40.44, lng: -79.99 } })
-  gps_location: { lat: number; lng: number };
+  gps_location!: { lat: number; lng: number };
 }
 
 export class CompleteJobDto {

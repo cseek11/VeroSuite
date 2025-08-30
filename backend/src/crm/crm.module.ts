@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { IsString, IsEmail, IsOptional, IsEnum, IsPhoneNumber, IsUUID } from 'class-validator';
 import { DatabaseService } from '../common/services/database.service';
@@ -13,8 +13,8 @@ export enum AccountType {
 }
 
 export class CreateAccountDto {
-  @IsString() name: string;
-  @IsEnum(AccountType) account_type: AccountType;
+  @IsString() name!: string;
+  @IsEnum(AccountType) account_type!: AccountType;
   @IsOptional() @IsPhoneNumber('US') phone?: string;
   @IsOptional() @IsEmail() email?: string;
   @IsOptional() billing_address?: {
@@ -27,13 +27,13 @@ export class CreateAccountDto {
 }
 
 export class CreateLocationDto {
-  @IsUUID() account_id: string;
-  @IsString() name: string;
-  @IsString() address_line1: string;
+  @IsUUID() account_id!: string;
+  @IsString() name!: string;
+  @IsString() address_line1!: string;
   @IsOptional() @IsString() address_line2?: string;
-  @IsString() city: string;
-  @IsString() state: string;
-  @IsString() postal_code: string;
+  @IsString() city!: string;
+  @IsString() state!: string;
+  @IsString() postal_code!: string;
   @IsOptional() @IsUUID() service_area_id?: string;
 }
 
@@ -47,8 +47,8 @@ export class CrmService {
         tenant_id: tenantId,
         name: dto.name,
         account_type: dto.account_type,
-        phone: dto.phone,
-        email: dto.email,
+        phone: dto.phone || null,
+        email: dto.email || null,
         billing_address: dto.billing_address || {},
       },
     });
@@ -67,13 +67,13 @@ export class CrmService {
         account_id: dto.account_id,
         name: dto.name,
         address_line1: dto.address_line1,
-        address_line2: dto.address_line2,
+        address_line2: dto.address_line2 || null,
         city: dto.city,
         state: dto.state,
         postal_code: dto.postal_code,
         latitude: coords.latitude as any,
         longitude: coords.longitude as any,
-        service_area_id: dto.service_area_id,
+        service_area_id: dto.service_area_id || null,
       },
     });
   }
@@ -118,6 +118,92 @@ export class CrmService {
       orderBy: { name: 'asc' },
     });
   }
+
+  // Customer Notes CRUD Operations
+  async getCustomerNotes(customerId: string, tenantId: string) {
+    return this.db.customerNote.findMany({
+      where: {
+        tenant_id: tenantId,
+        customer_id: customerId,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+  }
+
+  async getCustomerNote(noteId: string, tenantId: string) {
+    const note = await this.db.customerNote.findFirst({
+      where: {
+        id: noteId,
+        tenant_id: tenantId,
+      },
+    });
+
+    if (!note) {
+      throw new Error('Note not found');
+    }
+
+    return note;
+  }
+
+  async createCustomerNote(customerId: string, dto: any, tenantId: string, userId: string) {
+    // Get user info for created_by field
+    const user = await this.db.user.findUnique({
+      where: { id: userId },
+      select: { first_name: true, last_name: true },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return this.db.customerNote.create({
+      data: {
+        tenant_id: tenantId,
+        customer_id: customerId,
+        note_type: dto.note_type,
+        note_source: dto.note_source || 'office',
+        note_content: dto.note_content,
+        created_by: `${user.first_name} ${user.last_name}`,
+        priority: dto.priority || 'low',
+        is_alert: dto.is_alert || false,
+        is_internal: dto.is_internal || false,
+        technician_id: dto.technician_id,
+        work_order_id: dto.work_order_id,
+        location_coords: dto.location_coords,
+      },
+    });
+  }
+
+  async updateCustomerNote(noteId: string, dto: any, tenantId: string) {
+    // Check if note exists and belongs to tenant
+    await this.getCustomerNote(noteId, tenantId);
+
+    return this.db.customerNote.update({
+      where: { id: noteId },
+      data: {
+        note_type: dto.note_type,
+        note_source: dto.note_source,
+        note_content: dto.note_content,
+        priority: dto.priority,
+        is_alert: dto.is_alert,
+        is_internal: dto.is_internal,
+        technician_id: dto.technician_id,
+        work_order_id: dto.work_order_id,
+        location_coords: dto.location_coords,
+      },
+    });
+  }
+
+  async deleteCustomerNote(noteId: string, tenantId: string) {
+    // Check if note exists and belongs to tenant
+    await this.getCustomerNote(noteId, tenantId);
+
+    return this.db.customerNote.delete({
+      where: { id: noteId },
+    });
+  }
 }
 
 // Controller
@@ -157,6 +243,45 @@ export class CrmController {
   @ApiOperation({ summary: 'Create location' })
   async createLocation(@Body() dto: CreateLocationDto, @Request() req: any) {
     return this.crm.createLocation(dto, req.user.tenantId);
+  }
+
+  // Customer Notes Endpoints
+  @Get('accounts/:customerId/notes')
+  @ApiOperation({ summary: 'Get all notes for a customer' })
+  async getCustomerNotes(@Param('customerId') customerId: string, @Request() req: any) {
+    return this.crm.getCustomerNotes(customerId, req.user.tenantId);
+  }
+
+  @Get('notes/:noteId')
+  @ApiOperation({ summary: 'Get a specific note by ID' })
+  async getCustomerNote(@Param('noteId') noteId: string, @Request() req: any) {
+    return this.crm.getCustomerNote(noteId, req.user.tenantId);
+  }
+
+  @Post('accounts/:customerId/notes')
+  @ApiOperation({ summary: 'Create a new note for a customer' })
+  async createCustomerNote(
+    @Param('customerId') customerId: string,
+    @Body() createNoteDto: any,
+    @Request() req: any
+  ) {
+    return this.crm.createCustomerNote(customerId, createNoteDto, req.user.tenantId, req.user.id);
+  }
+
+  @Put('notes/:noteId')
+  @ApiOperation({ summary: 'Update an existing note' })
+  async updateCustomerNote(
+    @Param('noteId') noteId: string,
+    @Body() updateNoteDto: any,
+    @Request() req: any
+  ) {
+    return this.crm.updateCustomerNote(noteId, updateNoteDto, req.user.tenantId);
+  }
+
+  @Delete('notes/:noteId')
+  @ApiOperation({ summary: 'Delete a note' })
+  async deleteCustomerNote(@Param('noteId') noteId: string, @Request() req: any) {
+    return this.crm.deleteCustomerNote(noteId, req.user.tenantId);
   }
 }
 

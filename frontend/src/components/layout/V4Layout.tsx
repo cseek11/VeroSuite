@@ -118,11 +118,11 @@ export default function V4Layout({ children }: V4LayoutProps) {
         />
 
                  {/* Main Workspace */}
-        <div className="flex-1 flex min-w-0 overflow-hidden relative flex-shrink">
+        <div className="flex-1 flex min-w-0 overflow-hidden relative">
           {/* Main Content */}
-          <main className="flex-1 flex flex-col min-w-0 overflow-hidden flex-shrink min-w-0">
-            <section className="flex-1 p-4 pl-4 main-content-area overflow-hidden">
-              <div className="relative bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50 h-full overflow-hidden">
+          <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <section className="flex-1 main-content-area overflow-hidden">
+              <div className="relative bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200/50 h-full overflow-hidden">
                 {/* Visual connection to active tab */}
                 <div 
                   className="absolute -left-6 w-8 h-12 bg-green-500 rounded-l-full transition-all duration-300 ease-out z-10 shadow-lg"
@@ -132,8 +132,14 @@ export default function V4Layout({ children }: V4LayoutProps) {
                   }}
                 />
                 
-                {/* Content with embedded scrollbar */}
-                <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                {/* Content with embedded scrollbar */}                <div className="h-full overflow-y-auto
+                  [&::-webkit-scrollbar]:w-2
+                  [&::-webkit-scrollbar-track]:bg-gray-50
+                  [&::-webkit-scrollbar-thumb]:bg-purple-300
+                  hover:[&::-webkit-scrollbar-thumb]:bg-purple-400
+                  dark:[&::-webkit-scrollbar-track]:bg-gray-50
+                  dark:[&::-webkit-scrollbar-thumb]:bg-purple-300
+                  dark:hover:[&::-webkit-scrollbar-thumb]:bg-purple-400">
                   <div className="p-6">
                     {children}
                   </div>

@@ -609,15 +609,14 @@ export default function V4Dashboard() {
                 </div>
                 <div className="p-2">
                   <div 
-                    className="space-y-1 max-h-64"
-                    style={{
-                      marginRight: '15px',
-                      scrollbarGutter: 'stable',
-                      overflowY: 'auto',
-                      overflowX: 'hidden',
-                      scrollbarWidth: 'thin',
-                      msOverflowStyle: 'none'
-                    }}
+                    className="space-y-1 max-h-64 overflow-y-auto overflow-x-hidden
+                      [&::-webkit-scrollbar]:w-2
+                      [&::-webkit-scrollbar-track]:bg-gray-50
+                      [&::-webkit-scrollbar-thumb]:bg-purple-300
+                      hover:[&::-webkit-scrollbar-thumb]:bg-purple-400
+                      dark:[&::-webkit-scrollbar-track]:bg-gray-50
+                      dark:[&::-webkit-scrollbar-thumb]:bg-purple-300
+                      dark:hover:[&::-webkit-scrollbar-thumb]:bg-purple-400"
                   >
                     {mockJobs.map((job) => (
                       <div 

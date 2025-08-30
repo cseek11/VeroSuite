@@ -30,6 +30,7 @@ import {
   Typography,
   Navbar
 } from '@/components/ui/EnhancedUI';
+import { ReusablePopup } from '@/components/ui';
 import { 
   Users, 
   TrendingUp, 
@@ -2140,7 +2141,14 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
                                     <div className="flex items-center justify-center mb-3">
                                       <Typography variant="h6" className="text-gray-900">Select Card Type</Typography>
                                     </div>
-                                                                        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                                                                                                                                                 <div className="flex-1 overflow-y-auto
+           [&::-webkit-scrollbar]:w-2
+           [&::-webkit-scrollbar-track]:bg-gray-50
+           [&::-webkit-scrollbar-thumb]:bg-purple-300
+           hover:[&::-webkit-scrollbar-thumb]:bg-purple-400
+           dark:[&::-webkit-scrollbar-track]:bg-gray-50
+           dark:[&::-webkit-scrollbar-thumb]:bg-purple-300
+           dark:hover:[&::-webkit-scrollbar-thumb]:bg-purple-400">
                                       <div className="grid grid-cols-1 gap-2">
                                      {availableCardTypes.map((cardType) => {
                                        const IconComponent = cardType.icon;
@@ -2220,7 +2228,14 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
                                                  
                                                  {/* Routes List */}
                                                  {routingRoutes.length > 0 && (
-                                                                                                    <div className="space-y-2 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                                                                                                    <div className="space-y-2 max-h-32 overflow-y-auto
+                                                     [&::-webkit-scrollbar]:w-2
+                                                     [&::-webkit-scrollbar-track]:bg-gray-50
+                                                     [&::-webkit-scrollbar-thumb]:bg-purple-300
+                                                     hover:[&::-webkit-scrollbar-thumb]:bg-purple-400
+                                                     dark:[&::-webkit-scrollbar-track]:bg-gray-50
+                                                     dark:[&::-webkit-scrollbar-thumb]:bg-purple-300
+                                                     dark:hover:[&::-webkit-scrollbar-thumb]:bg-purple-400">
                                                      {routingRoutes.slice(0, 3).map((route: any, index: number) => (
                                                        <div key={route.technicianId} className="bg-gray-50 rounded p-2 text-sm">
                                                          <div className="font-medium text-gray-900">
@@ -2285,7 +2300,14 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
                                                    </Typography>
                                                    <Chip variant="primary">{displayJobs.length}</Chip>
                                                  </div>
-                                                 <div className="space-y-2 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                                                 <div className="space-y-2 max-h-32 overflow-y-auto
+                                                   [&::-webkit-scrollbar]:w-2
+                                                   [&::-webkit-scrollbar-track]:bg-gray-50
+                                                   [&::-webkit-scrollbar-thumb]:bg-purple-300
+                                                   hover:[&::-webkit-scrollbar-thumb]:bg-purple-400
+                                                   dark:[&::-webkit-scrollbar-track]:bg-gray-50
+                                                   dark:[&::-webkit-scrollbar-thumb]:bg-purple-300
+                                                   dark:hover:[&::-webkit-scrollbar-thumb]:bg-purple-400">
                                                    {displayJobs.slice(0, 3).map((job: Job) => (
                                                      <div key={job.id} className="bg-gray-50 rounded p-2 text-sm">
                                                        <div className="font-medium text-gray-900 truncate">
@@ -2313,7 +2335,14 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
                                                  <Typography variant="h6" className="text-gray-900">
                                                    Recent Activity
                                                  </Typography>
-                                                 <div className="space-y-2 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                                                 <div className="space-y-2 max-h-32 overflow-y-auto
+                                                   [&::-webkit-scrollbar]:w-2
+                                                   [&::-webkit-scrollbar-track]:bg-gray-50
+                                                   [&::-webkit-scrollbar-thumb]:bg-purple-300
+                                                   hover:[&::-webkit-scrollbar-thumb]:bg-purple-400
+                                                   dark:[&::-webkit-scrollbar-track]:bg-gray-50
+                                                   dark:[&::-webkit-scrollbar-thumb]:bg-purple-300
+                                                   dark:hover:[&::-webkit-scrollbar-thumb]:bg-purple-400">
                                                    {displayJobs.slice(0, 4).map((job: Job, index: number) => (
                                                      <div key={job.id} className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
                                                        <Avatar size="sm" fallback={job.technician?.charAt(0) || 'T'} />
@@ -2613,113 +2642,86 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
         </div>
 
         {/* Search Palette Modal */}
-        {showSearchPalette && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className={`p-6 rounded-lg shadow-xl max-w-md w-full mx-4 ${
-              currentTheme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
-            }`}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Search Cards</h3>
+        <ReusablePopup
+          isOpen={showSearchPalette}
+          onClose={() => setShowSearchPalette(false)}
+          title="Search Cards"
+          size={{ width: 500, height: 400 }}
+        >
+          <div className="space-y-4">
+            <input
+              type="text"
+              placeholder="Search cards..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+              autoFocus
+            />
+            <div className="space-y-2">
+              {filteredCards.map((cardId) => (
                 <button
-                  onClick={() => setShowSearchPalette(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  key={cardId}
+                  onClick={() => jumpToCard(cardId)}
+                  className="w-full text-left p-2 rounded hover:bg-gray-100 transition-colors"
                 >
-                  <X className="h-5 w-5" />
+                  {getCardDisplayName(cardId)}
                 </button>
-              </div>
-              <input
-                type="text"
-                placeholder="Search cards..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full p-3 border rounded-lg mb-4 ${
-                  currentTheme === 'dark' 
-                    ? 'bg-gray-700 border-gray-600 text-white' 
-                    : 'bg-white border-gray-300 text-gray-900'
-                }`}
-                autoFocus
-              />
-              <div className="max-h-64 overflow-y-auto">
-                {filteredCards.map((cardId) => (
-                  <button
-                    key={cardId}
-                    onClick={() => jumpToCard(cardId)}
-                    className={`w-full text-left p-2 rounded hover:bg-gray-100 ${
-                      currentTheme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-                    }`}
-                  >
-                    {getCardDisplayName(cardId)}
-                  </button>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
-        )}
+        </ReusablePopup>
 
         {/* Grouping Menu Modal */}
-        {showGroupingMenu && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className={`p-6 rounded-lg shadow-xl max-w-md w-full mx-4 ${
-              currentTheme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
-            }`}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Group Cards</h3>
+        <ReusablePopup
+          isOpen={showGroupingMenu}
+          onClose={() => setShowGroupingMenu(false)}
+          title="Group Cards"
+          size={{ width: 500, height: 400 }}
+        >
+          <div className="space-y-4">
+            {selectedCards.size > 0 ? (
+              <div>
+                <input
+                  type="text"
+                  placeholder="Enter group name..."
+                  id="groupName"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                />
                 <button
-                  onClick={() => setShowGroupingMenu(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  onClick={() => {
+                    const groupName = (document.getElementById('groupName') as HTMLInputElement).value;
+                    if (groupName) {
+                      groupCards(groupName);
+                      setShowGroupingMenu(false);
+                    }
+                  }}
+                  className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white p-3 rounded-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-200 mt-4"
                 >
-                  <X className="h-5 w-5" />
+                  Create Group
                 </button>
               </div>
-              
-              {selectedCards.size > 0 ? (
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Enter group name..."
-                    id="groupName"
-                    className={`w-full p-3 border rounded-lg mb-4 ${
-                      currentTheme === 'dark' 
-                        ? 'bg-gray-700 border-gray-600 text-white' 
-                        : 'bg-white border-gray-300 text-gray-900'
-                    }`}
-                  />
-                  <button
-                    onClick={() => {
-                      const groupName = (document.getElementById('groupName') as HTMLInputElement).value;
-                      if (groupName) {
-                        groupCards(groupName);
-                        setShowGroupingMenu(false);
-                      }
-                    }}
-                    className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600"
-                  >
-                    Create Group
-                  </button>
-                </div>
-              ) : (
-                <p className="text-gray-500">Select cards first to group them</p>
-              )}
+            ) : (
+              <p className="text-gray-500">Select cards first to group them</p>
+            )}
 
-              {Object.keys(cardGroups).length > 0 && (
-                <div className="mt-6">
-                  <h4 className="font-semibold mb-2">Existing Groups</h4>
-                  {Object.entries(cardGroups).map(([groupName, cardIds]) => (
-                    <div key={groupName} className="flex items-center justify-between p-2 border rounded mb-2">
-                      <span>{groupName} ({cardIds.length} cards)</span>
-                      <button
-                        onClick={() => ungroupCards(groupName)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            {Object.keys(cardGroups).length > 0 && (
+              <div className="mt-6">
+                <h4 className="font-semibold mb-2">Existing Groups</h4>
+                {Object.entries(cardGroups).map(([groupName, cardIds]) => (
+                  <div key={groupName} className="flex items-center justify-between p-2 border rounded mb-2">
+                    <span>{groupName} ({cardIds.length} cards)</span>
+                    <button
+                      onClick={() => ungroupCards(groupName)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </ReusablePopup>
 
         {/* AI Assistant Modal */}
         {showAIAssistant && (
@@ -2887,7 +2889,14 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
          {/* Keyboard Shortcuts Modal */}
          {showKeyboardShortcuts && (
            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-             <div className={`p-6 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto ${
+             <div className={`p-6 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto
+               [&::-webkit-scrollbar]:w-2
+               [&::-webkit-scrollbar-track]:bg-gray-50
+               [&::-webkit-scrollbar-thumb]:bg-purple-300
+               hover:[&::-webkit-scrollbar-thumb]:bg-purple-400
+               dark:[&::-webkit-scrollbar-track]:bg-gray-50
+               dark:[&::-webkit-scrollbar-thumb]:bg-purple-300
+               dark:hover:[&::-webkit-scrollbar-thumb]:bg-purple-400 ${
                currentTheme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
              }`}>
                <div className="flex items-center justify-between mb-6">

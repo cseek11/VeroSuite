@@ -55,14 +55,14 @@ export class RoutingService {
 
       const points: RoutePoint[] = availableJobs.map((j) => ({
         id: j.id,
-        name: `${j.workOrder.account.name} - ${j.workOrder.location.name}`,
-        address: `${j.workOrder.location.address_line1}, ${j.workOrder.location.city}, ${j.workOrder.location.state}`,
+        name: `${j.workOrder.account.name} - ${j.workOrder.location?.name || 'Unknown Location'}`,
+        address: j.workOrder.location ? `${j.workOrder.location.address_line1}, ${j.workOrder.location.city}, ${j.workOrder.location.state}` : 'Unknown Address',
         coordinates: {
-          lat: Number(j.workOrder.location.latitude) || 40.4406,
-          lng: Number(j.workOrder.location.longitude) || -79.9959,
+          lat: Number(j.workOrder.location?.latitude) || 40.4406,
+          lng: Number(j.workOrder.location?.longitude) || -79.9959,
         },
         timeWindow: { start: j.scheduled_start_time || '08:00', end: j.scheduled_end_time || '17:00' },
-        serviceDuration: j.workOrder.estimated_duration,
+        serviceDuration: j.workOrder.estimated_duration || 60,
         priority: (j.priority as any) || 'medium',
       }));
 

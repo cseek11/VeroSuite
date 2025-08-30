@@ -8,7 +8,7 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
       log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['warn', 'error'],
       datasources: { 
         db: { 
-          url: process.env.DATABASE_URL 
+          url: process.env.DATABASE_URL || 'postgresql://localhost:5432/verosuite'
         } 
       },
     });
@@ -29,7 +29,7 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
     return this.$queryRawUnsafe(sql, ...params);
   }
 
-  async withTenant<T>(tenantId: string, operation: () => Promise<T>): Promise<T> {
+  async withTenant<T>(_tenantId: string, operation: () => Promise<T>): Promise<T> {
     // For now, just run the operation without tenant context
     return operation();
   }

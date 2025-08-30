@@ -26,6 +26,8 @@ import SettingsPage from './Settings';
 import CRMDemo from './CRMDemo';
 import ChartsPage from './Charts';
 import ChartsTestPage from './ChartsTest';
+import WorkOrdersPage from './WorkOrders';
+import CustomerPage from '@/components/CustomerPage';
 
 const LoginPage = lazy(() => import('@/routes/Login'));
 
@@ -198,6 +200,18 @@ export default function App() {
               }
             />
             <Route
+              path="/work-orders"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <WorkOrdersPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/customers"
               element={
                 <PrivateRoute>
@@ -228,6 +242,18 @@ export default function App() {
                   <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <CustomersPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/customers/:customerId"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <CustomerPage />
                     </Suspense>
                   </V4Layout>
                 </PrivateRoute>

@@ -11,7 +11,7 @@ export interface Technician {
 @Injectable()
 export class TechnicianService {
   // Mock technicians per tenant
-  async getAvailableTechnicians(tenantId: string, date: string): Promise<Technician[]> {
+  async getAvailableTechnicians(tenantId: string, _date: string): Promise<Technician[]> {
     // Return a deterministic set based on tenantId
     const seed = tenantId.charCodeAt(0) % 3;
     const techs: Technician[] = [
