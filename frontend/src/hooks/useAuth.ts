@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { login, logout, getCurrentUser } from '@/lib/api';
+import { authApi } from '@/lib/enhanced-api';
 import { queryKeys, invalidateQueries } from '@/lib/queryClient';
 import { useAuthStore } from '@/stores/auth';
 import { LoginFormData } from '@/lib/validation';
@@ -8,7 +8,7 @@ import { LoginFormData } from '@/lib/validation';
 export const useCurrentUser = () => {
   return useQuery({
     queryKey: queryKeys.auth.user,
-    queryFn: getCurrentUser,
+    queryFn: authApi.getCurrentUser,
     staleTime: 10 * 60 * 1000, // 10 minutes
     retry: false,
   });
@@ -21,7 +21,7 @@ export const useLogin = () => {
   
   return useMutation({
     mutationFn: async (credentials: LoginFormData) => {
-      const result = await login(credentials.email, credentials.password);
+      const result = await authApi.login(credentials.email, credentials.password);
       return { ...result, tenantId: credentials.tenantId };
     },
     onSuccess: (data) => {
@@ -42,7 +42,7 @@ export const useLogout = () => {
   const clearAuth = useAuthStore((s) => s.clear);
   
   return useMutation({
-    mutationFn: logout,
+    mutationFn: authApi.logout,
     onSuccess: () => {
       clearAuth();
       // Clear all queries

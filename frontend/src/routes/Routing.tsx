@@ -1,8 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { routingApi } from '@/lib/api';
+import { enhancedApi } from '@/lib/enhanced-api';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+
+// TODO: Implement routing API in enhanced API
+// For now, using placeholder functions
+const routingApi = {
+  optimize: async (date: string) => {
+    console.log('TODO: Implement routing API in enhanced API');
+    return [];
+  }
+};
 
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 

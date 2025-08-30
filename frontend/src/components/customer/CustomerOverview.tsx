@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { MapPin, Building, Phone, Mail, Calendar, DollarSign, Tag, Clock, TrendingUp, AlertCircle, Loader2, Edit, Check, X, User, MessageSquare, FileText, ChevronLeft } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/api';
+import { enhancedApi } from '@/lib/enhanced-api';
 import {
   Typography,
   Button,
@@ -91,16 +91,7 @@ const CustomerOverview: React.FC<CustomerOverviewProps> = ({
   // Fetch customer data
   const { data: customer, isLoading, error } = useQuery({
     queryKey: ['customer', customerId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('id', customerId)
-        .single();
-
-      if (error) throw error;
-      return data as Customer;
-    },
+    queryFn: () => enhancedApi.customers.getById(customerId),
     enabled: !!customerId
   });
 

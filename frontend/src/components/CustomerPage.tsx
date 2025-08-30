@@ -88,7 +88,7 @@ import {
   Loader2,
   ArrowLeft
 } from 'lucide-react';
-import { supabase } from '@/lib/api';
+import { enhancedApi } from '@/lib/enhanced-api';
 import CustomerOverview from './customer/CustomerOverview';
 import CustomerContact from './customer/CustomerContact';
 import CustomerServices from './customer/CustomerServices';
@@ -157,32 +157,13 @@ const CustomerPage: React.FC<CustomerPageProps> = ({ customerId: propCustomerId 
   // Fetch customer data
   const { data: customer, isLoading: customerLoading, error: customerError } = useQuery({
     queryKey: ['customer', customerId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('id', customerId)
-        .single();
-
-      if (error) throw error;
-      return data as Customer;
-    },
+    queryFn: () => enhancedApi.customers.getById(customerId!),
     enabled: !!customerId
   });
 
   // Update customer mutation
   const updateCustomerMutation = useMutation({
-    mutationFn: async (updates: Partial<Customer>) => {
-      const { data, error } = await supabase
-        .from('accounts')
-        .update(updates)
-        .eq('id', customerId)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
+    mutationFn: (updates: Partial<Customer>) => enhancedApi.customers.update(customerId!, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customer', customerId] });
       setIsEditing(false);

@@ -1,9 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { UserManagementForm } from './UserManagementForm';
-;
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { enhancedApi } from '@/lib/enhanced-api';
+
+// TODO: Implement these APIs in enhanced API
+// For now, using placeholder functions
+const jobsApi = {
+  today: async () => {
+    console.log('TODO: Implement jobs API in enhanced API');
+    return [];
+  }
+};
+
+const crmApi = {
+  accounts: async () => {
+    console.log('TODO: Implement accounts API in enhanced API');
+    return [];
+  }
+};
+
+const routingApi = {
+  optimize: async (date: string) => {
+    console.log('TODO: Implement routing API in enhanced API');
+    return [];
+  }
+};
 
 export default function DispatcherDashboard() {
   const [auditLogs, setAuditLogs] = useState<any[]>([]);

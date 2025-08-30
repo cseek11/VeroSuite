@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { crmApi } from '@/lib/api';
+import { enhancedApi } from '@/lib/enhanced-api';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import CustomerProfileCard from './CustomerProfileCard';
 import ServiceHistoryTimeline from './ServiceHistoryTimeline';
@@ -39,31 +39,34 @@ export default function CustomerDashboard({ customerId }: CustomerDashboardProps
   // Fetch customer data
   const { data: customer, isLoading: customerLoading, error: customerError } = useQuery({
     queryKey: ['crm', 'customer', customerId],
-    queryFn: () => crmApi.getCustomer(customerId),
+    queryFn: () => enhancedApi.customers.getById(customerId),
   });
 
-  // Fetch related data
+  // Fetch service history using enhanced API
   const { data: serviceHistory, isLoading: historyLoading } = useQuery({
-    queryKey: ['crm', 'customer', customerId, 'service-history'],
-    queryFn: () => crmApi.getServiceHistory(customerId),
+    queryKey: ['service-history', customerId],
+    queryFn: () => enhancedApi.serviceHistory.getByCustomer(customerId),
     enabled: !!customerId,
   });
 
-  const { data: contracts, isLoading: contractsLoading } = useQuery({
-    queryKey: ['crm', 'customer', customerId, 'contracts'],
-    queryFn: () => crmApi.getContracts(customerId),
-    enabled: !!customerId,
-  });
-
+  // Fetch customer notes using enhanced API
   const { data: notes, isLoading: notesLoading } = useQuery({
-    queryKey: ['crm', 'customer', customerId, 'notes'],
-    queryFn: () => crmApi.getCustomerNotes(customerId),
+    queryKey: ['customer-notes', customerId],
+    queryFn: () => enhancedApi.customerNotes.getByCustomer(customerId),
     enabled: !!customerId,
   });
 
+  // Fetch customer photos using enhanced API
   const { data: photos, isLoading: photosLoading } = useQuery({
-    queryKey: ['crm', 'customer', customerId, 'photos'],
-    queryFn: () => crmApi.getCustomerPhotos(customerId),
+    queryKey: ['customer-photos', customerId],
+    queryFn: () => enhancedApi.customerPhotos.getByCustomer(customerId),
+    enabled: !!customerId,
+  });
+
+  // Fetch contracts using enhanced API
+  const { data: contracts, isLoading: contractsLoading } = useQuery({
+    queryKey: ['customer-contracts', customerId],
+    queryFn: () => enhancedApi.contracts.getByCustomer(customerId),
     enabled: !!customerId,
   });
 

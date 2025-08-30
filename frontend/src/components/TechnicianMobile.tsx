@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { jobsApi } from '../lib/api';
+import { enhancedApi } from '@/lib/enhanced-api';
+
+// TODO: Implement jobs API in enhanced API
+// For now, using placeholder functions
+const jobsApi = {
+  today: async (technicianId?: string) => {
+    console.log('TODO: Implement jobs API in enhanced API');
+    return [];
+  }
+};
 
 export function TechnicianMobile() {
   const [jobs, setJobs] = useState<any[]>([]);

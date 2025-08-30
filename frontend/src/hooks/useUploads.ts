@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { presignUpload } from '@/lib/api';
+// TODO: Update to use enhanced API for file uploads
+// import { enhancedApi } from '@/lib/enhanced-api';
 import { queryKeys, invalidateQueries } from '@/lib/queryClient';
 import { FileUploadData } from '@/lib/validation';
 
