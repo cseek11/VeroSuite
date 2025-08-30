@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { login } from '@/lib/api';
+import { authApi } from '@/lib/enhanced-api';
 import { useAuthStore } from '@/stores/auth';
 import { loginSchema, type LoginFormData } from '@/lib/validation';
 import { Eye, EyeOff, Mail, Lock, Building, Loader2 } from 'lucide-react';
@@ -37,9 +37,18 @@ export default function Login() {
     setLoading(true);
     setError(null);
     try {
-      const res = await login(data.email, data.password);
+      const res = await authApi.login(data.email, data.password);
       console.log('Login successful:', res);
-      setAuth({ token: res.access_token, tenantId: data.tenantId, user: res.user });
+      
+      // Extract the correct fields from Supabase response
+      const token = res.session?.access_token;
+      const user = res.user;
+      
+      if (!token || !user) {
+        throw new Error('Invalid login response from server');
+      }
+      
+      setAuth({ token, tenantId: data.tenantId, user });
       console.log('Auth set, navigating to dashboard');
       navigate('/dashboard');
     } catch (err: any) {

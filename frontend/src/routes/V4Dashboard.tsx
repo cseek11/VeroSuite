@@ -24,51 +24,17 @@ import {
   Users,
   BarChart3,
   Settings,
-  Calendar
+  Calendar,
+  Building,
+  Heart
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import SchedulerPro from '@/components/scheduler/SchedulerPro';
+import { useQuery } from '@tanstack/react-query';
+import { enhancedApi } from '@/lib/enhanced-api';
 
-// Mock data - will be replaced with real API calls
-const mockKPIs = [
-  {
-    id: 'revenue',
-    label: "Today's Revenue",
-    value: "$18,240",
-    change: "+12.5%",
-    changeType: 'positive',
-    icon: DollarSign,
-    iconColor: 'text-purple-500'
-  },
-  {
-    id: 'jobs',
-    label: "Jobs Completed",
-    value: "47/52",
-    change: "90.4% completion rate",
-    changeType: 'positive',
-    icon: CheckCircle,
-    iconColor: 'text-green-500'
-  },
-  {
-    id: 'ar',
-    label: "AR Aging",
-    value: "$12,670",
-    change: "+8.3% overdue",
-    changeType: 'negative',
-    icon: Clock,
-    iconColor: 'text-orange-500'
-  },
-  {
-    id: 'satisfaction',
-    label: "Customer Satisfaction",
-    value: "4.8/5.0",
-    change: "+0.2 this month",
-    changeType: 'positive',
-    icon: Star,
-    iconColor: 'text-yellow-500'
-  }
-];
+// Enhanced API data fetching - KPIs will be calculated from real data
 
 const mockJobs = [
   {
@@ -143,7 +109,10 @@ const agreementIcons = {
   general: { icon: Shield, color: 'bg-green-500' },
   mosquito: { icon: Bug, color: 'bg-purple-500' },
   termite: { icon: Home, color: 'bg-red-500' },
-  rodent: { icon: Mouse, color: 'bg-orange-500' }
+  rodent: { icon: Mouse, color: 'bg-orange-500' },
+  residential: { icon: Home, color: 'bg-blue-500' },
+  commercial: { icon: Building, color: 'bg-purple-500' },
+  healthcare: { icon: Heart, color: 'bg-red-500' }
 };
 
 export default function V4Dashboard() {
@@ -158,6 +127,50 @@ export default function V4Dashboard() {
   
   // Tab state
   const [tabsActive, setTabsActive] = useState('overview');
+
+  // Enhanced API queries
+  const { data: customers = [], isLoading: customersLoading, error: customersError } = useQuery({
+    queryKey: ['enhanced-customers'],
+    queryFn: () => enhancedApi.customers.getAll(),
+  });
+
+  // Debug logging
+  console.log('Dashboard - Customers data:', customers);
+  console.log('Dashboard - Customers loading:', customersLoading);
+  console.log('Dashboard - Customers error:', customersError);
+
+  // Calculate KPIs from real data
+  const kpis = {
+    totalCustomers: customers.length,
+    completedServices: 0, // TODO: Implement when service history getAll is available
+    totalRevenue: 0, // TODO: Implement when service history getAll is available
+    activeContracts: customers.filter((c: any) => c.status === 'active').length,
+  };
+
+  // Convert customers to job-like format for display
+  const realJobs = customers.map((customer: any, index: number) => ({
+    id: index + 1,
+    customer: customer.name,
+    service: customer.account_type === 'commercial' ? 'Commercial Service' : 'Residential Service',
+    time: '9:00 AM',
+    technician: customer.contact_person || 'Unassigned',
+    status: customer.status === 'active' ? 'scheduled' : 'overdue',
+    agreements: [customer.account_type],
+    overdue: customer.status !== 'active',
+    overdueDays: customer.status !== 'active' ? 1 : 0
+  }));
+
+  // Create activity feed from customer data
+  const realActivityFeed = customers.slice(0, 5).map((customer: any) => ({
+    id: customer.id,
+    type: 'customer',
+    message: `${customer.name} - ${customer.account_type} customer`,
+    time: customer.created_at || new Date().toISOString(),
+    status: customer.status,
+    color: customer.status === 'active' ? 'bg-green-500' : 'bg-red-500',
+    amount: customer.ar_balance || 0,
+    detail: customer.account_type
+  }));
 
   const handleAddJob = () => {
     navigate('/jobs/new');
@@ -257,29 +270,81 @@ export default function V4Dashboard() {
           <div className="space-y-3">
             {/* KPIs Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-              {mockKPIs.map((kpi) => {
-                const Icon = kpi.icon;
-                return (
-                  <div key={kpi.id} className="bg-gradient-to-br from-slate-500 to-slate-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
-                    <div className="relative z-10">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="p-1.5 bg-white/20 rounded-lg">
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <TrendingUp className="h-3 w-3 text-slate-300" />
-                          <span className="text-xs font-semibold bg-white/20 px-1.5 py-0.5 rounded-md">
-                            {kpi.change}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-xl font-bold mb-1">{kpi.value}</div>
-                      <div className="text-slate-100 font-medium text-xs">{kpi.label}</div>
+              <div className="bg-gradient-to-br from-slate-500 to-slate-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="p-1.5 bg-white/20 rounded-lg">
+                      <Users className="h-5 w-5" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-3 w-3 text-slate-300" />
+                      <span className="text-xs font-semibold bg-white/20 px-1.5 py-0.5 rounded-md">
+                        Active
+                      </span>
                     </div>
                   </div>
-                );
-              })}
+                  <div className="text-xl font-bold mb-1">{kpis.totalCustomers}</div>
+                  <div className="text-slate-100 font-medium text-xs">Total Customers</div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-slate-500 to-slate-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="p-1.5 bg-white/20 rounded-lg">
+                      <CheckCircle className="h-5 w-5" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-3 w-3 text-slate-300" />
+                      <span className="text-xs font-semibold bg-white/20 px-1.5 py-0.5 rounded-md">
+                        {kpis.completedServices}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-xl font-bold mb-1">{kpis.completedServices}</div>
+                  <div className="text-slate-100 font-medium text-xs">Services Completed</div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-slate-500 to-slate-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="p-1.5 bg-white/20 rounded-lg">
+                      <DollarSign className="h-5 w-5" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-3 w-3 text-slate-300" />
+                      <span className="text-xs font-semibold bg-white/20 px-1.5 py-0.5 rounded-md">
+                        ${kpis.totalRevenue.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-xl font-bold mb-1">${kpis.totalRevenue.toLocaleString()}</div>
+                  <div className="text-slate-100 font-medium text-xs">Total Revenue</div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-slate-500 to-slate-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="p-1.5 bg-white/20 rounded-lg">
+                      <Star className="h-5 w-5" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-3 w-3 text-slate-300" />
+                      <span className="text-xs font-semibold bg-white/20 px-1.5 py-0.5 rounded-md">
+                        {kpis.activeContracts}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-xl font-bold mb-1">{kpis.activeContracts}</div>
+                  <div className="text-slate-100 font-medium text-xs">Active Contracts</div>
+                </div>
+              </div>
             </div>
 
             {/* Dashboard Overview Section */}
@@ -295,7 +360,7 @@ export default function V4Dashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-blue-700">Total Jobs</p>
-                        <p className="text-2xl font-bold text-blue-900">{mockJobs.length}</p>
+                        <p className="text-2xl font-bold text-blue-900">{realJobs.length}</p>
                         <p className="text-xs text-blue-600">This week</p>
                       </div>
                       <div className="p-2 bg-blue-200 rounded-lg">
@@ -309,7 +374,7 @@ export default function V4Dashboard() {
                       <div>
                         <p className="text-sm font-medium text-green-700">Completed</p>
                         <p className="text-2xl font-bold text-green-900">
-                          {mockJobs.filter(job => job.status === 'completed').length}
+                          {realJobs.filter(job => job.status === 'completed').length}
                         </p>
                         <p className="text-xs text-green-600">Today</p>
                       </div>
@@ -324,7 +389,7 @@ export default function V4Dashboard() {
                       <div>
                         <p className="text-sm font-medium text-orange-700">In Progress</p>
                         <p className="text-2xl font-bold text-orange-900">
-                          {mockJobs.filter(job => job.status === 'scheduled').length}
+                          {realJobs.filter(job => job.status === 'scheduled').length}
                         </p>
                         <p className="text-xs text-orange-600">Active</p>
                       </div>
@@ -339,7 +404,7 @@ export default function V4Dashboard() {
                       <div>
                         <p className="text-sm font-medium text-red-700">Overdue</p>
                         <p className="text-2xl font-bold text-red-900">
-                          {mockJobs.filter(job => job.overdue).length}
+                          {realJobs.filter(job => job.overdue).length}
                         </p>
                         <p className="text-xs text-red-600">Requires attention</p>
                       </div>
@@ -446,7 +511,7 @@ export default function V4Dashboard() {
                       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                       
                       {/* Job Locations */}
-                      {mockJobs.map((job) => (
+                      {realJobs.map((job) => (
                         <Marker 
                           key={job.id} 
                           position={[
@@ -468,7 +533,7 @@ export default function V4Dashboard() {
                       ))}
                       
                       {/* Sample Route Lines */}
-                      {mockJobs.length > 1 && (
+                      {realJobs.length > 1 && (
                         <Polyline
                           positions={[
                             [40.44, -79.99],
@@ -618,7 +683,7 @@ export default function V4Dashboard() {
                       dark:[&::-webkit-scrollbar-thumb]:bg-purple-300
                       dark:hover:[&::-webkit-scrollbar-thumb]:bg-purple-400"
                   >
-                    {mockJobs.map((job) => (
+                    {realJobs.map((job) => (
                       <div 
                         key={job.id}
                         className={`bg-white rounded-lg border border-gray-200 p-1 hover:shadow-md transition-all cursor-pointer ${
@@ -709,7 +774,7 @@ export default function V4Dashboard() {
                       msOverflowStyle: 'none'
                     }}
                   >
-                    {mockActivityFeed.map((activity) => (
+                    {realActivityFeed.map((activity) => (
                       <div key={activity.id} className="flex items-start gap-3">
                         <div className={`w-2 h-2 rounded-full mt-2 ${activity.color}`}></div>
                         <div className="flex-1">
@@ -734,7 +799,7 @@ export default function V4Dashboard() {
             <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Today's Operations</h3>
               <div className="space-y-3">
-                {mockJobs.map((job) => (
+                {realJobs.map((job) => (
                   <div key={job.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <div className="font-medium text-gray-800">{job.customer}</div>
@@ -767,12 +832,12 @@ export default function V4Dashboard() {
                   <div className="text-sm text-green-700">Customer Satisfaction</div>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-blue-600">156</div>
+                  <div className="text-2xl font-bold text-blue-600">{kpis.activeContracts}</div>
                   <div className="text-sm text-blue-700">Active Customers</div>
                 </div>
                 <div className="bg-purple-50 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-purple-600">23</div>
-                  <div className="text-sm text-purple-700">New This Month</div>
+                  <div className="text-2xl font-bold text-purple-600">{kpis.totalCustomers}</div>
+                  <div className="text-sm text-purple-700">Total Customers</div>
                 </div>
               </div>
             </div>
@@ -868,7 +933,7 @@ export default function V4Dashboard() {
             <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Job Progress</h3>
               <div className="space-y-3">
-                {mockJobs.map((job) => (
+                {realJobs.map((job) => (
                   <div key={job.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex-1">
                       <div className="font-medium text-gray-800">{job.customer}</div>

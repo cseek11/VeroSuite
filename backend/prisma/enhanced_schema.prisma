@@ -1,0 +1,372 @@
+// Enhanced Pest Control Database Schema
+// This file contains the new tables to be added to the existing schema
+
+// Customer Segmentation & Service Types
+model CustomerSegment {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  segment_name          String   @db.VarChar(100)
+  segment_code          String   @db.VarChar(20)
+  description           String?
+  default_service_types Json?
+  pricing_tier          String   @default("standard") @db.VarChar(20)
+  compliance_requirements Json?
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime @updatedAt @db.Timestamptz(6)
+  
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  customerProfiles      CustomerProfile[]
+  
+  @@unique([tenant_id, segment_code])
+  @@map("customer_segments")
+}
+
+model ServiceCategory {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  category_name         String   @db.VarChar(100)
+  category_code         String   @db.VarChar(20)
+  description           String?
+  applicable_segments   Json?
+  estimated_duration    Int      @default(60)
+  base_price            Decimal? @db.Decimal(10, 2)
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  serviceTypes          ServiceType[]
+  
+  @@unique([tenant_id, category_code])
+  @@map("service_categories")
+}
+
+model ServiceType {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  category_id           String?  @db.Uuid
+  service_name          String   @db.VarChar(100)
+  service_code          String   @db.VarChar(20)
+  description           String?
+  required_equipment    Json?
+  required_chemicals    Json?
+  safety_requirements   Json?
+  compliance_requirements Json?
+  estimated_duration    Int      @default(60)
+  base_price            Decimal? @db.Decimal(10, 2)
+  is_active             Boolean  @default(true)
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  category              ServiceCategory? @relation(fields: [category_id], references: [id])
+  technicianSkills      TechnicianSkill[]
+  servicePricing        ServicePricing[]
+  
+  @@unique([tenant_id, service_code])
+  @@map("service_types")
+}
+
+// Enhanced Customer Management
+model CustomerProfile {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  account_id            String   @db.Uuid
+  segment_id            String?  @db.Uuid
+  
+  // Business Information
+  business_name         String?  @db.VarChar(255)
+  business_type         String?  @db.VarChar(100)
+  tax_id                String?  @db.VarChar(50)
+  credit_limit          Decimal? @db.Decimal(10, 2)
+  credit_score          Int?
+  credit_check_date     DateTime? @db.Date
+  
+  // Property Information
+  property_type         String?  @db.VarChar(50)
+  property_size         String?  @db.VarChar(50)
+  year_built            Int?
+  square_footage        Int?
+  
+  // Access Information
+  access_codes          String?
+  gate_codes            String?
+  key_locations         String?
+  special_instructions  String?
+  
+  // Communication Preferences
+  preferred_language    String   @default("English") @db.VarChar(20)
+  timezone              String   @default("UTC") @db.VarChar(20)
+  communication_methods Json?
+  
+  // Contract Information
+  contract_start_date   DateTime? @db.Date
+  contract_end_date     DateTime? @db.Date
+  contract_type         String?  @db.VarChar(50)
+  contract_value        Decimal? @db.Decimal(10, 2)
+  auto_renew            Boolean  @default(false)
+  cancellation_policy   String?
+  
+  // Status Information
+  account_status        String   @default("active") @db.VarChar(20)
+  payment_status        String   @default("current") @db.VarChar(20)
+  service_status        String   @default("scheduled") @db.VarChar(20)
+  
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime @updatedAt @db.Timestamptz(6)
+  
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  account               Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
+  segment               CustomerSegment? @relation(fields: [segment_id], references: [id])
+  
+  @@unique([tenant_id, account_id])
+  @@map("customer_profiles")
+}
+
+model CustomerContact {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  account_id            String   @db.Uuid
+  contact_type          String   @db.VarChar(20) // primary, secondary, emergency, billing
+  first_name            String?  @db.VarChar(100)
+  last_name             String?  @db.VarChar(100)
+  email                 String?  @db.VarChar(255)
+  phone                 String?  @db.VarChar(20)
+  mobile                String?  @db.VarChar(20)
+  position              String?  @db.VarChar(100)
+  is_primary            Boolean  @default(false)
+  is_emergency_contact  Boolean  @default(false)
+  preferred_contact_method String? @db.VarChar(20)
+  notes                 String?
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  account               Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
+  
+  @@unique([tenant_id, account_id, contact_type])
+  @@map("customer_contacts")
+}
+
+// Advanced Scheduling & Routing
+model ServiceArea {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  area_name             String   @db.VarChar(100)
+  area_code             String   @db.VarChar(20)
+  description           String?
+  boundaries            String?  // GEOGRAPHY(POLYGON) - stored as text for Prisma
+  center_lat            Decimal? @db.Decimal(10, 8)
+  center_lng            Decimal? @db.Decimal(11, 8)
+  estimated_travel_time Int?     // minutes
+  is_active             Boolean  @default(true)
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  
+  @@unique([tenant_id, area_code])
+  @@map("service_areas")
+}
+
+model TechnicianSkill {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  technician_id         String   @db.Uuid
+  service_type_id       String   @db.Uuid
+  skill_level           String   @default("basic") @db.VarChar(20) // basic, intermediate, expert
+  certification_required Boolean @default(false)
+  certification_expiry  DateTime? @db.Date
+  training_completed_date DateTime? @db.Date
+  is_active             Boolean  @default(true)
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  technician            User     @relation(fields: [technician_id], references: [id])
+  serviceType           ServiceType @relation(fields: [service_type_id], references: [id])
+  
+  @@unique([tenant_id, technician_id, service_type_id])
+  @@map("technician_skills")
+}
+
+// Enhanced Financial Management
+model PricingTier {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  tier_name             String   @db.VarChar(100)
+  tier_code             String   @db.VarChar(20)
+  description           String?
+  base_multiplier       Decimal  @default(1.00) @db.Decimal(5, 2)
+  minimum_contract_value Decimal? @db.Decimal(10, 2)
+  payment_terms         Int      @default(30) // days
+  late_fee_percentage   Decimal  @default(0.00) @db.Decimal(5, 2)
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  servicePricing        ServicePricing[]
+  
+  @@unique([tenant_id, tier_code])
+  @@map("pricing_tiers")
+}
+
+model ServicePricing {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  service_type_id       String   @db.Uuid
+  pricing_tier_id       String   @db.Uuid
+  base_price            Decimal  @db.Decimal(10, 2)
+  hourly_rate           Decimal? @db.Decimal(10, 2)
+  minimum_charge        Decimal? @db.Decimal(10, 2)
+  travel_fee            Decimal? @db.Decimal(10, 2)
+  emergency_fee         Decimal? @db.Decimal(10, 2)
+  effective_date        DateTime @db.Date
+  expiry_date           DateTime? @db.Date
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  serviceType           ServiceType @relation(fields: [service_type_id], references: [id])
+  pricingTier           PricingTier @relation(fields: [pricing_tier_id], references: [id])
+  
+  @@unique([tenant_id, service_type_id, pricing_tier_id, effective_date])
+  @@map("service_pricing")
+}
+
+model PaymentMethod {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  account_id            String   @db.Uuid
+  payment_type          String   @db.VarChar(20) // credit_card, ach, check, cash, cod
+  payment_name          String?  @db.VarChar(100)
+  account_number        String?  @db.VarChar(50)
+  routing_number        String?  @db.VarChar(20)
+  card_type             String?  @db.VarChar(20)
+  card_last4            String?  @db.VarChar(4)
+  card_expiry           String?  @db.VarChar(7)
+  is_default            Boolean  @default(false)
+  is_active             Boolean  @default(true)
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  account               Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
+  
+  @@unique([tenant_id, account_id, payment_type])
+  @@map("payment_methods")
+}
+
+// Analytics & Reporting
+model CustomerAnalytics {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  account_id            String   @db.Uuid
+  metric_date            DateTime @db.Date
+  metric_type            String   @db.VarChar(50) // lifetime_value, service_frequency, payment_history
+  metric_value           Decimal  @db.Decimal(15, 4)
+  metric_metadata        Json?
+  calculated_at          DateTime @default(now()) @db.Timestamptz(6)
+  
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  account               Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
+  
+  @@unique([tenant_id, account_id, metric_date, metric_type])
+  @@map("customer_analytics")
+}
+
+model ServiceAnalytics {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  service_type_id       String?  @db.Uuid
+  service_area_id       String?  @db.Uuid
+  technician_id         String?  @db.Uuid
+  metric_date            DateTime @db.Date
+  metric_type            String   @db.VarChar(50) // completion_time, customer_satisfaction, efficiency
+  metric_value           Decimal  @db.Decimal(15, 4)
+  metric_metadata        Json?
+  calculated_at          DateTime @default(now()) @db.Timestamptz(6)
+  
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  serviceType           ServiceType? @relation(fields: [service_type_id], references: [id])
+  serviceArea           ServiceArea? @relation(fields: [service_area_id], references: [id])
+  technician            User? @relation(fields: [technician_id], references: [id])
+  
+  @@map("service_analytics")
+}
+
+// Communication & Marketing
+model CommunicationTemplate {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  template_name          String   @db.VarChar(100)
+  template_type          String   @db.VarChar(50) // email, sms, letter, notification
+  subject                String?  @db.VarChar(255)
+  content                String
+  variables              Json?    // template variables
+  applicable_segments    Json?
+  is_active              Boolean  @default(true)
+  created_at             DateTime @default(now()) @db.Timestamptz(6)
+  
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  
+  @@map("communication_templates")
+}
+
+model AutomatedCommunication {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenant_id             String   @db.Uuid
+  account_id            String   @db.Uuid
+  template_id           String?  @db.Uuid
+  trigger_type          String   @db.VarChar(50) // service_reminder, payment_reminder, follow_up
+  trigger_conditions    Json?
+  scheduled_date        DateTime? @db.Timestamptz(6)
+  sent_date             DateTime? @db.Timestamptz(6)
+  status                String   @default("pending") @db.VarChar(20) // pending, sent, failed, cancelled
+  recipient_contact_id  String?  @db.Uuid
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  
+  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  account               Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
+  template              CommunicationTemplate? @relation(fields: [template_id], references: [id])
+  recipientContact      CustomerContact? @relation(fields: [recipient_contact_id], references: [id])
+  
+  @@map("automated_communications")
+}
+
+// Update existing models to include new relations
+model Tenant {
+  // ... existing fields ...
+  customerSegments      CustomerSegment[]
+  serviceCategories     ServiceCategory[]
+  serviceTypes          ServiceType[]
+  customerProfiles      CustomerProfile[]
+  customerContacts      CustomerContact[]
+  serviceAreas          ServiceArea[]
+  pricingTiers          PricingTier[]
+  servicePricing        ServicePricing[]
+  paymentMethods        PaymentMethod[]
+  customerAnalytics     CustomerAnalytics[]
+  serviceAnalytics      ServiceAnalytics[]
+  communicationTemplates CommunicationTemplate[]
+  automatedCommunications AutomatedCommunication[]
+}
+
+model User {
+  // ... existing fields ...
+  technicianSkills      TechnicianSkill[]
+  serviceAnalytics      ServiceAnalytics[]
+}
+
+model Account {
+  // ... existing fields ...
+  customerProfile       CustomerProfile?
+  customerContacts      CustomerContact[]
+  paymentMethods        PaymentMethod[]
+  customerAnalytics     CustomerAnalytics[]
+  automatedCommunications AutomatedCommunication[]
+}
+
+// Add relations to existing models
+model CommunicationTemplate {
+  automatedCommunications AutomatedCommunication[]
+}
+
+model CustomerContact {
+  automatedCommunications AutomatedCommunication[]
+}
+
+model ServiceArea {
+  serviceAnalytics      ServiceAnalytics[]
+}

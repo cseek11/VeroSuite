@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { Button, Input, Textarea, Badge } from '@/components/ui';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase, crmApi } from '@/lib/api';
+import { enhancedApi } from '@/lib/enhanced-api';
 
 interface CustomerNotesHistoryProps {
   customerId: string;
@@ -51,13 +51,21 @@ const CustomerNotesHistory: React.FC<CustomerNotesHistoryProps> = ({ customerId 
   // Fetch notes from API
   const { data: notesData, isLoading: notesLoading, error: notesError } = useQuery({
     queryKey: ['customer-notes', customerId],
-    queryFn: () => crmApi.getCustomerNotes(customerId),
+    queryFn: () => enhancedApi.customerNotes.getByCustomer(customerId),
   });
 
   // Create note mutation
   const createNoteMutation = useMutation({
     mutationFn: (noteData: { content: string; priority: string }) =>
-      crmApi.createCustomerNote(customerId, noteData),
+      enhancedApi.customerNotes.create({
+        customer_id: customerId,
+        note_type: 'internal',
+        note_source: 'office',
+        note_content: noteData.content,
+        priority: noteData.priority as 'low' | 'medium' | 'high',
+        is_alert: false,
+        is_internal: true,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customer-notes', customerId] });
       setNewNoteContent('');

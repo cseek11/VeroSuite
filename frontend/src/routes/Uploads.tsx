@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { presignUpload } from '@/lib/api';
+// TODO: Update to use enhanced API for file uploads
+// import { enhancedApi } from '@/lib/enhanced-api';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import {
   Upload,

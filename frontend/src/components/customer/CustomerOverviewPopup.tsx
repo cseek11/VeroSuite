@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { MapPin, Building, Phone, Mail, Calendar, DollarSign, Tag, Clock, TrendingUp, AlertCircle, Loader2, Edit, Check, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/api';
+import { enhancedApi } from '@/lib/enhanced-api';
 import {
   Typography,
   Button,
@@ -60,16 +60,7 @@ const CustomerOverviewPopup: React.FC<CustomerOverviewPopupProps> = ({
   // Fetch customer data
   const { data: customer, isLoading, error } = useQuery({
     queryKey: ['customer', customerId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('id', customerId)
-        .single();
-
-      if (error) throw error;
-      return data as Customer;
-    },
+    queryFn: () => enhancedApi.customers.getById(customerId),
     enabled: !!customerId
   });
 

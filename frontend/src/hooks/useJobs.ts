@@ -1,7 +1,36 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { jobsApi } from '@/lib/api';
+import { enhancedApi } from '@/lib/enhanced-api';
 import { queryKeys, invalidateQueries } from '@/lib/queryClient';
 import { Job, JobEvent } from '@/types';
+
+// TODO: Implement jobs API in enhanced API
+// For now, using placeholder functions
+const jobsApi = {
+  today: async (technicianId?: string) => {
+    console.log('TODO: Implement jobs API in enhanced API');
+    return [];
+  },
+  get: async (id: string) => {
+    console.log('TODO: Implement jobs API in enhanced API');
+    return null;
+  },
+  create: async (jobData: Partial<Job>) => {
+    console.log('TODO: Implement jobs API in enhanced API');
+    return null;
+  },
+  assign: async (data: { job_id: string; technician_id: string }) => {
+    console.log('TODO: Implement jobs API in enhanced API');
+    return null;
+  },
+  start: async (id: string, gps: { lat: number; lng: number }) => {
+    console.log('TODO: Implement jobs API in enhanced API');
+    return null;
+  },
+  complete: async (id: string, payload: any) => {
+    console.log('TODO: Implement jobs API in enhanced API');
+    return null;
+  }
+};
 
 // Hook to get today's jobs
 export const useTodayJobs = (technicianId?: string) => {

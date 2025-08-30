@@ -10,7 +10,16 @@ import DashboardMetrics from '@/components/dashboard/DashboardMetrics';
 
 import { DashboardMetric, Job } from '@/types';
 import { useQuery } from '@tanstack/react-query';
-import { routingApi } from '@/lib/api';
+import { enhancedApi } from '@/lib/enhanced-api';
+
+// TODO: Implement routing API in enhanced API
+// For now, using placeholder functions
+const routingApi = {
+  optimize: async (date: string) => {
+    console.log('TODO: Implement routing API in enhanced API');
+    return [];
+  }
+};
 import {
   Alert,
   Avatar,

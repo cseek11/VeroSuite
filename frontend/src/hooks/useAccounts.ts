@@ -1,7 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { crmApi } from '@/lib/api';
+import { enhancedApi } from '@/lib/enhanced-api';
 import { queryKeys, invalidateQueries } from '@/lib/queryClient';
 import { Account } from '@/types';
+
+// TODO: Implement accounts API in enhanced API
+// For now, using placeholder functions
+const crmApi = {
+  accounts: async (search?: string) => {
+    console.log('TODO: Implement accounts API in enhanced API');
+    return [];
+  },
+  createAccount: async (accountData: Partial<Account>) => {
+    console.log('TODO: Implement accounts API in enhanced API');
+    return null;
+  }
+};
 
 // Hook to get all accounts
 export const useAccounts = (search?: string) => {

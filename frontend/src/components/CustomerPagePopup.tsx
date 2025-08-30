@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { X, User, Phone, Calendar, FileText, DollarSign, MessageSquare, Settings, BarChart3, MapPin, Mail, GripVertical, Maximize2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/api';
+import { enhancedApi } from '@/lib/enhanced-api';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui';
 import CustomerOverviewPopup from './customer/CustomerOverviewPopup';
 import CustomerContact from './customer/CustomerContact';
@@ -52,16 +52,7 @@ const CustomerPagePopup: React.FC<CustomerPagePopupProps> = ({
   // Fetch customer data for header
   const { data: customer, isLoading } = useQuery({
     queryKey: ['customer', customerId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('accounts')
-        .select('id, name, email, phone, address, city, state, zip_code')
-        .eq('id', customerId)
-        .single();
-
-      if (error) throw error;
-      return data as Customer;
-    },
+    queryFn: () => enhancedApi.customers.getById(customerId),
     enabled: !!customerId && isOpen
   });
 
