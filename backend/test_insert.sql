@@ -24,3 +24,4 @@ INSERT INTO customer_notes (
 -- Check all notes in the table
 SELECT * FROM customer_notes ORDER BY created_at DESC;
 
+

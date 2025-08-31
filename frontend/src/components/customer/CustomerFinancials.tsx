@@ -318,3 +318,4 @@ const CustomerFinancials: React.FC<CustomerFinancialsProps> = ({ customerId }) =
 
 export default CustomerFinancials;
 
+

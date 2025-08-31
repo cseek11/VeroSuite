@@ -21,7 +21,7 @@ export const useLogin = () => {
   
   return useMutation({
     mutationFn: async (credentials: LoginFormData) => {
-      const result = await authApi.login(credentials.email, credentials.password);
+      const result = await authApi.signIn(credentials.email, credentials.password);
       return { ...result, tenantId: credentials.tenantId };
     },
     onSuccess: (data) => {
@@ -42,7 +42,7 @@ export const useLogout = () => {
   const clearAuth = useAuthStore((s) => s.clear);
   
   return useMutation({
-    mutationFn: authApi.logout,
+    mutationFn: authApi.signOut,
     onSuccess: () => {
       clearAuth();
       // Clear all queries

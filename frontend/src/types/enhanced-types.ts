@@ -751,3 +751,4 @@ export type CommunicationType = 'email' | 'sms' | 'letter' | 'notification';
 export type ComplianceType = 'epa' | 'fda' | 'usda' | 'state' | 'local';
 export type FrequencyType = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annually';
 export type SkillLevelType = 'basic' | 'intermediate' | 'expert';
+

@@ -10,3 +10,4 @@ SELECT gen_random_uuid() as test_uuid;
 -- Check if the customer_notes table is working now
 SELECT * FROM customer_notes;
 
+
