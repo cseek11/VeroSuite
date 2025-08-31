@@ -647,4 +647,75 @@ textarea.crm-textarea:hover,
   }
 }
 
+/* ===== GLOBAL FORM ELEMENT PURPLE THEMING ===== */
+/* Override default gray styling with purple theme - NO GRAY FORMS */
+@layer components {
+  /* Apply purple theming to all standard form inputs */
+  input[type="text"]:not(.custom-styled),
+  input[type="email"]:not(.custom-styled),
+  input[type="password"]:not(.custom-styled),
+  input[type="search"]:not(.custom-styled),
+  input[type="tel"]:not(.custom-styled),
+  input[type="url"]:not(.custom-styled),
+  input[type="number"]:not(.custom-styled),
+  select:not(.custom-styled),
+  textarea:not(.custom-styled) {
+    @apply bg-white border-purple-200 text-gray-900;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  input[type="text"]:not(.custom-styled):focus,
+  input[type="email"]:not(.custom-styled):focus,
+  input[type="password"]:not(.custom-styled):focus,
+  input[type="search"]:not(.custom-styled):focus,
+  input[type="tel"]:not(.custom-styled):focus,
+  input[type="url"]:not(.custom-styled):focus,
+  input[type="number"]:not(.custom-styled):focus,
+  select:not(.custom-styled):focus,
+  textarea:not(.custom-styled):focus {
+    @apply border-purple-500 ring-2 ring-purple-500 ring-opacity-50;
+    outline: none;
+  }
+
+  input[type="text"]:not(.custom-styled):hover,
+  input[type="email"]:not(.custom-styled):hover,
+  input[type="password"]:not(.custom-styled):hover,
+  input[type="search"]:not(.custom-styled):hover,
+  input[type="tel"]:not(.custom-styled):hover,
+  input[type="url"]:not(.custom-styled):hover,
+  input[type="number"]:not(.custom-styled):hover,
+  select:not(.custom-styled):hover,
+  textarea:not(.custom-styled):hover {
+    @apply border-purple-300;
+  }
+
+  /* Ensure disabled inputs follow purple theme but are muted */
+  input[type="text"]:not(.custom-styled):disabled,
+  input[type="email"]:not(.custom-styled):disabled,
+  input[type="password"]:not(.custom-styled):disabled,
+  input[type="search"]:not(.custom-styled):disabled,
+  input[type="tel"]:not(.custom-styled):disabled,
+  input[type="url"]:not(.custom-styled):disabled,
+  input[type="number"]:not(.custom-styled):disabled,
+  select:not(.custom-styled):disabled,
+  textarea:not(.custom-styled):disabled {
+    @apply bg-purple-50 border-purple-200 text-gray-600;
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  /* Override any potential gray border classes */
+  .border-gray-300 {
+    @apply border-purple-200 !important;
+  }
+
+  .border-gray-400 {
+    @apply border-purple-300 !important;
+  }
+
+  /* Focus states should always use purple */
+  .focus\:border-transparent:focus {
+    @apply border-purple-500 !important;
+  }
+}
 

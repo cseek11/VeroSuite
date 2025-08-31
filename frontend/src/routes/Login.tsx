@@ -37,7 +37,7 @@ export default function Login() {
     setLoading(true);
     setError(null);
     try {
-      const res = await authApi.login(data.email, data.password);
+      const res = await authApi.signIn(data.email, data.password);
       console.log('Login successful:', res);
       
       // Extract the correct fields from Supabase response

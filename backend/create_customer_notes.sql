@@ -29,3 +29,4 @@ CREATE INDEX IF NOT EXISTS customer_notes_tenant_id_idx ON customer_notes (tenan
 CREATE INDEX IF NOT EXISTS customer_notes_created_at_idx ON customer_notes (created_at);
 CREATE INDEX IF NOT EXISTS customer_notes_is_internal_idx ON customer_notes (is_internal);
 
+

@@ -28,6 +28,7 @@ import ChartsPage from './Charts';
 import ChartsTestPage from './ChartsTest';
 import WorkOrdersPage from './WorkOrders';
 import CustomerPage from '@/components/CustomerPage';
+import { CustomerListTest } from './CustomerListTest';
 
 const LoginPage = lazy(() => import('@/routes/Login'));
 
@@ -254,6 +255,18 @@ export default function App() {
                   <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <CustomerPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/customer-list-test"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <CustomerListTest />
                     </Suspense>
                   </V4Layout>
                 </PrivateRoute>

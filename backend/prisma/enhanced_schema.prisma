@@ -370,3 +370,4 @@ model CustomerContact {
 model ServiceArea {
   serviceAnalytics      ServiceAnalytics[]
 }
+
