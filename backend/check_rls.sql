@@ -24,3 +24,6 @@ SET request.jwt.claims = '{"tenant_id": "fb39f15b-b382-4525-8404-1e32ca1486c9"}'
 SELECT * FROM customer_notes;
 
 
+
+
+

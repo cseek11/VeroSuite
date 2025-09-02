@@ -15,3 +15,6 @@ FROM pg_tables
 WHERE tablename = 'customer_notes';
 
 
+
+
+

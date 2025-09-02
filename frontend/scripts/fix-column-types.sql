@@ -63,3 +63,6 @@ DO $$
 BEGIN
   RAISE NOTICE 'Search function with correct column types created successfully!';
 END $$;
+
+
+

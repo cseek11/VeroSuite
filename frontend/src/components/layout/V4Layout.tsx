@@ -22,6 +22,7 @@ const navigationItems = [
   { id: 'communications', label: 'Communications', path: '/communications' },
   { id: 'finance', label: 'Finance', path: '/finance' },
   { id: 'reports', label: 'Reports', path: '/reports' },
+      { id: 'search-analytics', label: 'Search Analytics', path: '/search-analytics' },
   { id: 'knowledge', label: 'Knowledge', path: '/knowledge' },
   { id: 'settings', label: 'Settings', path: '/settings' },
 ];
@@ -48,6 +49,7 @@ export default function V4Layout({ children }: V4LayoutProps) {
     if (path === '/communications') return 'communications';
     if (path === '/finance') return 'finance';
     if (path === '/reports') return 'reports';
+    if (path === '/search-analytics') return 'search-analytics';
     if (path === '/knowledge') return 'knowledge';
     if (path === '/settings') return 'settings';
     return 'dashboard';
@@ -70,8 +72,9 @@ export default function V4Layout({ children }: V4LayoutProps) {
       'communications': 3,
       'finance': 4,
       'reports': 5,
-      'knowledge': 6,
-      'settings': 7
+      'search-analytics': 6,
+      'knowledge': 7,
+      'settings': 8
     };
     
     const index = itemIndex[activeTab] || 0;

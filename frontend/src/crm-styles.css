@@ -704,18 +704,111 @@ textarea.crm-textarea:hover,
     cursor: not-allowed;
   }
 
-  /* Override any potential gray border classes */
+  /* Override any potential gray border classes - HIGHEST PRIORITY */
   .border-gray-300 {
-    @apply border-purple-200 !important;
+    border-color: rgb(196 181 253) !important; /* purple-200 */
   }
 
   .border-gray-400 {
-    @apply border-purple-300 !important;
+    border-color: rgb(167 139 250) !important; /* purple-300 */
+  }
+
+  .border-gray-200 {
+    border-color: rgb(233 213 255) !important; /* purple-200 */
   }
 
   /* Focus states should always use purple */
   .focus\:border-transparent:focus {
-    @apply border-purple-500 !important;
+    border-color: rgb(139 92 246) !important; /* purple-500 */
   }
+
+  /* Force purple on all input elements regardless of classes */
+  input:not(.custom-styled),
+  select:not(.custom-styled),
+  textarea:not(.custom-styled) {
+    border-color: rgb(196 181 253) !important; /* purple-200 */
+  }
+
+  input:not(.custom-styled):focus,
+  select:not(.custom-styled):focus,
+  textarea:not(.custom-styled):focus {
+    border-color: rgb(139 92 246) !important; /* purple-500 */
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2) !important;
+  }
+
+  input:not(.custom-styled):hover,
+  select:not(.custom-styled):hover,
+  textarea:not(.custom-styled):hover {
+    border-color: rgb(167 139 250) !important; /* purple-300 */
+  }
+}
+
+/* ===== CRITICAL FORM ANTI-GRAY OVERRIDES - MAXIMUM PRIORITY ===== */
+/* These overrides MUST come last to ensure they take precedence over all other styles */
+@layer utilities {
+  /* Nuclear option: Override ALL gray borders on form elements */
+  [class*="border-gray"] {
+    border-color: rgb(196 181 253) !important; /* purple-200 */
+  }
+
+  /* Specific gray border overrides */
+  .border-gray-100 { border-color: rgb(233 213 255) !important; } /* purple-200 */
+  .border-gray-200 { border-color: rgb(196 181 253) !important; } /* purple-200 */
+  .border-gray-300 { border-color: rgb(196 181 253) !important; } /* purple-200 */
+  .border-gray-400 { border-color: rgb(167 139 250) !important; } /* purple-300 */
+  .border-gray-500 { border-color: rgb(139 92 246) !important; } /* purple-500 */
+
+  /* Force purple focus states */
+  .focus\:border-transparent:focus,
+  .focus\:border-gray-300:focus,
+  .focus\:border-gray-400:focus {
+    border-color: rgb(139 92 246) !important; /* purple-500 */
+  }
+
+  /* Override hover states */
+  .hover\:border-gray-300:hover,
+  .hover\:border-gray-400:hover {
+    border-color: rgb(167 139 250) !important; /* purple-300 */
+  }
+}
+
+/* Final nuclear option - force on all inputs */
+input, select, textarea {
+  border-color: rgb(196 181 253) !important; /* purple-200 */
+}
+
+/* Specific fix for search inputs - ensure white background */
+.advanced-search-input,
+input[type="search"],
+input[placeholder*="search"],
+input[placeholder*="Search"] {
+  background-color: white !important;
+  background: white !important;
+}
+
+.advanced-search-input:focus,
+input[type="search"]:focus,
+input[placeholder*="search"]:focus,
+input[placeholder*="Search"]:focus {
+  background-color: white !important;
+  background: white !important;
+}
+
+.advanced-search-input:hover,
+input[type="search"]:hover,
+input[placeholder*="search"]:hover,
+input[placeholder*="Search"]:hover {
+  background-color: white !important;
+  background: white !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: rgb(139 92 246) !important; /* purple-500 */
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2) !important;
+  outline: none !important;
+}
+
+input:hover, select:hover, textarea:hover {
+  border-color: rgb(167 139 250) !important; /* purple-300 */
 }
 

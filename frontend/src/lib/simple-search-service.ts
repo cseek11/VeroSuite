@@ -125,3 +125,6 @@ export class SimpleSearchService {
 
 // Export singleton instance
 export const simpleSearch = new SimpleSearchService();
+
+
+

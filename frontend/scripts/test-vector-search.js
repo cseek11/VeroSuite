@@ -121,3 +121,6 @@ async function testVectorSearch() {
 
 // Run the test
 testVectorSearch();
+
+
+

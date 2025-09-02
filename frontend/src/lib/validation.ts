@@ -10,10 +10,6 @@ export const loginSchema = z.object({
     .string()
     .min(1, 'Password is required')
     .min(6, 'Password must be at least 6 characters'),
-  tenantId: z
-    .string()
-    .min(1, 'Tenant ID is required')
-    .uuid('Invalid tenant ID format'),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;

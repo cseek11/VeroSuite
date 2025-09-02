@@ -662,6 +662,7 @@ export interface SearchFilters {
   search?: string;
   segmentId?: string;
   status?: string;
+  date?: string;
   dateRange?: {
     start: string;
     end: string;
@@ -751,4 +752,7 @@ export type CommunicationType = 'email' | 'sms' | 'letter' | 'notification';
 export type ComplianceType = 'epa' | 'fda' | 'usda' | 'state' | 'local';
 export type FrequencyType = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annually';
 export type SkillLevelType = 'basic' | 'intermediate' | 'expert';
+
+
+
 

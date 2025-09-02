@@ -174,3 +174,6 @@ BEGIN
   RAISE NOTICE '2. Test vector search functionality';
   RAISE NOTICE '3. Update frontend to use vector search';
 END $$;
+
+
+

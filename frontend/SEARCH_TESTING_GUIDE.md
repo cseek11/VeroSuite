@@ -117,3 +117,6 @@ If search isn't working as expected:
 
 **Frontend URL**: http://localhost:5173 (should be running)
 **Test the Customer List page** to validate all improvements!
+
+
+

@@ -492,3 +492,6 @@ CREATE INDEX idx_service_areas_geography ON service_areas USING GIST(boundaries)
 
 This comprehensive schema design provides a robust foundation for the pest control customer management system while maintaining backward compatibility with existing data.
 
+
+
+

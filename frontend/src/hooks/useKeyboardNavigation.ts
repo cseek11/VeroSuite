@@ -52,11 +52,16 @@ export const useKeyboardNavigation = (options: UseKeyboardNavigationOptions = {}
     },
     {
       key: '6',
+      description: 'Go to Search Analytics',
+      action: () => navigate('/search-analytics')
+    },
+    {
+      key: '7',
       description: 'Go to Uploads',
       action: () => navigate('/uploads')
     },
     {
-      key: '7',
+      key: '8',
       description: 'Go to Settings',
       action: () => navigate('/settings')
     },

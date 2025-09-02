@@ -276,3 +276,6 @@ BEGIN
   RAISE NOTICE '2. Set up AI service to update embeddings';
   RAISE NOTICE '3. Test hybrid search functionality';
 END $$;
+
+
+

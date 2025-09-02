@@ -6,7 +6,8 @@
 -- Drop the existing function
 DROP FUNCTION IF EXISTS search_customers_enhanced(text, uuid, integer, integer);
 
--- Create a simple working search function
+-- Create a simple working sear
+ch function
 CREATE OR REPLACE FUNCTION search_customers_enhanced(
   p_search_term text,
   p_tenant_id uuid,
@@ -84,3 +85,6 @@ DO $$
 BEGIN
   RAISE NOTICE 'Simple working search function created successfully!';
 END $$;
+
+
+

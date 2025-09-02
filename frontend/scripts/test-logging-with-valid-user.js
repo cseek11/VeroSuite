@@ -161,3 +161,6 @@ async function testSearchLogging(userId) {
 
 // Run the test
 testLoggingWithValidUser();
+
+
+
