@@ -16,3 +16,6 @@ CREATE POLICY "Allow search log updates" ON search_logs
 
 COMMENT ON POLICY "Allow search log inserts" ON search_logs IS 'Allow authenticated users to insert search logs';
 COMMENT ON POLICY "Allow search log updates" ON search_logs IS 'Allow authenticated users to update search logs for click tracking';
+
+
+

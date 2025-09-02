@@ -30,3 +30,6 @@ CREATE INDEX IF NOT EXISTS customer_notes_created_at_idx ON customer_notes (crea
 CREATE INDEX IF NOT EXISTS customer_notes_is_internal_idx ON customer_notes (is_internal);
 
 
+
+
+

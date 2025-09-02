@@ -4,6 +4,7 @@
 // Provides advanced search functionality with logging and relevance ranking
 
 import { createClient } from '@supabase/supabase-js';
+import { useAuthStore } from '@/stores/auth';
 import type { SearchFilters, Account } from '@/types/enhanced-types';
 
 // Initialize Supabase client
@@ -22,12 +23,30 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // ============================================================================
 
 const getTenantId = async (): Promise<string> => {
-  // Use the tenant ID where the customers are located
-  const knownTenantId = '7193113e-ece2-4f7b-ae8c-176df4367e28';
-  
-  // For now, always use the known tenant ID since the user's tenant doesn't have customers
-  console.log('Using known tenant ID for customers:', knownTenantId);
-  return knownTenantId;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (user) {
+      const tenantId = user.user_metadata?.tenant_id || user.app_metadata?.tenant_id;
+      if (tenantId) {
+        console.log('Search service using tenant ID:', tenantId);
+        return tenantId;
+      }
+    }
+    
+    // Fallback to auth store
+    const authStore = useAuthStore.getState();
+    if (authStore.tenantId) {
+      return authStore.tenantId;
+    }
+    
+    // Development fallback
+    console.warn('Using test tenant for search');
+    return '7193113e-ece2-4f7b-ae8c-176df4367e28';
+  } catch (error) {
+    console.error('Error getting tenant ID for search:', error);
+    return '7193113e-ece2-4f7b-ae8c-176df4367e28';
+  }
 };
 
 const getUserId = async (): Promise<string> => {

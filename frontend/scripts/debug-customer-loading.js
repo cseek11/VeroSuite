@@ -139,3 +139,6 @@ async function debugCustomerLoading() {
 
 // Run the debug
 debugCustomerLoading();
+
+
+

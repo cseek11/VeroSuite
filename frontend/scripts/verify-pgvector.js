@@ -82,3 +82,6 @@ async function verifyPgvector() {
 
 // Run the verification
 verifyPgvector();
+
+
+

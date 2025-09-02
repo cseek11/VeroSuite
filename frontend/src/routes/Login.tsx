@@ -8,6 +8,7 @@ import { loginSchema, type LoginFormData } from '@/lib/validation';
 import { Eye, EyeOff, Mail, Lock, Building, Loader2 } from 'lucide-react';
 import { Button, Input, Card, Typography } from '@/components/ui/EnhancedUI';
 import { BackgroundBeams } from '@/components/ui/background-beams';
+import { BugIcon } from '@/components/icons/BugIcon';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -27,7 +28,6 @@ export default function Login() {
     defaultValues: {
       email: '',
       password: '',
-      tenantId: '',
     },
   });
 
@@ -48,7 +48,8 @@ export default function Login() {
         throw new Error('Invalid login response from server');
       }
       
-      setAuth({ token, tenantId: data.tenantId, user });
+      // Don't set tenantId from user input - it will be validated and set by the auth store
+      await setAuth({ token, user });
       console.log('Auth set, navigating to dashboard');
       navigate('/dashboard');
     } catch (err: any) {
@@ -61,7 +62,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{
-      background: `url('/branding/crm_BG_V2.png') center center / cover no-repeat fixed`,
+      background: `url('/branding/newbg22.png') center 48% / cover no-repeat fixed`,
       position: 'relative',
     }}>
       {/* Background Beams Effect */}
@@ -131,24 +132,7 @@ export default function Login() {
               )}
             </div>
 
-            {/* Tenant ID Field */}
-            <div className="space-y-2">
-              <label htmlFor="tenantId" className="block text-sm font-medium login-text">
-                Tenant ID
-              </label>
-              <div className="relative">
-                <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300 h-4 w-4" />
-                <input
-                  type="text"
-                  className="login-gradient-input pl-10 w-full"
-                  placeholder="Enter your tenant ID"
-                  {...register('tenantId')}
-                />
-              </div>
-              {errors.tenantId && (
-                <p className="text-red-300 text-sm">{errors.tenantId.message}</p>
-              )}
-            </div>
+
 
             {/* Error Message */}
             {error && (

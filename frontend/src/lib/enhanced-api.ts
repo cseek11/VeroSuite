@@ -4,7 +4,7 @@
 // This file provides a unified API client for all database operations
 // with multi-tenant support, type safety, and comprehensive error handling
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from './supabase-client';
 import type { 
   Account, 
   CustomerProfile, 
@@ -33,28 +33,77 @@ import type {
   SearchFilters
 } from '@/types/enhanced-types';
 
-// Initialize Supabase client
-const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL;
-const supabaseAnonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables. Please check your .env file.');
-  throw new Error('Missing Supabase environment variables');
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
 
 const getTenantId = async (): Promise<string> => {
-  // Use the tenant ID where the customers are located
-  const knownTenantId = '7193113e-ece2-4f7b-ae8c-176df4367e28';
-  
-  // For now, always use the known tenant ID since the user's tenant doesn't have customers
-  console.log('Using known tenant ID for customers:', knownTenantId);
-  return knownTenantId;
+  try {
+    // First, try to get from Supabase auth
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (user) {
+      // Get the user's valid tenant ID from database (not from metadata)
+      try {
+        const { data: validTenantId, error: tenantError } = await supabase
+          .rpc('get_user_tenant_id', {
+            user_email: user.email
+          });
+        
+        if (tenantError) {
+          console.error('Failed to get user tenant ID:', tenantError.message);
+          throw new Error(`Failed to get user tenant ID: ${tenantError.message}`);
+        }
+        
+        if (validTenantId) {
+          console.log('✅ User tenant ID retrieved from database:', validTenantId);
+          return validTenantId;
+        } else {
+          throw new Error('No tenant ID found for user in database');
+        }
+      } catch (tenantError: any) {
+        console.error('Error getting user tenant ID:', tenantError);
+        throw new Error(`Failed to get user tenant ID: ${tenantError.message}`);
+      }
+    }
+    
+    // If no user, this is a critical error
+    throw new Error('No authenticated user found');
+    
+  } catch (error: any) {
+    console.error('Error resolving tenant ID:', error);
+    throw new Error(`Authentication failed: ${error.message}`);
+  }
+};
+
+// New function to validate tenant access for a specific claimed tenant ID
+const validateTenantAccess = async (claimedTenantId: string): Promise<boolean> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('No authenticated user found');
+    }
+    
+    // Validate the claimed tenant ID against the user's actual tenant ID
+    const { data: validationResult, error: validationError } = await supabase
+      .rpc('validate_user_tenant_access', {
+        user_email: user.email,
+        claimed_tenant_id: claimedTenantId
+      });
+    
+    if (validationError) {
+      console.error('Tenant validation failed:', validationError.message);
+      return false;
+    }
+    
+    return validationResult === true;
+  } catch (error: any) {
+    console.error('Error validating tenant access:', error);
+    return false;
+  }
 };
 
 const handleApiError = (error: any, context: string) => {

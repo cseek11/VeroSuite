@@ -1,8 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { enhancedSearch } from '@/lib/enhanced-search-service';
 import { useUserPreferences } from '@/stores/userPreferences';
 import { useDensityMode } from '@/hooks/useDensityMode';
+import { useSearchLogging } from '@/hooks/useSearchLogging';
+import { AdvancedSearchBar } from '@/components/search/AdvancedSearchBar';
 import { CustomerStatusBar } from './CustomerStatusBar';
 import { CustomerCard } from './CustomerCard';
 import { CustomerListItem } from './CustomerListItem';
@@ -35,16 +37,54 @@ export const CustomerList: React.FC<CustomerListProps> = ({
   const [showFilters, setShowFilters] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [useAdvancedSearch, setUseAdvancedSearch] = useState<boolean>(false);
 
-  // Fetch customers
+  // Search logging hook
+  const {
+    startSearchLog,
+    completeSearchLog,
+    logSearchClick,
+    getSearchSuggestions,
+    getSuggestedCorrection,
+    recentSearches,
+    popularSearches
+  } = useSearchLogging({
+    enableLogging: true,
+    enableAnalytics: true,
+    enableSuggestions: true
+  });
+
+  // Fetch customers with search logging
   const { data: customers = [], isLoading, error } = useQuery({
     queryKey: ['customers', searchTerm, statusFilter, typeFilter],
-    queryFn: () => enhancedSearch.searchCustomers({
-      search: searchTerm,
-      status: statusFilter !== 'all' ? statusFilter : undefined,
-      segmentId: typeFilter !== 'all' ? typeFilter : undefined
-    }),
+    queryFn: async () => {
+      // Start logging the search
+      if (searchTerm.trim()) {
+        startSearchLog(searchTerm, {
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+          type: typeFilter !== 'all' ? typeFilter : undefined
+        });
+      }
+
+      const results = await enhancedSearch.searchCustomers({
+        search: searchTerm,
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        segmentId: typeFilter !== 'all' ? typeFilter : undefined
+      });
+
+      // Complete logging the search
+      if (searchTerm.trim()) {
+        await completeSearchLog(searchTerm, results.length, {
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+          type: typeFilter !== 'all' ? typeFilter : undefined
+        });
+      }
+
+      return results;
+    },
   });
+
+
 
   // Debug logging
   console.log('CustomerList Debug:', {
@@ -111,6 +151,9 @@ export const CustomerList: React.FC<CustomerListProps> = ({
     if (searchTerm) {
       await enhancedSearch.logResultClick(customer.id, searchTerm);
     }
+    
+    // Log the click using the new search logging service
+    logSearchClick(customer.id);
     
     // Call the original click handler
     onCustomerClick(customer);
@@ -184,15 +227,52 @@ export const CustomerList: React.FC<CustomerListProps> = ({
 
       {/* Search and filters */}
       <div className="space-y-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <input
-            type="text"
-            placeholder="Search customers..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 hover:border-purple-300 transition-colors"
-          />
+        <div className="space-y-2">
+          {/* Search Mode Toggle */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setUseAdvancedSearch(!useAdvancedSearch)}
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                  useAdvancedSearch
+                    ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                    : 'bg-gray-100 text-gray-600 border border-gray-200'
+                }`}
+              >
+                {useAdvancedSearch ? '🔍 Advanced Search' : '🔍 Standard Search'}
+              </button>
+              {useAdvancedSearch && (
+                <span className="text-xs text-gray-500">
+                  Fuzzy matching, typo tolerance, and suggestions enabled
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Search Input */}
+          {useAdvancedSearch ? (
+            <AdvancedSearchBar
+              onResultsChange={(results) => {
+                // Handle advanced search results
+                console.log('Advanced search results:', results);
+              }}
+              placeholder="Search with fuzzy matching and suggestions..."
+              showModeSelector={true}
+              showSuggestions={true}
+              enableAutoCorrection={true}
+            />
+          ) : (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search customers..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-white border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 hover:border-purple-300 transition-colors"
+              />
+            </div>
+          )}
         </div>
 
         {showFilters && (

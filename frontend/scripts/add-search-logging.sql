@@ -228,3 +228,6 @@ COMMENT ON TABLE search_logs IS 'Stores search queries and results for AI traini
 COMMENT ON TABLE search_corrections IS 'Stores search corrections and synonyms for improved search accuracy';
 COMMENT ON FUNCTION log_search IS 'Logs a search query with metadata for analytics and AI training';
 COMMENT ON FUNCTION get_search_analytics IS 'Returns search analytics for a tenant over a specified time period';
+
+
+

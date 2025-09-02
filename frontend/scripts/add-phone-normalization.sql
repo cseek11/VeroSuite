@@ -63,3 +63,6 @@ ON accounts(tenant_id, status, account_type);
 COMMENT ON COLUMN accounts.phone_digits IS 'Normalized phone number (digits only) for improved search performance';
 COMMENT ON INDEX idx_accounts_phone_digits IS 'Index for phone number search by digits';
 COMMENT ON INDEX idx_accounts_search_composite IS 'Composite index for common search patterns';
+
+
+

@@ -150,3 +150,6 @@ $$ LANGUAGE plpgsql;
 GRANT EXECUTE ON FUNCTION search_customers_with_relevance(TEXT, UUID) TO authenticated;
 
 COMMENT ON FUNCTION search_customers_with_relevance IS 'Search customers with relevance ranking that works with Supabase';
+
+
+

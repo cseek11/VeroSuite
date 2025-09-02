@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { CustomerList } from '@/components/customer/CustomerList';
 import { CustomerStatusBar } from '@/components/customer/CustomerStatusBar';
 import { useUserPreferences } from '@/stores/userPreferences';
 import { useDensityMode } from '@/hooks/useDensityMode';
+import { Button } from '@/components/ui/EnhancedUI';
+import { BarChart3, Search, Sparkles } from 'lucide-react';
 import type { Account } from '@/types/enhanced-types';
 
 export const CustomerListTest: React.FC = () => {
@@ -19,10 +22,30 @@ export const CustomerListTest: React.FC = () => {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Customer List Test</h1>
-        <p className="text-gray-600 mb-4">
-          Testing the new customer list components with view modes and density controls
-        </p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Customer List Test</h1>
+            <p className="text-gray-600">
+              Testing the new customer list components with view modes and density controls
+            </p>
+          </div>
+          
+          {/* Navigation Links */}
+          <div className="flex space-x-3">
+            <Link to="/search-analytics">
+              <Button variant="outline" className="flex items-center space-x-2">
+                <BarChart3 className="w-4 h-4" />
+                <span>Search Analytics</span>
+              </Button>
+            </Link>
+            <Link to="/advanced-search-demo">
+              <Button variant="outline" className="flex items-center space-x-2">
+                <Sparkles className="w-4 h-4" />
+                <span>Advanced Search Demo</span>
+              </Button>
+            </Link>
+          </div>
+        </div>
         
         {/* Current Settings Display */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
@@ -127,8 +150,8 @@ export const CustomerListTest: React.FC = () => {
 
       {/* Component Information */}
       <div className="bg-blue-50 rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-blue-900 mb-3">Component Features</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
+        <h2 className="text-lg font-semibold text-blue-900 mb-3">Component Features & Test Links</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-blue-800">
           <div>
             <h3 className="font-medium mb-2">✅ Implemented Features:</h3>
             <ul className="space-y-1 list-disc list-inside">
@@ -139,6 +162,14 @@ export const CustomerListTest: React.FC = () => {
               <li>Persistent user preferences</li>
               <li>Mobile responsive design</li>
               <li>Customer status bar component</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-medium mb-2">🧪 Test Pages:</h3>
+            <ul className="space-y-1 list-disc list-inside">
+              <li><strong>Search Analytics:</strong> View search performance metrics and analytics</li>
+              <li><strong>Advanced Search Demo:</strong> Test fuzzy matching and typo tolerance</li>
+              <li><strong>Customer List Test:</strong> This page - test all customer list features</li>
             </ul>
           </div>
           <div>
@@ -155,4 +186,7 @@ export const CustomerListTest: React.FC = () => {
     </div>
   );
 };
+
+
+
 

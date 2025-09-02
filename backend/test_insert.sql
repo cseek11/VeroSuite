@@ -25,3 +25,6 @@ INSERT INTO customer_notes (
 SELECT * FROM customer_notes ORDER BY created_at DESC;
 
 
+
+
+

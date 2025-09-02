@@ -66,3 +66,6 @@ node scripts/update-test-data.js
 - The script only updates existing customers, it doesn't create new ones
 - It preserves all other customer data (email, phone, address, etc.)
 - Only updates: status, ar_balance, and created_at fields
+
+
+

@@ -22,13 +22,13 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: async (credentials: LoginFormData) => {
       const result = await authApi.signIn(credentials.email, credentials.password);
-      return { ...result, tenantId: credentials.tenantId };
+      return result; // Remove tenantId from here
     },
     onSuccess: (data) => {
       setAuth({ 
         token: data.access_token, 
-        tenantId: data.tenantId, 
         user: data.user 
+        // tenantId will be resolved from user metadata
       });
       // Invalidate and refetch user data
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.user });

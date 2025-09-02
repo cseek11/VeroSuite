@@ -9,11 +9,12 @@ const KeyboardHelp: React.FC<KeyboardHelpProps> = ({ className = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const shortcuts = [
-    { key: '1-7', description: 'Navigate to sections' },
+    { key: '1-8', description: 'Navigate to sections' },
     { key: 'h', description: 'Go to Dashboard' },
     { key: 'j', description: 'Go to Jobs' },
     { key: 'c', description: 'Go to Customers' },
     { key: 'r', description: 'Go to Reports' },
+    { key: '6', description: 'Go to Search Analytics' },
     { key: 's', description: 'Go to Settings' },
     { key: 'Ctrl + N', description: 'Create New Job' },
     { key: 'Ctrl + Shift + N', description: 'Create New Customer' },
