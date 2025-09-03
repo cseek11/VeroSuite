@@ -28,3 +28,6 @@ SELECT EXISTS (
 
 -- Check the current data in popular_searches
 SELECT * FROM popular_searches LIMIT 5;
+
+
+

@@ -94,6 +94,79 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     
     console.log('🧹 Auth store cleared completely');
   },
+
+  forceLogout: async () => {
+    try {
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+      console.log('✅ Supabase auth signed out');
+    } catch (error) {
+      console.error('Error signing out from Supabase:', error);
+    }
+    
+    // Clear local storage and state
+    get().clear();
+    
+    // Clear ALL possible Supabase storage
+    const allKeys = Object.keys(localStorage);
+    allKeys.forEach(key => {
+      if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
+        localStorage.removeItem(key);
+        console.log('🗑️ Removed:', key);
+      }
+    });
+    
+    // Clear session storage completely
+    sessionStorage.clear();
+    
+    // Clear cookies (if any)
+    document.cookie.split(";").forEach(function(c) { 
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+    
+    // Clear any remaining auth state
+    try {
+      // Force clear any remaining Supabase session
+      await supabase.auth.setSession(null);
+      console.log('✅ Supabase session cleared');
+    } catch (error) {
+      console.error('Error clearing session:', error);
+    }
+    
+    console.log('🧹 Complete cleanup done');
+    
+    // Force page reload to clear any remaining state
+    window.location.reload();
+  },
+
+  nuclearLogout: async () => {
+    console.log('🚨 NUCLEAR LOGOUT - Complete system reset');
+    
+    try {
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+      console.log('✅ Supabase auth signed out');
+    } catch (error) {
+      console.error('Error signing out from Supabase:', error);
+    }
+    
+    // Clear ALL storage without exceptions
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Clear all cookies
+    document.cookie.split(";").forEach(function(c) { 
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+    
+    // Clear state
+    set({ token: null, tenantId: null, user: null, isAuthenticated: null });
+    
+    console.log('🧨 Nuclear cleanup complete - redirecting to login');
+    
+    // Redirect to login page instead of reload
+    window.location.href = '/login';
+  },
   validateTenantAccess: async () => {
     const { user, tenantId } = get();
     

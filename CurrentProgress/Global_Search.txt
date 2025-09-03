@@ -1,0 +1,134 @@
+ 🧑‍💻 Developer Prompt: Global Smart Search for Pest Control CRM
+🎯 Goal
+
+We are upgrading our CRM’s customer search into a unified global smart search interface. This new feature should allow users to:
+
+Search for information (customers, jobs, invoices, etc.)
+
+Perform actions using natural language (e.g., create accounts, schedule appointments, send reminders)
+
+This is more than a search bar — it's a natural language task interface that acts as a command center for our CRM.
+
+🛠 Functional Requirements
+
+Natural Language Input Parsing
+
+Detect user intent: search, create, update, delete, reschedule, etc.
+
+Extract entities from user input:
+
+Customer Name
+
+Address
+
+Phone number
+
+Pest type
+
+Service date/time
+
+Appointment ID
+
+Product names
+
+Keywords like "urgent", "follow-up", "VIP"
+
+Action Execution
+
+Route parsed input to the correct handler (e.g., createCustomer(), scheduleAppointment(), etc.)
+
+Show confirmation previews before executing sensitive actions
+
+Search + Task Examples to Support
+
+🧪 Example Input Queries
+"Find John Smith"
+"Lookup customer at 123 Maple Ave"
+"Create a new account for John Doe at 123 Maple Ave. He’s been seeing roaches and wants to schedule asap"
+"Schedule bed bug treatment for Lisa Nguyen at 7pm tomorrow"
+"Add note: Customer has pets, use only organic products"
+"Reschedule today’s appointment for Jake to Friday at 10am"
+"Cancel Mike’s job scheduled for Wednesday"
+"Assign technician Alex to appointment #2093"
+"Send reminder to Emily White"
+"Show all termite jobs in August"
+"Mark invoice 10023 as paid"
+"Create quarterly service plan for Sam at 456 Oak St starting next Monday"
+
+🧾 Sample Data for Search + NLP Training
+
+Use this dataset to seed the system and help train/test search and intent parsing.
+
+📁 1. Customers
+Customer ID	Name	Address	Phone	Email	Notes
+C001	John Smith	123 Maple Ave, CA	(555) 123-4567	john@gmail.com
+	Prefers calls, has dogs
+C002	Lisa Nguyen	789 Elm St, CA	(555) 987-6543	lisa@yahoo.com
+	Bed bugs, urgent service
+C003	Emily White	456 Oak St, CA	(555) 234-7890	emily@gmail.com
+	Quarterly service plan
+📍 2. Appointments
+Appointment ID	Customer ID	Date	Time	Service Type	Technician	Status
+A1001	C001	2025-09-03	10:00	Roach Treatment	Alex	Scheduled
+A1002	C002	2025-09-02	14:00	Bed Bug Heat	Sam	Completed
+A1003	C003	2025-09-05	09:00	Quarterly Spray	Jessica	Scheduled
+🐜 3. Pests
+Pest Type	Severity	Treatment Required
+Roaches	Medium	Gel Bait + Spray
+Bed Bugs	High	Heat + Residual Spray
+Ants	Low	Bait Only
+Termites	High	Termidor + Drill Treatment
+Rodents	Medium	Traps + Sealing Entry
+💳 4. Invoices
+Invoice ID	Customer ID	Amount	Status	Date
+INV1001	C001	$250	Paid	2025-08-15
+INV1002	C002	$450	Unpaid	2025-08-20
+INV1003	C003	$150	Paid	2025-08-01
+👷 5. Technicians
+Technician ID	Name	Certifications	Territories
+T001	Alex	General Pest Control	90210, 90001
+T002	Sam	Bed Bug Specialist	90002, 90003
+T003	Jessica	Rodents & Termites	90210, 90211
+⚙️ Technical Suggestions
+
+Use NLP libraries to classify intents and extract structured data:
+
+OpenAI (GPT-4o API w/ functions)
+
+spaCy (for named entity recognition)
+
+Rasa NLU (customizable NLU pipelines)
+
+Define structured Intent -> Handler mappings
+
+Create a “Command Processor” layer in the backend that:
+
+Accepts user input
+
+Parses it into structured intent and entities
+
+Validates
+
+Executes or returns preview/confirmation
+
+📋 Intent-Handler Examples
+Intent	Example Input	Handler Function
+Create Customer	"Create account for John at 123 Maple Ave"	createCustomer(data)
+Schedule Appointment	"Book roach treatment for tomorrow 2pm"	scheduleAppointment(data)
+Update Appointment	"Reschedule today’s job for Mike to Friday"	updateAppointment(data)
+Lookup Customer	"Find Lisa Nguyen"	findCustomer(query)
+Search Invoices	"Show unpaid invoices over $300"	searchInvoices(filters)
+Add Note	"Add note: use organic treatment for Emily"	addCustomerNote(customerId, note)
+🧪 Phase 1 MVP Suggestion
+
+Start with support for 3 intents:
+
+findCustomer
+
+createCustomer
+
+scheduleAppointment
+
+Use the provided sample data for development, NLP fine-tuning, and QA.
+
+Build preview/confirmation modals before executing any actions.

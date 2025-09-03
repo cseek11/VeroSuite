@@ -1,1 +1,18 @@
+# Allow Cursor to see important files
 !.env
+!package.json
+!package-lock.json
+!tsconfig.json
+!vite.config.ts
+!tailwind.config.js
+
+# Allow Cursor to see source files
+!src/
+!public/
+
+# Allow Cursor to see documentation
+!*.md
+!*.txt
+
+# Allow Cursor to see scripts
+!scripts/

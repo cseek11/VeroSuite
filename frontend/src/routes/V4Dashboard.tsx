@@ -26,7 +26,9 @@ import {
   Settings,
   Calendar,
   Building,
-  Heart
+  Heart,
+  Factory,
+  XCircle
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -112,7 +114,10 @@ const agreementIcons = {
   rodent: { icon: Mouse, color: 'bg-orange-500' },
   residential: { icon: Home, color: 'bg-blue-500' },
   commercial: { icon: Building, color: 'bg-purple-500' },
-  healthcare: { icon: Heart, color: 'bg-red-500' }
+  healthcare: { icon: Heart, color: 'bg-red-500' },
+  industrial: { icon: Factory, color: 'bg-gray-500' },
+  active: { icon: CheckCircle, color: 'bg-green-500' },
+  inactive: { icon: XCircle, color: 'bg-red-500' }
 };
 
 export default function V4Dashboard() {
@@ -694,7 +699,10 @@ export default function V4Dashboard() {
                           <div className="flex items-center gap-3">
                             <div className="flex gap-1">
                               {job.agreements.map((agreement) => {
-                                const { icon: Icon, color } = agreementIcons[agreement as keyof typeof agreementIcons];
+                                const agreementIcon = agreementIcons[agreement as keyof typeof agreementIcons];
+                                if (!agreementIcon) return null;
+                                
+                                const { icon: Icon, color } = agreementIcon;
                                 return (
                                   <span key={agreement} className={`w-3.5 h-3.5 rounded-full ${color} flex items-center justify-center`}>
                                     <Icon className="w-2 h-2 text-white" />

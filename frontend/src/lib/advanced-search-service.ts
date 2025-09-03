@@ -4,7 +4,10 @@
 // Enhanced search service with fuzzy matching, typo tolerance, and vector search
 
 import { supabase } from './supabase-client';
+import { config } from '@/lib/config';
 import type { SearchFilters, Account } from '@/types/enhanced-types';
+import { intentClassificationService, type IntentResult } from './intent-classification-service';
+import { actionExecutorService, type ActionResult } from './action-handlers';
 
 // ============================================================================
 // TYPES
@@ -36,6 +39,16 @@ export interface SearchSuggestion {
   confidence: number;
 }
 
+// New interface for global search results
+export interface GlobalSearchResult {
+  type: 'search' | 'action';
+  intent?: IntentResult;
+  searchResults?: AdvancedSearchResult[];
+  actionResult?: ActionResult;
+  requiresConfirmation?: boolean;
+  confirmationData?: any;
+}
+
 // ============================================================================
 // ADVANCED SEARCH SERVICE
 // ============================================================================
@@ -62,6 +75,159 @@ class AdvancedSearchService {
 
     console.log('✅ Got tenant ID:', tenantId);
     return tenantId;
+  };
+
+  /**
+   * Global search that handles both natural language commands and regular search
+   * This is the main entry point for the unified search interface
+   */
+  globalSearch = async (
+    query: string,
+    filters?: SearchFilters,
+    options: AdvancedSearchOptions = {}
+  ): Promise<GlobalSearchResult> => {
+    try {
+      console.log('🌍 Starting global search for query:', query);
+      
+      // First, classify the intent of the query
+      const intentResult = intentClassificationService.classifyIntent(query);
+      console.log('🎯 Intent classified:', intentResult);
+      
+      // If it's a search intent or low confidence, fall back to regular search
+      if (intentResult.intent === 'search' || intentResult.confidence < 0.6) {
+        console.log('🔍 Falling back to regular search');
+        const searchResults = await this.searchCustomersAdvanced(query, filters, options);
+        return {
+          type: 'search',
+          searchResults,
+          intent: intentResult
+        };
+      }
+      
+      // For action intents with high confidence, execute the action
+      if (intentResult.confidence >= 0.6) {
+        console.log('🚀 Executing action for intent:', intentResult.intent);
+        
+        // Validate the action before execution
+        const validation = actionExecutorService.validateAction(intentResult);
+        if (!validation.isValid) {
+          console.log('❌ Action validation failed:', validation.errors);
+          // Fall back to search if validation fails
+          const searchResults = await this.searchCustomersAdvanced(query, filters, options);
+          return {
+            type: 'search',
+            searchResults,
+            intent: intentResult
+          };
+        }
+        
+        // Get confirmation data for the action
+        const confirmationData = actionExecutorService.getConfirmationData(intentResult);
+        
+        // If confidence is high enough, execute immediately
+        if (intentResult.confidence >= 0.9) {
+          console.log('⚡ High confidence, executing action immediately');
+          const actionResult = await actionExecutorService.executeAction(intentResult);
+          
+          return {
+            type: 'action',
+            intent: intentResult,
+            actionResult,
+            requiresConfirmation: false
+          };
+        }
+        
+        // Otherwise, return confirmation data for user approval
+        console.log('⏳ Medium confidence, requiring confirmation');
+        return {
+          type: 'action',
+          intent: intentResult,
+          requiresConfirmation: true,
+          confirmationData
+        };
+      }
+      
+      // Fallback to search
+      console.log('🔍 Fallback to search');
+      const searchResults = await this.searchCustomersAdvanced(query, filters, options);
+      return {
+        type: 'search',
+        searchResults,
+        intent: intentResult
+      };
+      
+    } catch (error) {
+      console.error('❌ Error in global search:', error);
+      
+      // On error, fall back to regular search
+      try {
+        const searchResults = await this.searchCustomersAdvanced(query, filters, options);
+        return {
+          type: 'search',
+          searchResults,
+          intent: {
+            intent: 'search',
+            confidence: 0.5,
+            entities: {},
+            originalQuery: query,
+            processedQuery: query
+          }
+        };
+      } catch (searchError) {
+        console.error('❌ Fallback search also failed:', searchError);
+        throw error; // Re-throw original error
+      }
+    }
+  };
+
+  /**
+   * Execute a confirmed action (called after user confirms)
+   */
+  executeConfirmedAction = async (intentResult: IntentResult): Promise<ActionResult> => {
+    try {
+      console.log('✅ Executing confirmed action:', intentResult.intent);
+      return await actionExecutorService.executeAction(intentResult);
+    } catch (error) {
+      console.error('❌ Error executing confirmed action:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Get search suggestions based on intent classification
+   */
+  getIntentBasedSuggestions = (query: string, maxSuggestions: number = 5): string[] => {
+    const intentResult = intentClassificationService.classifyIntent(query);
+    const examples = intentClassificationService.getIntentExamples();
+    
+    if (intentResult.intent === 'search') {
+      // For search queries, return related search suggestions
+      return [
+        `Find ${query}`,
+        `Search for ${query}`,
+        `Lookup ${query}`,
+        `Show all ${query}`,
+        `Find customers with ${query}`
+      ].slice(0, maxSuggestions);
+    }
+    
+    // For action intents, return examples of that intent type
+    const intentExamples = examples[intentResult.intent] || [];
+    return intentExamples.slice(0, maxSuggestions);
+  };
+
+  /**
+   * Get all supported intents for help/autocomplete
+   */
+  getSupportedIntents = () => {
+    return intentClassificationService.getSupportedIntents();
+  };
+
+  /**
+   * Get examples for all intents
+   */
+  getIntentExamples = () => {
+    return intentClassificationService.getIntentExamples();
   };
 
   /**
@@ -311,7 +477,24 @@ class AdvancedSearchService {
     fuzzyThreshold: number = 0.3,
     maxResults: number = 50
   ): Promise<AdvancedSearchResult[]> {
-    // Use the enhanced search function with fuzzy matching
+    // Prefer backend RPC when feature is enabled
+    if (config.features.enableFuzzy) {
+      try {
+        const { data, error } = await supabase.rpc('search_customers_fuzzy', {
+          p_tenant_id: tenantId,
+          p_query: searchVariations[0] || '',
+          p_threshold: fuzzyThreshold,
+          p_limit: maxResults
+        });
+        if (!error && data) {
+          return this.mapToAdvancedResults(data, 'fuzzy');
+        }
+      } catch (e) {
+        console.warn('Fuzzy RPC unavailable, falling back to client fuzzy search');
+      }
+    }
+
+    // Fallback: client-side aggregation using existing RPC
     const allResults: AdvancedSearchResult[] = [];
     
     for (const variation of searchVariations) {
@@ -411,26 +594,105 @@ class AdvancedSearchService {
 
   private async getQueryCompletions(tenantId: string, query: string, limit: number): Promise<SearchSuggestion[]> {
     try {
-      // Get popular queries that start with the current query
-      const { data, error } = await supabase
-        .from('search_logs')
-        .select('query')
-        .eq('tenant_id', tenantId)
-        .ilike('query', `${query}%`)
-        .order('created_at', { ascending: false })
-        .limit(limit);
-
-      if (error) return [];
-
-      const completions = data.map(item => ({
-        text: item.query,
-        type: 'completion' as const,
-        confidence: 0.8
-      }));
-
-      return completions;
+      if (config.features.enableSuggestions) {
+        try {
+          console.log('🔍 Calling get_search_suggestions RPC with:', { query, limit });
+          const { data, error } = await supabase.rpc('get_search_suggestions', {
+            p_query: query,
+            p_limit: limit
+          });
+          console.log('🔍 RPC response:', { data, error });
+          if (!error && Array.isArray(data)) {
+            const suggestions = (data as any[]).map((row) => ({
+              text: row.suggestion || '',
+              type: this.mapSourceToType(row.source),
+              confidence: Number(row.score) / 100 // Convert score (0-100) to confidence (0-1)
+            }));
+            console.log('🔍 Mapped suggestions:', suggestions);
+            return suggestions;
+          }
+          if (error) {
+            console.error('❌ RPC error:', error);
+          }
+        } catch (rpcError) {
+          console.warn('⚠️ RPC get_search_suggestions failed, falling back to direct queries:', rpcError);
+        }
+      }
+      
+      // Fallback to querying customers and logs directly
+      const [customersData, logsData] = await Promise.all([
+        // Customer names
+        supabase
+          .from('customers')
+          .select('first_name, last_name')
+          .eq('tenant_id', tenantId)
+          .or(`first_name.ilike.${query}%,last_name.ilike.${query}%`)
+          .limit(limit),
+        // Search logs
+        supabase
+          .from('search_logs')
+          .select('query')
+          .eq('tenant_id', tenantId)
+          .ilike('query', `${query}%`)
+          .order('created_at', { ascending: false })
+          .limit(limit)
+      ]);
+      
+      const suggestions: SearchSuggestion[] = [];
+      
+      // Add customer name suggestions
+      if (customersData.data) {
+        customersData.data.forEach(customer => {
+          if (customer.first_name?.toLowerCase().startsWith(query.toLowerCase())) {
+            suggestions.push({ text: customer.first_name, type: 'completion', confidence: 0.9 });
+          }
+          if (customer.last_name?.toLowerCase().startsWith(query.toLowerCase())) {
+            suggestions.push({ text: customer.last_name, type: 'completion', confidence: 0.9 });
+          }
+          if (customer.first_name && customer.last_name && 
+              (customer.first_name + ' ' + customer.last_name).toLowerCase().startsWith(query.toLowerCase())) {
+            suggestions.push({ text: customer.first_name + ' ' + customer.last_name, type: 'completion', confidence: 0.95 });
+          }
+        });
+      }
+      
+      // Add log suggestions
+      if (logsData.data) {
+        logsData.data.forEach(item => {
+          if (item.query && !suggestions.some(s => s.text === item.query)) {
+            suggestions.push({ text: item.query, type: 'completion', confidence: 0.8 });
+          }
+        });
+      }
+      
+      return suggestions
+        .sort((a, b) => b.confidence - a.confidence)
+        .slice(0, limit);
+        
     } catch (error) {
+      console.error('Failed to get query completions:', error);
       return [];
+    }
+  }
+
+  private mapSourceToType(source: string): 'correction' | 'completion' | 'related' {
+    switch (source) {
+      case 'contacts':
+        return 'completion';
+      case 'accounts':
+        return 'completion';
+      case 'users':
+        return 'completion';
+      case 'popular':
+        return 'completion';
+      case 'logs':
+        return 'related';
+      case 'analytics':
+        return 'related';
+      case 'trends':
+        return 'related';
+      default:
+        return 'completion';
     }
   }
 

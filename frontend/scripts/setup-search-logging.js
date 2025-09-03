@@ -93,3 +93,6 @@ async function setupSearchLogging() {
 
 // Run the setup
 setupSearchLogging();
+
+
+

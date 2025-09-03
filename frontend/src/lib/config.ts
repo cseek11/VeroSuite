@@ -11,6 +11,8 @@ interface Config {
   features: {
     enableAnalytics: boolean;
     enableDebugMode: boolean;
+    enableFuzzy: boolean;
+    enableSuggestions: boolean;
   };
   monitoring: {
     sentry: {
@@ -50,6 +52,8 @@ function validateConfig(): Config {
     features: {
       enableAnalytics: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
       enableDebugMode: import.meta.env.DEV,
+      enableFuzzy: import.meta.env.VITE_ENABLE_FUZZY === 'true',
+      enableSuggestions: import.meta.env.VITE_ENABLE_SUGGESTIONS === 'true',
     },
     monitoring: {
       sentry: {
@@ -61,3 +65,12 @@ function validateConfig(): Config {
 }
 
 export const config = validateConfig();
+
+// Expose config in development for easy debugging in the browser console
+// Access via: window.appConfig.features
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  (window as unknown as { appConfig?: Config }).appConfig = config;
+  // One-time log to confirm flags at startup
+  // eslint-disable-next-line no-console
+  console.log('App feature flags:', config.features);
+}

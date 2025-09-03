@@ -110,7 +110,7 @@ export interface ButtonProps {
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   loading?: boolean;
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<any>;
   children: React.ReactNode;
   onClick?: () => void;
   className?: string;
@@ -128,7 +128,7 @@ export interface CardProps {
 export interface NavigationItem {
   id: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<any>;
   path?: string;
   children?: NavigationItem[];
 }
@@ -139,7 +139,7 @@ export interface DashboardMetric {
   value: string | number;
   change?: number;
   changeType?: 'increase' | 'decrease';
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<any>;
   color: string;
 }
 

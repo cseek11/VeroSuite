@@ -18,7 +18,6 @@ import KnowledgePage from './Knowledge';
 import SchedulerPage from './Scheduler';
 import JobsPage from './Jobs';
 import CustomersPage from '@/components/CustomersPage';
-import Customers from './Customers';
 import RoutingPage from './Routing';
 import ReportsPage from './Reports';
 import UploadsPage from './Uploads';
@@ -30,7 +29,10 @@ import WorkOrdersPage from './WorkOrders';
 import CustomerPage from '@/components/CustomerPage';
 import { CustomerListTest } from './CustomerListTest';
 import SearchAnalyticsDashboard from '@/components/analytics/SearchAnalyticsDashboard';
-import AdvancedSearchDemo from '@/routes/AdvancedSearchDemo';
+import AdvancedSearchDemo from './AdvancedSearchDemo';
+import GlobalSearchDemo from './GlobalSearchDemo';
+import CustomerManagement from '@/pages/CustomerManagement';
+import ServiceManagement from '@/pages/ServiceManagement';
 
 const LoginPage = lazy(() => import('@/routes/Login'));
 
@@ -64,9 +66,7 @@ function DashboardFallback() {
 export default function App() {
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
-  const tenantId = useAuthStore((s) => s.tenantId);
   const clearAuth = useAuthStore((s) => s.clear);
-  const validateTenantAccess = useAuthStore((s) => s.validateTenantAccess);
   const hasInitialized = useRef(false);
 
   // Force clear auth only once on app start
@@ -81,36 +81,9 @@ export default function App() {
     // Only clear if there's no valid authentication
     if (!token || !user) {
       console.log('No valid auth found, clearing all data');
-      
-      // Comprehensive auth clearing
       clearAuth();
-      
-      // Clear all localStorage
-      try {
-        localStorage.clear();
-        console.log('✅ localStorage cleared');
-      } catch (e) {
-        console.log('⚠️ localStorage clear failed:', e);
-      }
-      
-      // Clear all sessionStorage
-      try {
-        sessionStorage.clear();
-        console.log('✅ sessionStorage cleared');
-      } catch (e) {
-        console.log('⚠️ sessionStorage clear failed:', e);
-      }
-      
-      // Clear Supabase-specific storage
-      try {
-        const supabaseKeys = Object.keys(localStorage).filter(key => 
-          key.includes('supabase') || key.includes('sb-')
-        );
-        supabaseKeys.forEach(key => localStorage.removeItem(key));
-        console.log('✅ Supabase storage cleared');
-      } catch (e) {
-        console.log('⚠️ Supabase storage clear failed:', e);
-      }
+      localStorage.clear(); // Clear all localStorage
+      sessionStorage.clear(); // Clear all sessionStorage
       
       // Force redirect to login
       setTimeout(() => {
@@ -125,19 +98,6 @@ export default function App() {
 
   // Check if user is properly authenticated
   const isAuthenticated = token && user;
-  
-  // Validate tenant access on every render if authenticated
-  useEffect(() => {
-    if (isAuthenticated && user && tenantId) {
-      validateTenantAccess().then((isValid) => {
-        if (!isValid) {
-          console.error('Tenant access validation failed, logging out user');
-          clearAuth();
-          window.location.href = '/login';
-        }
-      });
-    }
-  }, [isAuthenticated, user, tenantId, validateTenantAccess, clearAuth]);
   
   console.log('App render - token:', token, 'user:', user, 'isAuthenticated:', isAuthenticated);
 
@@ -305,6 +265,30 @@ export default function App() {
               }
             />
             <Route
+              path="/customer-management"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <CustomerManagement />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/service-management"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <ServiceManagement />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/customer-list-test"
               element={
                 <PrivateRoute>
@@ -340,30 +324,6 @@ export default function App() {
                 </PrivateRoute>
               }
             />
-                    <Route
-          path="/search-analytics"
-          element={
-            <PrivateRoute>
-              <V4Layout>
-                <Suspense fallback={<DashboardFallback />}>
-                  <SearchAnalyticsDashboard />
-                </Suspense>
-              </V4Layout>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/advanced-search-demo"
-          element={
-            <PrivateRoute>
-              <V4Layout>
-                <Suspense fallback={<DashboardFallback />}>
-                  <AdvancedSearchDemo />
-                </Suspense>
-              </V4Layout>
-            </PrivateRoute>
-          }
-        />
             <Route
               path="/uploads"
               element={
@@ -455,6 +415,42 @@ export default function App() {
                   <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <ChartsTestPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/advanced-search-demo"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <AdvancedSearchDemo />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/global-search-demo"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <GlobalSearchDemo />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/search-analytics"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <SearchAnalyticsDashboard />
                     </Suspense>
                   </V4Layout>
                 </PrivateRoute>

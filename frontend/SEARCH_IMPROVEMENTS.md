@@ -1,166 +1,48 @@
-# Search Functionality Improvements
+# Search Improvements: Fuzzy & Suggestions
 
-## Overview
-This document outlines the enhanced search functionality implemented to address the robustness issues identified in the customer search system.
+## Feature Flags
+- VITE_ENABLE_FUZZY: enable fuzzy search RPC usage
+- VITE_ENABLE_SUGGESTIONS: enable suggestion RPC usage
 
-## 🔧 Implemented Improvements
+## Backend RPCs
+- search_customers_fuzzy(uuid p_tenant_id, text p_query, double precision p_threshold, int p_limit)
+- get_search_suggestions(uuid p_tenant_id, text p_query, int p_limit)
 
-### 1. Phone Number Search Enhancement
+## Indexes (recommended)
+Run `frontend/scripts/fuzzy_trgm_indexes.sql` in Supabase to add trigram indexes:
+- name, email, address, city, state, zip_code (GIN, gin_trgm_ops)
 
-**Problem**: Search failed when only part of the phone number was typed (especially after area code).
+## Threshold Tuning
+- Start p_threshold = 0.30; evaluate false positives, adjust 0.25–0.35
+- Keep limit ≤ 50; order by relevance desc, name asc
 
-**Solution**:
-- **Normalized Storage**: Added `phone_digits` column to store digits-only version
-- **Partial Matching**: Search now matches digits anywhere in the phone number
-- **Format Flexibility**: Handles both formatted `(412) 555-1234` and digits-only `4125551234`
+### Pros/Cons of 0.30
+- Pros: balanced recall; catches common typos without flooding results; good default for small/medium datasets
+- Cons: can admit mild false positives on noisy address fields; on very short queries (2–3 chars) may feel permissive
 
-**Examples**:
-- `5551234` → matches `(412) 555-1234`
-- `412` → matches all 412 area code customers
-- `555` → matches any phone with 555
+### When to adjust
+- Lower to 0.25–0.29 if users report missed typo hits; small datasets where extra matches are cheap
+- Raise to 0.31–0.35 if you see loose matches or precision complaints; large datasets impacting p95 latency
 
-### 2. Address Search Tokenization
+### Guardrails
+- Require min query length ≥ 3 for fuzzy
+- Blend exact phone-digit matches to outrank fuzzy text
+- Cap results to 50 and monitor false-positive rate in analytics
 
-**Problem**: Exact string matching failed on partials like "321 oak".
+## Frontend
+- Flags read in `src/lib/config.ts` (window.appConfig in dev)
+- Services: `advanced-search-service.ts` uses RPCs when flags are true, with fallbacks
+- UI: `components/search/AdvancedSearchBar.tsx` has mode selector and suggestions dropdown
 
-**Solution**:
-- **Tokenization**: Split search terms on spaces and search each token individually
-- **Multi-field Search**: Each token must match at least one address field
-- **Case Insensitive**: Automatic handling of different case variations
+### Where to change the fuzzy threshold
+- Primary (recommended): in `frontend/src/hooks/useAdvancedSearch.ts`, the default option `fuzzyThreshold = 0.3`. Updating this changes what the frontend passes to the RPC.
+- Alternative (per-call): plumb a `fuzzyThreshold` prop into `AdvancedSearchBar` and pass through to `useAdvancedSearch` if you want UI-level control.
+- Backend default: `frontend/scripts/search_customers_fuzzy.sql` defines `p_threshold double precision DEFAULT 0.3`. Changing this updates the DB default used when the client doesn’t pass an override.
 
-**Examples**:
-- `321 oak` → matches "321 Oak Street" (both tokens found)
-- `oak street` → matches "321 Oak Street" (both tokens found)
-- `pittsburgh pa` → matches "Pittsburgh, PA" customers
+## Validation
+- Ensure tenant isolation in all RPCs (p_tenant_id filter)
+- Monitor p95 latency: suggestions < 100ms; fuzzy < 200ms (current dataset)
 
-### 3. Relevance Ranking
-
-**Problem**: All search matches were treated equally, leading to poor result ordering.
-
-**Solution**:
-- **Scoring System**: Implemented relevance scoring based on match type and field
-- **Priority Ordering**: Phone matches (100pts) > Name matches (80pts) > Address matches (60pts)
-- **Exact vs Partial**: Exact matches get bonus points over partial matches
-
-**Scoring Breakdown**:
-- Phone match: 100 points + 50 for exact
-- Name match: 80 points + 40 for exact
-- Address match: 60 points
-- Email match: 40 points + 20 for exact
-- Status/Type match: 30 points each
-
-### 4. Performance Optimizations
-
-**Database Improvements**:
-- **Phone Normalization**: Pre-stored digits-only phone numbers
-- **Indexes**: Added indexes on commonly searched fields
-- **Composite Indexes**: Optimized for common search patterns
-- **Triggers**: Automatic phone normalization on insert/update
-
-**Query Optimizations**:
-- **Server-side Filtering**: Moved from client-side to server-side
-- **Efficient Queries**: Single database query handles all search logic
-- **Caching**: React Query caching for search results
-
-## 🧪 Testing Scenarios
-
-### Phone Number Tests
-- ✅ `(412) 555-1234` → exact match
-- ✅ `4125551234` → same customer found
-- ✅ `5551234` → partial match (after area code)
-- ✅ `412` → area code search
-
-### Address Tests
-- ✅ `321 Oak Street` → exact address
-- ✅ `321 oak` → partial address match
-- ✅ `oak` → street name search
-- ✅ `pittsburgh` → city search
-
-### Name Tests
-- ✅ `John Smith` → exact name
-- ✅ `john` → partial name
-- ✅ `smith` → last name only
-
-### Mixed Tests
-- ✅ `412 john` → phone + name combination
-- ✅ `oak active` → address + status combination
-
-## 📊 Performance Metrics
-
-### Before Improvements
-- Phone partial matches: ❌ Failed
-- Address partial matches: ❌ Failed
-- Result ranking: ❌ Poor
-- Search speed: ⚠️ Slow (client-side)
-
-### After Improvements
-- Phone partial matches: ✅ Working
-- Address partial matches: ✅ Working
-- Result ranking: ✅ Excellent
-- Search speed: ✅ Fast (server-side)
-
-## 🚀 Usage
-
-### Client-Side Search
-```typescript
-import { SearchUtils } from '@/utils/searchUtils';
-
-const results = SearchUtils.searchCustomers(customers, searchTerm);
-// Returns ranked results with relevance scores
-```
-
-### Server-Side Search
-```typescript
-const query = SearchUtils.buildSearchQuery(searchTerm);
-// Returns optimized Supabase query string
-```
-
-### Database Migration
-Run the SQL script to add phone normalization:
-```sql
--- Execute: scripts/add-phone-normalization.sql
-```
-
-## 🔍 Search Examples
-
-| Search Term | Expected Result | Priority |
-|-------------|----------------|----------|
-| `5551234` | Customer with phone containing 555-1234 | High (Phone) |
-| `321 oak` | Customer at 321 Oak Street | High (Address) |
-| `john smith` | Customer named John Smith | High (Name) |
-| `active` | All active customers | Medium (Status) |
-| `residential` | All residential customers | Medium (Type) |
-
-## 📈 Future Enhancements
-
-### Planned Improvements
-1. **Fuzzy Matching**: Add Levenshtein distance for typos
-2. **Full-Text Search**: Implement PostgreSQL full-text search
-3. **Search Analytics**: Track popular search terms
-4. **Auto-complete**: Suggest search terms based on data
-5. **Search History**: Remember user search patterns
-
-### Performance Monitoring
-- Monitor search query performance
-- Track search result relevance
-- Measure user satisfaction with results
-- Optimize indexes based on usage patterns
-
-## 🛠️ Technical Implementation
-
-### Files Modified
-- `src/lib/enhanced-api.ts` - Enhanced search queries
-- `src/utils/searchUtils.ts` - New search utility class
-- `scripts/add-phone-normalization.sql` - Database improvements
-- `scripts/test-search-performance.js` - Performance testing
-
-### Database Changes
-- Added `phone_digits` column
-- Created normalization triggers
-- Added performance indexes
-- Implemented search optimization
-
-This implementation provides a robust, fast, and user-friendly search experience that handles the most common search scenarios in a pest control management system.
 
 
 

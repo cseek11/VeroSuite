@@ -142,3 +142,6 @@ async function testSearchLoggingIntegration() {
 
 // Run the test
 testSearchLoggingIntegration();
+
+
+

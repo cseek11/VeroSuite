@@ -196,3 +196,6 @@ export const useSearchLogging = (options: UseSearchLoggingOptions = {}) => {
 };
 
 export default useSearchLogging;
+
+
+
