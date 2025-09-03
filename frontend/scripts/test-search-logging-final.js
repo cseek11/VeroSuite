@@ -177,3 +177,6 @@ async function testSearchLoggingFinal() {
 
 // Run the test
 testSearchLoggingFinal();
+
+
+

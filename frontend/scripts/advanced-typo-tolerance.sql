@@ -456,3 +456,6 @@ BEGIN
   RAISE NOTICE '- Smart search with auto-correction';
   RAISE NOTICE '- Typo learning system';
 END $$;
+
+
+

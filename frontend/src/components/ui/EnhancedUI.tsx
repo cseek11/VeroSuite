@@ -34,11 +34,11 @@ interface ButtonProps {
   disabled?: boolean;
   onClick?: (event?: any) => void;
   className?: string;
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<any>;
 }
 
 interface IconButtonProps {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<any>;
   onClick?: () => void;
   variant?: 'default' | 'primary' | 'danger';
   size?: 'sm' | 'md' | 'lg';
@@ -79,7 +79,7 @@ interface CollapseProps {
 
 interface DropdownItem {
   label?: string;
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<any>;
   onClick?: () => void;
   divider?: boolean;
 }
@@ -96,7 +96,7 @@ interface InputProps {
   onChange?: (value: string) => void;
   placeholder?: string;
   type?: string;
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<any>;
   error?: string;
   className?: string;
   disabled?: boolean;
@@ -125,7 +125,7 @@ interface TabsProps {
   tabs?: Array<{
     id: string;
     label: string;
-    icon?: React.ComponentType<{ className?: string }>;
+    icon?: React.ComponentType<any>;
   }>;
   active?: string;
   onTabChange?: (id: string) => void;

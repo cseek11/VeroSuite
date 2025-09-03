@@ -108,3 +108,6 @@ async function testSearchLoggingSimple() {
 
 // Run the test
 testSearchLoggingSimple();
+
+
+

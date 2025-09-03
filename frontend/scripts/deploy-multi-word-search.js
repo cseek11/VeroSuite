@@ -96,3 +96,6 @@ async function deployMultiWordSearch() {
 
 // Run the deployment
 deployMultiWordSearch();
+
+
+

@@ -116,3 +116,6 @@ GRANT EXECUTE ON FUNCTION get_search_analytics TO authenticated;
 -- Add comments
 COMMENT ON FUNCTION log_search_query IS 'Logs a search query with results and timing information';
 COMMENT ON FUNCTION get_search_analytics IS 'Returns search analytics for a tenant over a specified time period';
+
+
+

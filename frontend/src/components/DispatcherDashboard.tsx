@@ -30,6 +30,14 @@ const routingApi = {
 
 export default function DispatcherDashboard() {
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [routes, setRoutes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [_assignJobId, setAssignJobId] = useState<string>('');
+  const [assignTechId, setAssignTechId] = useState<string>('');
+  const [assignStatus, setAssignStatus] = useState<string>('');
+  
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
@@ -41,20 +49,14 @@ export default function DispatcherDashboard() {
             headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` },
           });
           const logs = await res.json();
-          setAuditLogs(logs      } catch {
-     } catch (err) {
+          setAuditLogs(logs);
+        }
+      } catch (err) {
         // handle error
       }
     }
     fetchAuditLogs();
   }, [user.roles]);
-  const [jobs, setJobs] = useState<any[]>([]);
-  const [accounts, setAccounts] = useState<any[]>([]);
-  const [routes, setRoutes] = useState<any[]>([]);
-  const [loading, se  const [_assignJobId, setAssignJobId] = useState<string>('');
-bId] = useState<string>('');
-  const [assignTechId, setAssignTechId] = useState<string>('');
-  const [assignStatus, setAssignStatus] = useState<string>('');
 
   useEffect(() => {
     async function fetchData() {

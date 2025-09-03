@@ -15,7 +15,8 @@ import {
   ChevronDown,
   Lightbulb,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  ArrowRight
 } from 'lucide-react';
 import { Card, Button } from '@/components/ui/EnhancedUI';
 import type { SearchFilters } from '@/types/enhanced-types';
@@ -290,22 +291,32 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
       {showSuggestionsDropdown && suggestions.length > 0 && (
         <Card className="absolute top-full left-0 right-0 mt-1 z-40 max-h-60 overflow-y-auto bg-white border border-gray-200 shadow-lg backdrop-blur-sm">
           <div className="p-2">
-            <div className="text-xs font-medium text-gray-500 mb-2">Suggestions</div>
+            <div className="text-xs font-medium text-gray-500 mb-2 flex items-center justify-between">
+              <span>Smart Suggestions</span>
+              <span className="text-purple-600 font-medium">{suggestions.length} found</span>
+            </div>
             <div className="space-y-1">
               {suggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-gray-100 hover:border-gray-200 border border-transparent flex items-center space-x-2 transition-colors"
+                  className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-purple-50 hover:border-purple-200 border border-transparent flex items-center space-x-2 transition-colors"
                 >
                   <div className="flex-1">
-                    <div className="font-medium">{suggestion.text}</div>
-                    <div className="text-xs text-gray-500 capitalize">
-                      {suggestion.type} • {(suggestion.confidence * 100).toFixed(0)}% confidence
+                    <div className="font-medium text-gray-900">{suggestion.text}</div>
+                    <div className="text-xs text-gray-500 flex items-center space-x-2">
+                      <span className="capitalize">{suggestion.type}</span>
+                      <span>•</span>
+                      <span className="font-medium text-purple-600">
+                        {(suggestion.confidence * 100).toFixed(0)}% match
+                      </span>
                     </div>
                   </div>
                   {suggestion.type === 'correction' && (
                     <CheckCircle className="w-4 h-4 text-green-500" />
+                  )}
+                  {suggestion.type === 'completion' && (
+                    <ArrowRight className="w-4 h-4 text-purple-400" />
                   )}
                 </button>
               ))}

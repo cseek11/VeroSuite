@@ -70,3 +70,6 @@ debugSearch()
     console.error('❌ Debug failed:', err);
     process.exit(1);
   });
+
+
+

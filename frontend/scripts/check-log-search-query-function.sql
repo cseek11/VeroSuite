@@ -36,3 +36,6 @@ SELECT
 FROM information_schema.columns 
 WHERE table_name = 'search_logs' 
 ORDER BY ordinal_position;
+
+
+

@@ -395,3 +395,6 @@ export const optimizedSearch = new OptimizedSearchService();
 
 // Export types
 export type { SearchOptions, SearchPerformanceMetrics };
+
+
+

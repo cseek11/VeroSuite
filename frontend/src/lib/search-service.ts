@@ -3,20 +3,12 @@
 // ============================================================================
 // Provides advanced search functionality with logging and relevance ranking
 
-import { createClient } from '@supabase/supabase-js';
+import { config } from '@/lib/config';
+import supabase from '@/lib/supabase-client';
 import { useAuthStore } from '@/stores/auth';
 import type { SearchFilters, Account } from '@/types/enhanced-types';
 
-// Initialize Supabase client
-const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL;
-const supabaseAnonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables');
-  throw new Error('Missing Supabase environment variables');
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Use shared singleton Supabase client
 
 // ============================================================================
 // UTILITY FUNCTIONS
@@ -268,6 +260,13 @@ export const enhancedSearch = {
           
           // Apply simple ordering using proper Supabase syntax
           query = query.order('name', { ascending: true });
+
+          // Optional fuzzy matching phase (scaffold)
+          // When backend RPC is available, gate by feature flag and pass-through
+          if (config.features.enableFuzzy) {
+            // Placeholder: future RPC call like `search_customers_fuzzy`
+            // For now, keep existing behavior to avoid breaking changes
+          }
         }
       }
 

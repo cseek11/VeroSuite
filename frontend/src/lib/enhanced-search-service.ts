@@ -4,19 +4,10 @@
 // This service uses Postgres functions for weighted full-text search,
 // fuzzy matching, and vector search capabilities.
 
-import { createClient } from '@supabase/supabase-js';
+import supabase from '@/lib/supabase-client';
 import type { SearchFilters, Account } from '@/types/enhanced-types';
 
-// Initialize Supabase client
-const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL;
-const supabaseAnonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables');
-  throw new Error('Missing Supabase environment variables');
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Use shared singleton Supabase client
 
 // ============================================================================
 // TYPES

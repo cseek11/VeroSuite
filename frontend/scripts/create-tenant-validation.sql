@@ -87,3 +87,6 @@ $$;
 -- Test the functions
 -- SELECT validate_user_tenant_access('admin@veropestsolutions.com', '7193113e-ece2-4f7b-ae8c-176df4367e28'::uuid);
 -- SELECT get_user_tenant_id('admin@veropestsolutions.com');
+
+
+
