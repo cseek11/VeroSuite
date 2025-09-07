@@ -41,3 +41,5 @@ SELECT 'search_trends count:' as table_name, COUNT(*) as record_count FROM searc
 SELECT 'search_suggestions_analytics count:' as table_name, COUNT(*) as record_count FROM search_suggestions_analytics;
 
 
+
+

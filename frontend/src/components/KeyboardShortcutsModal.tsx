@@ -21,11 +21,29 @@ interface ShortcutGroup {
 
 const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ isOpen, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { getAllShortcuts } = useKeyboardNavigation();
+  const { getAllShortcuts } = useKeyboardNavigation({ enabled: false }); // Disable in modal
 
   // Close modal on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
+      // Don't trigger when typing in input fields (except in the modal's own search)
+      const target = e.target as HTMLElement;
+      const isInputField = target.tagName === 'INPUT' || 
+                          target.tagName === 'TEXTAREA' || 
+                          target.contentEditable === 'true' ||
+                          target.closest('[contenteditable="true"]') ||
+                          target.closest('input') ||
+                          target.closest('textarea') ||
+                          target.closest('[data-search-input]') ||
+                          target.hasAttribute('data-search-input');
+      
+      // Allow Escape in the modal's search input to close the modal
+      const isModalSearch = target.closest('[data-modal-search]');
+      
+      if (isInputField && !isModalSearch) {
+        return; // Don't trigger shortcuts when typing in input fields outside the modal
+      }
+
       if (e.key === 'Escape' && isOpen) {
         onClose();
       }
@@ -139,10 +157,13 @@ const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ isOpen,
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
+                id="shortcuts-search"
+                name="shortcuts-search"
                 type="text"
                 placeholder="Search shortcuts..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                data-modal-search="true"
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 autoFocus
               />

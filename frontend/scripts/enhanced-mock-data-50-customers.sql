@@ -553,3 +553,5 @@ WHERE a.tenant_id = '7193113e-ece2-4f7b-ae8c-176df4367e28'::uuid
 AND sa.tenant_id = '7193113e-ece2-4f7b-ae8c-176df4367e28'::uuid
 GROUP BY sa.area_name, sa.area_code
 ORDER BY sa.area_code;
+
+

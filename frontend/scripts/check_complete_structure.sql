@@ -30,3 +30,5 @@ SELECT '=== SEARCH LOGS SAMPLE ===' as info;
 SELECT * FROM search_logs LIMIT 5;
 
 
+
+

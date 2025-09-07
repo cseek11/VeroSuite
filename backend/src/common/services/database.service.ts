@@ -26,7 +26,29 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
 
   async query(sql: string, params: any[] = []) {
     // Use unsafe for dynamic SET LOCAL statements
-    return this.$queryRawUnsafe(sql, ...params);
+    // For $queryRawUnsafe, we need to replace placeholders with actual values
+    if (params.length === 0) {
+      return this.$queryRawUnsafe(sql);
+    }
+    
+    // Replace $1, $2, etc. with actual values
+    let processedSql = sql;
+    params.forEach((param, index) => {
+      const placeholder = `$${index + 1}`;
+      let value;
+      if (typeof param === 'string') {
+        // Escape single quotes in strings
+        value = `'${param.replace(/'/g, "''")}'`;
+      } else if (param === null || param === undefined) {
+        value = 'NULL';
+      } else {
+        value = String(param);
+      }
+      processedSql = processedSql.replace(placeholder, value);
+    });
+    
+    console.log('DatabaseService - Processed SQL:', processedSql);
+    return this.$queryRawUnsafe(processedSql);
   }
 
   async withTenant<T>(_tenantId: string, operation: () => Promise<T>): Promise<T> {

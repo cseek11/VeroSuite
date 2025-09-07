@@ -142,6 +142,9 @@ export const enhancedSearch = {
    * Search customers using enhanced Postgres function with weighted ranking
    */
   async searchCustomers(filters?: SearchFilters): Promise<Account[]> {
+    // TEMPORARILY RE-ENABLED - Backend API not fully implemented yet
+    console.log('🔍 Enhanced search service temporarily re-enabled for customer loading');
+    
     const startTime = performance.now();
     
     console.log('🔍 Enhanced search service called with filters:', filters);

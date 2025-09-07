@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
+import { secureApiClient } from '@/lib/secure-api-client';
 import { Customer } from '@/types/customer';
 import { ArrowLeftIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
@@ -210,9 +211,8 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
   // Create/Update customer mutation
   const createCustomerMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      // Ensure required fields have values
+      // Prepare account data for backend API
       const accountData = {
-        tenant_id: '7193113e-ece2-4f7b-ae8c-176df4367e28',
         name: data.name,
         account_type: data.account_type || 'commercial',
         status: data.status || 'active',
@@ -233,33 +233,11 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
         ar_balance: data.ar_balance || 0,
       };
 
-      console.log('Sending account data:', accountData);
+      console.log('Creating account via backend API:', accountData);
 
-      // Try a minimal insert first to test
-      const minimalData = {
-        tenant_id: '7193113e-ece2-4f7b-ae8c-176df4367e28',
-        name: data.name,
-        account_type: data.account_type || 'commercial',
-        status: data.status || 'active',
-        ar_balance: 0
-      };
-
-      console.log('Trying minimal insert with:', minimalData);
-
-      const { data: account, error: accountError } = await supabase
-        .from('accounts')
-        .insert(minimalData)
-        .select()
-        .single();
-
-      if (accountError) {
-        console.error('Account creation error:', accountError);
-        console.error('Error code:', accountError.code);
-        console.error('Error message:', accountError.message);
-        console.error('Error details:', accountError.details);
-        console.error('Error hint:', accountError.hint);
-        throw accountError;
-      }
+      // Use backend API to create account
+      const account = await secureApiClient.accounts.create(accountData);
+      console.log('Account created successfully:', account);
 
       // Create customer profile
       if (data.segment_id) {

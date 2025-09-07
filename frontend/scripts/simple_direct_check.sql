@@ -50,3 +50,5 @@ WHERE table_name = 'search_suggestions_analytics'
 ORDER BY ordinal_position;
 
 
+
+

@@ -7,15 +7,15 @@ import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!supabaseUrl || !supabasePublishableKey) {
   console.error('Missing Supabase environment variables');
   throw new Error('Missing Supabase environment variables');
 }
 
 // Create single, shared instance
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabasePublishableKey);
 
 // Export the client for use in other services
 export default supabase;

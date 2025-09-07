@@ -28,7 +28,6 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { enhancedApi } from '@/lib/enhanced-api';
 import { Account } from '@/types/enhanced-types';
 import CustomerPagePopup from './CustomerPagePopup';
 

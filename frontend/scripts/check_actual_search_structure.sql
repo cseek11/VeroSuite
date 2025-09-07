@@ -74,3 +74,5 @@ WHERE table_name = 'search_user_behavior'
 ORDER BY ordinal_position;
 
 
+
+

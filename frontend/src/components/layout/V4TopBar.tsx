@@ -75,9 +75,29 @@ export default function V4TopBar({
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Only trigger if not typing in an input
-      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
-        return;
+      // Don't trigger when typing in input fields
+      const target = event.target as HTMLElement;
+      const isInputField = target.tagName === 'INPUT' || 
+                          target.tagName === 'TEXTAREA' || 
+                          target.contentEditable === 'true' ||
+                          target.closest('[contenteditable="true"]') ||
+                          target.closest('input') ||
+                          target.closest('textarea') ||
+                          target.closest('[data-search-input]') ||
+                          target.hasAttribute('data-search-input');
+      
+      // Debug logging for V4TopBar
+      console.log('🔝 V4TopBar keyDown:', {
+        key: event.key,
+        target: target.tagName,
+        isInputField,
+        hasDataSearchInput: target.hasAttribute('data-search-input'),
+        id: target.id
+      });
+      
+      if (isInputField) {
+        console.log('🚫 V4TopBar BLOCKED for input field');
+        return; // Don't trigger shortcuts when typing in input fields
       }
 
       const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
@@ -196,6 +216,8 @@ export default function V4TopBar({
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
           <input 
+            id="topbar-search"
+            name="topbar-search"
             className="w-full pl-8 pr-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
             placeholder="Search..." 
           />

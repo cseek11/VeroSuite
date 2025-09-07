@@ -59,3 +59,5 @@ SELECT 'search_suggestions_analytics sample:' as info;
 SELECT * FROM search_suggestions_analytics LIMIT 1;
 
 
+
+

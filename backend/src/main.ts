@@ -23,9 +23,12 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   app.enableCors({
-    origin: (process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000']),
+    origin: (process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:5173']),
     credentials: true,
   });
+
+  // Set API prefix
+  app.setGlobalPrefix('api');
 
   await app.listen(process.env.PORT || 3001);
 }

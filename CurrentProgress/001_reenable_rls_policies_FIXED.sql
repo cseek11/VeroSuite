@@ -130,3 +130,5 @@ SELECT
         THEN '✅ Tenant context set'
         ELSE '❌ No tenant context - access should be blocked'
     END as status;
+
+

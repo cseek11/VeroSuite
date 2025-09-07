@@ -404,3 +404,5 @@ export default function GlobalSearchDemo() {
     </div>
   );
 }
+
+

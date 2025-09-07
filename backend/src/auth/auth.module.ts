@@ -4,7 +4,6 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { AuthController } from './auth.controller';
-import { UserModule } from '../user/user.module';
 
 // Validate JWT secret is provided
 if (!process.env.JWT_SECRET) {
@@ -13,7 +12,6 @@ if (!process.env.JWT_SECRET) {
 
 @Module({
   imports: [
-    UserModule,
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,

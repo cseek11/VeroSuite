@@ -1466,6 +1466,31 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger when typing in input fields
+      const target = e.target as HTMLElement;
+      const isInputField = target.tagName === 'INPUT' || 
+                          target.tagName === 'TEXTAREA' || 
+                          target.contentEditable === 'true' ||
+                          target.closest('[contenteditable="true"]') ||
+                          target.closest('input') ||
+                          target.closest('textarea') ||
+                          target.closest('[data-search-input]') ||
+                          target.hasAttribute('data-search-input');
+      
+      // Debug logging for VeroCards
+      console.log('🎯 VeroCards keyDown:', {
+        key: e.key,
+        target: target.tagName,
+        isInputField,
+        hasDataSearchInput: target.hasAttribute('data-search-input'),
+        id: target.id
+      });
+      
+      if (isInputField) {
+        console.log('🚫 VeroCards BLOCKED for input field');
+        return; // Don't trigger shortcuts when typing in input fields
+      }
+
       // Undo/Redo
       if (e.ctrlKey || e.metaKey) {
         if (e.key === 'z' && !e.shiftKey) {
@@ -1594,8 +1619,8 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
         }
       }
 
-      // Space bar scrolling
-      if (e.key === ' ') {
+      // Space bar scrolling (only when not in input fields)
+      if (e.key === ' ' && !isInputField) {
         e.preventDefault();
         const scrollAmount = e.shiftKey ? -300 : 300; // Shift+Space scrolls up, Space scrolls down
         window.scrollBy({

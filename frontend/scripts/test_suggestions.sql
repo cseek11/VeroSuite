@@ -42,3 +42,5 @@ WHERE table_name = 'popular_searches'
 AND column_name IN ('query', 'tenant_id');
 
 
+
+
