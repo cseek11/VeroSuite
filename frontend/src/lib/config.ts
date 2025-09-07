@@ -1,7 +1,7 @@
 interface Config {
   supabase: {
     url: string;
-    anonKey: string;
+    publishableKey: string;
   };
   app: {
     name: string;
@@ -24,11 +24,11 @@ interface Config {
 
 function validateConfig(): Config {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!supabaseUrl || !supabasePublishableKey) {
     throw new Error(
-      'Missing required environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY'
+      'Missing required environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY'
     );
   }
 
@@ -42,7 +42,7 @@ function validateConfig(): Config {
   return {
     supabase: {
       url: supabaseUrl,
-      anonKey: supabaseAnonKey,
+      publishableKey: supabasePublishableKey,
     },
     app: {
       name: 'VeroPest Suite',

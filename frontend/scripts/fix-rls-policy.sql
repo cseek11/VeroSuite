@@ -22,3 +22,5 @@ COMMENT ON POLICY "Allow search log updates" ON search_logs IS 'Allow authentica
 
 
 
+
+

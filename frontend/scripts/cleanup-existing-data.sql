@@ -56,3 +56,5 @@ SELECT 'CLEANUP VERIFICATION' as info, 'search_logs' as table_name, COUNT(*) as 
 -- After running this cleanup script successfully:
 -- 1. Run add-missing-columns.sql (if you haven't already)
 -- 2. Run mock-customer-data-proper.sql to populate fresh data
+
+

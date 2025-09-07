@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { enhancedSearch } from '@/lib/enhanced-search-service';
 import { useUserPreferences } from '@/stores/userPreferences';
 import { useDensityMode } from '@/hooks/useDensityMode';
 import { useSearchLogging } from '@/hooks/useSearchLogging';
@@ -66,11 +65,7 @@ export const CustomerList: React.FC<CustomerListProps> = ({
         });
       }
 
-      const results = await enhancedSearch.searchCustomers({
-        search: searchTerm,
-        status: statusFilter !== 'all' ? statusFilter : undefined,
-        segmentId: typeFilter !== 'all' ? typeFilter : undefined
-      });
+      const results = await secureApiClient.accounts.getAll();
 
       // Complete logging the search
       if (searchTerm.trim()) {
@@ -265,6 +260,8 @@ export const CustomerList: React.FC<CustomerListProps> = ({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
+                id="customer-search"
+                name="customer-search"
                 type="text"
                 placeholder="Search customers..."
                 value={searchTerm}

@@ -233,11 +233,35 @@ export const useKeyboardNavigation = (options: UseKeyboardNavigationOptions = {}
 
     // Don't trigger shortcuts when typing in input fields
     const target = event.target as HTMLElement;
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') {
-      // Allow some shortcuts even in input fields
-      if (event.key === 'Escape' || (event.ctrlKey && event.key === 'f')) {
-        // Continue with these shortcuts
+    const isInputField = target.tagName === 'INPUT' || 
+                        target.tagName === 'TEXTAREA' || 
+                        target.contentEditable === 'true' ||
+                        target.closest('[contenteditable="true"]') ||
+                        target.closest('input') ||
+                        target.closest('textarea') ||
+                        target.closest('[data-search-input]') ||
+                        target.hasAttribute('data-search-input');
+    
+    // Debug logging for all key events
+    console.log('⌨️ Global keyDown:', {
+      key: event.key,
+      target: target.tagName,
+      isInputField,
+      hasDataSearchInput: target.hasAttribute('data-search-input'),
+      id: target.id,
+      name: target.getAttribute('name')
+    });
+    
+    if (isInputField) {
+      // Only allow specific shortcuts in input fields
+      if (event.key === 'Escape' || 
+          (event.ctrlKey && (event.key === 'f' || event.key === 'r')) ||
+          (event.ctrlKey && event.shiftKey && event.key === 'n')) {
+        // Continue with these specific shortcuts
+        console.log('✅ Global keyboard navigation ALLOWED specific shortcut in input field:', event.key);
       } else {
+        // Block all other shortcuts when typing in input fields
+        console.log('🚫 Global keyboard navigation BLOCKED for input field:', event.key);
         return;
       }
     }
@@ -264,8 +288,12 @@ export const useKeyboardNavigation = (options: UseKeyboardNavigationOptions = {}
 
   // Initialize keyboard navigation
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      console.log('🚫 Keyboard navigation DISABLED');
+      return;
+    }
 
+    console.log('✅ Keyboard navigation ENABLED');
     document.addEventListener('keydown', handleKeyDown);
     
     // Update focusable elements when DOM changes

@@ -52,3 +52,5 @@ SELECT 'search_trends' as table_name, * FROM search_trends LIMIT 3;
 SELECT 'search_suggestions_analytics' as table_name, * FROM search_suggestions_analytics LIMIT 3;
 
 
+
+

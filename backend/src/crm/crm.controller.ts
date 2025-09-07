@@ -30,8 +30,41 @@ export class CrmController {
 
   @Get('accounts')
   @ApiOperation({ summary: 'Get all accounts' })
-  async getAccounts() {
-    return this.crmService.getAccounts();
+  async getAccounts(@Request() req: any) {
+    console.log('CRM Controller - Request user:', req.user);
+    console.log('CRM Controller - Tenant ID:', req.user?.tenantId);
+    return this.crmService.getAccounts(req.user?.tenantId);
+  }
+
+  @Post('accounts')
+  @ApiOperation({ summary: 'Create a new account' })
+  @ApiResponse({ status: 201, description: 'Account created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  async createAccount(@Body() createAccountDto: any, @Request() req: any) {
+    console.log('CRM Controller - Creating account for tenant:', req.user?.tenantId);
+    console.log('CRM Controller - Account data:', createAccountDto);
+    return this.crmService.createAccount(createAccountDto, req.user?.tenantId);
+  }
+
+  @Get('test')
+  @ApiOperation({ summary: 'Test endpoint' })
+  async test() {
+    console.log('CRM Controller - Test endpoint called');
+    return { message: 'CRM Controller is working', timestamp: new Date().toISOString() };
+  }
+
+  @Get('test-supabase')
+  @ApiOperation({ summary: 'Test Supabase connection' })
+  async testSupabase() {
+    console.log('CRM Controller - Test Supabase endpoint called');
+    try {
+      const result = await this.crmService.testSupabaseConnection();
+      return { message: 'Supabase connection test successful', result };
+    } catch (error) {
+      console.error('Supabase connection test failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return { message: 'Supabase connection test failed', error: errorMessage };
+    }
   }
 
   // Customer Notes Endpoints

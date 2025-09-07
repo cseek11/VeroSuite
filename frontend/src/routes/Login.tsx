@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { authApi } from '@/lib/enhanced-api';
+import { secureApiClient } from '@/lib/secure-api-client';
+import { authService } from '@/lib/auth-service';
 import { useAuthStore } from '@/stores/auth';
 import { loginSchema, type LoginFormData } from '@/lib/validation';
 import { Eye, EyeOff, Mail, Lock, Building, Loader2 } from 'lucide-react';
@@ -37,11 +38,11 @@ export default function Login() {
     setLoading(true);
     setError(null);
     try {
-      const res = await authApi.signIn(data.email, data.password);
+      const res = await authService.login(data.email, data.password);
       console.log('Login successful:', res);
       
-      // Extract the correct fields from Supabase response
-      const token = res.session?.access_token;
+      // Extract the correct fields from backend response
+      const token = res.token;
       const user = res.user;
       
       if (!token || !user) {
@@ -95,6 +96,8 @@ export default function Login() {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300 h-4 w-4" />
                 <input
+                  id="email"
+                  name="email"
                   type="email"
                   className="login-gradient-input pl-10 w-full"
                   placeholder="Enter your email"
@@ -114,6 +117,8 @@ export default function Login() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300 h-4 w-4" />
                 <input
+                  id="password"
+                  name="password"
                   type={showPassword ? 'text' : 'password'}
                   className="login-gradient-input pl-10 pr-10 w-full"
                   placeholder="Enter your password"

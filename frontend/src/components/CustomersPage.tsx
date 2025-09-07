@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './CompactLayout.css';
@@ -24,22 +24,27 @@ import {
   X
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { enhancedApi } from '@/lib/enhanced-api';
+import { secureApiClient } from '@/lib/secure-api-client';
 import { Account, CustomerProfile } from '@/types/enhanced-types';
 
 export default function CustomersPage() {
+  console.log('🔄 CustomersPage component rendering');
+  
   const [selectedCustomer, setSelectedCustomer] = useState<Account | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'commercial' | 'residential'>('all');
   const [selectedCustomers, setSelectedCustomers] = useState<Set<string>>(new Set());
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const queryClient = useQueryClient();
 
-  // Fetch customers from enhanced API
+  // Fetch customers from backend API
   const { data: customers = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['enhanced-customers'],
-    queryFn: () => enhancedApi.customers.getAll(),
+    queryKey: ['secure-customers'],
+    queryFn: async () => {
+      return secureApiClient.accounts.getAll();
+    },
   });
 
   // Debug logging
@@ -63,11 +68,26 @@ export default function CustomersPage() {
     setShowHistory(true);
   };
 
-  const filteredCustomers = customers.filter((customer: Account) => {
-    const matchesSearch = customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         customer.email?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === 'all' || customer.account_type === filterType;
-    return matchesSearch && matchesFilter;
+  const filteredCustomers = useMemo(() => {
+    console.log('🔄 Filtering customers - searchTerm:', searchTerm, 'filterType:', filterType);
+    return customers.filter((customer: Account) => {
+      const matchesSearch = customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           customer.email?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesFilter = filterType === 'all' || customer.account_type === filterType;
+      return matchesSearch && matchesFilter;
+    });
+  }, [customers, searchTerm, filterType]);
+
+  // Maintain focus on search input if it gets lost due to re-renders
+  useEffect(() => {
+    if (searchInputRef.current && document.activeElement !== searchInputRef.current) {
+      // Check if the search input was previously focused
+      const wasSearchFocused = document.activeElement?.hasAttribute('data-search-input');
+      if (wasSearchFocused) {
+        console.log('🔄 Restoring focus to search input');
+        searchInputRef.current.focus();
+      }
+    }
   });
 
   return (
@@ -107,10 +127,23 @@ export default function CustomersPage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
+                ref={searchInputRef}
+                key="customer-search-input"
+                id="customer-search-input"
+                name="customer-search"
                 type="text"
                 placeholder="Search customers..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => {
+                              console.log('🔍 Search input onChange:', e.target.value);
+                              setSearchTerm(e.target.value);
+                            }}
+                            onFocus={() => console.log('🎯 Search input FOCUSED')}
+                            onBlur={() => console.log('🚫 Search input BLURRED')}
+                            onKeyDown={(e) => {
+                              console.log('⌨️ Search input keyDown:', e.key, 'target:', e.target);
+                            }}
+                data-search-input="true"
                 className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
               />
             </div>
