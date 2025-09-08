@@ -54,3 +54,5 @@ SELECT 'search_suggestions_analytics' as table_name, * FROM search_suggestions_a
 
 
 
+
+

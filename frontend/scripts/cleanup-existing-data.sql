@@ -58,3 +58,5 @@ SELECT 'CLEANUP VERIFICATION' as info, 'search_logs' as table_name, COUNT(*) as 
 -- 2. Run mock-customer-data-proper.sql to populate fresh data
 
 
+
+

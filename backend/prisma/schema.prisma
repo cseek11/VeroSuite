@@ -7,365 +7,314 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================================================
-// CORE SYSTEM MODELS
-// ============================================================================
-
 model Tenant {
-  id                String          @id @default(uuid()) @db.Uuid
-  name              String          @db.VarChar(255)
-  domain            String?         @unique @db.VarChar(100)
-  status            String          @default("active") @db.VarChar(20)
-  subscription_tier String          @default("basic") @db.VarChar(20)
-  created_at        DateTime        @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime        @updatedAt @db.Timestamptz(6)
-  
-  // Core Relations
-  users             User[]
-  accounts          Account[]
-  workOrders        WorkOrder[]
-  jobs              Job[]
-  
-  // Enhanced Customer Management
-  customerSegments  CustomerSegment[]
-  customerProfiles  CustomerProfile[]
-  customerContacts  CustomerContact[]
-  
-  // Service Management
-  serviceCategories ServiceCategory[]
-  serviceTypes      ServiceType[]
-  serviceAreas      ServiceArea[]
-  
-  // Financial Management
-  pricingTiers      PricingTier[]
-  servicePricing    ServicePricing[]
-  paymentMethods    PaymentMethod[]
-  
-  // Analytics & Reporting
-  customerAnalytics CustomerAnalytics[]
-  serviceAnalytics  ServiceAnalytics[]
-  
-  // Communication & Marketing
-  communicationTemplates CommunicationTemplate[]
+  id                      String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                    String                   @db.VarChar(255)
+  domain                  String?                  @unique @db.VarChar(100)
+  status                  String                   @default("active") @db.VarChar(20)
+  subscription_tier       String                   @default("basic") @db.VarChar(20)
+  created_at              DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                 @default(now()) @updatedAt @db.Timestamptz(6)
+  Invoice                 Invoice[]
+  Payment                 Payment[]
+  ServiceAgreement        ServiceAgreement[]
+  accounts                Account[]
+  auditLogs               AuditLog[]
   automatedCommunications AutomatedCommunication[]
-  
-  // Compliance & Documentation
-  complianceRequirements ComplianceRequirement[]
-  complianceRecords ComplianceRecord[]
-  
-  // Service Management
-  technicianSkills TechnicianSkill[]
-  
-  // System Configuration
-  tenantBranding    TenantBranding?
-  auditLogs         AuditLog[]
+  communicationTemplates  CommunicationTemplate[]
+  complianceRecords       ComplianceRecord[]
+  complianceRequirements  ComplianceRequirement[]
+  customerAnalytics       CustomerAnalytics[]
+  customerContacts        CustomerContact[]
+  customerProfiles        CustomerProfile[]
+  customerSegments        CustomerSegment[]
+  jobs                    Job[]
+  paymentMethods          PaymentMethod[]
+  pricingTiers            PricingTier[]
+  serviceAnalytics        ServiceAnalytics[]
+  serviceAreas            ServiceArea[]
+  serviceCategories       ServiceCategory[]
+  servicePricing          ServicePricing[]
+  serviceTypes            ServiceType[]
+  technicianSkills        TechnicianSkill[]
+  tenantBranding          TenantBranding?
+  users                   User[]
+  workOrders              WorkOrder[]
 
   @@map("tenants")
 }
 
 model User {
-  id            String   @id @default(uuid()) @db.Uuid
-  tenant_id     String   @db.Uuid
-  email         String   @unique @db.VarChar(255)
-  password_hash String   @db.VarChar(255)
-  first_name    String   @db.VarChar(100)
-  last_name     String   @db.VarChar(100)
-  phone         String?  @db.VarChar(20)
-  roles         String[] @default([])
-  status        String   @default("active") @db.VarChar(20)
-  created_at    DateTime @default(now()) @db.Timestamptz(6)
-  updated_at    DateTime @updatedAt @db.Timestamptz(6)
-  
-  // Relations
-  tenant        Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  assignedWorkOrders WorkOrder[] @relation("WorkOrderAssignedTo")
-  technicianSkills TechnicianSkill[]
-  serviceAnalytics ServiceAnalytics[]
-  complianceRecords ComplianceRecord[]
+  id                                                  String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id                                           String             @db.Uuid
+  email                                               String             @unique @db.VarChar(255)
+  password_hash                                       String             @db.VarChar(255)
+  first_name                                          String             @db.VarChar(100)
+  last_name                                           String             @db.VarChar(100)
+  phone                                               String?            @db.VarChar(20)
+  roles                                               String[]           @default([])
+  status                                              String             @default("active") @db.VarChar(20)
+  created_at                                          DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at                                          DateTime           @default(now()) @updatedAt @db.Timestamptz(6)
+  Invoice_Invoice_created_byTousers                   Invoice[]          @relation("Invoice_created_byTousers")
+  Invoice_Invoice_updated_byTousers                   Invoice[]          @relation("Invoice_updated_byTousers")
+  Payment                                             Payment[]
+  ServiceAgreement_ServiceAgreement_created_byTousers ServiceAgreement[] @relation("ServiceAgreement_created_byTousers")
+  ServiceAgreement_ServiceAgreement_updated_byTousers ServiceAgreement[] @relation("ServiceAgreement_updated_byTousers")
+  complianceRecords                                   ComplianceRecord[]
+  serviceAnalytics                                    ServiceAnalytics[]
+  technicianSkills                                    TechnicianSkill[]
+  tenant                                              Tenant             @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  assignedWorkOrders                                  WorkOrder[]        @relation("WorkOrderAssignedTo")
 
   @@map("users")
 }
 
-// ============================================================================
-// CUSTOMER SEGMENTATION & SERVICE TYPES
-// ============================================================================
-
 model CustomerSegment {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  segment_name          String   @db.VarChar(100)
-  segment_code          String   @db.VarChar(20)
-  description           String?
-  default_service_types Json?
-  pricing_tier          String   @default("standard") @db.VarChar(20)
+  id                      String            @id @default(uuid()) @db.Uuid
+  tenant_id               String            @db.Uuid
+  segment_name            String            @db.VarChar(100)
+  segment_code            String            @db.VarChar(20)
+  description             String?
+  default_service_types   Json?
+  pricing_tier            String            @default("standard") @db.VarChar(20)
   compliance_requirements Json?
-  created_at            DateTime @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime @updatedAt @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  customerProfiles      CustomerProfile[]
-  
+  created_at              DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime          @updatedAt @db.Timestamptz(6)
+  customerProfiles        CustomerProfile[]
+  tenant                  Tenant            @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
   @@unique([tenant_id, segment_code])
+  @@unique([tenant_id, segment_code], map: "customer_segments_tenant_code_unique")
   @@map("customer_segments")
 }
 
 model ServiceCategory {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  category_name         String   @db.VarChar(100)
-  category_code         String   @db.VarChar(20)
-  description           String?
-  applicable_segments   Json?
-  estimated_duration    Int      @default(60)
-  base_price            Decimal? @db.Decimal(10, 2)
-  created_at            DateTime @default(now()) @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  serviceTypes          ServiceType[]
-  
+  id                  String        @id @default(uuid()) @db.Uuid
+  tenant_id           String        @db.Uuid
+  category_name       String        @db.VarChar(100)
+  category_code       String        @db.VarChar(20)
+  description         String?
+  applicable_segments Json?
+  estimated_duration  Int           @default(60)
+  base_price          Decimal?      @db.Decimal(10, 2)
+  created_at          DateTime      @default(now()) @db.Timestamptz(6)
+  is_active           Boolean?      @default(true)
+  tenant              Tenant        @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  serviceTypes        ServiceType[]
+
   @@unique([tenant_id, category_code])
+  @@unique([tenant_id, category_code], map: "service_categories_tenant_code_unique")
   @@map("service_categories")
 }
 
 model ServiceType {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  category_id           String?  @db.Uuid
-  service_name          String   @db.VarChar(100)
-  service_code          String   @db.VarChar(20)
-  description           String?
-  required_equipment    Json?
-  required_chemicals    Json?
-  safety_requirements   Json?
+  id                      String             @id @default(uuid()) @db.Uuid
+  tenant_id               String             @db.Uuid
+  category_id             String?            @db.Uuid
+  service_name            String             @db.VarChar(100)
+  service_code            String             @db.VarChar(20)
+  description             String?
+  required_equipment      Json?
+  required_chemicals      Json?
+  safety_requirements     Json?
   compliance_requirements Json?
-  estimated_duration    Int      @default(60)
-  base_price            Decimal? @db.Decimal(10, 2)
-  is_active             Boolean  @default(true)
-  created_at            DateTime @default(now()) @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  category              ServiceCategory? @relation(fields: [category_id], references: [id])
-  technicianSkills      TechnicianSkill[]
-  servicePricing        ServicePricing[]
-  serviceAnalytics      ServiceAnalytics[]
-  
+  estimated_duration      Int                @default(60)
+  base_price              Decimal?           @db.Decimal(10, 2)
+  is_active               Boolean            @default(true)
+  created_at              DateTime           @default(now()) @db.Timestamptz(6)
+  InvoiceItem             InvoiceItem[]
+  ServiceAgreement        ServiceAgreement[]
+  serviceAnalytics        ServiceAnalytics[]
+  servicePricing          ServicePricing[]
+  category                ServiceCategory?   @relation(fields: [category_id], references: [id])
+  tenant                  Tenant             @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  technicianSkills        TechnicianSkill[]
+
   @@unique([tenant_id, service_code])
+  @@unique([tenant_id, service_code], map: "service_types_tenant_code_unique")
   @@map("service_types")
 }
 
-// ============================================================================
-// ENHANCED CUSTOMER MANAGEMENT
-// ============================================================================
-
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model Account {
-  id                       String                  @id @default(uuid()) @db.Uuid
-  tenant_id                String                  @db.Uuid
-  name                     String                  @db.VarChar(255)
-  account_type             String                  @default("commercial") @db.VarChar(20)
-  status                   String                  @default("active") @db.VarChar(20)
-  phone                    String?                 @db.VarChar(20)
-  email                    String?                 @db.VarChar(255)
+  id                       String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id                String                   @db.Uuid
+  name                     String
+  account_type             String                   @default("commercial")
+  status                   String                   @default("active")
+  phone                    String?
+  email                    String?
   address                  String?
-  city                     String?                 @db.VarChar(100)
-  state                    String?                 @db.VarChar(20)
-  zip_code                 String?                 @db.VarChar(20)
+  city                     String?
+  state                    String?
+  zip_code                 String?
   billing_address          Json?
-  payment_method           String?                 @db.VarChar(50)
-  billing_cycle            String?                 @db.VarChar(20)
-  property_type            String?                 @db.VarChar(50)
-  property_size            String?                 @db.VarChar(50)
+  payment_method           String?                  @db.VarChar(50)
+  billing_cycle            String?                  @db.VarChar(20)
+  property_type            String?                  @db.VarChar(50)
+  property_size            String?                  @db.VarChar(50)
   access_instructions      String?
-  emergency_contact        String?                 @db.VarChar(100)
-  preferred_contact_method String?                 @db.VarChar(20)
-  ar_balance               Decimal                 @default(0) @db.Decimal(10, 2)
-  created_at               DateTime                @default(now()) @db.Timestamptz(6)
-  updated_at               DateTime                @updatedAt @db.Timestamptz(6)
-  
-  // Core Relations
-  tenant                   Tenant                  @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  locations                Location[]
-  workOrders               WorkOrder[]
-  jobs                     Job[]
-  
-  // Enhanced Customer Management
-  customerProfile          CustomerProfile?
-  customerContacts         CustomerContact[]
-  
-  // Financial Management
-  paymentMethods           PaymentMethod[]
-  
-  // Analytics & Communication
-  customerAnalytics        CustomerAnalytics[]
+  emergency_contact        String?                  @db.VarChar(100)
+  preferred_contact_method String?                  @db.VarChar(20)
+  ar_balance               Decimal                  @default(0) @db.Decimal(10, 2)
+  created_at               DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime                 @default(now()) @updatedAt @db.Timestamptz(6)
+  phone_digits             String?
+  embedding                Unsupported("vector")?
+  search_vector            Unsupported("tsvector")?
+  name_trigram             String?
+  address_trigram          String?
+  Invoice                  Invoice[]
+  ServiceAgreement         ServiceAgreement[]
+  tenant                   Tenant                   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
   automatedCommunications  AutomatedCommunication[]
-  
-  // Compliance
-  complianceRecords        ComplianceRecord[]
-  
-  // Legacy Relations (for backward compatibility)
   businessAnalytics        BusinessAnalytics[]
   chemicalUsage            ChemicalUsageLog[]
   communicationLogs        CommunicationLog[]
+  complianceRecords        ComplianceRecord[]
   complianceTracking       ComplianceTracking[]
   contracts                ContractsSubscription[]
+  customerAnalytics        CustomerAnalytics[]
+  customerContacts         CustomerContact[]
   customerDocuments        CustomerDocument[]
   customerNotes            CustomerNote[]
   customerPhotos           CustomerPhoto[]
+  customerProfile          CustomerProfile?
+  locations                Location[]
+  paymentMethods           PaymentMethod[]
   pestActivity             PestActivityTracking[]
   serviceHistory           ServiceHistory[]
+  workOrders               WorkOrder[]
+  jobs                     Job[]
 
   @@unique([tenant_id, id])
   @@map("accounts")
 }
 
 model CustomerProfile {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  account_id            String   @db.Uuid
-  segment_id            String?  @db.Uuid
-  
-  // Business Information
-  business_name         String?  @db.VarChar(255)
-  business_type         String?  @db.VarChar(100)
-  tax_id                String?  @db.VarChar(50)
-  credit_limit          Decimal? @db.Decimal(10, 2)
+  id                    String           @id @default(uuid()) @db.Uuid
+  tenant_id             String           @db.Uuid
+  account_id            String           @db.Uuid
+  segment_id            String?          @db.Uuid
+  business_name         String?          @db.VarChar(255)
+  business_type         String?          @db.VarChar(100)
+  tax_id                String?          @db.VarChar(50)
+  credit_limit          Decimal?         @db.Decimal(10, 2)
   credit_score          Int?
-  credit_check_date     DateTime? @db.Date
-  
-  // Property Information
-  property_type         String?  @db.VarChar(50)
-  property_size         String?  @db.VarChar(50)
+  credit_check_date     DateTime?        @db.Date
+  property_type         String?          @db.VarChar(50)
+  property_size         String?          @db.VarChar(50)
   year_built            Int?
   square_footage        Int?
-  
-  // Access Information
   access_codes          String?
   gate_codes            String?
   key_locations         String?
   special_instructions  String?
-  
-  // Communication Preferences
-  preferred_language    String   @default("English") @db.VarChar(20)
-  timezone              String   @default("UTC") @db.VarChar(20)
+  preferred_language    String           @default("English") @db.VarChar(20)
+  timezone              String           @default("UTC") @db.VarChar(20)
   communication_methods Json?
-  
-  // Contract Information
-  contract_start_date   DateTime? @db.Date
-  contract_end_date     DateTime? @db.Date
-  contract_type         String?  @db.VarChar(50)
-  contract_value        Decimal? @db.Decimal(10, 2)
-  auto_renew            Boolean  @default(false)
+  contract_start_date   DateTime?        @db.Date
+  contract_end_date     DateTime?        @db.Date
+  contract_type         String?          @db.VarChar(50)
+  contract_value        Decimal?         @db.Decimal(10, 2)
+  auto_renew            Boolean          @default(false)
   cancellation_policy   String?
-  
-  // Status Information
-  account_status        String   @default("active") @db.VarChar(20)
-  payment_status        String   @default("current") @db.VarChar(20)
-  service_status        String   @default("scheduled") @db.VarChar(20)
-  
-  created_at            DateTime @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime @updatedAt @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  account               Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
+  account_status        String           @default("active") @db.VarChar(20)
+  payment_status        String           @default("current") @db.VarChar(20)
+  service_status        String           @default("scheduled") @db.VarChar(20)
+  created_at            DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime         @updatedAt @db.Timestamptz(6)
   segment               CustomerSegment? @relation(fields: [segment_id], references: [id])
-  
+  account               Account          @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
+  tenant                Tenant           @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
   @@unique([tenant_id, account_id])
   @@map("customer_profiles")
 }
 
 model CustomerContact {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  account_id            String   @db.Uuid
-  contact_type          String   @db.VarChar(20) // primary, secondary, emergency, billing
-  first_name            String?  @db.VarChar(100)
-  last_name             String?  @db.VarChar(100)
-  email                 String?  @db.VarChar(255)
-  phone                 String?  @db.VarChar(20)
-  mobile                String?  @db.VarChar(20)
-  position              String?  @db.VarChar(100)
-  is_primary            Boolean  @default(false)
-  is_emergency_contact  Boolean  @default(false)
-  preferred_contact_method String? @db.VarChar(20)
-  notes                 String?
-  created_at            DateTime @default(now()) @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  account               Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
-  automatedCommunications AutomatedCommunication[]
-  
+  id                       String                   @id @default(uuid()) @db.Uuid
+  tenant_id                String                   @db.Uuid
+  account_id               String                   @db.Uuid
+  contact_type             String                   @db.VarChar(20)
+  first_name               String?                  @db.VarChar(100)
+  last_name                String?                  @db.VarChar(100)
+  email                    String?                  @db.VarChar(255)
+  phone                    String?                  @db.VarChar(20)
+  mobile                   String?                  @db.VarChar(20)
+  position                 String?                  @db.VarChar(100)
+  is_primary               Boolean                  @default(false)
+  is_emergency_contact     Boolean                  @default(false)
+  preferred_contact_method String?                  @db.VarChar(20)
+  notes                    String?
+  created_at               DateTime                 @default(now()) @db.Timestamptz(6)
+  automatedCommunications  AutomatedCommunication[]
+  account                  Account                  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
+  tenant                   Tenant                   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
   @@unique([tenant_id, account_id, contact_type])
   @@map("customer_contacts")
 }
 
 model Location {
-  id              String      @id @default(uuid()) @db.Uuid
-  tenant_id       String      @db.Uuid
-  account_id      String      @db.Uuid
-  name            String      @db.VarChar(255)
-  address_line1   String      @db.VarChar(255)
-  address_line2   String?     @db.VarChar(255)
-  city            String      @db.VarChar(100)
-  state           String      @db.VarChar(20)
-  postal_code     String      @db.VarChar(20)
-  country         String      @default("US") @db.VarChar(10)
-  latitude        Decimal?    @db.Decimal(10, 8)
-  longitude       Decimal?    @db.Decimal(11, 8)
-  service_area_id String?     @db.Uuid
-  created_at      DateTime    @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime    @updatedAt @db.Timestamptz(6)
-  
-  account         Account     @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
-  jobs            Job[]
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id       String   @db.Uuid
+  account_id      String   @db.Uuid
+  name            String   @db.VarChar(255)
+  address_line1   String   @db.VarChar(255)
+  address_line2   String?  @db.VarChar(255)
+  city            String   @db.VarChar(100)
+  state           String   @db.VarChar(20)
+  postal_code     String   @db.VarChar(20)
+  country         String   @default("US") @db.VarChar(10)
+  latitude        Decimal? @db.Decimal(10, 8)
+  longitude       Decimal? @db.Decimal(11, 8)
+  service_area_id String?  @db.Uuid
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  account         Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
   workOrders      WorkOrder[]
+  jobs            Job[]
 
   @@unique([tenant_id, id])
   @@map("locations")
 }
 
-// ============================================================================
-// SERVICE MANAGEMENT & SCHEDULING
-// ============================================================================
-
 model WorkOrder {
-  id                String    @id @default(uuid()) @db.Uuid
-  tenant_id         String    @db.Uuid
-  customer_id       String    @db.Uuid
-  assigned_to       String?   @db.Uuid
-  status            String    @default("pending") @db.VarChar(20)
-  priority          String    @default("medium") @db.VarChar(20)
-  scheduled_date    DateTime? @db.Timestamptz(6)
-  completion_date   DateTime? @db.Timestamptz(6)
-  description       String    @db.Text
-  notes             String?   @db.Text
-  created_at        DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime  @updatedAt @db.Timestamptz(6)
-  
-  // Legacy fields for backward compatibility
-  account_id        String?   @db.Uuid
-  location_id       String?   @db.Uuid
-  service_type      String?   @db.VarChar(100)
-  recurrence_rule   String?   @db.VarChar(255)
-  estimated_duration Int?     @default(60)
-  service_price     Decimal?  @db.Decimal(8, 2)
-  special_instructions String? @db.Text
-  
-  // Relations
-  jobs              Job[]
-  account           Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id])
-  tenant            Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  assignedTechnician User?    @relation("WorkOrderAssignedTo", fields: [assigned_to], references: [id])
-  location          Location? @relation(fields: [tenant_id, location_id], references: [tenant_id, id])
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id            String    @db.Uuid
+  customer_id          String    @db.Uuid
+  assigned_to          String?   @db.Uuid
+  status               String    @default("pending") @db.VarChar(20)
+  priority             String    @default("medium") @db.VarChar(20)
+  scheduled_date       DateTime? @db.Timestamptz(6)
+  completion_date      DateTime? @db.Timestamptz(6)
+  description          String
+  notes                String?
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  account_id           String?   @db.Uuid
+  location_id          String?   @db.Uuid
+  service_type         String?   @db.VarChar(100)
+  recurrence_rule      String?   @db.VarChar(255)
+  estimated_duration   Int?      @default(60)
+  service_price        Decimal?  @db.Decimal(8, 2)
+  special_instructions String?
+  Invoice              Invoice[]
+  jobs                 Job[]
+  assignedTechnician   User?     @relation("WorkOrderAssignedTo", fields: [assigned_to], references: [id])
+  tenant               Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  account              Account?  @relation(fields: [account_id], references: [id])
+  location             Location? @relation(fields: [location_id], references: [id])
 
   @@unique([tenant_id, id])
-  @@index([tenant_id])
-  @@index([customer_id])
-  @@index([assigned_to])
-  @@index([status])
+  @@index([tenant_id, status], map: "idx_work_orders_tenant_status")
   @@map("work_orders")
 }
 
 model Job {
-  id                   String    @id @default(uuid()) @db.Uuid
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   tenant_id            String    @db.Uuid
   work_order_id        String    @db.Uuid
   account_id           String    @db.Uuid
@@ -383,260 +332,234 @@ model Job {
   photos               String[]  @default([])
   chemicals_used       Json[]    @default([])
   created_at           DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
-  
-  account              Account   @relation(fields: [tenant_id, account_id], references: [tenant_id, id])
+  updated_at           DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  Invoice              Invoice[]
   tenant               Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  location             Location  @relation(fields: [tenant_id, location_id], references: [tenant_id, id])
   workOrder            WorkOrder @relation(fields: [tenant_id, work_order_id], references: [tenant_id, id])
+  account              Account   @relation(fields: [account_id], references: [id])
+  location             Location  @relation(fields: [location_id], references: [id])
 
   @@unique([tenant_id, id])
   @@index([tenant_id, technician_id, scheduled_date])
-  @@index([tenant_id, account_id])
   @@index([tenant_id, status, scheduled_date])
   @@map("jobs")
 }
 
 model ServiceArea {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  area_name             String   @db.VarChar(100)
-  area_code             String   @db.VarChar(20)
+  id                    String             @id @default(uuid()) @db.Uuid
+  tenant_id             String             @db.Uuid
+  area_name             String             @db.VarChar(100)
+  area_code             String             @db.VarChar(20)
   description           String?
-  boundaries            String?  // GEOGRAPHY(POLYGON) - stored as text for Prisma
-  center_lat            Decimal? @db.Decimal(10, 8)
-  center_lng            Decimal? @db.Decimal(11, 8)
-  estimated_travel_time Int?     // minutes
-  is_active             Boolean  @default(true)
-  created_at            DateTime @default(now()) @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  boundaries            String?
+  center_lat            Decimal?           @db.Decimal(10, 8)
+  center_lng            Decimal?           @db.Decimal(11, 8)
+  estimated_travel_time Int?
+  is_active             Boolean            @default(true)
+  created_at            DateTime           @default(now()) @db.Timestamptz(6)
+  coverage_radius_miles Decimal?           @db.Decimal(8, 2)
   serviceAnalytics      ServiceAnalytics[]
-  
+  tenant                Tenant             @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
   @@unique([tenant_id, area_code])
+  @@unique([tenant_id, area_code], map: "service_areas_tenant_code_unique")
   @@map("service_areas")
 }
 
 model TechnicianSkill {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  technician_id         String   @db.Uuid
-  service_type_id       String   @db.Uuid
-  skill_level           String   @default("basic") @db.VarChar(20) // basic, intermediate, expert
-  certification_required Boolean @default(false)
-  certification_expiry  DateTime? @db.Date
-  training_completed_date DateTime? @db.Date
-  is_active             Boolean  @default(true)
-  created_at            DateTime @default(now()) @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  technician            User     @relation(fields: [technician_id], references: [id])
-  serviceType           ServiceType @relation(fields: [service_type_id], references: [id])
-  
+  id                      String      @id @default(uuid()) @db.Uuid
+  tenant_id               String      @db.Uuid
+  technician_id           String      @db.Uuid
+  service_type_id         String      @db.Uuid
+  skill_level             String      @default("basic") @db.VarChar(20)
+  certification_required  Boolean     @default(false)
+  certification_expiry    DateTime?   @db.Date
+  training_completed_date DateTime?   @db.Date
+  is_active               Boolean     @default(true)
+  created_at              DateTime    @default(now()) @db.Timestamptz(6)
+  serviceType             ServiceType @relation(fields: [service_type_id], references: [id])
+  technician              User        @relation(fields: [technician_id], references: [id])
+  tenant                  Tenant      @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
   @@unique([tenant_id, technician_id, service_type_id])
   @@map("technician_skills")
 }
 
-// ============================================================================
-// FINANCIAL MANAGEMENT
-// ============================================================================
-
 model PricingTier {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  tier_name             String   @db.VarChar(100)
-  tier_code             String   @db.VarChar(20)
-  description           String?
-  base_multiplier       Decimal  @default(1.00) @db.Decimal(5, 2)
-  minimum_contract_value Decimal? @db.Decimal(10, 2)
-  payment_terms         Int      @default(30) // days
-  late_fee_percentage   Decimal  @default(0.00) @db.Decimal(5, 2)
-  created_at            DateTime @default(now()) @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  servicePricing        ServicePricing[]
-  
+  id                     String           @id @default(uuid()) @db.Uuid
+  tenant_id              String           @db.Uuid
+  tier_name              String           @db.VarChar(100)
+  tier_code              String           @db.VarChar(20)
+  description            String?
+  base_multiplier        Decimal          @default(1.00) @db.Decimal(5, 2)
+  minimum_contract_value Decimal?         @db.Decimal(10, 2)
+  payment_terms          Int              @default(30)
+  late_fee_percentage    Decimal          @default(0.00) @db.Decimal(5, 2)
+  created_at             DateTime         @default(now()) @db.Timestamptz(6)
+  is_active              Boolean?         @default(true)
+  discount_percentage    Decimal?         @default(0.0) @db.Decimal(5, 2)
+  tenant                 Tenant           @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  servicePricing         ServicePricing[]
+
   @@unique([tenant_id, tier_code])
+  @@unique([tenant_id, tier_code], map: "pricing_tiers_tenant_code_unique")
   @@map("pricing_tiers")
 }
 
 model ServicePricing {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  service_type_id       String   @db.Uuid
-  pricing_tier_id       String   @db.Uuid
-  base_price            Decimal  @db.Decimal(10, 2)
-  hourly_rate           Decimal? @db.Decimal(10, 2)
-  minimum_charge        Decimal? @db.Decimal(10, 2)
-  travel_fee            Decimal? @db.Decimal(10, 2)
-  emergency_fee         Decimal? @db.Decimal(10, 2)
-  effective_date        DateTime @db.Date
-  expiry_date           DateTime? @db.Date
-  created_at            DateTime @default(now()) @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  serviceType           ServiceType @relation(fields: [service_type_id], references: [id])
-  pricingTier           PricingTier @relation(fields: [pricing_tier_id], references: [id])
-  
+  id              String      @id @default(uuid()) @db.Uuid
+  tenant_id       String      @db.Uuid
+  service_type_id String      @db.Uuid
+  pricing_tier_id String      @db.Uuid
+  base_price      Decimal     @db.Decimal(10, 2)
+  hourly_rate     Decimal?    @db.Decimal(10, 2)
+  minimum_charge  Decimal?    @db.Decimal(10, 2)
+  travel_fee      Decimal?    @db.Decimal(10, 2)
+  emergency_fee   Decimal?    @db.Decimal(10, 2)
+  effective_date  DateTime    @db.Date
+  expiry_date     DateTime?   @db.Date
+  created_at      DateTime    @default(now()) @db.Timestamptz(6)
+  pricingTier     PricingTier @relation(fields: [pricing_tier_id], references: [id])
+  serviceType     ServiceType @relation(fields: [service_type_id], references: [id])
+  tenant          Tenant      @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
   @@unique([tenant_id, service_type_id, pricing_tier_id, effective_date])
   @@map("service_pricing")
 }
 
 model PaymentMethod {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  account_id            String   @db.Uuid
-  payment_type          String   @db.VarChar(20) // credit_card, ach, check, cash, cod
-  payment_name          String?  @db.VarChar(100)
-  account_number        String?  @db.VarChar(50)
-  routing_number        String?  @db.VarChar(20)
-  card_type             String?  @db.VarChar(20)
-  card_last4            String?  @db.VarChar(4)
-  card_expiry           String?  @db.VarChar(7)
-  is_default            Boolean  @default(false)
-  is_active             Boolean  @default(true)
-  created_at            DateTime @default(now()) @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  account               Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
-  
+  id             String    @id @default(uuid()) @db.Uuid
+  tenant_id      String    @db.Uuid
+  account_id     String    @db.Uuid
+  payment_type   String    @db.VarChar(20)
+  payment_name   String?   @db.VarChar(100)
+  account_number String?   @db.VarChar(50)
+  routing_number String?   @db.VarChar(20)
+  card_type      String?   @db.VarChar(20)
+  card_last4     String?   @db.VarChar(4)
+  card_expiry    String?   @db.VarChar(7)
+  is_default     Boolean   @default(false)
+  is_active      Boolean   @default(true)
+  created_at     DateTime  @default(now()) @db.Timestamptz(6)
+  Payment        Payment[]
+  account        Account   @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
+  tenant         Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
   @@unique([tenant_id, account_id, payment_type])
   @@map("payment_methods")
 }
 
-// ============================================================================
-// ANALYTICS & REPORTING
-// ============================================================================
-
 model CustomerAnalytics {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  account_id            String   @db.Uuid
-  metric_date            DateTime @db.Date
-  metric_type            String   @db.VarChar(50) // lifetime_value, service_frequency, payment_history
-  metric_value           Decimal  @db.Decimal(15, 4)
-  metric_metadata        Json?
-  calculated_at          DateTime @default(now()) @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  account               Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
-  
+  id              String   @id @default(uuid()) @db.Uuid
+  tenant_id       String   @db.Uuid
+  account_id      String   @db.Uuid
+  metric_date     DateTime @db.Date
+  metric_type     String   @db.VarChar(50)
+  metric_value    Decimal  @db.Decimal(15, 4)
+  metric_metadata Json?
+  calculated_at   DateTime @default(now()) @db.Timestamptz(6)
+  account         Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
+  tenant          Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
   @@unique([tenant_id, account_id, metric_date, metric_type])
   @@map("customer_analytics")
 }
 
 model ServiceAnalytics {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  service_type_id       String?  @db.Uuid
-  service_area_id       String?  @db.Uuid
-  technician_id         String?  @db.Uuid
-  metric_date            DateTime @db.Date
-  metric_type            String   @db.VarChar(50) // completion_time, customer_satisfaction, efficiency
-  metric_value           Decimal  @db.Decimal(15, 4)
-  metric_metadata        Json?
-  calculated_at          DateTime @default(now()) @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  serviceType           ServiceType? @relation(fields: [service_type_id], references: [id])
-  serviceArea           ServiceArea? @relation(fields: [service_area_id], references: [id])
-  technician            User? @relation(fields: [technician_id], references: [id])
-  
+  id              String       @id @default(uuid()) @db.Uuid
+  tenant_id       String       @db.Uuid
+  service_type_id String?      @db.Uuid
+  service_area_id String?      @db.Uuid
+  technician_id   String?      @db.Uuid
+  metric_date     DateTime     @db.Date
+  metric_type     String       @db.VarChar(50)
+  metric_value    Decimal      @db.Decimal(15, 4)
+  metric_metadata Json?
+  calculated_at   DateTime     @default(now()) @db.Timestamptz(6)
+  serviceArea     ServiceArea? @relation(fields: [service_area_id], references: [id])
+  serviceType     ServiceType? @relation(fields: [service_type_id], references: [id])
+  technician      User?        @relation(fields: [technician_id], references: [id])
+  tenant          Tenant       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
   @@map("service_analytics")
 }
 
-// ============================================================================
-// COMMUNICATION & MARKETING
-// ============================================================================
-
 model CommunicationTemplate {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  template_name          String   @db.VarChar(100)
-  template_type          String   @db.VarChar(50) // email, sms, letter, notification
-  subject                String?  @db.VarChar(255)
-  content                String
-  variables              Json?    // template variables
-  applicable_segments    Json?
-  is_active              Boolean  @default(true)
-  created_at             DateTime @default(now()) @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  id                      String                   @id @default(uuid()) @db.Uuid
+  tenant_id               String                   @db.Uuid
+  template_name           String                   @db.VarChar(100)
+  template_type           String                   @db.VarChar(50)
+  subject                 String?                  @db.VarChar(255)
+  content                 String
+  variables               Json?
+  applicable_segments     Json?
+  is_active               Boolean                  @default(true)
+  created_at              DateTime                 @default(now()) @db.Timestamptz(6)
   automatedCommunications AutomatedCommunication[]
-  
+  tenant                  Tenant                   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
   @@map("communication_templates")
 }
 
 model AutomatedCommunication {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  account_id            String   @db.Uuid
-  template_id           String?  @db.Uuid
-  trigger_type          String   @db.VarChar(50) // service_reminder, payment_reminder, follow_up
-  trigger_conditions    Json?
-  scheduled_date        DateTime? @db.Timestamptz(6)
-  sent_date             DateTime? @db.Timestamptz(6)
-  status                String   @default("pending") @db.VarChar(20) // pending, sent, failed, cancelled
-  recipient_contact_id  String?  @db.Uuid
-  created_at            DateTime @default(now()) @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  account               Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
-  template              CommunicationTemplate? @relation(fields: [template_id], references: [id])
-  recipientContact      CustomerContact? @relation(fields: [recipient_contact_id], references: [id])
-  
+  id                   String                 @id @default(uuid()) @db.Uuid
+  tenant_id            String                 @db.Uuid
+  account_id           String                 @db.Uuid
+  template_id          String?                @db.Uuid
+  trigger_type         String                 @db.VarChar(50)
+  trigger_conditions   Json?
+  scheduled_date       DateTime?              @db.Timestamptz(6)
+  sent_date            DateTime?              @db.Timestamptz(6)
+  status               String                 @default("pending") @db.VarChar(20)
+  recipient_contact_id String?                @db.Uuid
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  recipientContact     CustomerContact?       @relation(fields: [recipient_contact_id], references: [id])
+  template             CommunicationTemplate? @relation(fields: [template_id], references: [id])
+  account              Account                @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
+  tenant               Tenant                 @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
   @@map("automated_communications")
 }
 
-// ============================================================================
-// COMPLIANCE & DOCUMENTATION
-// ============================================================================
-
 model ComplianceRequirement {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  requirement_name       String   @db.VarChar(255)
-  requirement_type       String   @db.VarChar(50) // epa, fda, usda, state, local
-  applicable_segments    Json?
+  id                       String             @id @default(uuid()) @db.Uuid
+  tenant_id                String             @db.Uuid
+  requirement_name         String             @db.VarChar(255)
+  requirement_type         String             @db.VarChar(50)
+  applicable_segments      Json?
   applicable_service_types Json?
-  frequency             String   @db.VarChar(20) // daily, weekly, monthly, quarterly, annually
-  documentation_required Boolean  @default(true)
-  auto_reminder         Boolean  @default(true)
-  reminder_days          Int      @default(30)
-  is_active             Boolean  @default(true)
-  created_at            DateTime @default(now()) @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  complianceRecords     ComplianceRecord[]
-  
+  frequency                String             @db.VarChar(20)
+  documentation_required   Boolean            @default(true)
+  auto_reminder            Boolean            @default(true)
+  reminder_days            Int                @default(30)
+  is_active                Boolean            @default(true)
+  created_at               DateTime           @default(now()) @db.Timestamptz(6)
+  complianceRecords        ComplianceRecord[]
+  tenant                   Tenant             @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
   @@map("compliance_requirements")
 }
 
 model ComplianceRecord {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenant_id             String   @db.Uuid
-  account_id            String   @db.Uuid
-  requirement_id         String   @db.Uuid
-  service_id            String?  @db.Uuid
-  status                String   @default("pending") @db.VarChar(20) // pending, completed, overdue, waived
-  due_date              DateTime @db.Date
-  completion_date       DateTime? @db.Date
-  completed_by          String?  @db.Uuid
-  documentation_url     String?  @db.VarChar(500)
-  notes                 String?
-  created_at            DateTime @default(now()) @db.Timestamptz(6)
-  
-  tenant                Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  account               Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
-  requirement           ComplianceRequirement @relation(fields: [requirement_id], references: [id])
-  completedByUser       User? @relation(fields: [completed_by], references: [id])
-  
+  id                String                @id @default(uuid()) @db.Uuid
+  tenant_id         String                @db.Uuid
+  account_id        String                @db.Uuid
+  requirement_id    String                @db.Uuid
+  service_id        String?               @db.Uuid
+  status            String                @default("pending") @db.VarChar(20)
+  due_date          DateTime              @db.Date
+  completion_date   DateTime?             @db.Date
+  completed_by      String?               @db.Uuid
+  documentation_url String?               @db.VarChar(500)
+  notes             String?
+  created_at        DateTime              @default(now()) @db.Timestamptz(6)
+  completedByUser   User?                 @relation(fields: [completed_by], references: [id])
+  requirement       ComplianceRequirement @relation(fields: [requirement_id], references: [id])
+  account           Account               @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
+  tenant            Tenant                @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
   @@map("compliance_records")
 }
-
-// ============================================================================
-// LEGACY TABLES (for backward compatibility)
-// ============================================================================
 
 model ServiceHistory {
   id                 String   @id @default(uuid()) @db.Uuid
@@ -652,7 +575,6 @@ model ServiceHistory {
   cost               Decimal  @db.Decimal(10, 2)
   status             String   @default("completed") @db.VarChar(20)
   created_at         DateTime @default(now()) @db.Timestamptz(6)
-  
   account            Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
@@ -674,7 +596,6 @@ model ContractsSubscription {
   signed_date       DateTime? @db.Date
   status            String    @default("active") @db.VarChar(20)
   created_at        DateTime  @default(now()) @db.Timestamptz(6)
-  
   account           Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
@@ -693,7 +614,6 @@ model CommunicationLog {
   timestamp          DateTime  @default(now()) @db.Timestamptz(6)
   follow_up_required Boolean   @default(false)
   follow_up_date     DateTime? @db.Date
-  
   account            Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
@@ -715,7 +635,6 @@ model CustomerNote {
   technician_id   String?  @db.Uuid
   work_order_id   String?  @db.Uuid
   location_coords String?  @db.VarChar(100)
-  
   account         Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
@@ -739,7 +658,6 @@ model PestActivityTracking {
   recorded_at          DateTime @default(now()) @db.Timestamptz(6)
   gps_coordinates      String?  @db.VarChar(100)
   photo_evidence_ids   Json?
-  
   account              Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
@@ -758,7 +676,6 @@ model ComplianceTracking {
   assigned_to       String?   @db.VarChar(100)
   notes             String?
   documentation_url String?   @db.VarChar(500)
-  
   account           Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
@@ -796,7 +713,6 @@ model ChemicalUsageLog {
   application_date   DateTime @default(now()) @db.Timestamptz(6)
   weather_conditions String?  @db.VarChar(100)
   safety_precautions String?
-  
   account            Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
@@ -821,7 +737,6 @@ model CustomerPhoto {
   is_customer_facing Boolean  @default(true)
   pest_type          String?  @db.VarChar(100)
   treatment_area     String?  @db.VarChar(255)
-  
   account            Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
@@ -838,7 +753,6 @@ model BusinessAnalytics {
   factors               Json?
   prediction_confidence Decimal?  @db.Decimal(5, 4)
   next_review_date      DateTime? @db.Date
-  
   account               Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
@@ -857,16 +771,11 @@ model CustomerDocument {
   uploaded_by   String?   @db.VarChar(100)
   uploaded_at   DateTime  @default(now()) @db.Timestamptz(6)
   document_date DateTime? @db.Date
-  
   account       Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
   @@map("customer_documents")
 }
-
-// ============================================================================
-// SYSTEM CONFIGURATION
-// ============================================================================
 
 model TenantBranding {
   id         String   @id @default(uuid()) @db.Uuid
@@ -877,7 +786,6 @@ model TenantBranding {
   status     String   @default("published") @db.VarChar(20)
   created_at DateTime @default(now()) @db.Timestamptz(6)
   updated_at DateTime @updatedAt @db.Timestamptz(6)
-  
   tenant     Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@map("tenant_branding")
@@ -896,9 +804,308 @@ model AuditLog {
   ip_address    String?  @db.Inet
   user_agent    String?
   timestamp     DateTime @default(now()) @db.Timestamptz(6)
-
   tenant        Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@index([tenant_id, timestamp(sort: Desc)])
+  @@index([tenant_id, timestamp(sort: Desc)], map: "idx_audit_logs_tenant_timestamp")
   @@map("audit_logs")
+}
+
+model Invoice {
+  id                              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id                       String            @db.Uuid
+  account_id                      String            @db.Uuid
+  service_agreement_id            String?           @db.Uuid
+  work_order_id                   String?           @db.Uuid
+  job_id                          String?           @db.Uuid
+  invoice_number                  String
+  status                          InvoiceStatus     @default(draft)
+  issue_date                      DateTime
+  due_date                        DateTime
+  subtotal                        Decimal           @default(0) @db.Decimal(10, 2)
+  tax_amount                      Decimal           @default(0) @db.Decimal(10, 2)
+  total_amount                    Decimal           @default(0) @db.Decimal(10, 2)
+  notes                           String?
+  created_at                      DateTime          @default(now())
+  updated_at                      DateTime
+  created_by                      String            @db.Uuid
+  updated_by                      String            @db.Uuid
+  accounts                        Account           @relation(fields: [account_id], references: [id])
+  users_Invoice_created_byTousers User              @relation("Invoice_created_byTousers", fields: [created_by], references: [id])
+  jobs                            Job?              @relation(fields: [job_id], references: [id])
+  ServiceAgreement                ServiceAgreement? @relation(fields: [service_agreement_id], references: [id])
+  tenants                         Tenant            @relation(fields: [tenant_id], references: [id])
+  users_Invoice_updated_byTousers User              @relation("Invoice_updated_byTousers", fields: [updated_by], references: [id])
+  work_orders                     WorkOrder?        @relation(fields: [work_order_id], references: [id])
+  InvoiceItem                     InvoiceItem[]
+  Payment                         Payment[]
+
+  @@unique([invoice_number, tenant_id])
+  @@index([account_id])
+  @@index([due_date])
+  @@index([status])
+  @@index([tenant_id])
+}
+
+model InvoiceItem {
+  id              String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invoice_id      String      @db.Uuid
+  service_type_id String      @db.Uuid
+  description     String
+  quantity        Int         @default(1)
+  unit_price      Decimal     @db.Decimal(10, 2)
+  total_price     Decimal     @db.Decimal(10, 2)
+  created_at      DateTime    @default(now())
+  Invoice         Invoice     @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+  service_types   ServiceType @relation(fields: [service_type_id], references: [id])
+
+  @@index([invoice_id])
+}
+
+model Payment {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id         String        @db.Uuid
+  invoice_id        String        @db.Uuid
+  payment_method_id String        @db.Uuid
+  amount            Decimal       @db.Decimal(10, 2)
+  payment_date      DateTime
+  reference_number  String?
+  notes             String?
+  created_at        DateTime      @default(now())
+  created_by        String        @db.Uuid
+  users             User          @relation(fields: [created_by], references: [id])
+  Invoice           Invoice       @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+  payment_methods   PaymentMethod @relation(fields: [payment_method_id], references: [id])
+  tenants           Tenant        @relation(fields: [tenant_id], references: [id])
+
+  @@index([invoice_id])
+  @@index([payment_date])
+  @@index([tenant_id])
+}
+
+model ServiceAgreement {
+  id                                       String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id                                String                 @db.Uuid
+  account_id                               String                 @db.Uuid
+  service_type_id                          String                 @db.Uuid
+  agreement_number                         String
+  title                                    String
+  description                              String?
+  start_date                               DateTime
+  end_date                                 DateTime?
+  status                                   ServiceAgreementStatus @default(active)
+  terms                                    String?
+  pricing                                  Decimal?               @db.Decimal(10, 2)
+  billing_frequency                        BillingFrequency       @default(monthly)
+  created_at                               DateTime               @default(now())
+  updated_at                               DateTime
+  created_by                               String                 @db.Uuid
+  updated_by                               String                 @db.Uuid
+  Invoice                                  Invoice[]
+  accounts                                 Account                @relation(fields: [account_id], references: [id])
+  users_ServiceAgreement_created_byTousers User                   @relation("ServiceAgreement_created_byTousers", fields: [created_by], references: [id])
+  service_types                            ServiceType            @relation(fields: [service_type_id], references: [id])
+  tenants                                  Tenant                 @relation(fields: [tenant_id], references: [id])
+  users_ServiceAgreement_updated_byTousers User                   @relation("ServiceAgreement_updated_byTousers", fields: [updated_by], references: [id])
+
+  @@unique([agreement_number, tenant_id])
+  @@index([account_id])
+  @@index([status])
+  @@index([tenant_id])
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model ext_exists {
+  exists Boolean?
+
+  @@ignore
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model knowledge_articles {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  category_id  String    @db.Uuid
+  title        String
+  author       String?
+  publish_date DateTime? @db.Date
+  last_updated DateTime? @db.Date
+  read_time    String?
+  difficulty   String?
+  rating       Decimal?  @db.Decimal
+  views        Int?      @default(0)
+  tags         String[]  @default([])
+  content      String
+  featured     Boolean?  @default(false)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+model knowledge_categories {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug        String    @unique
+  name        String
+  description String?
+  icon        String?
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model popular_searches {
+  id                 String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tenant_id          String?   @db.Uuid
+  query_text         String
+  query_hash         String    @db.VarChar(64)
+  search_count       Int       @default(1)
+  unique_users       Int       @default(1)
+  last_searched_at   DateTime? @default(now()) @db.Timestamptz(6)
+  success_rate       Decimal   @default(1.0) @db.Decimal(5, 4)
+  avg_results_count  Decimal   @default(0) @db.Decimal(5, 2)
+  click_through_rate Decimal   @default(0.0) @db.Decimal(5, 4)
+  query_length       Int
+  word_count         Int
+  has_numbers        Boolean   @default(false)
+  has_special_chars  Boolean   @default(false)
+  is_trending        Boolean   @default(false)
+  trend_score        Decimal   @default(0.0) @db.Decimal(5, 4)
+  created_at         DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime? @default(now()) @db.Timestamptz(6)
+  success_count      Int       @default(0)
+  total_results      Int       @default(0)
+  query              String?
+
+  @@unique([tenant_id, query_hash])
+  @@index([tenant_id], map: "idx_popular_searches_tenant")
+  @@index([tenant_id, is_trending, trend_score], map: "idx_popular_searches_trending")
+  @@index([tenant_id, search_count(sort: Desc)], map: "idx_popular_searches_usage")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model search_corrections {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id        String    @db.Uuid
+  original_query   String
+  corrected_query  String
+  success_count    Int?      @default(0)
+  total_attempts   Int?      @default(0)
+  confidence_score Decimal?  @default(0.0) @db.Decimal(3, 2)
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([confidence_score(sort: Desc)], map: "idx_search_corrections_confidence")
+  @@index([original_query], map: "idx_search_corrections_original_query")
+  @@index([tenant_id], map: "idx_search_corrections_tenant_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model search_performance_metrics {
+  id                       String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tenant_id                String    @db.Uuid
+  metric_date              DateTime  @db.Date
+  metric_hour              Int
+  total_searches           Int       @default(0)
+  unique_users             Int       @default(0)
+  unique_queries           Int       @default(0)
+  avg_execution_time_ms    Decimal   @default(0) @db.Decimal(10, 2)
+  median_execution_time_ms Decimal   @default(0) @db.Decimal(10, 2)
+  p95_execution_time_ms    Decimal   @default(0) @db.Decimal(10, 2)
+  p99_execution_time_ms    Decimal   @default(0) @db.Decimal(10, 2)
+  success_rate             Decimal   @default(1.0) @db.Decimal(5, 4)
+  error_count              Int       @default(0)
+  cache_hit_rate           Decimal   @default(0.0) @db.Decimal(5, 4)
+  cache_hits               Int       @default(0)
+  cache_misses             Int       @default(0)
+  avg_results_per_search   Decimal   @default(0) @db.Decimal(5, 2)
+  click_through_rate       Decimal   @default(0.0) @db.Decimal(5, 4)
+  avg_time_to_click_ms     Decimal   @default(0) @db.Decimal(10, 2)
+  standard_searches        Int       @default(0)
+  fuzzy_searches           Int       @default(0)
+  hybrid_searches          Int       @default(0)
+  vector_searches          Int       @default(0)
+  created_at               DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, metric_date, metric_hour])
+  @@index([created_at], map: "idx_search_performance_created")
+  @@index([tenant_id, metric_date], map: "idx_search_performance_tenant_date")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model search_suggestions_analytics {
+  id                      String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tenant_id               String?   @db.Uuid
+  original_query          String
+  suggested_query         String
+  suggestion_type         String    @db.VarChar(50)
+  confidence_score        Decimal   @db.Decimal(5, 4)
+  times_suggested         Int       @default(1)
+  times_accepted          Int       @default(0)
+  times_rejected          Int       @default(0)
+  avg_time_to_accept_ms   Decimal   @default(0) @db.Decimal(10, 2)
+  acceptance_rate         Decimal   @default(0.0) @db.Decimal(5, 4)
+  avg_original_results    Int       @default(0)
+  avg_suggested_results   Int       @default(0)
+  result_improvement_rate Decimal   @default(0.0) @db.Decimal(5, 4)
+  created_at              DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, confidence_score(sort: Desc)], map: "idx_search_suggestions_confidence")
+  @@index([tenant_id], map: "idx_search_suggestions_tenant")
+  @@index([tenant_id, suggestion_type], map: "idx_search_suggestions_type")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model search_trends {
+  id                     String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tenant_id              String?   @db.Uuid
+  trend_period           String    @db.VarChar(20)
+  trend_date             DateTime  @db.Date
+  trending_queries       Json
+  emerging_queries       Json
+  declining_queries      Json
+  total_trending_queries Int       @default(0)
+  avg_trend_score        Decimal   @default(0.0) @db.Decimal(5, 4)
+  trend_volatility       Decimal   @default(0.0) @db.Decimal(5, 4)
+  is_seasonal            Boolean   @default(false)
+  season_name            String?   @db.VarChar(50)
+  seasonal_multiplier    Decimal   @default(1.0) @db.Decimal(5, 4)
+  created_at             DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, trend_period, trend_date])
+  @@index([tenant_id, trend_period, trend_date], map: "idx_search_trends_period_date")
+  @@index([tenant_id], map: "idx_search_trends_tenant")
+}
+
+model search_typo_corrections {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id       String    @db.Uuid
+  original_query  String
+  corrected_query String
+  user_accepted   Boolean?  @default(false)
+  frequency       Int?      @default(1)
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, original_query, corrected_query])
+  @@index([tenant_id, original_query], map: "idx_typo_corrections_tenant_query")
+}
+
+enum BillingFrequency {
+  monthly
+  quarterly
+  annually
+  one_time
+}
+
+enum InvoiceStatus {
+  draft
+  sent
+  paid
+  overdue
+  cancelled
+}
+
+enum ServiceAgreementStatus {
+  active
+  inactive
+  expired
+  cancelled
 }

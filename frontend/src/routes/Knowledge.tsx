@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useAuthStore } from '@/stores/auth';
 import { 
   BookOpen, 
   Search, 
@@ -30,6 +31,7 @@ import {
   Clock,
   X
 } from 'lucide-react';
+import { fetchKnowledgeArticles, fetchKnowledgeCategories, createKnowledgeArticle, updateKnowledgeArticle, deleteKnowledgeArticle } from '../lib/services/knowledgeService';
 
 // Mock data for knowledge base
 const mockCategories = [
@@ -74,6 +76,14 @@ const mockCategories = [
     description: 'Best practices for customer interactions and service',
     articleCount: 10,
     icon: '👥'
+  }
+  ,
+  {
+    id: 'verosuite-training',
+    name: 'VeroSuite Training',
+    description: 'Learn how to use the VeroSuite CRM effectively',
+    articleCount: 3,
+    icon: '🎓'
   }
 ];
 
@@ -153,6 +163,53 @@ const mockArticles = [
     content: 'Effective communication strategies for customer interactions...',
     featured: false
   }
+  ,
+  // VeroSuite Training Articles
+  {
+    id: 'vs-001',
+    title: 'VeroSuite: Getting Started',
+    category: 'verosuite-training',
+    author: 'VeroSuite Team',
+    publishDate: '2025-02-06',
+    lastUpdated: '2025-02-06',
+    readTime: '6 min',
+    difficulty: 'beginner',
+    rating: 4.9,
+    views: 0,
+    tags: ['onboarding', 'setup', 'account'],
+    content: 'Create your account, understand the layout, and complete the initial setup to start using VeroSuite.',
+    featured: true
+  },
+  {
+    id: 'vs-002',
+    title: 'Navigating VeroSuite: Dashboard, Customers, Jobs',
+    category: 'verosuite-training',
+    author: 'VeroSuite Team',
+    publishDate: '2025-02-06',
+    lastUpdated: '2025-02-06',
+    readTime: '8 min',
+    difficulty: 'beginner',
+    rating: 4.8,
+    views: 0,
+    tags: ['navigation', 'dashboard', 'customers', 'jobs'],
+    content: 'Learn the main sections of VeroSuite and how to move quickly using the sidebar and keyboard shortcuts.',
+    featured: false
+  },
+  {
+    id: 'vs-003',
+    title: 'Quick Commands: Create Customers and Jobs with Natural Language',
+    category: 'verosuite-training',
+    author: 'VeroSuite Team',
+    publishDate: '2025-02-06',
+    lastUpdated: '2025-02-06',
+    readTime: '7 min',
+    difficulty: 'beginner',
+    rating: 4.7,
+    views: 0,
+    tags: ['commands', 'nlp', 'productivity'],
+    content: 'Use the command bar to type natural language like "create new customer Chris Seek 134 Thompson Ave Donora PA 15033" to auto-fill forms.',
+    featured: false
+  }
 ];
 
 const mockFaqs = [
@@ -183,18 +240,61 @@ const mockFaqs = [
 ];
 
 const KnowledgePage: React.FC = () => {
+  const { user } = useAuthStore();
+  const isAdmin = !!(user && Array.isArray(user.roles) && user.roles.includes('admin'));
   const [activeTab, setActiveTab] = useState('articles');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
+  const [fetchedArticles, setFetchedArticles] = useState<any[]>([]);
+  const [fetchedCategories, setFetchedCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
+  const [editorData, setEditorData] = useState<any>({
+    id: undefined,
+    title: '',
+    category_id: '',
+    author: 'VeroSuite Team',
+    read_time: '5 min',
+    difficulty: 'beginner',
+    tags: [],
+    content: '',
+    featured: false
+  });
+  const editorRef = useRef<HTMLDivElement | null>(null);
 
   const tabs = [
     { id: 'articles', label: 'Articles', icon: FileText },
+    { id: 'verosuite', label: 'VeroSuite', icon: BookOpen },
     { id: 'categories', label: 'Categories', icon: FolderOpen },
     { id: 'faqs', label: 'FAQs', icon: HelpCircle },
     { id: 'favorites', label: 'Favorites', icon: Bookmark }
   ];
+
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const [cats, arts] = await Promise.all([
+          fetchKnowledgeCategories().catch(() => []),
+          fetchKnowledgeArticles().catch(() => [])
+        ]);
+        if (!isMounted) return;
+        if (cats && cats.length) setFetchedCategories(cats);
+        if (arts && arts.length) setFetchedArticles(arts);
+      } catch (e: any) {
+        if (!isMounted) return;
+        setError(e?.message || 'Failed to load knowledge base');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    })();
+    return () => { isMounted = false; };
+  }, []);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -214,10 +314,19 @@ const KnowledgePage: React.FC = () => {
     }
   };
 
-  const filteredArticles = mockArticles.filter(article => 
-    article.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    (selectedCategory === 'all' || article.category === selectedCategory)
-  );
+  const usingFetched = fetchedArticles.length > 0;
+  const categories = usingFetched ? fetchedCategories : mockCategories;
+  const articles = usingFetched ? fetchedArticles : (mockArticles as any[]);
+
+  const filteredArticles = articles.filter((article: any) => {
+    const title = (article.title || '').toLowerCase();
+    const matchesTitle = title.includes(searchQuery.toLowerCase());
+    if (selectedCategory === 'all') return matchesTitle;
+    if (usingFetched) {
+      return matchesTitle && article.category_slug === selectedCategory;
+    }
+    return matchesTitle && article.category === selectedCategory;
+  });
 
   const filteredFaqs = mockFaqs.filter(faq =>
     faq.question.toLowerCase().includes(searchQuery.toLowerCase())
@@ -253,7 +362,12 @@ const KnowledgePage: React.FC = () => {
               <Download className="h-3 w-3" />
               Export
             </button>
-            <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 font-medium text-sm">
+            <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 font-medium text-sm"
+              onClick={() => {
+                setEditorData({ id: undefined, title: '', category_id: (fetchedCategories.find((c:any)=>c.slug==='verosuite-training')?.id)||'', author: 'VeroSuite Team', read_time: '5 min', difficulty: 'beginner', tags: [], content: '', featured: false });
+                setIsEditorOpen(true);
+              }}
+            >
               <Plus className="h-3 w-3" />
               New Article
             </button>
@@ -339,8 +453,8 @@ const KnowledgePage: React.FC = () => {
             className="border border-slate-200 rounded-lg px-2 py-1.5 min-w-[150px] bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
           >
             <option value="all">All Categories</option>
-            {mockCategories.map(category => (
-              <option key={category.id} value={category.id}>{category.name}</option>
+            {categories.map((category: any) => (
+              <option key={category.id} value={category.slug || category.id}>{category.name}</option>
             ))}
           </select>
           <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-medium text-sm">
@@ -385,8 +499,15 @@ const KnowledgePage: React.FC = () => {
               Articles
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {filteredArticles.map((article) => (
-                <div key={article.id} className="p-3 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
+              {filteredArticles.map((article: any) => (
+                <div
+                  key={article.id}
+                  className="p-3 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm cursor-pointer"
+                  onClick={() => setSelectedArticle(article)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelectedArticle(article); }}
+                >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-slate-600" />
@@ -399,7 +520,7 @@ const KnowledgePage: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    <button className="p-1 text-slate-400 hover:text-slate-600 transition-colors">
+                    <button className="p-1 text-slate-400 hover:text-slate-600 transition-colors" onClick={(e) => e.stopPropagation()}>
                       <MoreVertical className="h-3 w-3" />
                     </button>
                   </div>
@@ -407,17 +528,15 @@ const KnowledgePage: React.FC = () => {
                     <h3 className="text-sm font-semibold text-slate-900 mb-1 line-clamp-2">
                       {article.title}
                     </h3>
-                    <p className="text-xs text-slate-600 mb-2 line-clamp-2">
-                      {article.content}
-                    </p>
+                    <div className="prose max-w-none text-slate-600 text-xs line-clamp-3" dangerouslySetInnerHTML={{ __html: (article.content || '').slice(0, 800) }} />
                   </div>
                   <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
                     <div className="flex items-center gap-3">
-                      <span>{article.readTime}</span>
-                      <span>{article.views} views</span>
+                      <span>{article.read_time || article.readTime || ''}</span>
+                      <span>{(article.views ?? 0)} views</span>
                       <div className="flex items-center gap-1">
                         <Star className="h-3 w-3 text-amber-500" />
-                        <span>{article.rating}</span>
+                        <span>{Number(article.rating ?? 0).toFixed(1)}</span>
                       </div>
                     </div>
                     {getDifficultyIcon(article.difficulty)}
@@ -425,15 +544,51 @@ const KnowledgePage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <User className="h-3 w-3 text-slate-400" />
-                      <span className="text-xs text-slate-600">{article.author}</span>
+                      <span className="text-xs text-slate-600">{article.author || 'VeroSuite Team'}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button className="h-6 px-2 bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 rounded hover:bg-white hover:shadow-lg transition-all duration-200">
-                        <Bookmark className="h-3 w-3" />
-                      </button>
-                      <button className="h-6 px-2 bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 rounded hover:bg-white hover:shadow-lg transition-all duration-200">
-                        <Share2 className="h-3 w-3" />
-                      </button>
+                      {isAdmin && (
+                        <>
+                          <button
+                            className="h-6 px-2 bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 rounded hover:bg-white hover:shadow-lg transition-all duration-200"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditorData({
+                                id: article.id,
+                                title: article.title,
+                                category_id: article.category_id || (fetchedCategories.find((c: any) => c.slug === article.category_slug)?.id || ''),
+                                author: article.author || 'VeroSuite Team',
+                                read_time: article.read_time || '5 min',
+                                difficulty: article.difficulty || 'beginner',
+                                tags: article.tags || [],
+                                content: article.content || '',
+                                featured: !!article.featured
+                              });
+                              setIsEditorOpen(true);
+                            }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="h-6 px-2 bg-white/80 backdrop-blur-sm border border-rose-200 text-rose-700 rounded hover:bg-white hover:shadow-lg transition-all duration-200"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!confirm('Delete this article?')) return;
+                              try {
+                                if (!article.id) return;
+                                await deleteKnowledgeArticle(article.id);
+                                const arts = await fetchKnowledgeArticles();
+                                setFetchedArticles(arts);
+                              } catch (err) {
+                                console.error(err);
+                                alert('Failed to delete article');
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -441,6 +596,59 @@ const KnowledgePage: React.FC = () => {
             </div>
           </div>
         )}
+
+          {activeTab === 'verosuite' && (
+            <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+              <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <div className="p-1 bg-purple-100 rounded-md">
+                  <BookOpen className="h-4 w-4 text-purple-600" />
+                </div>
+                VeroSuite Training
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {articles.filter((a: any) => (usingFetched ? a.category_slug === 'verosuite-training' : a.category === 'verosuite-training')).map((article: any) => (
+                  <div
+                    key={article.id}
+                    className="p-3 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm cursor-pointer"
+                    onClick={() => setSelectedArticle(article)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelectedArticle(article); }}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-slate-600" />
+                        <span className={`px-1.5 py-0.5 text-xs rounded-full ${getDifficultyColor(article.difficulty || 'beginner')}`}>
+                          {article.difficulty || 'beginner'}
+                        </span>
+                        {article.featured && (
+                          <span className="px-1.5 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800">
+                            Featured
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mb-2">
+                      <h3 className="text-sm font-semibold text-slate-900 mb-1 line-clamp-2">
+                        {article.title}
+                      </h3>
+                      <div className="prose max-w-none text-slate-600 text-xs line-clamp-3" dangerouslySetInnerHTML={{ __html: (article.content || '').slice(0, 800) }} />
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
+                      <div className="flex items-center gap-3">
+                        <span>{article.read_time || article.readTime || ''}</span>
+                        <span>{(article.views ?? 0)} views</span>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-3 w-3 text-amber-500" />
+                          <span>{Number(article.rating ?? 0).toFixed(1)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {activeTab === 'categories' && (
             <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
@@ -451,9 +659,9 @@ const KnowledgePage: React.FC = () => {
                 Categories
               </h2>
               <div className="space-y-3">
-                {mockCategories.map((category) => {
+                {categories.map((category: any) => {
                   const isExpanded = expandedCategories.includes(category.id);
-                  const categoryArticles = getCategoryArticles(category.id);
+                  const categoryArticles = (usingFetched ? articles.filter((a: any) => a.category_slug === (category.slug || category.id)) : mockArticles.filter((a: any) => a.category === category.id));
                   
                   return (
                     <div key={category.id} className="border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
@@ -623,17 +831,143 @@ const KnowledgePage: React.FC = () => {
                   <span>•</span>
                   <span>{selectedArticle.views} views</span>
                 </div>
-                <div className="prose max-w-none">
-                  <p className="text-slate-700">
-                    {selectedArticle.content}
-                  </p>
-                </div>
+                <div className="prose max-w-none text-slate-700" dangerouslySetInnerHTML={{ __html: selectedArticle.content || '' }} />
                 <div className="flex items-center gap-2">
                   {selectedArticle.tags.map((tag: string) => (
                     <span key={tag} className="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-700">
                       {tag}
                     </span>
                   ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Editor Modal */}
+      {isEditorOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-slate-900">{editorData.id ? 'Edit Article' : 'New Article'}</h2>
+                <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200" onClick={() => setIsEditorOpen(false)}>Close</button>
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                <div>
+                  <label className="block text-xs text-slate-600 mb-1">Title</label>
+                  <input className="w-full border border-slate-200 rounded px-3 py-2 text-sm" value={editorData.title} onChange={(e) => setEditorData({ ...editorData, title: e.target.value })} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-slate-600 mb-1">Category</label>
+                    <select className="w-full border border-slate-200 rounded px-3 py-2 text-sm" value={editorData.category_id} onChange={(e) => setEditorData({ ...editorData, category_id: e.target.value })}>
+                      <option value="">Select category</option>
+                      {fetchedCategories.map((c: any) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-600 mb-1">Difficulty</label>
+                    <select className="w-full border border-slate-200 rounded px-3 py-2 text-sm" value={editorData.difficulty} onChange={(e) => setEditorData({ ...editorData, difficulty: e.target.value })}>
+                      <option value="beginner">Beginner</option>
+                      <option value="intermediate">Intermediate</option>
+                      <option value="advanced">Advanced</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs text-slate-600 mb-1">Author</label>
+                    <input className="w-full border border-slate-200 rounded px-3 py-2 text-sm" value={editorData.author} onChange={(e) => setEditorData({ ...editorData, author: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-600 mb-1">Read Time</label>
+                    <input className="w-full border border-slate-200 rounded px-3 py-2 text-sm" value={editorData.read_time} onChange={(e) => setEditorData({ ...editorData, read_time: e.target.value })} />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input id="featured" type="checkbox" checked={!!editorData.featured} onChange={(e) => setEditorData({ ...editorData, featured: e.target.checked })} />
+                    <label htmlFor="featured" className="text-sm text-slate-700">Featured</label>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-600 mb-1">Tags (comma separated)</label>
+                  <input className="w-full border border-slate-200 rounded px-3 py-2 text-sm" value={(editorData.tags || []).join(', ')} onChange={(e) => setEditorData({ ...editorData, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })} />
+                </div>
+
+                {/* WYSIWYG Toolbar */}
+                <div className="flex items-center gap-2 border border-slate-200 rounded px-2 py-1 bg-slate-50">
+                  <button className="px-2 py-1 text-sm" onClick={() => document.execCommand('bold')}>Bold</button>
+                  <button className="px-2 py-1 text-sm" onClick={() => document.execCommand('italic')}>Italic</button>
+                  <button className="px-2 py-1 text-sm" onClick={() => document.execCommand('underline')}>Underline</button>
+                  <button className="px-2 py-1 text-sm" onClick={() => document.execCommand('insertUnorderedList')}>• List</button>
+                  <button className="px-2 py-1 text-sm" onClick={() => document.execCommand('insertOrderedList')}>1. List</button>
+                  <button className="px-2 py-1 text-sm" onClick={() => {
+                    const url = prompt('Enter URL');
+                    if (url) document.execCommand('createLink', false, url);
+                  }}>Link</button>
+                </div>
+                <div className="border border-slate-200 rounded">
+                  <div
+                    ref={editorRef}
+                    className="min-h-[220px] p-3 text-sm prose max-w-none"
+                    contentEditable
+                    suppressContentEditableWarning
+                    onInput={() => setEditorData({ ...editorData, content: editorRef.current?.innerHTML || '' })}
+                    dangerouslySetInnerHTML={{ __html: editorData.content }}
+                  />
+                </div>
+                <div className="flex items-center justify-end gap-2">
+                  <button className="px-3 py-1.5 border border-slate-200 rounded text-slate-700 text-sm" onClick={() => setIsEditorOpen(false)}>Cancel</button>
+                  <button
+                    className="px-3 py-1.5 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700"
+                    onClick={async () => {
+                      try {
+                        if (!editorData.title || !editorData.category_id || !editorData.content) {
+                          alert('Title, Category, and Content are required');
+                          return;
+                        }
+                        if (editorData.id) {
+                          await updateKnowledgeArticle(editorData.id, {
+                            title: editorData.title,
+                            category_id: editorData.category_id,
+                            author: editorData.author,
+                            read_time: editorData.read_time,
+                            difficulty: editorData.difficulty,
+                            tags: editorData.tags,
+                            content: editorData.content,
+                            featured: editorData.featured,
+                            last_updated: new Date().toISOString().slice(0, 10)
+                          });
+                        } else {
+                          await createKnowledgeArticle({
+                            title: editorData.title,
+                            category_id: editorData.category_id,
+                            author: editorData.author,
+                            publish_date: new Date().toISOString().slice(0, 10),
+                            last_updated: new Date().toISOString().slice(0, 10),
+                            read_time: editorData.read_time,
+                            difficulty: editorData.difficulty,
+                            rating: 0,
+                            views: 0,
+                            tags: editorData.tags,
+                            content: editorData.content,
+                            featured: editorData.featured
+                          } as any);
+                        }
+                        const arts = await fetchKnowledgeArticles();
+                        setFetchedArticles(arts);
+                        setIsEditorOpen(false);
+                      } catch (e) {
+                        console.error(e);
+                        alert('Failed to save article');
+                      }
+                    }}
+                  >
+                    Save
+                  </button>
                 </div>
               </div>
             </div>

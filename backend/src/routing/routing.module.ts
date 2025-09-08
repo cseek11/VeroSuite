@@ -55,7 +55,7 @@ export class RoutingService {
 
       const points: RoutePoint[] = availableJobs.map((j) => ({
         id: j.id,
-        name: `${j.workOrder.account.name} - ${j.workOrder.location?.name || 'Unknown Location'}`,
+        name: `${j.workOrder.account?.name || 'Unknown Customer'} - ${j.workOrder.location?.name || 'Unknown Location'}`,
         address: j.workOrder.location ? `${j.workOrder.location.address_line1}, ${j.workOrder.location.city}, ${j.workOrder.location.state}` : 'Unknown Address',
         coordinates: {
           lat: Number(j.workOrder.location?.latitude) || 40.4406,

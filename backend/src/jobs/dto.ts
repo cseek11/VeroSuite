@@ -23,6 +23,9 @@ export class CreateJobDto {
   @IsUUID() account_id!: string;
   @ApiProperty()
   @IsUUID() location_id!: string;
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString() job_number?: string;
 
   @ApiProperty({ example: '2025-08-18' })
   @IsDateString() scheduled_date!: string;

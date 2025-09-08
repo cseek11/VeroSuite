@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import React from 'react';
 import { enhancedApi } from '@/lib/enhanced-api';
+import { secureApiClient } from '@/lib/secure-api-client';
 import { Account } from '@/types/enhanced-types';
 
 interface CustomerPageState {
@@ -48,7 +49,8 @@ export const useCustomerPageStore = create<CustomerPageState>((set, get) => ({
     set({ isLoading: true, error: null });
     
     try {
-      const updatedCustomer = await enhancedApi.customers.update(customer.id, updates);
+      // Use secureApiClient for updates (which goes to our backend)
+      const updatedCustomer = await secureApiClient.put(`/accounts/${customer.id}`, updates);
       set({ 
         customer: updatedCustomer, 
         isLoading: false, 

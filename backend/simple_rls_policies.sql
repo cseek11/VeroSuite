@@ -51,3 +51,5 @@ FROM pg_policies
 WHERE schemaname = 'public' 
   AND policyname LIKE '%Allow all access%'
 ORDER BY tablename, policyname;
+
+

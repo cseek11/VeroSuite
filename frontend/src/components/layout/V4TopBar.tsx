@@ -18,6 +18,7 @@ import {
   X,
   Command
 } from 'lucide-react';
+import { SimpleGlobalSearchBar } from '@/components/search/SimpleGlobalSearchBar';
 
 interface V4TopBarProps {
   onMobileMenuToggle: () => void;
@@ -107,8 +108,8 @@ export default function V4TopBar({
         switch (event.key.toLowerCase()) {
           case 'k':
             event.preventDefault();
-            // Focus search input
-            const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
+            // Focus global search input
+            const searchInput = document.querySelector('.global-search-input') as HTMLInputElement;
             if (searchInput) {
               searchInput.focus();
             }
@@ -212,16 +213,18 @@ export default function V4TopBar({
            </div>
          </div>
         
-        {/* Search Bar */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
-          <input 
-            id="topbar-search"
-            name="topbar-search"
-            className="w-full pl-8 pr-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
-            placeholder="Search..." 
-          />
-        </div>
+            {/* Simple Global Search Bar */}
+            <div className="relative flex-1 max-w-md">
+              <SimpleGlobalSearchBar
+                placeholder="Search customers or use natural language commands..."
+                className="w-full"
+                enableCommands={true}
+                onActionExecuted={(result) => {
+                  console.log('Action executed from header:', result);
+                  // You can add additional handling here if needed
+                }}
+              />
+            </div>
         
         {/* Time & Status - Compact */}
         <div className="flex items-center gap-2 text-xs flex-shrink-0">
@@ -234,7 +237,7 @@ export default function V4TopBar({
                  {/* User Profile - Compact */}
          <div className="flex items-center gap-2 flex-shrink-0">
            <div className="text-center hidden sm:block">
-             <div className="font-semibold text-sm">{user?.name || 'Kevin Davis'}</div>
+             <div className="font-semibold text-sm">{user?.name || user?.first_name || user?.email || 'User'}</div>
              <div className="text-xs opacity-80">{user?.role || 'Admin'}</div>
            </div>
            <div className="relative user-menu-dropdown">
@@ -249,8 +252,8 @@ export default function V4TopBar({
              {showUserMenu && (
                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                  <div className="px-4 py-2 border-b border-gray-100">
-                   <div className="font-semibold text-gray-800">{user?.name || 'Kevin Davis'}</div>
-                   <div className="text-sm text-gray-500 truncate">{user?.email || 'kevin@veropest.com'}</div>
+                   <div className="font-semibold text-gray-800">{user?.name || user?.first_name || user?.email || 'User'}</div>
+                   <div className="text-sm text-gray-500 truncate">{user?.email || 'user@example.com'}</div>
                  </div>
                 <button className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                   <User className="w-4 h-4" />
