@@ -76,19 +76,19 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
     queryKey: ['enhanced-account-details', customers?.length],
     queryFn: async () => {
       if (!customers) return [];
-      console.log('Starting to fetch account details for', customers.length, 'customers');
+      console.log('Starting to fetch account details for', Array.isArray(customers) ? customers.length : 0, 'customers');
       
       // For now, return empty details - will be enhanced when agreements and payments APIs are updated
-      const details = customers.map((customer) => ({
+      const details = Array.isArray(customers) ? customers.map((customer) => ({
         accountId: customer.id,
         agreements: [] as string[],
         overdue_days: 0
-      }));
+      })) : [];
       
       console.log('All account details:', details);
       return details;
     },
-    enabled: !!customers && customers.length > 0,
+    enabled: !!customers && Array.isArray(customers) && customers.length > 0,
   });
 
   // Agreement indicator component
@@ -221,6 +221,9 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
 
   // Get selected customers data
   const selectedCustomersData = useMemo(() => {
+    if (!Array.isArray(customers)) {
+      return [];
+    }
     return customers.filter(customer => selectedCustomers.has(customer.id));
   }, [customers, selectedCustomers]);
 
@@ -257,7 +260,52 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
   };
 
   // Get the customer object for the map popup
-  const mapPopupCustomer = customers.find(c => c.id === mapPopupCustomerId) || null;
+  const mapPopupCustomer = Array.isArray(customers) ? customers.find(c => c.id === mapPopupCustomerId) || null : null;
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Card className="p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <Typography variant="h6" className="text-gray-900 mb-2">
+              Loading Customers...
+            </Typography>
+            <Typography variant="body2" className="text-gray-600">
+              Please wait while we fetch your customer data.
+            </Typography>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <Card className="p-8">
+          <div className="text-center">
+            <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <Typography variant="h6" className="text-gray-900 mb-2">
+              Error Loading Customers
+            </Typography>
+            <Typography variant="body2" className="text-gray-600 mb-4">
+              {error?.message || 'An error occurred while loading customer data.'}
+            </Typography>
+            <Button 
+              onClick={() => window.location.reload()} 
+              variant="outline"
+              className="text-indigo-600 border-indigo-600 hover:bg-indigo-50"
+            >
+              Try Again
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

@@ -386,3 +386,33 @@ frontend/
 **Confidence Level:** 99% - Core functionality complete, service management operational
 
 **Overall Progress:** **Phase 1: 100% Complete | Phase 2: 60% Complete | Total: 40% Complete**
+
+---
+
+## 📅 Daily Update — 2025-09-08
+
+### Summary
+- Clarified backend run scripts. The backend exposes `start:dev` in `backend/package.json`. Run from `backend/` directory: `npm run start:dev`.
+- Global search "update customer ... phone/email" command executes end-to-end; request succeeds (200). Response currently omits updated `phone` in payload, though UI shows success.
+- Tenant context and JWT guard previously fixed; keeping `x-tenant-id` header in frontend calls temporarily for local testing.
+
+### What Changed Today
+- Verified backend scripts in `backend/package.json`:
+  - `start:dev`: `nest start --watch`
+  - `start`: `nest start`
+  - `start:prod`: `node dist/main`
+- Confirmed `{ data, error }` return shape across account service methods; materialized view errors are gracefully handled in tenant-aware service.
+
+### Outstanding Issues
+- Supabase REST 400s for `customer_segments` and `service_types` (legacy frontend REST calls) — check RLS/columns and migrate reads to backend API.
+- Analytics RPC errors: `log_search_query` 400 and `update_popular_searches` 409 — verify SQL signatures and conflict targets.
+- Account update response missing `phone` after PUT — verify column mapping (`phone` vs `phone_number`) and ensure response selects updated fields.
+
+### Immediate Next Steps
+1. Start backend from `backend/`: `npm run start:dev`.
+2. Ensure `accounts.service.ts` update returns the updated record including `phone`.
+3. Route `customer_segments` and `service_types` to backend endpoints; fix RLS if needed.
+4. Align analytics RPC parameter lists and upsert conflicts to resolve 400/409.
+
+### Notes
+- Do not modify any `.env` files; code-only changes per project preference.

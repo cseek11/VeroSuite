@@ -56,25 +56,26 @@ export interface GlobalSearchResult {
 class AdvancedSearchService {
 
   private getTenantId = async (): Promise<string> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    // Get auth data from localStorage
+    const authData = localStorage.getItem('verosuite_auth');
+    if (!authData) {
       throw new Error('User not authenticated');
     }
 
-    console.log('🔍 Getting tenant ID for user:', user.email);
+    try {
+      const parsed = JSON.parse(authData);
+      const tenantId = parsed.tenantId;
+      
+      if (!tenantId) {
+        throw new Error('Tenant ID not found in auth data');
+      }
 
-    const { data: tenantId, error } = await supabase
-      .rpc('get_user_tenant_id', {
-        user_email: user.email
-      });
-
-    if (error || !tenantId) {
-      console.error('❌ Failed to get tenant ID:', error);
-      throw new Error('Failed to get tenant ID');
+      console.log('🔍 Getting tenant ID for user:', parsed.user?.email);
+      return tenantId;
+    } catch (error) {
+      console.error('Error parsing auth data:', error);
+      throw new Error('Invalid authentication data');
     }
-
-    console.log('✅ Got tenant ID:', tenantId);
-    return tenantId;
   };
 
   /**

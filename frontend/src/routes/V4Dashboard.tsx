@@ -131,7 +131,7 @@ export default function V4Dashboard() {
   // Backend API queries
   const { data: customers = [], isLoading: customersLoading, error: customersError } = useQuery({
     queryKey: ['secure-customers'],
-    queryFn: () => secureApiClient.accounts.getAll(),
+    queryFn: () => secureApiClient.getAllAccounts(),
   });
 
   // Debug logging
@@ -141,14 +141,14 @@ export default function V4Dashboard() {
 
   // Calculate KPIs from real data
   const kpis = {
-    totalCustomers: customers.length,
+    totalCustomers: Array.isArray(customers) ? customers.length : 0,
     completedServices: 0, // TODO: Implement when service history getAll is available
     totalRevenue: 0, // TODO: Implement when service history getAll is available
-    activeContracts: customers.filter((c: any) => c.status === 'active').length,
+    activeContracts: Array.isArray(customers) ? customers.filter((c: any) => c.status === 'active').length : 0,
   };
 
   // Convert customers to job-like format for display
-  const realJobs = customers.map((customer: any, index: number) => ({
+  const realJobs = Array.isArray(customers) ? customers.map((customer: any, index: number) => ({
     id: index + 1,
     customer: customer.name,
     service: customer.account_type === 'commercial' ? 'Commercial Service' : 'Residential Service',
@@ -158,10 +158,10 @@ export default function V4Dashboard() {
     agreements: [customer.account_type],
     overdue: customer.status !== 'active',
     overdueDays: customer.status !== 'active' ? 1 : 0
-  }));
+  })) : [];
 
   // Create activity feed from customer data
-  const realActivityFeed = customers.slice(0, 5).map((customer: any) => ({
+  const realActivityFeed = Array.isArray(customers) ? customers.slice(0, 5).map((customer: any) => ({
     id: customer.id,
     type: 'customer',
     message: `${customer.name} - ${customer.account_type} customer`,
@@ -170,7 +170,7 @@ export default function V4Dashboard() {
     color: customer.status === 'active' ? 'bg-green-500' : 'bg-red-500',
     amount: customer.ar_balance || 0,
     detail: customer.account_type
-  }));
+  })) : [];
 
   const handleAddJob = () => {
     navigate('/jobs/new');

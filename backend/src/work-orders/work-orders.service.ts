@@ -41,17 +41,14 @@ export class WorkOrdersService {
       data: {
         tenant_id: tenantId,
         customer_id: data.customer_id,
+        location_id: data.customer_id, // Use customer_id as fallback for location
+        service_type: data.service_type || 'General Service',
         assigned_to: data.assigned_to || null,
         status: data.status || WorkOrderStatus.PENDING,
         priority: data.priority || WorkOrderPriority.MEDIUM,
         scheduled_date: data.scheduled_date ? new Date(data.scheduled_date) : null,
         description: data.description,
         notes: data.notes || null,
-        // Map to legacy fields for backward compatibility
-        account_id: data.customer_id, // customer_id and account_id are the same
-        location_id: null, // Will be handled separately if needed
-        service_type: data.service_type || null,
-        recurrence_rule: data.recurrence_rule || null,
         estimated_duration: data.estimated_duration || 60,
         service_price: data.service_price || null,
         special_instructions: data.description, // Use description as special_instructions

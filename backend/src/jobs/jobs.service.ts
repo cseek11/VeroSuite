@@ -26,7 +26,11 @@ export class JobsService {
       priority: job.priority,
       scheduled_date: job.scheduled_date,
       time_window: { start: job.scheduled_start_time, end: job.scheduled_end_time },
-      customer: { id: job.workOrder.account.id, name: job.workOrder.account.name, type: job.workOrder.account.account_type },
+      customer: { 
+        id: job.workOrder.account?.id || '', 
+        name: job.workOrder.account?.name || 'Unknown Customer', 
+        type: job.workOrder.account?.account_type || 'unknown' 
+      },
       location: {
         id: job.workOrder.location?.id || '',
         name: job.workOrder.location?.name || '',

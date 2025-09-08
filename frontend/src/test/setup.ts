@@ -30,16 +30,22 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// Mock window.scrollTo
+Object.defineProperty(window, 'scrollTo', {
+  writable: true,
+  value: vi.fn(),
+});
+
 // Mock localStorage
 const localStorageMock = {
   getItem: vi.fn(),
   setItem: vi.fn(),
   removeItem: vi.fn(),
   clear: vi.fn(),
-  length: 0,
-  key: vi.fn(),
 };
-global.localStorage = localStorageMock as Storage;
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+});
 
 // Mock sessionStorage
 const sessionStorageMock = {
@@ -47,7 +53,29 @@ const sessionStorageMock = {
   setItem: vi.fn(),
   removeItem: vi.fn(),
   clear: vi.fn(),
-  length: 0,
-  key: vi.fn(),
 };
-global.sessionStorage = sessionStorageMock as Storage;
+Object.defineProperty(window, 'sessionStorage', {
+  value: sessionStorageMock,
+});
+
+// Mock fetch
+global.fetch = vi.fn();
+
+// Mock console methods to reduce noise in tests
+global.console = {
+  ...console,
+  log: vi.fn(),
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+};
+
+// Mock environment variables
+vi.mock('../lib/config', () => ({
+  config: {
+    supabaseUrl: 'https://test.supabase.co',
+    supabaseAnonKey: 'test-anon-key',
+    environment: 'test',
+  },
+}));

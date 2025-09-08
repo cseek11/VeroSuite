@@ -432,7 +432,12 @@ export class SearchAnalyticsService {
       });
 
       if (error) {
-        console.error('Failed to update popular searches:', error);
+        // 409 errors are non-critical (conflict/duplicate) - just log as warning
+        if (error.code === '409' || error.message?.includes('409')) {
+          console.warn('Popular searches update conflict (non-critical):', error.message);
+        } else {
+          console.error('Failed to update popular searches:', error);
+        }
       }
     } catch (error) {
       console.error('Error updating popular searches:', error);

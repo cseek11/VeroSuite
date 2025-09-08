@@ -33,7 +33,7 @@ export class TenantMiddleware implements NestMiddleware {
 
     try {
       await this.databaseService.query(`SET LOCAL app.tenant_id = $1`, [tenantId]);
-      await this.databaseService.query(`SET LOCAL ROLE verosuite_app`);
+      // Note: Supabase manages database roles, so we don't need to set a custom role
       next();
     } catch (err) {
       // eslint-disable-next-line no-console

@@ -17,6 +17,11 @@ export enum WorkOrderPriority {
 }
 
 export class CreateWorkOrderDto {
+  @ApiProperty({ description: 'Work Order Number', required: false })
+  @IsOptional()
+  @IsString()
+  work_order_number?: string;
+
   @ApiProperty({ description: 'Customer/Account ID' })
   @IsUUID()
   customer_id!: string;

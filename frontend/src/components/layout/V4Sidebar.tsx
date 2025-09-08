@@ -13,7 +13,8 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
-  TrendingUp
+  TrendingUp,
+  Search
 } from 'lucide-react';
 import { BugIcon } from '../icons/BugIcon';
 

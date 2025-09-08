@@ -3,6 +3,8 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './CompactLayout.css';
 import CustomerListView from './CustomerListView';
+import SearchBar from './SearchBar';
+import CustomerSearchResults from './CustomerSearchResults';
 import {
   Users,
   Search,
@@ -21,11 +23,15 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
-  X
+  X,
+  Grid3X3,
+  List
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { secureApiClient } from '@/lib/secure-api-client';
 import { Account, CustomerProfile } from '@/types/enhanced-types';
+import { useSearchIntegration } from '@/lib/search-integration';
+import type { SearchResult } from '@/lib/unified-search-service';
 
 export default function CustomersPage() {
   console.log('🔄 CustomersPage component rendering');
@@ -35,7 +41,19 @@ export default function CustomersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'commercial' | 'residential'>('all');
   const [selectedCustomers, setSelectedCustomers] = useState<Set<string>>(new Set());
+  const [viewMode, setViewMode] = useState<'list' | 'grid' | 'map'>('list');
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Search integration
+  const {
+    results: searchResults,
+    loading: searchLoading,
+    error: searchError,
+    search,
+    clearAll: clearSearch,
+    refreshCurrentSearch
+  } = useSearchIntegration({ debounceMs: 300 });
 
   const queryClient = useQueryClient();
 
@@ -43,13 +61,141 @@ export default function CustomersPage() {
   const { data: customers = [], isLoading, error, refetch } = useQuery({
     queryKey: ['secure-customers'],
     queryFn: async () => {
-      return secureApiClient.accounts.getAll();
+      return secureApiClient.getAllAccounts();
     },
   });
+
+  // Listen for real-time customer updates
+  useEffect(() => {
+    const handleCustomerUpdate = (event: CustomEvent) => {
+      const { customerId } = event.detail;
+      console.log('🔄 Real-time customer update received in CustomersPage:', customerId);
+      
+      // Invalidate and refetch customer data
+      queryClient.invalidateQueries({ queryKey: ['secure-customers'] });
+      queryClient.invalidateQueries({ queryKey: ['search'] });
+      queryClient.invalidateQueries({ queryKey: ['unified-search'] });
+      
+      // If we have a current search, refresh it
+      if (searchTerm.trim()) {
+        refreshCurrentSearch();
+      }
+    };
+    
+    const handleCustomerCreate = (event: CustomEvent) => {
+      console.log('🔄 Real-time customer creation received in CustomersPage');
+      queryClient.invalidateQueries({ queryKey: ['secure-customers'] });
+      queryClient.invalidateQueries({ queryKey: ['search'] });
+      queryClient.invalidateQueries({ queryKey: ['unified-search'] });
+    };
+    
+    const handleCustomerDelete = (event: CustomEvent) => {
+      console.log('🔄 Real-time customer deletion received in CustomersPage');
+      queryClient.invalidateQueries({ queryKey: ['secure-customers'] });
+      queryClient.invalidateQueries({ queryKey: ['search'] });
+      queryClient.invalidateQueries({ queryKey: ['unified-search'] });
+    };
+
+    // Add event listeners
+    window.addEventListener('customerUpdated', handleCustomerUpdate as EventListener);
+    window.addEventListener('customerCreated', handleCustomerCreate as EventListener);
+    window.addEventListener('customerDeleted', handleCustomerDelete as EventListener);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('customerUpdated', handleCustomerUpdate as EventListener);
+      window.removeEventListener('customerCreated', handleCustomerCreate as EventListener);
+      window.removeEventListener('customerDeleted', handleCustomerDelete as EventListener);
+    };
+  }, [queryClient, search, searchTerm]);
 
   // Debug logging
   console.log('CustomersPage - Customers data:', customers);
   console.log('CustomersPage - Loading:', isLoading);
+
+  // ============================================================================
+  // SEARCH HANDLERS
+  // ============================================================================
+
+  const handleSearch = async (term: string) => {
+    setSearchTerm(term);
+    if (term.trim()) {
+      setShowSearchResults(true);
+      await search(term);
+    } else {
+      setShowSearchResults(false);
+      clearSearch();
+    }
+  };
+
+  const handleSearchResultSelect = (result: SearchResult) => {
+    // Convert SearchResult to Account format for compatibility
+    const account: Account = {
+      id: result.id,
+      name: result.name,
+      email: result.email || '',
+      phone: result.phone || '',
+      address: result.address || '',
+      city: '',
+      state: '',
+      zip_code: '',
+      country: 'USA',
+      status: result.status,
+      account_type: result.type,
+      tenant_id: '7193113e-ece2-4f7b-ae8c-176df4367e28',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      created_by: null,
+      updated_by: null
+    };
+    
+    setSelectedCustomer(account);
+    setShowSearchResults(false);
+    setSearchTerm('');
+  };
+
+  const handleViewCustomer = (result: SearchResult) => {
+    handleSearchResultSelect(result);
+  };
+
+  const handleEditCustomer = (result: SearchResult) => {
+    handleSearchResultSelect(result);
+    // TODO: Open edit modal or navigate to edit page
+  };
+
+  const handleDeleteCustomer = async (result: SearchResult) => {
+    if (confirm(`Are you sure you want to delete ${result.name}?`)) {
+      try {
+        await secureApiClient.deleteAccount(result.id);
+        queryClient.invalidateQueries({ queryKey: ['secure-customers'] });
+        setShowSearchResults(false);
+        setSearchTerm('');
+        
+        // Dispatch custom event for real-time updates
+        window.dispatchEvent(new CustomEvent('customerDeleted', {
+          detail: { customerId: result.id }
+        }));
+        
+        // Show success message
+        console.log(`✅ Customer "${result.name}" deleted successfully`);
+      } catch (error) {
+        console.error('Failed to delete customer:', error);
+        alert('Failed to delete customer. Please try again.');
+      }
+    }
+  };
+
+  const handleCallCustomer = (result: SearchResult) => {
+    if (result.phone) {
+      window.open(`tel:${result.phone}`, '_self');
+    }
+  };
+
+  const handleEmailCustomer = (result: SearchResult) => {
+    if (result.email) {
+      window.open(`mailto:${result.email}`, '_self');
+    }
+  };
   console.log('CustomersPage - Error:', error);
 
   // Fetch service history for selected customer
@@ -70,6 +216,9 @@ export default function CustomersPage() {
 
   const filteredCustomers = useMemo(() => {
     console.log('🔄 Filtering customers - searchTerm:', searchTerm, 'filterType:', filterType);
+    if (!Array.isArray(customers)) {
+      return [];
+    }
     return customers.filter((customer: Account) => {
       const matchesSearch = customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            customer.email?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -124,29 +273,16 @@ export default function CustomersPage() {
       <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input
-                ref={searchInputRef}
-                key="customer-search-input"
-                id="customer-search-input"
-                name="customer-search"
-                type="text"
-                placeholder="Search customers..."
-                value={searchTerm}
-                            onChange={(e) => {
-                              console.log('🔍 Search input onChange:', e.target.value);
-                              setSearchTerm(e.target.value);
-                            }}
-                            onFocus={() => console.log('🎯 Search input FOCUSED')}
-                            onBlur={() => console.log('🚫 Search input BLURRED')}
-                            onKeyDown={(e) => {
-                              console.log('⌨️ Search input keyDown:', e.key, 'target:', e.target);
-                            }}
-                data-search-input="true"
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
-              />
-            </div>
+            <SearchBar
+              placeholder="Search customers by name, email, phone, or address..."
+              onSearchChange={handleSearch}
+              onResultSelect={handleSearchResultSelect}
+              showHistory={true}
+              showRecentSearches={true}
+              maxResults={10}
+              debounceMs={300}
+              className="w-full"
+            />
           </div>
           <div className="flex gap-2">
             <select
@@ -158,10 +294,47 @@ export default function CustomersPage() {
               <option value="commercial">Commercial</option>
               <option value="residential">Residential</option>
             </select>
+            <div className="flex border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-3 py-2 text-sm transition-colors ${
+                  viewMode === 'list' 
+                    ? 'bg-indigo-100 text-indigo-700' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                title="List View"
+              >
+                <List className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`px-3 py-2 text-sm transition-colors ${
+                  viewMode === 'grid' 
+                    ? 'bg-indigo-100 text-indigo-700' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                title="Grid View"
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('map')}
+                className={`px-3 py-2 text-sm transition-colors ${
+                  viewMode === 'map' 
+                    ? 'bg-indigo-100 text-indigo-700' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                title="Map View"
+              >
+                <MapPin className="h-4 w-4" />
+              </button>
+            </div>
             <button
               onClick={() => {
                 setSearchTerm('');
                 setFilterType('all');
+                setShowSearchResults(false);
+                clearSearch();
               }}
               className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-sm flex items-center gap-2"
             >
@@ -171,6 +344,45 @@ export default function CustomersPage() {
           </div>
         </div>
       </div>
+
+      {/* Search Results */}
+      {showSearchResults && (
+        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6 mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Search Results
+              {searchResults.length > 0 && (
+                <span className="ml-2 text-sm font-normal text-gray-500">
+                  ({searchResults.length} found)
+                </span>
+              )}
+            </h3>
+            <button
+              onClick={() => {
+                setShowSearchResults(false);
+                setSearchTerm('');
+                clearSearch();
+              }}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          
+          <CustomerSearchResults
+            results={searchResults}
+            loading={searchLoading}
+            error={searchError}
+            onView={handleViewCustomer}
+            onEdit={handleEditCustomer}
+            onDelete={handleDeleteCustomer}
+            onCall={handleCallCustomer}
+            onEmail={handleEmailCustomer}
+            showActions={true}
+            compact={viewMode === 'grid'}
+          />
+        </div>
+      )}
 
       {/* Customer List */}
       <CustomerListView

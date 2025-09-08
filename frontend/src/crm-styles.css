@@ -775,6 +775,23 @@ textarea.crm-textarea:hover,
 /* Final nuclear option - force on all inputs */
 input, select, textarea {
   border-color: rgb(196 181 253) !important; /* purple-200 */
+  background-color: white !important;
+  background: white !important;
+}
+
+/* Force white background on all form elements */
+input:not([type="checkbox"]):not([type="radio"]), 
+select, 
+textarea {
+  background-color: white !important;
+  background: white !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus, 
+select:focus, 
+textarea:focus {
+  background-color: white !important;
+  background: white !important;
 }
 
 /* Specific fix for search inputs - ensure white background */
@@ -784,6 +801,77 @@ input[placeholder*="search"],
 input[placeholder*="Search"] {
   background-color: white !important;
   background: white !important;
+}
+
+/* Fix for help modal form elements */
+[data-modal-search],
+input[placeholder*="Search commands"],
+select[class*="border-gray-300"] {
+  background-color: white !important;
+  background: white !important;
+}
+
+/* Force white background on all modal form elements */
+.modal input,
+.modal select,
+.modal textarea,
+[role="dialog"] input,
+[role="dialog"] select,
+[role="dialog"] textarea {
+  background-color: white !important;
+  background: white !important;
+}
+
+/* Specific fix for CommandHelpModal */
+.fixed.inset-0 input,
+.fixed.inset-0 select,
+.fixed.inset-0 textarea {
+  background-color: white !important;
+  background: white !important;
+}
+
+/* Nuclear option for help modal */
+input[data-modal-search],
+input[placeholder*="Search commands"],
+select[class*="border-gray-300"] {
+  background-color: white !important;
+  background: white !important;
+  background-image: none !important;
+}
+
+/* Ultimate fix for all form elements in the app */
+* input:not([type="checkbox"]):not([type="radio"]),
+* select,
+* textarea {
+  background-color: white !important;
+  background: white !important;
+  background-image: none !important;
+  color: #1f2937 !important; /* gray-800 for good contrast */
+}
+
+* input:not([type="checkbox"]):not([type="radio"]):focus,
+* select:focus,
+* textarea:focus {
+  background-color: white !important;
+  background: white !important;
+  background-image: none !important;
+  color: #1f2937 !important; /* gray-800 for good contrast */
+}
+
+/* Fix dropdown text visibility */
+select option {
+  background-color: white !important;
+  color: #1f2937 !important; /* gray-800 for good contrast */
+}
+
+/* Fix for help modal dropdown specifically */
+input[data-modal-search],
+input[placeholder*="Search commands"],
+select[class*="border-gray-300"] {
+  background-color: white !important;
+  background: white !important;
+  background-image: none !important;
+  color: #1f2937 !important; /* gray-800 for good contrast */
 }
 
 .advanced-search-input:focus,

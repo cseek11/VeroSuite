@@ -15,6 +15,12 @@ export class AuthController {
     return this.authService.login(body.email, body.password);
   }
 
+  @Post('exchange-supabase-token')
+  @ApiOperation({ summary: 'Exchange Supabase token for backend JWT' })
+  async exchangeSupabaseToken(@Body() body: { supabaseToken: string }) {
+    return this.authService.exchangeSupabaseToken(body.supabaseToken);
+  }
+
   @Get('refresh')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)

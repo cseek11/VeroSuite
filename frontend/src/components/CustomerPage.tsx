@@ -161,14 +161,83 @@ const CustomerPage: React.FC<CustomerPageProps> = ({ customerId: propCustomerId 
     enabled: !!customerId
   });
 
-  // Update customer mutation
+  // Update customer mutation with comprehensive cache invalidation
   const updateCustomerMutation = useMutation({
     mutationFn: (updates: Partial<Customer>) => enhancedApi.customers.update(customerId!, updates),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('✅ Customer updated successfully:', data.name);
+      
+      // Invalidate all customer-related queries
       queryClient.invalidateQueries({ queryKey: ['customer', customerId] });
+      queryClient.invalidateQueries({ queryKey: ['crm', 'customer', customerId] });
+      queryClient.invalidateQueries({ queryKey: ['enhanced-customer', customerId] });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['secure-customers'] });
+      queryClient.invalidateQueries({ queryKey: ['search'] });
+      queryClient.invalidateQueries({ queryKey: ['unified-search'] });
+      
       setIsEditing(false);
+      
+      // Dispatch custom event for real-time updates
+      window.dispatchEvent(new CustomEvent('customerUpdated', {
+        detail: { customerId, customer: data }
+      }));
+    },
+    onError: (error) => {
+      console.error('❌ Customer update failed:', error);
     }
   });
+
+  // Delete customer mutation with automatic redirection
+  const deleteCustomerMutation = useMutation({
+    mutationFn: () => enhancedApi.customers.delete(customerId!),
+    onSuccess: () => {
+      console.log('✅ Customer deleted successfully');
+      
+      // Invalidate all customer-related queries
+      queryClient.invalidateQueries({ queryKey: ['customer', customerId] });
+      queryClient.invalidateQueries({ queryKey: ['crm', 'customer', customerId] });
+      queryClient.invalidateQueries({ queryKey: ['enhanced-customer', customerId] });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['secure-customers'] });
+      queryClient.invalidateQueries({ queryKey: ['search'] });
+      queryClient.invalidateQueries({ queryKey: ['unified-search'] });
+      
+      // Dispatch custom event for real-time updates
+      window.dispatchEvent(new CustomEvent('customerDeleted', {
+        detail: { customerId }
+      }));
+      
+      // Redirect to customer search page
+      navigate('/customers');
+    },
+    onError: (error) => {
+      console.error('❌ Customer deletion failed:', error);
+    }
+  });
+
+  // Listen for customer updates from action handlers
+  useEffect(() => {
+    const handleCustomerUpdate = (event: CustomEvent) => {
+      const { customerId: updatedCustomerId } = event.detail;
+      if (updatedCustomerId === customerId) {
+        console.log('🔄 Customer updated via action handler, invalidating cache');
+        queryClient.invalidateQueries({ queryKey: ['customer', customerId] });
+      }
+    };
+
+    window.addEventListener('customerUpdated', handleCustomerUpdate as EventListener);
+    return () => {
+      window.removeEventListener('customerUpdated', handleCustomerUpdate as EventListener);
+    };
+  }, [customerId, queryClient]);
+
+  // Handle delete confirmation
+  const handleDeleteCustomer = () => {
+    if (window.confirm(`Are you sure you want to delete ${customer?.name}? This action cannot be undone.`)) {
+      deleteCustomerMutation.mutate();
+    }
+  };
 
   // Quick actions
   const quickActions = [
@@ -195,6 +264,13 @@ const CustomerPage: React.FC<CustomerPageProps> = ({ customerId: propCustomerId 
       icon: MapPin,
       action: () => setActiveTab('overview'),
       variant: 'outline' as const
+    },
+    {
+      label: 'Delete Customer',
+      icon: Trash2,
+      action: handleDeleteCustomer,
+      variant: 'destructive' as const,
+      disabled: deleteCustomerMutation.isPending
     }
   ];
 
@@ -318,13 +394,25 @@ const CustomerPage: React.FC<CustomerPageProps> = ({ customerId: propCustomerId 
             <div className="flex items-center gap-2">
               {quickActions.map((action, index) => {
                 const Icon = action.icon;
+                const isDestructive = action.variant === 'destructive';
+                const isDisabled = action.disabled;
+                
                 return (
                   <button
                     key={index}
                     onClick={action.action}
-                    className="px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all duration-200 rounded-md"
+                    disabled={isDisabled}
+                    className={`px-3 py-1.5 text-xs font-medium shadow-md hover:shadow-lg transition-all duration-200 rounded-md flex items-center ${
+                      isDestructive
+                        ? 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 disabled:from-red-400 disabled:to-red-500'
+                        : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500'
+                    } ${isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                   >
-                    <Icon className="w-3 h-3 mr-1.5" />
+                    {isDisabled ? (
+                      <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                    ) : (
+                      <Icon className="w-3 h-3 mr-1.5" />
+                    )}
                     {action.label}
                   </button>
                 );

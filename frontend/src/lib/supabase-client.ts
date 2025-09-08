@@ -15,7 +15,18 @@ if (!supabaseUrl || !supabasePublishableKey) {
 }
 
 // Create single, shared instance
-export const supabase = createClient(supabaseUrl, supabasePublishableKey);
+export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true
+  },
+  global: {
+    headers: {
+      apikey: supabasePublishableKey,
+      Authorization: `Bearer ${supabasePublishableKey}`
+    }
+  }
+});
 
 // Export the client for use in other services
 export default supabase;

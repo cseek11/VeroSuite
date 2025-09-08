@@ -1,408 +1,331 @@
 // ============================================================================
 // GLOBAL SEARCH DEMO PAGE
 // ============================================================================
-// Test page for the new global search functionality with natural language processing
+// Demo page showcasing the Global Smart Search functionality
+// 
+// This page demonstrates natural language commands and search capabilities
 
 import React, { useState, useCallback } from 'react';
 import { Card, Button } from '@/components/ui/EnhancedUI';
+import GlobalSearchBar from '@/components/search/GlobalSearchBar';
 import { 
   Search, 
-  Brain, 
-  Zap, 
+  Command, 
+  Lightbulb, 
   CheckCircle, 
-  AlertCircle, 
-  Clock, 
-  UserPlus, 
+  AlertCircle,
+  UserPlus,
   Calendar,
-  Edit3,
   FileText,
-  Users,
-  Settings
+  DollarSign,
+  UserCheck,
+  Bell,
+  Settings,
+  HelpCircle,
+  ArrowRight,
+  Sparkles
 } from 'lucide-react';
-import { advancedSearchService } from '@/lib/advanced-search-service';
-import type { GlobalSearchResult, IntentResult } from '@/lib/advanced-search-service';
 import type { ActionResult } from '@/lib/action-handlers';
+import type { IntentResult } from '@/lib/intent-classification-service';
+import { intentClassificationService } from '@/lib/intent-classification-service';
 
-export default function GlobalSearchDemo() {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<GlobalSearchResult | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showExamples, setShowExamples] = useState(false);
+export const GlobalSearchDemo: React.FC = () => {
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [actionResults, setActionResults] = useState<ActionResult[]>([]);
+  const [showExamples, setShowExamples] = useState(true);
 
-  // Example queries for testing
-  const exampleQueries = [
-    // Search examples
-    "Find John Smith",
-    "Lookup customer at 123 Maple Ave",
-    "Show all termite jobs in August",
-    
-    // Create customer examples
-    "Create a new account for John Doe at 123 Maple Ave",
-    "New customer Lisa Nguyen, phone 555-1234",
-    "Add customer Mike Johnson, email mike@email.com",
-    
-    // Schedule appointment examples
-    "Schedule bed bug treatment for Lisa Nguyen at 7pm tomorrow",
-    "Book roach treatment for John Smith",
-    "Schedule termite inspection for 456 Oak St",
-    
-    // Update appointment examples
-    "Reschedule today's appointment for Jake to Friday at 10am",
-    "Change the appointment for Mike to 2pm tomorrow",
-    "Move Lisa's appointment to next Monday",
-    
-    // Add note examples
-    "Add note: Customer has pets, use only organic products",
-    "Note for Emily: Prefers morning appointments",
-    "Add note for John: Allergic to certain chemicals"
-  ];
-
-  const handleSearch = useCallback(async () => {
-    if (!query.trim()) return;
-    
-    setIsLoading(true);
-    setError(null);
-    setResults(null);
-    
-    try {
-      console.log('🔍 Executing global search for:', query);
-      const result = await advancedSearchService.globalSearch(query);
-      setResults(result);
-      console.log('✅ Global search result:', result);
-    } catch (err) {
-      console.error('❌ Global search error:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [query]);
-
-  const handleExecuteAction = useCallback(async (intentResult: IntentResult) => {
-    try {
-      console.log('🚀 Executing confirmed action:', intentResult);
-      const actionResult = await advancedSearchService.executeConfirmedAction(intentResult);
-      
-      // Update results with the executed action
-      setResults(prev => prev ? {
-        ...prev,
-        actionResult,
-        requiresConfirmation: false
-      } : null);
-      
-      console.log('✅ Action executed:', actionResult);
-    } catch (err) {
-      console.error('❌ Action execution error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to execute action');
-    }
+  const handleResultsChange = useCallback((results: any[]) => {
+    setSearchResults(results);
   }, []);
 
-  const handleExampleClick = (example: string) => {
-    setQuery(example);
-    setShowExamples(false);
+  const handleActionExecuted = useCallback((result: ActionResult) => {
+    setActionResults(prev => [result, ...prev.slice(0, 4)]); // Keep last 5 results
+  }, []);
+
+  const getIntentExamples = () => {
+    const examples = intentClassificationService.getIntentExamples();
+    return [
+      {
+        category: 'Customer Management',
+        icon: <UserPlus className="w-5 h-5" />,
+        color: 'text-green-600 bg-green-50 border-green-200',
+        examples: examples.createCustomer.slice(0, 2)
+      },
+      {
+        category: 'Appointment Scheduling',
+        icon: <Calendar className="w-5 h-5" />,
+        color: 'text-blue-600 bg-blue-50 border-blue-200',
+        examples: examples.scheduleAppointment.slice(0, 2)
+      },
+      {
+        category: 'Customer Notes',
+        icon: <FileText className="w-5 h-5" />,
+        color: 'text-purple-600 bg-purple-50 border-purple-200',
+        examples: examples.addNote.slice(0, 2)
+      },
+      {
+        category: 'Invoice Management',
+        icon: <DollarSign className="w-5 h-5" />,
+        color: 'text-green-600 bg-green-50 border-green-200',
+        examples: examples.markInvoicePaid.slice(0, 2)
+      },
+      {
+        category: 'Technician Assignment',
+        icon: <UserCheck className="w-5 h-5" />,
+        color: 'text-indigo-600 bg-indigo-50 border-indigo-200',
+        examples: examples.assignTechnician.slice(0, 2)
+      },
+      {
+        category: 'Customer Communication',
+        icon: <Bell className="w-5 h-5" />,
+        color: 'text-orange-600 bg-orange-50 border-orange-200',
+        examples: examples.sendReminder.slice(0, 2)
+      }
+    ];
   };
 
-  const getIntentIcon = (intent: string) => {
-    switch (intent) {
-      case 'createCustomer': return <UserPlus className="h-5 w-5 text-green-600" />;
-      case 'scheduleAppointment': return <Calendar className="h-5 w-5 text-blue-600" />;
-      case 'updateAppointment': return <Edit3 className="h-5 w-5 text-orange-600" />;
-      case 'addNote': return <FileText className="h-5 w-5 text-purple-600" />;
-      case 'search': return <Search className="h-5 w-5 text-gray-600" />;
-      default: return <Brain className="h-5 w-5 text-indigo-600" />;
+  const getActionStatusIcon = (result: ActionResult) => {
+    if (result.success) {
+      return <CheckCircle className="w-4 h-4 text-green-500" />;
+    } else {
+      return <AlertCircle className="w-4 h-4 text-red-500" />;
     }
   };
 
-  const getIntentColor = (intent: string) => {
-    switch (intent) {
-      case 'createCustomer': return 'bg-green-50 border-green-200 text-green-800';
-      case 'scheduleAppointment': return 'bg-blue-50 border-blue-200 text-blue-800';
-      case 'updateAppointment': return 'bg-orange-50 border-orange-200 text-orange-800';
-      case 'addNote': return 'bg-purple-50 border-purple-200 text-purple-800';
-      case 'search': return 'bg-gray-50 border-gray-200 text-gray-800';
-      default: return 'bg-indigo-50 border-indigo-200 text-indigo-800';
+  const getActionStatusColor = (result: ActionResult) => {
+    if (result.success) {
+      return 'bg-green-50 border-green-200';
+    } else {
+      return 'bg-red-50 border-red-200';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6 mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
-              <Brain className="h-8 w-8 text-indigo-600" />
-              Global Search Demo
-            </h1>
-            <p className="text-slate-600 mt-2">
-              Test natural language search and commands with AI-powered intent classification
-            </p>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="text-center">
+          <div className="flex items-center justify-center space-x-2 mb-2">
+            <Sparkles className="w-8 h-8 text-purple-600" />
+            <h1 className="text-3xl font-bold text-gray-900">Global Smart Search</h1>
           </div>
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={() => setShowExamples(!showExamples)}
-              variant="outline"
-              className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 hover:bg-white hover:shadow-lg"
-            >
-              <Zap className="h-4 w-4 mr-2" />
-              {showExamples ? 'Hide' : 'Show'} Examples
-            </Button>
-          </div>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Search for customers or use natural language commands to manage your pest control business. 
+            Try commands like "create customer", "schedule appointment", or "add note".
+          </p>
         </div>
-      </div>
 
-      {/* Search Interface */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6 mb-6">
-        <div className="flex flex-col gap-4">
-          <div className="flex gap-3">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Try natural language: 'Create customer John Doe at 123 Main St' or 'Find Lisa Nguyen'..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-base"
-              />
+        {/* Main Search Interface */}
+        <Card className="p-6">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Command className="w-5 h-5 text-purple-600" />
+              <h2 className="text-xl font-semibold text-gray-900">Smart Search & Commands</h2>
             </div>
-            <Button
-              onClick={handleSearch}
-              disabled={isLoading || !query.trim()}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition-colors disabled:opacity-50"
-            >
-              {isLoading ? (
-                <Clock className="h-5 w-5 animate-spin" />
-              ) : (
-                <Search className="h-5 w-5" />
-              )}
-            </Button>
-          </div>
+            
+            <GlobalSearchBar
+              onResultsChange={handleResultsChange}
+              onActionExecuted={handleActionExecuted}
+              placeholder="Try: 'Create customer John Smith at 123 Main St' or 'Find Lisa Nguyen'"
+              className="w-full"
+            />
 
-          {/* Examples Dropdown */}
-          {showExamples && (
-            <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-              <h3 className="font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                <Zap className="h-4 w-4 text-yellow-600" />
-                Try These Examples
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                {exampleQueries.map((example, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleExampleClick(example)}
-                    className="text-left p-2 rounded text-sm text-slate-600 hover:bg-white hover:text-slate-800 transition-colors"
-                  >
-                    {example}
-                  </button>
+            {/* Search Results */}
+            {searchResults.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-lg font-medium text-gray-900 mb-3">
+                  Search Results ({searchResults.length})
+                </h3>
+                <div className="grid gap-3">
+                  {searchResults.slice(0, 5).map((result, index) => (
+                    <div key={index} className="p-3 bg-white border border-gray-200 rounded-lg">
+                      <div className="font-medium text-gray-900">{result.name}</div>
+                      <div className="text-sm text-gray-600">{result.address}</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {result.phone} • {result.email}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Action Results */}
+        {actionResults.length > 0 && (
+          <Card className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <h2 className="text-xl font-semibold text-gray-900">Recent Actions</h2>
+              </div>
+              
+              <div className="space-y-3">
+                {actionResults.map((result, index) => (
+                  <div key={index} className={`p-4 border rounded-lg ${getActionStatusColor(result)}`}>
+                    <div className="flex items-start space-x-3">
+                      {getActionStatusIcon(result)}
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">{result.message}</div>
+                        {result.error && (
+                          <div className="text-sm text-red-600 mt-1">{result.error}</div>
+                        )}
+                        {result.data && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Action ID: {result.data.id || 'N/A'}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
-          )}
-        </div>
-      </div>
+          </Card>
+        )}
 
-      {/* Error Display */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center gap-2 text-red-800">
-            <AlertCircle className="h-5 w-5" />
-            <span className="font-medium">Error:</span>
-            <span>{error}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Results Display */}
-      {results && (
-        <div className="space-y-6">
-          {/* Intent Classification */}
-          {results.intent && (
-            <Card className="bg-white/80 backdrop-blur-xl border border-white/20">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
-                    {getIntentIcon(results.intent.intent)}
-                    Intent Classification
-                  </h2>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getIntentColor(results.intent.intent)}`}>
-                    {results.intent.intent}
-                  </span>
+        {/* Command Examples */}
+        {showExamples && (
+          <Card className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Lightbulb className="w-5 h-5 text-yellow-600" />
+                  <h2 className="text-xl font-semibold text-gray-900">Command Examples</h2>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="font-medium text-slate-700 mb-2">Query Analysis</h3>
-                    <div className="space-y-2 text-sm">
-                      <div><span className="font-medium">Original:</span> {results.intent.originalQuery}</div>
-                      <div><span className="font-medium">Processed:</span> {results.intent.processedQuery}</div>
-                      <div><span className="font-medium">Confidence:</span> {(results.intent.confidence * 100).toFixed(1)}%</div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowExamples(false)}
+                >
+                  Hide Examples
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getIntentExamples().map((category, index) => (
+                  <div key={index} className="space-y-3">
+                    <div className={`flex items-center space-x-2 p-3 rounded-lg border ${category.color}`}>
+                      {category.icon}
+                      <h3 className="font-medium text-gray-900">{category.category}</h3>
                     </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-medium text-slate-700 mb-2">Extracted Entities</h3>
-                    <div className="space-y-1 text-sm">
-                      {Object.entries(results.intent.entities).map(([key, value]) => (
-                        value && (
-                          <div key={key}>
-                            <span className="font-medium capitalize">{key}:</span> {value}
-                          </div>
-                        )
+                    
+                    <div className="space-y-2">
+                      {category.examples.map((example, exampleIndex) => (
+                        <div key={exampleIndex} className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                          <div className="text-sm text-gray-700 font-mono">{example}</div>
+                        </div>
                       ))}
                     </div>
                   </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* How It Works */}
+        <Card className="p-6">
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-gray-900">How It Works</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Search className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="font-medium text-gray-900 mb-2">1. Natural Language Input</h3>
+                <p className="text-sm text-gray-600">
+                  Type your request in plain English. The system understands commands like 
+                  "create customer" or "schedule appointment".
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Command className="w-6 h-6 text-blue-600" />
+                </div>
+                <h3 className="font-medium text-gray-900 mb-2">2. Intent Classification</h3>
+                <p className="text-sm text-gray-600">
+                  The system analyzes your input to understand what you want to do and 
+                  extracts relevant information like customer names and dates.
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                </div>
+                <h3 className="font-medium text-gray-900 mb-2">3. Action Execution</h3>
+                <p className="text-sm text-gray-600">
+                  The system executes your command, creating customers, scheduling appointments, 
+                  or performing other actions as requested.
+                </p>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Features */}
+        <Card className="p-6">
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-gray-900">Key Features</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mt-0.5">
+                  <Sparkles className="w-4 h-4 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900">Smart Intent Recognition</h3>
+                  <p className="text-sm text-gray-600">
+                    Automatically detects whether you want to search or perform an action.
+                  </p>
                 </div>
               </div>
-            </Card>
-          )}
-
-          {/* Search Results */}
-          {results.type === 'search' && results.searchResults && (
-            <Card className="bg-white/80 backdrop-blur-xl border border-white/20">
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <Search className="h-6 w-6 text-indigo-600" />
-                  Search Results ({results.searchResults.length})
-                </h2>
-                
-                {results.searchResults.length > 0 ? (
-                  <div className="space-y-3">
-                    {results.searchResults.slice(0, 5).map((customer, index) => (
-                      <div key={customer.id || index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                        <div>
-                          <div className="font-medium text-slate-800">{customer.name}</div>
-                          <div className="text-sm text-slate-600">{customer.email}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm text-slate-600">{customer.phone}</div>
-                          <div className="text-xs text-slate-500">Score: {(customer.relevance_score * 100).toFixed(1)}%</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-slate-500">
-                    <Search className="h-12 w-12 mx-auto mb-3 text-slate-300" />
-                    <p>No search results found</p>
-                  </div>
-                )}
+              
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
+                  <UserPlus className="w-4 h-4 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900">Customer Management</h3>
+                  <p className="text-sm text-gray-600">
+                    Create customers, add notes, and manage customer information.
+                  </p>
+                </div>
               </div>
-            </Card>
-          )}
-
-          {/* Action Results */}
-          {results.type === 'action' && (
-            <Card className="bg-white/80 backdrop-blur-xl border border-white/20">
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <Zap className="h-6 w-6 text-green-600" />
-                  Action Execution
-                </h2>
-                
-                {results.requiresConfirmation && results.confirmationData ? (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <AlertCircle className="h-5 w-5 text-yellow-600" />
-                      <span className="font-medium text-yellow-800">Action Requires Confirmation</span>
-                    </div>
-                    
-                    <div className="mb-4">
-                      <h3 className="font-medium text-yellow-800 mb-2">{results.confirmationData.action}</h3>
-                      <p className="text-yellow-700">{results.confirmationData.summary}</p>
-                    </div>
-                    
-                    <div className="flex gap-3">
-                      <Button
-                        onClick={() => handleExecuteAction(results.intent!)}
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Confirm & Execute
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setResults(null)}
-                        className="border-yellow-300 text-yellow-700 hover:bg-yellow-100"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                ) : results.actionResult ? (
-                  <div className={`border rounded-lg p-4 ${results.actionResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                    <div className="flex items-center gap-2 mb-2">
-                      {results.actionResult.success ? (
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                      ) : (
-                        <AlertCircle className="h-5 w-5 text-red-600" />
-                      )}
-                      <span className={`font-medium ${results.actionResult.success ? 'text-green-800' : 'text-red-800'}`}>
-                        {results.actionResult.message}
-                      </span>
-                    </div>
-                    
-                    {results.actionResult.data && (
-                      <div className="mt-3 p-3 bg-white rounded border">
-                        <pre className="text-sm text-slate-700 whitespace-pre-wrap">
-                          {JSON.stringify(results.actionResult.data, null, 2)}
-                        </pre>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-slate-500">
-                    <Zap className="h-12 w-12 mx-auto mb-3 text-slate-300" />
-                    <p>Action ready to execute</p>
-                  </div>
-                )}
+              
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5">
+                  <Calendar className="w-4 h-4 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900">Appointment Scheduling</h3>
+                  <p className="text-sm text-gray-600">
+                    Schedule, reschedule, and cancel appointments with natural language.
+                  </p>
+                </div>
               </div>
-            </Card>
-          )}
-        </div>
-      )}
-
-      {/* Help Section */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6">
-        <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center gap-2">
-          <Settings className="h-6 w-6 text-slate-600" />
-          How It Works
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center">
-            <div className="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Brain className="h-6 w-6 text-indigo-600" />
+              
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mt-0.5">
+                  <Lightbulb className="w-4 h-4 text-yellow-600" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900">Confirmation & Safety</h3>
+                  <p className="text-sm text-gray-600">
+                    Shows confirmation dialogs for important actions to prevent mistakes.
+                  </p>
+                </div>
+              </div>
             </div>
-            <h3 className="font-medium text-slate-800 mb-2">1. Intent Classification</h3>
-            <p className="text-sm text-slate-600">
-              The system analyzes your natural language query and determines what you want to do
-            </p>
           </div>
-          
-          <div className="text-center">
-            <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Zap className="h-6 w-6 text-green-600" />
-            </div>
-            <h3 className="font-medium text-slate-800 mb-2">2. Action Execution</h3>
-            <p className="text-sm text-slate-600">
-              For commands, the system executes the action. For searches, it performs the search
-            </p>
-          </div>
-          
-          <div className="text-center">
-            <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-              <CheckCircle className="h-6 w-6 text-blue-600" />
-            </div>
-            <h3 className="font-medium text-slate-800 mb-2">3. Smart Fallback</h3>
-            <p className="text-sm text-slate-600">
-              If intent classification fails, it automatically falls back to regular search
-            </p>
-          </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
-}
+};
 
-
+export default GlobalSearchDemo;
