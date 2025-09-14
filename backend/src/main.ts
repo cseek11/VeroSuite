@@ -13,7 +13,7 @@ async function bootstrap() {
   }));
 
   const config = new DocumentBuilder()
-    .setTitle('VeroSuite API')
+    .setTitle('VeroField API')
     .setDescription('Multi-tenant Pest Control Operations Platform')
     .setVersion('1.0')
     .addBearerAuth()

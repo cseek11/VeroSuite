@@ -1,208 +1,83 @@
-# 🚀 VeroSuite CRM Global Search - Deployment Guide
+# Contact Form Deployment Guide
 
-**Status**: Ready for Deployment  
-**Priority**: Critical  
-**Estimated Time**: 30 minutes  
+## 🚀 Deploy the Public Edge Function
 
----
+### Step 1: Deploy with No JWT Verification
 
-## 📋 **PRE-DEPLOYMENT CHECKLIST**
-
-- [ ] Access to Supabase Dashboard
-- [ ] Database admin privileges
-- [ ] Backup of current database (if needed)
-- [ ] Test environment ready
-
----
-
-## 🗄️ **STEP 1: DEPLOY DATABASE SCHEMA**
-
-### **Option A: Supabase Dashboard (Recommended)**
-
-1. **Open Supabase Dashboard**
-   - Go to: https://supabase.com/dashboard
-   - Navigate to your project: `iehzwglvmbtrlhdgofew`
-
-2. **Open SQL Editor**
-   - Click on "SQL Editor" in the left sidebar
-   - Click "New Query"
-
-3. **Deploy Schema**
-   - Copy the contents of `frontend/scripts/deploy-database-schema.sql`
-   - Paste into the SQL Editor
-   - Click "Run" to execute
-
-4. **Verify Deployment**
-   - Check for any error messages
-   - Look for success notices in the output
-
-### **Option B: Command Line (Alternative)**
+Run this command to deploy the Edge Function as public (no authentication required):
 
 ```bash
-# Install psql if not already installed
-# Windows: Download from https://www.postgresql.org/download/windows/
-
-# Connect to database
-psql "postgresql://postgres:dOAClCvIDABqtXb5@db.iehzwglvmbtrlhdgofew.supabase.co:5432/postgres"
-
-# Execute schema file
-\i frontend/scripts/deploy-database-schema.sql
-
-# Exit
-\q
+npx supabase functions deploy contact-submit --no-verify-jwt
 ```
 
----
+### Step 2: Set Environment Variables
 
-## 🧪 **STEP 2: VERIFY DEPLOYMENT**
+In your Supabase Dashboard, go to **Settings** → **Edge Functions** and set these environment variables:
 
-### **Run Test Script**
+- `SENDGRID_API_KEY`: `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`
+- `NOTIFICATION_EMAIL`: `cseek@veropest.com`
+- `SUPABASE_SERVICE_ROLE_KEY`: `sb_secret_ZzGLSBjMOlOgJ5Q8a-1pMQ_9wODxv6s`
 
-```bash
-# Navigate to frontend directory
-cd frontend
+### Step 3: Create Database Table
 
-# Run admin test script
-node scripts/test-search-fixes-admin.js
+Run this SQL in your Supabase Dashboard → SQL Editor:
+
+```sql
+-- Create leads table for contact form submissions
+CREATE TABLE IF NOT EXISTS public.leads (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT,
+    company TEXT,
+    message TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
+
+-- Create policy for service role to insert leads
+CREATE POLICY "Service role can insert leads" ON public.leads
+    FOR INSERT TO service_role
+    WITH CHECK (true);
+
+-- Grant permissions
+GRANT ALL ON public.leads TO service_role;
 ```
 
-### **Expected Results**
+### Step 4: Test the Contact Form
 
-```
-✅ Database Function: search_customers_enhanced: Function call successful
-✅ Database Function: search_customers_multi_word: Function call successful
-✅ Database Function: search_customers_fuzzy: Function call successful
-✅ Search: Empty query (should return all): Found X results
-✅ Search: Simple name search: Found X results
-✅ CRUD: Create: Customer created successfully
-✅ CRUD: Update: Customer updated successfully
-✅ CRUD: Delete: Customer deleted successfully
-```
+1. Open your presentation page
+2. Fill out the contact form
+3. Submit it
+4. Check:
+   - Success message appears
+   - Email notification sent to `cseek@veropest.com`
+   - Lead saved in `leads` table in Supabase Dashboard
 
----
+## ✅ What This Setup Provides
 
-## 🔧 **STEP 3: FIX AUTHENTICATION**
+- **Public Edge Function** - No authentication required
+- **Database Storage** - Leads saved to `leads` table
+- **Email Notifications** - Automatic emails via SendGrid
+- **Input Validation** - Email format, length limits
+- **Input Sanitization** - Prevents injection attacks
+- **Error Handling** - Proper error messages and logging
 
-### **Update Frontend Configuration**
+## 🔒 Security Features
 
-1. **Check Environment Variables**
-   ```bash
-   # Verify these are set in frontend/.env
-   VITE_SUPABASE_URL=https://iehzwglvmbtrlhdgofew.supabase.co
-   VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_OFGfJcRCQlPh41a2MLSSgg_iEdpZKbJ
-   ```
+- **Environment Variables** - No credentials in code
+- **Input Validation** - Email format validation
+- **Input Sanitization** - Length limits, trimming
+- **Service Role Access** - Secure database operations
+- **CORS Headers** - Proper cross-origin handling
 
-2. **Update Test Script**
-   - The test script should now work with proper authentication
-   - Run the original test: `node scripts/test-search-fixes.js`
+## 🎯 Endpoint
 
----
+Your public contact form endpoint will be:
+`https://iehzwglvmbtrlhdgofew.supabase.co/functions/v1/contact-submit`
 
-## 🚀 **STEP 4: DEPLOY UNIFIED SEARCH SERVICE**
-
-### **Deploy Frontend Components**
-
-1. **Copy Files**
-   ```bash
-   # These files should already be created:
-   # - frontend/src/lib/unified-search-service.ts
-   # - frontend/src/lib/search-error-logger.ts
-   # - frontend/src/lib/__tests__/unified-search-service.test.ts
-   ```
-
-2. **Update Components**
-   - Update `SimpleGlobalSearchBar.tsx` to use unified service
-   - Update action handlers to use unified service
-   - Remove old search implementations
-
----
-
-## 📊 **STEP 5: PERFORMANCE TESTING**
-
-### **Run Performance Tests**
-
-```bash
-# Run comprehensive tests
-node scripts/test-search-fixes-admin.js
-
-# Check performance metrics
-# - Search response time should be < 200ms
-# - All CRUD operations should succeed
-# - Error rate should be < 1%
-```
-
----
-
-## 🎯 **SUCCESS CRITERIA**
-
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Database Functions | All working | Test script passes |
-| Search Response Time | < 200ms | Performance tests |
-| CRUD Operations | 100% success | Test script passes |
-| Error Rate | < 1% | Test script passes |
-| Authentication | Working | Test script passes |
-
----
-
-## 🚨 **TROUBLESHOOTING**
-
-### **Common Issues**
-
-1. **"Function not found" errors**
-   - Solution: Re-run the database schema deployment
-   - Check: SQL executed without errors
-
-2. **"Table not found" errors**
-   - Solution: Verify customers table was created
-   - Check: RLS policies are enabled
-
-3. **"Permission denied" errors**
-   - Solution: Check function permissions
-   - Check: RLS policies are correct
-
-4. **"Invalid API key" errors**
-   - Solution: Verify environment variables
-   - Check: Supabase configuration
-
-### **Rollback Plan**
-
-If deployment fails:
-1. **Database**: Restore from backup
-2. **Frontend**: Revert to previous version
-3. **Investigate**: Check error logs
-4. **Retry**: Fix issues and redeploy
-
----
-
-## 📞 **SUPPORT**
-
-- **Database Issues**: Check Supabase dashboard logs
-- **Frontend Issues**: Check browser console
-- **Authentication Issues**: Verify environment variables
-- **Performance Issues**: Check database query performance
-
----
-
-## 📝 **POST-DEPLOYMENT**
-
-### **Next Steps**
-
-1. **Monitor Performance**
-   - Check search response times
-   - Monitor error rates
-   - Track user satisfaction
-
-2. **Update Documentation**
-   - Document any changes made
-   - Update troubleshooting guide
-   - Train team on new system
-
-3. **Plan Future Enhancements**
-   - Global Smart Search integration
-   - Advanced analytics
-   - Performance optimizations
-
----
-
-*This deployment guide ensures a systematic approach to fixing the global search functionality while maintaining system stability.*
+No authentication required - anyone can submit forms!

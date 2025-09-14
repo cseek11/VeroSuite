@@ -1,6 +1,6 @@
 # Agreement Indicators & Overdue Tracking Setup
 
-This guide will help you set up the customer agreement indicators and overdue tracking system in your VeroSuite application using a production-ready database design.
+This guide will help you set up the customer agreement indicators and overdue tracking system in your VeroField application using a production-ready database design.
 
 ## 🏗️ **Recommended Approach: Separate Tables**
 

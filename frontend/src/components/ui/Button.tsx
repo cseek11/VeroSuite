@@ -14,35 +14,35 @@ const Button: React.FC<ButtonProps> = ({
   type = 'button' as const,
   ...props
 }) => {
-  // Map variants to CRM button classes
+  // Map variants to Tailwind button classes
   const getVariantClasses = () => {
     switch (variant) {
       case 'primary':
-        return 'crm-btn crm-btn-primary';
+        return 'bg-purple-600 hover:bg-purple-700 text-white';
       case 'secondary':
-        return 'crm-btn crm-btn-secondary';
+        return 'bg-gray-600 hover:bg-gray-700 text-white';
       case 'outline':
-        return 'crm-btn crm-btn-outline';
+        return 'border border-gray-300 hover:bg-gray-50 text-gray-700';
       case 'ghost':
-        return 'crm-btn crm-btn-ghost';
+        return 'hover:bg-gray-100 text-gray-700';
       case 'danger':
-        return 'crm-btn crm-btn-danger';
+        return 'bg-red-600 hover:bg-red-700 text-white';
       case 'success':
-        return 'crm-btn crm-btn-success';
+        return 'bg-green-600 hover:bg-green-700 text-white';
       default:
-        return 'crm-btn crm-btn-default';
+        return 'bg-gray-900 hover:bg-gray-800 text-white';
     }
   };
 
-  // Map sizes to CRM button classes
+  // Map sizes to Tailwind button classes
   const getSizeClasses = () => {
     switch (size) {
       case 'sm':
-        return 'crm-btn-sm';
+        return 'px-3 py-1.5 text-sm';
       case 'lg':
-        return 'crm-btn-lg';
+        return 'px-6 py-3 text-lg';
       default:
-        return 'crm-btn-md';
+        return 'px-4 py-2 text-base';
     }
   };
 
@@ -51,7 +51,7 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <button
       type={type}
-      className={`${getVariantClasses()} ${getSizeClasses()} ${className}`}
+      className={`inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${getVariantClasses()} ${getSizeClasses()} ${className}`}
       disabled={isDisabled}
       onClick={onClick}
       {...props}

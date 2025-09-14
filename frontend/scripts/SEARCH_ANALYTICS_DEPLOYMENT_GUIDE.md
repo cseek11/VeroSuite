@@ -2,7 +2,7 @@
 
 ## 📋 **Overview**
 
-This guide will help you deploy the comprehensive Search Analytics system for VeroSuite. The system includes:
+This guide will help you deploy the comprehensive Search Analytics system for VeroField. The system includes:
 
 - **Database Schema**: 7 analytics tables with proper indexing and RLS
 - **Backend Functions**: 15+ PostgreSQL functions for data collection and analysis
@@ -302,6 +302,7 @@ If you encounter issues:
 ---
 
 **🎉 Congratulations!** You now have a comprehensive Search Analytics system that will provide valuable insights into your search performance and user behavior.
+
 
 
 

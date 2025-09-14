@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '../../test/setup/test-utils';
 import { describe, it, expect, vi } from 'vitest';
 import Input from '../ui/Input';
 import { Mail } from 'lucide-react';

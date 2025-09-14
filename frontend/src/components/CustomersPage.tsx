@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import './CompactLayout.css';
 import CustomerListView from './CustomerListView';
 import SearchBar from './SearchBar';
 import CustomerSearchResults from './CustomerSearchResults';

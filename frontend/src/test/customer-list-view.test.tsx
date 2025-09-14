@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '../test/setup/test-utils';
 import { describe, it, expect, vi } from 'vitest';
 import CustomerListView from '../components/CustomerListView';
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeroSuite Technician Mobile (Standalone)</title>
+  <title>VeroField Technician Mobile (Standalone)</title>
   <style>
     body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; background-color: #f0f2f5; }
     .max-w-sm{max-width:24rem}.mx-auto{margin-left:auto;margin-right:auto}
@@ -66,7 +66,7 @@
       { id:'job3', status:'completed', priority:'high', scheduled_date:'2025-08-18', time_window:{start:'07:30', end:'09:30'}, customer:{ id:'account3', name:'Westfield Apartments', type:'residential' }, location:{ id:'location3', name:'Building A', address:'321 Fifth Ave, Pittsburgh, PA 15222', coordinates:{ lat:40.4472, lng:-79.9473 } }, service:{ type:'Bed Bug Treatment', description:'Heat treatment and chemical application', estimated_duration:180, price:850.00, special_instructions:'Units 2A, 2B, 3C - residents relocated. Use heat treatment protocol.' }, technician_id:'tech1', actual_times:{ started_at:'2025-08-18T07:45:00Z', completed_at:'2025-08-18T10:30:00Z' }, completion_data:{ notes:'Heat treatment successful. All units treated according to protocol. Recommended follow-up in 2 weeks.', signature:'signature_url_123.png', photos:['before_photo_1.jpg','after_photo_1.jpg','treatment_photo_1.jpg'], chemicals_used:[{ product_id:'chem1', name:'Temprid FX', epa_reg_no:'264-1025', amount_used:1.5, concentration:'0.25%', application_method:'spray', target_pest:'bed_bugs' }] } }
     ]};
 
-    function VeroSuiteMobileApp(){
+    function VeroFieldMobileApp(){
       const [currentScreen, setCurrentScreen] = useState('jobList');
       const [selectedJob, setSelectedJob] = useState(null);
       const [jobs, setJobs] = useState([]);
@@ -330,7 +330,7 @@
     }
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<VeroSuiteMobileApp />);
+    root.render(<VeroFieldMobileApp />);
   </script>
 </body>
 </html>

@@ -6,7 +6,7 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   helperText?: string;
 }
 
-const Textarea: React.FC<TextareaProps> = ({
+const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({
   label,
   error,
   helperText,
@@ -14,7 +14,7 @@ const Textarea: React.FC<TextareaProps> = ({
   id,
   rows = 3,
   ...props
-}) => {
+}, ref) => {
   const textareaId = id || `textarea-${Math.random().toString(36).substr(2, 9)}`;
   const errorId = error ? `${textareaId}-error` : undefined;
   const helperId = helperText ? `${textareaId}-helper` : undefined;
@@ -27,6 +27,7 @@ const Textarea: React.FC<TextareaProps> = ({
         </label>
       )}
       <textarea
+        ref={ref}
         id={textareaId}
         rows={rows}
         className={`crm-textarea ${error ? 'crm-input-error' : ''}`}
@@ -46,7 +47,9 @@ const Textarea: React.FC<TextareaProps> = ({
       )}
     </div>
   );
-};
+});
+
+Textarea.displayName = 'Textarea';
 
 export default Textarea;
 

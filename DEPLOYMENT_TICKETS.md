@@ -1,6 +1,6 @@
-# 🚀 VeroSuite CRM Global Search - Deployment Tickets
+# 🚀 VeroField CRM Global Search - Deployment Tickets
 
-**Project**: VeroSuite CRM Global Search Fix  
+**Project**: VeroField CRM Global Search Fix  
 **Priority**: Critical  
 **Timeline**: 2 weeks  
 **Status**: Ready for Implementation  

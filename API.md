@@ -1,4 +1,4 @@
-# VeroSuite API Overview
+# VeroField API Overview
 
 The API is designed for a multi-tenant operations platform. Authentication is JWT-based and each request is tenant-scoped via RLS. This document summarizes key endpoints grouped by modules.
 

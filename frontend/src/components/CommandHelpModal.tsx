@@ -222,7 +222,7 @@ const CommandHelpModal: React.FC<CommandHelpModalProps> = ({ isOpen, onClose }) 
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">Command Help</h2>
-              <p className="text-sm text-gray-600">Natural language commands for VeroSuite</p>
+              <p className="text-sm text-gray-600">Natural language commands for VeroField</p>
             </div>
           </div>
           <button

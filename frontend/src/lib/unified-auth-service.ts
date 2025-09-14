@@ -1,7 +1,7 @@
 // ============================================================================
 // UNIFIED AUTHENTICATION SERVICE
 // ============================================================================
-// Centralized authentication service for VeroSuite CRM
+// Centralized authentication service for VeroField CRM
 
 import { supabase } from './supabase-client';
 import { searchErrorLogger } from './search-error-logger';

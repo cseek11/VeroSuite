@@ -5,7 +5,7 @@
 // 
 // Priority: P0 - CRITICAL SECURITY IMPLEMENTATION
 // 
-// Author: VeroSuite Security Audit
+// Author: VeroField Security Audit
 // Date: January 2, 2025
 // ============================================================================
 

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# VeroSuite V4 Migration Script
+# VeroField V4 Migration Script
 # This script safely migrates from old layout to V4 layout
 
 set -e  # Exit on any error
 
-echo "🐜 VeroSuite V4 Migration Script"
+echo "🐜 VeroField V4 Migration Script"
 echo "=================================="
 
 # Colors for output

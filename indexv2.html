@@ -1,0 +1,3260 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VeroField - Complete Service Management Platform</title>
+<meta name="description" content="Transform your service business with VeroField's comprehensive CRM, scheduling, billing, and field service management platform. Built for scale, designed for efficiency."/>
+<meta name="keywords" content="CRM, field service management, scheduling software, service business, technician management, route optimization, billing software"/>
+<meta name="author" content="VeroField"/>
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://verofield.com/"/>
+<meta property="og:title" content="VeroField - Complete Service Management Platform"/>
+<meta property="og:description" content="Transform your service business with our comprehensive CRM, scheduling, billing, and field service management platform. Built for scale, designed for efficiency."/>
+<meta property="og:image" content="https://verofield.com/assets/images/og-image.svg"/>
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image"/>
+<meta property="twitter:url" content="https://verofield.com/"/>
+<meta property="twitter:title" content="VeroField - Complete Service Management Platform"/>
+<meta property="twitter:description" content="Transform your service business with our comprehensive CRM, scheduling, billing, and field service management platform. Built for scale, designed for efficiency."/>
+<meta property="twitter:image" content="https://verofield.com/assets/images/og-image.svg"/>
+<link rel="canonical" href="https://verofield.com/"/>
+<meta name="robots" content="index,follow"/>
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+<link rel="icon" type="image/png" href="favicon.png"/>
+<link rel="apple-touch-icon" href="favicon.png"/>
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "VeroField",
+  "description": "Complete service management platform with CRM, scheduling, billing, and field service management capabilities",
+  "url": "https://verofield.com",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "Contact for pricing",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "Customer Relationship Management",
+    "Field Service Management", 
+    "Route Optimization",
+    "Billing & Payments",
+    "Mobile Field Service",
+    "Analytics & Reporting"
+  ]
+}
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<style>
+        :root {
+            /* Primary Brand Colors */
+            --crm-slate-50: #f8fafc;
+            --crm-slate-100: #f1f5f9;
+            --crm-slate-200: #e2e8f0;
+            --crm-slate-300: #cbd5e1;
+            --crm-slate-400: #94a3b8;
+            --crm-slate-500: #64748b;
+            --crm-slate-600: #475569;
+            --crm-slate-700: #334155;
+            --crm-slate-800: #1e293b;
+            --crm-slate-900: #0f172a;
+            --crm-slate-950: #020617;
+
+            /* Accent Colors */
+            --crm-blue-500: #3b82f6;
+            --crm-blue-600: #2563eb;
+            --crm-green-500: #10b981;
+            --crm-green-600: #059669;
+            --crm-orange-500: #f59e0b;
+            --crm-orange-600: #d97706;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+            color: #f8fafc;
+            font-weight: 400;
+            position: relative;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            font-variant-ligatures: none;
+            font-feature-settings: "kern" 1;
+        }
+        
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Modern glass morphism background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 50%, rgba(51, 65, 85, 0.95) 100%);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.01) 0%, transparent 50%, rgba(255, 255, 255, 0.01) 100%);
+            animation: very-subtle-shimmer 20s ease-in-out infinite;
+        }
+
+        @keyframes very-subtle-shimmer {
+            0%, 100% { transform: translateX(-100%); opacity: 0.1; }
+            50% { transform: translateX(100%); opacity: 0.02; }
+        }
+
+        .card-glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-glass:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.4);
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(30, 41, 59, 0.03), transparent);
+            transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 0 32px 64px -12px rgba(30, 41, 59, 0.25), 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(30, 41, 59, 0.15);
+        }
+
+        .icon-gradient {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            box-shadow: 0 8px 25px -5px rgba(30, 41, 59, 0.4);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .heading-shadow {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+        }
+
+        .subheading-shadow {
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.1);
+            filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+            filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
+        }
+
+        .stats-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(30, 41, 59, 0.15);
+            box-shadow: 0 20px 40px -8px rgba(30, 41, 59, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stats-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 32px 64px -12px rgba(30, 41, 59, 0.2), 0 16px 32px -8px rgba(0, 0, 0, 0.15);
+        }
+
+        .tech-stack-item {
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid rgba(30, 41, 59, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 12px 28px -6px rgba(30, 41, 59, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.08);
+        }
+
+        .tech-stack-item:hover {
+            background: rgba(30, 41, 59, 0.05);
+            border-color: rgba(30, 41, 59, 0.25);
+            transform: scale(1.08) translateY(-6px);
+            box-shadow: 0 24px 48px -12px rgba(30, 41, 59, 0.2), 0 8px 16px -4px rgba(0, 0, 0, 0.12);
+        }
+
+        .metric-number {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 1.25rem 2.5rem;
+            border-radius: 1rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 35px -5px rgba(30, 41, 59, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 25px 50px -10px rgba(30, 41, 59, 0.7);
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+        }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(30, 41, 59, 0.2), transparent);
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .section-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 50%;
+        }
+
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+            margin-top: 2rem;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Modern Scroll Animation Classes */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-left {
+            opacity: 0;
+            transform: translateX(-60px);
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide-left.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .slide-right {
+            opacity: 0;
+            transform: translateX(60px);
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide-right.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .scale-in {
+            opacity: 0;
+            transform: scale(0.85) translateY(20px);
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .scale-in.visible {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        /* Smooth scrolling for the entire page */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Enhanced scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(30, 41, 59, 0.5);
+        }
+
+        /* Popup Modal Styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .popup-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .popup-content {
+            background: white;
+            border-radius: 2rem;
+            padding: 2rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .popup-overlay.active .popup-content {
+            transform: scale(1);
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .popup-close:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .feature-link {
+            color: #dc2626;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .feature-link:hover {
+            border-bottom-color: #dc2626;
+            text-shadow: 0 0 4px rgba(220, 38, 38, 0.2);
+        }
+
+        /* Modern Checkmark Styles */
+        .modern-check {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .modern-check:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Modern Badge Styles */
+        .modern-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Modern Icon Styles */
+        .modern-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+            margin-right: 12px;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .page-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 4rem 0;
+        }
+
+        .navigation {
+            position: fixed;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 90vh;
+            overflow: hidden;
+            padding: 0.25rem 0;
+        }
+
+        .nav-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 4px 0;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+        }
+        .nav-dot::after {
+            content: '';
+            width: 4px;
+            height: 4px;
+            border-radius: 9999px;
+            background: rgba(255,255,255,0.8);
+        }
+        @media (min-width: 768px) {
+            .nav-dot { width: 16px; height: 16px; }
+            .nav-dot::after { width: 6px; height: 6px; }
+        }
+
+        .nav-dot:hover {
+            background: rgba(255, 255, 255, 0.7);
+            transform: scale(1.2);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .nav-dot.active {
+            background: rgba(255, 255, 255, 0.95);
+            transform: scale(1.2);
+            border-color: rgba(255, 255, 255, 1);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
+        }
+        .nav-dot:focus-visible {
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.45);
+        }
+
+        /* Tooltip for nav dots (hover/long-press hint) */
+        .nav-dot[aria-label] { position: relative; }
+        .nav-dot[aria-label]:hover::before,
+        .nav-dot[aria-label]:focus::before {
+            content: attr(aria-label);
+            position: absolute;
+            right: 110%;
+            white-space: nowrap;
+            background: rgba(15, 23, 42, 0.9);
+            color: #fff;
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+            transform: translateY(-50%);
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, #1e293b, #0f172a);
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+    
+/* Reduce excessive spacing */
+.page-section {
+  padding-top: 3rem !important;
+  padding-bottom: 3rem !important;
+}
+
+/* Reduce card grid gaps for smoother flow */
+.grid, .polished-grid {
+  gap: 1.25rem !important;
+}
+
+/* Center text blocks more cleanly */
+.page-section .text-center {
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Headings improved readability */
+h1.hero-title, h2.section-title, h3.section-title {
+  text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+h2.section-title {
+  color: #f8fafc;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+h3.section-title {
+  color: #f8fafc;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Paragraphs polished */
+.page-section p {
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+/* Reduce top/bottom spacing specifically for Integrations & Productivity sections */
+#integrations, #productivity {
+  padding-top: 2rem !important;
+  padding-bottom: 2rem !important;
+}
+
+/* Equal size integration cards */
+#integrations .grid > div {
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#integrations .grid > div > div {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #8b5cf6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Lazy Loading */
+        img[data-src] {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        img[data-src].loaded {
+            opacity: 1;
+        }
+        
+        /* Print Styles */
+        @media print {
+            .navigation, .progress-bar {
+                display: none !important;
+            }
+            
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            
+            .page-section {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+
+        
+        /* Layout polish: consistent containers, spacing, and alignment */
+        .container,
+        .container.mx-auto {
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Consistent section spacing - all sections get same padding */
+        .page-section > .py-12 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
+        .page-section > .py-8 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
+        .page-section > .py-4 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
+        .page-section > .py-3 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
+        .page-section > .py-2 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
+        
+        /* Headings: unify margins for visual rhythm */
+        h1.heading-shadow, h2.heading-shadow, h3.heading-shadow { margin-bottom: 0.75rem !important; }
+        .subheading-shadow { margin-bottom: 0.5rem !important; }
+        
+        /* Section dividers - consistent spacing */
+        .section-divider { margin: 1rem 0 !important; }
+        
+        /* Equal height cards in grids while preserving content */
+        .grid > .bg-white\/10,
+        .grid > .feature-card,
+        .grid > .glass-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .grid > .bg-white\/10 > *,
+        .grid > .feature-card > *,
+        .grid > .glass-card > * { flex-shrink: 0; }
+        .grid > .bg-white\/10 .mt-auto,
+        .grid > .feature-card .mt-auto,
+        .grid > .glass-card .mt-auto { margin-top: auto; }
+        
+        /* Responsive grid gap refinements */
+        .grid { gap: 1rem; }
+        @media (min-width: 768px) { .grid { gap: 1.25rem; } }
+        @media (min-width: 1024px) { .grid { gap: 1.5rem; } }
+        
+        /* Ensure imagery does not overflow and remains centered */
+        img { max-width: 100%; height: auto; }
+        .object-contain { object-fit: contain; }
+        
+        /* Consistent inner padding + softer shadows for glass cards */
+        .bg-white\/10 { padding: 1.25rem; box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+        @media (min-width: 768px) { .bg-white\/10 { padding: 1.5rem; } }
+        @media (min-width: 1024px) { .bg-white\/10 { padding: 1.75rem; } }
+
+        
+        /* Popup Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+            margin: 5% auto;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 2rem;
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            backdrop-filter: blur(20px);
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+        }
+        
+        .close:hover {
+            color: #fff;
+        }
+        
+        /* Reveal animations */
+        .reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+        .reveal.visible { opacity: 1; transform: none; }
+        .reveal-stagger > * { opacity: 0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
+        .reveal-stagger.visible > * { opacity: 1; transform: none; }
+        .reveal-stagger.visible > *:nth-child(1) { transition-delay: .05s; }
+        .reveal-stagger.visible > *:nth-child(2) { transition-delay: .1s; }
+        .reveal-stagger.visible > *:nth-child(3) { transition-delay: .15s; }
+        .reveal-stagger.visible > *:nth-child(4) { transition-delay: .2s; }
+        .reveal-stagger.visible > *:nth-child(5) { transition-delay: .25s; }
+
+        /* Safe-area aware mobile CTA */
+        .mobile-sticky-cta {
+            position: fixed;
+            inset-inline: 0;
+            bottom: calc(1rem + env(safe-area-inset-bottom));
+            padding-inline: 1rem;
+            z-index: 1000;
+        }
+
+        /* Glass utility classes (for CDN Tailwind environment) */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.20);
+            border-radius: 1rem;
+        }
+        .card-hover { transition: transform 300ms ease, box-shadow 300ms ease, background-color 300ms ease; }
+        .card-hover:hover { transform: translateY(-4px); }
+        .card-shadow-soft { box-shadow: 0 16px 40px rgba(0,0,0,0.28); }
+</style>
+<style>
+/* Emergency visibility override */
+.reveal, .reveal-stagger, .reveal > *, .reveal-stagger > * {
+  opacity: 1 !important;
+  transform: none !important;
+}
+.glass-card { display: block; }
+.container { display: block; }
+</style>
+</head>
+<body class="min-h-screen" style="background-image: url('assets/images/crm_bg.png'); background-size: cover; background-position: center; background-attachment: scroll;">
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+<!-- Navigation Dots -->
+<div class="navigation md:bottom-auto md:top-1/2 md:translate-y-[-50%] bottom-24 right-2" id="sectionNav" role="navigation" aria-label="Page sections navigation">
+<div class="nav-dot active" data-section="hero"></div>
+<div class="nav-dot" data-section="competitive-advantage"></div>
+<div class="nav-dot" data-section="executive-summary"></div>
+<div class="nav-dot" data-section="business-solution"></div>
+<div class="nav-dot" data-section="ui-showcase"></div>
+<div class="nav-dot" data-section="screenshot-gallery"></div>
+<div class="nav-dot" data-section="interactive-features"></div>
+<div class="nav-dot" data-section="roadmap"></div>
+<div class="nav-dot" data-section="enterprise-capabilities"></div>
+<div class="nav-dot" data-section="integrations"></div>
+<div class="nav-dot" data-section="business-impact"></div>
+<div class="nav-dot" data-section="contact"></div>
+</div>
+
+<!-- Hero Section -->
+<section class="page-section reveal" id="hero" style="scroll-margin-top: 80px;">
+<div class="hero-gradient text-white py-10 w-full relative">
+<div class="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-800/85 to-slate-900/90"></div>
+<div class="container mx-auto px-6 text-center relative z-10">
+<div class="floating-animation mb-6">
+<div class="bg-gradient-to-br from-purple-500 to-purple-600 w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+                        <i class="fas fa-tools text-4xl text-white" aria-hidden="true"></i>
+</div>
+</div>
+<h1 class="font-black mb-6 slide-in tracking-tight heading-shadow text-[clamp(2.25rem,7vw,4.25rem)]">
+<span class="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">Vero</span><span class="bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">Field</span>
+</h1>
+<p class="text-2xl md:text-3xl mb-4 text-white/95 max-w-3xl mx-auto slide-in font-bold subheading-shadow">
+                    The Complete Service Management Platform
+                </p>
+<p class="text-lg mb-8 text-white/90 max-w-4xl mx-auto slide-in leading-relaxed">
+                    Transform your service business with our comprehensive CRM, scheduling, billing, and field service management platform. Built for scale, designed for efficiency.
+                </p>
+<div class="flex justify-center items-center gap-6 slide-in">
+<a class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-sm flex items-center gap-3" href="#business-solution">
+<i class="fas fa-rocket" aria-hidden="true"></i>
+                        Explore Features
+                    </a>
+</div>
+<!-- Social Icons -->
+<div class="flex justify-center gap-4 mt-8">
+
+
+<a href="https://www.facebook.com/share/171XBT1iLD/?mibextid=wwXIfr" class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110" aria-label="Facebook">
+<i class="fab fa-facebook-f text-white text-sm"></i>
+</a>
+<a href="https://www.instagram.com/vero.field?igsh=eHNocnVsOWJtYjY%3D&utm_source=qr" class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110" aria-label="Instagram">
+<i class="fab fa-instagram text-white text-sm"></i>
+</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Competitive Advantage Section -->
+<section class="page-section reveal" id="competitive-advantage" style="scroll-margin-top: 80px;">
+<div class="py-4 relative overflow-hidden" style="background-image: url('assets/images/crm_bg.png'); background-size: cover; background-position: center;">
+<div class="absolute inset-0 bg-gradient-to-br from-slate-900/85 via-slate-800/80 to-slate-900/85"></div>
+<div class="container mx-auto px-6 relative z-10 reveal-stagger">
+<div class="text-center mb-8 fade-in">
+<h1 class="font-black mb-6 slide-in tracking-tight heading-shadow text-[clamp(2.25rem,7vw,4.25rem)]"
+<i class="fas fa-trophy text-yellow-400"></i>
+Why Choose <span class="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">Vero</span><span class="bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">Field?</span>
+</h1>
+<p class="text-xl text-slate-300 max-w-3xl mx-auto font-semibold">
+What sets us apart from the competition
+</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="glass-card card-hover card-shadow-soft p-6">
+<div class="text-center mb-4">
+<i class="fas fa-brain text-4xl text-purple-400 mb-3"></i>
+<h3 class="text-xl font-bold text-white mb-2">AI-Powered Intelligence</h3>
+</div>
+<p class="text-slate-300 text-center">Advanced natural language processing and machine learning algorithms that understand context and intent, unlike basic keyword search systems.</p>
+</div>
+<div class="glass-card card-hover card-shadow-soft p-6">
+<div class="text-center mb-4">
+<i class="fas fa-lock text-4xl text-green-400 mb-3"></i>
+<h3 class="text-xl font-bold text-white mb-2">Enterprise Security</h3>
+</div>
+<p class="text-slate-300 text-center">Row-level security with complete tenant isolation. Your data is completely separated and secure, unlike shared database systems. Built on AWS infrastructure for enterprise-grade security.</p>
+</div>
+<div class="glass-card card-hover card-shadow-soft p-6">
+<div class="text-center mb-4">
+<i class="fas fa-rocket text-4xl text-blue-400 mb-3"></i>
+<h3 class="text-xl font-bold text-white mb-2">Built for Scale</h3>
+</div>
+<p class="text-slate-300 text-center">Multi-tenant architecture designed to handle thousands of users and millions of records without performance degradation.</p>
+</div>
+<div class="glass-card card-hover card-shadow-soft p-6">
+<div class="text-center mb-4">
+<i class="fas fa-mobile-alt text-4xl text-orange-400 mb-3"></i>
+<h3 class="text-xl font-bold text-white mb-2">True Mobile-First</h3>
+</div>
+<p class="text-slate-300 text-center">Offline-capable mobile app with real-time sync, not just a responsive website. Work anywhere, anytime.</p>
+</div>
+<div class="glass-card card-hover card-shadow-soft p-6">
+<div class="text-center mb-4">
+<i class="fas fa-route text-4xl text-emerald-400 mb-3"></i>
+<h3 class="text-xl font-bold text-white mb-2">Smart Route Optimization</h3>
+</div>
+<p class="text-slate-300 text-center">Advanced algorithms reduce travel time by up to 30% and improve efficiency, saving fuel costs and increasing service capacity.</p>
+</div>
+<div class="glass-card card-hover card-shadow-soft p-6">
+<div class="text-center mb-4">
+<i class="fas fa-cogs text-4xl text-pink-400 mb-3"></i>
+<h3 class="text-xl font-bold text-white mb-2">Complete Integration</h3>
+</div>
+<p class="text-slate-300 text-center">Seamless integration with existing tools - no data migration headaches or workflow disruption.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Sticky Mobile CTA -->
+<div class="mobile-sticky-cta md:hidden" role="region" aria-label="Quick actions">
+  <button onclick="openWaitlistModal()" class="block w-full text-center bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-6 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-lg">
+    Join Waitlist
+  </button>
+  <span class="sr-only">Sticky call to action for mobile users</span>
+  
+  
+  
+</div>
+
+
+<section class="page-section reveal" id="executive-summary">
+<div class="py-4 relative overflow-hidden" style="background-image: url('assets/images/crm_bg.png'); background-size: cover; background-position: center;">
+<div class="absolute inset-0 bg-gradient-to-br from-slate-900/85 via-slate-800/80 to-slate-900/85"></div>
+<div class="container mx-auto px-6 relative z-10">
+<div class="text-center mb-8 fade-in">
+<h2 class="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center justify-center gap-4">
+<i class="fas fa-clipboard-list text-indigo-400" aria-hidden="true"></i>
+</h2>
+<ul class="text-lg text-slate-300 max-w-4xl mx-auto font-medium text-left grid gap-2 md:grid-cols-2">
+<li class="flex items-start gap-2"><i class="fas fa-check text-green-400 mt-1" aria-hidden="true"></i><span>Comprehensive platform: CRM, scheduling, billing, field service</span></li>
+<li class="flex items-start gap-2"><i class="fas fa-check text-green-400 mt-1" aria-hidden="true"></i><span>AI-powered automation: routing, search, analytics</span></li>
+<li class="flex items-start gap-2"><i class="fas fa-check text-green-400 mt-1" aria-hidden="true"></i><span>Mobile-first experience with offline support</span></li>
+<li class="flex items-start gap-2"><i class="fas fa-check text-green-400 mt-1" aria-hidden="true"></i><span>Enterprise security: JWT, RLS, multi-tenant isolation</span></li>
+</ul>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-md">
+<h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-3">
+<i class="fas fa-target text-green-400" aria-hidden="true"></i>
+The Challenge
+</h3>
+<p class="text-slate-300 mb-4">Service businesses struggle with disconnected systems, inefficient scheduling, poor customer communication, and lack of real-time visibility into operations.</p>
+<ul class="text-slate-300 space-y-2">
+<li class="flex items-center gap-2"><i class="fas fa-times text-red-400"></i> Manual scheduling and routing</li>
+<li class="flex items-center gap-2"><i class="fas fa-times text-red-400"></i> Disconnected customer data</li>
+<li class="flex items-center gap-2"><i class="fas fa-times text-red-400"></i> Limited mobile capabilities</li>
+<li class="flex items-center gap-2"><i class="fas fa-times text-red-400"></i> Poor communication tools</li>
+</ul>
+</div>
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-md">
+<h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-3">
+<i class="fas fa-lightbulb text-yellow-400" aria-hidden="true"></i>
+The Solution
+</h3>
+<p class="text-slate-300 mb-4"><span class="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">Vero</span><span class="bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">Field</span>
+</span> provides an integrated platform that streamlines operations, improves customer satisfaction, and drives business growth through intelligent automation.</p>
+<ul class="text-slate-300 space-y-2">
+<li class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i> AI-powered scheduling and routing</li>
+<li class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i> Unified customer management</li>
+<li class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i> Mobile-first field service</li>
+<li class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i> Automated communications</li>
+</ul>
+</div>
+</div>
+<div class="mt-8 text-center">
+<div class="bg-gradient-to-r from-purple-500/20 to-green-500/20 backdrop-blur-lg border border-white/20 rounded-2xl p-6 inline-block">
+<h4 class="text-xl font-bold text-white mb-2"></h4>
+<p class="text-slate-300 text-lg">Reduce operational costs by 25%, increase technician productivity by 40%, and improve customer satisfaction by 60% with <span class="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">Vero</span><span class="bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">Field's</span>
+ intelligent service management platform.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Key Metrics Section -->
+<div class="flex justify-center items-center py-4 relative overflow-hidden" style="background-image: url('assets/images/crm_bg.png'); background-size: cover; background-position: center;">
+<div class="absolute  inset-0 bg-gradient-to-br from-slate-900/85 via-slate-800/80 to-slate-900/85"></div>
+<div class="container mx-auto px-6 relative z-10">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 ">
+<div class="text-center fade-in bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8 shadow-md hover:bg-white/10 transition-all duration-300">
+<div class="text-4xl font-black bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent mb-2">Open API</div>
+<p class="text-white font-semibold text-lg">RESTful &amp; GraphQL</p>
+</div>
+<div class="text-center fade-in bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8 shadow-md hover:bg-white/10 transition-all duration-300">
+<div class="text-4xl font-black bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent mb-2">98%</div>
+<p class="text-white font-semibold text-lg">Production Ready</p>
+<p class="text-slate-300 text-sm mt-2">Fully deployed</p>
+</div>
+<div class="text-center fade-in bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8 shadow-md hover:bg-white/10 transition-all duration-300">
+<div class="text-4xl font-black bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent mb-2">100%</div>
+<p class="text-white font-semibold text-lg">Test Coverage</p>
+<p class="text-slate-300 text-sm mt-2">Quality assured</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Complete Business Solution Section -->
+<section class="page-section reveal" id="business-solution" style="scroll-margin-top: 80px;">
+<div class="py-3">
+<div class="container mx-auto px-6 relative z-10">
+<div class="text-center mb-6 fade-in">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center justify-center gap-4">
+                        <i class="fas fa-cogs text-purple-400"></i>
+                        Complete Business Solution
+                    </h2>
+<p class="text-xl text-slate-300 max-w-3xl mx-auto font-semibold">
+                        Everything you need to run a modern service business, from customer management to field operations
+                    </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Customer Management -->
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-3 scale-in shadow-md hover:shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white/15">
+<div class="bg-gradient-to-br from-blue-500 to-blue-600 w-12 h-12 rounded-lg flex items-center justify-center mb-3 shadow-sm">
+<i class="fas fa-users text-white text-xl"></i>
+</div>
+<h3 class="text-xl font-bold text-white mb-2">Customer Management</h3>
+<ul class="text-slate-300 space-y-2">
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Complete customer profiles &amp; history
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Multi-location account management
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Service agreements &amp; contracts
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Advanced search &amp; filtering
+                            </li>
+</ul>
+</div>
+<!-- Smart Scheduling -->
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-3 scale-in shadow-md hover:shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white/15">
+<div class="bg-gradient-to-br from-green-500 to-green-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4 shadow-sm">
+<i class="fas fa-calendar-alt text-white text-xl"></i>
+</div>
+<h3 class="text-xl font-bold text-white mb-2">Smart Scheduling</h3>
+<ul class="text-slate-300 space-y-2">
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Intelligent work order scheduling
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Technician availability management
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Route optimization algorithms
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Real-time calendar integration
+                            </li>
+</ul>
+</div>
+<!-- Mobile Field Service -->
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-3 scale-in shadow-md hover:shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white/15">
+<div class="bg-gradient-to-br from-purple-500 to-purple-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4 shadow-sm">
+<i class="fas fa-mobile-alt text-white text-xl"></i>
+</div>
+<h3 class="text-xl font-bold text-white mb-2">Mobile Field Service</h3>
+<ul class="text-slate-300 space-y-2">
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Offline-capable mobile app
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Photo capture &amp; documentation
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Digital signature collection
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                GPS location tracking
+                            </li>
+</ul>
+</div>
+<!-- Billing & Payments -->
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-3 scale-in shadow-md hover:shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white/15">
+<div class="bg-gradient-to-br from-orange-500 to-orange-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4 shadow-sm">
+<i class="fas fa-credit-card text-white text-xl"></i>
+</div>
+<h3 class="text-xl font-bold text-white mb-2">Billing &amp; Payments</h3>
+<ul class="text-slate-300 space-y-2">
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Automated invoice generation
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Stripe payment processing
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                QuickBooks integration
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Customer payment portal
+                            </li>
+</ul>
+</div>
+<!-- Technician Management -->
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-3 scale-in shadow-md hover:shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white/15">
+<div class="bg-gradient-to-br from-indigo-500 to-indigo-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4 shadow-sm">
+<i class="fas fa-user-tie text-white text-xl"></i>
+</div>
+<h3 class="text-xl font-bold text-white mb-2">Technician Management</h3>
+<ul class="text-slate-300 space-y-2">
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Complete employee profiles
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Payroll &amp; time tracking
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                License &amp; certification tracking
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Performance evaluation system
+                            </li>
+</ul>
+</div>
+<!-- Analytics & Reporting -->
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-3 scale-in shadow-md hover:shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white/15">
+<div class="bg-gradient-to-br from-pink-500 to-pink-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4 shadow-sm">
+<i class="fas fa-chart-line text-white text-xl"></i>
+</div>
+<h3 class="text-xl font-bold text-white mb-2">Analytics &amp; Reporting</h3>
+<ul class="text-slate-300 space-y-2">
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Real-time business dashboards
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Revenue &amp; performance metrics
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Custom report generation
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Data export capabilities
+                            </li>
+</ul>
+</div>
+<!-- Global Smart Search -->
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-3 scale-in shadow-md hover:shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white/15">
+<div class="bg-gradient-to-br from-teal-500 to-teal-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4 shadow-sm">
+<i class="fas fa-search text-white text-xl"></i>
+</div>
+<h3 class="text-xl font-bold text-white mb-2">Global Smart Search</h3>
+<ul class="text-slate-300 space-y-2">
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Natural language processing
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Intent classification system
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Command execution (create, schedule)
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Search analytics &amp; tracking
+                            </li>
+</ul>
+</div>
+<!-- Work Order Management -->
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-3 scale-in shadow-md hover:shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white/15">
+<div class="bg-gradient-to-br from-cyan-500 to-cyan-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4 shadow-sm">
+<i class="fas fa-clipboard-list text-white text-xl"></i>
+</div>
+<h3 class="text-xl font-bold text-white mb-2">Work Order Management</h3>
+<ul class="text-slate-300 space-y-2">
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Complete work order lifecycle
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Technician assignment &amp; tracking
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Status management &amp; updates
+                            </li>
+<li class="flex items-center gap-2">
+<div class="w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+<i class="fas fa-check text-white text-xs"></i>
+</div>
+                                Service history tracking
+                            </li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="page-section reveal" id="ui-showcase" style="scroll-margin-top: 10px;">
+<div class="py-4 relative overflow-hidden" style="background-image: url('assets/images/Screenshot 2025-09-08 211517.png'); background-size: cover; background-position: center;">
+<div class="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-slate-800/75 to-slate-900/80"></div>
+<div class="container mx-auto px-6 relative z-10">
+<div class="text-center mb-6 fade-in">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-6 heading-shadow flex items-center justify-center gap-4">
+                        <i class="fas fa-palette text-blue-400" aria-hidden="true"></i>
+                        Modern Interface Design
+                    </h2>
+<p class="text-xl text-slate-300 max-w-3xl mx-auto font-semibold subheading-shadow">
+                        Experience the power of <span class="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">Vero</span><span class="bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">Field</span>
+</span> through our intuitive, professional interface
+                    </p>
+</div>
+<!-- VeroField Demo Video -->
+<div class="mb-8">
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6 shadow-md">
+<div class="text-center mb-6">
+<h3 class="text-2xl font-bold text-white mb-2 flex items-center justify-center">
+<i class="fas fa-play-circle text-purple-400" aria-hidden="true"></i>
+See&nbsp; <span class="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent"> Vero</span><span class="bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">Field </span>
+</span> &nbsp;in Action </h3>
+<p class="text-slate-300">Watch our comprehensive product demonstration</p>
+</div>
+<div class="relative max-w-4xl mx-auto">
+<video id="demoVideo" controls preload="none" class="w-full rounded-2xl shadow-lg" poster="assets/images/Screenshot 2025-09-08 211517.png">
+<p>Your browser does not support the video tag. <a href="assets/videos/demo_1_optimized.mp4" download>Download the video</a> to view it.</p>
+</video>
+<div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl pointer-events-none"></div>
+</div>
+</div>
+</div>
+
+<!-- Screenshots Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+<!-- Dashboard Screenshot -->
+<div class="glass-card card-hover card-shadow-soft p-5">
+<figure class="mb-4">
+<img src="assets/images/Analytics Dashboard.png" alt="VeroField Analytics Dashboard" class="w-full rounded-xl shadow-lg">
+<figcaption class="text-sm text-slate-400 mt-2">VeroField Analytics Dashboard</figcaption>
+</figure>
+<h3 class="text-2xl font-bold text-white mb-2 heading-shadow">Analytics Dashboard</h3>
+<p class="text-slate-300 mb-4 font-medium">
+                            Real-time business intelligence with revenue trends, customer health metrics, and performance analytics.
+                        </p>
+</div>
+<!-- Settings Interface -->
+<div class="glass-card card-hover card-shadow-soft p-5">
+<div class="bg-gradient-to-br from-slate-800 to-slate-900 w-16 h-16 rounded-2xl flex items-center justify-center mb-3 shadow-sm">
+<i class="fas fa-cog text-2xl text-white"></i>
+</div>
+<h3 class="text-2xl font-bold text-white mb-2 heading-shadow">Settings &amp; Configuration</h3>
+<p class="text-slate-300 mb-4 font-medium">
+                            Comprehensive system settings with user management, security controls, and customization options.
+                        </p>
+<figure class="bg-gradient-to-r from-slate-100 to-slate-200 rounded-2xl p-4 shadow-inner mb-2">
+<img alt="Settings &amp; Configuration" class="w-full h-32 object-cover rounded-xl" src="assets/images/settings.png"/>
+<figcaption class="text-xs text-slate-500 mt-2">Settings and configuration</figcaption>
+</figure>
+</div>
+<!-- Scheduling Interface -->
+<div class="glass-card card-hover card-shadow-soft p-5">
+<figure class="mb-4">
+<img src="assets/images/Smart Scheduling.png" alt="VeroField Smart Scheduling Interface" class="w-full rounded-xl shadow-lg">
+<figcaption class="text-sm text-slate-400 mt-2">Smart Scheduling Interface</figcaption>
+</figure>
+<h3 class="text-2xl font-bold text-white mb-2 heading-shadow">Smart Scheduling</h3>
+<p class="text-slate-300 mb-4 font-medium">
+                            Advanced scheduling with route optimization, technician management, and real-time map integration.
+                        </p>
+</div>
+<!-- Customizable Dashboard -->
+<div class="glass-card card-hover card-shadow-soft p-5">
+<figure class="mb-4">
+<img src="assets/images/Customizable Interface.png" alt="VeroField Customizable Interface" class="w-full rounded-xl shadow-lg">
+<figcaption class="text-sm text-slate-400 mt-2">Customizable Interface</figcaption>
+</figure>
+<h3 class="text-2xl font-bold text-white mb-2 heading-shadow">Customizable Interface</h3>
+<p class="text-slate-300 mb-4 font-medium">
+                            Drag-and-drop dashboard customization with real-time activity feeds and personalized layouts.
+                        </p>
+</div>
+</div>
+<!-- Key UI Features -->
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6 mb-4">
+<h3 class="text-2xl font-bold text-white mb-3 text-center heading-shadow">Interface Highlights</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="text-center">
+<div class="bg-gradient-to-br from-blue-500 to-blue-600 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3 shadow-sm">
+<i class="fas fa-search text-white"></i>
+</div>
+<h4 class="font-bold text-white mb-2 subheading-shadow">Smart Search</h4>
+<p class="text-sm text-slate-300">Natural language search with instant results</p>
+</div>
+<div class="text-center">
+<div class="bg-gradient-to-br from-purple-500 to-purple-600 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3 shadow-sm">
+<i class="fas fa-bell text-white"></i>
+</div>
+<h4 class="font-bold text-white mb-2 subheading-shadow">Real-time Notifications</h4>
+<p class="text-sm text-slate-300">Live updates and activity feeds</p>
+</div>
+<div class="text-center">
+<div class="bg-gradient-to-br from-green-500 to-green-600 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3 shadow-sm">
+<i class="fas fa-mobile-alt text-white"></i>
+</div>
+<h4 class="font-bold text-white mb-2 subheading-shadow">Mobile Responsive</h4>
+<p class="text-sm text-slate-300">Perfect on all devices and screen sizes</p>
+</div>
+<div class="text-center">
+<div class="bg-gradient-to-br from-orange-500 to-orange-600 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3 shadow-sm">
+<i class="fas fa-palette text-white"></i>
+</div>
+<h4 class="font-bold text-white mb-2 subheading-shadow">Modern Design</h4>
+<p class="text-sm text-slate-300">Clean, professional, and intuitive interface</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Comprehensive Screenshot Gallery -->
+<section class="page-section reveal" id="screenshot-gallery" style="scroll-margin-top: 80px;">
+<div class="py-4 relative overflow-hidden" style="background-image: url('assets/images/crm_bg.png'); background-size: cover; background-position: center;">
+<div class="absolute inset-0 bg-gradient-to-br from-slate-900/85 via-slate-800/80 to-slate-900/85"></div>
+<div class="container mx-auto px-6 relative z-10">
+<div class="text-center mb-8 fade-in">
+<h2 class="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center justify-center gap-4">
+<i class="fas fa-envelope text-blue-400"></i>
+Stay in the Loop
+</h2>
+<p class="text-xl text-slate-300 max-w-3xl mx-auto font-semibold">
+We're actively building <span class="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">Vero</span><span class="bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">Field</span>
+</span>. Join the waitlist for product updates, early access, and a demo invite at launch.
+</p>
+</div>
+<div class="max-w-4xl mx-auto text-center">
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-md">
+<h3 class="text-2xl font-bold text-white mb-6">Ready to Transform Your Business?</h3>
+<p class="text-slate-300 mb-8">Join the waitlist for product updates, early access, and a demo invite at launch.</p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center">
+<button onclick="openLearnMoreModal()" class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center gap-3">
+<i class="fas fa-info-circle"></i>
+Learn More
+</button>
+<button onclick="openWaitlistModal()" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center gap-3">
+<i class="fas fa-clipboard-list"></i>
+Join Waitlist
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+<!-- Interactive Feature Showcase -->
+<section class="page-section reveal" id="interactive-features" style="scroll-margin-top: 80px;">
+<div class="py-4 relative overflow-hidden" style="background-image: url('assets/images/Screenshot 2025-09-08 211611.png'); background-size: cover; background-position: center;">
+<div class="absolute inset-0 bg-gradient-to-br from-slate-900/85 via-slate-800/80 to-slate-900/85"></div>
+<div class="container mx-auto px-6 relative z-10">
+<div class="text-center mb-6 fade-in">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-6 heading-shadow flex items-center justify-center gap-0">
+                        <i class="fas fa-mouse-pointer text-green-400"></i>
+                        Interactive Features
+                    </h2>
+<p class="text-xl text-slate-300 max-w-3xl mx-auto font-semibold subheading-shadow">Follow our progress and be first to try <span class="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">Vero</span><span class="bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">Field</span>
+</span></p>
+</div>
+<!-- Dashboard Overview -->
+<div class="mb-6">
+<div class="card-glass rounded-3xl p-8 mb-8 reveal-stagger">
+<div class="flex items-center gap-4 mb-8">
+<div class="bg-gradient-to-br from-blue-500 to-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm">
+<i class="fas fa-tachometer-alt text-2xl text-white"></i>
+</div>
+<div>
+<h3 class="text-3xl font-bold text-white mb-2 heading-shadow">Dashboard Overview</h3>
+<p class="text-slate-300">Real-time KPIs, interactive charts, and activity feeds</p>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- KPI Cards -->
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
+<div class="flex items-center justify-between mb-4">
+<h4 class="text-lg font-semibold text-white">Monthly Revenue</h4>
+<i class="fas fa-chart-line text-green-400"></i>
+</div>
+<div class="text-3xl font-bold text-green-400 mb-2">$45,230</div>
+<div class="flex items-center gap-2">
+<div class="w-full bg-slate-700 rounded-full h-2">
+<div class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full progress-bar" style="width: 75%"></div>
+</div>
+<span class="text-sm text-slate-300">+12%</span>
+</div>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
+<div class="flex items-center justify-between mb-4">
+<h4 class="text-lg font-semibold text-white">Active Jobs</h4>
+<i class="fas fa-tasks text-blue-400"></i>
+</div>
+<div class="text-3xl font-bold text-blue-400 mb-2">127</div>
+<div class="flex items-center gap-2">
+<div class="w-full bg-slate-700 rounded-full h-2">
+<div class="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full progress-bar" style="width: 60%"></div>
+</div>
+<span class="text-sm text-slate-300">+8%</span>
+</div>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
+<div class="flex items-center justify-between mb-4">
+<h4 class="text-lg font-semibold text-white">Customer Satisfaction</h4>
+<i class="fas fa-star text-yellow-400"></i>
+</div>
+<div class="text-3xl font-bold text-yellow-400 mb-2">4.8/5</div>
+<div class="flex items-center gap-2">
+<div class="w-full bg-slate-700 rounded-full h-2">
+<div class="bg-gradient-to-r from-yellow-400 to-yellow-600 h-2 rounded-full progress-bar" style="width: 96%"></div>
+</div>
+<span class="text-sm text-slate-300">+0.2</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Customer Management -->
+<div class="mb-6">
+<div class="card-glass rounded-3xl p-8 mb-8">
+<div class="flex items-center gap-4 mb-8">
+<div class="bg-gradient-to-br from-purple-500 to-purple-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm">
+<i class="fas fa-users text-2xl text-white"></i>
+</div>
+<div>
+<h3 class="text-3xl font-bold text-white mb-2 heading-shadow">Customer Management</h3>
+<p class="text-slate-300">Comprehensive customer profiles with smooth interactions</p>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Customer List -->
+<div class="space-y-4">
+<h4 class="text-xl font-semibold text-white mb-4">Recent Customers</h4>
+<div class="space-y-3">
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-all duration-300 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                                                JD
+                                            </div>
+<div class="flex-1">
+<h5 class="font-semibold text-white">John Doe</h5>
+<p class="text-sm text-slate-300">john.doe@email.com</p>
+<p class="text-xs text-slate-400">Last service: 2 days ago</p>
+</div>
+<div class="text-right">
+<div class="text-sm font-semibold text-green-400">$2,450</div>
+<div class="text-xs text-slate-400">Total Value</div>
+</div>
+</div>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-all duration-300 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold">
+                                                SM
+                                            </div>
+<div class="flex-1">
+<h5 class="font-semibold text-white">Sarah Miller</h5>
+<p class="text-sm text-slate-300">sarah.miller@email.com</p>
+<p class="text-xs text-slate-400">Last service: 1 week ago</p>
+</div>
+<div class="text-right">
+<div class="text-sm font-semibold text-green-400">$1,890</div>
+<div class="text-xs text-slate-400">Total Value</div>
+</div>
+</div>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-all duration-300 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                                                RJ
+                                            </div>
+<div class="flex-1">
+<h5 class="font-semibold text-white">Robert Johnson</h5>
+<p class="text-sm text-slate-300">robert.j@email.com</p>
+<p class="text-xs text-slate-400">Last service: 3 days ago</p>
+</div>
+<div class="text-right">
+<div class="text-sm font-semibold text-green-400">$3,120</div>
+<div class="text-xs text-slate-400">Total Value</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Customer Profile Preview -->
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
+<h4 class="text-xl font-semibold text-white mb-4">Customer Profile</h4>
+<div class="space-y-4">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                                            JD
+                                        </div>
+<div>
+<h5 class="text-xl font-bold text-white">John Doe</h5>
+<p class="text-slate-300">Premium Customer</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-white/5 rounded-lg p-3">
+<div class="text-sm text-slate-400">Total Jobs</div>
+<div class="text-2xl font-bold text-white">24</div>
+</div>
+<div class="bg-white/5 rounded-lg p-3">
+<div class="text-sm text-slate-400">Satisfaction</div>
+<div class="text-2xl font-bold text-yellow-400">4.9★</div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-sm">
+<span class="text-slate-300">Service History</span>
+<span class="text-slate-400">24 services</span>
+</div>
+<div class="w-full bg-slate-700 rounded-full h-2">
+<div class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full" style="width: 85%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Work Orders & Job Management -->
+<div class="mb-6">
+<div class="card-glass rounded-3xl p-8 mb-8">
+<div class="flex items-center gap-4 mb-8">
+<div class="bg-gradient-to-br from-green-500 to-green-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm">
+<i class="fas fa-clipboard-list text-2xl text-white"></i>
+</div>
+<div>
+<h3 class="text-3xl font-bold text-white mb-2 heading-shadow">Work Orders &amp; Job Management</h3>
+<p class="text-slate-300">Drag-and-drop scheduling with visual calendar integration</p>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Job Status Cards -->
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
+<h4 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+<div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                                    Pending Jobs
+                                </h4>
+<div class="space-y-3">
+<div class="bg-white/5 rounded-lg p-3 hover:bg-white/10 transition-all duration-300 cursor-pointer">
+<div class="flex justify-between items-start">
+<div>
+<h5 class="font-semibold text-white text-sm">Pest Control - Office Building</h5>
+<p class="text-xs text-slate-400">123 Main St</p>
+</div>
+<span class="text-xs bg-yellow-400/20 text-yellow-400 px-2 py-1 rounded-full">High</span>
+</div>
+</div>
+<div class="bg-white/5 rounded-lg p-3 hover:bg-white/10 transition-all duration-300 cursor-pointer">
+<div class="flex justify-between items-start">
+<div>
+<h5 class="font-semibold text-white text-sm">Inspection - Residential</h5>
+<p class="text-xs text-slate-400">456 Oak Ave</p>
+</div>
+<span class="text-xs bg-blue-400/20 text-blue-400 px-2 py-1 rounded-full">Medium</span>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
+<h4 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+<div class="w-3 h-3 bg-blue-400 rounded-full"></div>
+                                    In Progress
+                                </h4>
+<div class="space-y-3">
+<div class="bg-white/5 rounded-lg p-3 hover:bg-white/10 transition-all duration-300 cursor-pointer">
+<div class="flex justify-between items-start">
+<div>
+<h5 class="font-semibold text-white text-sm">Termite Treatment</h5>
+<p class="text-xs text-slate-400">789 Pine St</p>
+</div>
+<span class="text-xs bg-green-400/20 text-green-400 px-2 py-1 rounded-full">Low</span>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
+<h4 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+<div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                                    Completed
+                                </h4>
+<div class="space-y-3">
+<div class="bg-white/5 rounded-lg p-3 hover:bg-white/10 transition-all duration-300 cursor-pointer">
+<div class="flex justify-between items-start">
+<div>
+<h5 class="font-semibold text-white text-sm">Routine Maintenance</h5>
+<p class="text-xs text-slate-400">321 Elm St</p>
+</div>
+<span class="text-xs bg-green-400/20 text-green-400 px-2 py-1 rounded-full">✓</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Search & Global Navigation -->
+<div class="mb-6">
+<div class="card-glass rounded-3xl p-8 mb-8">
+<div class="flex items-center gap-4 mb-8">
+<div class="bg-gradient-to-br from-indigo-500 to-indigo-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm">
+<i class="fas fa-search text-2xl text-white"></i>
+</div>
+<div>
+<h3 class="text-3xl font-bold text-white mb-2 heading-shadow">Smart Search &amp; Navigation</h3>
+<p class="text-slate-300">Predictive search with instant results and smooth navigation</p>
+</div>
+</div>
+<div class="max-w-2xl mx-auto">
+<div class="relative">
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-4 flex items-center gap-4">
+<i class="fas fa-search text-slate-400"></i>
+<input class="flex-1 bg-transparent text-white placeholder-slate-400 focus:outline-none" placeholder="Search customers, jobs, or reports..." type="text"/>
+<div class="flex gap-2">
+<button class="bg-purple-500/20 text-purple-400 px-3 py-1 rounded-lg text-sm hover:bg-purple-500/30 transition-all duration-300">
+                                            Customers
+                                        </button>
+<button class="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-lg text-sm hover:bg-blue-500/30 transition-all duration-300">
+                                            Jobs
+                                        </button>
+</div>
+</div>
+<!-- Search Suggestions -->
+<div class="absolute top-full left-0 right-0 mt-2 bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl p-4 space-y-2">
+<div class="flex items-center gap-3 p-2 hover:bg-white/10 rounded-lg cursor-pointer transition-all duration-300">
+<i class="fas fa-user text-blue-400"></i>
+<div>
+<div class="text-white font-medium">John Doe</div>
+<div class="text-sm text-slate-400">Customer • 123 Main St</div>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 hover:bg-white/10 rounded-lg cursor-pointer transition-all duration-300">
+<i class="fas fa-clipboard-list text-green-400"></i>
+<div>
+<div class="text-white font-medium">Job #1234 - Pest Control</div>
+<div class="text-sm text-slate-400">In Progress • 456 Oak Ave</div>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 hover:bg-white/10 rounded-lg cursor-pointer transition-all duration-300">
+<i class="fas fa-chart-bar text-purple-400"></i>
+<div>
+<div class="text-white font-medium">Monthly Revenue Report</div>
+<div class="text-sm text-slate-400">Report • Last updated 2 hours ago</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Mobile Responsive View -->
+<div class="mb-6">
+<div class="card-glass rounded-3xl p-8 mb-8">
+<div class="flex items-center gap-4 mb-8">
+<div class="bg-gradient-to-br from-pink-500 to-pink-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm">
+<i class="fas fa-mobile-alt text-2xl text-white"></i>
+</div>
+<div>
+<h3 class="text-3xl font-bold text-white mb-2 heading-shadow">Mobile &amp; Responsive Design</h3>
+<p class="text-slate-300">Perfect experience across all devices with touch-friendly interactions</p>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Mobile Preview -->
+<div class="bg-slate-800 rounded-2xl p-4 max-w-sm mx-auto">
+<div class="bg-slate-700 rounded-lg p-4 mb-4">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+<i class="fas fa-bug text-white text-sm"></i>
+</div>
+<span class="text-white font-bold text-sm"><span class="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">Vero</span><span class="bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">Field</span>
+</span></span>
+</div>
+<i class="fas fa-bell text-slate-400"></i>
+</div>
+<div class="space-y-3">
+<div class="bg-white/10 rounded-lg p-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                                    JD
+                                                </div>
+<div class="flex-1">
+<div class="text-white font-medium text-sm">John Doe</div>
+<div class="text-slate-400 text-xs">Pest Control - Office</div>
+</div>
+<span class="text-xs bg-yellow-400/20 text-yellow-400 px-2 py-1 rounded-full">Pending</span>
+</div>
+</div>
+<div class="bg-white/10 rounded-lg p-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                                    SM
+                                                </div>
+<div class="flex-1">
+<div class="text-white font-medium text-sm">Sarah Miller</div>
+<div class="text-slate-400 text-xs">Inspection - Residential</div>
+</div>
+<span class="text-xs bg-green-400/20 text-green-400 px-2 py-1 rounded-full">Complete</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Features List -->
+<div class="space-y-6">
+<div class="flex items-start gap-4">
+<div class="bg-gradient-to-br from-blue-500 to-blue-600 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-hand-pointer text-white"></i>
+</div>
+<div>
+<h4 class="text-xl font-semibold text-white mb-2">Touch-Optimized Interface</h4>
+<p class="text-slate-300">Large buttons, swipe gestures, and intuitive mobile navigation designed for field technicians.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="bg-gradient-to-br from-green-500 to-green-600 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+<i class="fas fa-sync-alt text-white"></i>
+</div>
+<div>
+<h4 class="text-xl font-semibold text-white mb-2">Offline Sync</h4>
+<p class="text-slate-300">Work without internet connection and sync data when connectivity is restored.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="bg-gradient-to-br from-purple-500 to-purple-600 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+<i class="fas fa-camera text-white"></i>
+</div>
+<div>
+<h4 class="text-xl font-semibold text-white mb-2">Photo &amp; Signature Capture</h4>
+<p class="text-slate-300">Capture job photos, customer signatures, and document work completion on the go.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div class="section-divider"></div>
+<!-- Advanced Features Section -->
+<section class="page-section reveal" id="roadmap" style="scroll-margin-top: 80px;">
+<div class="py-3">
+<div class="container mx-auto px-6">
+<div class="text-center mb-6 fade-in">
+<h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                        Advanced Capabilities
+                    </h2>
+<p class="text-xl text-slate-300 max-w-3xl mx-auto font-semibold">
+                        Enterprise-grade features that set <span class="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">Vero</span><span class="bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">Field</span>
+</span> apart from the competition
+                    </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+<div class="space-y-8 slide-left">
+<div class="flex items-start gap-6">
+<div class="bg-gradient-to-br from-green-500 to-green-600 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+<i class="fas fa-shield-alt text-white"></i>
+</div>
+<div>
+<h3 class="text-xl font-bold text-white mb-2">Multi-Tenant Security</h3>
+<p class="text-slate-300 font-semibold">Row-level security with complete tenant isolation. Each customer's data is completely separated and secure.</p>
+</div>
+</div>
+<div class="flex items-start gap-6">
+<div class="bg-gradient-to-br from-green-500 to-green-600 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+<i class="fas fa-route text-white"></i>
+</div>
+<div>
+<h3 class="text-xl font-bold text-white mb-2">Route Optimization</h3>
+<p class="text-slate-300 font-semibold">Advanced algorithms optimize technician routes, reducing travel time by up to 30% and improving efficiency.</p>
+</div>
+</div>
+<div class="flex items-start gap-6">
+<div class="bg-gradient-to-br from-green-500 to-green-600 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+<i class="fas fa-comments text-white"></i>
+</div>
+<div>
+<h3 class="text-xl font-bold text-white mb-2">Communication Engine</h3>
+<p class="text-slate-300 font-semibold">Automated SMS and email notifications with customizable templates and delivery tracking.</p>
+</div>
+</div>
+<div class="flex items-start gap-6">
+<div class="bg-gradient-to-br from-green-500 to-green-600 w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+<i class="fas fa-boxes text-white"></i>
+</div>
+<div>
+<h3 class="text-xl font-bold text-white mb-2">Inventory Management</h3>
+<p class="text-slate-300 font-semibold">Track chemicals, equipment, and supplies with compliance reporting and automated reorder alerts.</p>
+</div>
+</div>
+</div>
+<div class="relative slide-right">
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-8">
+<div class="text-center mb-8">
+<h3 class="text-2xl font-bold text-white mb-2 heading-shadow">System Architecture</h3>
+<p class="text-slate-300 font-semibold">Modern, scalable AWS cloud infrastructure for maximum reliability</p>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 bg-white/10 rounded-lg">
+<div class="flex items-center gap-3">
+<i class="fas fa-server text-white"></i>
+<span class="font-semibold text-white">Backend API</span>
+</div>
+<span class="text-sm text-green-400 font-semibold">NestJS + TypeScript</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-white/10 rounded-lg">
+<div class="flex items-center gap-3">
+<i class="fas fa-database text-white"></i>
+<span class="font-semibold text-white">Database</span>
+</div>
+<span class="text-sm text-green-400 font-semibold">Supabase + Prisma</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-white/10 rounded-lg">
+<div class="flex items-center gap-3">
+<i class="fas fa-mobile-alt text-white"></i>
+<span class="font-semibold text-white">Frontend</span>
+</div>
+<span class="text-sm text-green-400 font-semibold">React + TypeScript</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-white/10 rounded-lg">
+<div class="flex items-center gap-3">
+<i class="fas fa-shield-alt text-white"></i>
+<span class="font-semibold text-white">Security</span>
+</div>
+<span class="text-sm text-green-400 font-semibold">JWT + RLS</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-white/10 rounded-lg">
+<div class="flex items-center gap-3">
+<i class="fas fa-users text-white"></i>
+<span class="font-semibold text-white">Multi-tenant</span>
+</div>
+<span class="text-sm text-green-400 font-semibold">Tenant Isolation</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-white/10 rounded-lg">
+<div class="flex items-center gap-3">
+<i class="fas fa-search text-white"></i>
+<span class="font-semibold text-white">Search</span>
+</div>
+<span class="text-sm text-green-400 font-semibold">Global Smart Search</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Enterprise Capabilities -->
+<section class="page-section reveal" id="enterprise-capabilities" style="scroll-margin-top: 80px;">
+<div class="py-2 relative overflow-hidden" style="background-image: url('assets/images/crm_bg.png'); background-size: cover; background-position: center;">
+<div class="absolute inset-0 bg-gradient-to-br from-slate-900/85 via-slate-800/80 to-slate-900/85"></div>
+<div class="container mx-auto px-6 relative z-10">
+<div class="text-center mb-6 fade-in">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-6 heading-shadow flex items-center justify-center gap-4">
+                        <i class="fas fa-shield-alt text-yellow-400"></i>
+                        Enterprise-Grade Capabilities
+                    </h2>
+<p class="text-xl text-slate-300 max-w-4xl mx-auto font-semibold subheading-shadow">
+                        Comprehensive business management features that scale with your growth
+                    </p>
+</div>
+<!-- Advanced CRM & Customer Management -->
+<div class="mb-6">
+<div class="card-glass rounded-3xl p-6 mb-4">
+<div class="flex items-center gap-4 mb-4">
+<div class="bg-gradient-to-br from-blue-500 to-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm">
+<i class="fas fa-users text-2xl text-white"></i>
+</div>
+<div>
+<h3 class="text-3xl font-bold text-white mb-2 heading-shadow">Advanced CRM &amp; Customer Intelligence</h3>
+<p class="text-slate-300">Complete customer lifecycle management with intelligent insights</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-layer-group text-blue-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Customer Segmentation</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Dynamic customer segments with custom service types, pricing tiers, and compliance requirements</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Commercial vs Residential segments</li>
+<li>• Custom pricing tiers per segment</li>
+<li>• Compliance requirement mapping</li>
+</ul>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-chart-line text-green-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Customer Analytics</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Advanced customer behavior tracking and predictive analytics</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Service history analysis</li>
+<li>• Customer lifetime value</li>
+<li>• Churn prediction models</li>
+</ul>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-handshake text-purple-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Service Agreements</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Complete contract management and service agreement tracking</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Automated contract generation</li>
+<li>• Renewal tracking &amp; alerts</li>
+<li>• Terms &amp; conditions management</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Inventory & Compliance Management -->
+<div class="mb-6">
+<div class="card-glass rounded-3xl p-6 mb-4">
+<div class="flex items-center gap-4 mb-4">
+<div class="bg-gradient-to-br from-orange-500 to-orange-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm">
+<i class="fas fa-boxes text-2xl text-white"></i>
+</div>
+<div>
+<h3 class="text-3xl font-bold text-white mb-2 heading-shadow">Inventory &amp; Compliance Management</h3>
+<p class="text-slate-300">Complete chemical tracking, safety compliance, and regulatory reporting</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-flask text-red-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Chemical Inventory</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Complete chemical tracking with usage logging and safety data sheets</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Real-time inventory tracking</li>
+<li>• Safety data sheet management</li>
+<li>• Usage logging &amp; reporting</li>
+</ul>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-shield-alt text-yellow-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Compliance Reporting</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Automated regulatory compliance reporting and audit trails</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• EPA compliance tracking</li>
+<li>• Automated report generation</li>
+<li>• Audit trail maintenance</li>
+</ul>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-bell text-indigo-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Smart Alerts</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Intelligent alerts for low stock, expirations, and compliance issues</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Low stock notifications</li>
+<li>• Expiration date alerts</li>
+<li>• Compliance deadline warnings</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Knowledge Management & Training -->
+<div class="mb-6">
+<div class="card-glass rounded-3xl p-6 mb-4">
+<div class="flex items-center gap-4 mb-4">
+<div class="bg-gradient-to-br from-indigo-500 to-indigo-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm">
+<i class="fas fa-graduation-cap text-2xl text-white"></i>
+</div>
+<div>
+<h3 class="text-3xl font-bold text-white mb-2 heading-shadow">Knowledge Management &amp; Training</h3>
+<p class="text-slate-300">Comprehensive employee training system with knowledge base and certification tracking</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-book text-blue-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Knowledge Base</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Centralized knowledge repository with searchable content and version control</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Service procedures &amp; protocols</li>
+<li>• Safety guidelines &amp; best practices</li>
+<li>• Product information &amp; MSDS</li>
+</ul>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-certificate text-green-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Training &amp; Certification</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Employee training programs with certification tracking and renewal alerts</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Interactive training modules</li>
+<li>• Certification tracking</li>
+<li>• Renewal notifications</li>
+</ul>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-chart-bar text-purple-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Performance Analytics</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Training progress tracking and performance analytics for continuous improvement</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Training completion rates</li>
+<li>• Knowledge assessment scores</li>
+<li>• Skill gap analysis</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Advanced Financial Management -->
+<div class="mb-6">
+<div class="card-glass rounded-3xl p-6 mb-4">
+<div class="flex items-center gap-4 mb-4">
+<div class="bg-gradient-to-br from-green-500 to-green-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm">
+<i class="fas fa-dollar-sign text-2xl text-white"></i>
+</div>
+<div>
+<h3 class="text-3xl font-bold text-white mb-2 heading-shadow">Advanced Financial Management</h3>
+<p class="text-slate-300">Complete billing, payment processing, and accounting integration</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-file-invoice text-green-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Invoice Management</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Complete invoice lifecycle with automated generation and tracking</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Automated invoice generation</li>
+<li>• PDF creation &amp; delivery</li>
+<li>• Payment tracking &amp; history</li>
+</ul>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-credit-card text-blue-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Payment Processing</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Stripe integration with multiple payment methods and reconciliation</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Stripe payment processing</li>
+<li>• Multiple payment methods</li>
+<li>• Payment reconciliation</li>
+</ul>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-calculator text-purple-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">QuickBooks Integration</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Seamless accounting system synchronization and data consistency</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Customer &amp; invoice sync</li>
+<li>• Payment reconciliation</li>
+<li>• Financial reporting</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Communications Engine -->
+<div class="mb-6">
+<div class="card-glass rounded-3xl p-6 mb-4">
+<div class="flex items-center gap-4 mb-4">
+<div class="bg-gradient-to-br from-pink-500 to-pink-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm">
+<i class="fas fa-comments text-2xl text-white"></i>
+</div>
+<div>
+<h3 class="text-3xl font-bold text-white mb-2 heading-shadow">Communications Engine</h3>
+<p class="text-slate-300">Automated customer communications with SMS, email, and delivery tracking</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-sms text-blue-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">SMS Notifications</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Twilio-powered SMS with automated scheduling and delivery tracking</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Appointment reminders</li>
+<li>• Service confirmations</li>
+<li>• Delivery status tracking</li>
+</ul>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-envelope text-green-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Email Campaigns</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">SendGrid integration with customizable templates and analytics</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Custom email templates</li>
+<li>• Automated campaigns</li>
+<li>• Open &amp; click tracking</li>
+</ul>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-cog text-orange-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Communication Preferences</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Customer communication preferences and automated scheduling</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Preference management</li>
+<li>• Automated scheduling</li>
+<li>• Opt-out handling</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Advanced Route Optimization -->
+<div class="mb-6">
+<div class="card-glass rounded-3xl p-6 mb-4">
+<div class="flex items-center gap-4 mb-4">
+<div class="bg-gradient-to-br from-teal-500 to-teal-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm">
+<i class="fas fa-route text-2xl text-white"></i>
+</div>
+<div>
+<h3 class="text-3xl font-bold text-white mb-2 heading-shadow">Advanced Route Optimization</h3>
+<p class="text-slate-300">Sophisticated routing algorithms with Google Maps integration and real-time optimization</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-map-marked-alt text-blue-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Google Maps Integration</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Full mapping integration with distance matrix and real-time traffic data</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Real-time traffic updates</li>
+<li>• Distance matrix calculations</li>
+<li>• Turn-by-turn navigation</li>
+</ul>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-brain text-green-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">AI-Powered Algorithms</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Advanced routing algorithms including 2-opt and genetic algorithms</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• 2-opt optimization</li>
+<li>• Genetic algorithms</li>
+<li>• Constraint handling</li>
+</ul>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-clock text-orange-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Time Window Management</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Complex scheduling with time windows and vehicle capacity constraints</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Time window constraints</li>
+<li>• Vehicle capacity limits</li>
+<li>• ETA calculations</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- System Architecture & Security -->
+<div class="mb-6">
+<div class="card-glass rounded-3xl p-6 mb-4">
+<div class="flex items-center gap-4 mb-4">
+<div class="bg-gradient-to-br from-red-500 to-red-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm">
+<i class="fas fa-shield-alt text-2xl text-white"></i>
+</div>
+<div>
+<h3 class="text-3xl font-bold text-white mb-2 heading-shadow">Enterprise Security &amp; Architecture</h3>
+<p class="text-slate-300">Production-ready security, compliance, and scalable architecture</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-lock text-red-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Security &amp; Compliance</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">PCI compliance, data encryption, and comprehensive audit logging</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• PCI DSS compliance</li>
+<li>• End-to-end encryption</li>
+<li>• Comprehensive audit trails</li>
+</ul>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-database text-blue-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Multi-Tenant Architecture</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Row-level security with complete tenant isolation and scalability</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Row-level security (RLS)</li>
+<li>• Complete tenant isolation</li>
+<li>• Scalable architecture</li>
+</ul>
+</div>
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+<i class="fas fa-rocket text-green-400"></i>
+</div>
+<h4 class="text-lg font-semibold text-white">Performance &amp; Scalability</h4>
+</div>
+<p class="text-slate-300 text-sm mb-3">Optimized performance with caching, load testing, and monitoring</p>
+<ul class="text-xs text-slate-400 space-y-1">
+<li>• Redis caching strategy</li>
+<li>• Load testing validation</li>
+<li>• Performance monitoring</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Enterprise Security Section -->
+<section class="page-section reveal" id="enterprise-security" style="scroll-margin-top: 80px;">
+<div class="py-2 relative overflow-hidden" style="background-image: url('assets/images/crm_bg.png'); background-size: cover; background-position: center;">
+<div class="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-800/85 to-slate-900/90"></div>
+<div class="container mx-auto px-6 relative z-10">
+<div class="text-center mb-8 fade-in">
+<h2 class="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center justify-center gap-4">
+<i class="fas fa-shield-alt text-orange-400"></i>
+Enterprise-Grade Security & Reliability
+</h2>
+<p class="text-xl text-slate-300 max-w-3xl mx-auto font-semibold">
+Built on AWS for maximum security, uptime, and scalability
+</p>
+</div>
+<div class="max-w-6xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-md text-center">
+<div class="bg-gradient-to-br from-orange-500 to-orange-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+<i class="fas fa-shield-alt text-white text-2xl"></i>
+</div>
+<h3 class="text-2xl font-bold text-white mb-4">99.9% Uptime SLA</h3>
+<p class="text-slate-300">AWS infrastructure ensures your business never stops with enterprise-grade reliability and redundancy</p>
+</div>
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-md text-center">
+<div class="bg-gradient-to-br from-blue-500 to-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+<i class="fas fa-lock text-white text-2xl"></i>
+</div>
+<h3 class="text-2xl font-bold text-white mb-4">Bank-Level Security</h3>
+<p class="text-slate-300">SOC 2 Type II compliant with end-to-end encryption, secure data centers, and advanced threat protection</p>
+</div>
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-md text-center">
+<div class="bg-gradient-to-br from-green-500 to-green-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+<i class="fas fa-expand-arrows-alt text-white text-2xl"></i>
+</div>
+<h3 class="text-2xl font-bold text-white mb-4">Auto-Scaling</h3>
+<p class="text-slate-300">Seamlessly handles growth from startup to enterprise with automatic resource scaling and load balancing</p>
+</div>
+</div>
+<div class="mt-12 text-center">
+<div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8 inline-block">
+<h4 class="text-2xl font-bold text-white mb-4">Trusted by Enterprise</h4>
+<p class="text-slate-300 mb-6">Built on enterprise cloud infrastructure trusted by Fortune 500 companies worldwide</p>
+<div class="flex items-center justify-center gap-8 opacity-60">
+<a href="https://aws.amazon.com/what-is-cloud-computing"><img src="https://d0.awsstatic.com/logos/powered-by-aws-white.png" alt="Powered by AWS Cloud Computing" style="height: 40px;"></a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Seamless Integrations Section -->
+<section class="page-section reveal" id="integrations" style="scroll-margin-top: 80px;">
+<div class="py-4 relative overflow-hidden" style="background-image: url('assets/images/crm_bg.png'); background-size: cover; background-position: center;">
+<div class="absolute inset-0 bg-gradient-to-br from-slate-900/85 via-slate-800/80 to-slate-900/85"></div>
+<div class="container mx-auto px-6 relative z-10">
+<div class="text-center mb-6 fade-in">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center justify-center gap-4">
+                        <i class="fas fa-plug text-orange-400"></i>
+                        Seamless Integrations
+                    </h2>
+<p class="text-xl text-slate-300 max-w-3xl mx-auto font-semibold">
+                        Connect with the tools your business already uses
+                    </p>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 justify-items-center items-stretch">
+<!-- Stripe -->
+<div class="glass-card card-hover card-shadow-soft rounded-2xl p-3 h-full flex">
+<div class="text-center flex flex-col justify-between w-full">
+<div class="bg-gradient-to-br from-purple-500 to-purple-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+<i class="fas fa-credit-card text-white text-2xl"></i>
+</div>
+<h3 class="text-xl font-bold text-white mb-2">Stripe</h3>
+<p class="text-slate-300">Payments</p>
+<div class="mt-auto"></div>
+</div>
+</div>
+<!-- QuickBooks -->
+<div class="glass-card card-hover card-shadow-soft rounded-2xl p-3 h-full flex">
+<div class="text-center flex flex-col justify-between w-full">
+<div class="bg-gradient-to-br from-blue-500 to-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+<i class="fas fa-calculator text-white text-2xl"></i>
+</div>
+<h3 class="text-xl font-bold text-white mb-2">QuickBooks</h3>
+<p class="text-slate-300">Accounting</p>
+<div class="mt-auto"></div>
+</div>
+</div>
+<!-- Twilio -->
+<div class="glass-card card-hover card-shadow-soft rounded-2xl p-3 h-full flex">
+<div class="text-center flex flex-col justify-between w-full">
+<div class="bg-gradient-to-br from-red-500 to-red-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+<i class="fas fa-sms text-white text-2xl"></i>
+</div>
+<h3 class="text-xl font-bold text-white mb-2">Twilio</h3>
+<p class="text-slate-300">SMS</p>
+<div class="mt-auto"></div>
+</div>
+</div>
+<!-- SendGrid -->
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-3 scale-in shadow-md hover:shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white/15">
+<div class="text-center">
+<div class="bg-gradient-to-br from-orange-500 to-orange-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+<i class="fas fa-envelope text-white text-2xl"></i>
+</div>
+<h3 class="text-xl font-bold text-white mb-2">SendGrid</h3>
+<p class="text-slate-300">Email</p>
+</div>
+</div>
+<!-- Google Maps -->
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-3 scale-in shadow-md hover:shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white/15">
+<div class="text-center">
+<div class="bg-gradient-to-br from-yellow-500 to-yellow-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+<i class="fas fa-map-marked-alt text-white text-2xl"></i>
+</div>
+<h3 class="text-xl font-bold text-white mb-2">Google Maps</h3>
+<p class="text-slate-300">Routing</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div class="section-divider"></div>
+<!-- Proven Business Impact Section -->
+<section class="page-section reveal" id="business-impact" style="scroll-margin-top: 80px;">
+<div class="py-4 relative overflow-hidden" style="background-image: url('assets/images/crm_bg.png'); background-size: cover; background-position: center;">
+<div class="absolute inset-0 bg-gradient-to-br from-slate-900/85 via-slate-800/80 to-slate-900/85"></div>
+<div class="container mx-auto px-6 relative z-10">
+<div class="text-center mb-6 fade-in">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center justify-center gap-4">
+                        <i class="fas fa-chart-line text-emerald-400"></i>
+                        How VeroField Improves Business Productivity
+                    </h2>
+<p class="text-xl text-slate-300 max-w-3xl mx-auto font-semibold">
+                        Transform your service business with measurable efficiency gains
+                    </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Time Savings -->
+<div class="glass-card card-hover card-shadow-soft p-6 scale-in text-center">
+<div class="text-6xl font-black bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent mb-4">40%</div>
+<h3 class="text-2xl font-bold text-white mb-3">Time Savings</h3>
+<p class="text-slate-300">Reduce administrative tasks and manual processes with automated workflows and smart scheduling</p>
+</div>
+<!-- Revenue Growth -->
+<div class="glass-card card-hover card-shadow-soft p-6 scale-in text-center">
+<div class="text-6xl font-black bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent mb-4">30%</div>
+<h3 class="text-2xl font-bold text-white mb-3">Revenue Growth</h3>
+<p class="text-slate-300">Increase job capacity and customer satisfaction with optimized routes and better service delivery</p>
+</div>
+<!-- Cost Reduction -->
+<div class="glass-card card-hover card-shadow-soft p-6 scale-in text-center">
+<div class="text-6xl font-black bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent mb-4">25%</div>
+<h3 class="text-2xl font-bold text-white mb-3">Cost Reduction</h3>
+<p class="text-slate-300">Lower operational costs through efficient resource management and reduced fuel consumption</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Stay in the Loop Section -->
+<section class="page-section reveal" id="contact" style="scroll-margin-top: 80px;">
+<div class="py-4 relative overflow-hidden" style="background-image: url('assets/images/crm_bg.png'); background-size: cover; background-position: center;">
+<div class="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-800/85 to-slate-900/90"></div>
+<div class="container mx-auto px-6 relative z-10">
+<div class="text-center mb-8 fade-in">
+<h2 class="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center justify-center gap-4">
+<i class="fas fa-envelope text-blue-400"></i>
+Stay in the Loop
+</h2>
+<p class="text-xl text-slate-300 max-w-3xl mx-auto font-semibold">
+We're actively building VeroField. Join the waitlist for product updates, early access, and a demo invite at launch.
+</p>
+</div>
+<div class="max-w-4xl mx-auto text-center">
+<div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-md">
+<h3 class="text-2xl font-bold text-white mb-6">Ready to Transform Your Business?</h3>
+<p class="text-slate-300 mb-8">Get started with VeroField and join thousands of service businesses already improving their operations.</p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center">
+<button onclick="openLearnMoreModal()" class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center gap-3">
+<i class="fas fa-info-circle"></i>
+Learn More
+</button>
+<button onclick="openWaitlistModal()" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center gap-3">
+<i class="fas fa-clipboard-list"></i>
+Join Waitlist
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+<!-- Footer -->
+<div class="bg-slate-900 text-white py-4">
+<div class="container mx-auto px-6">
+<div class="text-center">
+<div class="flex items-center justify-center gap-3 mb-6">
+<div class="icon-gradient w-12 h-12 rounded-xl flex items-center justify-center">
+<i class="fas fa-tools text-4xl text-white" aria-hidden="true"></i>
+</div>
+<span class="text-3xl font-bold">
+<span class="bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">Vero</span><span class="bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">Field</span>
+</span>
+</div>
+<p class="text-slate-300 mb-4 font-medium">
+                    The Complete Service Management Platform
+                </p>
+<div class="text-center text-sm text-slate-400">
+<span>© 2025 VeroField. All rights reserved.</span>
+<div class="mt-2">
+<a href="terms-and-conditions.html" class="text-slate-400 hover:text-white transition-colors duration-300 underline">Terms and Conditions</a>
+<span class="mx-2">|</span>
+<a href="privacy-policy.html" class="text-slate-400 hover:text-white transition-colors duration-300 underline">Privacy Policy</a>
+</div>
+<div class="mt-2 text-xs text-slate-500">
+Amazon Web Services and the Powered by AWS logo are trademarks of Amazon.com, Inc. or its affiliates.
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Learn More Modal -->
+<div id="learnMoreModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="learnMoreTitle" aria-describedby="learnMoreDesc">
+<div class="modal-content" tabindex="-1" style="max-width: 600px;">
+<button class="close" type="button" aria-label="Close dialog" onclick="closeLearnMoreModal()">&times;</button>
+<h2 id="learnMoreTitle" class="sr-only">Learn More</h2>
+<h2 class="text-2xl font-bold text-white mb-6 text-center">Get Started with VeroField</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<h3 class="text-lg font-bold text-white mb-3">Implementation Process</h3>
+<div class="space-y-3">
+<div class="flex items-start gap-3">
+<div class="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs">1</div>
+<div>
+<h4 class="text-white font-semibold text-sm">Initial Consultation</h4>
+<p class="text-slate-300 text-xs">Free 30-minute consultation to understand your business needs</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs">2</div>
+<div>
+<h4 class="text-white font-semibold text-sm">Custom Setup</h4>
+<p class="text-slate-300 text-xs">Configure VeroField to match your business processes</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs">3</div>
+<div>
+<h4 class="text-white font-semibold text-sm">Data Migration</h4>
+<p class="text-slate-300 text-xs">Seamless transfer of your existing data</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs">4</div>
+<div>
+<h4 class="text-white font-semibold text-sm">Team Training</h4>
+<p class="text-slate-300 text-xs">Comprehensive training for all users</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs">5</div>
+<div>
+<h4 class="text-white font-semibold text-sm">Go Live</h4>
+<p class="text-slate-300 text-xs">Launch with full support and monitoring</p>
+</div>
+</div>
+</div>
+</div>
+<div>
+<h3 class="text-lg font-bold text-white mb-3">Support & Resources</h3>
+<div class="space-y-3">
+<div class="bg-white/10 rounded-lg p-3">
+<h4 class="text-white font-semibold text-sm mb-1">24/7 Support</h4>
+<p class="text-slate-300 text-xs">Dedicated support team available around the clock</p>
+</div>
+<div class="bg-white/10 rounded-lg p-3">
+<h4 class="text-white font-semibold text-sm mb-1">Training Resources</h4>
+<p class="text-slate-300 text-xs">Video tutorials, documentation, and live training sessions</p>
+</div>
+<div class="bg-white/10 rounded-lg p-3">
+<h4 class="text-white font-semibold text-sm mb-1">Success Manager</h4>
+<p class="text-slate-300 text-xs">Dedicated success manager to ensure your success</p>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-6 text-center">
+</div>
+</div>
+</div>
+<!-- Waitlist Modal -->
+<div id="waitlistModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="waitlistTitle" aria-describedby="waitlistDesc">
+<div class="modal-content" tabindex="-1" style="max-width: 600px;">
+<button class="close" type="button" aria-label="Close dialog" onclick="closeWaitlistModal()">&times;</button>
+<h2 id="waitlistTitle" class="sr-only">Join Waitlist</h2>
+<h2 class="text-2xl font-bold text-white mb-6 text-center">Join the VeroField Waitlist</h2>
+<form class="space-y-3" id="waitlistForm" role="form" aria-label="Contact form for waitlist signup">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+<div>
+<label class="block text-white font-semibold mb-1 text-xs">First Name</label>
+<input type="text" name="firstName" required class="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-all duration-300 text-xs" placeholder="John">
+</div>
+<div>
+<label class="block text-white font-semibold mb-1 text-xs">Last Name</label>
+<input type="text" name="lastName" required class="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-all duration-300 text-xs" placeholder="Doe">
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+<div>
+<label class="block text-white font-semibold mb-1 text-xs">Email</label>
+<input type="email" name="email" required class="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-all duration-300 text-xs" placeholder="john@company.com">
+</div>
+<div>
+<label class="block text-white font-semibold mb-1 text-xs">Company</label>
+<input type="text" name="company" class="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-all duration-300 text-xs" placeholder="Your Company">
+</div>
+</div>
+<div>
+<label class="block text-white font-semibold mb-1 text-xs">Message</label>
+<textarea name="message" rows="2" class="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-all duration-300 text-xs" placeholder="Tell us about your business needs..."></textarea>
+</div>
+<div class="flex items-start gap-2">
+<input type="checkbox" id="emailConsent" name="emailConsent" required class="mt-1 w-4 h-4 text-purple-600 bg-white/10 border-white/20 rounded focus:ring-purple-500 focus:ring-2">
+<label for="emailConsent" class="text-white text-xs">
+I agree to receive email communications from VeroField about product updates, news, and marketing materials. You can unsubscribe at any time.
+<span class="text-red-400">*</span>
+</label>
+</div>
+<button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+<i class="fas fa-paper-plane"></i>
+Join Waitlist
+</button>
+</form>
+</div>
+</div>
+
+<!-- Getting Started Modal -->
+<div id="gettingStartedModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="gettingStartedTitle" aria-describedby="gettingStartedDesc">
+<div class="modal-content" tabindex="-1">
+<button class="close" type="button" aria-label="Close dialog" onclick="closeGettingStartedModal()">&times;</button>
+<h2 id="gettingStartedTitle" class="sr-only">Get Started</h2>
+<h2 class="text-3xl font-bold text-white mb-6 text-center">Get Started with VeroField</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div>
+<h3 class="text-xl font-bold text-white mb-4">Implementation Process</h3>
+<div class="space-y-4">
+<div class="flex items-start gap-3">
+<div class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">1</div>
+<div>
+<h4 class="text-white font-semibold">Initial Consultation</h4>
+<p class="text-slate-300 text-sm">Free 30-minute consultation to understand your business needs</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">2</div>
+<div>
+<h4 class="text-white font-semibold">Custom Setup</h4>
+<p class="text-slate-300 text-sm">Configure VeroField to match your business processes</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">3</div>
+<div>
+<h4 class="text-white font-semibold">Data Migration</h4>
+<p class="text-slate-300 text-sm">Seamless transfer of your existing data</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">4</div>
+<div>
+<h4 class="text-white font-semibold">Team Training</h4>
+<p class="text-slate-300 text-sm">Comprehensive training for all users</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">5</div>
+<div>
+<h4 class="text-white font-semibold">Go Live</h4>
+<p class="text-slate-300 text-sm">Launch with full support and monitoring</p>
+</div>
+</div>
+</div>
+</div>
+<div>
+<h3 class="text-xl font-bold text-white mb-4">Support & Resources</h3>
+<div class="space-y-4">
+<div class="bg-white/10 rounded-lg p-4">
+<h4 class="text-white font-semibold mb-2">24/7 Support</h4>
+<p class="text-slate-300 text-sm">Dedicated support team available around the clock</p>
+</div>
+<div class="bg-white/10 rounded-lg p-4">
+<h4 class="text-white font-semibold mb-2">Training Resources</h4>
+<p class="text-slate-300 text-sm">Video tutorials, documentation, and live training sessions</p>
+</div>
+<div class="bg-white/10 rounded-lg p-4">
+<h4 class="text-white font-semibold mb-2">Success Manager</h4>
+<p class="text-slate-300 text-sm">Dedicated success manager to ensure your success</p>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-8 text-center">
+<div class="flex flex-col sm:flex-row gap-4 justify-center">
+<a href="tel:+1-555-VEROFIELD" class="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg transition-all duration-300">
+<i class="fas fa-phone"></i>
+Call Us: (555) VEROFIELD
+</a>
+<a href="mailto:sales@verofield.com" class="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg transition-all duration-300">
+<i class="fas fa-envelope"></i>
+Email Us
+</a>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+   // ===== Helpers =====
+  const $ = (sel, ctx=document) => ctx.querySelector(sel);
+  const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+
+  // Mark decorative Font Awesome icons as aria-hidden if no label present
+  document.querySelectorAll('i.fas, i.far, i.fab, i.fa').forEach(icon => {
+    if (!icon.hasAttribute('aria-label') && !icon.hasAttribute('role')) {
+      icon.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  // ===== Sections & Navigation =====
+  const sections = $$('section[id].page-section');
+  const navContainer = $('.navigation') || (() => {
+    const nav = document.createElement('div');
+    nav.className = 'navigation';
+    document.body.appendChild(nav);
+    return nav;
+  })();
+
+  // If no dots present or count mismatch, (re)build dots from sections
+  const existingDots = $$('.nav-dot', navContainer);
+  if (existingDots.length !== sections.length) {
+    navContainer.innerHTML = '';
+    sections.forEach((sec, i) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'nav-dot';
+      dot.setAttribute('data-section', sec.id);
+      dot.setAttribute('aria-label', `${sec.querySelector('h2, h3')?.textContent || sec.id}`);
+      dot.setAttribute('title', `${sec.querySelector('h2, h3')?.textContent || sec.id}`);
+      navContainer.appendChild(dot);
+    });
+  }
+
+  const navDots = $$('.nav-dot', navContainer);
+
+  // Click to scroll
+  navDots.forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      const id = dot.getAttribute('data-section');
+      const target = document.getElementById(id);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Smooth scrolling for anchor links
+  $$('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const href = a.getAttribute('href');
+      if (!href || href.length <= 1) return;
+      const target = document.getElementById(href.slice(1));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // ===== Animations with IntersectionObserver =====
+  const animateElems = $$('.fade-in, .slide-left, .slide-right, .scale-in, .feature-card, .stats-card, .tech-stack-item, .bg-white\\/5');
+  const animObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -10% 0px' });
+  animateElems.forEach(el => animObserver.observe(el));
+
+   // ===== Active Section detection =====
+   const sectionObserver = new IntersectionObserver((entries) => {
+     let currentSection = '';
+     let maxRatio = 0;
+     
+     entries.forEach(entry => {
+       if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+         maxRatio = entry.intersectionRatio;
+         currentSection = entry.target.id;
+       }
+     });
+     
+     if (currentSection) {
+       navDots.forEach(dot => {
+         dot.classList.toggle('active', dot.getAttribute('data-section') === currentSection);
+       });
+     }
+   }, { threshold: [0.1, 0.3, 0.5, 0.7], rootMargin: '-10% 0px -10% 0px' });
+   sections.forEach(sec => sectionObserver.observe(sec));
+
+  // ===== Progress Bar =====
+  const progressBar = document.getElementById('progressBar');
+  const onScroll = () => {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+    const max = (document.documentElement.scrollHeight - window.innerHeight);
+    const pct = max > 0 ? (scrollTop / max) * 100 : 0;
+    if (progressBar) progressBar.style.width = pct + '%';
+  };
+  document.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // ===== Parallax (guarded) =====
+  const parallaxEl = $('.hero-gradient');
+  let ticking = false;
+  const updateParallax = () => {
+    if (!parallaxEl) return;
+    const y = (window.pageYOffset || 0) * 0.2;
+    parallaxEl.style.transform = `translateY(${y}px)`;
+    ticking = false;
+  };
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(updateParallax);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  // ===== Hover micro-interactions =====
+  $$('.feature-card, .bg-white\\/5').forEach(card => {
+    card.addEventListener('mouseenter', () => card.style.transform = 'translateY(-4px) scale(1.02)');
+    card.addEventListener('mouseleave', () => card.style.transform = '');
+  });
+
+  // ===== Accessibility =====
+  // Ensure sections have scroll margin so content isn't hidden under sticky headers (if any)
+  sections.forEach(sec => sec.style.scrollMarginTop = '80px');
+
+  // ===== Contact Form Handling =====
+  const contactForm = document.getElementById('contactForm');
+  const waitlistForm = document.getElementById('waitlistForm');
+  
+  function handleFormSubmission(form, isModal = false) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const data = {
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        company: formData.get('company'),
+        message: formData.get('message'),
+        emailConsent: formData.get('emailConsent') === 'on'
+      };
+      
+      const submitBtn = form.querySelector('button[type="submit"]');
+      
+      // Show loading state
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+      
+      try {
+        // Call Supabase Edge Function (public, no auth required)
+        const response = await fetch(window.location.origin.includes('localhost') 
+          ? 'https://iehzwglvmbtrlhdgofew.supabase.co/functions/v1/contact-form'
+          : 'https://verofield.com/supabase/functions/v1/contact-form', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        if (!response.ok) {
+          console.error('Response status:', response.status);
+          console.error('Response text:', await response.text());
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Show in-form success, then auto-close modal (if open)
+          submitBtn.textContent = 'Thanks! You\'re on the list';
+          submitBtn.disabled = true;
+          setTimeout(() => {
+            form.reset();
+            if (isModal) {
+              const modal = form.closest('.modal');
+              if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+              }
+            }
+            submitBtn.textContent = 'Join Waitlist';
+            submitBtn.disabled = false;
+          }, 1000);
+        } else {
+          throw new Error(result.error || 'Submission failed');
+        }
+        
+      } catch (error) {
+        console.error('Form submission error:', error);
+        alert('Sorry, there was an error submitting your request. Please try again.');
+      } finally {
+        // Remove loading state
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      }
+    });
+  }
+  
+  if (contactForm) {
+    handleFormSubmission(contactForm, false);
+  }
+  
+  if (waitlistForm) {
+    handleFormSubmission(waitlistForm, true);
+  }
+
+  // ===== Lazy Loading for Images =====
+  const imageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        if (img.dataset.src) {
+          img.src = img.dataset.src;
+          img.classList.add('loaded');
+          img.removeAttribute('data-src');
+          observer.unobserve(img);
+        }
+      }
+    });
+  });
+
+  // Observe all images with data-src attribute
+  document.querySelectorAll('img[data-src]').forEach(img => {
+    imageObserver.observe(img);
+  });
+
+  // ===== Error Handling for Missing Images =====
+  document.querySelectorAll('img').forEach(img => {
+    img.addEventListener('error', function() {
+      this.style.display = 'none';
+      // Create fallback placeholder
+      const placeholder = document.createElement('div');
+      placeholder.className = 'bg-slate-700 rounded-lg flex items-center justify-center text-slate-400';
+      placeholder.style.width = this.style.width || '100%';
+      placeholder.style.height = this.style.height || '200px';
+      placeholder.innerHTML = '<i class="fas fa-image text-2xl"></i>';
+      this.parentNode.insertBefore(placeholder, this);
+    });
+  });
+
+
+  // Ensure visibility immediately to avoid hidden content
+  document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => el.classList.add('visible'));
+
+  // ===== IntersectionObserver: reveal on scroll (with stagger) =====
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => io.observe(el));
+
+  // Fallback: if IO unsupported or styles failed, ensure content is visible
+  try {
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => el.classList.add('visible'));
+    }
+  } catch (_) {
+    document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => el.classList.add('visible'));
+  }
+
+  // ===== Lazy load video when in viewport =====
+  const video = document.getElementById('demoVideo');
+  if (video) {
+    const vio = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !video.querySelector('source')) {
+          const source = document.createElement('source');
+          source.src = 'assets/videos/demo_1_optimized.mp4';
+          source.type = 'video/mp4';
+          video.appendChild(source);
+          video.load();
+          vio.disconnect();
+        }
+      });
+    }, { threshold: 0.1 });
+    vio.observe(video);
+  }
+
+  
+
+  // ===== Learn More Modal =====
+  window.openLearnMoreModal = function() {
+    const modal = document.getElementById('learnMoreModal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    const focusable = modal.querySelector('.modal-content');
+    if (focusable) focusable.focus();
+  };
+  
+  window.closeLearnMoreModal = function() {
+    const modal = document.getElementById('learnMoreModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  };
+
+  // ===== Waitlist Modal =====
+  window.openWaitlistModal = function() {
+    const modal = document.getElementById('waitlistModal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    const focusable = modal.querySelector('.modal-content');
+    if (focusable) focusable.focus();
+  };
+  
+  window.closeWaitlistModal = function() {
+    const modal = document.getElementById('waitlistModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  };
+
+  // ===== Getting Started Modal =====
+  window.openGettingStartedModal = function() {
+    const modal = document.getElementById('gettingStartedModal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    const focusable = modal.querySelector('.modal-content');
+    if (focusable) focusable.focus();
+  };
+  
+  window.closeGettingStartedModal = function() {
+    const modal = document.getElementById('gettingStartedModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  };
+  
+  // Close modals when clicking outside and handle Escape/focus trap
+  window.addEventListener('click', function(event) {
+    const learnMoreModal = document.getElementById('learnMoreModal');
+    const waitlistModal = document.getElementById('waitlistModal');
+    const gettingStartedModal = document.getElementById('gettingStartedModal');
+    
+    if (learnMoreModal && event.target === learnMoreModal) closeLearnMoreModal();
+    if (waitlistModal && event.target === waitlistModal) closeWaitlistModal();
+    if (gettingStartedModal && event.target === gettingStartedModal) closeGettingStartedModal();
+  });
+  
+  document.addEventListener('keydown', function(event) {
+    const learnMoreModal = document.getElementById('learnMoreModal');
+    const waitlistModal = document.getElementById('waitlistModal');
+    const gettingStartedModal = document.getElementById('gettingStartedModal');
+    
+    if (event.key === 'Escape') {
+      if (learnMoreModal && learnMoreModal.style.display === 'block') closeLearnMoreModal();
+      if (waitlistModal && waitlistModal.style.display === 'block') closeWaitlistModal();
+      if (gettingStartedModal && gettingStartedModal.style.display === 'block') closeGettingStartedModal();
+    }
+    
+    // Focus trap for active modal
+    const activeModal = learnMoreModal?.style.display === 'block' ? learnMoreModal :
+                       waitlistModal?.style.display === 'block' ? waitlistModal :
+                       gettingStartedModal?.style.display === 'block' ? gettingStartedModal : null;
+    
+    if (activeModal && event.key === 'Tab') {
+      const focusableSelectors = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+      const nodes = Array.from(activeModal.querySelectorAll(focusableSelectors));
+      if (nodes.length === 0) return;
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        last.focus();
+        event.preventDefault();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        first.focus();
+        event.preventDefault();
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>
+
+

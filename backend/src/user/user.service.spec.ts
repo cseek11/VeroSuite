@@ -1,11 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
+import { DatabaseService } from '../common/services/database.service';
 
 // Mock Supabase client
 const mockSupabaseClient = {
   auth: {
     admin: {
       listUsers: jest.fn(),
+      createUser: jest.fn(),
     },
   },
 };
@@ -14,6 +16,15 @@ const mockSupabaseClient = {
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => mockSupabaseClient),
 }));
+
+// Mock DatabaseService
+const mockDatabaseService = {
+  public_users: {
+    findMany: jest.fn(),
+    findUnique: jest.fn(),
+    create: jest.fn(),
+  },
+};
 
 describe('UserService', () => {
   let service: UserService;
@@ -33,7 +44,13 @@ describe('UserService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UserService],
+      providers: [
+        UserService,
+        {
+          provide: DatabaseService,
+          useValue: mockDatabaseService,
+        },
+      ],
     }).compile();
 
     service = module.get<UserService>(UserService);

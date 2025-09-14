@@ -454,7 +454,28 @@ const CustomerInfoPanel: React.FC<CustomerInfoPanelProps> = ({
   }, [paymentMethods]);
 
   const handleSave = () => {
-    updateCustomerMutation.mutate(panelData);
+    const updates: Partial<Account> = {
+      phone: panelData.phone,
+      email: panelData.email,
+      address: panelData.serviceAddress.street,
+      city: panelData.serviceAddress.city,
+      state: panelData.serviceAddress.state,
+      zip_code: panelData.serviceAddress.zip,
+      billing_address: {
+        street: panelData.billingAddress.street,
+        city: panelData.billingAddress.city,
+        state: panelData.billingAddress.state,
+        zip: panelData.billingAddress.zip
+      } as any,
+      preferred_contact_method: panelData.preferredContactMethod,
+      billing_cycle: panelData.billingCycle,
+      payment_method: panelData.paymentMethod,
+      status: panelData.accountStatus,
+      access_instructions: panelData.accessInstructions,
+      emergency_contact: panelData.emergencyContact
+    } as Partial<Account>;
+
+    updateCustomerMutation.mutate(updates);
   };
 
   const handleCancel = () => {

@@ -14,7 +14,7 @@ const CATEGORY_SLUG = 'verosuite-training';
 
 const html = `
   <h2>Overview</h2>
-  <p>Use natural language in the top command box to create records fast. VeroSuite parses your text, extracts entities (name, address, phone, email, date/time), and pre-fills forms for review before saving.</p>
+  <p>Use natural language in the top command box to create records fast. VeroField parses your text, extracts entities (name, address, phone, email, date/time), and pre-fills forms for review before saving.</p>
 
   <h2>Available today</h2>
   <ul>
@@ -142,7 +142,7 @@ async function run() {
     .insert([{ 
       category_id: category.id,
       title: ARTICLE_TITLE,
-      author: 'VeroSuite Team',
+      author: 'VeroField Team',
       publish_date: today,
       last_updated: today,
       read_time: '7 min',

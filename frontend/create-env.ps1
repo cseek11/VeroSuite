@@ -1,5 +1,5 @@
-# Create .env file for VeroSuite Frontend
-Write-Host "Creating .env file for VeroSuite Frontend..." -ForegroundColor Green
+# Create .env file for VeroField Frontend
+Write-Host "Creating .env file for VeroField Frontend..." -ForegroundColor Green
 
 # Check if .env already exists
 if (Test-Path ".env") {

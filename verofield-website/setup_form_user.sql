@@ -1,0 +1,4 @@
+-- Deprecated: Do not create a dedicated auth user for public form submissions.
+-- Recommendation: Use a Supabase Edge Function with the service role key to perform inserts
+-- into the `public.leads` table, with RLS enabled and a policy allowing service_role inserts.
+-- See `setup_leads_table.sql` and `supabase/functions/index.ts`.

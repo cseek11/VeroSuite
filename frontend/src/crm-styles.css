@@ -1,5 +1,5 @@
-/* ===== MODERN CRM STYLING SYSTEM ===== */
-/* Productivity-First Design with Clean, Modern Aesthetics */
+/* ===== UNIFIED CRM STYLING SYSTEM ===== */
+/* Clean, Modern Design with No Conflicts */
 
 @layer base {
   /* ===== COLOR SYSTEM ===== */
@@ -54,849 +54,310 @@
     --crm-info-500: #3b82f6;
     --crm-info-600: #2563eb;
     --crm-info-700: #1d4ed8;
-
-    /* Spacing System */
-    --crm-space-xs: 0.25rem;
-    --crm-space-sm: 0.5rem;
-    --crm-space-md: 1rem;
-    --crm-space-lg: 1.5rem;
-    --crm-space-xl: 2rem;
-    --crm-space-2xl: 3rem;
-
-    /* Border Radius */
-    --crm-radius-sm: 4px;
-    --crm-radius-md: 8px;
-    --crm-radius-lg: 12px;
-    --crm-radius-xl: 16px;
-
-    /* Shadows */
-    --crm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --crm-shadow-md: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --crm-shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --crm-shadow-xl: 0 10px 15px rgba(0, 0, 0, 0.1);
   }
 }
 
-/* ===== TYPOGRAPHY SYSTEM ===== */
 @layer components {
-  /* Heading Hierarchy */
-  .crm-heading-1 {
-    @apply text-3xl font-bold text-slate-900 leading-tight;
-    font-size: 2rem; /* 32px */
-    line-height: 1.25;
-  }
-
-  .crm-heading-2 {
-    @apply text-2xl font-bold text-slate-900 leading-tight;
-    font-size: 1.5rem; /* 24px */
-    line-height: 1.33;
-  }
-
-  .crm-heading-3 {
-    @apply text-xl font-semibold text-slate-900 leading-tight;
-    font-size: 1.25rem; /* 20px */
-    line-height: 1.4;
-  }
-
-  .crm-heading-4 {
-    @apply text-lg font-semibold text-slate-900 leading-tight;
-    font-size: 1.125rem; /* 18px */
-    line-height: 1.44;
-  }
-
-  /* Body Text */
-  .crm-text-body {
-    @apply text-base text-slate-700 leading-relaxed;
-    font-size: 1rem; /* 16px */
-    line-height: 1.6;
-  }
-
-  .crm-text-secondary {
-    @apply text-sm text-slate-600 leading-relaxed;
-    font-size: 0.875rem; /* 14px */
-    line-height: 1.57;
-  }
-
-  .crm-text-small {
-    @apply text-xs text-slate-500 leading-relaxed;
-    font-size: 0.75rem; /* 12px */
-    line-height: 1.5;
-  }
-
-  /* Labels and Captions */
-  .crm-label {
-    @apply text-sm font-medium text-slate-700 leading-tight;
-    font-size: 0.875rem; /* 14px */
-    line-height: 1.43;
-  }
-
-  .crm-caption {
-    @apply text-xs text-slate-500 leading-tight;
-    font-size: 0.75rem; /* 12px */
-    line-height: 1.33;
-  }
-}
-
-/* ===== CARD SYSTEM ===== */
-@layer components {
-  .crm-card {
-    @apply bg-white/90 backdrop-blur-sm border border-white/20 rounded-lg shadow-sm;
-    transition: all 0.2s ease;
-    backdrop-filter: blur(8px);
-  }
-
-  .crm-card:hover {
-    @apply shadow-lg;
-    transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-
-  .crm-card-header {
-    @apply px-6 py-4 border-b border-white/20;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(4px);
-  }
-
-  .crm-card-body {
-    @apply px-6 py-4;
-  }
-
-  .crm-card-footer {
-    @apply px-6 py-4 border-t border-white/20;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(4px);
-  }
-
-  /* Glass card variant for more transparency */
-  .crm-card-glass {
-    @apply bg-white/30 backdrop-blur-md border border-white/30 rounded-lg shadow-lg;
-    backdrop-filter: blur(12px);
-  }
-
-  .crm-card-glass:hover {
-    @apply shadow-xl;
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.4);
-    border-color: rgba(255, 255, 255, 0.5);
-  }
-}
-
-/* ===== BUTTON SYSTEM ===== */
-@layer components {
-  .crm-btn {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50;
-    min-height: 44px; /* Touch-friendly */
-    backdrop-filter: blur(8px);
-    font-size: 0.875rem; /* text-sm */
-  }
-
-  .crm-btn-primary {
-    @apply bg-white/20 text-white shadow-sm;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.15);
-  }
-
-  .crm-btn-primary:hover {
-    @apply shadow-md transform -translate-y-0.5;
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
-  }
-
-  .crm-btn-primary:focus {
-    @apply ring-white/50;
-    background: rgba(255, 255, 255, 0.3);
-  }
-
-  .crm-btn-secondary {
-    @apply bg-white/10 text-white border border-white/20 shadow-sm;
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .crm-btn-secondary:hover {
-    @apply shadow-md transform -translate-y-0.5;
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-
-  .crm-btn-secondary:focus {
-    @apply ring-white/50;
-    background: rgba(255, 255, 255, 0.25);
-  }
-
-  .crm-btn-success {
-    @apply bg-green-500/20 text-green-100 border border-green-400/30 shadow-sm;
-    background: rgba(34, 197, 94, 0.2);
-  }
-
-  .crm-btn-success:hover {
-    @apply shadow-md transform -translate-y-0.5;
-    background: rgba(34, 197, 94, 0.3);
-    border-color: rgba(34, 197, 94, 0.4);
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
-  }
-
-  .crm-btn-danger {
-    @apply bg-red-500/20 text-red-100 border border-red-400/30 shadow-sm;
-    background: rgba(239, 68, 68, 0.2);
-  }
-
-  .crm-btn-danger:hover {
-    @apply shadow-md transform -translate-y-0.5;
-    background: rgba(239, 68, 68, 0.3);
-    border-color: rgba(239, 68, 68, 0.4);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
-  }
-
-  /* Button Sizes */
-  .crm-btn-sm {
-    @apply px-3 py-1.5 text-sm;
-    min-height: 36px;
-  }
-
-  .crm-btn-lg {
-    @apply px-6 py-3 text-lg;
-    min-height: 52px;
-  }
-
-  /* Outline variant for better contrast on light backgrounds */
-  .crm-btn-outline {
-    @apply bg-white/90 text-slate-800 border border-slate-300 shadow-sm;
-    backdrop-filter: blur(8px);
-  }
-
-  .crm-btn-outline:hover {
-    @apply shadow-md transform -translate-y-0.5;
-    background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-
-  .crm-btn-outline:focus {
-    @apply ring-white/50;
-    background: rgba(255, 255, 255, 1);
-  }
-
-  /* Override disabled button styling */
-  .crm-btn:disabled {
-    background-color: rgba(255, 255, 255, 0.9);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: rgb(30, 41, 59); /* slate-800 */
-    opacity: 1;
-    cursor: pointer;
-  }
-}
-
-/* ===== FORM SYSTEM ===== */
-@layer components {
-  /* Base form styling based on topbar search template */
+  /* ===== FORM COMPONENTS ===== */
   .crm-input {
-    @apply w-full px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-slate-800 placeholder-slate-500 transition-all duration-200;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    min-height: 44px; /* Touch-friendly */
-    font-size: 0.875rem; /* text-sm */
+    @apply w-full px-3 py-2 rounded-lg text-slate-800 placeholder-slate-500 transition-all duration-200;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(4px);
+    min-height: 44px;
+    font-size: 0.875rem;
   }
 
   .crm-input:focus {
-    @apply outline-none ring-2 ring-white/50;
-    border-color: rgba(255, 255, 255, 0.3);
-    background-color: rgba(255, 255, 255, 0.95);
-  }
-
-  .crm-input:hover {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-
-  /* FORCE GLASSMORPHISM STYLING - MAXIMUM SPECIFICITY */
-select.crm-select,
-input.crm-input,
-textarea.crm-textarea,
-.crm-field select,
-.crm-field input,
-.crm-field textarea {
-  background-color: rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.3);
-  border-radius: 0.5rem;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  color: rgb(30, 41, 59);
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  box-shadow: none;
-  transition: none;
-  outline: none;
-}
-
-/* PREVENT GRAY FLASH ON FOCUS */
-select.crm-select:focus,
-input.crm-input:focus,
-textarea.crm-textarea:focus,
-.crm-field select:focus,
-.crm-field input:focus,
-.crm-field textarea:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
-  border-color: rgba(34, 197, 94, 0.5);
-  background-color: rgba(255, 255, 255, 0.95);
-  transition: none;
-}
-
-/* PREVENT GRAY FLASH ON HOVER */
-select.crm-select:hover,
-input.crm-input:hover,
-textarea.crm-textarea:hover,
-.crm-field select:hover,
-.crm-field input:hover,
-.crm-field textarea:hover {
-  background-color: rgba(255, 255, 255, 0.95);
-  border-color: rgba(255, 255, 255, 0.4);
-  transition: none;
-}
-
-  /* FORCE GREEN FOCUS STATES */
-  select.crm-select:focus,
-  input.crm-input:focus,
-  textarea.crm-textarea:focus,
-  .crm-field select:focus,
-  .crm-field input:focus,
-  .crm-field textarea:focus {
-    outline: none;
+    @apply outline-none;
     box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
     border-color: rgba(34, 197, 94, 0.5);
     background-color: rgba(255, 255, 255, 0.95);
   }
 
-  /* OVERRIDE ANY BROWSER DEFAULTS - REMOVED AGGRESSIVE OVERRIDES */
+  .crm-input:hover {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
 
-  /* TEST CSS - REMOVED - WAS OVERRIDING STYLES */
-
-/* Override any default disabled styling */
-.crm-input:disabled {
-  background-color: rgba(255, 255, 255, 0.9);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: rgb(30, 41, 59); /* slate-800 */
-  opacity: 1;
-  cursor: text;
-  backdrop-filter: blur(4px);
-}
-
-  /* Force glassmorphism even when disabled */
-  input.crm-input:disabled {
+  .crm-input:disabled {
     background-color: rgba(255, 255, 255, 0.9);
     border-color: rgba(255, 255, 255, 0.2);
     color: rgb(30, 41, 59);
-    opacity: 1;
-    backdrop-filter: blur(4px);
-  }
-
-
-  .crm-textarea {
-    @apply w-full px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-slate-800 placeholder-slate-500 transition-all duration-200 resize-vertical;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    min-height: 100px;
-    font-size: 0.875rem; /* text-sm */
-  }
-
-  .crm-textarea:focus {
-    @apply outline-none ring-2 ring-white/50;
-    border-color: rgba(255, 255, 255, 0.3);
-    background-color: rgba(255, 255, 255, 0.95);
-  }
-
-  .crm-textarea:hover {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-
-  /* Override any default disabled styling */
-  .crm-textarea:disabled {
-    background-color: rgba(255, 255, 255, 0.9);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: rgb(30, 41, 59); /* slate-800 */
     opacity: 1;
     cursor: text;
     backdrop-filter: blur(4px);
   }
 
-  /* Force glassmorphism even when disabled */
-  textarea.crm-textarea:disabled {
+  .crm-textarea {
+    @apply w-full px-3 py-2 rounded-lg text-slate-800 placeholder-slate-500 transition-all duration-200 resize-vertical;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(4px);
+    min-height: 100px;
+    font-size: 0.875rem;
+  }
+
+  .crm-textarea:focus {
+    @apply outline-none;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
+    border-color: rgba(34, 197, 94, 0.5);
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+
+  .crm-textarea:hover {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  .crm-textarea:disabled {
     background-color: rgba(255, 255, 255, 0.9);
     border-color: rgba(255, 255, 255, 0.2);
     color: rgb(30, 41, 59);
     opacity: 1;
+    cursor: text;
     backdrop-filter: blur(4px);
   }
+
   .crm-select {
-    @apply w-full px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-slate-800 transition-all duration-200;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    min-height: 44px; /* Touch-friendly */
-    font-size: 0.875rem; /* text-sm */
+    @apply w-full px-3 py-2 rounded-lg text-slate-800 transition-all duration-200;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(4px);
+    min-height: 44px;
+    font-size: 0.875rem;
   }
 
   .crm-select:focus {
-    @apply outline-none ring-2 ring-white/50;
-    border-color: rgba(255, 255, 255, 0.3);
+    @apply outline-none;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
+    border-color: rgba(34, 197, 94, 0.5);
     background-color: rgba(255, 255, 255, 0.95);
   }
 
   .crm-select:hover {
     background-color: rgba(255, 255, 255, 0.95);
-    border-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
   }
 
-  /* Override any default disabled styling */
   .crm-select:disabled {
-    background-color: rgba(255, 255, 255, 0.9);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: rgb(30, 41, 59); /* slate-800 */
-    opacity: 1;
-    cursor: pointer;
-    backdrop-filter: blur(4px);
-  }
-
-  /* Force glassmorphism even when disabled */
-  select.crm-select:disabled {
     background-color: rgba(255, 255, 255, 0.9);
     border-color: rgba(255, 255, 255, 0.2);
     color: rgb(30, 41, 59);
     opacity: 1;
-    backdrop-filter: blur(4px);
-  }
-  /* Enhanced checkbox and radio with backdrop blur */
-  .crm-checkbox {
-    @apply w-4 h-4 text-purple-600 border-slate-300 rounded focus:ring-2 focus:ring-white/50;
-    background-color: rgba(255, 255, 255, 0.9);
+    cursor: text;
     backdrop-filter: blur(4px);
   }
 
-  .crm-radio {
-    @apply w-4 h-4 text-purple-600 border-slate-300 focus:ring-2 focus:ring-white/50;
-    background-color: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(4px);
+  /* ===== BUTTON COMPONENTS ===== */
+  .crm-button {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
   }
 
-  /* Search input variant (matches topbar exactly) */
-  .crm-search {
-    @apply w-full pl-8 pr-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+  .crm-button-primary {
+    @apply crm-button bg-purple-600 text-white hover:bg-purple-700 focus:ring-purple-500;
   }
 
-  .crm-search:focus {
-    border-color: rgba(255, 255, 255, 0.3);
-    background-color: rgba(255, 255, 255, 0.95);
+  .crm-button-secondary {
+    @apply crm-button bg-slate-200 text-slate-900 hover:bg-slate-300 focus:ring-slate-500;
   }
 
-  .crm-search:hover {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-color: rgba(255, 255, 255, 0.3);
+  .crm-button-outline {
+    @apply crm-button border border-slate-300 text-slate-700 hover:bg-slate-50 focus:ring-slate-500;
   }
-}
 
-/* ===== STATUS INDICATORS ===== */
-@layer components {
+  .crm-button-danger {
+    @apply crm-button bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+  }
+
+  .crm-button-success {
+    @apply crm-button bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
+  }
+
+  /* ===== FIELD COMPONENTS ===== */
+  .crm-field {
+    @apply space-y-2;
+  }
+
+  .crm-label {
+    @apply block text-sm font-medium text-slate-700;
+  }
+
+  .crm-error {
+    @apply text-sm text-red-600;
+  }
+
+  .crm-help {
+    @apply text-sm text-slate-500;
+  }
+
+  /* ===== CARD COMPONENTS ===== */
+  .crm-card {
+    @apply bg-white rounded-lg shadow-sm border border-slate-200;
+  }
+
+  .crm-card-header {
+    @apply px-6 py-4 border-b border-slate-200;
+  }
+
+  .crm-card-content {
+    @apply px-6 py-4;
+  }
+
+  .crm-card-footer {
+    @apply px-6 py-4 border-t border-slate-200;
+  }
+
+  /* ===== STATUS COMPONENTS ===== */
   .crm-status {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex px-2 py-1 text-xs font-semibold rounded-full;
   }
 
   .crm-status-success {
-    @apply bg-green-100 text-green-800;
+    @apply crm-status bg-green-100 text-green-800;
   }
 
   .crm-status-warning {
-    @apply bg-yellow-100 text-yellow-800;
+    @apply crm-status bg-yellow-100 text-yellow-800;
   }
 
   .crm-status-error {
-    @apply bg-red-100 text-red-800;
+    @apply crm-status bg-red-100 text-red-800;
   }
 
   .crm-status-info {
-    @apply bg-blue-100 text-blue-800;
+    @apply crm-status bg-blue-100 text-blue-800;
   }
 
   .crm-status-neutral {
-    @apply bg-slate-100 text-slate-800;
+    @apply crm-status bg-slate-100 text-slate-800;
+  }
+
+  /* ===== NAVIGATION COMPONENTS ===== */
+  .crm-nav-item {
+    @apply flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200;
+  }
+
+  .crm-nav-item-active {
+    @apply crm-nav-item bg-purple-100 text-purple-700;
+  }
+
+  .crm-nav-item-inactive {
+    @apply crm-nav-item text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+  }
+
+  /* ===== TABLE COMPONENTS ===== */
+  .crm-table {
+    @apply min-w-full divide-y divide-slate-200;
+  }
+
+  .crm-table-header {
+    @apply bg-slate-50;
+  }
+
+  .crm-table-header-cell {
+    @apply px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider;
+  }
+
+  .crm-table-body {
+    @apply bg-white divide-y divide-slate-200;
+  }
+
+  .crm-table-row {
+    @apply hover:bg-slate-50;
+  }
+
+  .crm-table-cell {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-slate-900;
+  }
+
+  /* ===== MODAL COMPONENTS ===== */
+  .crm-modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50;
+  }
+
+  .crm-modal {
+    @apply bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto;
+  }
+
+  .crm-modal-header {
+    @apply px-6 py-4 border-b border-slate-200;
+  }
+
+  .crm-modal-content {
+    @apply px-6 py-4;
+  }
+
+  .crm-modal-footer {
+    @apply px-6 py-4 border-t border-slate-200 flex justify-end gap-2;
+  }
+
+  /* ===== SEARCH COMPONENTS ===== */
+  .crm-search-input {
+    @apply crm-input pl-10;
+  }
+
+  .crm-search-icon {
+    @apply absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400;
+  }
+
+  /* ===== LOADING COMPONENTS ===== */
+  .crm-loading {
+    @apply animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600;
+  }
+
+  .crm-loading-overlay {
+    @apply absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center;
   }
 }
 
-/* ===== SELECT: GRADIENT BORDER + FOCUS OVERLAY (Glassmorphism) ===== */
-@layer components {
-  /* Use layered backgrounds to create a gradient border while keeping a translucent inner fill.
-     Focus uses a CSS variable overlay to apply the translucent green effect without breaking the border gradient. */
-  select.crm-select,
-  .crm-field select {
-    --crm-select-inner-bg: rgba(255, 255, 255, 0.9);
-    --crm-select-border-start: var(--crm-purple-600);
-    --crm-select-border-end: var(--crm-purple-900);
-    --crm-select-focus-bg: rgba(34, 197, 94, 0); /* becomes 0.3 on focus */
-
-    /* Custom caret (keeps arrow when appearance is none) */
-    background:
-      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 20 20' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 8 10 12 14 8'/></svg>") no-repeat right 0.65rem center / 0.7rem,
-      linear-gradient(var(--crm-select-focus-bg), var(--crm-select-focus-bg)) padding-box,
-      linear-gradient(var(--crm-select-inner-bg), var(--crm-select-inner-bg)) padding-box,
-      linear-gradient(135deg, var(--crm-select-border-start), var(--crm-select-border-end)) border-box;
-
-    border: 1px solid transparent;
-    border-radius: 0.5rem; /* 8px */
-    color: rgb(30, 41, 59); /* slate-800 */
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    box-shadow: 0 1px 2px rgba(2, 6, 23, 0.05); /* subtle */
-    min-height: 44px;
-    padding: 0.375rem 2rem 0.375rem 0.75rem; /* room for caret */
-  }
-
-  /* Focus state: apply translucent green overlay while preserving the gradient border */
-  select.crm-select:focus,
-  .crm-field select:focus {
-    --crm-select-focus-bg: rgba(34, 197, 94, 0.3);
-    outline: none;
-  }
+/* ===== GLOBAL FORM OVERRIDES ===== */
+/* Ensure all form elements use our styling system */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(.crm-input) {
+  @apply crm-input;
 }
 
-/* ===== LAYOUT UTILITIES ===== */
-@layer utilities {
-  .crm-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
-
-  .crm-section {
-    @apply mb-8;
-  }
-
-  .crm-grid {
-    @apply grid gap-6;
-  }
-
-  .crm-grid-2 {
-    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
-  }
-
-  .crm-grid-3 {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
-  }
-
-  .crm-grid-4 {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
-  }
+textarea:not(.crm-textarea) {
+  @apply crm-textarea;
 }
 
-/* ===== ANIMATIONS ===== */
-@layer utilities {
-  @keyframes crmFadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .crm-fade-in-up {
-    animation: crmFadeInUp 0.3s ease-out;
-  }
-
-  @keyframes crmPulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
-  }
-
-  .crm-pulse {
-    animation: crmPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
+select:not(.crm-select) {
+  @apply crm-select;
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
-@layer utilities {
-  /* Mobile-first responsive utilities */
-  .crm-responsive-text {
-    @apply text-sm sm:text-base;
-  }
-
-  .crm-responsive-spacing {
-    @apply p-4 sm:p-6 lg:p-8;
-  }
-
-  .crm-responsive-grid {
-    @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
-  }
+/* Override any gray backgrounds on form elements */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+textarea,
+select {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
-/* ===== ACCESSIBILITY ===== */
-@layer utilities {
-  .crm-focus-visible {
-    @apply focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2;
-  }
-
-  .crm-sr-only {
-    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
-  }
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+textarea:focus,
+select:focus {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(34, 197, 94, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3) !important;
 }
 
-/* ===== GLOBAL FORM ELEMENT PURPLE THEMING ===== */
-/* Override default gray styling with purple theme - NO GRAY FORMS */
-@layer components {
-  /* Apply purple theming to all standard form inputs */
-  input[type="text"]:not(.custom-styled),
-  input[type="email"]:not(.custom-styled),
-  input[type="password"]:not(.custom-styled),
-  input[type="search"]:not(.custom-styled),
-  input[type="tel"]:not(.custom-styled),
-  input[type="url"]:not(.custom-styled),
-  input[type="number"]:not(.custom-styled),
-  select:not(.custom-styled),
-  textarea:not(.custom-styled) {
-    @apply bg-white border-purple-200 text-gray-900;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  input[type="text"]:not(.custom-styled):focus,
-  input[type="email"]:not(.custom-styled):focus,
-  input[type="password"]:not(.custom-styled):focus,
-  input[type="search"]:not(.custom-styled):focus,
-  input[type="tel"]:not(.custom-styled):focus,
-  input[type="url"]:not(.custom-styled):focus,
-  input[type="number"]:not(.custom-styled):focus,
-  select:not(.custom-styled):focus,
-  textarea:not(.custom-styled):focus {
-    @apply border-purple-500 ring-2 ring-purple-500 ring-opacity-50;
-    outline: none;
-  }
-
-  input[type="text"]:not(.custom-styled):hover,
-  input[type="email"]:not(.custom-styled):hover,
-  input[type="password"]:not(.custom-styled):hover,
-  input[type="search"]:not(.custom-styled):hover,
-  input[type="tel"]:not(.custom-styled):hover,
-  input[type="url"]:not(.custom-styled):hover,
-  input[type="number"]:not(.custom-styled):hover,
-  select:not(.custom-styled):hover,
-  textarea:not(.custom-styled):hover {
-    @apply border-purple-300;
-  }
-
-  /* Ensure disabled inputs follow purple theme but are muted */
-  input[type="text"]:not(.custom-styled):disabled,
-  input[type="email"]:not(.custom-styled):disabled,
-  input[type="password"]:not(.custom-styled):disabled,
-  input[type="search"]:not(.custom-styled):disabled,
-  input[type="tel"]:not(.custom-styled):disabled,
-  input[type="url"]:not(.custom-styled):disabled,
-  input[type="number"]:not(.custom-styled):disabled,
-  select:not(.custom-styled):disabled,
-  textarea:not(.custom-styled):disabled {
-    @apply bg-purple-50 border-purple-200 text-gray-600;
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-
-  /* Override any potential gray border classes - HIGHEST PRIORITY */
-  .border-gray-300 {
-    border-color: rgb(196 181 253) !important; /* purple-200 */
-  }
-
-  .border-gray-400 {
-    border-color: rgb(167 139 250) !important; /* purple-300 */
-  }
-
-  .border-gray-200 {
-    border-color: rgb(233 213 255) !important; /* purple-200 */
-  }
-
-  /* Focus states should always use purple */
-  .focus\:border-transparent:focus {
-    border-color: rgb(139 92 246) !important; /* purple-500 */
-  }
-
-  /* Force purple on all input elements regardless of classes */
-  input:not(.custom-styled),
-  select:not(.custom-styled),
-  textarea:not(.custom-styled) {
-    border-color: rgb(196 181 253) !important; /* purple-200 */
-  }
-
-  input:not(.custom-styled):focus,
-  select:not(.custom-styled):focus,
-  textarea:not(.custom-styled):focus {
-    border-color: rgb(139 92 246) !important; /* purple-500 */
-    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2) !important;
-  }
-
-  input:not(.custom-styled):hover,
-  select:not(.custom-styled):hover,
-  textarea:not(.custom-styled):hover {
-    border-color: rgb(167 139 250) !important; /* purple-300 */
-  }
+/* Override Tailwind's default form styles */
+.border-gray-300 {
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
-/* ===== CRITICAL FORM ANTI-GRAY OVERRIDES - MAXIMUM PRIORITY ===== */
-/* These overrides MUST come last to ensure they take precedence over all other styles */
-@layer utilities {
-  /* Nuclear option: Override ALL gray borders on form elements */
-  [class*="border-gray"] {
-    border-color: rgb(196 181 253) !important; /* purple-200 */
-  }
-
-  /* Specific gray border overrides */
-  .border-gray-100 { border-color: rgb(233 213 255) !important; } /* purple-200 */
-  .border-gray-200 { border-color: rgb(196 181 253) !important; } /* purple-200 */
-  .border-gray-300 { border-color: rgb(196 181 253) !important; } /* purple-200 */
-  .border-gray-400 { border-color: rgb(167 139 250) !important; } /* purple-300 */
-  .border-gray-500 { border-color: rgb(139 92 246) !important; } /* purple-500 */
-
-  /* Force purple focus states */
-  .focus\:border-transparent:focus,
-  .focus\:border-gray-300:focus,
-  .focus\:border-gray-400:focus {
-    border-color: rgb(139 92 246) !important; /* purple-500 */
-  }
-
-  /* Override hover states */
-  .hover\:border-gray-300:hover,
-  .hover\:border-gray-400:hover {
-    border-color: rgb(167 139 250) !important; /* purple-300 */
-  }
+.bg-gray-50,
+.bg-gray-100,
+.bg-gray-200 {
+  background-color: rgba(255, 255, 255, 0.9) !important;
 }
 
-/* Final nuclear option - force on all inputs */
-input, select, textarea {
-  border-color: rgb(196 181 253) !important; /* purple-200 */
-  background-color: white !important;
-  background: white !important;
+/* Override focus ring colors */
+.focus\:ring-blue-500:focus {
+  --tw-ring-color: rgba(34, 197, 94, 0.3) !important;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3) !important;
 }
 
-/* Force white background on all form elements */
-input:not([type="checkbox"]):not([type="radio"]), 
-select, 
-textarea {
-  background-color: white !important;
-  background: white !important;
+.focus\:border-blue-500:focus {
+  border-color: rgba(34, 197, 94, 0.5) !important;
 }
-
-input:not([type="checkbox"]):not([type="radio"]):focus, 
-select:focus, 
-textarea:focus {
-  background-color: white !important;
-  background: white !important;
-}
-
-/* Specific fix for search inputs - ensure white background */
-.advanced-search-input,
-input[type="search"],
-input[placeholder*="search"],
-input[placeholder*="Search"] {
-  background-color: white !important;
-  background: white !important;
-}
-
-/* Fix for help modal form elements */
-[data-modal-search],
-input[placeholder*="Search commands"],
-select[class*="border-gray-300"] {
-  background-color: white !important;
-  background: white !important;
-}
-
-/* Force white background on all modal form elements */
-.modal input,
-.modal select,
-.modal textarea,
-[role="dialog"] input,
-[role="dialog"] select,
-[role="dialog"] textarea {
-  background-color: white !important;
-  background: white !important;
-}
-
-/* Specific fix for CommandHelpModal */
-.fixed.inset-0 input,
-.fixed.inset-0 select,
-.fixed.inset-0 textarea {
-  background-color: white !important;
-  background: white !important;
-}
-
-/* Nuclear option for help modal */
-input[data-modal-search],
-input[placeholder*="Search commands"],
-select[class*="border-gray-300"] {
-  background-color: white !important;
-  background: white !important;
-  background-image: none !important;
-}
-
-/* Ultimate fix for all form elements in the app */
-* input:not([type="checkbox"]):not([type="radio"]),
-* select,
-* textarea {
-  background-color: white !important;
-  background: white !important;
-  background-image: none !important;
-  color: #1f2937 !important; /* gray-800 for good contrast */
-}
-
-* input:not([type="checkbox"]):not([type="radio"]):focus,
-* select:focus,
-* textarea:focus {
-  background-color: white !important;
-  background: white !important;
-  background-image: none !important;
-  color: #1f2937 !important; /* gray-800 for good contrast */
-}
-
-/* Fix dropdown text visibility */
-select option {
-  background-color: white !important;
-  color: #1f2937 !important; /* gray-800 for good contrast */
-}
-
-/* Fix for help modal dropdown specifically */
-input[data-modal-search],
-input[placeholder*="Search commands"],
-select[class*="border-gray-300"] {
-  background-color: white !important;
-  background: white !important;
-  background-image: none !important;
-  color: #1f2937 !important; /* gray-800 for good contrast */
-}
-
-.advanced-search-input:focus,
-input[type="search"]:focus,
-input[placeholder*="search"]:focus,
-input[placeholder*="Search"]:focus {
-  background-color: white !important;
-  background: white !important;
-}
-
-.advanced-search-input:hover,
-input[type="search"]:hover,
-input[placeholder*="search"]:hover,
-input[placeholder*="Search"]:hover {
-  background-color: white !important;
-  background: white !important;
-}
-
-input:focus, select:focus, textarea:focus {
-  border-color: rgb(139 92 246) !important; /* purple-500 */
-  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2) !important;
-  outline: none !important;
-}
-
-input:hover, select:hover, textarea:hover {
-  border-color: rgb(167 139 250) !important; /* purple-300 */
-}
-

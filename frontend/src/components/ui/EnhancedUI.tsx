@@ -137,6 +137,18 @@ interface TabsProps {
   className?: string;
 }
 
+interface SelectProps {
+  label?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  options?: Array<{ value: string; label: string }>;
+  error?: string;
+  className?: string;
+  disabled?: boolean;
+  children?: React.ReactNode;
+}
+
 interface TextareaProps {
   label?: string;
   value: string;
@@ -395,7 +407,7 @@ export const Dropdown: React.FC<DropdownProps> = ({ trigger, items, className = 
   );
 };
 
-export const Input: React.FC<InputProps> = ({ label, value, onChange, placeholder, type = 'text', icon: Icon, error, className = '', disabled, multiline }) => {
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(({ label, value, onChange, placeholder, type = 'text', icon: Icon, error, className = '', disabled, multiline }, ref) => {
   if (multiline) {
     return (
       <div className={`crm-field ${className}`}>
@@ -428,6 +440,7 @@ export const Input: React.FC<InputProps> = ({ label, value, onChange, placeholde
         </div>
       )}
               <input
+        ref={ref}
         type={type}
         value={value}
           onChange={(e) => onChange?.(e.target.value)}
@@ -445,7 +458,9 @@ export const Input: React.FC<InputProps> = ({ label, value, onChange, placeholde
       {error && <p className="crm-error">{error}</p>}
   </div>
 );
-};
+});
+
+Input.displayName = 'Input';
 
 export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md', className = '' }) => {
   const sizes = {
@@ -570,10 +585,60 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, active, onTabChange, variant =
 );
 };
 
-export const Textarea: React.FC<TextareaProps> = ({ label, value, onChange, placeholder, rows = 4, error, className = '' }) => (
+export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({ label, value, onChange, placeholder, options = [], error, className = '', disabled = false, children }, ref) => (
+  <div className={`crm-field ${className}`}>
+    {label && <label className="crm-label">{label}</label>}
+    <div className="relative">
+      <select
+        ref={ref}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        className={`crm-input ${error ? 'crm-input-error' : ''}`}
+        style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          borderColor: 'rgba(255, 255, 255, 0.2)',
+          color: 'rgb(30, 41, 59)',
+          backdropFilter: 'blur(4px)',
+          appearance: 'none',
+          backgroundImage: 'url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3e%3c/svg%3e")',
+          backgroundPosition: 'right 0.5rem center',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: '1.5em 1.5em',
+          paddingRight: '2.5rem'
+        }}
+        onFocus={(e) => {
+          e.target.style.boxShadow = '0 0 0 2px rgba(34, 197, 94, 0.3)';
+          e.target.style.borderColor = 'rgba(34, 197, 94, 0.5)';
+        }}
+        onBlur={(e) => {
+          e.target.style.boxShadow = 'none';
+          e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+        }}
+      >
+        {placeholder && (
+          <option value="" disabled>
+            {placeholder}
+          </option>
+        )}
+        {children ? children : options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+    {error && <p className="crm-error">{error}</p>}
+  </div>
+));
+
+Select.displayName = 'Select';
+
+export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({ label, value, onChange, placeholder, rows = 4, error, className = '' }, ref) => (
   <div className={`crm-field ${className}`}>
     {label && <label className="crm-label">{label}</label>}
     <textarea
+      ref={ref}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
@@ -596,7 +661,9 @@ export const Textarea: React.FC<TextareaProps> = ({ label, value, onChange, plac
     />
     {error && <p className="crm-error">{error}</p>}
   </div>
-);
+));
+
+Textarea.displayName = 'Textarea';
 
 export const Tooltip: React.FC<TooltipProps> = ({ content, children, position = 'top' }) => {
   const [visible, setVisible] = useState(false);

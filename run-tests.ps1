@@ -1,12 +1,12 @@
-# VeroSuite Comprehensive Test Runner
+# VeroField Comprehensive Test Runner
 # This script runs all tests for both backend and frontend
 
-Write-Host "🧪 VeroSuite Comprehensive Test Suite" -ForegroundColor Cyan
+Write-Host "🧪 VeroField Comprehensive Test Suite" -ForegroundColor Cyan
 Write-Host "=====================================" -ForegroundColor Cyan
 
 # Check if we're in the right directory
 if (-not (Test-Path "backend") -or -not (Test-Path "frontend")) {
-    Write-Host "❌ Error: Please run this script from the VeroSuite root directory" -ForegroundColor Red
+    Write-Host "❌ Error: Please run this script from the VeroField root directory" -ForegroundColor Red
     exit 1
 }
 
@@ -103,7 +103,7 @@ foreach ($test in $testResults.GetEnumerator()) {
 
 # Overall result
 if ($failedTests -eq 0) {
-    Write-Host "`n🎉 All tests passed! VeroSuite is ready for production." -ForegroundColor Green
+    Write-Host "`n🎉 All tests passed! VeroField is ready for production." -ForegroundColor Green
     exit 0
 } else {
     Write-Host "`n⚠️  Some tests failed. Please review the errors above." -ForegroundColor Yellow

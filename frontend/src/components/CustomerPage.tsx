@@ -99,7 +99,6 @@ import CustomerAnalytics from './customer/CustomerAnalytics';
 import CustomerSettings from './customer/CustomerSettings';
 import CustomerNotesHistory from './customer/CustomerNotesHistory';
 import CustomerInfoPanel from './customer/CustomerInfoPanel';
-import './CustomerPage.css';
 
 interface Customer {
   id: string;

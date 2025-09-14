@@ -1,9 +1,9 @@
--- Seed: Quick Commands: Natural Language Actions (VeroSuite Training)
+-- Seed: Quick Commands: Natural Language Actions (VeroField Training)
 -- Run this in Supabase SQL editor
 
 -- Ensure category exists
 insert into knowledge_categories (slug, name, description, icon)
-values ('verosuite-training', 'VeroSuite Training', 'Learn how to use the VeroSuite CRM effectively', '🎓')
+values ('verosuite-training', 'VeroField Training', 'Learn how to use the VeroField CRM effectively', '🎓')
 on conflict (slug) do nothing;
 
 -- Remove existing article with same title (idempotent)
@@ -19,7 +19,7 @@ insert into knowledge_articles (
 ) select
   cat.id,
   'Quick Commands: Natural Language Actions',
-  'VeroSuite Team',
+  'VeroField Team',
   current_date,
   current_date,
   '7 min',
@@ -29,7 +29,7 @@ insert into knowledge_articles (
   array['commands','nlp','productivity'],
   $$
   <h2>Overview</h2>
-  <p>Use natural language in the top command box to create records fast. VeroSuite parses your text, extracts entities (name, address, phone, email, date/time), and pre-fills forms for review before saving.</p>
+  <p>Use natural language in the top command box to create records fast. VeroField parses your text, extracts entities (name, address, phone, email, date/time), and pre-fills forms for review before saving.</p>
 
   <h2>Available today</h2>
   <ul>

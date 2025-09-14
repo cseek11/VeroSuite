@@ -80,8 +80,8 @@ const mockCategories = [
   ,
   {
     id: 'verosuite-training',
-    name: 'VeroSuite Training',
-    description: 'Learn how to use the VeroSuite CRM effectively',
+    name: 'VeroField Training',
+    description: 'Learn how to use the VeroField CRM effectively',
     articleCount: 3,
     icon: '🎓'
   }
@@ -164,12 +164,12 @@ const mockArticles = [
     featured: false
   }
   ,
-  // VeroSuite Training Articles
+  // VeroField Training Articles
   {
     id: 'vs-001',
-    title: 'VeroSuite: Getting Started',
+    title: 'VeroField: Getting Started',
     category: 'verosuite-training',
-    author: 'VeroSuite Team',
+    author: 'VeroField Team',
     publishDate: '2025-02-06',
     lastUpdated: '2025-02-06',
     readTime: '6 min',
@@ -177,14 +177,14 @@ const mockArticles = [
     rating: 4.9,
     views: 0,
     tags: ['onboarding', 'setup', 'account'],
-    content: 'Create your account, understand the layout, and complete the initial setup to start using VeroSuite.',
+    content: 'Create your account, understand the layout, and complete the initial setup to start using VeroField.',
     featured: true
   },
   {
     id: 'vs-002',
-    title: 'Navigating VeroSuite: Dashboard, Customers, Jobs',
+    title: 'Navigating VeroField: Dashboard, Customers, Jobs',
     category: 'verosuite-training',
-    author: 'VeroSuite Team',
+    author: 'VeroField Team',
     publishDate: '2025-02-06',
     lastUpdated: '2025-02-06',
     readTime: '8 min',
@@ -192,14 +192,14 @@ const mockArticles = [
     rating: 4.8,
     views: 0,
     tags: ['navigation', 'dashboard', 'customers', 'jobs'],
-    content: 'Learn the main sections of VeroSuite and how to move quickly using the sidebar and keyboard shortcuts.',
+    content: 'Learn the main sections of VeroField and how to move quickly using the sidebar and keyboard shortcuts.',
     featured: false
   },
   {
     id: 'vs-003',
     title: 'Quick Commands: Create Customers and Jobs with Natural Language',
     category: 'verosuite-training',
-    author: 'VeroSuite Team',
+    author: 'VeroField Team',
     publishDate: '2025-02-06',
     lastUpdated: '2025-02-06',
     readTime: '7 min',
@@ -256,7 +256,7 @@ const KnowledgePage: React.FC = () => {
     id: undefined,
     title: '',
     category_id: '',
-    author: 'VeroSuite Team',
+    author: 'VeroField Team',
     read_time: '5 min',
     difficulty: 'beginner',
     tags: [],
@@ -267,7 +267,7 @@ const KnowledgePage: React.FC = () => {
 
   const tabs = [
     { id: 'articles', label: 'Articles', icon: FileText },
-    { id: 'verosuite', label: 'VeroSuite', icon: BookOpen },
+    { id: 'verosuite', label: 'VeroField', icon: BookOpen },
     { id: 'categories', label: 'Categories', icon: FolderOpen },
     { id: 'faqs', label: 'FAQs', icon: HelpCircle },
     { id: 'favorites', label: 'Favorites', icon: Bookmark }
@@ -364,7 +364,7 @@ const KnowledgePage: React.FC = () => {
             </button>
             <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 font-medium text-sm"
               onClick={() => {
-                setEditorData({ id: undefined, title: '', category_id: (fetchedCategories.find((c:any)=>c.slug==='verosuite-training')?.id)||'', author: 'VeroSuite Team', read_time: '5 min', difficulty: 'beginner', tags: [], content: '', featured: false });
+                setEditorData({ id: undefined, title: '', category_id: (fetchedCategories.find((c:any)=>c.slug==='verosuite-training')?.id)||'', author: 'VeroField Team', read_time: '5 min', difficulty: 'beginner', tags: [], content: '', featured: false });
                 setIsEditorOpen(true);
               }}
             >
@@ -544,7 +544,7 @@ const KnowledgePage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <User className="h-3 w-3 text-slate-400" />
-                      <span className="text-xs text-slate-600">{article.author || 'VeroSuite Team'}</span>
+                      <span className="text-xs text-slate-600">{article.author || 'VeroField Team'}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       {isAdmin && (
@@ -557,7 +557,7 @@ const KnowledgePage: React.FC = () => {
                                 id: article.id,
                                 title: article.title,
                                 category_id: article.category_id || (fetchedCategories.find((c: any) => c.slug === article.category_slug)?.id || ''),
-                                author: article.author || 'VeroSuite Team',
+                                author: article.author || 'VeroField Team',
                                 read_time: article.read_time || '5 min',
                                 difficulty: article.difficulty || 'beginner',
                                 tags: article.tags || [],
@@ -603,7 +603,7 @@ const KnowledgePage: React.FC = () => {
                 <div className="p-1 bg-purple-100 rounded-md">
                   <BookOpen className="h-4 w-4 text-purple-600" />
                 </div>
-                VeroSuite Training
+                VeroField Training
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {articles.filter((a: any) => (usingFetched ? a.category_slug === 'verosuite-training' : a.category === 'verosuite-training')).map((article: any) => (

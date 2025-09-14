@@ -31,10 +31,10 @@ create or replace view knowledge_articles_view as
   from knowledge_articles a
   join knowledge_categories c on c.id = a.category_id;
 
--- Seed VeroSuite category and starter articles
+-- Seed VeroField category and starter articles
 insert into knowledge_categories (slug, name, description, icon)
 values
-  ('verosuite-training', 'VeroSuite Training', 'Learn how to use the VeroSuite CRM effectively', '🎓')
+  ('verosuite-training', 'VeroField Training', 'Learn how to use the VeroField CRM effectively', '🎓')
 on conflict (slug) do nothing;
 
 -- Insert articles only if not exist by title
@@ -42,8 +42,8 @@ with cat as (
   select id from knowledge_categories where slug = 'verosuite-training' limit 1
 )
 insert into knowledge_articles (category_id, title, author, publish_date, last_updated, read_time, difficulty, rating, tags, content, featured)
-select cat.id, 'VeroSuite: Getting Started', 'VeroSuite Team', current_date, current_date, '6 min', 'beginner', 4.9, array['onboarding','setup','account'],
-$$Create your account, understand the layout, and complete the initial setup to start using VeroSuite.
+select cat.id, 'VeroField: Getting Started', 'VeroField Team', current_date, current_date, '6 min', 'beginner', 4.9, array['onboarding','setup','account'],
+$$Create your account, understand the layout, and complete the initial setup to start using VeroField.
 
 Topics:
 - Logging in and user roles
@@ -51,14 +51,14 @@ Topics:
 - Updating company settings and branding
 - Keyboard shortcuts (press ? to view)
 $$, true from cat
-where not exists (select 1 from knowledge_articles where title = 'VeroSuite: Getting Started');
+where not exists (select 1 from knowledge_articles where title = 'VeroField: Getting Started');
 
 with cat as (
   select id from knowledge_categories where slug = 'verosuite-training' limit 1
 )
 insert into knowledge_articles (category_id, title, author, publish_date, last_updated, read_time, difficulty, rating, tags, content, featured)
-select cat.id, 'Navigating VeroSuite: Dashboard, Customers, Jobs', 'VeroSuite Team', current_date, current_date, '8 min', 'beginner', 4.8, array['navigation','dashboard','customers','jobs'],
-$$Learn the main sections of VeroSuite and how to move quickly using the sidebar and keyboard shortcuts.
+select cat.id, 'Navigating VeroField: Dashboard, Customers, Jobs', 'VeroField Team', current_date, current_date, '8 min', 'beginner', 4.8, array['navigation','dashboard','customers','jobs'],
+$$Learn the main sections of VeroField and how to move quickly using the sidebar and keyboard shortcuts.
 
 Topics:
 - Sidebar and top bar
@@ -66,13 +66,13 @@ Topics:
 - Jobs: scheduling basics
 - Reports and Analytics
 $$, false from cat
-where not exists (select 1 from knowledge_articles where title = 'Navigating VeroSuite: Dashboard, Customers, Jobs');
+where not exists (select 1 from knowledge_articles where title = 'Navigating VeroField: Dashboard, Customers, Jobs');
 
 with cat as (
   select id from knowledge_categories where slug = 'verosuite-training' limit 1
 )
 insert into knowledge_articles (category_id, title, author, publish_date, last_updated, read_time, difficulty, rating, tags, content, featured)
-select cat.id, 'Quick Commands: Natural Language Actions', 'VeroSuite Team', current_date, current_date, '7 min', 'beginner', 4.7, array['commands','nlp','productivity'],
+select cat.id, 'Quick Commands: Natural Language Actions', 'VeroField Team', current_date, current_date, '7 min', 'beginner', 4.7, array['commands','nlp','productivity'],
 $$Use the command bar to type natural language like "create new customer Chris Seek 134 Thompson Ave Donora PA 15033" to auto-fill forms.
 
 Tips:

@@ -5,9 +5,35 @@
 /* Import CRM Styling System */
 @import './crm-styles.css';
 
-/* V4 Layout Styles */
+/* ============================================================================
+   UNIFIED STYLING SYSTEM - NO CONFLICTS
+   ============================================================================ */
+
+@layer base {
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    @apply bg-slate-50 text-slate-900;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  /* Focus styles for accessibility */
+  *:focus {
+    outline: 2px solid #8b5cf6;
+    outline-offset: 2px;
+  }
+  
+  /* Remove default focus for custom components */
+  .focus-manager *:focus {
+    outline: none;
+  }
+}
+
 @layer components {
-  /* Custom scrollbar for V4 */
+  /* V4 Layout Components */
   .v4-scrollbar::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -22,7 +48,6 @@
     background: #2d3748;
   }
   
-  /* V4 fade-in animation */
   .v4-fade-in {
     animation: v4FadeIn 0.3s ease-in-out;
   }
@@ -38,7 +63,6 @@
     }
   }
   
-  /* V4 card hover effects */
   .v4-card {
     @apply bg-white rounded-lg shadow-sm border border-gray-200 transition-all duration-200;
   }
@@ -47,42 +71,28 @@
     @apply shadow-lg transform -translate-y-1;
   }
   
-  /* V4 notification badge */
   .v4-notification-badge {
     @apply absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center font-semibold;
   }
   
-  /* V4 user status indicator */
   .v4-user-status {
     @apply absolute -bottom-1 -right-1 w-2 h-2 bg-green-500 rounded-full border-2 border-white;
   }
   
-  /* Hide scrollbar for activity panel */
+  /* Scrollbar utilities */
   .scrollbar-hide {
-    -ms-overflow-style: none !important;  /* Internet Explorer 10+ */
-    scrollbar-width: none !important;  /* Firefox */
-    overflow: -moz-scrollbars-none !important;  /* Firefox */
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+    overflow: -moz-scrollbars-none !important;
   }
+  
   .scrollbar-hide::-webkit-scrollbar {
-    display: none !important;  /* Safari and Chrome */
+    display: none !important;
     width: 0 !important;
     height: 0 !important;
     background: transparent !important;
   }
-  .scrollbar-hide::-webkit-scrollbar-track {
-    display: none !important;
-    background: transparent !important;
-  }
-  .scrollbar-hide::-webkit-scrollbar-thumb {
-    display: none !important;
-    background: transparent !important;
-  }
-  .scrollbar-hide::-webkit-scrollbar-corner {
-    display: none !important;
-    background: transparent !important;
-  }
   
-  /* Global webkit scrollbar override for activity panel */
   .scrollbar-hide *::-webkit-scrollbar {
     display: none !important;
     width: 0 !important;
@@ -90,345 +100,125 @@
     background: transparent !important;
   }
   
-  /* Force hide all scrollbars in activity panel */
   .scrollbar-hide * {
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
   }
-}
-
-/* Keyboard Navigation and Focus Styles */
-@layer base {
-  /* Improved focus indicators for better accessibility */
-  *:focus {
-    outline: 2px solid #8b5cf6;
-    outline-offset: 2px;
+  
+  /* Main content scrollbar */
+  .main-content-area {
+    margin-right: 15px;
+    scrollbar-gutter: stable;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
-
-  /* Custom focus styles for interactive elements */
-  button:focus,
-  input:focus,
-  select:focus,
-  textarea:focus,
-  a:focus,
-  [tabindex]:focus {
-    outline: 2px solid #8b5cf6;
-    outline-offset: 2px;
+  
+  .main-content-area::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .main-content-area::-webkit-scrollbar-track {
+    background: #f1f5f9;
     border-radius: 4px;
   }
-
-  /* Remove default focus styles for custom components */
-  .focus-manager *:focus {
-    outline: none;
-  }
-
-  .focus-manager button:focus,
-  .focus-manager input:focus,
-  .focus-manager select:focus,
-  .focus-manager textarea:focus,
-  .focus-manager a:focus,
-  .focus-manager [tabindex]:focus {
-    outline: 2px solid #8b5cf6;
-    outline-offset: 2px;
+  
+  .main-content-area::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
     border-radius: 4px;
   }
-
-  /* High contrast focus for better visibility */
-  @media (prefers-contrast: high) {
-    *:focus {
-      outline: 3px solid #000;
-      outline-offset: 1px;
-    }
+  
+  .main-content-area::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
   }
-
-  /* Reduced motion for users who prefer it */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
+  
+  /* Dashboard scrollbar */
+  .dashboard-scroll {
+    margin-right: 15px !important;
+    scrollbar-gutter: stable !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
   }
-}
-
-@layer components {
-  /* Keyboard navigation indicator */
-  .keyboard-nav-indicator {
-    @apply relative;
+  
+  .dashboard-scroll::-webkit-scrollbar {
+    width: 8px !important;
   }
-
-  .keyboard-nav-indicator::after {
-    content: '';
-    @apply absolute inset-0 border-2 border-purple-500 rounded pointer-events-none opacity-0 transition-opacity duration-200;
+  
+  .dashboard-scroll::-webkit-scrollbar-track {
+    background: #f1f5f9 !important;
+    border-radius: 4px !important;
   }
-
-  .keyboard-nav-indicator:focus::after {
-    @apply opacity-100;
+  
+  .dashboard-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1 !important;
+    border-radius: 4px !important;
   }
-
-  /* Skip link for accessibility - completely hidden by default */
-  .skip-link {
-    position: absolute;
-    top: -9999px;
-    left: 6px;
-    background: #8b5cf6;
+  
+  .dashboard-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8 !important;
+  }
+  
+  /* Login form styling */
+  .login-form-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 
+                0 0 0 1px rgba(139, 92, 246, 0.2),
+                0 0 20px rgba(139, 92, 246, 0.3),
+                0 0 40px rgba(139, 92, 246, 0.4),
+                0 0 60px rgba(139, 92, 246, 0.3),
+                0 0 80px rgba(139, 92, 246, 0.2),
+                0 0 100px rgba(139, 92, 246, 0.1),
+                0 0 120px rgba(139, 92, 246, 0.05);
+  }
+  
+  .login-button {
+    background: linear-gradient(135deg, #8b5cf6, #a855f7, #9333ea);
+    border: none;
     color: white;
-    padding: 8px 16px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    z-index: 9999;
-    transition: top 0.2s ease;
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
+    font-weight: 600;
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+    transition: all 0.3s ease;
   }
-
-  .skip-link:focus {
-    top: 6px;
-    opacity: 1;
-    pointer-events: auto;
-    visibility: visible;
+  
+  .login-button:hover {
+    background: linear-gradient(135deg, #a855f7, #c084fc, #a855f7);
+    box-shadow: 0 12px 35px rgba(139, 92, 246, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  .login-button:active {
+    transform: translateY(0);
+  }
+  
+  .login-text {
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3),
+                 0 0 20px rgba(139, 92, 246, 0.4),
+                 0 0 40px rgba(139, 92, 246, 0.2);
+    font-weight: 600;
+  }
+  
+  .login-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3),
+                 0 0 15px rgba(139, 92, 246, 0.3),
+                 0 0 30px rgba(139, 92, 246, 0.1);
   }
 }
 
-:root { color-scheme: light dark; }
-body { @apply bg-gray-50 text-gray-900; }
-
-/* Hide React Developer Tools panel */
-#react-devtools-root {
-  display: none !important;
-}
-
-/* Alternative selectors that might work */
-[data-reactroot] > div:last-child {
-  display: none !important;
-}
-
-/* Hide any fixed positioned elements in bottom right that might be React DevTools */
-.fixed.bottom-0.right-0 {
-  display: none !important;
-}
-
-/* Hide the SVG circle element in bottom right */
-circle[cx="316.5"][cy="316.5"][r="316.5"] {
-  display: none !important;
-}
-
-/* Hide any SVG elements that might be appearing in bottom right */
-svg {
-  pointer-events: none;
-}
-
-/* More specific selector for the circle */
-circle[fill*="url(#a-cl-39)"] {
-  display: none !important;
-}
-
-/* Hide Tanstack Query DevTools button */
+/* Hide development tools */
+#react-devtools-root,
+[data-reactroot] > div:last-child,
+.fixed.bottom-0.right-0,
+circle[cx="316.5"][cy="316.5"][r="316.5"],
+circle[fill*="url(#a-cl-39)"],
 button[aria-label="Open Tanstack query devtools"],
-.tsqd-open-btn {
-  display: none !important;
-}
-
-/* Hide any button with Tanstack query devtools */
+.tsqd-open-btn,
 button[class*="tsqd"] {
   display: none !important;
 }
 
-/* Custom scrollbar styles */
-.scrollbar-thin {
-  scrollbar-width: thin;
+svg {
+  pointer-events: none;
 }
-
-.scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: #f3f4f6;
-  border-radius: 3px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
-  transition: background-color 0.2s ease;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
-}
-
-.scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-}
-
-.scrollbar-track-gray-100::-webkit-scrollbar-track {
-  background: #f3f4f6;
-}
-
-.hover\:scrollbar-thumb-gray-400:hover::-webkit-scrollbar-thumb {
-  background: #9ca3af;
-}
-
-.scrollbar-thumb-purple-300::-webkit-scrollbar-thumb {
-  background: #c4b5fd;
-}
-
-.hover\:scrollbar-thumb-purple-400:hover::-webkit-scrollbar-thumb {
-  background: #a78bfa;
-}
-
-/* Embedded scrollbar styling for main content area */
-.main-content-area {
-  margin-right: 15px; /* Safety margin */
-  scrollbar-gutter: stable; /* Reserve scrollbar space */
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-/* Custom scrollbar styling for main content */
-.main-content-area::-webkit-scrollbar {
-  width: 8px;
-}
-
-.main-content-area::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
-}
-
-.main-content-area::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-.main-content-area::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Embedded scrollbar for dashboard sections */
-.dashboard-scroll {
-  margin-right: 15px !important; /* Safety margin - same as main content */
-  scrollbar-gutter: stable !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-
-.dashboard-scroll::-webkit-scrollbar {
-  width: 8px !important; /* Same width as main content */
-}
-
-.dashboard-scroll::-webkit-scrollbar-track {
-  background: #f1f5f9 !important; /* Same as main content */
-  border-radius: 4px !important; /* Same as main content */
-}
-
-.dashboard-scroll::-webkit-scrollbar-thumb {
-  background: #cbd5e1 !important; /* Same as main content */
-  border-radius: 4px !important; /* Same as main content */
-}
-
-.dashboard-scroll::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8 !important; /* Same as main content */
-}
-
-/* More specific dashboard scrollbar styling */
-.dashboard-section-scroll {
-  margin-right: 15px !important;
-  scrollbar-gutter: stable !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-
-.dashboard-section-scroll::-webkit-scrollbar {
-  width: 8px !important;
-}
-
-.dashboard-section-scroll::-webkit-scrollbar-track {
-  background: #f1f5f9 !important;
-  border-radius: 4px !important;
-}
-
-.dashboard-section-scroll::-webkit-scrollbar-thumb {
-  background: #cbd5e1 !important;
-  border-radius: 4px !important;
-}
-
-.dashboard-section-scroll::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8 !important;
-}
-
-/* Global webkit scrollbar overrides for all elements */
-*::-webkit-scrollbar {
-  width: 8px;
-}
-
-*::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
-}
-
-*::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Login form card styling */
-.login-form-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 
-              0 0 0 1px rgba(139, 92, 246, 0.2),
-              0 0 20px rgba(139, 92, 246, 0.3),
-              0 0 40px rgba(139, 92, 246, 0.4),
-              0 0 60px rgba(139, 92, 246, 0.3),
-              0 0 80px rgba(139, 92, 246, 0.2),
-              0 0 100px rgba(139, 92, 246, 0.1),
-              0 0 120px rgba(139, 92, 246, 0.05);
-}
-
-/* Login button styling */
-.login-button {
-  background: linear-gradient(135deg, #8b5cf6, #a855f7, #9333ea);
-  border: none;
-  color: white;
-  font-weight: 600;
-  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
-  transition: all 0.3s ease;
-}
-.login-button:hover {
-  background: linear-gradient(135deg, #a855f7, #c084fc, #a855f7);
-  box-shadow: 0 12px 35px rgba(139, 92, 246, 0.4);
-  transform: translateY(-2px);
-}
-.login-button:active {
-  transform: translateY(0);
-}
-
-/* Login text styling */
-.login-text {
-  color: rgba(255, 255, 255, 0.9);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3),
-               0 0 20px rgba(139, 92, 246, 0.4),
-               0 0 40px rgba(139, 92, 246, 0.2);
-  font-weight: 600;
-}
-
-.login-subtitle {
-  color: rgba(255, 255, 255, 0.7);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3),
-               0 0 15px rgba(139, 92, 246, 0.3),
-               0 0 30px rgba(139, 92, 246, 0.1);
-}
-
-/* CRITICAL: Login gradient inputs - HIGHEST PRIORITY - REMOVED AGGRESSIVE OVERRIDES */
-/* These were causing conflicts with other form elements */

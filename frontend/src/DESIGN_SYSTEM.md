@@ -1,7 +1,7 @@
-# VeroSuite Design System
+# VeroField Design System
 
 ## Overview
-This design system establishes consistent layout patterns and sizing standards across all pages in the VeroSuite application, based on the Settings page layout that provides a clean, modern, and professional appearance.
+This design system establishes consistent layout patterns and sizing standards across all pages in the VeroField application, based on the Settings page layout that provides a clean, modern, and professional appearance.
 
 ## Core Layout Standards
 

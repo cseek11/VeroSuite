@@ -4,8 +4,19 @@ import { supabase } from '../supabase-client';
 
 // Mock Supabase client
 vi.mock('../supabase-client', () => ({
+  default: {
+    from: vi.fn(),
+    auth: {
+      getUser: vi.fn(),
+    },
+    rpc: vi.fn(),
+  },
   supabase: {
     from: vi.fn(),
+    auth: {
+      getUser: vi.fn(),
+    },
+    rpc: vi.fn(),
   },
 }));
 

@@ -1,0 +1,107 @@
+[
+  {
+    "id": "test-customer-1",
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john.doe@example.com",
+    "phone": "+1-555-0123",
+    "address": "123 Main Street",
+    "city": "Anytown",
+    "state": "CA",
+    "zip_code": "12345",
+    "tenant_id": "test-tenant-1"
+  },
+  {
+    "id": "test-customer-2",
+    "first_name": "Jane",
+    "last_name": "Smith",
+    "email": "jane.smith@example.com",
+    "phone": "+1-555-0124",
+    "address": "456 Oak Avenue",
+    "city": "Somewhere",
+    "state": "NY",
+    "zip_code": "67890",
+    "tenant_id": "test-tenant-1"
+  },
+  {
+    "id": "test-customer-3",
+    "first_name": "Bob",
+    "last_name": "Johnson",
+    "email": "bob.johnson@example.com",
+    "phone": "+1-555-0125",
+    "address": "789 Pine Road",
+    "city": "Elsewhere",
+    "state": "TX",
+    "zip_code": "54321",
+    "tenant_id": "test-tenant-1"
+  },
+  {
+    "id": "test-work-order-1",
+    "customer_id": "test-customer-1",
+    "technician_id": "test-technician-1",
+    "status": "scheduled",
+    "priority": "high",
+    "service_type": "pest_control",
+    "scheduled_date": "2024-12-25T10:00:00Z",
+    "description": "Pest control treatment for kitchen and living room",
+    "tenant_id": "test-tenant-1"
+  },
+  {
+    "id": "test-work-order-2",
+    "customer_id": "test-customer-2",
+    "technician_id": "test-technician-2",
+    "status": "in_progress",
+    "priority": "medium",
+    "service_type": "inspection",
+    "scheduled_date": "2024-12-26T14:00:00Z",
+    "description": "Annual pest inspection",
+    "tenant_id": "test-tenant-1"
+  },
+  {
+    "id": "test-work-order-3",
+    "customer_id": "test-customer-3",
+    "technician_id": "test-technician-3",
+    "status": "completed",
+    "priority": "low",
+    "service_type": "maintenance",
+    "scheduled_date": "2024-12-24T09:00:00Z",
+    "description": "Routine maintenance check",
+    "tenant_id": "test-tenant-1"
+  },
+  {
+    "id": "test-technician-1",
+    "first_name": "Alice",
+    "last_name": "Technician",
+    "email": "alice.tech@example.com",
+    "phone": "+1-555-0201",
+    "skills": ["pest_control", "inspection"],
+    "availability": "available",
+    "tenant_id": "test-tenant-1"
+  },
+  {
+    "id": "test-technician-2",
+    "first_name": "Charlie",
+    "last_name": "Expert",
+    "email": "charlie.expert@example.com",
+    "phone": "+1-555-0202",
+    "skills": ["inspection", "maintenance"],
+    "availability": "available",
+    "tenant_id": "test-tenant-1"
+  },
+  {
+    "id": "test-technician-3",
+    "first_name": "David",
+    "last_name": "Specialist",
+    "email": "david.specialist@example.com",
+    "phone": "+1-555-0203",
+    "skills": ["pest_control", "maintenance"],
+    "availability": "busy",
+    "tenant_id": "test-tenant-1"
+  }
+]
+
+
+
+
+
+

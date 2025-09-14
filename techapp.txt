@@ -189,7 +189,7 @@ const mockChemicals = [
   }
 ];
 
-const VeroSuiteMobileApp = () => {
+const VeroFieldMobileApp = () => {
   const [currentScreen, setCurrentScreen] = useState('jobList');
   const [selectedJob, setSelectedJob] = useState(null);
   const [jobs, setJobs] = useState([]);

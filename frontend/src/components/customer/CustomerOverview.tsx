@@ -76,6 +76,7 @@ const CustomerOverview: React.FC<CustomerOverviewProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedCustomer, setEditedCustomer] = useState<Customer | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [newTag, setNewTag] = useState('');
   const [customerTags, setCustomerTags] = useState<string[]>(['VIP', 'Quarterly Service', 'High Priority']);
   const [selectedNote, setSelectedNote] = useState<NoteData | null>(null);
@@ -101,6 +102,31 @@ const CustomerOverview: React.FC<CustomerOverviewProps> = ({
       setEditedCustomer(customer);
     }
   }, [customer, editedCustomer]);
+
+  const handleInputChange = (field: keyof Customer, value: string) => {
+    setEditedCustomer((prev) => prev ? { ...prev, [field]: value } : prev);
+  };
+
+  const handleSaveCustomer = async () => {
+    if (!editedCustomer) return;
+    try {
+      setIsSaving(true);
+      await enhancedApi.customers.update(customerId, {
+        name: editedCustomer.name,
+        phone: editedCustomer.phone,
+        email: editedCustomer.email,
+        address: editedCustomer.address,
+        city: editedCustomer.city,
+        state: editedCustomer.state,
+        zip_code: editedCustomer.zip_code,
+      } as any);
+      setIsEditing(false);
+    } catch (e) {
+      console.error('Failed to save customer', e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Analytics calculations
   const analytics = useMemo(() => {
@@ -375,15 +401,36 @@ const CustomerOverview: React.FC<CustomerOverviewProps> = ({
                 <User className="w-4 h-4" />
                 Customer Information
               </Typography>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditing(!isEditing)}
-                className="text-xs px-2 py-1 border-purple-300 text-purple-700 hover:bg-purple-50"
-              >
-                <Edit className="w-3 h-3 mr-1" />
-                Edit
-              </Button>
+              {isEditing ? (
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    onClick={handleSaveCustomer}
+                    disabled={isSaving}
+                    className="text-xs px-2 py-1 bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50"
+                  >
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => { setEditedCustomer(customer as Customer); setIsEditing(false); }}
+                    className="text-xs px-2 py-1 border-purple-300 text-purple-700 hover:bg-purple-50"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEditing(true)}
+                  className="text-xs px-2 py-1 border-purple-300 text-purple-700 hover:bg-purple-50"
+                >
+                  <Edit className="w-3 h-3 mr-1" />
+                  Edit
+                </Button>
+              )}
             </div>
             
             <div className="grid grid-cols-2 gap-4">
@@ -391,7 +438,8 @@ const CustomerOverview: React.FC<CustomerOverviewProps> = ({
                 <label className="text-xs font-medium text-purple-700 mb-1 block">Name</label>
                 <input
                   type="text"
-                  value={customer.name}
+                  value={editedCustomer?.name || ''}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
                   disabled={!isEditing}
                   className="w-full text-sm px-2 py-1 border border-purple-300 rounded bg-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                 />
@@ -400,7 +448,8 @@ const CustomerOverview: React.FC<CustomerOverviewProps> = ({
                 <label className="text-xs font-medium text-purple-700 mb-1 block">Phone</label>
                 <input
                   type="text"
-                  value={customer.phone || ''}
+                  value={editedCustomer?.phone || ''}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
                   disabled={!isEditing}
                   className="w-full text-sm px-2 py-1 border border-purple-300 rounded bg-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                 />
@@ -409,7 +458,8 @@ const CustomerOverview: React.FC<CustomerOverviewProps> = ({
                 <label className="text-xs font-medium text-purple-700 mb-1 block">Email</label>
                 <input
                   type="email"
-                  value={customer.email || ''}
+                  value={editedCustomer?.email || ''}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
                   disabled={!isEditing}
                   className="w-full text-sm px-2 py-1 border border-purple-300 rounded bg-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                 />
@@ -425,12 +475,40 @@ const CustomerOverview: React.FC<CustomerOverviewProps> = ({
             
             <div className="mt-3">
               <label className="text-xs font-medium text-purple-700 mb-1 block">Address</label>
-              <input
-                type="text"
-                value={`${customer.address || ''}, ${customer.city}, ${customer.state} ${customer.zip_code || ''}`}
-                disabled={!isEditing}
-                className="w-full text-sm px-2 py-1 border border-purple-300 rounded bg-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
-              />
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="text"
+                  placeholder="Street Address"
+                  value={editedCustomer?.address || ''}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  disabled={!isEditing}
+                  className="w-full text-sm px-2 py-1 border border-purple-300 rounded bg-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500 col-span-2"
+                />
+                <input
+                  type="text"
+                  placeholder="City"
+                  value={editedCustomer?.city || ''}
+                  onChange={(e) => handleInputChange('city', e.target.value)}
+                  disabled={!isEditing}
+                  className="w-full text-sm px-2 py-1 border border-purple-300 rounded bg-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                />
+                <input
+                  type="text"
+                  placeholder="State"
+                  value={editedCustomer?.state || ''}
+                  onChange={(e) => handleInputChange('state', e.target.value)}
+                  disabled={!isEditing}
+                  className="w-full text-sm px-2 py-1 border border-purple-300 rounded bg-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                />
+                <input
+                  type="text"
+                  placeholder="ZIP Code"
+                  value={editedCustomer?.zip_code || ''}
+                  onChange={(e) => handleInputChange('zip_code', e.target.value)}
+                  disabled={!isEditing}
+                  className="w-full text-sm px-2 py-1 border border-purple-300 rounded bg-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                />
+              </div>
             </div>
           </div>
 

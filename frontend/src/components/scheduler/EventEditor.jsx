@@ -17,7 +17,7 @@ export default function EventEditor({ event, setEvent, saveEvent, deleteEvent, r
             <input 
               value={form.title} 
               onChange={e=>patch({title:e.target.value})} 
-              className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+              className="crm-input" 
               placeholder="Enter event title"
             />
           </div>
@@ -28,7 +28,7 @@ export default function EventEditor({ event, setEvent, saveEvent, deleteEvent, r
                 type="datetime-local" 
                 value={form.start ? new Date(form.start).toISOString().slice(0,16) : ''} 
                 onChange={e=>patch({start:new Date(e.target.value).toISOString()})} 
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+                className="crm-input" 
               />
             </div>
             <div>
@@ -37,7 +37,7 @@ export default function EventEditor({ event, setEvent, saveEvent, deleteEvent, r
                 type="datetime-local" 
                 value={form.end ? new Date(form.end).toISOString().slice(0,16) : ''} 
                 onChange={e=>patch({end:new Date(e.target.value).toISOString()})} 
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+                className="crm-input" 
               />
             </div>
           </div>

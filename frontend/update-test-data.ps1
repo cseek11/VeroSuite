@@ -1,5 +1,5 @@
-# Update Test Data Script for VeroSuite
-Write-Host "Updating test data for VeroSuite..." -ForegroundColor Green
+# Update Test Data Script for VeroField
+Write-Host "Updating test data for VeroField..." -ForegroundColor Green
 
 # Check if we're in the right directory
 if (-not (Test-Path "scripts/update-test-data.js")) {
@@ -29,6 +29,7 @@ if ($LASTEXITCODE -eq 0) {
 } else {
     Write-Host "Test data update failed!" -ForegroundColor Red
 }
+
 
 
 

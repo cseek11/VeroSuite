@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { DatabaseService } from '../common/services/database.service';
 import { CreateNoteDto, UpdateNoteDto } from './dto';
 import { createClient } from '@supabase/supabase-js';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class CrmService {
@@ -161,6 +162,7 @@ export class CrmService {
 
     return this.prisma.customerNote.create({
       data: {
+        id: randomUUID(),
         tenant_id: tenantId,
         customer_id: customerId,
         note_type: dto.note_type,

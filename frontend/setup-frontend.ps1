@@ -1,5 +1,5 @@
-# VeroSuite Frontend Setup Script
-Write-Host "Setting up VeroSuite frontend environment..." -ForegroundColor Green
+# VeroField Frontend Setup Script
+Write-Host "Setting up VeroField frontend environment..." -ForegroundColor Green
 
 # Create .env file if it doesn't exist
 $envFile = ".env"

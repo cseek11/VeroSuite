@@ -9,7 +9,6 @@ import { expandRecurrence, computeRange } from "../../utils/recurrence";
 import { exportCsv, downloadIcs, parseIcs } from "../../utils/export";
 import { DataAdapter } from "../../utils/dataAdapter";
 
-import "./styles.css"; // optional: pull styles into project
 
 const DEFAULT_RESOURCES = [
   { id: "unassigned", name: "Unassigned", color: "#9CA3AF" },

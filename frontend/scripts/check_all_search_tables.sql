@@ -63,3 +63,11 @@ SELECT * FROM search_suggestions_analytics LIMIT 1;
 
 
 
+
+
+
+
+
+
+
+

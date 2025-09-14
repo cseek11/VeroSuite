@@ -1,5 +1,5 @@
 // ===============================================
-// VeroSuite Backend API - Core Implementation
+// VeroField Backend API - Core Implementation
 // NestJS with Multi-Tenant Architecture & RLS
 // ===============================================
 
@@ -21,7 +21,7 @@ async function bootstrap() {
 
   // Swagger API documentation
   const config = new DocumentBuilder()
-    .setTitle('VeroSuite API')
+    .setTitle('VeroField API')
     .setDescription('Multi-tenant Pest Control Operations Platform')
     .setVersion('1.0')
     .addBearerAuth()
@@ -1713,6 +1713,6 @@ describe('Tenant Isolation (e2e)', () => {
 6. Implement real-time notifications
 7. Set up monitoring and observability stack
 
-This backend provides the solid foundation for VeroSuite's multi-tenant 
+This backend provides the solid foundation for VeroField's multi-tenant 
 pest control platform with enterprise-grade security and scalability.
 */
