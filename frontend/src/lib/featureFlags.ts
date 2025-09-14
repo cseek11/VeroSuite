@@ -1,5 +1,5 @@
 /**
- * Feature Flag System for VeroSuite V4 Migration
+ * Feature Flag System for VeroField V4 Migration
  * 
  * This system allows for gradual rollout of V4 features and easy rollback
  * if issues are encountered during migration.
@@ -108,7 +108,7 @@ export function getFeatureFlags(): FeatureFlags {
  */
 export function logFeatureFlags(): void {
   if (import.meta.env.DEV) {
-    console.group('🔧 VeroSuite Feature Flags');
+    console.group('🔧 VeroField Feature Flags');
     console.table(getFeatureFlags());
     console.groupEnd();
   }

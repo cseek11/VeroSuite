@@ -42,7 +42,7 @@ export class RoutingService {
         scheduled_date: new Date(date),
         status: { in: ['unassigned', 'scheduled'] },
       },
-      include: { workOrder: { include: { location: true, account: true } } },
+      include: { workOrder: { include: { location: true } } },
     });
 
     const technicians = await this.techs.getAvailableTechnicians(tenantId, date);
@@ -55,7 +55,7 @@ export class RoutingService {
 
       const points: RoutePoint[] = availableJobs.map((j) => ({
         id: j.id,
-        name: `${j.workOrder.account?.name || 'Unknown Customer'} - ${j.workOrder.location?.name || 'Unknown Location'}`,
+        name: `${j.account_id || 'Unknown Customer'} - ${j.workOrder.location?.name || 'Unknown Location'}`,
         address: j.workOrder.location ? `${j.workOrder.location.address_line1}, ${j.workOrder.location.city}, ${j.workOrder.location.state}` : 'Unknown Address',
         coordinates: {
           lat: Number(j.workOrder.location?.latitude) || 40.4406,
@@ -102,7 +102,7 @@ export class RoutingService {
 
     const stops = sorted.map((p, i) => {
       const job = jobs.find((j) => j.id === p.id);
-      const loc = job?.work_order?.location;
+      const loc = job?.work_orders_jobs_work_order_idTowork_orders?.locations;
       const drivingTime = i === 0 ? 15 : 20;
       const distance = i === 0 ? 5 : 8;
       t += drivingTime;
@@ -117,7 +117,7 @@ export class RoutingService {
         estimatedDeparture: departure,
         drivingTime,
         coordinates: { lat: loc?.latitude ?? null, lng: loc?.longitude ?? null },
-        name: `${job?.work_order?.account?.name || ''} - ${loc?.name || ''}`.trim(),
+        name: `${job?.account_id || ''} - ${loc?.name || ''}`.trim(),
         address: `${loc?.address_line1 || ''}, ${loc?.city || ''}, ${loc?.state || ''}`,
       };
     });

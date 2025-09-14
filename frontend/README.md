@@ -34,7 +34,7 @@ A modern React-based frontend for the VeroPest Suite, a comprehensive pest contr
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd VeroSuite/frontend
+   cd VeroField/frontend
    ```
 
 2. **Install dependencies**

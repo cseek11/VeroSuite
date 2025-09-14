@@ -66,6 +66,8 @@ export default function Login() {
       background: `url('/branding/newbg22.png') center 48% / cover no-repeat fixed`,
       position: 'relative',
     }}>
+      {/* Background light overlay to reduce image intensity by ~25% */}
+      <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: 'rgba(255,255,255,0.25)' }} />
       {/* Background Beams Effect */}
       <BackgroundBeams />
       

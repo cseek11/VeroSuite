@@ -73,6 +73,63 @@ export interface ConfirmationData {
 class ActionExecutorService {
 
   /**
+   * Extract a likely customer name and address tokens from a free-form string.
+   * Example input: "Chris Seek 135 Thompson Ave Donora Pa 15033"
+   * - name: "Chris Seek"
+   * - address tokens: { streetNumber: "135", street: "Thompson Ave", city: "Donora", state: "PA", zip: "15033" }
+   */
+  private extractNameAndAddress(raw: string): { name: string; tokens: { streetNumber?: string; street?: string; city?: string; state?: string; zip?: string } } {
+    if (!raw) return { name: '', tokens: {} };
+    const cleaned = raw.replace(/\s+,/g, ' ,').replace(/\s+/g, ' ').trim();
+
+    // Try to find a street number (first numeric token after the name)
+    const parts = cleaned.split(' ');
+    const idxWithNumber = parts.findIndex(p => /\d/.test(p));
+    let name = cleaned;
+    let trailing = '';
+    if (idxWithNumber > 0) {
+      name = parts.slice(0, idxWithNumber).join(' ');
+      trailing = parts.slice(idxWithNumber).join(' ');
+    }
+
+    // Parse trailing address pieces: number, street words until hitting city/state/zip
+    const tokens: { streetNumber?: string; street?: string; city?: string; state?: string; zip?: string } = {};
+    if (trailing) {
+      const streetNumMatch = trailing.match(/^(\d+[A-Za-z]?)/);
+      if (streetNumMatch) tokens.streetNumber = streetNumMatch[1];
+
+      // Common street suffixes
+      const streetSuffixes = ['st', 'street', 'ave', 'avenue', 'rd', 'road', 'blvd', 'lane', 'ln', 'dr', 'drive', 'ct', 'court', 'cir', 'circle', 'way', 'terrace', 'ter'];
+      const streetMatch = trailing.match(new RegExp(String.raw`^\d+[A-Za-z]?\s+([A-Za-z]+(?:\s+[A-Za-z]+)*\s+(?:${streetSuffixes.join('|')})\b)`, 'i'));
+      if (streetMatch) tokens.street = streetMatch[1];
+
+      // State as 2-letter code
+      const stateMatch = trailing.match(/\b([A-Za-z]{2})\b(?!.*\b\1\b)/);
+      if (stateMatch) tokens.state = stateMatch[1].toUpperCase();
+
+      // ZIP code (5 digits)
+      const zipMatch = trailing.match(/\b\d{5}\b/);
+      if (zipMatch) tokens.zip = zipMatch[0];
+
+      // City: take the word(s) before state or zip if present
+      if (!tokens.city) {
+        const withoutZip = tokens.zip ? trailing.replace(tokens.zip, '').trim() : trailing;
+        const withoutState = tokens.state ? withoutZip.replace(new RegExp(String.raw`\b${tokens.state}\b`, 'i'), '').trim() : withoutZip;
+        // Remove street number and street phrase for city guess
+        let remainder = withoutState;
+        if (tokens.streetNumber) remainder = remainder.replace(new RegExp(`^${tokens.streetNumber}\\b`), '').trim();
+        if (tokens.street) remainder = remainder.replace(new RegExp(tokens.street, 'i'), '').trim();
+        const words = remainder.split(/\s+/).filter(Boolean);
+        if (words.length > 0) tokens.city = words.join(' ');
+      }
+    }
+
+    // Final sanitize name: remove trailing commas and spaces
+    name = name.replace(/[\s,]+$/, '').trim();
+    return { name, tokens };
+  }
+
+  /**
    * Validate an action before execution
    */
   validateAction(intentResult: IntentResult): ValidationResult {
@@ -1800,13 +1857,17 @@ class ActionExecutorService {
 
   private async findCustomer(customerName: string, requireExactMatch: boolean = false): Promise<any> {
     try {
+      // Sanitize input and extract address tokens
+      const { name: sanitizedName, tokens } = this.extractNameAndAddress(customerName || '');
+
       // Get all customers and search locally
       const customers = await secureApiClient.getAllAccounts();
       
       if (customers && customers.length > 0) {
+        const target = sanitizedName || customerName;
         // Find exact match first
         const exactMatch = customers.find((c: any) => 
-          c.name.toLowerCase() === customerName.toLowerCase()
+          c.name.toLowerCase() === target.toLowerCase()
         );
         if (exactMatch) return exactMatch;
         
@@ -1817,10 +1878,35 @@ class ActionExecutorService {
         
         // Find partial match (only for non-delete operations)
         const partialMatch = customers.find((c: any) => 
-          c.name.toLowerCase().includes(customerName.toLowerCase())
+          c.name.toLowerCase().includes(target.toLowerCase())
         );
         if (partialMatch) return partialMatch;
         
+        // Fallback: address-based fuzzy search when name matching fails
+        const hasAddressTokens = !!(tokens.streetNumber || tokens.street || tokens.city || tokens.state || tokens.zip);
+        if (hasAddressTokens) {
+          const scored = customers.map((c: any) => {
+            const addr = `${c.address || ''} ${c.city || ''} ${c.state || ''} ${c.zip_code || ''}`.toLowerCase();
+            let score = 0;
+            if (tokens.zip && addr.includes((tokens.zip || '').toLowerCase())) score += 50;
+            if (tokens.state && addr.includes((tokens.state || '').toLowerCase())) score += 20;
+            if (tokens.city && addr.includes((tokens.city || '').toLowerCase())) score += 25;
+            if (tokens.streetNumber && addr.includes((tokens.streetNumber || '').toLowerCase())) score += 20;
+            if (tokens.street) {
+              // boost for presence of all words of street
+              const streetWords = (tokens.street || '').toLowerCase().split(/\s+/).filter(Boolean);
+              const matchedWords = streetWords.filter(w => addr.includes(w)).length;
+              score += matchedWords * 8;
+            }
+            return { c, score };
+          }).sort((a, b) => b.score - a.score);
+
+          const best = scored[0];
+          if (best && best.score >= 40) {
+            return best.c;
+          }
+        }
+
         // Return null if no match found
         return null;
       }

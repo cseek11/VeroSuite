@@ -359,7 +359,7 @@ class SearchIntegration {
 // REACT HOOKS
 // ============================================================================
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 /**
  * React hook for search integration
@@ -367,6 +367,21 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 export function useSearchIntegration(options: SearchIntegrationOptions = {}) {
   const [state, setState] = useState<SearchIntegrationState>(searchIntegration.getState());
   const searchIntegrationRef = useRef(searchIntegration);
+  
+  // Memoize options to prevent unnecessary re-renders
+  const memoizedOptions = useMemo(() => options, [
+    options.debounceMs,
+    options.minSearchLength,
+    options.showLoadingState,
+    options.enableRealTimeSearch,
+    options.includeFields,
+    options.excludeFields,
+    options.limit,
+    options.offset,
+    options.sortBy,
+    options.sortOrder,
+    options.filters
+  ]);
 
   useEffect(() => {
     const unsubscribe = searchIntegrationRef.current.subscribe(setState);
@@ -375,9 +390,9 @@ export function useSearchIntegration(options: SearchIntegrationOptions = {}) {
 
   const search = useCallback(
     (searchTerm: string, searchOptions?: SearchOptions) => {
-      return searchIntegrationRef.current.search(searchTerm, { ...options, ...searchOptions });
+      return searchIntegrationRef.current.search(searchTerm, { ...memoizedOptions, ...searchOptions });
     },
-    [options]
+    [memoizedOptions]
   );
 
   const clearAll = useCallback(() => {

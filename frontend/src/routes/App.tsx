@@ -25,14 +25,24 @@ import SettingsPage from './Settings';
 import CRMDemo from './CRMDemo';
 import ChartsPage from './Charts';
 import ChartsTestPage from './ChartsTest';
-import WorkOrdersPage from './WorkOrders';
+import WorkOrdersPage from '@/pages/WorkOrdersPage';
+import CreateWorkOrderPage from '@/pages/CreateWorkOrderPage';
+import WorkOrderDetailPage from '@/pages/WorkOrderDetailPage';
+import EditWorkOrderPage from '@/pages/EditWorkOrderPage';
 import CustomerPage from '@/components/CustomerPage';
+import TechniciansPage from '@/pages/TechniciansPage';
+import CreateTechnicianPage from '@/pages/CreateTechnicianPage';
+import EditTechnicianPage from '@/pages/EditTechnicianPage';
+import TechnicianDetailPage from '@/pages/TechnicianDetailPage';
 import { CustomerListTest } from './CustomerListTest';
 import SearchAnalyticsDashboard from '@/components/analytics/SearchAnalyticsDashboard';
 import AdvancedSearchDemo from './AdvancedSearchDemo';
 import GlobalSearchDemo from './GlobalSearchDemo';
 import CustomerManagement from '@/pages/CustomerManagement';
 import ServiceManagement from '@/pages/ServiceManagement';
+import TestingDashboardPage from '@/pages/TestingDashboardPage';
+import AgreementsPage from '@/pages/AgreementsPage';
+import CreateAgreementPage from '@/pages/CreateAgreementPage';
 
 const LoginPage = lazy(() => import('@/routes/Login'));
 
@@ -109,6 +119,8 @@ export default function App() {
           position: 'relative',
         }}
       >
+        {/* Subtle light overlay to reduce background intensity by ~25% */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: 'rgba(255,255,255,0.25)' }} />
         <SkipLink />
         <main id="main-content" tabIndex={-1}>
           <Suspense fallback={<Spinner />}>
@@ -217,6 +229,90 @@ export default function App() {
               }
             />
             <Route
+              path="/work-orders/:id"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <WorkOrderDetailPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/work-orders/:id/edit"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <EditWorkOrderPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/work-orders/new"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <CreateWorkOrderPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/technicians"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <TechniciansPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/technicians/new"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <CreateTechnicianPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/technicians/:id"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <TechnicianDetailPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/technicians/:id/edit"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <EditTechnicianPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/customers"
               element={
                 <PrivateRoute>
@@ -283,6 +379,30 @@ export default function App() {
                   <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <ServiceManagement />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/agreements"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <AgreementsPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/agreements/create"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <CreateAgreementPage />
                     </Suspense>
                   </V4Layout>
                 </PrivateRoute>
@@ -451,6 +571,18 @@ export default function App() {
                   <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <SearchAnalyticsDashboard />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/testing-dashboard"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <TestingDashboardPage />
                     </Suspense>
                   </V4Layout>
                 </PrivateRoute>

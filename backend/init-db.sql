@@ -1,4 +1,4 @@
--- Initialize VeroSuite Database
+-- Initialize VeroField Database
 CREATE DATABASE IF NOT EXISTS verosuite;
 \c verosuite;
 

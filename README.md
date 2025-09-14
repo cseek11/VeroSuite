@@ -1,11 +1,11 @@
-# VeroSuite
+# VeroField
 
 Multi-tenant pest control operations platform demo. This repository contains interactive browser demos and technical design documents spanning frontend, mobile, backend, database, and multi-tenant security (RLS) concepts.
 
 ## Quickstart
 
 - Open the system architecture demo directly in your browser:
-  - Windows: double-click `demov1.htm` or run `start "" "c:\\Users\\ashse\\Documents\\Training\\Calude_VeroSuite\\demov1.htm"`
+  - Windows: double-click `demov1.htm` or run `start "" "c:\\Users\\ashse\\Documents\\Training\\Calude_VeroField\\demov1.htm"`
   - macOS: open with your browser of choice
 
 The demo includes:

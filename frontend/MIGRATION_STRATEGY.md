@@ -1,4 +1,4 @@
-# VeroSuite Migration Strategy: Old → V4 Layout
+# VeroField Migration Strategy: Old → V4 Layout
 
 ## 🎯 **Current State Analysis**
 
@@ -159,7 +159,7 @@ rm src/components/DashboardHeader.tsx
 
 #### **4.2 Update Documentation**
 ```markdown
-# VeroSuite V4 - User Guide
+# VeroField V4 - User Guide
 
 ## Layout System
 - **V4Layout**: The only layout system (replaces old LayoutWrapper)
@@ -183,7 +183,7 @@ rm src/components/DashboardHeader.tsx
 #!/bin/bash
 # migration-script.sh
 
-echo "Starting VeroSuite V4 Migration..."
+echo "Starting VeroField V4 Migration..."
 
 # 1. Create backup
 git checkout -b backup-$(date +%Y%m%d)

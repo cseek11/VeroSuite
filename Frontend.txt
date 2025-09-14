@@ -164,7 +164,7 @@ const mockJobs = [
   }
 ];
 
-const VeroSuiteDispatcherDashboard = () => {
+const VeroFieldDispatcherDashboard = () => {
   const [currentTenant, setCurrentTenant] = useState('ace-pest');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedJob, setSelectedJob] = useState(null);
@@ -262,7 +262,7 @@ const VeroSuiteDispatcherDashboard = () => {
             <div className="flex items-center">
               <Building2 className="h-8 w-8 text-white mr-3" />
               <div>
-                <h1 className="text-xl font-semibold text-white">VeroSuite</h1>
+                <h1 className="text-xl font-semibold text-white">VeroField</h1>
                 <p className="text-sm text-white/80">{tenant.name}</p>
               </div>
             </div>
@@ -757,4 +757,4 @@ const VeroSuiteDispatcherDashboard = () => {
   );
 };
 
-export default VeroSuiteDispatcherDashboard;
+export default VeroFieldDispatcherDashboard;

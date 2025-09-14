@@ -1,4 +1,4 @@
-# 🚨 IMMEDIATE ACTION CHECKLIST - VeroSuite CRM Security
+# 🚨 IMMEDIATE ACTION CHECKLIST - VeroField CRM Security
 
 **CRITICAL: These actions must be completed within 48 hours to secure the system**
 
@@ -41,7 +41,7 @@
 1. **Remove secrets from git history:**
    ```bash
    # Navigate to project root
-   cd "C:\Users\ashse\Documents\VeroPest Suite\Training\VeroSuite"
+   cd "C:\Users\ashse\Documents\VeroPest Suite\Training\VeroField"
    
    # Remove .env files from history
    git filter-branch --force --index-filter \

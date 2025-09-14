@@ -1,7 +1,7 @@
 -- ============================================================================
 -- DEPLOY DATABASE SCHEMA FOR GLOBAL SEARCH
 -- ============================================================================
--- Complete database setup for VeroSuite CRM Global Search functionality
+-- Complete database setup for VeroField CRM Global Search functionality
 
 -- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

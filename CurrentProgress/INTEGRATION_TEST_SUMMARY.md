@@ -108,7 +108,7 @@ Invoke-RestMethod -Uri "http://localhost:3001/api/accounts" -Method GET
 
 ## 🚀 **Ready for Production Use**
 
-The VeroSuite system now has:
+The VeroField system now has:
 - **✅ Secure tenant isolation**
 - **✅ Working API endpoints**
 - **✅ Modern React frontend**

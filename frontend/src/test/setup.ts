@@ -79,3 +79,14 @@ vi.mock('../lib/config', () => ({
     environment: 'test',
   },
 }));
+
+// Mock lucide-react icons
+vi.mock('lucide-react', () => ({
+  Users: vi.fn(() => 'Users'),
+  Mail: vi.fn(() => 'Mail'),
+  AlertTriangle: vi.fn(() => 'AlertTriangle'),
+  Loader2: vi.fn(() => 'Loader2'),
+  ArrowLeftIcon: vi.fn(() => 'ArrowLeft'),
+  CheckIcon: vi.fn(() => 'Check'),
+  XMarkIcon: vi.fn(() => 'XMark'),
+}));

@@ -8,7 +8,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   helperText?: string;
 }
 
-const Input: React.FC<InputProps> = ({
+const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   label,
   error,
   icon: Icon,
@@ -16,15 +16,15 @@ const Input: React.FC<InputProps> = ({
   className = '',
   id,
   ...props
-}) => {
+}, ref) => {
   const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
   const errorId = error ? `${inputId}-error` : undefined;
   const helperId = helperText ? `${inputId}-helper` : undefined;
 
   return (
-    <div className={`crm-field ${className}`}>
+    <div className={`space-y-1 ${className}`}>
       {label && (
-        <label htmlFor={inputId} className="crm-label">
+        <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
           {label}
         </label>
       )}
@@ -35,25 +35,28 @@ const Input: React.FC<InputProps> = ({
           </div>
         )}
         <input
+          ref={ref}
           id={inputId}
-          className={`crm-input ${Icon ? 'pl-10' : ''} ${error ? 'crm-input-error' : ''}`}
+          className={`block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 sm:text-sm ${Icon ? 'pl-10' : ''} ${error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={[errorId, helperId].filter(Boolean).join(' ') || undefined}
           {...props}
         />
       </div>
       {error && (
-        <p id={errorId} className="crm-error">
+        <p id={errorId} className="text-sm text-red-600">
           {error}
         </p>
       )}
       {helperText && !error && (
-        <p id={helperId} className="crm-help">
+        <p id={helperId} className="text-sm text-gray-500">
           {helperText}
         </p>
       )}
     </div>
   );
-};
+});
+
+Input.displayName = 'Input';
 
 export default Input;

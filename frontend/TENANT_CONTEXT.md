@@ -1,6 +1,6 @@
 # Tenant Context and Row Level Security (RLS)
 
-This document describes how VeroSuite enforces multi-tenant data isolation using PostgreSQL Row Level Security (RLS) combined with a per-request database session variable.
+This document describes how VeroField enforces multi-tenant data isolation using PostgreSQL Row Level Security (RLS) combined with a per-request database session variable.
 
 ## Overview
 

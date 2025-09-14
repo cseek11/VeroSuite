@@ -37,6 +37,10 @@ model Tenant {
   servicePricing          ServicePricing[]
   serviceTypes            ServiceType[]
   technicianSkills        TechnicianSkill[]
+  technicianProfiles      TechnicianProfile[]
+  technicianPayroll       TechnicianPayroll[]
+  technicianDocuments     TechnicianDocument[]
+  technicianPerformance   TechnicianPerformance[]
   tenantBranding          TenantBranding?
   users                   User[]
   workOrders              WorkOrder[]
@@ -54,6 +58,15 @@ model User {
   phone                                               String?            @db.VarChar(20)
   roles                                               String[]           @default([])
   status                                              String             @default("active") @db.VarChar(20)
+  technician_number                                   String?            @db.VarChar(20)
+  pesticide_license_number                            String?            @db.VarChar(50)
+  license_expiration_date                             DateTime?          @db.Date
+  hire_date                                           DateTime?          @db.Date
+  position                                            String?            @db.VarChar(100)
+  department                                          String?            @db.VarChar(100)
+  employment_type                                     String?            @default("full_time") @db.VarChar(20)
+  emergency_contact_name                              String?            @db.VarChar(100)
+  emergency_contact_phone                             String?            @db.VarChar(20)
   created_at                                          DateTime           @default(now()) @db.Timestamptz(6)
   updated_at                                          DateTime           @default(now()) @updatedAt @db.Timestamptz(6)
   Invoice_Invoice_created_byTousers                   Invoice[]          @relation("Invoice_created_byTousers")
@@ -64,6 +77,12 @@ model User {
   complianceRecords                                   ComplianceRecord[]
   serviceAnalytics                                    ServiceAnalytics[]
   technicianSkills                                    TechnicianSkill[]
+  technicianProfiles                                  TechnicianProfile[]
+  technicianPayrolls                                  TechnicianPayroll[]
+  technicianDocuments                                 TechnicianDocument[]
+  technicianPerformance                               TechnicianPerformance[]
+  uploadedDocuments                                   TechnicianDocument[] @relation("DocumentUploader")
+  verifiedDocuments                                   TechnicianDocument[] @relation("DocumentVerifier")
   tenant                                              Tenant             @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
   assignedWorkOrders                                  WorkOrder[]        @relation("WorkOrderAssignedTo")
 
@@ -150,21 +169,10 @@ model Account {
   state                    String?
   zip_code                 String?
   billing_address          Json?
-  payment_method           String?                  @db.VarChar(50)
-  billing_cycle            String?                  @db.VarChar(20)
-  property_type            String?                  @db.VarChar(50)
-  property_size            String?                  @db.VarChar(50)
-  access_instructions      String?
-  emergency_contact        String?                  @db.VarChar(100)
-  preferred_contact_method String?                  @db.VarChar(20)
-  ar_balance               Decimal                  @default(0) @db.Decimal(10, 2)
   created_at               DateTime                 @default(now()) @db.Timestamptz(6)
   updated_at               DateTime                 @default(now()) @updatedAt @db.Timestamptz(6)
-  phone_digits             String?
-  embedding                Unsupported("vector")?
-  search_vector            Unsupported("tsvector")?
-  name_trigram             String?
-  address_trigram          String?
+  created_by               String?                  @db.Uuid
+  updated_by               String?                  @db.Uuid
   Invoice                  Invoice[]
   ServiceAgreement         ServiceAgreement[]
   tenant                   Tenant                   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
@@ -845,6 +853,7 @@ model Invoice {
   @@index([due_date])
   @@index([status])
   @@index([tenant_id])
+  @@map("Invoice")
 }
 
 model InvoiceItem {
@@ -860,6 +869,7 @@ model InvoiceItem {
   service_types   ServiceType @relation(fields: [service_type_id], references: [id])
 
   @@index([invoice_id])
+  @@map("InvoiceItem")
 }
 
 model Payment {
@@ -881,6 +891,7 @@ model Payment {
   @@index([invoice_id])
   @@index([payment_date])
   @@index([tenant_id])
+  @@map("Payment")
 }
 
 model ServiceAgreement {
@@ -902,7 +913,7 @@ model ServiceAgreement {
   created_by                               String                 @db.Uuid
   updated_by                               String                 @db.Uuid
   Invoice                                  Invoice[]
-  accounts                                 Account                @relation(fields: [account_id], references: [id])
+  account                                  Account                @relation(fields: [account_id], references: [id])
   users_ServiceAgreement_created_byTousers User                   @relation("ServiceAgreement_created_byTousers", fields: [created_by], references: [id])
   service_types                            ServiceType            @relation(fields: [service_type_id], references: [id])
   tenants                                  Tenant                 @relation(fields: [tenant_id], references: [id])
@@ -912,6 +923,7 @@ model ServiceAgreement {
   @@index([account_id])
   @@index([status])
   @@index([tenant_id])
+  @@map("ServiceAgreement")
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
@@ -1108,4 +1120,110 @@ enum ServiceAgreementStatus {
   inactive
   expired
   cancelled
+}
+
+// ===== TECHNICIAN MANAGEMENT MODELS =====
+
+model TechnicianProfile {
+  id                              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id                       String   @db.Uuid
+  user_id                         String   @db.Uuid
+  employee_id                     String?  @unique @db.VarChar(20)
+  hire_date                       DateTime @db.Date
+  position                        String?  @db.VarChar(100)
+  department                      String?  @db.VarChar(100)
+  employment_type                 String   @default("full_time") @db.VarChar(20)
+  status                          String   @default("active") @db.VarChar(20)
+  emergency_contact_name          String?  @db.VarChar(100)
+  emergency_contact_phone         String?  @db.VarChar(20)
+  emergency_contact_relationship  String?  @db.VarChar(50)
+  address_line1                   String?  @db.VarChar(255)
+  address_line2                   String?  @db.VarChar(255)
+  city                            String?  @db.VarChar(100)
+  state                           String?  @db.VarChar(20)
+  postal_code                     String?  @db.VarChar(20)
+  country                         String   @default("US") @db.VarChar(10)
+  date_of_birth                   DateTime? @db.Date
+  social_security_number          String?  @db.VarChar(11)
+  driver_license_number           String?  @db.VarChar(50)
+  driver_license_state            String?  @db.VarChar(20)
+  driver_license_expiry           DateTime? @db.Date
+  created_at                      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                      DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  tenant                          Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user                            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, user_id])
+  @@map("technician_profiles")
+}
+
+model TechnicianPayroll {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id             String    @db.Uuid
+  technician_id         String    @db.Uuid
+  employment_type       String    @default("hourly") @db.VarChar(20)
+  pay_rate              Decimal?  @db.Decimal(10, 2)
+  overtime_rate         Decimal?  @db.Decimal(10, 2)
+  benefits_enrolled     Json?
+  direct_deposit_info   Json?
+  tax_withholding       Json?
+  start_date            DateTime? @db.Date
+  end_date              DateTime? @db.Date
+  is_active             Boolean   @default(true)
+  created_at            DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  tenant                Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  technician            User      @relation(fields: [technician_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, technician_id])
+  @@map("technician_payroll")
+}
+
+model TechnicianDocument {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id       String    @db.Uuid
+  technician_id   String    @db.Uuid
+  document_type   String    @db.VarChar(50)
+  document_name   String    @db.VarChar(255)
+  file_url        String    @db.VarChar(500)
+  file_size       Int?
+  mime_type       String?   @db.VarChar(100)
+  expiration_date DateTime? @db.Date
+  upload_date     DateTime  @default(now()) @db.Timestamptz(6)
+  uploaded_by     String?   @db.Uuid
+  is_verified     Boolean   @default(false)
+  verified_by     String?   @db.Uuid
+  verified_at     DateTime? @db.Timestamptz(6)
+  notes           String?
+
+  tenant          Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  technician      User      @relation(fields: [technician_id], references: [id], onDelete: Cascade)
+  uploader        User?     @relation("DocumentUploader", fields: [uploaded_by], references: [id], onDelete: SetNull)
+  verifier        User?     @relation("DocumentVerifier", fields: [verified_by], references: [id], onDelete: SetNull)
+
+  @@map("technician_documents")
+}
+
+model TechnicianPerformance {
+  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id               String    @db.Uuid
+  technician_id           String    @db.Uuid
+  period_start            DateTime  @db.Date
+  period_end              DateTime  @db.Date
+  jobs_completed          Int       @default(0)
+  jobs_cancelled          Int       @default(0)
+  total_revenue           Decimal   @default(0) @db.Decimal(10, 2)
+  average_rating          Decimal?  @db.Decimal(3, 2)
+  customer_feedback_count Int       @default(0)
+  on_time_percentage      Decimal?  @db.Decimal(5, 2)
+  completion_rate         Decimal?  @db.Decimal(5, 2)
+  created_at              DateTime  @default(now()) @db.Timestamptz(6)
+
+  tenant                  Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  technician              User      @relation(fields: [technician_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, technician_id, period_start, period_end])
+  @@map("technician_performance")
 }

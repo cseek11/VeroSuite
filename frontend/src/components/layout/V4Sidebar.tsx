@@ -14,7 +14,9 @@ import {
   ChevronLeft,
   ChevronRight,
   TrendingUp,
-  Search
+  Search,
+  ClipboardList,
+  FileText
 } from 'lucide-react';
 import { BugIcon } from '../icons/BugIcon';
 
@@ -28,6 +30,9 @@ interface V4SidebarProps {
 const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard', badge: null },
   { id: 'crm', label: 'CRM', icon: Users, path: '/customers', badge: '2.1k' },
+  { id: 'work-orders', label: 'Work Orders', icon: ClipboardList, path: '/work-orders', badge: '12' },
+  { id: 'agreements', label: 'Agreements', icon: FileText, path: '/agreements', badge: '5' },
+  { id: 'technicians', label: 'Technicians', icon: Users, path: '/technicians', badge: '8' },
   { id: 'scheduling', label: 'Scheduling', icon: Calendar, path: '/scheduler', badge: '47' },
   { id: 'communications', label: 'Communications', icon: MessageCircle, path: '/communications', badge: '3' },
   { id: 'finance', label: 'Finance', icon: DollarSign, path: '/finance', badge: '$45k' },
@@ -45,6 +50,9 @@ export default function V4Sidebar({ collapsed, onToggle, mobileOpen, onMobileClo
     const path = location.pathname;
     if (path === '/dashboard' || path === '/') return 'dashboard';
     if (path === '/customers') return 'crm';
+    if (path === '/work-orders') return 'work-orders';
+    if (path === '/agreements') return 'agreements';
+    if (path.startsWith('/technicians')) return 'technicians';
     if (path === '/scheduler') return 'scheduling';
     if (path === '/communications') return 'communications';
     if (path === '/finance') return 'finance';
@@ -108,7 +116,7 @@ export default function V4Sidebar({ collapsed, onToggle, mobileOpen, onMobileClo
                <div className="ml-3 flex items-center transition-opacity duration-200">
                  <svg viewBox="0 0 150 30" className="h-8 w-auto">
                    <text x="0" y="22" fontSize="20" fontWeight="700" fill="#a855f7">Vero</text>
-                   <text x="45" y="22" fontSize="20" fontWeight="700" fill="#22c55e">Suite</text>
+                   <text x="45" y="22" fontSize="20" fontWeight="700" fill="#22c55e">Field</text>
                  </svg>
                </div>
              )}

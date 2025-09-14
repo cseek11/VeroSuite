@@ -1,6 +1,6 @@
 # Database Design
 
-This document outlines the logical schema, key relationships, indices, and RLS policies for VeroSuite.
+This document outlines the logical schema, key relationships, indices, and RLS policies for VeroField.
 
 ## Core Entities
 

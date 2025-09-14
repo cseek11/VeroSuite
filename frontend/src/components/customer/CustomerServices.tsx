@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Calendar, Clock, User, MapPin, CheckCircle, AlertCircle, Plus } from 'lucide-react';
 import { Button, Typography, Badge } from '@/components/ui';
+import { useQuery } from '@tanstack/react-query';
+import { enhancedApi } from '@/lib/enhanced-api';
 
 interface CustomerServicesProps {
   customerId: string;
@@ -9,51 +11,44 @@ interface CustomerServicesProps {
 const CustomerServices: React.FC<CustomerServicesProps> = ({ customerId }) => {
   const [activeTab, setActiveTab] = useState('upcoming');
 
-  const upcomingServices = [
-    {
-      id: 1,
-      date: '2024-01-15',
-      time: '09:00 AM',
-      service: 'Quarterly Pest Control',
-      technician: 'Mike Johnson',
-      status: 'scheduled'
-    },
-    {
-      id: 2,
-      date: '2024-02-01',
-      time: '02:00 PM',
-      service: 'Rodent Inspection',
-      technician: 'Sarah Wilson',
-      status: 'pending'
-    }
-  ];
+  const { data: jobs = [], isLoading: jobsLoading } = useQuery({
+    queryKey: ['customer-jobs', customerId],
+    queryFn: () => enhancedApi.jobs.getByCustomerId(customerId),
+    enabled: !!customerId,
+  });
 
-  const serviceHistory = [
-    {
-      id: 1,
-      date: '2023-12-15',
-      service: 'Quarterly Pest Control',
-      technician: 'Mike Johnson',
-      status: 'completed',
-      notes: 'Applied treatment to perimeter and interior. No issues found.'
-    },
-    {
-      id: 2,
-      date: '2023-11-15',
-      service: 'Emergency Spider Treatment',
-      technician: 'Sarah Wilson',
-      status: 'completed',
-      notes: 'Customer reported spider infestation in basement. Applied targeted treatment.'
-    },
-    {
-      id: 3,
-      date: '2023-10-15',
-      service: 'Quarterly Pest Control',
-      technician: 'Mike Johnson',
-      status: 'completed',
-      notes: 'Routine quarterly service. Minor ant activity detected and treated.'
-    }
-  ];
+  const { data: workOrders = [], isLoading: workOrdersLoading } = useQuery({
+    queryKey: ['customer-work-orders', customerId],
+    queryFn: () => enhancedApi.workOrders.getByCustomerId(customerId),
+    enabled: !!customerId,
+  });
+
+  const upcomingServices = useMemo(() => {
+    const scheduled = (jobs || []).filter((j: any) => ['scheduled', 'unassigned'].includes((j.status || '').toLowerCase()));
+    return scheduled.map((j: any) => ({
+      id: j.id,
+      date: j.scheduled_date,
+      time: j.scheduled_start_time,
+      service: j.work_orders?.service_type || j.work_orders?.description || 'Service',
+      technician: j.technicians ? `${j.technicians.first_name} ${j.technicians.last_name}` : 'Unassigned',
+      status: j.status,
+    }));
+  }, [jobs]);
+
+  const pendingWorkOrders = useMemo(() => {
+    return (workOrders || []).filter((w: any) => (w.status || '').toLowerCase() === 'pending');
+  }, [workOrders]);
+
+  const serviceHistory = useMemo(() => {
+    return (jobs || []).filter((j: any) => (j.status || '').toLowerCase() === 'completed').map((j: any) => ({
+      id: j.id,
+      date: j.actual_end_time || j.scheduled_date,
+      service: j.work_orders?.service_type || 'Service',
+      technician: j.technicians ? `${j.technicians.first_name} ${j.technicians.last_name}` : 'Tech',
+      status: j.status,
+      notes: j.completion_notes,
+    }));
+  }, [jobs]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -115,6 +110,16 @@ const CustomerServices: React.FC<CustomerServicesProps> = ({ customerId }) => {
           }`}
         >
           History ({serviceHistory.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('workorders')}
+          className={`flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors ${
+            activeTab === 'workorders'
+              ? 'bg-white text-purple-600 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Work Orders ({pendingWorkOrders.length})
         </button>
       </div>
 
@@ -216,6 +221,39 @@ const CustomerServices: React.FC<CustomerServicesProps> = ({ customerId }) => {
                   Schedule Follow-up
                 </Button>
               </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeTab === 'workorders' && (
+        <div className="space-y-3">
+          {pendingWorkOrders.map((w: any) => (
+            <div key={w.id} className="bg-white rounded-lg p-4 border border-gray-200/50">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
+                    <AlertCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">{w.service_type || 'Work Order'}</h4>
+                    <p className="text-sm text-gray-600">
+                      {w.scheduled_date ? new Date(w.scheduled_date).toLocaleString() : 'Not Scheduled'}
+                    </p>
+                  </div>
+                </div>
+                <Badge className={'bg-yellow-100 text-yellow-800'}>
+                  <div className="flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" />
+                    Pending
+                  </div>
+                </Badge>
+              </div>
+              {w.description && (
+                <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                  <p className="text-sm text-gray-700">{w.description}</p>
+                </div>
+              )}
             </div>
           ))}
         </div>

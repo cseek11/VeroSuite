@@ -8,7 +8,7 @@
 -- 
 -- Usage: Run this in your Supabase SQL Editor as the service role
 -- 
--- Author: VeroSuite Security Audit
+-- Author: VeroField Security Audit
 -- Date: January 2, 2025
 -- ============================================================================
 

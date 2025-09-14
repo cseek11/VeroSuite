@@ -199,7 +199,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     if (onSearchChange) {
       onSearchChange(inputValue);
     }
-  }, [inputValue, onSearchChange]);
+  }, [inputValue]); // Remove onSearchChange from dependencies to prevent infinite loop
 
   // ============================================================================
   // EVENT HANDLERS

@@ -15,7 +15,7 @@ interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>
   onChange?: (value: string) => void;
 }
 
-const Select: React.FC<SelectProps> = ({
+const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
   label,
   error,
   helperText,
@@ -26,7 +26,7 @@ const Select: React.FC<SelectProps> = ({
   id,
   value,
   ...props
-}) => {
+}, ref) => {
   const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`;
   const errorId = error ? `${selectId}-error` : undefined;
   const helperId = helperText ? `${selectId}-helper` : undefined;
@@ -43,6 +43,7 @@ const Select: React.FC<SelectProps> = ({
         </label>
       )}
       <select
+        ref={ref}
         id={selectId}
         value={value}
         onChange={handleChange}
@@ -89,6 +90,8 @@ const Select: React.FC<SelectProps> = ({
       )}
     </div>
   );
-};
+});
+
+Select.displayName = 'Select';
 
 export default Select;

@@ -15,6 +15,10 @@ import { RoutingModule } from './routing/routing.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { WorkOrdersModule } from './work-orders/work-orders.module';
 import { AccountsModule } from './accounts/accounts.module';
+import { TechnicianModule } from './technician/technician.module';
+import { UserModule } from './user/user.module';
+import { AgreementsModule } from './agreements/agreements.module';
+import { ServiceTypesModule } from './service-types/service-types.module';
 
 @Module({
   imports: [
@@ -28,6 +32,10 @@ import { AccountsModule } from './accounts/accounts.module';
     UploadsModule,
     WorkOrdersModule,
     AccountsModule,
+    TechnicianModule,
+    UserModule,
+    AgreementsModule,
+    ServiceTypesModule,
   ],
   providers: [
     DatabaseService,

@@ -1,13 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { CustomerForm } from '../customers/CustomerForm';
+import { render, screen, fireEvent, waitFor } from '../../test/setup/test-utils';
+import CustomerForm from '../customers/CustomerForm';
 import { supabase } from '../../lib/supabase-client';
 
 // Mock Supabase client
 vi.mock('../../lib/supabase-client', () => ({
+  default: {
+    from: vi.fn(),
+    auth: {
+      getUser: vi.fn(),
+    },
+    rpc: vi.fn(),
+  },
   supabase: {
     from: vi.fn(),
+    auth: {
+      getUser: vi.fn(),
+    },
+    rpc: vi.fn(),
   },
 }));
 

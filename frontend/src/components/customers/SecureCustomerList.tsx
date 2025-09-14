@@ -185,9 +185,9 @@ export default function SecureCustomerList({ onViewCustomer, onEditCustomer, onC
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
             >
               <option value="all">All Segments</option>
-              <option value="new">New (< 6 months)</option>
+              <option value="new">New (&lt; 6 months)</option>
               <option value="active">Active (6-24 months)</option>
-              <option value="veteran">Veteran (> 24 months)</option>
+              <option value="veteran">Veteran (&gt; 24 months)</option>
             </select>
 
             {/* Type Filter */}

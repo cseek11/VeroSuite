@@ -3,7 +3,7 @@
 # ============================================================================
 # Guides the user through running the search logging migration
 
-Write-Host "🚀 VeroSuite Search Logging Migration" -ForegroundColor Cyan
+Write-Host "🚀 VeroField Search Logging Migration" -ForegroundColor Cyan
 Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -61,6 +61,7 @@ Write-Host ""
 
 Write-Host "Press any key to exit..." -ForegroundColor Gray
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+
 
 
 

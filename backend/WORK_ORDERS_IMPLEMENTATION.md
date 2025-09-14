@@ -1,6 +1,6 @@
 # Work Orders Implementation
 
-This document outlines the complete implementation of Work Orders functionality in the VeroSuite CRM application.
+This document outlines the complete implementation of Work Orders functionality in the VeroField CRM application.
 
 ## Overview
 

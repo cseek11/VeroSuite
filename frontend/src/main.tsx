@@ -11,7 +11,6 @@ import KeyboardNavigationProvider from './components/KeyboardNavigationProvider'
 import { LayoutProvider } from './context/LayoutContext';
 import { initSentry, SentryErrorBoundary } from './lib/sentry';
 import './index.css';
-import './custom-calendar.css';
 
 // Initialize Sentry for error tracking
 initSentry();

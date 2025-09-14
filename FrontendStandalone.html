@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VeroSuite Dispatcher Dashboard (Standalone)</title>
+  <title>VeroField Dispatcher Dashboard (Standalone)</title>
   <link rel="preconnect" href="https://unpkg.com" />
   <style>
     body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; background-color: #f8fafc; }
@@ -90,7 +90,7 @@
       { id:'job4', customerId:'1', locationId:'1b', customer:'Downtown Restaurant Group', location:'Strip District Location', address:'456 Penn Ave, Pittsburgh, PA', serviceType:'Monthly Service', status:'completed', priority:'medium', scheduledDate:'2025-08-17', timeWindow:'14:00-16:00', technicianId:'tech3', technician:'David Wilson', estimatedDuration:75, specialInstructions:'Exterior perimeter treatment', value:165.00 },
     ];
 
-    function VeroSuiteDispatcherDashboard(){
+    function VeroFieldDispatcherDashboard(){
       const [currentTenant, setCurrentTenant] = useState('ace-pest');
       const [activeTab, setActiveTab] = useState('dashboard');
       const [selectedJob, setSelectedJob] = useState(null);
@@ -173,7 +173,7 @@
                 <div className="flex items-center">
                   <span className="h-8 w-8 text-white mr-3">🏢</span>
                   <div>
-                    <h1 className="text-xl font-semibold text-white">VeroSuite</h1>
+                    <h1 className="text-xl font-semibold text-white">VeroField</h1>
                     <p className="text-sm text-white/80">{tenant.name}</p>
                   </div>
                 </div>
@@ -387,7 +387,7 @@
     }
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<VeroSuiteDispatcherDashboard />);
+    root.render(<VeroFieldDispatcherDashboard />);
   </script>
 </body>
 </html>

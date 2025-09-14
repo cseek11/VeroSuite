@@ -331,7 +331,7 @@ const Reports: React.FC = () => {
 
       {/* Report Categories Tabs */}
       <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4 overflow-hidden">
-        <div className="flex-1 space-x-4 overflow-hidden border-b border-slate-200">
+        <div className="flex flex-1 space-x-4 overflow-x-auto border-b border-slate-200">
           {Object.entries(reportCategories).map(([key, category]) => (
             <button
               key={key}

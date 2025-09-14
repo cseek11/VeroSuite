@@ -16,7 +16,7 @@ export class JobsService {
         scheduled_date: { equals: new Date(today!) },
         ...(technicianId ? { technician_id: technicianId } : {}),
       },
-      include: { workOrder: { include: { account: true, location: true } } },
+      include: { workOrder: { include: { location: true } } },
       orderBy: [{ priority: 'desc' }, { scheduled_start_time: 'asc' }],
     });
 
@@ -26,11 +26,7 @@ export class JobsService {
       priority: job.priority,
       scheduled_date: job.scheduled_date,
       time_window: { start: job.scheduled_start_time, end: job.scheduled_end_time },
-      customer: { 
-        id: job.workOrder.account?.id || '', 
-        name: job.workOrder.account?.name || 'Unknown Customer', 
-        type: job.workOrder.account?.account_type || 'unknown' 
-      },
+      customer: { id: job.account_id, name: '', type: 'unknown' },
       location: {
         id: job.workOrder.location?.id || '',
         name: job.workOrder.location?.name || '',
@@ -53,7 +49,7 @@ export class JobsService {
   async getJobById(jobId: string, tenantId: string) {
     const job = await this.db.job.findFirst({
       where: { id: jobId, tenant_id: tenantId },
-      include: { workOrder: { include: { account: true, location: true } } },
+      include: { workOrder: { include: { location: true } } },
     });
     if (!job) throw new NotFoundException('Job not found');
     return job;
@@ -75,7 +71,7 @@ export class JobsService {
         scheduled_end_time: dto.time_window_end,
         updated_at: new Date(),
       },
-      include: { workOrder: { include: { account: true, location: true } } },
+      include: { workOrder: { include: { location: true } } },
     });
 
     await this.audit.log({
@@ -107,7 +103,7 @@ export class JobsService {
         technician_id: dto.technician_id || null,
         status: dto.technician_id ? JobStatus.SCHEDULED : JobStatus.UNASSIGNED,
       },
-      include: { workOrder: { include: { account: true, location: true } } },
+      include: { workOrder: { include: { location: true } } },
     });
 
     await this.audit.log({

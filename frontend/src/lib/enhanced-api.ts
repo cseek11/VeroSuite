@@ -304,12 +304,24 @@ export const customers = {
       
       // Primary: Update in accounts table (real customer data)
       console.log('🔍 Updating customer in accounts table...');
+      // Only include columns that exist in Supabase 'accounts' schema
+      const allowedAccountColumns = [
+        'name', 'email', 'phone', 'address', 'city', 'state', 'zip_code',
+        'country', 'status', 'account_type', 'notes', 'ar_balance',
+        'company_name', 'contact_person'
+      ] as const;
+      const filteredAccountUpdates: Record<string, any> = {};
+      Object.entries(updates || {}).forEach(([key, value]) => {
+        if ((allowedAccountColumns as readonly string[]).includes(key)) {
+          filteredAccountUpdates[key] = value;
+        }
+      });
+      // Always touch updated_at when updating accounts
+      filteredAccountUpdates.updated_at = new Date().toISOString();
+
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
+        .update(filteredAccountUpdates)
         .eq('id', id)
         .eq('tenant_id', tenantId)
         .select()
@@ -322,10 +334,21 @@ export const customers = {
 
       // Fallback: Try customers table (test data)
       console.log('🔄 Customer not found in accounts table, trying customers table...');
+      const allowedCustomerColumns = [
+        'first_name', 'last_name', 'email', 'phone', 'address', 'city', 'state',
+        'zip_code', 'country', 'status', 'account_type', 'notes'
+      ] as const;
+      const filteredCustomerUpdates: Record<string, any> = {};
+      Object.entries(updates || {}).forEach(([key, value]) => {
+        if ((allowedCustomerColumns as readonly string[]).includes(key)) {
+          filteredCustomerUpdates[key] = value;
+        }
+      });
+
       const { data: customerData, error: customerError } = await supabase
         .from('customers')
         .update({
-          ...updates,
+          ...filteredCustomerUpdates,
           // Transform name back to first_name and last_name if provided
           ...(updates.name && {
             first_name: updates.name.split(' ')[0] || '',
@@ -555,6 +578,28 @@ export const workOrders = {
     }
   },
 
+  getByCustomerId: async (customerId: string): Promise<WorkOrder[]> => {
+    try {
+      const tenantId = await getTenantId();
+      const { data, error } = await supabase
+        .from('work_orders')
+        .select(`
+          *,
+          accounts (*),
+          service_types (*),
+          jobs (*)
+        `)
+        .eq('tenant_id', tenantId)
+        .eq('customer_id', customerId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return (data as any) || [];
+    } catch (error) {
+      handleApiError(error, 'fetch work orders by customer');
+    }
+  },
+
   getById: async (id: string): Promise<WorkOrder | null> => {
     try {
       const tenantId = await getTenantId();
@@ -662,6 +707,28 @@ export const jobs = {
       return data || [];
     } catch (error) {
       handleApiError(error, 'fetch jobs');
+    }
+  },
+
+  getByCustomerId: async (customerId: string): Promise<Job[]> => {
+    try {
+      const tenantId = await getTenantId();
+      const { data, error } = await supabase
+        .from('jobs')
+        .select(`
+          *,
+          accounts (name, email, phone),
+          work_orders (*),
+          technicians (first_name, last_name, email)
+        `)
+        .eq('tenant_id', tenantId)
+        .eq('account_id', customerId)
+        .order('scheduled_date', { ascending: false });
+
+      if (error) throw error;
+      return (data as any) || [];
+    } catch (error) {
+      handleApiError(error, 'fetch jobs by customer');
     }
   },
 

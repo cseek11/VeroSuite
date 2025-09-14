@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { DatabaseService } from './database.service';
 
 interface AuditLogEntry {
@@ -22,6 +23,7 @@ export class AuditService {
     try {
       await this.db.auditLog.create({
         data: {
+          id: randomUUID(),
           tenant_id: entry.tenantId,
           user_id: entry.userId || null,
           action: entry.action,
@@ -29,7 +31,7 @@ export class AuditService {
           resource_id: entry.resourceId || null,
           before_state: entry.beforeState,
           after_state: entry.afterState,
-          request_id: entry.requestId || 'system',
+          request_id: entry.requestId || randomUUID(),
           ip_address: entry.ipAddress || null,
           user_agent: entry.userAgent || null,
         },

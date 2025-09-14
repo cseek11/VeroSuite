@@ -27,7 +27,7 @@ import { CreateWorkOrderDto, UpdateWorkOrderDto, WorkOrderFiltersDto } from './d
 @ApiTags('Work Orders')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('api/work-orders')
+@Controller('work-orders')
 export class WorkOrdersController {
   constructor(private readonly workOrdersService: WorkOrdersService) {}
 
@@ -52,7 +52,7 @@ export class WorkOrdersController {
     return this.workOrdersService.createWorkOrder(
       createWorkOrderDto, 
       req.user.tenantId, 
-      req.user.id
+      req.user.userId
     );
   }
 
@@ -119,7 +119,7 @@ export class WorkOrdersController {
       id, 
       updateWorkOrderDto, 
       req.user.tenantId, 
-      req.user.id
+      req.user.userId
     );
   }
 
@@ -145,7 +145,7 @@ export class WorkOrdersController {
     return this.workOrdersService.deleteWorkOrder(
       id, 
       req.user.tenantId, 
-      req.user.id
+      req.user.userId
     );
   }
 

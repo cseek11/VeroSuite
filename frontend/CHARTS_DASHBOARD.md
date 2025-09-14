@@ -288,5 +288,5 @@ console.log('Chart dimensions:', containerRef.current?.getBoundingClientRect());
 
 ## License
 
-This dashboard is part of the VeroSuite CRM system and follows the same licensing terms.
+This dashboard is part of the VeroField CRM system and follows the same licensing terms.
 

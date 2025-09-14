@@ -58,7 +58,6 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { enhancedApi } from '@/lib/enhanced-api';
 import { Account, CustomerProfile as CustomerProfileType, CustomerContact, ServiceHistory, CustomerNote } from '@/types/enhanced-types';
-import './CustomerProfile.css';
 
 interface CustomerProfileProps {
   customer: Account;
