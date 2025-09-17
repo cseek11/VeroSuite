@@ -167,74 +167,11 @@ const CustomerOverview: React.FC<CustomerOverviewProps> = ({
     };
   }, [customer]);
 
-  // Mock data for notes - replace with actual API data
-  const noteData: NoteData[] = [
-    {
-      id: '1',
-      type: 'service',
-      title: 'General Pest Control Service',
-      content: 'Completed quarterly pest control service. Applied treatment to exterior perimeter and interior key areas. Customer reported seeing ants in kitchen - addressed with targeted treatment. No issues found during inspection.',
-      author: 'Mike Johnson',
-      timestamp: '2024-01-15T10:30:00Z',
-      priority: 'medium',
-      status: 'completed'
-    },
-    {
-      id: '2',
-      type: 'internal',
-      title: 'Customer Follow-up Required',
-      content: 'Customer called about billing question. Needs clarification on quarterly service charges. Follow up within 24 hours to explain the breakdown and ensure satisfaction.',
-      author: 'Sarah Wilson',
-      timestamp: '2024-01-14T14:20:00Z',
-      priority: 'high',
-      createdBy: 'Sarah Wilson'
-    },
-    {
-      id: '3',
-      type: 'email',
-      title: 'Service Schedule Confirmation',
-      content: 'Sent email confirming next service appointment for February 15th at 9:00 AM. Customer confirmed availability and requested early morning time slot.',
-      author: 'System',
-      timestamp: '2024-01-13T09:15:00Z',
-      status: 'completed'
-    },
-    {
-      id: '4',
-      type: 'phone',
-      title: 'Emergency Service Request',
-      content: 'Customer reported wasp nest in backyard. Dispatched technician immediately. Nest removed and area treated. Customer very satisfied with quick response.',
-      author: 'Emergency Dispatch',
-      timestamp: '2024-01-12T16:45:00Z',
-      priority: 'high',
-      status: 'completed'
-    },
-    {
-      id: '5',
-      type: 'invoice',
-      title: 'Quarterly Service Invoice',
-      content: 'Generated invoice #INV-2024-001 for quarterly pest control service. Amount: $150.00. Payment due within 30 days.',
-      author: 'Billing System',
-      timestamp: '2024-01-11T11:00:00Z',
-      status: 'pending'
-    },
-    {
-      id: '6',
-      type: 'payment',
-      title: 'Payment Received',
-      content: 'Received payment of $150.00 for invoice #INV-2023-004. Payment method: Credit Card ending in 4242. Account balance: $0.00.',
-      author: 'Payment System',
-      timestamp: '2024-01-10T13:30:00Z',
-      status: 'completed'
-    },
-    {
-      id: '7',
-      type: 'account',
-      title: 'Account Information Updated',
-      content: 'Updated customer contact information. New phone number: (555) 123-4567. Email address remains the same. Customer requested text notifications for service reminders.',
-      author: 'Customer Service',
-      timestamp: '2024-01-09T15:20:00Z'
-    }
-  ];
+  // Real data will be fetched from API
+  const { data: noteData = [] } = useQuery({
+    queryKey: ['customer-notes', customer.id],
+    queryFn: () => enhancedApi.customerNotes.getByCustomer(customer.id),
+  });
 
   // Handle note click to show popup
   const handleNoteClick = (note: NoteData, event: React.MouseEvent) => {

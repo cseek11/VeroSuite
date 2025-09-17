@@ -7,18 +7,18 @@ export interface ServiceAgreement {
   service_type_id: string;
   agreement_number: string;
   title: string;
+  description?: string;
   start_date: string;
   end_date?: string;
-  status: 'active' | 'inactive' | 'expired' | 'cancelled' | 'pending';
+  status: 'active' | 'inactive' | 'expired' | 'cancelled';
   terms?: string;
   pricing?: number;
-  billing_frequency: 'weekly' | 'monthly' | 'quarterly' | 'annually' | 'one_time';
-  auto_renewal?: boolean;
+  billing_frequency: 'monthly' | 'quarterly' | 'annually' | 'one_time';
   created_at: string;
   updated_at: string;
   created_by?: string;
   updated_by?: string;
-  accounts: {
+  account: {
     id: string;
     name: string;
     email?: string;
@@ -41,15 +41,15 @@ export interface ServiceAgreement {
 export interface CreateAgreementData {
   account_id: string;
   service_type_id: string;
-  agreement_number: string;
+  agreement_number?: string;
   title: string;
+  description?: string;
   start_date: string;
   end_date?: string;
-  status?: 'active' | 'inactive' | 'expired' | 'cancelled' | 'pending';
+  status?: 'active' | 'inactive' | 'expired' | 'cancelled';
   terms?: string;
   pricing?: number;
-  billing_frequency?: 'weekly' | 'monthly' | 'quarterly' | 'annually' | 'one_time';
-  auto_renewal?: boolean;
+  billing_frequency?: 'monthly' | 'quarterly' | 'annually' | 'one_time';
 }
 
 export interface UpdateAgreementData extends Partial<CreateAgreementData> {}
@@ -57,7 +57,7 @@ export interface UpdateAgreementData extends Partial<CreateAgreementData> {}
 export interface AgreementListParams {
   page?: number;
   limit?: number;
-  status?: 'active' | 'inactive' | 'expired' | 'cancelled' | 'pending';
+  status?: 'active' | 'inactive' | 'expired' | 'cancelled';
   customerId?: string;
 }
 

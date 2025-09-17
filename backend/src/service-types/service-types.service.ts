@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../common/services/database.service';
-import { CreateServiceTypeDto } from './dto/create-service-type.dto';
-import { UpdateServiceTypeDto } from './dto/update-service-type.dto';
+import { CreateServiceTypeDto, UpdateServiceTypeDto } from './dto';
 
 @Injectable()
 export class ServiceTypesService {

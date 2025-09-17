@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { DollarSign, CreditCard, FileText, Download, Eye, AlertCircle, CheckCircle, Clock, Calendar, Plus, Edit, Trash2 } from 'lucide-react';
 import {
   Typography,
@@ -20,6 +20,8 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui';
+import { enhancedApi } from '@/lib/enhanced-api';
+import type { Invoice, Payment, PaymentMethod, CreatePaymentMethodDto } from '@/types/enhanced-types';
 
 interface Customer {
   id: string;
@@ -89,96 +91,56 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
   const [showAddPaymentMethod, setShowAddPaymentMethod] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showInvoiceDetails, setShowInvoiceDetails] = useState(false);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock billing data - replace with actual data
-  const mockInvoices: Invoice[] = [
-    {
-      id: '1',
-      invoice_number: 'INV-2024-001',
-      issue_date: '2024-01-15',
-      due_date: '2024-02-14',
-      amount: 150.00,
-      paid_amount: 0,
-      status: 'overdue',
-      description: 'Quarterly Pest Control Service',
-      items: [
-        {
-          id: '1',
-          description: 'Pest Control Service',
-          quantity: 1,
-          unit_price: 150.00,
-          total: 150.00
-        }
-      ]
-    },
-    {
-      id: '2',
-      invoice_number: 'INV-2024-002',
-      issue_date: '2024-01-10',
-      due_date: '2024-02-09',
-      amount: 200.00,
-      paid_amount: 200.00,
-      status: 'paid',
-      description: 'Emergency Wasp Nest Removal',
-      items: [
-        {
-          id: '2',
-          description: 'Emergency Service',
-          quantity: 1,
-          unit_price: 200.00,
-          total: 200.00
-        }
-      ]
-    },
-    {
-      id: '3',
-      invoice_number: 'INV-2024-003',
-      issue_date: '2024-02-01',
-      due_date: '2024-03-03',
-      amount: 75.00,
-      paid_amount: 0,
-      status: 'sent',
-      description: 'Termite Inspection',
-      items: [
-        {
-          id: '3',
-          description: 'Inspection Service',
-          quantity: 1,
-          unit_price: 75.00,
-          total: 75.00
-        }
-      ]
-    }
-  ];
+  // Load customer billing data
+  useEffect(() => {
+    const loadCustomerBillingData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  const mockPaymentMethods: PaymentMethod[] = [
-    {
-      id: '1',
-      type: 'card',
-      name: 'Visa ending in 4242',
-      last4: '4242',
-      brand: 'Visa',
-      expiry: '12/25',
-      is_default: true
-    },
-    {
-      id: '2',
-      type: 'ach',
-      name: 'Chase Bank',
-      account: '****1234',
-      bank: 'Chase Bank',
-      is_default: false
+        const [invoicesData, paymentsData, paymentMethodsData] = await Promise.all([
+          enhancedApi.billing.getInvoices(customer.id),
+          enhancedApi.billing.getPayments(),
+          enhancedApi.billing.getPaymentMethods(customer.id)
+        ]);
+
+        setInvoices(invoicesData);
+        setPayments(paymentsData.filter(payment => 
+          invoicesData.some(invoice => invoice.id === payment.invoice_id)
+        ));
+        setPaymentMethods(paymentMethodsData);
+      } catch (err) {
+        console.error('Error loading customer billing data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load billing data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (customer.id) {
+      loadCustomerBillingData();
     }
-  ];
+  }, [customer.id]);
 
   // Calculate billing statistics
   const billingStats = useMemo(() => {
-    const totalInvoiced = mockInvoices.reduce((sum, inv) => sum + inv.amount, 0);
-    const totalPaid = mockInvoices.reduce((sum, inv) => sum + inv.paid_amount, 0);
+    const totalInvoiced = invoices.reduce((sum, inv) => sum + inv.total_amount, 0);
+    const totalPaid = payments.reduce((sum, payment) => sum + payment.amount, 0);
     const outstanding = totalInvoiced - totalPaid;
-    const overdue = mockInvoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + (inv.amount - inv.paid_amount), 0);
-    const paidInvoices = mockInvoices.filter(inv => inv.status === 'paid').length;
-    const overdueInvoices = mockInvoices.filter(inv => inv.status === 'overdue').length;
+    const overdue = invoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => {
+      const paidForInvoice = payments
+        .filter(p => p.invoice_id === inv.id)
+        .reduce((sum, p) => sum + p.amount, 0);
+      return sum + (inv.total_amount - paidForInvoice);
+    }, 0);
+    const paidInvoices = invoices.filter(inv => inv.status === 'paid').length;
+    const overdueInvoices = invoices.filter(inv => inv.status === 'overdue').length;
 
     return {
       totalInvoiced,
@@ -187,9 +149,9 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
       overdue,
       paidInvoices,
       overdueInvoices,
-      totalInvoices: mockInvoices.length
+      totalInvoices: invoices.length
     };
-  }, [mockInvoices]);
+  }, [invoices, payments]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -227,6 +189,41 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
     setSelectedInvoice(invoice);
     setShowInvoiceDetails(true);
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading billing data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Billing Data</h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <Button 
+              onClick={() => window.location.reload()}
+              variant="outline"
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -266,8 +263,8 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="invoices">Invoices ({mockInvoices.length})</TabsTrigger>
-          <TabsTrigger value="payments">Payment Methods ({mockPaymentMethods.length})</TabsTrigger>
+          <TabsTrigger value="invoices">Invoices ({invoices.length})</TabsTrigger>
+          <TabsTrigger value="payments">Payment Methods ({paymentMethods.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">
@@ -276,15 +273,17 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
             <Card className="p-6">
               <Typography variant="h6" className="mb-4">Recent Billing Activity</Typography>
               <div className="space-y-4">
-                {mockInvoices.slice(0, 5).map((invoice) => (
+                {invoices.slice(0, 5).map((invoice) => (
                   <div key={invoice.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <div className="font-medium">{invoice.invoice_number}</div>
-                      <div className="text-sm text-gray-600">{invoice.description}</div>
+                      <div className="text-sm text-gray-600">
+                        {invoice.InvoiceItem?.[0]?.description || 'Service'}
+                      </div>
                       <div className="text-xs text-gray-500">{formatDate(invoice.issue_date)}</div>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold">{formatCurrency(invoice.amount)}</div>
+                      <div className="font-semibold">{formatCurrency(invoice.total_amount)}</div>
                       {getStatusBadge(invoice.status)}
                     </div>
                   </div>
@@ -302,14 +301,14 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
                 </Button>
               </div>
               <div className="space-y-3">
-                {mockPaymentMethods.map((method) => (
+                {paymentMethods.map((method) => (
                   <div key={method.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <CreditCard className="w-5 h-5 text-gray-400" />
                       <div>
-                        <div className="font-medium">{method.name}</div>
+                        <div className="font-medium">{method.payment_name || 'Payment Method'}</div>
                         <div className="text-sm text-gray-600">
-                          {method.type === 'card' ? `${method.brand} •••• ${method.last4}` : method.bank}
+                          {method.payment_type === 'credit_card' ? `${method.card_type} •••• ${method.card_last4}` : method.payment_type}
                         </div>
                       </div>
                     </div>
@@ -325,37 +324,45 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
 
         <TabsContent value="invoices" className="mt-6">
           <div className="space-y-4">
-            {mockInvoices.map((invoice) => (
-              <Card key={invoice.id} className="invoice-item">
-                <div className="invoice-header">
-                  <div>
-                    <div className="invoice-number">{invoice.invoice_number}</div>
-                    <div className="text-sm text-gray-600">{invoice.description}</div>
+            {invoices.map((invoice) => {
+              const paidAmount = payments
+                .filter(p => p.invoice_id === invoice.id)
+                .reduce((sum, p) => sum + p.amount, 0);
+              
+              return (
+                <Card key={invoice.id} className="invoice-item">
+                  <div className="invoice-header">
+                    <div>
+                      <div className="invoice-number">{invoice.invoice_number}</div>
+                      <div className="text-sm text-gray-600">
+                        {invoice.InvoiceItem?.[0]?.description || 'Service'}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="invoice-amount">{formatCurrency(invoice.total_amount)}</div>
+                      {getStatusBadge(invoice.status)}
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="invoice-amount">{formatCurrency(invoice.amount)}</div>
-                    {getStatusBadge(invoice.status)}
+                  <div className="invoice-details">
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <span>Issued: {formatDate(invoice.issue_date)}</span>
+                      <span>Due: {formatDate(invoice.due_date)}</span>
+                      {paidAmount > 0 && (
+                        <span>Paid: {formatCurrency(paidAmount)}</span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => openInvoiceDetails(invoice)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <div className="invoice-details">
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span>Issued: {formatDate(invoice.issue_date)}</span>
-                    <span>Due: {formatDate(invoice.due_date)}</span>
-                    {invoice.paid_amount > 0 && (
-                      <span>Paid: {formatCurrency(invoice.paid_amount)}</span>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => openInvoiceDetails(invoice)}>
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button size="sm" variant="outline">
-                      <Download className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </div>
         </TabsContent>
 
@@ -369,7 +376,7 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
               </Button>
             </div>
 
-            {mockPaymentMethods.map((method) => (
+            {paymentMethods.map((method) => (
               <Card key={method.id} className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -377,12 +384,12 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
                       <CreditCard className="w-5 h-5 text-gray-600" />
                     </div>
                     <div>
-                      <div className="font-medium">{method.name}</div>
+                      <div className="font-medium">{method.payment_name || 'Payment Method'}</div>
                       <div className="text-sm text-gray-600">
-                        {method.type === 'card' ? `${method.brand} •••• ${method.last4}` : method.bank}
+                        {method.payment_type === 'credit_card' ? `${method.card_type} •••• ${method.card_last4}` : method.payment_type}
                       </div>
-                      {method.expiry && (
-                        <div className="text-xs text-gray-500">Expires {method.expiry}</div>
+                      {method.card_expiry && (
+                        <div className="text-xs text-gray-500">Expires {method.card_expiry}</div>
                       )}
                     </div>
                   </div>
@@ -393,7 +400,20 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
                     <Button size="sm" variant="outline">
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={async () => {
+                        try {
+                          await enhancedApi.billing.deletePaymentMethod(method.id);
+                          // Refresh payment methods
+                          const updatedMethods = await enhancedApi.billing.getPaymentMethods(customer.id);
+                          setPaymentMethods(updatedMethods);
+                        } catch (err) {
+                          console.error('Error deleting payment method:', err);
+                        }
+                      }}
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>

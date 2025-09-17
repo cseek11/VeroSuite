@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreateUserDto } from './dto';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -21,7 +22,7 @@ export class UserController {
   @Post()
   @ApiOperation({ summary: 'Create a new user' })
   @ApiResponse({ status: 201, description: 'User created successfully' })
-  async createUser(@Request() req: any, @Body() createUserDto: any) {
+  async createUser(@Request() req: any, @Body() createUserDto: CreateUserDto) {
     const tenantId = req.tenantId;
     return this.userService.createUser(tenantId, createUserDto);
   }

@@ -30,7 +30,15 @@ import type {
   User,
   ApiResponse,
   PaginatedResponse,
-  SearchFilters
+  SearchFilters,
+  Invoice,
+  Payment,
+  CreateInvoiceDto,
+  UpdateInvoiceDto,
+  CreatePaymentDto,
+  CreatePaymentMethodDto,
+  BillingAnalytics,
+  RevenueAnalytics
 } from '@/types/enhanced-types';
 
 
@@ -443,6 +451,72 @@ export const customerProfiles = {
     } catch (error) {
       handleApiError(error, 'fetch customer profile');
       return null;
+    }
+  },
+
+  // Dashboard Customer Experience APIs
+  getExperienceMetrics: async (): Promise<any> => {
+    try {
+      const tenantId = await getTenantId();
+      
+      // Get customer metrics from database
+      const { data: customers, error: customersError } = await supabase
+        .from('accounts')
+        .select('id, status, created_at')
+        .eq('tenant_id', tenantId);
+
+      if (customersError) throw customersError;
+
+      // Get satisfaction scores from feedback/surveys (placeholder for now)
+      const totalCustomers = customers?.length || 0;
+      const activeCustomers = customers?.filter(c => c.status === 'active').length || 0;
+      
+      // Calculate retention rate (active customers / total customers)
+      const retentionRate = totalCustomers > 0 ? (activeCustomers / totalCustomers) * 100 : 0;
+
+      // TODO: Replace with actual data when feedback/survey tables are implemented
+      return {
+        totalCustomers,
+        satisfactionScore: 4.5, // Placeholder - should come from actual feedback data
+        responseTime: '2.3 hours', // Placeholder - should come from support tickets
+        retentionRate: retentionRate.toFixed(1),
+        complaints: 0, // Placeholder - should come from actual complaint data
+        testimonials: 0 // Placeholder - should come from actual testimonial data
+      };
+    } catch (error) {
+      handleApiError(error, 'fetch customer experience metrics');
+      return {
+        totalCustomers: 0,
+        satisfactionScore: 0,
+        responseTime: '0 hours',
+        retentionRate: 0,
+        complaints: 0,
+        testimonials: 0
+      };
+    }
+  },
+
+  getRecentFeedback: async (): Promise<any[]> => {
+    try {
+      const tenantId = await getTenantId();
+      
+      // TODO: Replace with actual feedback table when implemented
+      // For now, return empty array until feedback system is built
+      return [];
+      
+      // Future implementation would look like:
+      // const { data, error } = await supabase
+      //   .from('customer_feedback')
+      //   .select('*')
+      //   .eq('tenant_id', tenantId)
+      //   .order('created_at', { ascending: false })
+      //   .limit(10);
+      //
+      // if (error) throw error;
+      // return data || [];
+    } catch (error) {
+      handleApiError(error, 'fetch recent customer feedback');
+      return [];
     }
   },
 
@@ -1303,11 +1377,21 @@ export const analytics = {
 
 export const authApi = {
   signIn: async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
+    // Use backend API instead of Supabase
+    const response = await fetch('http://localhost:3001/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
     });
-    if (error) throw error;
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Login failed');
+    }
+    
+    const data = await response.json();
     return data;
   },
 
@@ -1329,14 +1413,683 @@ export const authApi = {
   },
 
   getCurrentUser: async () => {
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (error) throw error;
-    return user;
+    // Use backend API instead of Supabase
+    const authData = localStorage.getItem('verosuite_auth');
+    if (!authData) {
+      throw new Error('No authentication token found');
+    }
+    
+    let token;
+    try {
+      const parsed = JSON.parse(authData);
+      token = parsed.token || parsed;
+    } catch {
+      token = authData;
+    }
+    
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    
+    const response = await fetch('http://localhost:3001/auth/me', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to get current user');
+    }
+    
+    const data = await response.json();
+    return data.user;
   },
 
   resetPassword: async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email);
     if (error) throw error;
+  }
+};
+
+// ============================================================================
+// BILLING API
+// ============================================================================
+
+export const billing = {
+  // Invoice Management
+  getInvoices: async (accountId?: string, status?: string): Promise<Invoice[]> => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const params = new URLSearchParams();
+      if (accountId) params.append('accountId', accountId);
+      if (status) params.append('status', status);
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/invoices?${params.toString()}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch invoices: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'fetch invoices');
+      return [];
+    }
+  },
+
+  getInvoiceById: async (id: string): Promise<Invoice | null> => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/invoices/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) return null;
+        throw new Error(`Failed to fetch invoice: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'fetch invoice');
+      return null;
+    }
+  },
+
+  createInvoice: async (invoiceData: CreateInvoiceDto): Promise<Invoice> => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch('http://localhost:3001/api/v1/billing/invoices', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(invoiceData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create invoice: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'create invoice');
+      throw error;
+    }
+  },
+
+  updateInvoice: async (id: string, updates: UpdateInvoiceDto): Promise<Invoice> => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/invoices/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update invoice: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'update invoice');
+      throw error;
+    }
+  },
+
+  deleteInvoice: async (id: string): Promise<void> => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/invoices/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete invoice: ${response.statusText}`);
+      }
+    } catch (error) {
+      handleApiError(error, 'delete invoice');
+      throw error;
+    }
+  },
+
+  // Payment Management
+  getPayments: async (invoiceId?: string): Promise<Payment[]> => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const params = new URLSearchParams();
+      if (invoiceId) params.append('invoiceId', invoiceId);
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/payments?${params.toString()}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch payments: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'fetch payments');
+      return [];
+    }
+  },
+
+  processPayment: async (invoiceId: string, paymentData: CreatePaymentDto): Promise<Payment> => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/invoices/${invoiceId}/pay`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to process payment: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'process payment');
+      throw error;
+    }
+  },
+
+  // Payment Method Management
+  getPaymentMethods: async (accountId?: string): Promise<PaymentMethod[]> => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const params = new URLSearchParams();
+      if (accountId) params.append('accountId', accountId);
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/payment-methods?${params.toString()}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch payment methods: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'fetch payment methods');
+      return [];
+    }
+  },
+
+  createPaymentMethod: async (paymentMethodData: CreatePaymentMethodDto): Promise<PaymentMethod> => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch('http://localhost:3001/api/v1/billing/payment-methods', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentMethodData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create payment method: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'create payment method');
+      throw error;
+    }
+  },
+
+  deletePaymentMethod: async (id: string): Promise<void> => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/payment-methods/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete payment method: ${response.statusText}`);
+      }
+    } catch (error) {
+      handleApiError(error, 'delete payment method');
+      throw error;
+    }
+  },
+
+  // Billing Analytics
+  getBillingAnalytics: async (): Promise<BillingAnalytics> => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch('http://localhost:3001/api/v1/billing/analytics/overview', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch billing analytics: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'fetch billing analytics');
+      return {
+        totalRevenue: 0,
+        outstandingAmount: 0,
+        paidAmount: 0,
+        totalInvoices: 0,
+        overdueInvoices: 0,
+        averagePaymentTime: 0,
+      };
+    }
+  },
+
+  getRevenueAnalytics: async (startDate?: string, endDate?: string): Promise<RevenueAnalytics> => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/analytics/revenue?${params.toString()}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch revenue analytics: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'fetch revenue analytics');
+      return {
+        monthlyRevenue: [],
+        totalRevenue: 0,
+        growthRate: 0,
+      };
+    }
+  },
+
+  // Stripe Payment Integration
+  createStripePaymentIntent: async (invoiceId: string): Promise<any> => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/invoices/${invoiceId}/stripe-payment-intent`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create payment intent: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'create Stripe payment intent');
+      throw error;
+    }
+  },
+
+  getStripePaymentStatus: async (paymentIntentId: string): Promise<any> => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/stripe/payment-status/${paymentIntentId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get payment status: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'get Stripe payment status');
+      throw error;
+    }
+  }
+};
+
+// ============================================================================
+// INVENTORY API (Dashboard Components)
+// ============================================================================
+
+export const inventory = {
+  getComplianceData: async (): Promise<any> => {
+    try {
+      // TODO: Replace with actual inventory data when inventory system is implemented
+      return {
+        totalItems: 0,
+        lowStock: 0,
+        outOfStock: 0,
+        expiringSoon: 0,
+        complianceRate: 0,
+        safetyScore: 0
+      };
+    } catch (error) {
+      handleApiError(error, 'fetch inventory compliance data');
+      return {
+        totalItems: 0,
+        lowStock: 0,
+        outOfStock: 0,
+        expiringSoon: 0,
+        complianceRate: 0,
+        safetyScore: 0
+      };
+    }
+  },
+
+  getCategories: async (): Promise<any[]> => {
+    try {
+      // TODO: Replace with actual inventory categories when implemented
+      return [];
+    } catch (error) {
+      handleApiError(error, 'fetch inventory categories');
+      return [];
+    }
+  },
+
+  getComplianceAlerts: async (): Promise<any[]> => {
+    try {
+      // TODO: Replace with actual compliance alerts when implemented
+      return [];
+    } catch (error) {
+      handleApiError(error, 'fetch compliance alerts');
+      return [];
+    }
+  },
+
+  getRecentInspections: async (): Promise<any[]> => {
+    try {
+      // TODO: Replace with actual inspection data when implemented
+      return [];
+    } catch (error) {
+      handleApiError(error, 'fetch recent inspections');
+      return [];
+    }
+  }
+};
+
+// ============================================================================
+// FINANCIAL API (Dashboard Components)
+// ============================================================================
+
+export const financial = {
+  getSnapshot: async (): Promise<any> => {
+    try {
+      // TODO: Replace with actual financial data when implemented
+      return {
+        currentMonth: {
+          revenue: 0,
+          expenses: 0,
+          profit: 0,
+          jobsCompleted: 0,
+          averageJobValue: 0,
+          outstandingInvoices: 0
+        },
+        previousMonth: {
+          revenue: 0,
+          expenses: 0,
+          profit: 0
+        },
+        yearly: {
+          revenue: 0,
+          expenses: 0,
+          profit: 0
+        }
+      };
+    } catch (error) {
+      handleApiError(error, 'fetch financial snapshot');
+      return {
+        currentMonth: {
+          revenue: 0,
+          expenses: 0,
+          profit: 0,
+          jobsCompleted: 0,
+          averageJobValue: 0,
+          outstandingInvoices: 0
+        },
+        previousMonth: {
+          revenue: 0,
+          expenses: 0,
+          profit: 0
+        },
+        yearly: {
+          revenue: 0,
+          expenses: 0,
+          profit: 0
+        }
+      };
+    }
+  },
+
+  getRevenueBreakdown: async (): Promise<any[]> => {
+    try {
+      // TODO: Replace with actual revenue breakdown when implemented
+      return [];
+    } catch (error) {
+      handleApiError(error, 'fetch revenue breakdown');
+      return [];
+    }
+  },
+
+  getRecentTransactions: async (): Promise<any[]> => {
+    try {
+      // TODO: Replace with actual transaction data when implemented
+      return [];
+    } catch (error) {
+      handleApiError(error, 'fetch recent transactions');
+      return [];
+    }
   }
 };
 
@@ -1361,6 +2114,9 @@ export const enhancedApi = {
   serviceAreas,
   technicianSkills,
   analytics,
+  billing,
+  inventory,
+  financial,
   auth: authApi
 };
 

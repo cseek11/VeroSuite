@@ -33,10 +33,16 @@ export class AgreementsService {
         throw new NotFoundException('Service type not found');
       }
 
+      // Generate agreement number if not provided
+      let agreementNumber = createAgreementDto.agreement_number;
+      if (!agreementNumber) {
+        agreementNumber = await this.generateAgreementNumber(tenantId);
+      }
+
       // Check if agreement number already exists for this tenant
       const existingAgreement = await this.prisma.serviceAgreement.findFirst({
         where: {
-          agreement_number: createAgreementDto.agreement_number,
+          agreement_number: agreementNumber,
           tenant_id: tenantId,
         },
       });
@@ -48,6 +54,9 @@ export class AgreementsService {
       const agreement = await this.prisma.serviceAgreement.create({
         data: {
           ...createAgreementDto,
+          start_date: new Date(createAgreementDto.start_date),
+          end_date: createAgreementDto.end_date ? new Date(createAgreementDto.end_date) : null,
+          agreement_number: agreementNumber,
           tenant_id: tenantId,
           created_by: userId,
           updated_by: userId,
@@ -240,13 +249,23 @@ export class AgreementsService {
         }
       }
 
+      const updateData: any = {
+        ...updateAgreementDto,
+        updated_by: userId,
+        updated_at: new Date(),
+      };
+
+      // Only include date fields if they are provided
+      if (updateAgreementDto.start_date) {
+        updateData.start_date = new Date(updateAgreementDto.start_date);
+      }
+      if (updateAgreementDto.end_date) {
+        updateData.end_date = new Date(updateAgreementDto.end_date);
+      }
+
       const agreement = await this.prisma.serviceAgreement.update({
         where: { id },
-        data: {
-          ...updateAgreementDto,
-          updated_by: userId,
-          updated_at: new Date(),
-        },
+        data: updateData,
         include: {
           account: {
             select: {
@@ -383,5 +402,28 @@ export class AgreementsService {
     });
 
     return agreements;
+  }
+
+  /**
+   * Generate a unique agreement number for the tenant
+   */
+  private async generateAgreementNumber(tenantId: string): Promise<string> {
+    const currentYear = new Date().getFullYear();
+    
+    // Get the count of agreements for this tenant in the current year
+    const count = await this.prisma.serviceAgreement.count({
+      where: {
+        tenant_id: tenantId,
+        created_at: {
+          gte: new Date(`${currentYear}-01-01`),
+          lt: new Date(`${currentYear + 1}-01-01`),
+        },
+      },
+    });
+
+    // Generate agreement number: AG-YYYY-NNNN (e.g., AG-2025-0001)
+    const agreementNumber = `AG-${currentYear}-${String(count + 1).padStart(4, '0')}`;
+    
+    return agreementNumber;
   }
 }

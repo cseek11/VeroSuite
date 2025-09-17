@@ -1,110 +1,40 @@
 import React from 'react';
 import { Card, Typography, Chip, ProgressBar } from '@/components/ui/EnhancedUI';
 import { Package, AlertTriangle, CheckCircle, Clock, Thermometer, Shield, Zap } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { enhancedApi } from '@/lib/enhanced-api';
 
 const InventoryCompliancePanel: React.FC = () => {
-  // Mock data - would come from API
-  const inventoryData = {
-    totalItems: 247,
-    lowStock: 12,
-    outOfStock: 3,
-    expiringSoon: 8,
-    complianceRate: 96.8,
-    safetyScore: 98.2
-  };
+  // Fetch inventory data from API
+  const { data: inventoryData = {
+    totalItems: 0,
+    lowStock: 0,
+    outOfStock: 0,
+    expiringSoon: 0,
+    complianceRate: 0,
+    safetyScore: 0
+  }, isLoading } = useQuery({
+    queryKey: ['inventory', 'compliance'],
+    queryFn: () => enhancedApi.inventory.getComplianceData(),
+  });
 
-  const inventoryCategories = [
-    {
-      name: 'Pesticides',
-      total: 89,
-      lowStock: 4,
-      outOfStock: 1,
-      compliance: 98.5
-    },
-    {
-      name: 'Safety Equipment',
-      total: 67,
-      lowStock: 3,
-      outOfStock: 0,
-      compliance: 100.0
-    },
-    {
-      name: 'Tools & Equipment',
-      total: 45,
-      lowStock: 2,
-      outOfStock: 1,
-      compliance: 95.2
-    },
-    {
-      name: 'PPE Supplies',
-      total: 46,
-      lowStock: 3,
-      outOfStock: 1,
-      compliance: 97.8
-    }
-  ];
+  // Fetch inventory categories from API
+  const { data: inventoryCategories = [] } = useQuery({
+    queryKey: ['inventory', 'categories'],
+    queryFn: () => enhancedApi.inventory.getCategories(),
+  });
 
-  const complianceAlerts = [
-    {
-      id: 1,
-      type: 'expiration',
-      item: 'Termite Control Solution',
-      severity: 'high',
-      message: 'Expires in 15 days',
-      date: '2024-01-30'
-    },
-    {
-      id: 2,
-      type: 'low_stock',
-      item: 'Safety Gloves',
-      severity: 'medium',
-      message: 'Only 5 units remaining',
-      date: '2024-01-20'
-    },
-    {
-      id: 3,
-      type: 'temperature',
-      item: 'Chemical Storage',
-      severity: 'low',
-      message: 'Temperature slightly above recommended',
-      date: '2024-01-18'
-    },
-    {
-      id: 4,
-      type: 'maintenance',
-      item: 'Spray Equipment',
-      severity: 'medium',
-      message: 'Scheduled maintenance due',
-      date: '2024-01-25'
-    }
-  ];
+  // Fetch compliance alerts from API
+  const { data: complianceAlerts = [] } = useQuery({
+    queryKey: ['inventory', 'alerts'],
+    queryFn: () => enhancedApi.inventory.getComplianceAlerts(),
+  });
 
-  const recentInspections = [
-    {
-      id: 1,
-      inspector: 'John Smith',
-      date: '2024-01-15',
-      score: 98,
-      status: 'passed',
-      notes: 'All safety protocols followed correctly'
-    },
-    {
-      id: 2,
-      inspector: 'Maria Garcia',
-      date: '2024-01-08',
-      score: 95,
-      status: 'passed',
-      notes: 'Minor improvement needed in storage labeling'
-    },
-    {
-      id: 3,
-      inspector: 'David Chen',
-      date: '2024-01-01',
-      score: 100,
-      status: 'passed',
-      notes: 'Perfect compliance score achieved'
-    }
-  ];
+  // Fetch recent inspections from API
+  const { data: recentInspections = [] } = useQuery({
+    queryKey: ['inventory', 'inspections'],
+    queryFn: () => enhancedApi.inventory.getRecentInspections(),
+  });
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {

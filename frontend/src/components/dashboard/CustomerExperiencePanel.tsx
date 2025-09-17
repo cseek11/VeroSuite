@@ -1,41 +1,28 @@
 import React from 'react';
 import { Card, Typography, Chip, ProgressBar } from '@/components/ui/EnhancedUI';
 import { Users, Star, MessageCircle, TrendingUp, Heart, AlertTriangle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { enhancedApi } from '@/lib/enhanced-api';
 
 const CustomerExperiencePanel: React.FC = () => {
-  // Mock data - would come from API
-  const customerMetrics = {
-    totalCustomers: 1247,
-    satisfactionScore: 4.8,
-    responseTime: '2.3 hours',
-    retentionRate: 94.2,
-    complaints: 3,
-    testimonials: 156
-  };
+  // Fetch customer metrics from API
+  const { data: customerMetrics = {
+    totalCustomers: 0,
+    satisfactionScore: 0,
+    responseTime: '0 hours',
+    retentionRate: 0,
+    complaints: 0,
+    testimonials: 0
+  }, isLoading } = useQuery({
+    queryKey: ['customer', 'experience-metrics'],
+    queryFn: () => enhancedApi.customers.getExperienceMetrics(),
+  });
 
-  const recentFeedback = [
-    {
-      id: 1,
-      customer: 'Sarah Johnson',
-      rating: 5,
-      comment: 'Excellent service! The technician was professional and thorough.',
-      date: '2024-01-15'
-    },
-    {
-      id: 2,
-      customer: 'Mike Chen',
-      rating: 4,
-      comment: 'Good work, but arrived 30 minutes late.',
-      date: '2024-01-14'
-    },
-    {
-      id: 3,
-      customer: 'Lisa Rodriguez',
-      rating: 5,
-      comment: 'Outstanding customer service and attention to detail.',
-      date: '2024-01-13'
-    }
-  ];
+  // Fetch recent feedback from API
+  const { data: recentFeedback = [] } = useQuery({
+    queryKey: ['customer', 'recent-feedback'],
+    queryFn: () => enhancedApi.customers.getRecentFeedback(),
+  });
 
   const getRatingColor = (rating: number) => {
     if (rating >= 4.5) return 'success';

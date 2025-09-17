@@ -23,16 +23,31 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
+    console.log('=== JWT STRATEGY VALIDATION ===');
+    console.log('JWT Payload received:', JSON.stringify(payload, null, 2));
+    console.log('Payload sub (user ID):', payload.sub);
+    console.log('Payload tenant_id:', payload.tenant_id);
+    console.log('Payload roles:', payload.roles);
+    console.log('================================');
+
     if (!payload.sub || !payload.tenant_id) {
+      console.error('JWT validation failed - missing required fields');
+      console.error('sub:', payload.sub);
+      console.error('tenant_id:', payload.tenant_id);
       throw new UnauthorizedException('Invalid token payload');
     }
 
-    return {
+    const userContext = {
       userId: payload.sub,
       email: payload.email,
-      tenantId: payload.tenant_id,
+      tenantId: payload.tenant_id, // Keep consistent with JWT payload structure
       roles: payload.roles,
       permissions: payload.permissions,
     };
+
+    console.log('User context created:', JSON.stringify(userContext, null, 2));
+    console.log('================================');
+
+    return userContext;
   }
 }

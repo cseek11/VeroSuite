@@ -3,10 +3,12 @@ import { createClient } from '@/lib/supabase';
 export interface ServiceType {
   id: string;
   tenant_id: string;
-  name: string;
+  service_name: string;
+  service_code: string;
   description?: string;
   category_id?: string;
-  service_price?: number;
+  base_price?: number;
+  estimated_duration?: number;
   is_active: boolean;
   created_at: string;
   updated_at: string;

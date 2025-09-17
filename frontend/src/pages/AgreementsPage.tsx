@@ -134,7 +134,7 @@ export default function AgreementsPage() {
               {expiringAgreements.slice(0, 3).map((agreement) => (
                 <div key={agreement.id} className="flex items-center justify-between">
                   <Typography variant="body2" className="font-medium">
-                    {agreement.title} - {agreement.accounts.name}
+                    {agreement.title} - {agreement.account.name}
                   </Typography>
                   <Typography variant="body2" className="text-gray-600">
                     Expires: {new Date(agreement.end_date!).toLocaleDateString()}

@@ -113,7 +113,7 @@ export default function App() {
 
     return (
       <div
-        className="min-h-screen w-full"
+        className="w-full h-screen"
         style={{
           background: `url('/branding/crm_bg.png') center center / cover no-repeat fixed`,
           position: 'relative',
@@ -122,7 +122,7 @@ export default function App() {
         {/* Subtle light overlay to reduce background intensity by ~25% */}
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: 'rgba(255,255,255,0.25)' }} />
         <SkipLink />
-        <main id="main-content" tabIndex={-1}>
+        <main id="main-content" tabIndex={-1} className="h-full overflow-hidden">
           <Suspense fallback={<Spinner />}>
             <Routes>
             <Route path="/login" element={<LoginPage />} />

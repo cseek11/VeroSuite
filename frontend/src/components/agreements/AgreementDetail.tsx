@@ -192,19 +192,19 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
           <div>
             <Typography variant="body2" className="text-gray-600">Customer Name</Typography>
             <Typography variant="body1" className="font-medium">
-              {agreement.accounts.name}
+              {agreement.account.name}
             </Typography>
           </div>
-          {agreement.accounts.email && (
+          {agreement.account.email && (
             <div>
               <Typography variant="body2" className="text-gray-600">Email</Typography>
-              <Typography variant="body1">{agreement.accounts.email}</Typography>
+              <Typography variant="body1">{agreement.account.email}</Typography>
             </div>
           )}
-          {agreement.accounts.phone && (
+          {agreement.account.phone && (
             <div>
               <Typography variant="body2" className="text-gray-600">Phone</Typography>
-              <Typography variant="body1">{agreement.accounts.phone}</Typography>
+              <Typography variant="body1">{agreement.account.phone}</Typography>
             </div>
           )}
         </div>

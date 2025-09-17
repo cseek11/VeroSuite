@@ -45,6 +45,8 @@
     "@nestjs/schedule": "^3.0.0",
     "@nestjs/swagger": "^7.1.0",
     "@prisma/client": "^5.0.0",
+    "@stripe/stripe-js": "^7.9.0",
+    "@supabase/supabase-js": "^2.38.0",
     "axios": "^1.11.0",
     "bcrypt": "^5.1.0",
     "class-transformer": "^0.5.1",
@@ -52,8 +54,8 @@
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "rxjs": "^7.8.1",
-    "uuid": "^9.0.0",
-    "@supabase/supabase-js": "^2.38.0"
+    "stripe": "^18.5.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.10",

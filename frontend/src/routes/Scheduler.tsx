@@ -1,6 +1,7 @@
 
 
 import React, { useState, useEffect, Suspense } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import SchedulerPro from '../components/scheduler/SchedulerPro';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -25,61 +26,8 @@ import {
   Settings
 } from 'lucide-react';
 
-// Mock data for scheduling with proper structure
-const mockJobs = [
-  {
-    id: 1,
-    customer: "Johnson Family Residence",
-    service: "General Pest Control",
-    time: "9:00 AM",
-    technician: "Ashley Davis",
-    status: "scheduled",
-    agreements: ["general", "mosquito"],
-    overdue: false,
-    location: [40.44, -79.99]
-  },
-  {
-    id: 2,
-    customer: "Acme Corporation",
-    service: "Termite Inspection",
-    time: "10:30 AM",
-    technician: null,
-    status: "overdue",
-    agreements: ["termite"],
-    overdue: true,
-    overdueDays: 2,
-    location: [40.45, -79.98]
-  },
-  {
-    id: 3,
-    customer: "Maria Lopez",
-    service: "Rodent Control",
-    time: "8:00 AM",
-    technician: "Sarah Wilson",
-    status: "completed",
-    agreements: ["rodent"],
-    overdue: false,
-    location: [40.46, -79.97]
-  },
-  {
-    id: 4,
-    customer: "Downtown Office Complex",
-    service: "Commercial Pest Control",
-    time: "2:00 PM",
-    technician: "John Smith",
-    status: "scheduled",
-    agreements: ["commercial"],
-    overdue: false,
-    location: [40.47, -79.96]
-  }
-];
-
-const mockTechnicians = [
-  { id: "unassigned", name: "Unassigned", color: "#9CA3AF" },
-  { id: "ashleydavis", name: "Ashley Davis", color: "#60A5FA" },
-  { id: "johnsmith", name: "John Smith", color: "#34D399" },
-  { id: "sarahwilson", name: "Sarah Wilson", color: "#F59E0B" },
-];
+// Real data will be fetched from API
+import { enhancedApi } from '@/lib/enhanced-api';
 
 const SchedulerPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -89,6 +37,17 @@ const SchedulerPage: React.FC = () => {
   const [mapInteracting, setMapInteracting] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // Fetch jobs and technicians from API
+  const { data: jobs = [] } = useQuery({
+    queryKey: ['scheduler-jobs', selectedDate],
+    queryFn: () => enhancedApi.jobs.list({ scheduled_date: selectedDate.toISOString().split('T')[0] }),
+  });
+
+  const { data: technicians = [] } = useQuery({
+    queryKey: ['scheduler-technicians'],
+    queryFn: () => enhancedApi.users.list({ roles: ['technician'], status: 'active' }),
+  });
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Calendar },
@@ -139,7 +98,7 @@ const SchedulerPage: React.FC = () => {
   };
 
   // Filter jobs based on search query - FIXED to search by names
-  const filteredJobs = mockJobs.filter(job => {
+  const filteredJobs = jobs.filter(job => {
     const searchLower = searchQuery.toLowerCase();
     return (
       job.customer.toLowerCase().includes(searchLower) ||
@@ -195,7 +154,7 @@ const SchedulerPage: React.FC = () => {
   });
 
   // Get technician resource mapping - FIXED to match calendar events
-  const technicianResources = mockTechnicians.map(tech => ({
+  const technicianResources = technicians.map(tech => ({
     id: tech.id,
     name: tech.name,
     color: tech.color
@@ -258,7 +217,7 @@ const SchedulerPage: React.FC = () => {
                 <Users className="h-5 w-5" />
               </div>
             </div>
-            <div className="text-xl font-bold mb-1">{mockTechnicians.length - 1}</div>
+            <div className="text-xl font-bold mb-1">{technicians.length - 1}</div>
             <div className="text-emerald-100 font-medium text-xs">Active Technicians</div>
           </div>
         </div>
@@ -600,7 +559,7 @@ const SchedulerPage: React.FC = () => {
                 Technicians
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {mockTechnicians.filter(tech => tech.id !== 'unassigned').map((technician) => (
+                {technicians.filter(tech => tech.id !== 'unassigned').map((technician) => (
                   <div key={technician.id} className="p-3 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">

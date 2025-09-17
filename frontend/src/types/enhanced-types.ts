@@ -753,6 +753,158 @@ export type ComplianceType = 'epa' | 'fda' | 'usda' | 'state' | 'local';
 export type FrequencyType = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annually';
 export type SkillLevelType = 'basic' | 'intermediate' | 'expert';
 
+// ============================================================================
+// BILLING & PAYMENT TYPES
+// ============================================================================
+
+export interface Invoice {
+  id: string;
+  tenant_id: string;
+  account_id: string;
+  service_agreement_id?: string;
+  work_order_id?: string;
+  job_id?: string;
+  invoice_number: string;
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  issue_date: string;
+  due_date: string;
+  subtotal: number;
+  tax_amount: number;
+  total_amount: number;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+  InvoiceItem: InvoiceItem[];
+  accounts?: {
+    id: string;
+    name: string;
+    email?: string;
+    phone?: string;
+  };
+  Payment?: Payment[];
+}
+
+export interface InvoiceItem {
+  id: string;
+  service_type_id: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  created_at: string;
+}
+
+export interface Payment {
+  id: string;
+  tenant_id: string;
+  invoice_id: string;
+  payment_method_id: string;
+  amount: number;
+  payment_date: string;
+  reference_number?: string;
+  notes?: string;
+  created_at: string;
+  created_by: string;
+  payment_methods: PaymentMethod;
+  Invoice: {
+    id: string;
+    invoice_number: string;
+    total_amount: number;
+    status: string;
+  };
+}
+
+export interface PaymentMethod {
+  id: string;
+  tenant_id: string;
+  account_id: string;
+  payment_type: 'credit_card' | 'debit_card' | 'ach' | 'check' | 'cash' | 'cod';
+  payment_name?: string;
+  account_number?: string;
+  routing_number?: string;
+  card_type?: string;
+  card_last4?: string;
+  card_expiry?: string;
+  is_default: boolean;
+  is_active: boolean;
+  created_at: string;
+  account?: {
+    id: string;
+    name: string;
+    email?: string;
+  };
+}
+
+// Billing DTOs for API requests
+export interface CreateInvoiceDto {
+  account_id: string;
+  service_agreement_id?: string;
+  work_order_id?: string;
+  job_id?: string;
+  invoice_number?: string;
+  issue_date: string;
+  due_date: string;
+  notes?: string;
+  items: CreateInvoiceItemDto[];
+}
+
+export interface CreateInvoiceItemDto {
+  service_type_id: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+}
+
+export interface UpdateInvoiceDto {
+  status?: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  issue_date?: string;
+  due_date?: string;
+  notes?: string;
+}
+
+export interface CreatePaymentDto {
+  invoice_id: string;
+  payment_method_id: string;
+  amount: number;
+  payment_date: string;
+  reference_number?: string;
+  notes?: string;
+}
+
+export interface CreatePaymentMethodDto {
+  account_id: string;
+  payment_type: 'credit_card' | 'debit_card' | 'ach' | 'check' | 'cash' | 'cod';
+  payment_name?: string;
+  account_number?: string;
+  routing_number?: string;
+  card_type?: string;
+  card_last4?: string;
+  card_expiry?: string;
+  is_default?: boolean;
+  is_active?: boolean;
+}
+
+// Billing Analytics Types
+export interface BillingAnalytics {
+  totalRevenue: number;
+  outstandingAmount: number;
+  paidAmount: number;
+  totalInvoices: number;
+  overdueInvoices: number;
+  averagePaymentTime: number;
+}
+
+export interface RevenueAnalytics {
+  monthlyRevenue: Array<{
+    month: string;
+    revenue: number;
+  }>;
+  totalRevenue: number;
+  growthRate: number;
+}
+
 
 
 

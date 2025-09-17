@@ -1,8 +1,9 @@
 import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { LoginDto, ExchangeTokenDto, AuthResponseDto, RefreshTokenResponseDto } from './dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -11,21 +12,27 @@ export class AuthController {
 
   @Post('login')
   @ApiOperation({ summary: 'Authenticate user and get JWT' })
-  async login(@Body() body: { email: string; password: string }) {
-    return this.authService.login(body.email, body.password);
+  @ApiResponse({ status: 200, description: 'Login successful', type: AuthResponseDto })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  async login(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto.email, loginDto.password);
   }
 
   @Post('exchange-supabase-token')
   @ApiOperation({ summary: 'Exchange Supabase token for backend JWT' })
-  async exchangeSupabaseToken(@Body() body: { supabaseToken: string }) {
-    return this.authService.exchangeSupabaseToken(body.supabaseToken);
+  @ApiResponse({ status: 200, description: 'Token exchange successful', type: AuthResponseDto })
+  @ApiResponse({ status: 401, description: 'Invalid Supabase token' })
+  async exchangeSupabaseToken(@Body() exchangeTokenDto: ExchangeTokenDto) {
+    return this.authService.exchangeSupabaseToken(exchangeTokenDto.supabaseToken);
   }
 
   @Get('refresh')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Refresh access token for authenticated user' })
-  async refresh(@Request() req: any) {
+  @ApiResponse({ status: 200, description: 'Token refreshed successfully', type: RefreshTokenResponseDto })
+  @ApiResponse({ status: 401, description: 'Invalid or expired token' })
+  async refresh(@Request() req: any): Promise<RefreshTokenResponseDto> {
     // Re-issue a new access token using the current authenticated principal
     const payload = {
       sub: req.user.userId,
@@ -35,14 +42,13 @@ export class AuthController {
       permissions: req.user.permissions || [],
     };
 
-    return {
-      access_token: this.jwtService.sign(payload),
-      user: {
-        id: req.user.userId,
-        email: req.user.email,
-        tenant_id: req.user.tenantId,
-        roles: req.user.roles,
-      },
-    };
+    const accessToken = this.jwtService.sign(payload);
+    const expiresAt = Math.floor(Date.now() / 1000) + (60 * 60); // 1 hour from now
+
+    return new RefreshTokenResponseDto({
+      access_token: accessToken,
+      expires_at: expiresAt,
+      token_type: 'Bearer'
+    });
   }
 }

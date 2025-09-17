@@ -19,7 +19,7 @@ import {
   TechnicianQueryDto,
   TechnicianProfileResponseDto,
   TechnicianListResponseDto
-} from './dto/technician.dto';
+} from './dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('technicians')

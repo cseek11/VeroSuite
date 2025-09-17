@@ -18,98 +18,36 @@ import {
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ReusablePopup } from '@/components/ui';
 
-// Mock API for now - replace with actual work orders API
+// Real API using enhanced-api
+import { enhancedApi } from '@/lib/enhanced-api';
+
 const workOrdersApi = {
   list: async (filters: any) => {
-    // Mock data - replace with actual API call
-    return {
-      data: [
-        {
-          id: '1',
-          customer_id: 'cust-1',
-          assigned_to: 'tech-1',
-          status: 'pending',
-          priority: 'high',
-          scheduled_date: '2025-01-15T09:00:00Z',
-          description: 'Emergency pest control service needed',
-          notes: 'Customer reported seeing cockroaches',
-          created_at: '2025-01-14T10:00:00Z',
-          account: { name: 'Downtown Restaurant', account_type: 'commercial' },
-          assignedTechnician: { first_name: 'John', last_name: 'Smith' }
-        },
-        {
-          id: '2',
-          customer_id: 'cust-2',
-          assigned_to: 'tech-2',
-          status: 'in-progress',
-          priority: 'medium',
-          scheduled_date: '2025-01-15T14:00:00Z',
-          description: 'Regular monthly maintenance',
-          notes: 'Standard service',
-          created_at: '2025-01-13T15:00:00Z',
-          account: { name: 'Office Building A', account_type: 'commercial' },
-          assignedTechnician: { first_name: 'Sarah', last_name: 'Johnson' }
-        }
-      ],
-      pagination: {
-        page: 1,
-        limit: 20,
-        total: 2,
-        totalPages: 1
-      }
-    };
+    return await enhancedApi.workOrders.list(filters);
   },
   create: async (data: any) => {
-    // Mock - replace with actual API call
-    console.log('Creating work order:', data);
-    return { id: 'new-id', ...data };
+    return await enhancedApi.workOrders.create(data);
   },
   update: async (id: string, data: any) => {
-    // Mock - replace with actual API call
-    console.log('Updating work order:', id, data);
-    return { id, ...data };
+    return await enhancedApi.workOrders.update(id, data);
   },
   delete: async (id: string) => {
-    // Mock - replace with actual API call
-    console.log('Deleting work order:', id);
-    return { success: true };
+    return await enhancedApi.workOrders.delete(id);
   }
 };
 
-// Mock customer search API
+// Real customer search API
 const customerSearchApi = {
   search: async (query: string) => {
-    // Mock data - replace with actual API call
-    const mockCustomers = [
-      { id: 'cust-1', name: 'Downtown Restaurant', account_type: 'commercial', address: '123 Main St, Downtown', phone: '555-0101' },
-      { id: 'cust-2', name: 'Office Building A', account_type: 'commercial', address: '456 Business Ave, Uptown', phone: '555-0102' },
-      { id: 'cust-3', name: 'Smith Residence', account_type: 'residential', address: '789 Oak Lane, Suburbs', phone: '555-0103' },
-      { id: 'cust-4', name: 'Johnson Family', account_type: 'residential', address: '321 Pine Street, Downtown', phone: '555-0104' },
-      { id: 'cust-5', name: 'City Center Mall', account_type: 'commercial', address: '654 Commerce Blvd, City Center', phone: '555-0105' },
-    ];
-    
-    if (!query) return mockCustomers;
-    
-    return mockCustomers.filter(customer => 
-      customer.name.toLowerCase().includes(query.toLowerCase()) ||
-      customer.address.toLowerCase().includes(query.toLowerCase()) ||
-      customer.id.toLowerCase().includes(query.toLowerCase()) ||
-      customer.phone.includes(query)
-    );
+    if (!query) return [];
+    return await enhancedApi.accounts.search({ query, limit: 10 });
   }
 };
 
-// Mock technicians API
+// Real technicians API
 const techniciansApi = {
   list: async () => {
-    // Mock data - replace with actual API call
-    return [
-      { id: 'tech-1', first_name: 'John', last_name: 'Smith', email: 'john.smith@veropest.com', phone: '555-0201', is_active: true },
-      { id: 'tech-2', first_name: 'Sarah', last_name: 'Johnson', email: 'sarah.johnson@veropest.com', phone: '555-0202', is_active: true },
-      { id: 'tech-3', first_name: 'Mike', last_name: 'Davis', email: 'mike.davis@veropest.com', phone: '555-0203', is_active: true },
-      { id: 'tech-4', first_name: 'Lisa', last_name: 'Wilson', email: 'lisa.wilson@veropest.com', phone: '555-0204', is_active: false },
-      { id: 'tech-5', first_name: 'Tom', last_name: 'Brown', email: 'tom.brown@veropest.com', phone: '555-0205', is_active: true },
-    ].filter(tech => tech.is_active);
+    return await enhancedApi.users.list({ roles: ['technician'], status: 'active' });
   }
 };
 

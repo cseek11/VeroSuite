@@ -1,71 +1,46 @@
 import React from 'react';
 import { Card, Typography, Chip, ProgressBar } from '@/components/ui/EnhancedUI';
 import { DollarSign, TrendingUp, TrendingDown, CreditCard, Receipt, BarChart3, Calendar } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { enhancedApi } from '@/lib/enhanced-api';
 
 const FinancialSnapshot: React.FC = () => {
-  // Mock data - would come from API
-  const financialData = {
+  // Fetch financial data from API
+  const { data: financialData = {
     currentMonth: {
-      revenue: 124750,
-      expenses: 89420,
-      profit: 35330,
-      jobsCompleted: 156,
-      averageJobValue: 800,
-      outstandingInvoices: 23400
+      revenue: 0,
+      expenses: 0,
+      profit: 0,
+      jobsCompleted: 0,
+      averageJobValue: 0,
+      outstandingInvoices: 0
     },
     previousMonth: {
-      revenue: 118900,
-      expenses: 85600,
-      profit: 33300
+      revenue: 0,
+      expenses: 0,
+      profit: 0
     },
     yearly: {
-      revenue: 1485000,
-      expenses: 1072000,
-      profit: 413000
+      revenue: 0,
+      expenses: 0,
+      profit: 0
     }
-  };
+  }, isLoading } = useQuery({
+    queryKey: ['financial', 'snapshot'],
+    queryFn: () => enhancedApi.financial.getSnapshot(),
+  });
 
-  const revenueBreakdown = [
-    { category: 'Pest Control', amount: 45600, percentage: 36.5 },
-    { category: 'Termite Treatment', amount: 38900, percentage: 31.2 },
-    { category: 'Inspections', amount: 23400, percentage: 18.8 },
-    { category: 'Emergency Services', amount: 16850, percentage: 13.5 }
-  ];
+  // Fetch revenue breakdown from API
+  const { data: revenueBreakdown = [] } = useQuery({
+    queryKey: ['financial', 'revenue-breakdown'],
+    queryFn: () => enhancedApi.financial.getRevenueBreakdown(),
+  });
 
-  const recentTransactions = [
-    {
-      id: 1,
-      customer: 'ABC Corporation',
-      amount: 2400,
-      type: 'payment',
-      date: '2024-01-15',
-      status: 'completed'
-    },
-    {
-      id: 2,
-      customer: 'Smith Residence',
-      amount: 850,
-      type: 'invoice',
-      date: '2024-01-14',
-      status: 'pending'
-    },
-    {
-      id: 3,
-      customer: 'Downtown Mall',
-      amount: 3200,
-      type: 'payment',
-      date: '2024-01-13',
-      status: 'completed'
-    },
-    {
-      id: 4,
-      customer: 'Johnson Family',
-      amount: 650,
-      type: 'invoice',
-      date: '2024-01-12',
-      status: 'overdue'
-    }
-  ];
+  // Fetch recent transactions from API
+  const { data: recentTransactions = [] } = useQuery({
+    queryKey: ['financial', 'recent-transactions'],
+    queryFn: () => enhancedApi.financial.getRecentTransactions(),
+  });
 
   const calculateGrowth = (current: number, previous: number) => {
     return ((current - previous) / previous) * 100;

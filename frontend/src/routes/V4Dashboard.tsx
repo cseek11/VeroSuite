@@ -36,74 +36,15 @@ import { secureApiClient } from '@/lib/secure-api-client';
 
 // Enhanced API data fetching - KPIs will be calculated from real data
 
-const mockJobs = [
-  {
-    id: 1,
-    customer: "Johnson Family Residence",
-    service: "General Pest Control",
-    time: "9:00 AM",
-    technician: "A. Davis",
-    status: "scheduled",
-    agreements: ["general", "mosquito"],
-    overdue: false
-  },
-  {
-    id: 2,
-    customer: "Acme Corporation",
-    service: "Termite Inspection",
-    time: "10:30 AM",
-    technician: null,
-    status: "overdue",
-    agreements: ["termite"],
-    overdue: true,
-    overdueDays: 2
-  },
-  {
-    id: 3,
-    customer: "Maria Lopez",
-    service: "Rodent Control",
-    time: "8:00 AM",
-    technician: "B. Patel",
-    status: "completed",
-    agreements: ["rodent"],
-    overdue: false
-  }
-];
+// Fetch jobs from API
+const useJobsData = () => {
+  return useQuery({
+    queryKey: ['dashboard-jobs'],
+    queryFn: () => secureApiClient.getAllJobs(),
+  });
+};
 
-const mockActivityFeed = [
-  {
-    id: 1,
-    type: 'payment',
-    message: 'Payment received from Johnson Family',
-    amount: '$156.00',
-    time: '2 minutes ago',
-    color: 'bg-green-500'
-  },
-  {
-    id: 2,
-    type: 'job',
-    message: 'New job scheduled for Acme Corp',
-    detail: 'Termite inspection',
-    time: '5 minutes ago',
-    color: 'bg-blue-500'
-  },
-  {
-    id: 3,
-    type: 'complaint',
-    message: 'Customer complaint logged',
-    detail: 'Maria Lopez',
-    time: '15 minutes ago',
-    color: 'bg-orange-500'
-  },
-  {
-    id: 4,
-    type: 'route',
-    message: 'Route optimized for today',
-    detail: 'Saved 23 minutes',
-    time: '1 hour ago',
-    color: 'bg-purple-500'
-  }
-];
+// Activity feed will be fetched from API
 
 const agreementIcons = {
   general: { icon: Shield, color: 'bg-green-500' },
@@ -118,6 +59,9 @@ const agreementIcons = {
 export default function V4Dashboard() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  
+  // Fetch jobs data
+  const { data: jobs = [] } = useJobsData();
   
   // Map and Calendar state
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -627,7 +571,7 @@ export default function V4Dashboard() {
                         { id: "sarah", name: "Sarah", color: "#F59E0B" },
                       ]}
                       dataAdapter={{
-                        source: mockJobs.map(job => ({
+                        source: jobs.map(job => ({
                           id: job.id.toString(),
                           title: job.customer,
                           start: new Date().toISOString(),

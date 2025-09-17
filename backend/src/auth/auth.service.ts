@@ -36,14 +36,34 @@ export class AuthService {
 
       const user = authData.user;
 
+      // Debug logging to understand the user data structure
+      console.log('=== AUTH DEBUG ===');
+      console.log('User ID:', user.id);
+      console.log('User Email:', user.email);
+      console.log('User Metadata:', JSON.stringify(user.user_metadata, null, 2));
+      console.log('App Metadata:', JSON.stringify(user.app_metadata, null, 2));
+      console.log('==================');
+
+      // Extract tenant_id from user_metadata or app_metadata
+      const tenant_id = user.user_metadata?.tenant_id || user.app_metadata?.tenant_id;
+      
+      if (!tenant_id) {
+        console.error('No tenant_id found in user metadata or app metadata');
+        console.error('Available user_metadata keys:', Object.keys(user.user_metadata || {}));
+        console.error('Available app_metadata keys:', Object.keys(user.app_metadata || {}));
+        throw new UnauthorizedException('User does not have a tenant_id assigned');
+      }
+
       // Create JWT payload for our backend
       const payload = {
         sub: user.id,
         email: user.email,
-        tenant_id: user.user_metadata?.tenant_id,
-        roles: user.user_metadata?.roles || ['user'],
+        tenant_id: tenant_id,
+        roles: user.user_metadata?.roles || user.app_metadata?.roles || ['user'],
         permissions: [],
       };
+
+      console.log('JWT Payload:', JSON.stringify(payload, null, 2));
 
       // Generate our own JWT token for backend API access
       const access_token = this.jwtService.sign(payload);
@@ -55,8 +75,8 @@ export class AuthService {
           email: user.email,
           first_name: user.user_metadata?.first_name || '',
           last_name: user.user_metadata?.last_name || '',
-          tenant_id: user.user_metadata?.tenant_id,
-          roles: user.user_metadata?.roles || ['user'],
+          tenant_id: tenant_id,
+          roles: user.user_metadata?.roles || user.app_metadata?.roles || ['user'],
         },
       };
     } catch (error) {
@@ -74,14 +94,34 @@ export class AuthService {
         throw new UnauthorizedException('Invalid Supabase token');
       }
 
+      // Debug logging to understand the user data structure
+      console.log('=== TOKEN EXCHANGE DEBUG ===');
+      console.log('User ID:', user.id);
+      console.log('User Email:', user.email);
+      console.log('User Metadata:', JSON.stringify(user.user_metadata, null, 2));
+      console.log('App Metadata:', JSON.stringify(user.app_metadata, null, 2));
+      console.log('============================');
+
+      // Extract tenant_id from user_metadata or app_metadata
+      const tenant_id = user.user_metadata?.tenant_id || user.app_metadata?.tenant_id;
+      
+      if (!tenant_id) {
+        console.error('No tenant_id found in user metadata or app metadata');
+        console.error('Available user_metadata keys:', Object.keys(user.user_metadata || {}));
+        console.error('Available app_metadata keys:', Object.keys(user.app_metadata || {}));
+        throw new UnauthorizedException('User does not have a tenant_id assigned');
+      }
+
       // Create JWT payload for our backend
       const payload = {
         sub: user.id,
         email: user.email,
-        tenant_id: user.user_metadata?.tenant_id,
-        roles: user.user_metadata?.roles || ['user'],
+        tenant_id: tenant_id,
+        roles: user.user_metadata?.roles || user.app_metadata?.roles || ['user'],
         permissions: [],
       };
+
+      console.log('JWT Payload:', JSON.stringify(payload, null, 2));
 
       // Generate our own JWT token for backend API access
       const access_token = this.jwtService.sign(payload);
@@ -93,8 +133,8 @@ export class AuthService {
           email: user.email,
           first_name: user.user_metadata?.first_name || '',
           last_name: user.user_metadata?.last_name || '',
-          tenant_id: user.user_metadata?.tenant_id,
-          roles: user.user_metadata?.roles || ['user'],
+          tenant_id: tenant_id,
+          roles: user.user_metadata?.roles || user.app_metadata?.roles || ['user'],
         },
       };
     } catch (error) {

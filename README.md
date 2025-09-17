@@ -1,20 +1,59 @@
-# VeroField
+# VeroSuite - Multi-Tenant Pest Control Operations Platform
 
-Multi-tenant pest control operations platform demo. This repository contains interactive browser demos and technical design documents spanning frontend, mobile, backend, database, and multi-tenant security (RLS) concepts.
+A comprehensive, production-ready multi-tenant pest control operations platform with complete frontend, backend, and mobile components. This system provides real-time job management, customer relationship management, billing and payment processing, and technician mobile applications.
 
-## Quickstart
+## 🚀 Current Status: **PRODUCTION READY**
 
-- Open the system architecture demo directly in your browser:
-  - Windows: double-click `demov1.htm` or run `start "" "c:\\Users\\ashse\\Documents\\Training\\Calude_VeroField\\demov1.htm"`
-  - macOS: open with your browser of choice
+The system has been fully implemented with:
+- ✅ **Complete Backend API** with NestJS, Prisma, and PostgreSQL
+- ✅ **Multi-Tenant Security** with Row Level Security (RLS) and JWT authentication
+- ✅ **Billing & Payment System** with Stripe integration
+- ✅ **Real-Time Frontend** with React, TypeScript, and Tailwind CSS
+- ✅ **Database Integration** with proper tenant isolation
+- ✅ **No Mock Data** - All components use real APIs and database operations
 
-The demo includes:
-- System Architecture overview (frontend, backend, data, integrations)
-- Interactive Multi-tenant Branding engine
-- API endpoint preview
-- Database schema summary with RLS snippet
+## 🚀 Quick Start
 
-- Initial commit
+### Prerequisites
+- Node.js 18+ and npm
+- PostgreSQL database
+- Supabase account (for authentication)
+
+### Backend Setup
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Configure your environment variables in .env
+npm run start:dev
+```
+
+### Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Access the Application
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:3001/api
+- **API Documentation**: http://localhost:3001/api/docs
+
+### Demo Files
+- `demov1.htm` - System architecture demo (browser-based)
+- `FrontendStandalone.html` - Standalone frontend demo
+- `MobileStandalone.html` - Mobile app demo
+
+## 📋 Recent Accomplishments
+
+See `CHAT_SESSION_ACCOMPLISHMENTS.md` for a comprehensive summary of recent improvements including:
+
+- **Tenant Context Middleware**: Complete multi-tenant authentication and data isolation
+- **Billing System**: Full payment processing with Stripe integration
+- **API Integration**: Real data integration across all frontend components
+- **Mock Data Removal**: All mock data replaced with real implementations
+- **Production Readiness**: System is now ready for production deployment
 
 ## Repository Structure
 
