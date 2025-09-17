@@ -1,8 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query, ParseUUIDPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ServiceTypesService } from './service-types.service';
-import { CreateServiceTypeDto } from './dto/create-service-type.dto';
-import { UpdateServiceTypeDto } from './dto/update-service-type.dto';
+import { CreateServiceTypeDto, UpdateServiceTypeDto } from './dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('service-types')

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
@@ -10,89 +11,8 @@ import {
   Activity, UserCheck, Mail, Phone, Globe, Search
 } from 'lucide-react';
 
-// Mock data structure as specified
-const mockData = {
-  kpis: {
-    revenue: 128430,
-    pipeline: 420100,
-    newCustomers: 48,
-    retention: 0.92,
-    avgCloseDays: 13,
-    deltas: { revenue: 8, pipeline: -4, newCustomers: 12, retention: 1 }
-  },
-  sales: {
-    revenueTrend: [
-      { name: 'Week 1', revenue: 20000 },
-      { name: 'Week 2', revenue: 25000 },
-      { name: 'Week 3', revenue: 22000 },
-      { name: 'Week 4', revenue: 30000 },
-      { name: 'Week 5', revenue: 28000 },
-      { name: 'Week 6', revenue: 35000 },
-      { name: 'Week 7', revenue: 32000 },
-      { name: 'Week 8', revenue: 40000 }
-    ],
-    dealsByRep: [
-      { name: 'Alex Johnson', deals: 14, value: 85000 },
-      { name: 'Sarah Wilson', deals: 12, value: 72000 },
-      { name: 'Mike Chen', deals: 10, value: 65000 },
-      { name: 'Emily Davis', deals: 8, value: 52000 },
-      { name: 'David Brown', deals: 6, value: 38000 }
-    ],
-    funnel: [
-      { stage: 'Leads', value: 1200, color: '#6366F1' },
-      { stage: 'Qualified', value: 800, color: '#10B981' },
-      { stage: 'Proposal', value: 450, color: '#F59E0B' },
-      { stage: 'Negotiation', value: 280, color: '#EF4444' },
-      { stage: 'Closed Won', value: 180, color: '#8B5CF6' }
-    ]
-  },
-  support: {
-    tickets: [
-      { name: 'Open', value: 23, color: '#EF4444' },
-      { name: 'In Progress', value: 15, color: '#F59E0B' },
-      { name: 'Resolved', value: 67, color: '#10B981' },
-      { name: 'Closed', value: 45, color: '#6B7280' }
-    ],
-    resolutionTrend: [
-      { name: 'Week 1', avg: 32 },
-      { name: 'Week 2', avg: 28 },
-      { name: 'Week 3', avg: 35 },
-      { name: 'Week 4', avg: 25 },
-      { name: 'Week 5', avg: 30 },
-      { name: 'Week 6', avg: 22 },
-      { name: 'Week 7', avg: 27 },
-      { name: 'Week 8', avg: 24 }
-    ],
-    topIssues: [
-      { issue: 'Billing disputes', count: 12, priority: 'high' },
-      { issue: 'Login issues', count: 8, priority: 'medium' },
-      { issue: 'Feature requests', count: 15, priority: 'low' },
-      { issue: 'Technical support', count: 6, priority: 'high' },
-      { issue: 'Account access', count: 4, priority: 'medium' }
-    ]
-  },
-  customers: {
-    segments: [
-      { name: 'Enterprise', value: 130, color: '#8B5CF6' },
-      { name: 'Mid-Market', value: 85, color: '#6366F1' },
-      { name: 'SMB', value: 220, color: '#10B981' },
-      { name: 'Startup', value: 65, color: '#F59E0B' }
-    ],
-    nps: 45,
-    atRisk: 9
-  },
-  marketing: {
-    leadSources: [
-      { name: 'Website', value: 320, color: '#6366F1' },
-      { name: 'Social Media', value: 180, color: '#10B981' },
-      { name: 'Email Campaigns', value: 95, color: '#F59E0B' },
-      { name: 'Referrals', value: 75, color: '#EF4444' },
-      { name: 'Events', value: 45, color: '#8B5CF6' }
-    ],
-    topCampaign: { name: 'Q3 Referral Push', roas: 6.2 },
-    cpa: 42
-  }
-};
+// Real data will be fetched from API
+import { enhancedApi } from '@/lib/enhanced-api';
 
 const COLORS = {
   primary: '#6366F1',
@@ -108,10 +28,52 @@ const COLORS = {
   violet: '#8B5CF6'
 };
 
+// Default data structure for charts
+const defaultData = {
+  kpis: {
+    revenue: 0,
+    pipeline: 0,
+    newCustomers: 0,
+    retention: 0,
+    avgCloseDays: 0,
+    deltas: { revenue: 0, pipeline: 0, newCustomers: 0, retention: 0 }
+  },
+  sales: {
+    revenueTrend: [],
+    dealsByRep: [],
+    funnel: []
+  },
+  support: {
+    tickets: [],
+    resolutionTrend: [],
+    topIssues: []
+  },
+  customers: {
+    segments: [],
+    nps: 0,
+    atRisk: 0
+  },
+  marketing: {
+    leadSources: [],
+    topCampaign: { name: '', roas: 0 },
+    cpa: 0
+  }
+};
+
 const ChartsPage: React.FC = () => {
   const [dateRange, setDateRange] = useState('30d');
   const [teamFilter, setTeamFilter] = useState('all');
   const [exportFormat, setExportFormat] = useState('csv');
+
+  // Fetch analytics data from API
+  const { data: analyticsData = defaultData, isLoading } = useQuery({
+    queryKey: ['analytics', dateRange, teamFilter],
+    queryFn: async () => {
+      // TODO: Replace with actual API calls when analytics endpoints are available
+      // For now, return default empty data structure
+      return defaultData;
+    },
+  });
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -209,14 +171,14 @@ const ChartsPage: React.FC = () => {
                 <DollarSign className="h-5 w-5" />
               </div>
               <div className="flex items-center gap-2">
-                {getDeltaIcon(mockData.kpis.deltas.revenue)}
+                {getDeltaIcon(analyticsData.kpis.deltas.revenue)}
                 <span className="text-xs font-semibold bg-white/20 px-1.5 py-0.5 rounded-md">
-                  +{mockData.kpis.deltas.revenue}%
+                  +{analyticsData.kpis.deltas.revenue}%
                 </span>
               </div>
             </div>
             <div className="text-xl font-bold mb-1">
-              {formatCurrency(mockData.kpis.revenue)}
+              {formatCurrency(analyticsData.kpis.revenue)}
             </div>
             <div className="text-blue-100 font-medium text-xs">
               Monthly Revenue
@@ -233,14 +195,14 @@ const ChartsPage: React.FC = () => {
                 <Target className="h-6 w-6" />
               </div>
               <div className="flex items-center gap-2">
-                {getDeltaIcon(mockData.kpis.deltas.pipeline)}
+                {getDeltaIcon(analyticsData.kpis.deltas.pipeline)}
                 <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded-md">
-                  {mockData.kpis.deltas.pipeline}%
+                  {analyticsData.kpis.deltas.pipeline}%
                 </span>
               </div>
             </div>
             <div className="text-2xl font-bold mb-1">
-              {formatCurrency(mockData.kpis.pipeline)}
+              {formatCurrency(analyticsData.kpis.pipeline)}
             </div>
             <div className="text-emerald-100 font-medium text-sm">
               Pipeline Value
@@ -257,14 +219,14 @@ const ChartsPage: React.FC = () => {
                 <Users className="h-6 w-6" />
               </div>
               <div className="flex items-center gap-2">
-                {getDeltaIcon(mockData.kpis.deltas.newCustomers)}
+                {getDeltaIcon(analyticsData.kpis.deltas.newCustomers)}
                 <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded-md">
-                  +{mockData.kpis.deltas.newCustomers}%
+                  +{analyticsData.kpis.deltas.newCustomers}%
                 </span>
               </div>
             </div>
             <div className="text-2xl font-bold mb-1">
-              {mockData.kpis.newCustomers}
+              {analyticsData.kpis.newCustomers}
             </div>
             <div className="text-violet-100 font-medium text-sm">
               New Customers
@@ -281,14 +243,14 @@ const ChartsPage: React.FC = () => {
                 <UserCheck className="h-6 w-6" />
               </div>
               <div className="flex items-center gap-2">
-                {getDeltaIcon(mockData.kpis.deltas.retention)}
+                {getDeltaIcon(analyticsData.kpis.deltas.retention)}
                 <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded-md">
-                  +{mockData.kpis.deltas.retention}%
+                  +{analyticsData.kpis.deltas.retention}%
                 </span>
               </div>
             </div>
             <div className="text-2xl font-bold mb-1">
-              {formatPercentage(mockData.kpis.retention)}
+              {formatPercentage(analyticsData.kpis.retention)}
             </div>
             <div className="text-amber-100 font-medium text-sm">
               Retention Rate
@@ -310,7 +272,7 @@ const ChartsPage: React.FC = () => {
               </div>
             </div>
             <div className="text-2xl font-bold mb-1">
-              {mockData.kpis.avgCloseDays}
+              {analyticsData.kpis.avgCloseDays}
             </div>
             <div className="text-rose-100 font-medium text-sm">
               Avg. Time to Close
@@ -358,7 +320,7 @@ const ChartsPage: React.FC = () => {
             </h2>
             <div style={{ width: '100%', height: '250px' }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={mockData.sales.revenueTrend}>
+                <AreaChart data={analyticsData.sales.revenueTrend}>
                   <defs>
                     <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor={COLORS.indigo} stopOpacity={0.3}/>
@@ -401,7 +363,7 @@ const ChartsPage: React.FC = () => {
             </h2>
             <div style={{ width: '100%', height: '250px' }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={mockData.sales.dealsByRep}>
+                <BarChart data={analyticsData.sales.dealsByRep}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                   <XAxis dataKey="name" stroke="#64748B" angle={-45} textAnchor="end" height={60} fontSize={10} />
                   <YAxis stroke="#64748B" fontSize={11} />
@@ -432,7 +394,7 @@ const ChartsPage: React.FC = () => {
               Sales Pipeline
             </h2>
             <div className="space-y-3">
-              {mockData.sales.funnel.map((stage, index) => (
+              {analyticsData.sales.funnel.map((stage, index) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-gradient-to-r from-slate-50 to-white rounded-lg border border-slate-100">
                   <div className="flex items-center gap-3">
                     <div 
@@ -449,7 +411,9 @@ const ChartsPage: React.FC = () => {
                         className="h-6 rounded-full transition-all duration-500 shadow-md"
                         style={{ 
                           backgroundColor: stage.color,
-                          width: `${(stage.value / mockData.sales.funnel[0].value) * 100}%`
+                          width: `${analyticsData.sales.funnel.length > 0 && analyticsData.sales.funnel[0]?.value > 0 
+                            ? (stage.value / analyticsData.sales.funnel[0].value) * 100 
+                            : 0}%`
                         }}
                       />
                     </div>
@@ -463,7 +427,10 @@ const ChartsPage: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-base font-semibold text-slate-700">Conversion Rate:</span>
                   <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                    {((mockData.sales.funnel[mockData.sales.funnel.length - 1].value / mockData.sales.funnel[0].value) * 100).toFixed(1)}%
+                    {analyticsData.sales.funnel.length > 0 && analyticsData.sales.funnel[0]?.value > 0 
+                      ? ((analyticsData.sales.funnel[analyticsData.sales.funnel.length - 1]?.value / analyticsData.sales.funnel[0].value) * 100).toFixed(1)
+                      : '0.0'
+                    }%
                   </span>
                 </div>
               </div>
@@ -483,7 +450,7 @@ const ChartsPage: React.FC = () => {
                 <h3 className="text-lg font-semibold text-slate-700 mb-3">Resolution Time Trend</h3>
                 <div style={{ width: '100%', height: '200px' }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={mockData.support.resolutionTrend}>
+                    <LineChart data={analyticsData.support.resolutionTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                       <XAxis dataKey="name" stroke="#64748B" fontSize={10} />
                       <YAxis stroke="#64748B" fontSize={10} />
@@ -513,7 +480,7 @@ const ChartsPage: React.FC = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={mockData.support.tickets}
+                        data={analyticsData.support.tickets}
                         cx="50%"
                         cy="50%"
                         innerRadius={40}
@@ -521,7 +488,7 @@ const ChartsPage: React.FC = () => {
                         paddingAngle={6}
                         dataKey="value"
                       >
-                        {mockData.support.tickets.map((entry, index) => (
+                        {analyticsData.support.tickets.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
@@ -559,7 +526,7 @@ const ChartsPage: React.FC = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={mockData.customers.segments}
+                        data={analyticsData.customers.segments}
                         cx="50%"
                         cy="50%"
                         innerRadius={30}
@@ -567,7 +534,7 @@ const ChartsPage: React.FC = () => {
                         paddingAngle={5}
                         dataKey="value"
                       >
-                        {mockData.customers.segments.map((entry, index) => (
+                        {analyticsData.customers.segments.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
@@ -587,7 +554,7 @@ const ChartsPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-2">
                 <div className="text-center p-2 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
                   <div className="text-lg font-bold text-emerald-600 mb-1">
-                    {mockData.customers.nps}
+                    {analyticsData.customers.nps}
                   </div>
                   <div className="text-xs font-medium text-emerald-700">
                     NPS Score
@@ -595,7 +562,7 @@ const ChartsPage: React.FC = () => {
                 </div>
                 <div className="text-center p-2 bg-gradient-to-br from-rose-50 to-rose-100 rounded-lg border border-rose-200">
                   <div className="text-lg font-bold text-rose-600 mb-1">
-                    {mockData.customers.atRisk}
+                    {analyticsData.customers.atRisk}
                   </div>
                   <div className="text-xs font-medium text-rose-700">
                     At Risk
@@ -618,7 +585,7 @@ const ChartsPage: React.FC = () => {
                 <h3 className="text-sm font-semibold text-slate-700 mb-2">Lead Sources</h3>
                 <div style={{ width: '100%', height: '150px' }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={mockData.marketing.leadSources} layout="horizontal">
+                    <BarChart data={analyticsData.marketing.leadSources} layout="horizontal">
                       <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                       <XAxis type="number" stroke="#64748B" fontSize={10} />
                       <YAxis dataKey="name" type="category" stroke="#64748B" width={70} fontSize={10} />
@@ -639,7 +606,7 @@ const ChartsPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div className="text-center p-4 bg-gradient-to-br from-violet-50 to-violet-100 rounded-lg border border-violet-200">
                   <div className="text-2xl font-bold text-violet-600 mb-1">
-                    {mockData.marketing.topCampaign.roas}x
+                    {analyticsData.marketing.topCampaign.roas}x
                   </div>
                   <div className="text-xs font-medium text-violet-700">
                     Top Campaign ROAS
@@ -647,7 +614,7 @@ const ChartsPage: React.FC = () => {
                 </div>
                 <div className="text-center p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200">
                   <div className="text-2xl font-bold text-indigo-600 mb-1">
-                    ${mockData.marketing.cpa}
+                    ${analyticsData.marketing.cpa}
                   </div>
                   <div className="text-xs font-medium text-indigo-700">
                     Avg. CPA
@@ -692,7 +659,7 @@ const ChartsPage: React.FC = () => {
             <div className="mt-6">
               <h3 className="text-base font-semibold text-slate-700 mb-3">Top Support Issues</h3>
               <div className="space-y-2">
-                {mockData.support.topIssues.slice(0, 3).map((issue, index) => (
+                {analyticsData.support.topIssues.slice(0, 3).map((issue, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-gradient-to-r from-slate-50 to-white rounded-lg border border-slate-100">
                     <span className="text-sm font-medium text-slate-700">{issue.issue}</span>
                     <span className={`text-xs px-2 py-1 rounded-full font-semibold ${

@@ -92,7 +92,7 @@ interface DropdownProps {
 
 interface InputProps {
   label?: string;
-  value: string;
+  value?: string;
   onChange?: (value: string) => void;
   placeholder?: string;
   type?: string;
@@ -101,6 +101,10 @@ interface InputProps {
   className?: string;
   disabled?: boolean;
   multiline?: boolean;
+  // React Hook Form props
+  name?: string;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  ref?: React.Ref<HTMLInputElement>;
 }
 
 interface ModalProps {
@@ -139,14 +143,18 @@ interface TabsProps {
 
 interface SelectProps {
   label?: string;
-  value: string;
-  onChange: (value: string) => void;
+  value?: string;
+  onChange?: (value: string) => void;
   placeholder?: string;
   options?: Array<{ value: string; label: string }>;
   error?: string;
   className?: string;
   disabled?: boolean;
   children?: React.ReactNode;
+  // React Hook Form props
+  name?: string;
+  onBlur?: (e: React.FocusEvent<HTMLSelectElement>) => void;
+  ref?: React.Ref<HTMLSelectElement>;
 }
 
 interface TextareaProps {
@@ -407,14 +415,27 @@ export const Dropdown: React.FC<DropdownProps> = ({ trigger, items, className = 
   );
 };
 
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(({ label, value, onChange, placeholder, type = 'text', icon: Icon, error, className = '', disabled, multiline }, ref) => {
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(({ label, value, onChange, placeholder, type = 'text', icon: Icon, error, className = '', disabled, multiline, name, onBlur, ...rest }, ref) => {
+  // Handle React Hook Form's onChange signature
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    // Call both the custom onChange and React Hook Form's onChange if it exists
+    onChange?.(newValue);
+    // Also call any onChange from React Hook Form (in rest props) - safely check if it exists
+    if (rest.onChange && typeof rest.onChange === 'function') {
+      rest.onChange(e);
+    }
+  };
+
   if (multiline) {
     return (
       <div className={`crm-field ${className}`}>
         {label && <label className="crm-label">{label}</label>}
         <textarea
-          value={value}
-          onChange={(e) => onChange?.(e.target.value)}
+          name={name}
+          value={value || ''}
+          onChange={handleChange}
+          onBlur={onBlur}
           placeholder={placeholder}
           disabled={disabled || false}
           className={`crm-textarea ${error ? 'crm-input-error' : ''}`}
@@ -424,6 +445,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({ label, va
             color: 'rgb(30, 41, 59)',
             backdropFilter: 'blur(4px)'
           }}
+          {...rest}
         />
         {error && <p className="crm-error">{error}</p>}
       </div>
@@ -442,18 +464,21 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({ label, va
               <input
         ref={ref}
         type={type}
-        value={value}
-          onChange={(e) => onChange?.(e.target.value)}
+        name={name}
+        value={value || ''}
+        onChange={handleChange}
+        onBlur={onBlur}
         placeholder={placeholder}
-          disabled={disabled || false}
-          className={`crm-input ${Icon ? 'pl-10' : ''} ${error ? 'crm-input-error' : ''}`}
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            borderColor: 'rgba(255, 255, 255, 0.2)',
-            color: 'rgb(30, 41, 59)',
-            backdropFilter: 'blur(4px)'
-          }}
-        />
+        disabled={disabled || false}
+        className={`crm-input ${Icon ? 'pl-10' : ''} ${error ? 'crm-input-error' : ''}`}
+        style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          borderColor: 'rgba(255, 255, 255, 0.2)',
+          color: 'rgb(30, 41, 59)',
+          backdropFilter: 'blur(4px)'
+        }}
+        {...rest}
+      />
       </div>
       {error && <p className="crm-error">{error}</p>}
   </div>
@@ -585,14 +610,27 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, active, onTabChange, variant =
 );
 };
 
-export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({ label, value, onChange, placeholder, options = [], error, className = '', disabled = false, children }, ref) => (
+export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({ label, value, onChange, placeholder, options = [], error, className = '', disabled = false, children, name, onBlur, ...rest }, ref) => {
+  // Handle React Hook Form's onChange signature
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newValue = e.target.value;
+    // Call both the custom onChange and React Hook Form's onChange if it exists
+    onChange?.(newValue);
+    // Also call any onChange from React Hook Form (in rest props) - safely check if it exists
+    if (rest.onChange && typeof rest.onChange === 'function') {
+      rest.onChange(e);
+    }
+  };
+
+  return (
   <div className={`crm-field ${className}`}>
     {label && <label className="crm-label">{label}</label>}
     <div className="relative">
       <select
         ref={ref}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        name={name}
+        value={value || ''}
+        onChange={handleChange}
         disabled={disabled}
         className={`crm-input ${error ? 'crm-input-error' : ''}`}
         style={{
@@ -614,7 +652,9 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({ label,
         onBlur={(e) => {
           e.target.style.boxShadow = 'none';
           e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+          onBlur?.(e);
         }}
+        {...rest}
       >
         {placeholder && (
           <option value="" disabled>
@@ -630,7 +670,8 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({ label,
     </div>
     {error && <p className="crm-error">{error}</p>}
   </div>
-));
+  );
+});
 
 Select.displayName = 'Select';
 

@@ -13,22 +13,22 @@ import {
   Alert,
 } from '@/components/ui/EnhancedUI';
 import { secureApiClient } from '@/lib/secure-api-client';
-import { serviceTypesApi } from '@/lib/service-types-api';
+import { supabase } from '@/lib/supabase-client';
 import { agreementsApi, ServiceAgreement } from '@/lib/agreements-api';
 import { CustomerSearch } from './CustomerSearch';
 
 const agreementSchema = z.object({
   account_id: z.string().min(1, 'Customer is required'),
   service_type_id: z.string().min(1, 'Service type is required'),
-  agreement_number: z.string().min(1, 'Agreement number is required'),
+  agreement_number: z.string().optional(),
   title: z.string().min(1, 'Agreement title is required'),
+  description: z.string().optional(),
   start_date: z.string().min(1, 'Start date is required'),
   end_date: z.string().optional(),
-  status: z.enum(['active', 'inactive', 'expired', 'cancelled', 'pending']).default('active'),
+  status: z.enum(['active', 'inactive', 'expired', 'cancelled']).default('active'),
   terms: z.string().optional(),
   pricing: z.number().min(0).optional(),
-  billing_frequency: z.enum(['weekly', 'monthly', 'quarterly', 'annually', 'one_time']).default('monthly'),
-  auto_renewal: z.boolean().default(false),
+  billing_frequency: z.enum(['monthly', 'quarterly', 'annually', 'one_time']).default('monthly'),
 });
 
 type AgreementFormData = z.infer<typeof agreementSchema>;
@@ -55,7 +55,6 @@ export function AgreementForm({ agreement, onSuccess, onCancel }: AgreementFormP
     defaultValues: {
       status: 'active',
       billing_frequency: 'monthly',
-      auto_renewal: false,
     },
   });
 
@@ -65,14 +64,24 @@ export function AgreementForm({ agreement, onSuccess, onCancel }: AgreementFormP
     queryFn: () => secureApiClient.getAllAccounts(),
   });
 
-  // Debug logging
-  console.log('AgreementForm - Customers data:', customers);
-  console.log('AgreementForm - Customers loading:', customersLoading);
-  console.log('AgreementForm - Customers error:', customersError);
 
-  const { data: serviceTypes } = useQuery({
+  const { data: serviceTypes, isLoading: serviceTypesLoading, error: serviceTypesError } = useQuery({
     queryKey: ['service-types'],
-    queryFn: () => serviceTypesApi.getServiceTypes(),
+    queryFn: async () => {
+      console.log('Loading service types...');
+      const { data, error } = await supabase
+        .from('service_types')
+        .select('*')
+        .eq('tenant_id', '7193113e-ece2-4f7b-ae8c-176df4367e28')
+        .eq('is_active', true)
+        .order('service_name');
+      if (error) {
+        console.error('Error loading service types:', error);
+        throw error;
+      }
+      console.log('Service types loaded:', data);
+      return data;
+    },
   });
 
   // Initialize form with existing agreement data
@@ -83,13 +92,13 @@ export function AgreementForm({ agreement, onSuccess, onCancel }: AgreementFormP
         service_type_id: agreement.service_type_id,
         agreement_number: agreement.agreement_number,
         title: agreement.title,
+        description: agreement.description || '',
         start_date: agreement.start_date.split('T')[0], // Convert to YYYY-MM-DD format
         end_date: agreement.end_date ? agreement.end_date.split('T')[0] : '',
         status: agreement.status,
         terms: agreement.terms || '',
         pricing: agreement.pricing || 0,
         billing_frequency: agreement.billing_frequency,
-        auto_renewal: agreement.auto_renewal || false,
       });
     }
   }, [agreement, reset]);
@@ -123,7 +132,9 @@ export function AgreementForm({ agreement, onSuccess, onCancel }: AgreementFormP
       if (agreement) {
         await updateMutation.mutateAsync(data);
       } else {
-        await createMutation.mutateAsync(data);
+        // Remove agreement_number for new agreements (will be auto-generated)
+        const { agreement_number, ...createData } = data;
+        await createMutation.mutateAsync(createData);
       }
     } catch (error) {
       console.error('Form submission error:', error);
@@ -132,7 +143,6 @@ export function AgreementForm({ agreement, onSuccess, onCancel }: AgreementFormP
     }
   };
 
-  const autoRenewal = watch('auto_renewal');
 
   return (
     <div className="pt-6">
@@ -169,40 +179,70 @@ export function AgreementForm({ agreement, onSuccess, onCancel }: AgreementFormP
           Service Type *
         </label>
         <Select
-          {...register('service_type_id')}
-          error={errors.service_type_id?.message}
+          value={watch('service_type_id') || ''}
+          onChange={(value) => setValue('service_type_id', value)}
+          error={errors.service_type_id?.message || (serviceTypesError ? 'Failed to load service types' : '')}
+          disabled={serviceTypesLoading}
         >
-          <option value="">Select a service type</option>
+          <option value="">
+            {serviceTypesLoading ? 'Loading service types...' : 'Select a service type'}
+          </option>
           {serviceTypes?.map((serviceType) => (
             <option key={serviceType.id} value={serviceType.id}>
               {serviceType.service_name}
             </option>
           ))}
         </Select>
+        {serviceTypesError && (
+          <p className="text-red-500 text-sm mt-1">
+            Error loading service types. Please refresh the page.
+          </p>
+        )}
       </div>
 
       {/* Agreement Number and Title */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Agreement Number *
+            Agreement Number
           </label>
           <Input
-            {...register('agreement_number')}
-            placeholder="e.g., AGR-2025-001"
+            value={watch('agreement_number') || ''}
+            onChange={(value) => setValue('agreement_number', value)}
+            placeholder="Auto-generated (e.g., AG-2025-0001)"
+            disabled={true}
+            className="bg-gray-50"
             error={errors.agreement_number?.message}
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Agreement number will be automatically generated when saved
+          </p>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Agreement Title *
           </label>
           <Input
-            {...register('title')}
+            value={watch('title') || ''}
+            onChange={(value) => setValue('title', value)}
             placeholder="e.g., Monthly Pest Control Service"
             error={errors.title?.message}
           />
         </div>
+      </div>
+
+      {/* Description */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Description
+        </label>
+        <Textarea
+          value={watch('description') || ''}
+          onChange={(value) => setValue('description', value)}
+          placeholder="Enter agreement description..."
+          rows={3}
+          error={errors.description?.message}
+        />
       </div>
 
       {/* Dates */}
@@ -213,7 +253,8 @@ export function AgreementForm({ agreement, onSuccess, onCancel }: AgreementFormP
           </label>
           <Input
             type="date"
-            {...register('start_date')}
+            value={watch('start_date') || ''}
+            onChange={(value) => setValue('start_date', value)}
             error={errors.start_date?.message}
           />
         </div>
@@ -223,7 +264,8 @@ export function AgreementForm({ agreement, onSuccess, onCancel }: AgreementFormP
           </label>
           <Input
             type="date"
-            {...register('end_date')}
+            value={watch('end_date') || ''}
+            onChange={(value) => setValue('end_date', value)}
             error={errors.end_date?.message}
           />
         </div>
@@ -236,11 +278,11 @@ export function AgreementForm({ agreement, onSuccess, onCancel }: AgreementFormP
             Status
           </label>
           <Select
-            {...register('status')}
+            value={watch('status') || 'active'}
+            onChange={(value) => setValue('status', value as any)}
             error={errors.status?.message}
           >
             <option value="active">Active</option>
-            <option value="pending">Pending</option>
             <option value="inactive">Inactive</option>
             <option value="expired">Expired</option>
             <option value="cancelled">Cancelled</option>
@@ -251,10 +293,10 @@ export function AgreementForm({ agreement, onSuccess, onCancel }: AgreementFormP
             Billing Frequency
           </label>
           <Select
-            {...register('billing_frequency')}
+            value={watch('billing_frequency') || 'monthly'}
+            onChange={(value) => setValue('billing_frequency', value as any)}
             error={errors.billing_frequency?.message}
           >
-            <option value="weekly">Weekly</option>
             <option value="monthly">Monthly</option>
             <option value="quarterly">Quarterly</option>
             <option value="annually">Annually</option>
@@ -272,24 +314,13 @@ export function AgreementForm({ agreement, onSuccess, onCancel }: AgreementFormP
           type="number"
           step="0.01"
           min="0"
-          {...register('pricing', { valueAsNumber: true })}
+          value={watch('pricing')?.toString() || ''}
+          onChange={(value) => setValue('pricing', parseFloat(value) || 0)}
           placeholder="0.00"
           error={errors.pricing?.message}
         />
       </div>
 
-      {/* Auto Renewal */}
-      <div className="flex items-center">
-        <input
-          type="checkbox"
-          id="auto_renewal"
-          {...register('auto_renewal')}
-          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-        />
-        <label htmlFor="auto_renewal" className="ml-2 block text-sm text-gray-700">
-          Auto-renewal enabled
-        </label>
-      </div>
 
       {/* Terms and Conditions */}
       <div>
@@ -297,7 +328,8 @@ export function AgreementForm({ agreement, onSuccess, onCancel }: AgreementFormP
           Terms and Conditions
         </label>
         <Textarea
-          {...register('terms')}
+          value={watch('terms') || ''}
+          onChange={(value) => setValue('terms', value)}
           placeholder="Enter terms and conditions..."
           rows={4}
           error={errors.terms?.message}

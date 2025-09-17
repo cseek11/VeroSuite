@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { supabase } from '@/lib/supabase-client';
 
 interface AuthState {
   token: string | null;
@@ -45,32 +44,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return;
     }
     
-    // Get tenant ID from database (not from user metadata)
+    // Get tenant ID from JWT token (already validated by backend)
     try {
-      // Get the user's valid tenant ID from database
-      const { data: validTenantId, error: tenantError } = await supabase
-        .rpc('get_user_tenant_id', {
-          user_email: user.email
-        });
+      const tenantId = user.tenant_id;
       
-      if (tenantError) {
-        console.error('Failed to get user tenant ID:', tenantError.message);
-        throw new Error(`Failed to get user tenant ID: ${tenantError.message}`);
+      if (!tenantId) {
+        console.error('No tenant ID found in user data');
+        throw new Error('No tenant ID found in user data');
       }
       
-      if (!validTenantId) {
-        console.error('No tenant ID found for user in database');
-        throw new Error('No tenant ID found for user in database');
-      }
+      console.log('✅ User tenant ID from JWT token:', tenantId);
       
-      console.log('✅ User tenant ID validated from database:', validTenantId);
-      
-      // Store auth data with validated tenant ID
-      localStorage.setItem('verosuite_auth', JSON.stringify({ token, tenantId: validTenantId, user }));
-      set({ token, tenantId: validTenantId, user, isAuthenticated: true });
+      // Store auth data with tenant ID from JWT
+      localStorage.setItem('verosuite_auth', JSON.stringify({ token, tenantId, user }));
+      set({ token, tenantId, user, isAuthenticated: true });
       
     } catch (error) {
-      console.error('Error validating tenant ID during login:', error);
+      console.error('Error setting auth data:', error);
       throw new Error(`Login failed: ${error.message}`);
     }
   },

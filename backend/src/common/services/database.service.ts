@@ -51,8 +51,28 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
     return this.$queryRawUnsafe(processedSql);
   }
 
-  async withTenant<T>(_tenantId: string, operation: () => Promise<T>): Promise<T> {
-    // For now, just run the operation without tenant context
-    return operation();
+          async withTenant<T>(tenantId: string, operation: () => Promise<T>): Promise<T> {
+            // Set tenant context for this operation
+            await this.query(`SET LOCAL app.tenant_id = $1`, [tenantId]);
+            // Skip setting the role for now - we'll rely on RLS policies instead
+            // await this.query(`SET LOCAL ROLE verosuite_app`);
+            
+            try {
+              return await operation();
+            } finally {
+              // Reset context after operation
+              await this.query(`RESET app.tenant_id`);
+              // await this.query(`RESET ROLE`);
+            }
+          }
+
+  async getCurrentTenantId(): Promise<string | null> {
+    try {
+      const result = await this.query(`SELECT current_setting('app.tenant_id', true) as tenant_id`) as any[];
+      return result[0]?.tenant_id || null;
+    } catch (error) {
+      console.error('Failed to get current tenant ID:', error);
+      return null;
+    }
   }
 }

@@ -185,7 +185,7 @@ const TechnicianList: React.FC = () => {
 
       {/* Results */}
       <Card>
-        {data?.technicians.length === 0 ? (
+        {!data?.technicians || data.technicians.length === 0 ? (
           <div className="text-center py-8">
             <div className="text-gray-500 mb-4">No technicians found</div>
             <Button 
@@ -224,7 +224,7 @@ const TechnicianList: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {data?.technicians.map((technician) => (
+                {(data?.technicians || []).map((technician) => (
                   <tr key={technician.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">

@@ -2,7 +2,11 @@ import { Controller, Get, Post, Put, Body, Query, UseGuards, Request, Param } fr
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JobsService } from './jobs.service';
-import { CreateJobDto, AssignJobDto } from './dto';
+import { 
+  CreateJobDto, 
+  AssignJobDto
+} from './dto';
+import { UpdatePhotosDto, PhotoDto } from './dto/index';
 import { StartJobDto, CompleteJobDto } from './jobs.actions';
 
 @ApiTags('Jobs')
@@ -45,8 +49,8 @@ export class JobsController {
 
   @Put(':id/photos')
   @ApiOperation({ summary: 'Replace photos collection for a job' })
-  async updatePhotos(@Param('id') id: string, @Body() body: { photos: string[] }, @Request() req: any) {
-    return this.jobsService.updatePhotos(id, body.photos || [], req.user.tenantId);
+  async updatePhotos(@Param('id') id: string, @Body() updatePhotosDto: UpdatePhotosDto, @Request() req: any) {
+    return this.jobsService.updatePhotos(id, updatePhotosDto.photos.map((p: PhotoDto) => p.url), req.user.tenantId);
   }
 
   @Post()

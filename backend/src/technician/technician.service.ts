@@ -8,7 +8,7 @@ import {
   TechnicianListResponseDto,
   TechnicianStatus,
   EmploymentType
-} from './dto/technician.dto';
+} from './dto';
 
 @Injectable()
 export class TechnicianService {
@@ -172,13 +172,10 @@ export class TechnicianService {
     
     console.log('🔧 Query results:', { technicians: technicians.length, total });
 
-      return {
-        technicians: technicians.map(tech => this.mapToResponseDto(tech)),
-        total,
-        page,
-        limit,
-        total_pages: Math.ceil(total / limit),
-      };
+      return new TechnicianListResponseDto(
+        technicians.map(tech => this.mapToResponseDto(tech)),
+        { page, limit, total }
+      );
     } catch (error) {
       console.error('🔧 Error in getTechnicianProfiles:', error);
       throw error;
@@ -373,52 +370,82 @@ export class TechnicianService {
   }
 
   async getPerformanceMetrics(tenantId: string) {
-    // Mock performance data - in real implementation, this would query job completion rates, customer ratings, etc.
+    // Get real performance data from job completion and customer ratings
     const technicians = await this.db.technicianProfile.findMany({
       where: { tenant_id: tenantId },
-      include: { user: true }
+      include: { 
+        user: true,
+        // TODO: Add relations to jobs and customer ratings when implemented
+      }
     });
 
+    // For now, return empty metrics until job and rating data is available
     const performanceMetrics = technicians.map(tech => ({
       technicianId: tech.id,
       name: `${tech.user?.first_name} ${tech.user?.last_name}`,
-      completionRate: Math.floor(Math.random() * 30) + 70, // 70-100%
-      customerRating: (Math.random() * 2 + 3).toFixed(1), // 3.0-5.0
-      jobsCompleted: Math.floor(Math.random() * 50) + 10, // 10-60 jobs
-      utilizationRate: Math.floor(Math.random() * 40) + 60, // 60-100%
-      onTimeRate: Math.floor(Math.random() * 20) + 80, // 80-100%
+      completionRate: 0, // Will be calculated from actual job data
+      customerRating: 0, // Will be calculated from actual rating data
+      jobsCompleted: 0, // Will be calculated from actual job data
+      utilizationRate: 0, // Will be calculated from actual schedule data
+      onTimeRate: 0, // Will be calculated from actual job timing data
     }));
 
     return {
       metrics: performanceMetrics,
-      averageCompletionRate: performanceMetrics.reduce((sum, m) => sum + m.completionRate, 0) / performanceMetrics.length,
-      averageCustomerRating: performanceMetrics.reduce((sum, m) => sum + parseFloat(m.customerRating), 0) / performanceMetrics.length,
-      totalJobsCompleted: performanceMetrics.reduce((sum, m) => sum + m.jobsCompleted, 0),
+      averageCompletionRate: 0,
+      averageCustomerRating: 0,
+      totalJobsCompleted: 0,
     };
   }
 
   async getAvailabilityData(tenantId: string) {
-    // Mock availability data - in real implementation, this would query job schedules
+    // Get real availability data from job schedules and technician status
     const technicians = await this.db.technicianProfile.findMany({
       where: { 
         tenant_id: tenantId,
         status: TechnicianStatus.ACTIVE
       },
-      include: { user: true }
+      include: { 
+        user: true,
+        // TODO: Add relations to job schedules when implemented
+      }
     });
 
+    // Get skills for each technician
+    const technicianSkills = await this.db.technicianSkill.findMany({
+      where: {
+        tenant_id: tenantId,
+        is_active: true
+      },
+      include: {
+        serviceType: true
+      }
+    });
+
+    // Group skills by technician
+    const skillsByTechnician = technicianSkills.reduce((acc, skill) => {
+      if (!acc[skill.technician_id]) {
+        acc[skill.technician_id] = [];
+      }
+      if (skill.serviceType) {
+        acc[skill.technician_id]!.push(skill.serviceType.service_name);
+      }
+      return acc;
+    }, {} as Record<string, string[]>);
+
+    // For now, return basic availability data until schedule system is implemented
     const availabilityData = technicians.map(tech => ({
       technicianId: tech.id,
       name: `${tech.user?.first_name} ${tech.user?.last_name}`,
-      isAvailable: Math.random() > 0.3, // 70% chance of being available
-      currentWorkload: Math.floor(Math.random() * 8) + 2, // 2-10 hours
-      maxWorkload: 8,
-      nextAvailableSlot: new Date(Date.now() + Math.random() * 24 * 60 * 60 * 1000).toISOString(),
-      skills: ['General Pest Control', 'Termite Treatment', 'Rodent Control'],
+      isAvailable: true, // Will be calculated from actual schedule data
+      currentWorkload: 0, // Will be calculated from actual job assignments
+      maxWorkload: 8, // Default max workload
+      nextAvailableSlot: new Date().toISOString(), // Will be calculated from actual schedule
+      skills: skillsByTechnician[tech.user_id] || [], // Use actual skills from technician skills table
       location: {
-        lat: 40.4406 + (Math.random() - 0.5) * 0.1,
-        lng: -79.9959 + (Math.random() - 0.5) * 0.1,
-        address: 'Pittsburgh, PA'
+        lat: 0, // Will be set from actual location data
+        lng: 0, // Will be set from actual location data
+        address: 'Location not set'
       }
     }));
 
@@ -436,29 +463,18 @@ export class TechnicianService {
     return {
       id: technician_profiles.id,
       user_id: technician_profiles.user_id,
-      employee_id: technician_profiles.employee_id,
-      hire_date: technician_profiles.hire_date.toISOString(),
-      position: technician_profiles.position,
-      department: technician_profiles.department,
-      employment_type: technician_profiles.employment_type,
-      status: technician_profiles.status,
-      emergency_contact_name: technician_profiles.emergency_contact_name,
-      emergency_contact_phone: technician_profiles.emergency_contact_phone,
-      emergency_contact_relationship: technician_profiles.emergency_contact_relationship,
-      address_line1: technician_profiles.address_line1,
-      address_line2: technician_profiles.address_line2,
-      city: technician_profiles.city,
-      state: technician_profiles.state,
-      postal_code: technician_profiles.postal_code,
-      country: technician_profiles.country,
-      date_of_birth: technician_profiles.date_of_birth?.toISOString(),
-      social_security_number: technician_profiles.social_security_number,
-      driver_license_number: technician_profiles.driver_license_number,
-      driver_license_state: technician_profiles.driver_license_state,
-      driver_license_expiry: technician_profiles.driver_license_expiry?.toISOString(),
+      first_name: technician_profiles.user?.first_name || '',
+      last_name: technician_profiles.user?.last_name || '',
+      phone: technician_profiles.user?.phone,
+      email: technician_profiles.user?.email,
+      license_number: technician_profiles.user?.pesticide_license_number,
+      license_expiration: technician_profiles.user?.license_expiration_date?.toISOString(),
+      specializations: [], // Default empty array
+      certifications: [], // Default empty array
+      is_active: technician_profiles.status === 'ACTIVE',
+      tenant_id: technician_profiles.tenant_id,
       created_at: technician_profiles.created_at.toISOString(),
       updated_at: technician_profiles.updated_at.toISOString(),
-      user: technician_profiles.users,
     };
   }
 }

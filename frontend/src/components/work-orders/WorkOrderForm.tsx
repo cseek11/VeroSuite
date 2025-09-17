@@ -266,83 +266,20 @@ export default function WorkOrderForm({
           }
         } else if (response.status === 401) {
           console.warn('Unauthorized while loading technicians (401). Using mock fallback.');
-          const mockTechnicians: Technician[] = [
-            { id: 'tech1', first_name: 'John', last_name: 'Smith', email: 'john.smith@veropest.com', phone: '(412) 555-1001', skills: ['general', 'commercial'], status: 'available' },
-            { id: 'tech2', first_name: 'Maria', last_name: 'Garcia', email: 'maria.garcia@veropest.com', phone: '(412) 555-1002', skills: ['residential', 'rodent'], status: 'available' },
-            { id: 'tech3', first_name: 'David', last_name: 'Wilson', email: 'david.wilson@veropest.com', phone: '(412) 555-1003', skills: ['commercial', 'termite'], status: 'available' },
-          ];
-          setTechnicians(mockTechnicians);
+          setTechnicians([]);
         } else {
           console.error('🔧 Failed to load technicians:', response.status, response.statusText);
           const errorText = await response.text();
           console.error('🔧 Error response:', errorText);
-          // Fallback to mock data if API fails
-          const mockTechnicians: Technician[] = [
-            { 
-              id: 'tech1', 
-              first_name: 'John', 
-              last_name: 'Smith', 
-              email: 'john.smith@veropest.com',
-              phone: '(412) 555-1001',
-              skills: ['general', 'commercial'],
-              status: 'available'
-            },
-            { 
-              id: 'tech2', 
-              first_name: 'Maria', 
-              last_name: 'Garcia', 
-              email: 'maria.garcia@veropest.com',
-              phone: '(412) 555-1002',
-              skills: ['residential', 'rodent'],
-              status: 'available'
-            },
-            { 
-              id: 'tech3', 
-              first_name: 'David', 
-              last_name: 'Wilson', 
-              email: 'david.wilson@veropest.com',
-              phone: '(412) 555-1003',
-              skills: ['commercial', 'termite'],
-              status: 'available'
-            },
-          ];
-          console.log('🔧 Using mock technicians fallback:', mockTechnicians);
-          setTechnicians(mockTechnicians);
+          // Fallback to empty array if API fails
+          console.log('🔧 API failed, using empty technicians list');
+          setTechnicians([]);
         }
       } catch (error) {
         console.error('🔧 Error loading technicians:', error);
-        // Fallback to mock data on error
-        const mockTechnicians: Technician[] = [
-          { 
-            id: 'tech1', 
-            first_name: 'John', 
-            last_name: 'Smith', 
-            email: 'john.smith@veropest.com',
-            phone: '(412) 555-1001',
-            skills: ['general', 'commercial'],
-            status: 'available'
-          },
-          { 
-            id: 'tech2', 
-            first_name: 'Maria', 
-            last_name: 'Garcia', 
-            email: 'maria.garcia@veropest.com',
-            phone: '(412) 555-1002',
-            skills: ['residential', 'rodent'],
-            status: 'available'
-          },
-          { 
-            id: 'tech3', 
-            first_name: 'David', 
-            last_name: 'Wilson', 
-            email: 'david.wilson@veropest.com',
-            phone: '(412) 555-1003',
-            skills: ['commercial', 'termite'],
-            status: 'available'
-          },
-        ];
-        console.log('🔧 Using mock technicians on error:', mockTechnicians);
-        setTechnicians(mockTechnicians);
+        // Fallback to empty array on error
+        console.log('🔧 Error occurred, using empty technicians list');
+        setTechnicians([]);
       } finally {
         console.log('🔧 Finished loading technicians');
         setLoadingTechnicians(false);

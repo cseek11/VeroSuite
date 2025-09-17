@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   DollarSign, 
   TrendingUp, 
@@ -21,106 +21,23 @@ import {
   Clock,
   AlertCircle
 } from 'lucide-react';
+import { enhancedApi } from '@/lib/enhanced-api';
+import type { Invoice, Payment, BillingAnalytics, RevenueAnalytics } from '@/types/enhanced-types';
 
-// Mock data for charts and financial data
-const mockFinancialData = {
-  revenue: {
-    current: 125000,
-    previous: 98000,
-    change: '+27.6%'
-  },
-  expenses: {
-    current: 45000,
-    previous: 52000,
-    change: '-13.5%'
-  },
-  profit: {
-    current: 80000,
-    previous: 46000,
-    change: '+73.9%'
-  },
-  outstanding: {
-    current: 35000,
-    previous: 42000,
-    change: '-16.7%'
-  }
-};
+// Real financial data will be fetched from the API
 
-const mockRevenueData = [
-  { month: 'Jan', revenue: 85000, expenses: 32000 },
-  { month: 'Feb', revenue: 92000, expenses: 35000 },
-  { month: 'Mar', revenue: 78000, expenses: 28000 },
-  { month: 'Apr', revenue: 105000, expenses: 42000 },
-  { month: 'May', revenue: 115000, expenses: 45000 },
-  { month: 'Jun', revenue: 125000, expenses: 45000 }
-];
-
-const mockInvoices = [
-  {
-    id: 'INV-001',
-    customer: 'ABC Pest Control',
-    amount: 2500,
-    status: 'paid',
-    dueDate: '2024-01-15',
-    type: 'service'
-  },
-  {
-    id: 'INV-002',
-    customer: 'XYZ Exterminators',
-    amount: 1800,
-    status: 'pending',
-    dueDate: '2024-01-20',
-    type: 'service'
-  },
-  {
-    id: 'INV-003',
-    customer: 'City Maintenance',
-    amount: 3200,
-    status: 'overdue',
-    dueDate: '2024-01-10',
-    type: 'service'
-  },
-  {
-    id: 'INV-004',
-    customer: 'Office Complex Ltd',
-    amount: 4500,
-    status: 'paid',
-    dueDate: '2024-01-25',
-    type: 'maintenance'
-  }
-];
-
-const mockExpenses = [
-  {
-    id: 'EXP-001',
-    category: 'Equipment',
-    description: 'Pest control chemicals',
-    amount: 1200,
-    date: '2024-01-15',
-    status: 'approved'
-  },
-  {
-    id: 'EXP-002',
-    category: 'Vehicle',
-    description: 'Fuel for service vehicles',
-    amount: 450,
-    date: '2024-01-14',
-    status: 'pending'
-  },
-  {
-    id: 'EXP-003',
-    category: 'Office',
-    description: 'Office supplies',
-    amount: 180,
-    date: '2024-01-13',
-    status: 'approved'
-  }
-];
+// Mock data removed - using real API data
 
 const FinancePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [billingAnalytics, setBillingAnalytics] = useState<BillingAnalytics | null>(null);
+  const [revenueAnalytics, setRevenueAnalytics] = useState<RevenueAnalytics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -129,6 +46,61 @@ const FinancePage: React.FC = () => {
     { id: 'expenses', label: 'Expenses', icon: Receipt },
     { id: 'reports', label: 'Reports', icon: PieChart }
   ];
+
+  // Load data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Load all data in parallel
+        const [invoicesData, paymentsData, analyticsData, revenueData] = await Promise.all([
+          enhancedApi.billing.getInvoices(),
+          enhancedApi.billing.getPayments(),
+          enhancedApi.billing.getBillingAnalytics(),
+          enhancedApi.billing.getRevenueAnalytics()
+        ]);
+
+        setInvoices(invoicesData);
+        setPayments(paymentsData);
+        setBillingAnalytics(analyticsData);
+        setRevenueAnalytics(revenueData);
+      } catch (err) {
+        console.error('Error loading finance data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load finance data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // Refresh data function
+  const refreshData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [invoicesData, paymentsData, analyticsData, revenueData] = await Promise.all([
+        enhancedApi.billing.getInvoices(),
+        enhancedApi.billing.getPayments(),
+        enhancedApi.billing.getBillingAnalytics(),
+        enhancedApi.billing.getRevenueAnalytics()
+      ]);
+
+      setInvoices(invoicesData);
+      setPayments(paymentsData);
+      setBillingAnalytics(analyticsData);
+      setRevenueAnalytics(revenueData);
+    } catch (err) {
+      console.error('Error refreshing finance data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to refresh finance data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -150,72 +122,73 @@ const FinancePage: React.FC = () => {
     }
   };
 
-  const filteredInvoices = mockInvoices.filter(invoice => 
-    invoice.customer.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    (filterStatus === 'all' || invoice.status === filterStatus)
-  );
+  const filteredInvoices = invoices.filter(invoice => {
+    const customerName = invoice.accounts?.name || 'Unknown Customer';
+    return customerName.toLowerCase().includes(searchQuery.toLowerCase()) &&
+           (filterStatus === 'all' || invoice.status === filterStatus);
+  });
 
-  const filteredExpenses = mockExpenses.filter(expense =>
-    expense.description.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    (filterStatus === 'all' || expense.status === filterStatus)
-  );
+  // Expenses will be loaded from real API when implemented
+  const filteredExpenses: any[] = [];
 
-  // Simple chart component using CSS gradients
-  const RevenueChart = () => (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-slate-900">Revenue vs Expenses</h3>
-        <div className="flex items-center gap-3 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-indigo-500 rounded"></div>
-            <span>Revenue</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-amber-500 rounded"></div>
-            <span>Expenses</span>
+  // Simple chart component using real data
+  const RevenueChart = () => {
+    const maxRevenue = Math.max(billingAnalytics?.totalRevenue || 0, 1000);
+    const maxOutstanding = Math.max(billingAnalytics?.outstandingAmount || 0, 1000);
+    
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold text-slate-900">Revenue vs Outstanding</h3>
+          <div className="flex items-center gap-3 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-indigo-500 rounded"></div>
+              <span>Revenue</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-amber-500 rounded"></div>
+              <span>Outstanding</span>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="h-48 flex items-end justify-between gap-2">
-        {mockRevenueData.map((data, index) => (
-          <div key={index} className="flex-1 flex flex-col items-center">
-            <div className="w-full flex flex-col-reverse gap-1 mb-2">
+        <div className="h-48 flex items-end justify-center gap-8">
+          <div className="flex flex-col items-center">
+            <div className="w-16 flex flex-col-reverse gap-1 mb-2">
               <div 
                 className="bg-purple-500 rounded-t"
-                style={{ height: `${(data.revenue / 125000) * 120}px` }}
+                style={{ height: `${((billingAnalytics?.totalRevenue || 0) / maxRevenue) * 120}px` }}
               ></div>
               <div 
                 className="bg-orange-500 rounded-t"
-                style={{ height: `${(data.expenses / 45000) * 120}px` }}
+                style={{ height: `${((billingAnalytics?.outstandingAmount || 0) / maxOutstanding) * 120}px` }}
               ></div>
             </div>
-            <span className="text-xs text-gray-600">{data.month}</span>
+            <span className="text-xs text-gray-600">Current</span>
           </div>
-        ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
-  const ProfitChart = () => (
-    <div className="space-y-3">
-      <h3 className="text-base font-semibold text-slate-900">Profit Trend</h3>
-      <div className="h-32 flex items-end justify-between gap-1">
-        {mockRevenueData.map((data, index) => {
-          const profit = data.revenue - data.expenses;
-          const maxProfit = 80000;
-          return (
-            <div key={index} className="flex-1 flex flex-col items-center">
-              <div 
-                className="w-full bg-green-500 rounded-t"
-                style={{ height: `${(profit / maxProfit) * 100}px` }}
-              ></div>
-              <span className="text-xs text-gray-600 mt-1">${(profit / 1000).toFixed(0)}k</span>
-            </div>
-          );
-        })}
+  const ProfitChart = () => {
+    const profit = (billingAnalytics?.totalRevenue || 0) - (billingAnalytics?.outstandingAmount || 0);
+    const maxProfit = Math.max(profit, 1000);
+    
+    return (
+      <div className="space-y-3">
+        <h3 className="text-base font-semibold text-slate-900">Current Profit</h3>
+        <div className="h-32 flex items-end justify-center">
+          <div className="flex flex-col items-center">
+            <div 
+              className="w-16 bg-green-500 rounded-t"
+              style={{ height: `${(profit / maxProfit) * 100}px` }}
+            ></div>
+            <span className="text-xs text-gray-600 mt-1">${(profit / 1000).toFixed(0)}k</span>
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const ExpensePieChart = () => (
     <div className="space-y-3">
@@ -258,6 +231,37 @@ const FinancePage: React.FC = () => {
     </div>
   );
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading finance data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-slate-900 mb-2">Error Loading Finance Data</h2>
+          <p className="text-slate-600 mb-4">{error}</p>
+          <button 
+            onClick={refreshData}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
       {/* Header */}
@@ -272,6 +276,13 @@ const FinancePage: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <button 
+              onClick={refreshData}
+              className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-medium text-sm"
+            >
+              <Download className="h-3 w-3" />
+              Refresh
+            </button>
             <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-medium text-sm">
               <Download className="h-3 w-3" />
               Export
@@ -296,11 +307,11 @@ const FinancePage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-3 w-3 text-emerald-300" />
                 <span className="text-xs font-semibold bg-white/20 px-1.5 py-0.5 rounded-md">
-                  {mockFinancialData.revenue.change}
+                  {billingAnalytics?.totalRevenue ? '+0%' : 'N/A'}
                 </span>
               </div>
             </div>
-            <div className="text-xl font-bold mb-1">${mockFinancialData.revenue.current.toLocaleString()}</div>
+            <div className="text-xl font-bold mb-1">${billingAnalytics?.totalRevenue.toLocaleString() || '0'}</div>
             <div className="text-emerald-100 font-medium text-xs">Total Revenue</div>
           </div>
         </div>
@@ -315,12 +326,12 @@ const FinancePage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <TrendingDown className="h-3 w-3 text-rose-300" />
                 <span className="text-xs font-semibold bg-white/20 px-1.5 py-0.5 rounded-md">
-                  {mockFinancialData.expenses.change}
+                  {billingAnalytics?.outstandingAmount ? '-0%' : 'N/A'}
                 </span>
               </div>
             </div>
-            <div className="text-xl font-bold mb-1">${mockFinancialData.expenses.current.toLocaleString()}</div>
-            <div className="text-rose-100 font-medium text-xs">Total Expenses</div>
+            <div className="text-xl font-bold mb-1">${billingAnalytics?.outstandingAmount.toLocaleString() || '0'}</div>
+            <div className="text-rose-100 font-medium text-xs">Outstanding Amount</div>
           </div>
         </div>
 
@@ -334,12 +345,12 @@ const FinancePage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-3 w-3 text-blue-300" />
                 <span className="text-xs font-semibold bg-white/20 px-1.5 py-0.5 rounded-md">
-                  {mockFinancialData.profit.change}
+                  {billingAnalytics?.paidAmount ? '+0%' : 'N/A'}
                 </span>
               </div>
             </div>
-            <div className="text-xl font-bold mb-1">${mockFinancialData.profit.current.toLocaleString()}</div>
-            <div className="text-blue-100 font-medium text-xs">Net Profit</div>
+            <div className="text-xl font-bold mb-1">${billingAnalytics?.paidAmount.toLocaleString() || '0'}</div>
+            <div className="text-blue-100 font-medium text-xs">Paid Amount</div>
           </div>
         </div>
 
@@ -353,12 +364,12 @@ const FinancePage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <TrendingDown className="h-3 w-3 text-amber-300" />
                 <span className="text-xs font-semibold bg-white/20 px-1.5 py-0.5 rounded-md">
-                  {mockFinancialData.outstanding.change}
+                  {billingAnalytics?.totalInvoices ? '0%' : 'N/A'}
                 </span>
               </div>
             </div>
-            <div className="text-xl font-bold mb-1">${mockFinancialData.outstanding.current.toLocaleString()}</div>
-            <div className="text-amber-100 font-medium text-xs">Outstanding</div>
+            <div className="text-xl font-bold mb-1">{billingAnalytics?.totalInvoices || '0'}</div>
+            <div className="text-amber-100 font-medium text-xs">Total Invoices</div>
           </div>
         </div>
       </div>
@@ -460,18 +471,18 @@ const FinancePage: React.FC = () => {
                     </div>
                     <div className="mb-2">
                       <h3 className="text-sm font-semibold text-slate-900 mb-1">
-                        {invoice.id}
+                        {invoice.invoice_number}
                       </h3>
                       <p className="text-xs text-slate-600 mb-1">
-                        {invoice.customer}
+                        {invoice.accounts?.name || 'Unknown Customer'}
                       </p>
                       <p className="text-xs text-slate-600 mb-2">
-                        Due: {new Date(invoice.dueDate).toLocaleDateString()}
+                        Due: {new Date(invoice.due_date).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold text-slate-900">
-                        ${invoice.amount.toLocaleString()}
+                        ${invoice.total_amount.toLocaleString()}
                       </span>
                       {getStatusIcon(invoice.status)}
                     </div>
@@ -490,7 +501,7 @@ const FinancePage: React.FC = () => {
                 Payments
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {mockInvoices.filter(inv => inv.status === 'paid').map((payment) => (
+                {payments.map((payment) => (
                   <div key={payment.id} className="p-3 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
@@ -505,13 +516,13 @@ const FinancePage: React.FC = () => {
                     </div>
                     <div className="mb-2">
                       <h3 className="text-sm font-semibold text-slate-900 mb-1">
-                        {payment.id}
+                        {payment.Invoice.invoice_number}
                       </h3>
                       <p className="text-xs text-slate-600 mb-1">
-                        {payment.customer}
+                        {payment.payment_methods.payment_name || 'Payment Method'}
                       </p>
                       <p className="text-xs text-slate-600 mb-2">
-                        Paid: {new Date(payment.dueDate).toLocaleDateString()}
+                        Paid: {new Date(payment.payment_date).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="flex items-center justify-between">

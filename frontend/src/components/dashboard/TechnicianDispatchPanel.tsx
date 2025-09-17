@@ -1,67 +1,15 @@
 import React from 'react';
 import { Card, Typography, Chip, ProgressBar, Avatar } from '@/components/ui/EnhancedUI';
 import { Users, MapPin, Clock, Phone, Mail, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { enhancedApi } from '@/lib/enhanced-api';
 
 const TechnicianDispatchPanel: React.FC = () => {
-  // Mock data - would come from API
-  const technicians = [
-    {
-      id: 1,
-      name: 'John Smith',
-      avatar: null,
-      status: 'available',
-      location: 'Downtown Area',
-      currentJob: null,
-      rating: 4.8,
-      jobsCompleted: 156,
-      responseTime: '15 min',
-      specialties: ['Pest Control', 'Inspection'],
-      phone: '+1 (555) 123-4567',
-      email: 'john.smith@veropest.com'
-    },
-    {
-      id: 2,
-      name: 'Maria Garcia',
-      avatar: null,
-      status: 'busy',
-      location: 'Westside',
-      currentJob: 'Pest Inspection - 123 Main St',
-      rating: 4.9,
-      jobsCompleted: 203,
-      responseTime: '25 min',
-      specialties: ['Termite Control', 'Fumigation'],
-      phone: '+1 (555) 234-5678',
-      email: 'maria.garcia@veropest.com'
-    },
-    {
-      id: 3,
-      name: 'David Chen',
-      avatar: null,
-      status: 'offline',
-      location: 'Eastside',
-      currentJob: null,
-      rating: 4.7,
-      jobsCompleted: 89,
-      responseTime: 'N/A',
-      specialties: ['Rodent Control', 'Prevention'],
-      phone: '+1 (555) 345-6789',
-      email: 'david.chen@veropest.com'
-    },
-    {
-      id: 4,
-      name: 'Sarah Johnson',
-      avatar: null,
-      status: 'available',
-      location: 'North District',
-      currentJob: null,
-      rating: 4.6,
-      jobsCompleted: 134,
-      responseTime: '20 min',
-      specialties: ['General Pest Control', 'Emergency Response'],
-      phone: '+1 (555) 456-7890',
-      email: 'sarah.johnson@veropest.com'
-    }
-  ];
+  // Fetch technicians data from API
+  const { data: technicians = [], isLoading } = useQuery({
+    queryKey: ['technicians', 'dispatch'],
+    queryFn: () => enhancedApi.users.list({ roles: ['technician'] }),
+  });
 
   const dispatchStats = {
     totalTechnicians: technicians.length,

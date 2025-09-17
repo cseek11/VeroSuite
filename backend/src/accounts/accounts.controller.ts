@@ -1,18 +1,35 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Req, Query, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { AccountsService } from './accounts.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { 
+  CreateAccountDto, 
+  AccountListResponseDto,
+  AccountCreateResponseDto
+} from './dto';
 
+@ApiTags('Accounts')
 @Controller('accounts')
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) {}
 
   @Get()
-  async getAccounts(@Req() req: Request) {
+  @ApiOperation({ summary: 'Get all accounts for the authenticated tenant' })
+  @ApiResponse({ status: 200, description: 'Accounts retrieved successfully', type: AccountListResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getAccounts(@Req() req: Request): Promise<AccountListResponseDto> {
     // Get tenant ID from JWT user context (populated by JwtAuthGuard)
     const tenantId = req.user?.tenantId || '7193113e-ece2-4f7b-ae8c-176df4367e28';
-    return this.accountsService.getAccountsForTenant(tenantId);
+    const result = await this.accountsService.getAccountsForTenant(tenantId);
+    
+    // Transform service result to response DTO
+    return new AccountListResponseDto(
+      result.data || [],
+      { page: 1, limit: 100, total: result.total || 0 }
+    );
   }
 
   @Get('search')
@@ -28,7 +45,11 @@ export class AccountsController {
   }
 
   @Post()
-  async createAccount(@Req() req: Request, @Body() accountData: any) {
+  @ApiOperation({ summary: 'Create a new account' })
+  @ApiResponse({ status: 201, description: 'Account created successfully', type: AccountCreateResponseDto })
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async createAccount(@Req() req: Request, @Body() accountData: CreateAccountDto): Promise<AccountCreateResponseDto> {
     const tenantId = req.user?.tenantId || '7193113e-ece2-4f7b-ae8c-176df4367e28';
     const result = await this.accountsService.createAccount(tenantId, accountData);
     
@@ -38,10 +59,10 @@ export class AccountsController {
       // For materialized view permission errors, we'll return a success response
       // since the main operation (insert) likely succeeded
       console.warn('Materialized view permission error (non-critical):', (result as any).error);
-      return { success: true, message: 'Account created successfully' };
+      return new AccountCreateResponseDto(result.data || result);
     }
     
-    return result;
+    return new AccountCreateResponseDto(result.data || result);
   }
 
   @Put(':id')

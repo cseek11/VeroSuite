@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   MessageCircle,
   Mail,
@@ -35,88 +36,13 @@ import {
   X
 } from 'lucide-react';
 
-// Mock data for communications
-const mockMessages = [
-  {
-    id: 1,
-    type: 'email',
-    from: 'john.smith@acme.com',
-    to: 'kevin@veropest.com',
-    subject: 'Service Schedule Confirmation',
-    content: 'Thank you for confirming our pest control service for next Tuesday at 2:00 PM. We look forward to your visit.',
-    timestamp: '2024-01-15T10:30:00Z',
-    status: 'read',
-    priority: 'normal',
-    attachments: ['service_agreement.pdf'],
-    tags: ['confirmation', 'scheduling']
-  },
-  {
-    id: 2,
-    type: 'sms',
-    from: '+1 (555) 123-4567',
-    to: '+1 (555) 987-6543',
-    subject: 'Appointment Reminder',
-    content: 'Reminder: Your pest control appointment is scheduled for tomorrow at 2:00 PM. Please ensure access to the property.',
-    timestamp: '2024-01-15T09:15:00Z',
-    status: 'sent',
-    priority: 'high',
-    attachments: [],
-    tags: ['reminder', 'appointment']
-  },
-  {
-    id: 3,
-    type: 'phone',
-    from: 'Maria Lopez',
-    to: 'Kevin Davis',
-    subject: 'Service Inquiry',
-    content: 'Customer called to inquire about additional services and pricing for termite treatment.',
-    timestamp: '2024-01-15T08:45:00Z',
-    status: 'completed',
-    priority: 'normal',
-    attachments: [],
-    tags: ['inquiry', 'pricing']
-  },
-  {
-    id: 4,
-    type: 'email',
-    from: 'support@veropest.com',
-    to: 'customer@example.com',
-    subject: 'Service Completion Report',
-    content: 'Your pest control service has been completed. Please find the detailed report attached.',
-    timestamp: '2024-01-14T16:20:00Z',
-    status: 'sent',
-    priority: 'normal',
-    attachments: ['service_report.pdf', 'invoice.pdf'],
-    tags: ['completion', 'report']
-  }
-];
+// Real data will be fetched from API
+import { enhancedApi } from '@/lib/enhanced-api';
 
-const mockTemplates = [
-  {
-    id: 1,
-    name: 'Appointment Confirmation',
-    type: 'email',
-    subject: 'Service Appointment Confirmed',
-    content: 'Dear {{customer_name}}, Your pest control service has been confirmed for {{appointment_date}} at {{appointment_time}}...',
-    category: 'scheduling'
-  },
-  {
-    id: 2,
-    name: 'Service Reminder',
-    type: 'sms',
-    subject: 'Appointment Reminder',
-    content: 'Reminder: Your pest control appointment is scheduled for {{appointment_date}} at {{appointment_time}}...',
-    category: 'reminders'
-  },
-  {
-    id: 3,
-    name: 'Service Completion',
-    type: 'email',
-    subject: 'Service Completed',
-    content: 'Dear {{customer_name}}, Your pest control service has been completed successfully...',
-    category: 'completion'
-  }
-];
+// Templates will be fetched from API
+const getTemplates = async () => {
+  return await enhancedApi.communicationTemplates.list();
+};
 
 const CommunicationsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('inbox');
@@ -135,7 +61,13 @@ const CommunicationsPage: React.FC = () => {
     { id: 'archived', label: 'Archived', icon: Archive }
   ];
 
-  const filteredMessages = mockMessages.filter(message => {
+  // Messages will be fetched from API
+  const { data: messages = [] } = useQuery({
+    queryKey: ['communications', 'messages'],
+    queryFn: () => enhancedApi.communications.list(),
+  });
+
+  const filteredMessages = messages.filter(message => {
     const matchesSearch = message.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          message.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          message.from.toLowerCase().includes(searchQuery.toLowerCase());

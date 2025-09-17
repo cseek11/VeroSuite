@@ -159,7 +159,7 @@ export function AgreementList({ customerId }: AgreementListProps) {
       return (
         agreement.title.toLowerCase().includes(searchLower) ||
         agreement.agreement_number.toLowerCase().includes(searchLower) ||
-        agreement.accounts.name.toLowerCase().includes(searchLower) ||
+        agreement.account.name.toLowerCase().includes(searchLower) ||
         agreement.service_types.name.toLowerCase().includes(searchLower)
       );
     }
@@ -288,7 +288,7 @@ export function AgreementList({ customerId }: AgreementListProps) {
                         Customer
                       </Typography>
                       <Typography variant="body2" className="text-gray-900 truncate">
-                        {agreement.accounts.name}
+                        {agreement.account.name}
                       </Typography>
                     </div>
                     

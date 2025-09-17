@@ -1,4 +1,4 @@
-import { IsString, IsUUID, IsDateString, IsOptional, IsNumber, IsEnum, IsBoolean } from 'class-validator';
+import { IsString, IsUUID, IsDateString, IsOptional, IsNumber, IsEnum } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ServiceAgreementStatus, BillingFrequency } from '@prisma/client';
 
@@ -11,13 +11,19 @@ export class CreateServiceAgreementDto {
   @IsUUID()
   service_type_id!: string;
 
-  @ApiProperty({ description: 'Agreement number' })
+  @ApiPropertyOptional({ description: 'Agreement number (auto-generated if not provided)' })
+  @IsOptional()
   @IsString()
-  agreement_number!: string;
+  agreement_number?: string;
 
   @ApiProperty({ description: 'Agreement title' })
   @IsString()
   title!: string;
+
+  @ApiPropertyOptional({ description: 'Agreement description' })
+  @IsOptional()
+  @IsString()
+  description?: string;
 
   @ApiProperty({ description: 'Start date', example: '2025-01-01' })
   @IsDateString()
@@ -48,10 +54,6 @@ export class CreateServiceAgreementDto {
   @IsEnum(BillingFrequency)
   billing_frequency?: BillingFrequency;
 
-  @ApiPropertyOptional({ description: 'Auto renewal' })
-  @IsOptional()
-  @IsBoolean()
-  auto_renewal?: boolean;
 
   @ApiPropertyOptional({ description: 'Created by user ID' })
   @IsOptional()
