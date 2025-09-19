@@ -2,6 +2,11 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth';
 import MigrationStatus from '@/components/MigrationStatus';
+import CustomerExperiencePanel from '@/components/dashboard/CustomerExperiencePanel';
+import TechnicianDispatchPanel from '@/components/dashboard/TechnicianDispatchPanel';
+import FinancialSnapshot from '@/components/dashboard/FinancialSnapshot';
+import InventoryCompliancePanel from '@/components/dashboard/InventoryCompliancePanel';
+import ChartsPage from './Charts';
 import { 
   DollarSign, 
   CheckCircle, 
@@ -777,107 +782,25 @@ export default function V4Dashboard() {
 
         {tabsActive === 'crm-customers' && (
           <div className="flex-1 min-h-0 overflow-hidden">
-            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Customer Experience</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-green-50 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-green-600">4.8/5.0</div>
-                  <div className="text-sm text-green-700">Customer Satisfaction</div>
-                </div>
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-blue-600">{kpis.activeContracts}</div>
-                  <div className="text-sm text-blue-700">Active Customers</div>
-                </div>
-                <div className="bg-purple-50 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-purple-600">{kpis.totalCustomers}</div>
-                  <div className="text-sm text-purple-700">Total Customers</div>
-                </div>
-              </div>
-            </div>
+            <CustomerExperiencePanel />
           </div>
         )}
 
         {tabsActive === 'crm-technicians' && (
           <div className="flex-1 min-h-0 overflow-hidden">
-            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Technician & Dispatch</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <div className="font-medium text-gray-800">Ashley Davis</div>
-                    <div className="text-sm text-gray-600">Available • 3 jobs today</div>
-                  </div>
-                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Available</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <div className="font-medium text-gray-800">John Smith</div>
-                    <div className="text-sm text-gray-600">On Job • 2 jobs today</div>
-                  </div>
-                  <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">On Job</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <div className="font-medium text-gray-800">Sarah Wilson</div>
-                    <div className="text-sm text-gray-600">Available • 4 jobs today</div>
-                  </div>
-                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Available</span>
-                </div>
-              </div>
-            </div>
+            <TechnicianDispatchPanel />
           </div>
         )}
 
         {tabsActive === 'crm-financial' && (
           <div className="flex-1 min-h-0 overflow-hidden">
-            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Financial Overview</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-green-50 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-green-600">$18,240</div>
-                  <div className="text-sm text-green-700">Today's Revenue</div>
-                </div>
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-blue-600">$124,750</div>
-                  <div className="text-sm text-blue-700">This Month</div>
-                </div>
-                <div className="bg-orange-50 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-orange-600">$23,400</div>
-                  <div className="text-sm text-orange-700">Outstanding AR</div>
-                </div>
-              </div>
-            </div>
+            <FinancialSnapshot />
           </div>
         )}
 
         {tabsActive === 'crm-inventory' && (
           <div className="flex-1 min-h-0 overflow-hidden">
-            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Inventory & Compliance</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <div className="font-medium text-gray-800">Pest Control Chemicals</div>
-                    <div className="text-sm text-gray-600">85% in stock</div>
-                  </div>
-                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Good</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <div className="font-medium text-gray-800">Safety Equipment</div>
-                    <div className="text-sm text-gray-600">All compliant</div>
-                  </div>
-                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Compliant</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <div className="font-medium text-gray-800">Vehicle Maintenance</div>
-                    <div className="text-sm text-gray-600">2 vehicles due</div>
-                  </div>
-                  <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">Due Soon</span>
-                </div>
-              </div>
-            </div>
+            <InventoryCompliancePanel />
           </div>
         )}
 
@@ -925,35 +848,7 @@ export default function V4Dashboard() {
 
         {tabsActive === 'analytics' && (
           <div className="flex-1 min-h-0 overflow-hidden">
-            <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Analytics</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-800 mb-2">Revenue Analytics</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-blue-700">This Week</span>
-                      <span className="text-sm font-medium text-blue-800">$45,600</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-blue-700">Last Week</span>
-                      <span className="text-sm font-medium text-blue-800">$42,300</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-blue-700">Growth</span>
-                      <span className="text-sm font-medium text-green-600">+7.8%</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-purple-50 rounded-lg p-4">
-                  <h4 className="font-medium text-purple-800 mb-2">Live Statistics</h4>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-purple-600">1,247</div>
-                    <div className="text-sm text-purple-700">Total Operations</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ChartsPage />
           </div>
         )}
 

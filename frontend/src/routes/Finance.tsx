@@ -54,18 +54,24 @@ const FinancePage: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        // Load all data in parallel
-        const [invoicesData, paymentsData, analyticsData, revenueData] = await Promise.all([
-          enhancedApi.billing.getInvoices(),
-          enhancedApi.billing.getPayments(),
-          enhancedApi.billing.getBillingAnalytics(),
-          enhancedApi.billing.getRevenueAnalytics()
+        // Load all data in parallel with error handling
+        const [invoicesData, paymentsData, analyticsData, revenueData] = await Promise.allSettled([
+          enhancedApi.billing.getInvoices().catch(() => []),
+          enhancedApi.billing.getPayments().catch(() => []),
+          enhancedApi.billing.getBillingAnalytics().catch(() => ({ totalRevenue: 0, outstandingAmount: 0, paidAmount: 0, totalInvoices: 0, overdueInvoices: 0 })),
+          enhancedApi.billing.getRevenueAnalytics().catch(() => ({ monthlyRevenue: [], totalRevenue: 0, growthRate: 0 }))
         ]);
 
-        setInvoices(invoicesData);
-        setPayments(paymentsData);
-        setBillingAnalytics(analyticsData);
-        setRevenueAnalytics(revenueData);
+        // Extract results, using fallback values for failed requests
+        const invoices = invoicesData.status === 'fulfilled' ? invoicesData.value : [];
+        const payments = paymentsData.status === 'fulfilled' ? paymentsData.value : [];
+        const analytics = analyticsData.status === 'fulfilled' ? analyticsData.value : { totalRevenue: 0, outstandingAmount: 0, paidAmount: 0, totalInvoices: 0, overdueInvoices: 0 };
+        const revenue = revenueData.status === 'fulfilled' ? revenueData.value : { monthlyRevenue: [], totalRevenue: 0, growthRate: 0 };
+
+        setInvoices(invoices);
+        setPayments(payments);
+        setBillingAnalytics(analytics);
+        setRevenueAnalytics(revenue);
       } catch (err) {
         console.error('Error loading finance data:', err);
         setError(err instanceof Error ? err.message : 'Failed to load finance data');

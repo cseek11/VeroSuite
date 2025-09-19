@@ -246,3 +246,4 @@ COMMENT ON FUNCTION get_search_analytics IS 'Returns search analytics for a tena
 
 
 
+

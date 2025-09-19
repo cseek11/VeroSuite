@@ -81,3 +81,4 @@ COMMENT ON INDEX idx_accounts_search_composite IS 'Composite index for common se
 
 
 
+

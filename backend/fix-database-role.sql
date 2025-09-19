@@ -15,3 +15,4 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO ve
 
 -- Verify the role was created
 SELECT rolname FROM pg_roles WHERE rolname = 'verosuite_app';
+

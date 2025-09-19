@@ -168,3 +168,4 @@ COMMENT ON FUNCTION search_customers_with_relevance IS 'Search customers with re
 
 
 
+

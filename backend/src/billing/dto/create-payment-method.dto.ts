@@ -90,3 +90,4 @@ export class CreatePaymentMethodDto {
   @IsBoolean()
   is_active?: boolean;
 }
+

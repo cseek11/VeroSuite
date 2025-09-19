@@ -35,3 +35,4 @@ export class UpdateInvoiceDto {
   @IsString()
   notes?: string;
 }
+

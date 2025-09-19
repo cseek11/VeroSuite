@@ -176,8 +176,7 @@ class SearchIntegration {
       this.addToSearchHistory(searchTerm);
 
       // Log successful search
-      await searchErrorLogger.logSearchSuccess('search', searchTerm, results.length, searchTime, {
-        searchType: 'unified',
+      await searchErrorLogger.logSuccess('search', searchTerm, results.length, searchTime, {
         tenantId: await this.getCurrentTenantId(),
         userId: await this.getCurrentUserId()
       });
@@ -188,12 +187,12 @@ class SearchIntegration {
       const searchTime = Date.now() - startTime;
       
       // Log search error
-      await searchErrorLogger.logSearchError('search', searchTerm, error, {
-        searchType: 'unified',
+      await searchErrorLogger.logError(error, {
+        operation: 'search',
+        query: searchTerm,
         tenantId: await this.getCurrentTenantId(),
-        userId: await this.getCurrentUserId(),
-        searchTime
-      });
+        userId: await this.getCurrentUserId()
+      }, 'medium');
 
       // Update state with error
       this.updateState({

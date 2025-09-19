@@ -1,4 +1,4 @@
-# VeroSuite - Multi-Tenant Pest Control Operations Platform
+# VeroField - Multi-Tenant Pest Control Operations Platform
 
 A comprehensive, production-ready multi-tenant pest control operations platform with complete frontend, backend, and mobile components. This system provides real-time job management, customer relationship management, billing and payment processing, and technician mobile applications.
 
