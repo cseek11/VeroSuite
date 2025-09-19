@@ -1,22 +1,5 @@
-import React, { useState } from 'react';
-import { 
-  Card, 
-  Button, 
-  Status, 
-  Container, 
-  Grid, 
-  Heading, 
-  Text, 
-  Badge, 
-  Divider,
-  Spinner 
-} from '@/components/ui/CRMComponents';
-import { 
-  Input,
-  Textarea,
-  Checkbox
-} from '@/components/ui/EnhancedUI';
-import Select from '@/components/ui/Select';
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   User, 
   Bell, 
@@ -36,14 +19,19 @@ import {
   Mail,
   Lock,
   Key,
-  Monitor,
-  Zap
+  Building2,
+  Phone,
+  Upload,
+  Image,
+  X
 } from 'lucide-react';
+import { company } from '@/lib/enhanced-api';
 
 export default function Settings() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
   const [showPassword, setShowPassword] = useState(false);
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     firstName: 'John',
     lastName: 'Doe',
@@ -56,15 +44,238 @@ export default function Settings() {
     colorScheme: 'purple'
   });
 
+  const [companyData, setCompanyData] = useState({
+    company_name: '',
+    address: '',
+    city: '',
+    state: '',
+    zip_code: '',
+    country: 'USA',
+    phone: '',
+    email: '',
+    website: '',
+    logo_url: '',
+    header_logo_url: '',
+    invoice_logo_url: ''
+  });
+
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  
+  // Separate states for header and invoice logos
+  const [headerLogoFile, setHeaderLogoFile] = useState<File | null>(null);
+  const [headerLogoPreview, setHeaderLogoPreview] = useState<string>('');
+  const [invoiceLogoFile, setInvoiceLogoFile] = useState<File | null>(null);
+  const [invoiceLogoPreview, setInvoiceLogoPreview] = useState<string>('');
+
+  // Fetch company settings
+  const { data: companySettings } = useQuery({
+    queryKey: ['company', 'settings'],
+    queryFn: company.getSettings,
+  });
+
+  // Update company settings mutation
+  const updateCompanyMutation = useMutation({
+    mutationFn: company.updateSettings,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['company', 'settings'] });
+      console.log('✅ Company settings updated successfully');
+    },
+    onError: (error) => {
+      console.error('❌ Failed to update company settings:', error);
+    }
+  });
+
+  // Load company data when fetched
+  useEffect(() => {
+    if (companySettings) {
+      setCompanyData({
+        company_name: companySettings.company_name || '',
+        address: companySettings.address || '',
+        city: companySettings.city || '',
+        state: companySettings.state || '',
+        zip_code: companySettings.zip_code || '',
+        country: companySettings.country || 'USA',
+        phone: companySettings.phone || '',
+        email: companySettings.email || '',
+        website: companySettings.website || '',
+        logo_url: companySettings.logo_url || '',
+        header_logo_url: companySettings.header_logo_url || '',
+        invoice_logo_url: companySettings.invoice_logo_url || '',
+      });
+      
+      // Set logo previews if logos exist
+      setHeaderLogoPreview(companySettings.header_logo_url || companySettings.logo_url || '');
+      setInvoiceLogoPreview(companySettings.invoice_logo_url || companySettings.logo_url || '');
+    }
+  }, [companySettings]);
+
+  // Header logo upload mutation
+  const uploadHeaderLogoMutation = useMutation({
+    mutationFn: (file: File) => company.uploadLogo(file, 'header'),
+    onSuccess: (data) => {
+      console.log('✅ Header logo uploaded successfully:', data.logo_url);
+      setCompanyData(prev => ({ ...prev, header_logo_url: data.logo_url }));
+      setHeaderLogoPreview(data.logo_url);
+      setHeaderLogoFile(null);
+      queryClient.invalidateQueries({ queryKey: ['company', 'settings'] });
+    },
+    onError: (error) => {
+      console.error('❌ Failed to upload header logo:', error);
+      alert('Failed to upload header logo. Please try again.');
+    }
+  });
+
+  // Invoice logo upload mutation
+  const uploadInvoiceLogoMutation = useMutation({
+    mutationFn: (file: File) => company.uploadLogo(file, 'invoice'),
+    onSuccess: (data) => {
+      console.log('✅ Invoice logo uploaded successfully:', data.logo_url);
+      setCompanyData(prev => ({ ...prev, invoice_logo_url: data.logo_url }));
+      setInvoiceLogoPreview(data.logo_url);
+      setInvoiceLogoFile(null);
+      queryClient.invalidateQueries({ queryKey: ['company', 'settings'] });
+    },
+    onError: (error) => {
+      console.error('❌ Failed to upload invoice logo:', error);
+      alert('Failed to upload invoice logo. Please try again.');
+    }
+  });
+
+  // Logo deletion mutations
+  const deleteLogoMutation = useMutation({
+    mutationFn: (logoType: 'header' | 'invoice') => company.deleteLogo(logoType),
+    onSuccess: (data, logoType) => {
+      console.log(`✅ ${logoType} logo deleted successfully`);
+      if (logoType === 'header') {
+        setCompanyData(prev => ({ ...prev, header_logo_url: '' }));
+        setHeaderLogoPreview('');
+      } else {
+        setCompanyData(prev => ({ ...prev, invoice_logo_url: '' }));
+        setInvoiceLogoPreview('');
+      }
+      queryClient.invalidateQueries({ queryKey: ['company', 'settings'] });
+    },
+    onError: (error) => {
+      console.error('❌ Failed to delete logo:', error);
+      alert('Failed to delete logo. Please try again.');
+    }
+  });
+
+  // Handle logo file selection and upload
+  // Validate logo file
+  const validateLogoFile = (file: File): boolean => {
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const maxSize = 2 * 1024 * 1024; // 2MB
+
+    if (!validTypes.includes(file.type)) {
+      alert('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+      return false;
+    }
+
+    if (file.size > maxSize) {
+      alert('File size must be less than 2MB');
+      return false;
+    }
+
+    return true;
+  };
+
+  // Handle header logo selection and upload
+  const handleHeaderLogoSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && validateLogoFile(file)) {
+      // Create preview immediately
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setHeaderLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Upload to Supabase Storage
+      try {
+        await uploadHeaderLogoMutation.mutateAsync(file);
+      } catch (error) {
+        setHeaderLogoPreview(''); // Clear preview on error
+      }
+    }
+    // Reset input
+    event.target.value = '';
+  };
+
+  // Handle invoice logo selection and upload
+  const handleInvoiceLogoSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && validateLogoFile(file)) {
+      // Create preview immediately
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setInvoiceLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Upload to Supabase Storage
+      try {
+        await uploadInvoiceLogoMutation.mutateAsync(file);
+      } catch (error) {
+        setInvoiceLogoPreview(''); // Clear preview on error
+      }
+    }
+    // Reset input
+    event.target.value = '';
+  };
+
+
   const handleSave = async () => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      if (activeTab === 'company') {
+        // Prepare company data with logo
+        let dataToSave = { ...companyData };
+        
+        // Logos are already uploaded via separate mutations, just save the current data
+        
+        // Clean data for validation - convert empty strings to null for optional fields
+        const cleanedData = {
+          ...dataToSave,
+          email: dataToSave.email.trim() || undefined,
+          website: dataToSave.website.trim() || undefined,
+          phone: dataToSave.phone.trim() || undefined,
+          address: dataToSave.address.trim() || undefined,
+          city: dataToSave.city.trim() || undefined,
+          state: dataToSave.state.trim() || undefined,
+          zip_code: dataToSave.zip_code.trim() || undefined,
+        };
+
+        // Save company settings
+        console.log('💾 Attempting to save company data:', {
+          ...cleanedData,
+          logo_url: cleanedData.logo_url ? `[URL - ${cleanedData.logo_url.length} chars]` : 'null'
+        });
+        
+        await updateCompanyMutation.mutateAsync(cleanedData);
+        console.log('✅ Company settings saved successfully');
+        
+        // Show success message
+        setShowSuccessMessage(true);
+        setTimeout(() => setShowSuccessMessage(false), 3000); // Hide after 3 seconds
+      } else {
+        // Save other settings (profile, etc.)
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log('✅ Settings saved successfully');
+        
+        // Show success message for all tabs
+        setShowSuccessMessage(true);
+        setTimeout(() => setShowSuccessMessage(false), 3000); // Hide after 3 seconds
+      }
+    } catch (error) {
+      console.error('❌ Failed to save settings:', error);
+    }
     setIsLoading(false);
   };
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User, color: 'indigo' },
+    { id: 'company', label: 'Company', icon: Building2, color: 'purple' },
     { id: 'notifications', label: 'Notifications', icon: Bell, color: 'emerald' },
     { id: 'security', label: 'Security', icon: Shield, color: 'amber' },
     { id: 'appearance', label: 'Appearance', icon: Palette, color: 'violet' },
@@ -72,21 +283,11 @@ export default function Settings() {
     { id: 'data', label: 'Data & Privacy', icon: Database, color: 'rose' },
   ];
 
-  const getTabColor = (color: string) => {
-    const colors = {
-      indigo: 'from-indigo-500 to-indigo-600',
-      emerald: 'from-emerald-500 to-emerald-600',
-      amber: 'from-amber-500 to-amber-600',
-      violet: 'from-violet-500 to-violet-600',
-      blue: 'from-blue-500 to-blue-600',
-      rose: 'from-rose-500 to-rose-600'
-    };
-    return colors[color as keyof typeof colors] || 'from-indigo-500 to-indigo-600';
-  };
 
   const getTabBgColor = (color: string) => {
     const colors = {
       indigo: 'bg-indigo-50',
+      purple: 'bg-purple-50',
       emerald: 'bg-emerald-50',
       amber: 'bg-amber-50',
       violet: 'bg-violet-50',
@@ -110,6 +311,14 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
+      {/* Success Message */}
+      {showSuccessMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 transition-all duration-300 transform translate-x-0 opacity-100">
+          <CheckCircle className="w-5 h-5" />
+          <span>Settings saved successfully!</span>
+        </div>
+      )}
+      
       {/* Page Header */}
       <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
         <div className="flex items-center gap-2 mb-2">
@@ -248,6 +457,300 @@ export default function Settings() {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeTab === 'company' && (
+            <div className="space-y-4">
+              <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1.5 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg">
+                    <Building2 className="w-4 h-4 text-white" />
+                  </div>
+                  <h2 className="text-lg font-bold text-slate-800">Company Information</h2>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Company Name</label>
+                    <input
+                      type="text"
+                      placeholder="Enter your company name"
+                      value={companyData.company_name}
+                      onChange={(e) => setCompanyData(prev => ({ ...prev, company_name: e.target.value }))}
+                      className="w-full px-2 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Address</label>
+                    <input
+                      type="text"
+                      placeholder="Enter street address"
+                      value={companyData.address}
+                      onChange={(e) => setCompanyData(prev => ({ ...prev, address: e.target.value }))}
+                      className="w-full px-2 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">City</label>
+                      <input
+                        type="text"
+                        placeholder="City"
+                        value={companyData.city}
+                        onChange={(e) => setCompanyData(prev => ({ ...prev, city: e.target.value }))}
+                        className="w-full px-2 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">State</label>
+                      <input
+                        type="text"
+                        placeholder="State"
+                        value={companyData.state}
+                        onChange={(e) => setCompanyData(prev => ({ ...prev, state: e.target.value }))}
+                        className="w-full px-2 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">ZIP Code</label>
+                      <input
+                        type="text"
+                        placeholder="ZIP"
+                        value={companyData.zip_code}
+                        onChange={(e) => setCompanyData(prev => ({ ...prev, zip_code: e.target.value }))}
+                        className="w-full px-2 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg">
+                    <Phone className="w-4 h-4 text-white" />
+                  </div>
+                  <h2 className="text-lg font-bold text-slate-800">Contact Information</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
+                    <input
+                      type="tel"
+                      placeholder="(555) 123-4567"
+                      value={companyData.phone}
+                      onChange={(e) => setCompanyData(prev => ({ ...prev, phone: e.target.value }))}
+                      className="w-full px-2 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+                    <input
+                      type="email"
+                      placeholder="billing@company.com"
+                      value={companyData.email}
+                      onChange={(e) => setCompanyData(prev => ({ ...prev, email: e.target.value }))}
+                      className="w-full px-2 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Website</label>
+                  <input
+                    type="url"
+                    placeholder="https://www.company.com"
+                    value={companyData.website}
+                    onChange={(e) => setCompanyData(prev => ({ ...prev, website: e.target.value }))}
+                    className="w-full px-2 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1.5 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg">
+                    <Globe className="w-4 h-4 text-white" />
+                  </div>
+                  <h2 className="text-lg font-bold text-slate-800">Regional Settings</h2>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Country</label>
+                  <select
+                    value={companyData.country}
+                    onChange={(e) => setCompanyData(prev => ({ ...prev, country: e.target.value }))}
+                    className="w-full px-2 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+                  >
+                    <option value="USA">United States</option>
+                    <option value="CA">Canada</option>
+                    <option value="UK">United Kingdom</option>
+                    <option value="AU">Australia</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Header Logo Upload */}
+              <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1.5 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg">
+                    <Image className="w-4 h-4 text-white" />
+                  </div>
+                  <h2 className="text-lg font-bold text-slate-800">Header Logo</h2>
+                  <span className="text-sm text-slate-500">(Navigation & Header)</span>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-24 h-24 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center bg-slate-50">
+                      {headerLogoPreview ? (
+                        <div className="relative">
+                          <img 
+                            src={headerLogoPreview} 
+                            alt="Header Logo" 
+                            className="w-20 h-20 object-contain rounded"
+                          />
+                          <button
+                            onClick={() => deleteLogoMutation.mutate('header')}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                            disabled={deleteLogoMutation.isPending}
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Image className="w-8 h-8 text-slate-400 mx-auto mb-1" />
+                          <p className="text-xs text-slate-500">No header logo</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1">
+                      <label className="block">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleHeaderLogoSelect}
+                          className="hidden"
+                          disabled={uploadHeaderLogoMutation.isPending || (headerLogoPreview && !deleteLogoMutation.isPending)}
+                        />
+                        <div className={`flex items-center space-x-2 px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-medium cursor-pointer ${
+                          uploadHeaderLogoMutation.isPending || (headerLogoPreview && !deleteLogoMutation.isPending)
+                            ? 'bg-gray-400 cursor-not-allowed' 
+                            : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700'
+                        }`}>
+                          {uploadHeaderLogoMutation.isPending ? (
+                            <>
+                              <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                              <span>Uploading...</span>
+                            </>
+                          ) : headerLogoPreview ? (
+                            <>
+                              <X className="w-4 h-4" />
+                              <span>Delete & Replace</span>
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="w-4 h-4" />
+                              <span>Upload Header Logo</span>
+                            </>
+                          )}
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Invoice Logo Upload */}
+              <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1.5 bg-gradient-to-r from-green-500 to-green-600 rounded-lg">
+                    <Image className="w-4 h-4 text-white" />
+                  </div>
+                  <h2 className="text-lg font-bold text-slate-800">Invoice Logo</h2>
+                  <span className="text-sm text-slate-500">(Invoices & PDFs)</span>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-24 h-24 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center bg-slate-50">
+                      {invoiceLogoPreview ? (
+                        <div className="relative">
+                          <img 
+                            src={invoiceLogoPreview} 
+                            alt="Invoice Logo" 
+                            className="w-20 h-20 object-contain rounded"
+                          />
+                          <button
+                            onClick={() => deleteLogoMutation.mutate('invoice')}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                            disabled={deleteLogoMutation.isPending}
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Image className="w-8 h-8 text-slate-400 mx-auto mb-1" />
+                          <p className="text-xs text-slate-500">No invoice logo</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1">
+                      <label className="block">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleInvoiceLogoSelect}
+                          className="hidden"
+                          disabled={uploadInvoiceLogoMutation.isPending || (invoiceLogoPreview && !deleteLogoMutation.isPending)}
+                        />
+                        <div className={`flex items-center space-x-2 px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-medium cursor-pointer ${
+                          uploadInvoiceLogoMutation.isPending || (invoiceLogoPreview && !deleteLogoMutation.isPending)
+                            ? 'bg-gray-400 cursor-not-allowed' 
+                            : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+                        }`}>
+                          {uploadInvoiceLogoMutation.isPending ? (
+                            <>
+                              <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                              <span>Uploading...</span>
+                            </>
+                          ) : invoiceLogoPreview ? (
+                            <>
+                              <X className="w-4 h-4" />
+                              <span>Delete & Replace</span>
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="w-4 h-4" />
+                              <span>Upload Invoice Logo</span>
+                            </>
+                          )}
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Logo Guidelines */}
+              <div className="bg-blue-50/80 backdrop-blur-xl rounded-xl border border-blue-200/50 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-1 bg-blue-100 rounded-md">
+                    <AlertTriangle className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <h3 className="font-semibold text-blue-800">Logo Guidelines</h3>
+                </div>
+                <div className="text-sm text-blue-700 space-y-1">
+                  <p>• <strong>Size:</strong> 200x200px or larger (square format preferred)</p>
+                  <p>• <strong>Format:</strong> PNG, JPEG, GIF, or WebP</p>
+                  <p>• <strong>File Size:</strong> Maximum 2MB per logo</p>
+                  <p>• <strong>Background:</strong> Transparent PNG recommended</p>
+                  <p>• <strong>Limit:</strong> One header logo + one invoice logo per tenant</p>
+                </div>
+              </div>
+
             </div>
           )}
 

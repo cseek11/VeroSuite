@@ -1454,6 +1454,172 @@ export const authApi = {
 };
 
 // ============================================================================
+// COMPANY SETTINGS API
+// ============================================================================
+
+export const company = {
+  // Get company settings
+  getSettings: async () => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/company/settings`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch company settings: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to fetch company settings:', error);
+      throw error;
+    }
+  },
+
+  // Upload company logo with type
+  uploadLogo: async (file: File, logoType: 'header' | 'invoice' = 'header') => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      console.log(`📸 Uploading ${logoType} logo file:`, file.name, file.size, 'bytes');
+      console.log('🔑 Using auth token for logo:', token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
+
+      const formData = new FormData();
+      formData.append('logo', file);
+      formData.append('logoType', logoType);
+
+      const response = await fetch(`http://localhost:3001/api/v1/company/logo`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Logo upload failed:', response.status, response.statusText);
+        console.error('❌ Error details:', errorText);
+        throw new Error(`Failed to upload logo: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to upload logo:', error);
+      throw error;
+    }
+  },
+
+  // Delete company logo
+  deleteLogo: async (logoType: 'header' | 'invoice') => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      console.log(`🗑️ Deleting ${logoType} logo`);
+
+      const response = await fetch(`http://localhost:3001/api/v1/company/logo/${logoType}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Logo deletion failed:', response.status, response.statusText);
+        console.error('❌ Error details:', errorText);
+        throw new Error(`Failed to delete logo: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to delete logo:', error);
+      throw error;
+    }
+  },
+
+  // Update company settings
+  updateSettings: async (settings: any) => {
+    try {
+      const authData = localStorage.getItem('verosuite_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      console.log('🔍 Sending company settings data:', settings);
+      console.log('🔑 Using auth token:', token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
+
+      const response = await fetch(`http://localhost:3001/api/v1/company/settings`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Server response:', response.status, response.statusText);
+        console.error('❌ Error details:', errorText);
+        throw new Error(`Failed to update company settings: ${response.statusText} - ${errorText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to update company settings:', error);
+      throw error;
+    }
+  },
+};
+
 // BILLING API
 // ============================================================================
 
@@ -1555,7 +1721,15 @@ export const billing = {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to create invoice: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('🔥 Backend error response:', errorText);
+        try {
+          const errorData = JSON.parse(errorText);
+          console.error('🔥 Parsed error data:', errorData);
+          throw new Error(`Failed to create invoice: ${errorData.message || response.statusText}`);
+        } catch {
+          throw new Error(`Failed to create invoice: ${response.statusText} - ${errorText}`);
+        }
       }
 
       return await response.json();

@@ -50,6 +50,8 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.2",
     "framer-motion": "^12.23.12",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.3",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.445.0",
     "motion": "^12.23.12",

@@ -58,3 +58,4 @@ export * from './Form';
 // Export individual components
 export { default as Checkbox } from './Checkbox';
 export { default as ReusablePopup } from './ReusablePopup';
+export { default as CustomerSearchSelector } from './CustomerSearchSelector';

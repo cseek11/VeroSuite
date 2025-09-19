@@ -432,9 +432,9 @@ export class SearchAnalyticsService {
       });
 
       if (error) {
-        // 409 errors are non-critical (conflict/duplicate) - just log as warning
-        if (error.code === '409' || error.message?.includes('409')) {
-          console.warn('Popular searches update conflict (non-critical):', error.message);
+        // Handle duplicate key constraint errors (23505) - these are non-critical
+        if (error.code === '23505' || error.code === '409' || error.message?.includes('duplicate key')) {
+          console.warn('Popular searches already exists (non-critical):', error.message);
         } else {
           console.error('Failed to update popular searches:', error);
         }

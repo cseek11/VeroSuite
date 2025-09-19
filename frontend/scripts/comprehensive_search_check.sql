@@ -61,3 +61,4 @@ SELECT 'search_suggestions_analytics' as table_name, COUNT(*) as record_count FR
 
 
 
+

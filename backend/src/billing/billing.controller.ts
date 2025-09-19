@@ -46,7 +46,9 @@ export class BillingController {
     @Body() createInvoiceDto: CreateInvoiceDto,
     @Request() req: any
   ): Promise<InvoiceResponseDto> {
-    return this.billingService.createInvoice(createInvoiceDto, req.user.userId);
+    // Pass both user ID and tenant ID from the JWT token
+    const tenantId = req.user?.tenantId || req.tenantId;
+    return this.billingService.createInvoice(createInvoiceDto, req.user.userId, tenantId);
   }
 
   @Get('invoices')

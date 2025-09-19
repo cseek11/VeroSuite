@@ -25,12 +25,14 @@ export class BillingService {
   // INVOICE MANAGEMENT
   // ============================================================================
 
-  async createInvoice(createInvoiceDto: CreateInvoiceDto, userId: string): Promise<InvoiceResponseDto> {
+  async createInvoice(createInvoiceDto: CreateInvoiceDto, userId: string, tenantId?: string): Promise<InvoiceResponseDto> {
     this.logger.log(`Creating invoice for account ${createInvoiceDto.account_id}`);
+    this.logger.log(`User ID: ${userId}`);
+    this.logger.log(`Tenant ID parameter: ${tenantId}`);
 
     try {
       // Generate invoice number if not provided
-      const invoiceNumber = createInvoiceDto.invoice_number || await this.generateInvoiceNumber();
+      const invoiceNumber = createInvoiceDto.invoice_number || await this.generateInvoiceNumber(tenantId);
 
       // Calculate totals
       const subtotal = createInvoiceDto.items.reduce((sum, item) => {
@@ -41,10 +43,30 @@ export class BillingService {
       const taxAmount = 0;
       const totalAmount = subtotal + taxAmount;
 
+      // Use provided tenant ID or try to get from context
+      let finalTenantId = tenantId;
+      if (!finalTenantId) {
+        try {
+          finalTenantId = await this.getCurrentTenantId();
+          this.logger.log(`✅ Got tenant_id from context: ${finalTenantId}`);
+        } catch (error: any) {
+          this.logger.error(`❌ Failed to get tenant_id from context: ${error?.message || error}`);
+          throw new BadRequestException('Tenant context not found');
+        }
+      } else {
+        this.logger.log(`✅ Using provided tenant_id: ${finalTenantId}`);
+      }
+      
+      this.logger.log(`Creating invoice with tenant_id: ${finalTenantId}`);
+      this.logger.log(`Invoice data: ${JSON.stringify({
+        account_id: createInvoiceDto.account_id,
+        items: createInvoiceDto.items
+      })}`);
+
       // Create invoice
       const invoice = await this.databaseService.invoice.create({
         data: {
-          tenant_id: await this.getCurrentTenantId(),
+          tenant_id: finalTenantId,
           account_id: createInvoiceDto.account_id,
           service_agreement_id: createInvoiceDto.service_agreement_id || null,
           work_order_id: createInvoiceDto.work_order_id || null,
@@ -78,6 +100,11 @@ export class BillingService {
               name: true,
               email: true,
               phone: true,
+              address: true,
+              city: true,
+              state: true,
+              zip_code: true,
+              account_type: true,
             }
           },
           Payment: {
@@ -95,9 +122,19 @@ export class BillingService {
 
       this.logger.log(`Invoice created successfully: ${invoice.id}`);
       return invoice as unknown as InvoiceResponseDto;
-    } catch (error) {
-      this.logger.error(`Failed to create invoice: ${(error as Error).message}`, (error as Error).stack);
-      throw new BadRequestException('Failed to create invoice');
+    } catch (error: any) {
+      this.logger.error(`Failed to create invoice: ${error?.message || error}`, error?.stack);
+      
+      // Provide more specific error details based on Prisma error codes
+      if (error?.code === 'P2002') {
+        throw new BadRequestException('Duplicate invoice number or constraint violation');
+      } else if (error?.code === 'P2003') {
+        throw new BadRequestException('Invalid reference - customer or service type not found');
+      } else if (error?.code === 'P2025') {
+        throw new BadRequestException('Required record not found');
+      } else {
+        throw new BadRequestException(`Failed to create invoice: ${error?.message || 'Unknown error'}`);
+      }
     }
   }
 
@@ -127,6 +164,11 @@ export class BillingService {
               name: true,
               email: true,
               phone: true,
+              address: true,
+              city: true,
+              state: true,
+              zip_code: true,
+              account_type: true,
             }
           },
           Payment: {
@@ -169,6 +211,11 @@ export class BillingService {
               name: true,
               email: true,
               phone: true,
+              address: true,
+              city: true,
+              state: true,
+              zip_code: true,
+              account_type: true,
             }
           },
           Payment: {
@@ -242,6 +289,11 @@ export class BillingService {
               name: true,
               email: true,
               phone: true,
+              address: true,
+              city: true,
+              state: true,
+              zip_code: true,
+              account_type: true,
             }
           },
           Payment: {
@@ -536,14 +588,17 @@ export class BillingService {
   // HELPER METHODS
   // ============================================================================
 
-  private async generateInvoiceNumber(): Promise<string> {
+  private async generateInvoiceNumber(tenantId?: string): Promise<string> {
     const currentYear = new Date().getFullYear();
     const prefix = `INV-${currentYear}-`;
+    
+    // Use provided tenant ID or get from context
+    const finalTenantId = tenantId || await this.getCurrentTenantId();
     
     // Get the last invoice number for this year
     const lastInvoice = await this.databaseService.invoice.findFirst({
       where: {
-        tenant_id: await this.getCurrentTenantId(),
+        tenant_id: finalTenantId,
         invoice_number: {
           startsWith: prefix
         }

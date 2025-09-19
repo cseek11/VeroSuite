@@ -1,6 +1,6 @@
-# VeroPest Suite Frontend
+# VeroField Frontend
 
-A modern React-based frontend for the VeroPest Suite, a comprehensive pest control management system.
+A modern React-based frontend for the VeroField, a comprehensive pest control management system.
 
 ## 🚀 Features
 
@@ -47,7 +47,7 @@ A modern React-based frontend for the VeroPest Suite, a comprehensive pest contr
    ```env
    VITE_SUPABASE_URL=your_supabase_project_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   VITE_APP_NAME=VeroPest Suite
+   VITE_APP_NAME=VeroField
    VITE_ENABLE_ANALYTICS=false
    VITE_ENABLE_DEBUG_MODE=false
    ```

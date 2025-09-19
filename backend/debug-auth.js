@@ -25,3 +25,4 @@ if (process.argv.length > 2) {
   console.log('Usage: node debug-auth.js "your-jwt-token-here"');
   console.log('This script will decode and display the JWT payload to help debug tenant_id issues.');
 }
+

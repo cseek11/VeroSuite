@@ -68,3 +68,4 @@ SELECT 'CLEANUP VERIFICATION' as info, 'search_logs' as table_name, COUNT(*) as 
 
 
 
+

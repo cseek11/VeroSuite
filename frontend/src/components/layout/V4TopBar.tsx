@@ -19,6 +19,8 @@ import {
   Command
 } from 'lucide-react';
 import { SimpleGlobalSearchBar } from '@/components/search/SimpleGlobalSearchBar';
+import { useQuery } from '@tanstack/react-query';
+import { company } from '@/lib/enhanced-api';
 
 interface V4TopBarProps {
   onMobileMenuToggle: () => void;
@@ -52,6 +54,12 @@ export default function V4TopBar({
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Fetch company settings for logo
+  const { data: companySettings, isLoading: isLoadingCompanySettings } = useQuery({
+    queryKey: ['company', 'settings'],
+    queryFn: company.getSettings,
+  });
 
   // Check if we're on a dashboard route
   const isOnDashboard = location.pathname === '/dashboard';
@@ -204,12 +212,29 @@ export default function V4TopBar({
          <div className={`flex items-center transition-all duration-300 ease-in-out ${
            sidebarCollapsed ? 'w-auto translate-x-0 opacity-100' : 'w-0 -translate-x-full opacity-0 overflow-hidden'
          }`}>
-           <div className="flex items-center justify-center">
-             <img 
-               src="/branding/vero_small.png" 
-               alt="VeroPest" 
-               className="w-auto h-auto drop-shadow-lg"
-             />
+           <div className="flex items-center justify-center relative">
+             {!isLoadingCompanySettings && (companySettings?.header_logo_url || companySettings?.logo_url) ? (
+               <>
+                 <img 
+                   src={companySettings.header_logo_url || companySettings.logo_url} 
+                   alt={companySettings?.company_name || "Company Logo"} 
+                   className="w-auto h-8 max-w-[120px] object-contain drop-shadow-lg"
+                   onError={(e) => {
+                     const img = e.currentTarget;
+                     const fallback = img.nextElementSibling as HTMLElement;
+                     img.style.display = 'none';
+                     if (fallback) fallback.style.display = 'block';
+                   }}
+                 />
+                 <div className="text-white font-bold text-lg drop-shadow-lg hidden">
+                   {companySettings?.company_name || "VeroField"}
+                 </div>
+               </>
+             ) : (
+               <div className="text-white font-bold text-lg drop-shadow-lg">
+                 {!isLoadingCompanySettings && companySettings?.company_name ? companySettings.company_name : "VeroField"}
+               </div>
+             )}
            </div>
          </div>
         

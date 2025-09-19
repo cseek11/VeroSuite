@@ -33,8 +33,10 @@ import {
   CheckCircle,
   Clock,
   DollarSign,
-  TrendingUp
+  TrendingUp,
+  CreditCard
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface CustomerProfileCardProps {
   customer: Account;
@@ -48,6 +50,7 @@ export default function CustomerProfileCard({
   contacts = []
 }: CustomerProfileCardProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const navigate = useNavigate();
   const [editedCustomer, setEditedCustomer] = useState(customer);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
@@ -158,6 +161,14 @@ export default function CustomerProfileCard({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => navigate(`/billing/${customer.id}`)}
+            >
+              <CreditCard className="w-4 h-4 mr-2" />
+              Payment Portal
+            </Button>
             <Button
               variant="outline"
               size="sm"

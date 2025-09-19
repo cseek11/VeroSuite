@@ -16,7 +16,8 @@ import {
   TrendingUp,
   Search,
   ClipboardList,
-  FileText
+  FileText,
+  CreditCard
 } from 'lucide-react';
 import { BugIcon } from '../icons/BugIcon';
 
@@ -36,6 +37,7 @@ const navigationItems = [
   { id: 'scheduling', label: 'Scheduling', icon: Calendar, path: '/scheduler', badge: '47' },
   { id: 'communications', label: 'Communications', icon: MessageCircle, path: '/communications', badge: '3' },
   { id: 'finance', label: 'Finance', icon: DollarSign, path: '/finance', badge: '$45k' },
+  { id: 'billing', label: 'Billing', icon: CreditCard, path: '/billing', badge: 'NEW' },
   { id: 'charts', label: 'Analytics', icon: TrendingUp, path: '/charts', badge: '📊' },
   { id: 'reports', label: 'Reports', icon: BarChart3, path: '/reports', badge: null },
   { id: 'knowledge', label: 'Knowledge', icon: BookOpen, path: '/knowledge', badge: null },
@@ -56,6 +58,7 @@ export default function V4Sidebar({ collapsed, onToggle, mobileOpen, onMobileClo
     if (path === '/scheduler') return 'scheduling';
     if (path === '/communications') return 'communications';
     if (path === '/finance') return 'finance';
+    if (path === '/billing' || path.startsWith('/billing/')) return 'billing';
     if (path === '/charts' || path === '/charts-test') return 'charts';
     if (path === '/reports') return 'reports';
     if (path === '/knowledge') return 'knowledge';
@@ -109,17 +112,17 @@ export default function V4Sidebar({ collapsed, onToggle, mobileOpen, onMobileClo
         
                  {/* Logo */}
                    <div className="p-5 flex items-center justify-center border-b border-gray-600">
-                                     <div className="w-10 h-10 flex items-center justify-center border border-purple-500 rounded-lg bg-gray-800">
-              <BugIcon size={36} />
-            </div>
-                         {!collapsed && (
-               <div className="ml-3 flex items-center transition-opacity duration-200">
-                 <svg viewBox="0 0 150 30" className="h-8 w-auto">
-                   <text x="0" y="22" fontSize="20" fontWeight="700" fill="#a855f7">Vero</text>
-                   <text x="45" y="22" fontSize="20" fontWeight="700" fill="#22c55e">Field</text>
-                 </svg>
-               </div>
-             )}
+                     <div className="w-10 h-10 flex items-center justify-center border border-purple-500 rounded-lg bg-gray-800">
+                       <BugIcon size={36} />
+                     </div>
+                     {!collapsed && (
+                       <div className="ml-3 flex items-center transition-opacity duration-200">
+                         <svg viewBox="0 0 150 30" className="h-8 w-auto">
+                           <text x="0" y="22" fontSize="20" fontWeight="700" fill="#a855f7">Vero</text>
+                           <text x="45" y="22" fontSize="20" fontWeight="700" fill="#22c55e">Field</text>
+                         </svg>
+                       </div>
+                     )}
           </div>
         
                  {/* Navigation Icons */}

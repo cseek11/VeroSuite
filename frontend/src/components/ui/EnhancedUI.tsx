@@ -607,7 +607,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, active, onTabChange, variant =
       ))}
     </nav>
   </div>
-);
+  );
 };
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({ label, value, onChange, placeholder, options = [], error, className = '', disabled = false, children, name, onBlur, ...rest }, ref) => {

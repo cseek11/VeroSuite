@@ -1,154 +1,336 @@
 # AI Assistant Best Practices for VeroSuite Development
 
 ## Overview
-This document outlines the best prompting strategies to ensure the AI assistant properly reviews existing project structure, documentation, and components before making changes. Following these practices prevents unnecessary work and maintains project consistency.
+This document outlines comprehensive best practices for AI-assisted development to ensure proper project analysis, efficient implementation, and maintainable code. Following these practices prevents unnecessary work, maintains project consistency, and maximizes development efficiency.
 
-## Best Prompting Strategies
+## 1. Pre-Implementation Analysis
 
-### 1. Explicit Review Request
+### Comprehensive Project Discovery
 ```
-"Before making any changes, please:
-1. Review the existing project structure and documentation
-2. Check for existing components, APIs, and database schemas
-3. Identify what's already implemented vs what needs to be built
-4. Show me what you found before proceeding"
-```
-
-### 2. Component-First Approach
-```
-"Check if [specific feature] already exists in the project before implementing anything new. Look for:
-- Existing components in /components
-- Existing APIs in /lib
-- Database schemas in Prisma
-- Documentation files"
+"Conduct a comprehensive project analysis before implementation:
+1. SEARCH: Use parallel semantic searches to understand the domain
+2. ANALYZE: Map existing implementations and identify patterns  
+3. VALIDATE: Cross-reference database schema with actual usage
+4. PLAN: Create a structured implementation approach with todos
+5. EXECUTE: Implement following established patterns
+6. VERIFY: Test integration with existing systems"
 ```
 
-### 3. Documentation Review
+### Multi-Dimensional Code Search
 ```
-"Review all documentation files first, then tell me:
-- What's already documented as implemented
-- What the current architecture looks like
-- What gaps exist vs what I'm asking for"
-```
-
-### 4. Search-First Strategy
-```
-"Before writing any code, search the entire codebase for:
-- Similar functionality
-- Existing patterns
-- Database models
-- API endpoints
-- Component structures"
+"Before implementing [feature], execute parallel searches:
+1. Semantic search: 'How does [feature] work in this system?'
+2. Pattern search: grep for similar component structures
+3. Database search: Review schema for related tables
+4. Documentation search: Check all .md files for current status
+5. API search: Find existing endpoints and services"
 ```
 
-### 5. Architecture Validation
+## 2. Context Management & Tool Usage
+
+### Parallel Tool Execution Strategy
+- **CRITICAL**: Always use parallel tool calls when gathering information
+- Execute multiple searches simultaneously rather than sequentially
+- Batch related operations to maximize context window utilization
+- Combine semantic search + grep + file reading in single operations
+
+### Tool Selection Matrix
+| Task Type | Primary Tool | Secondary Tool | Use Case |
+|-----------|-------------|----------------|----------|
+| Concept Understanding | `codebase_search` | `read_file` | Learning how features work |
+| Exact Symbol Lookup | `grep` | `codebase_search` | Finding specific functions/variables |
+| Architecture Analysis | `codebase_search` + `read_file` | `grep` | Understanding system design |
+| Implementation Planning | `todo_write` + parallel searches | `read_file` | Complex multi-step tasks |
+
+### Context Window Optimization
 ```
-"Validate the existing architecture before making changes:
-- What's the current data flow?
-- What APIs already exist?
-- What components are already built?
-- What's the established pattern?"
+"Maximize information gathering efficiency:
+- Run 3-5 parallel searches for comprehensive coverage
+- Use semantic search for broad understanding first
+- Follow with targeted grep searches for specifics
+- Read key files identified in search results
+- Create todos for complex implementations"
 ```
 
-## What the AI Should Always Do
+## 3. Implementation Strategy
 
-### Before Making Any Changes:
-1. **Search First** - Use codebase_search and grep to find existing implementations
-2. **Read Documentation** - Check all .md files for current status
-3. **Review Schemas** - Understand existing database structure
-4. **Map Existing Components** - See what's already built
-5. **Show Findings** - Present what was discovered before making changes
+### Component-First Development Approach
+```
+"Before building new components:
+1. Search for existing similar components in /frontend/src/components/
+2. Identify reusable patterns and established conventions
+3. Check if functionality can be achieved by extending existing components
+4. Map component dependencies and integration points
+5. Follow established naming and structure patterns
+6. Ensure proper TypeScript interfaces and prop definitions"
+```
 
-### Key Areas to Always Check:
-- **Components**: `/frontend/src/components/`
-- **APIs**: `/frontend/src/lib/` and `/backend/src/`
-- **Database**: `backend/prisma/schema.prisma`
-- **Documentation**: All `.md` files in the project
-- **Seed Data**: `backend/prisma/seed.ts`
-- **Existing Patterns**: How similar features are implemented
+### Incremental Implementation Strategy
+```
+"Break complex features into atomic, testable components:
+1. Create detailed todo list with specific deliverables
+2. Implement core functionality first
+3. Add integration points incrementally
+4. Test each component independently
+5. Validate integration at each step
+6. Update documentation as you progress"
+```
 
-## Common Mistakes to Avoid
+### Architecture Validation Protocol
+```
+"Validate existing architecture before making changes:
+1. Map current data flow and API structure
+2. Identify established patterns and conventions
+3. Check tenant isolation and security boundaries
+4. Verify database schema relationships
+5. Understand error handling approaches
+6. Document any architectural decisions or trade-offs"
+```
 
-### ❌ Don't Do This:
-- Create new components without checking if they exist
-- Implement new APIs without reviewing existing patterns
-- Modify database schemas without understanding current structure
-- Ignore existing documentation and project status
-- Assume field names without checking the actual schema
+## 4. Quality Assurance Standards
 
-### ✅ Do This Instead:
-- Search for existing implementations first
-- Read the Prisma schema to understand field names
-- Check documentation for current project status
-- Follow established patterns and conventions
-- Validate against existing code before making changes
+### Code Quality Requirements
+- **Type Safety**: Maintain 100% TypeScript coverage with proper interfaces
+- **Error Handling**: Implement comprehensive error management following existing patterns
+- **Validation**: Add proper input validation and sanitization
+- **Testing**: Include unit tests for new functionality when possible
+- **Documentation**: Update relevant .md files for new features
 
-## Example Workflow
+### Integration Testing Checklist
+- ✅ Verify API endpoint compatibility and response formats
+- ✅ Test database operations with proper tenant isolation
+- ✅ Validate frontend-backend data flow
+- ✅ Check authentication and authorization flows
+- ✅ Ensure proper error handling and user feedback
 
-### When Requesting New Features:
-1. **"Search the codebase for existing [feature] implementations"**
-2. **"Review the database schema for [related tables]"**
-3. **"Check documentation for current [feature] status"**
-4. **"Show me what exists vs what needs to be built"**
-5. **"Follow the established patterns for [similar feature]"**
+### Database Safety Protocols
+```
+"For database changes:
+1. Always review existing schema relationships first
+2. Understand current RLS (Row Level Security) policies
+3. Test migrations in development environment
+4. Verify tenant isolation is maintained
+5. Check for breaking changes in existing queries
+6. Update seed data if necessary"
+```
 
-### When Fixing Issues:
-1. **"Search for existing error handling patterns"**
-2. **"Review the current API structure"**
-3. **"Check documentation for known issues"**
-4. **"Validate against existing working examples"**
+## 5. Risk Management & Safety
 
-## Project-Specific Considerations
+### Safe Development Practices
+- **Backup Strategy**: Read existing files before making major modifications
+- **Incremental Changes**: Make small, testable changes rather than large rewrites
+- **Validation Gates**: Test each change before proceeding to the next
+- **Rollback Planning**: Understand how to revert changes if needed
+- **Security First**: Always maintain tenant isolation and data protection
 
-### VeroSuite Architecture:
-- **Frontend**: React + TypeScript + Tailwind CSS
-- **Backend**: NestJS + Prisma + Supabase
-- **Database**: PostgreSQL with RLS (Row Level Security)
-- **Authentication**: JWT with tenant isolation
-- **State Management**: Zustand + React Query
+### Change Impact Assessment
+```
+"Before implementing changes:
+1. Identify all affected components and services
+2. Map potential breaking changes and dependencies
+3. Plan migration strategy for existing data
+4. Consider backward compatibility requirements
+5. Document any breaking changes clearly"
+```
 
-### Key Patterns to Follow:
-- Use existing API clients in `/frontend/src/lib/`
-- Follow the established component structure
-- Maintain tenant isolation in all database operations
-- Use the existing authentication patterns
-- Follow the established error handling approaches
+## 6. Communication Standards
 
-## Success Metrics
+### Progress Reporting
+```
+"For complex implementations:
+1. Provide regular progress updates during long operations
+2. Explain architectural decisions and trade-offs clearly
+3. Document breaking changes and migration paths
+4. Include testing instructions for new features
+5. Update relevant documentation files
+6. Show intermediate results and validate direction"
+```
 
-### Good AI Assistant Behavior:
-- ✅ Searches before implementing
-- ✅ Reviews existing documentation
-- ✅ Understands current architecture
-- ✅ Follows established patterns
-- ✅ Shows findings before making changes
-- ✅ Minimizes unnecessary work
+### Clear Explanations
+- **Decision Rationale**: Explain why specific approaches were chosen
+- **Trade-off Analysis**: Discuss alternatives and their implications  
+- **Integration Impact**: Describe how changes affect existing systems
+- **Future Considerations**: Note potential enhancement opportunities
+- **Error Scenarios**: Document expected failure modes and handling
 
-### Poor AI Assistant Behavior:
-- ❌ Creates duplicate functionality
-- ❌ Ignores existing components
-- ❌ Modifies schemas without understanding
-- ❌ Doesn't check documentation
-- ❌ Assumes field names and structures
-- ❌ Causes unnecessary rework
+## 7. Project-Specific Guidelines
 
-## Quick Reference Commands
+### VeroSuite Architecture Standards
+- **Frontend**: React + TypeScript + Tailwind CSS (following purple theme preferences)
+- **Backend**: NestJS + Prisma + Supabase with comprehensive RLS
+- **Database**: PostgreSQL with strict tenant isolation
+- **Authentication**: JWT with multi-tenant security
+- **State Management**: Zustand + React Query for efficient data fetching
+- **Mobile**: React Native with offline-first architecture
 
-### For AI Assistant:
+### Critical Implementation Areas
+- **Components**: `/frontend/src/components/` - Follow established patterns
+- **APIs**: `/frontend/src/lib/` and `/backend/src/` - Maintain consistency
+- **Database**: `backend/prisma/schema.prisma` - Preserve relationships and RLS
+- **Documentation**: All `.md` files - Keep current and accurate
+- **Seed Data**: `backend/prisma/seed.ts` - Maintain test data integrity
+- **Mobile App**: `VeroSuiteMobile/` - Production-ready React Native
+
+### Security & Tenant Isolation
+```
+"Always maintain security standards:
+1. Verify tenant isolation in all database operations
+2. Use existing authentication patterns consistently
+3. Follow established error handling approaches
+4. Validate input data according to existing schemas
+5. Maintain audit logging for sensitive operations"
+```
+
+## 8. Success Metrics & Validation
+
+### Excellent AI Assistant Behavior
+- ✅ **Parallel Efficiency**: Uses multiple tools simultaneously for comprehensive analysis
+- ✅ **Context Awareness**: Understands existing architecture before making changes
+- ✅ **Pattern Following**: Consistently applies established project conventions
+- ✅ **Progress Communication**: Provides clear updates and explanations
+- ✅ **Quality Focus**: Implements proper error handling and validation
+- ✅ **Documentation**: Updates relevant files and maintains accuracy
+- ✅ **Security Conscious**: Maintains tenant isolation and data protection
+
+### Poor AI Assistant Behavior
+- ❌ **Sequential Operations**: Uses tools one at a time instead of parallel execution
+- ❌ **Duplicate Work**: Creates functionality that already exists
+- ❌ **Pattern Breaking**: Ignores established conventions and structures
+- ❌ **Schema Assumptions**: Modifies database without understanding relationships
+- ❌ **Silent Changes**: Makes modifications without explaining decisions
+- ❌ **Documentation Neglect**: Fails to update relevant documentation
+- ❌ **Security Gaps**: Breaks tenant isolation or security boundaries
+
+## 9. Common Patterns & Anti-Patterns
+
+### ✅ Recommended Patterns
+
+#### Information Gathering
+```
+"Execute comprehensive parallel analysis:
+1. Semantic search: 'How does [domain] work in this system?'
+2. Component search: grep for similar UI patterns
+3. API search: Find related backend endpoints
+4. Schema search: Review database relationships
+5. Documentation search: Check current implementation status"
+```
+
+#### Complex Feature Implementation
+```
+"For multi-step features:
+1. Create structured todo list with specific deliverables
+2. Start with core functionality and basic UI
+3. Add integration points incrementally
+4. Test each component independently
+5. Validate end-to-end workflow
+6. Update documentation and add error handling"
+```
+
+### ❌ Anti-Patterns to Avoid
+
+#### Sequential Tool Usage
+- **Wrong**: Search → wait → read → wait → implement
+- **Right**: Execute 3-5 parallel searches → analyze results → implement
+
+#### Assumption-Based Development  
+- **Wrong**: Assume field names and create new schemas
+- **Right**: Read existing schema and follow established patterns
+
+#### Silent Implementation
+- **Wrong**: Make changes without explanation
+- **Right**: Explain decisions and show intermediate progress
+
+## 10. Quick Reference & Templates
+
+### Comprehensive Feature Analysis Template
+```
+"Before implementing [FEATURE]:
+1. PARALLEL SEARCH: Execute 4-5 simultaneous searches:
+   - Semantic: 'How does [FEATURE] work in VeroSuite?'
+   - Components: grep for related UI components
+   - APIs: Search for existing backend endpoints  
+   - Schema: Review database tables for [DOMAIN]
+   - Docs: Check .md files for current status
+
+2. ANALYSIS: Based on search results:
+   - What exists vs what needs to be built?
+   - What patterns should be followed?
+   - What are the integration points?
+   - Are there any security considerations?
+
+3. IMPLEMENTATION PLAN:
+   - Create todo list for complex features
+   - Start with core functionality
+   - Follow established patterns
+   - Maintain tenant isolation
+   - Update documentation
+
+4. VALIDATION:
+   - Test integration with existing systems
+   - Verify error handling
+   - Check TypeScript compliance
+   - Validate security boundaries"
+```
+
+### Emergency Issue Resolution Template
+```
+"For urgent issues:
+1. IMMEDIATE ANALYSIS: Parallel search for:
+   - Error patterns and existing solutions
+   - Related components and their error handling
+   - Similar issues in documentation
+   - Working examples in the codebase
+
+2. ROOT CAUSE: Identify the core problem
+3. IMPACT ASSESSMENT: Understand affected systems
+4. SOLUTION: Apply fix following existing patterns
+5. VALIDATION: Test thoroughly before deployment
+6. DOCUMENTATION: Update relevant files with solution"
+```
+
+### Code Review Checklist
+- ✅ **Parallel Tool Usage**: Used multiple tools efficiently
+- ✅ **Pattern Compliance**: Follows established project conventions
+- ✅ **Type Safety**: Maintains TypeScript standards
+- ✅ **Error Handling**: Implements proper error management
+- ✅ **Security**: Maintains tenant isolation
+- ✅ **Testing**: Includes validation and testing
+- ✅ **Documentation**: Updates relevant .md files
+- ✅ **Communication**: Provides clear explanations
+
+---
+
+## Core Philosophy
+
+**"Work WITH the existing project structure, not against it. Always search, analyze, and understand before implementing. Maximize efficiency through parallel operations and maintain the highest standards of code quality and security."**
+
+### Key Success Factors
+1. **Efficiency First**: Use parallel tool calls for comprehensive analysis
+2. **Quality Focus**: Maintain TypeScript, testing, and documentation standards  
+3. **Security Conscious**: Always preserve tenant isolation and data protection
+4. **Pattern Driven**: Follow established conventions consistently
+5. **Communication Clear**: Explain decisions and provide progress updates
+6. **Safety Oriented**: Make incremental, testable changes with rollback plans
+
+---
+
+## Legacy Reference (Maintained for Compatibility)
+
+### Basic Prompting Commands
 ```
 "Before implementing [feature], please:
-1. Search for existing [feature] components
+1. Search for existing [feature] components  
 2. Review the database schema for [related tables]
 3. Check documentation for current status
 4. Show me what exists vs what needs to be built
 5. Follow established patterns"
 ```
 
-### For Project Review:
+### Project Review Template
 ```
 "Review the entire project structure and tell me:
 - What's already implemented
-- What the current architecture looks like
+- What the current architecture looks like  
 - What patterns are established
 - What gaps exist
 - What should be prioritized"
@@ -156,4 +338,4 @@ This document outlines the best prompting strategies to ensure the AI assistant 
 
 ---
 
-**Remember**: The goal is to work with the existing project structure, not against it. Always search, review, and understand before implementing.
+**Remember**: The goal is to work WITH the existing project structure, not against it. Always search, analyze, and understand before implementing. Maximize efficiency through parallel operations while maintaining the highest standards of quality and security.

@@ -19,6 +19,7 @@ import { UserModule } from './user/user.module';
 import { AgreementsModule } from './agreements/agreements.module';
 import { ServiceTypesModule } from './service-types/service-types.module';
 import { BillingModule } from './billing/billing.module';
+import { CompanyModule } from './company/company.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -33,6 +34,7 @@ import { HealthModule } from './health/health.module';
     UploadsModule,
     WorkOrdersModule,
     AccountsModule,
+    CompanyModule,
     TechnicianModule,
     UserModule,
     AgreementsModule,

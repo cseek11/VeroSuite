@@ -53,3 +53,4 @@ SELECT 'search_suggestions_analytics count:' as table_name, COUNT(*) as record_c
 
 
 
+

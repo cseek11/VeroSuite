@@ -14,6 +14,7 @@ import V4Dashboard from './V4Dashboard';
 import V4Test from './V4Test';
 import CommunicationsPage from './Communications';
 import FinancePage from './Finance';
+import BillingPage from './Billing';
 import KnowledgePage from './Knowledge';
 import SchedulerPage from './Scheduler';
 import JobsPage from './Jobs';
@@ -499,6 +500,30 @@ export default function App() {
                   <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
                       <FinancePage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/billing"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <BillingPage />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/billing/:customerId"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <BillingPage />
                     </Suspense>
                   </V4Layout>
                 </PrivateRoute>

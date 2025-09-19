@@ -48,3 +48,4 @@ export class PaymentMethodResponseDto {
     email?: string;
   };
 }
+
