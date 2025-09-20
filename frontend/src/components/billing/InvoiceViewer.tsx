@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Card,
@@ -147,30 +147,28 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50">
           <div className="flex items-center space-x-4 flex-1">
-            <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg">
-                        {(companySettings?.invoice_logo_url || companySettings?.logo_url) ? (
-                            <img 
-                                src={companySettings.invoice_logo_url || companySettings.logo_url} 
-                                alt="Company Logo" 
-                                className="w-6 h-6 object-contain"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  const fallback = target.nextElementSibling as HTMLElement;
-                                  if (fallback) fallback.style.display = 'block';
-                                }}
-                            />
-                        ) : null}
-                        <div 
-                          className="text-white font-bold text-xs" 
-                          style={{ display: (companySettings?.invoice_logo_url || companySettings?.logo_url) ? 'none' : 'block' }}
-                        >
-                          {companySettings?.company_name?.substring(0, 2).toUpperCase() || "VC"}
-                        </div>
-            </div>
+            {companySettings?.invoice_logo_url ? (
+              <img 
+                src={companySettings.invoice_logo_url} 
+                alt="Company Logo" 
+                className="w-auto h-16 max-w-[180px] object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const fallback = target.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'block';
+                }}
+              />
+            ) : (
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg">
+                <div className="text-white font-bold text-xs">
+                  {companySettings?.company_name?.substring(0, 2).toUpperCase() || "VC"}
+                </div>
+              </div>
+            )}
             <div className="flex-1">
               <Typography variant="h3" className="font-bold text-slate-800">
-                Invoice {invoice.invoice_number}
+                {!companySettings?.invoice_logo_url && `Invoice ${invoice.invoice_number}`}
               </Typography>
               <div className="flex flex-col space-y-2 mt-2">
                 <div className="flex items-center space-x-3">
@@ -182,11 +180,11 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
                     </span>
                   </div>
                 </div>
-                {invoice.accounts?.address && (
+                {(invoice.accounts as any)?.address && (
                   <div className="flex items-center text-sm text-slate-600">
                     <span className="flex items-center bg-white/60 px-2 py-1 rounded-lg">
                       <MapPin className="w-3 h-3 mr-1.5 text-slate-500" />
-                      {[invoice.accounts.address, invoice.accounts.city, invoice.accounts.state, invoice.accounts.zip_code]
+                      {[(invoice.accounts as any).address, (invoice.accounts as any).city, (invoice.accounts as any).state, (invoice.accounts as any).zip_code]
                         .filter(Boolean).join(', ')}
                     </span>
                   </div>
@@ -217,13 +215,13 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
           <div ref={printableRef} className="p-6 bg-white">
             {/* PDF Header - Only visible in PDF */}
             <div className="mb-8 pb-6 border-b-2 border-purple-200">
-              <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                        {(companySettings?.invoice_logo_url || companySettings?.logo_url) ? (
+                        {companySettings?.invoice_logo_url ? (
                             <img 
-                                src={companySettings.invoice_logo_url || companySettings.logo_url} 
+                                src={companySettings.invoice_logo_url} 
                                 alt="Company Logo" 
-                                className="w-16 h-16 object-contain"
+                                className="w-auto h-20 max-w-[200px] object-contain"
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
                                   target.style.display = 'none';
@@ -231,17 +229,17 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
                                   if (fallback) fallback.style.display = 'block';
                                 }}
                             />
-                        ) : null}
-                        <div 
-                          className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl"
-                          style={{ display: (companySettings?.invoice_logo_url || companySettings?.logo_url) ? 'none' : 'flex' }}
-                        >
-                          {companySettings?.company_name?.substring(0, 2).toUpperCase() || "VC"}
-                        </div>
+                        ) : (
+                          <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl">
+                            {companySettings?.company_name?.substring(0, 2).toUpperCase() || "VC"}
+                          </div>
+                        )}
                   <div>
-                    <h1 className="text-3xl font-bold text-purple-800 mb-2">
-                      {companySettings?.company_name || 'VeroField Pest Control'}
-                    </h1>
+                    {!companySettings?.invoice_logo_url && (
+                      <h1 className="text-3xl font-bold text-purple-800 mb-2">
+                        {companySettings?.company_name || 'VeroField Pest Control'}
+                      </h1>
+                    )}
                     <p className="text-slate-600">Professional Pest Control Services</p>
                     <div className="text-sm text-slate-500 mt-2">
                       <p>
@@ -330,11 +328,11 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
                   </Typography>
                   <div className="space-y-2 text-sm">
                     <div className="font-medium">{invoice.accounts?.name}</div>
-                    {invoice.accounts?.address && (
+                    {(invoice.accounts as any)?.address && (
                       <div className="flex items-start text-gray-600">
                         <MapPin className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
                         <div>
-                          {[invoice.accounts.address, invoice.accounts.city, invoice.accounts.state, invoice.accounts.zip_code]
+                          {[(invoice.accounts as any).address, (invoice.accounts as any).city, (invoice.accounts as any).state, (invoice.accounts as any).zip_code]
                             .filter(Boolean).join(', ')}
                         </div>
                       </div>

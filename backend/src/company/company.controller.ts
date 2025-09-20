@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Post, Body, Logger, UseInterceptors, UploadedFile, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Put, Post, Delete, Body, Logger, UseInterceptors, UploadedFile, UseGuards, Req, Param } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -39,13 +39,16 @@ export class CompanyController {
   async uploadLogo(
     @Req() req: Request,
     @UploadedFile() file: any,
+    @Body() body: { logoType?: string },
   ): Promise<{ logo_url: string }> {
-    this.logger.log(`POST /company/logo - Logo upload received`);
+    const logoType = body.logoType || 'header'; // Default to header
+    this.logger.log(`POST /company/logo - ${logoType} logo upload received`);
     this.logger.log(`Request user:`, req.user);
     this.logger.log(`File details:`, { 
       filename: file?.originalname, 
       mimetype: file?.mimetype, 
-      size: file?.size 
+      size: file?.size,
+      logoType 
     });
 
     const tenantId = req.user?.tenantId;
@@ -54,14 +57,55 @@ export class CompanyController {
       throw new Error('Tenant ID not found in request');
     }
 
-    this.logger.log(`✅ Uploading logo for tenant: ${tenantId}`);
+    // Validate logo type
+    if (!['header', 'invoice'].includes(logoType)) {
+      this.logger.error(`❌ Invalid logo type: ${logoType}`);
+      throw new Error('Invalid logo type. Must be "header" or "invoice"');
+    }
+
+    this.logger.log(`✅ Uploading ${logoType} logo for tenant: ${tenantId}`);
     const logoUrl = await this.companyService.uploadLogo(tenantId, file);
     
-    // Update the company settings with the new logo URL
-    await this.companyService.updateCompanySettings(tenantId, { logo_url: logoUrl });
-    this.logger.log(`✅ Logo URL saved to database: ${logoUrl}`);
+    // Update the appropriate logo field based on type
+    const updateData = logoType === 'header' 
+      ? { header_logo_url: logoUrl }
+      : { invoice_logo_url: logoUrl };
+      
+    await this.companyService.updateCompanySettings(tenantId, updateData);
+    this.logger.log(`✅ ${logoType} logo URL saved to database: ${logoUrl}`);
     
     return { logo_url: logoUrl };
+  }
+
+  @Delete('logo/:logoType')
+  @UseGuards(JwtAuthGuard)
+  async deleteLogo(
+    @Req() req: Request,
+    @Param('logoType') logoType: string,
+  ): Promise<{ message: string }> {
+    console.log(`🚨 DELETE ENDPOINT HIT! /company/logo/${logoType}`);
+    this.logger.log(`DELETE /company/logo/${logoType} - Logo deletion received`);
+    this.logger.log(`Request user:`, req.user);
+
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) {
+      this.logger.error('❌ Tenant ID not found in request');
+      throw new Error('Tenant ID not found in request');
+    }
+
+    // Validate logo type
+    if (!['header', 'invoice'].includes(logoType)) {
+      this.logger.error(`❌ Invalid logo type: ${logoType}`);
+      throw new Error('Invalid logo type. Must be "header" or "invoice"');
+    }
+
+    this.logger.log(`✅ Deleting ${logoType} logo for tenant: ${tenantId}`);
+    
+    // Delete logo from storage and database
+    await this.companyService.deleteLogo(tenantId, logoType as 'header' | 'invoice');
+    this.logger.log(`✅ ${logoType} logo deleted successfully`);
+    
+    return { message: `${logoType} logo deleted successfully` };
   }
 
   @Put('settings')

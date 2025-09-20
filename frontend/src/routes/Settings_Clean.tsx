@@ -23,6 +23,7 @@ import {
   DataSettings 
 } from '@/components/settings/sections';
 import { SuccessMessage } from '@/components/settings/shared/SuccessMessage';
+import { useCompanySettings } from '@/components/settings/hooks/useCompanySettings';
 
 export default function Settings() {
   const [isLoading, setIsLoading] = useState(false);
@@ -42,6 +43,8 @@ export default function Settings() {
     colorScheme: 'purple'
   });
 
+  // Use company settings hook
+  const { saveCompanySettings } = useCompanySettings();
 
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -51,16 +54,14 @@ export default function Settings() {
     setIsLoading(true);
     try {
       if (activeTab === 'company') {
-        // Company settings are handled by the CompanySettings component itself
-        console.log('ℹ️ Company settings are managed by the CompanySettings component');
-        return;
+        await saveCompanySettings();
       } else {
         // Save other settings (profile, etc.)
         await new Promise(resolve => setTimeout(resolve, 1000));
         console.log('✅ Settings saved successfully');
       }
       
-      // Show success message for non-company tabs
+      // Show success message for all tabs
       setShowSuccessMessage(true);
       setTimeout(() => setShowSuccessMessage(false), 3000); // Hide after 3 seconds
     } catch (error) {
@@ -182,6 +183,7 @@ export default function Settings() {
 
           {activeTab === 'company' && (
             <CompanySettings
+              onSave={saveCompanySettings}
               isLoading={isLoading}
             />
           )}
@@ -211,34 +213,32 @@ export default function Settings() {
 
         </div>
 
-        {/* Save Button - Only show for non-company tabs */}
-        {activeTab !== 'company' && (
-          <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
-            <div className="flex justify-end">
-              <button
-                onClick={handleSave}
-                disabled={isLoading}
-                className={`px-6 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-                  isLoading
-                    ? 'bg-gray-400 cursor-not-allowed text-white'
-                    : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl'
-                }`}
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span>Saving...</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    <span>Save Changes</span>
-                  </>
-                )}
-              </button>
-            </div>
+        {/* Save Button */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+          <div className="flex justify-end">
+            <button
+              onClick={handleSave}
+              disabled={isLoading}
+              className={`px-6 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
+                isLoading
+                  ? 'bg-gray-400 cursor-not-allowed text-white'
+                  : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl'
+              }`}
+            >
+              {isLoading ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  <span>Save Changes</span>
+                </>
+              )}
+            </button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

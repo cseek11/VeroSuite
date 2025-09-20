@@ -1554,6 +1554,8 @@ export const company = {
       if (!token) throw new Error('No access token found');
 
       console.log(`🗑️ Deleting ${logoType} logo`);
+      console.log(`🌐 Making DELETE request to: http://localhost:3001/api/v1/company/logo/${logoType}`);
+      console.log(`🔑 Using token: ${token ? token.substring(0, 20) + '...' : 'NO TOKEN'}`);
 
       const response = await fetch(`http://localhost:3001/api/v1/company/logo/${logoType}`, {
         method: 'DELETE',
@@ -1563,6 +1565,9 @@ export const company = {
         },
       });
 
+      console.log(`📡 Delete response status: ${response.status}`);
+      console.log(`📡 Delete response headers:`, response.headers);
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ Logo deletion failed:', response.status, response.statusText);
@@ -1570,7 +1575,9 @@ export const company = {
         throw new Error(`Failed to delete logo: ${response.statusText}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log(`✅ Delete response data:`, result);
+      return result;
     } catch (error) {
       console.error('Failed to delete logo:', error);
       throw error;
@@ -2291,6 +2298,7 @@ export const enhancedApi = {
   billing,
   inventory,
   financial,
+  company,
   auth: authApi
 };
 
