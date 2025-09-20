@@ -2,12 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Menu, 
-  Search, 
   Bell, 
   HelpCircle, 
   ChevronDown, 
-  Bug,
-  Rocket,
   User,
   LogOut,
   Settings,
@@ -19,27 +16,17 @@ import {
   Command
 } from 'lucide-react';
 import { SimpleGlobalSearchBar } from '@/components/search/SimpleGlobalSearchBar';
-import { useQuery } from '@tanstack/react-query';
-import { company } from '@/lib/enhanced-api';
 
 interface V4TopBarProps {
   onMobileMenuToggle: () => void;
   onLogout: () => void;
   user: any;
-  sidebarCollapsed?: boolean;
-  onSidebarToggle?: () => void;
-  activityPanelCollapsed?: boolean;
-  onActivityPanelToggle?: () => void;
 }
 
 export default function V4TopBar({ 
   onMobileMenuToggle, 
   onLogout, 
-  user, 
-  sidebarCollapsed, 
-  onSidebarToggle, 
-  activityPanelCollapsed, 
-  onActivityPanelToggle 
+  user
 }: V4TopBarProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
@@ -54,12 +41,6 @@ export default function V4TopBar({
 
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Fetch company settings for logo
-  const { data: companySettings, isLoading: isLoadingCompanySettings } = useQuery({
-    queryKey: ['company', 'settings'],
-    queryFn: company.getSettings,
-  });
 
   // Check if we're on a dashboard route
   const isOnDashboard = location.pathname === '/dashboard';
@@ -76,8 +57,6 @@ export default function V4TopBar({
     { key: '⌘ + /', description: 'Shortcuts', action: 'Show this help' },
     { key: '⌘ + 1', description: 'VeroDash', action: 'Switch to VeroDash' },
     { key: '⌘ + 2', description: 'VeroCards', action: 'Switch to VeroCards' },
-    { key: '⌘ + B', description: 'Toggle Sidebar', action: 'Collapse/expand sidebar' },
-    { key: '⌘ + A', description: 'Toggle Activity Panel', action: 'Show/hide activity panel' },
     { key: 'Esc', description: 'Close Modal', action: 'Close any open modal' },
   ];
 
@@ -154,18 +133,6 @@ export default function V4TopBar({
             event.preventDefault();
             navigate('/resizable-dashboard');
             break;
-          case 'b':
-            event.preventDefault();
-            if (onSidebarToggle) {
-              onSidebarToggle();
-            }
-            break;
-          case 'a':
-            event.preventDefault();
-            if (onActivityPanelToggle) {
-              onActivityPanelToggle();
-            }
-            break;
         }
       } else if (event.key === 'Escape') {
         setShowKeyboardShortcuts(false);
@@ -176,7 +143,7 @@ export default function V4TopBar({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [navigate, onSidebarToggle, onActivityPanelToggle]);
+  }, [navigate]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -197,9 +164,7 @@ export default function V4TopBar({
      return (
        <>
          <header className="bg-gradient-to-r from-gray-800 via-gray-700 to-purple-600 text-white shadow-lg z-30">
-           <div className={`px-3 py-3 flex items-center gap-6 transition-all duration-300 ${
-             sidebarCollapsed ? 'justify-center' : 'justify-start'
-           }`}>
+           <div className="px-3 py-3 flex items-center gap-6 justify-start">
         {/* Hamburger Menu */}
         <button 
           className="md:hidden p-1.5 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
@@ -208,33 +173,14 @@ export default function V4TopBar({
           <Menu className="w-4 h-4" />
         </button>
         
-                 {/* Logo - Animated to slide left and disappear */}
-         <div className={`flex items-center transition-all duration-300 ease-in-out ${
-           sidebarCollapsed ? 'w-auto translate-x-0 opacity-100' : 'w-0 -translate-x-full opacity-0 overflow-hidden'
-         }`}>
-           <div className="flex items-center justify-center relative">
-             {!isLoadingCompanySettings && (companySettings?.header_logo_url || companySettings?.logo_url) ? (
-               <>
-                 <img 
-                   src={companySettings.header_logo_url || companySettings.logo_url} 
-                   alt={companySettings?.company_name || "Company Logo"} 
-                   className="w-auto h-8 max-w-[120px] object-contain drop-shadow-lg"
-                   onError={(e) => {
-                     const img = e.currentTarget;
-                     const fallback = img.nextElementSibling as HTMLElement;
-                     img.style.display = 'none';
-                     if (fallback) fallback.style.display = 'block';
-                   }}
-                 />
-                 <div className="text-white font-bold text-lg drop-shadow-lg hidden">
-                   {companySettings?.company_name || "VeroField"}
-                 </div>
-               </>
-             ) : (
-               <div className="text-white font-bold text-lg drop-shadow-lg">
-                 {!isLoadingCompanySettings && companySettings?.company_name ? companySettings.company_name : "VeroField"}
-               </div>
-             )}
+                 {/* Logo - Always visible */}
+         <div className="flex items-center">
+           <div className="flex items-center justify-center">
+             <img 
+               src="/branding/vero_small.png" 
+               alt="VeroPest" 
+               className="w-auto h-auto drop-shadow-lg"
+             />
            </div>
          </div>
         
@@ -250,6 +196,7 @@ export default function V4TopBar({
                 }}
               />
             </div>
+
         
         {/* Time & Status - Compact */}
         <div className="flex items-center gap-2 text-xs flex-shrink-0">
@@ -382,18 +329,6 @@ export default function V4TopBar({
             <HelpCircle className="w-4 h-4" />
           </button>
           
-          {/* Activity Panel Toggle */}
-          <button 
-            onClick={onActivityPanelToggle}
-            className={`p-1.5 rounded-lg transition-colors ${
-              activityPanelCollapsed 
-                ? 'hover:bg-white/10' 
-                : 'bg-white/20 hover:bg-white/30'
-            }`}
-            title="Toggle Activity Panel (⌘ + A)"
-          >
-            <Bell className="w-4 h-4" />
-          </button>
           
           <button className="p-1.5 rounded-lg hover:bg-white/10 transition-colors relative">
             <Bell className="w-4 h-4" />

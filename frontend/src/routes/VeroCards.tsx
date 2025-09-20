@@ -49,7 +49,6 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  AlertTriangle,
   Plus,
   Edit,
   Trash2,
@@ -107,8 +106,6 @@ import {
 
 
 // Empty mock data - will be populated from API
-const mockJobs: Job[] = [];
-
 interface ResizableDashboardProps {
   showHeader?: boolean;
 }
@@ -196,7 +193,7 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
     // Canvas settings
     canvas: {
       minHeight: 800,
-      padding: 20,
+      padding: 4,
       autoExpandAmount: 200
     }
   };
@@ -1742,9 +1739,8 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
     }
   };
 
-  // Use mock data if API fails, otherwise use real data
-  const displayJobs = jobsError ? mockJobs : (jobs || []);
-  const isUsingMockData = !!jobsError;
+  // Use real data from API
+  const displayJobs = jobs || [];
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -1802,7 +1798,7 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
 
   return (
          <ErrorBoundary>
-               <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
+               <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-1">
         {/* Enhanced Header */}
         {showHeader && (
           <Navbar 
@@ -1820,29 +1816,17 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
 
                     {/* Main Content */}
           <div 
-            className="flex-1 p-1 transition-all duration-300"
+            className="flex-1 transition-all duration-300"
             style={{ marginLeft: showHeader ? (sidebarCollapsed ? '6px' : '6px') : '0px' }}
           >
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-7xl mx-auto px-2">
               {/* Layout Mode Indicator and Settings */}
-              <div className="mb-8 flex items-start justify-between">
-                {/* Demo Mode Alert */}
-                {isUsingMockData && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                      <div>
-                        <h3 className="text-sm font-medium text-yellow-800">Demo Mode</h3>
-                        <p className="text-sm text-yellow-700">Using demo data. Configure your Supabase connection to see real data.</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
+              <div className="mb-4 flex items-start justify-between">
 
                 {/* Layout Mode Indicator and Settings */}
-                <div className="flex-shrink-0 flex items-center space-x-4">
+                <div className="flex-shrink-0 flex items-center space-x-2">
                   {/* Layout Mode Indicator */}
-                  <div className="flex items-center gap-2 px-3 py-2 bg-white/60 backdrop-blur-sm rounded-lg border border-slate-200">
+                  <div className="flex items-center gap-2 px-2 py-1 bg-white/60 backdrop-blur-sm rounded-lg border border-slate-200">
                     <span className="text-sm font-medium text-slate-700">
                       {isGridMode ? 'Grid Mode' : 'Freehand Mode'}
                     </span>
@@ -1851,7 +1835,7 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
 
                   {/* Swap Mode Indicator */}
                   {swapMode && (
-                    <div className="flex items-center gap-2 px-3 py-2 bg-green-100 rounded-lg border border-green-300">
+                    <div className="flex items-center gap-2 px-2 py-1 bg-green-100 rounded-lg border border-green-300">
                       <span className="text-sm font-medium text-green-700">
                         Swap Mode Active
                       </span>
@@ -2905,20 +2889,22 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
            </div>
          )}
 
-         {/* Keyboard Shortcuts Help Button */}
-         <button
-           onClick={() => setShowKeyboardShortcuts(true)}
-           className={`fixed bottom-4 right-4 p-3 rounded-full shadow-lg z-40 transition-all duration-200 hover:scale-110 ${
-             currentTheme === 'dark' 
-               ? 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-600' 
-               : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-           }`}
-           title="Keyboard Shortcuts (?)"
-         >
-           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-           </svg>
-         </button>
+         {/* Keyboard Shortcuts Help Button - Moved to top right */}
+         <div className="absolute top-4 right-4 z-40">
+           <button
+             onClick={() => setShowKeyboardShortcuts(true)}
+             className={`p-2 rounded-lg shadow-md transition-all duration-200 hover:scale-105 ${
+               currentTheme === 'dark' 
+                 ? 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-600' 
+                 : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+             }`}
+             title="Keyboard Shortcuts (?)"
+           >
+             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+             </svg>
+           </button>
+         </div>
 
          {/* Keyboard Shortcuts Modal */}
          {showKeyboardShortcuts && (

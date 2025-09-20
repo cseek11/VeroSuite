@@ -801,8 +801,10 @@ model TenantBranding {
   email        String?  @db.VarChar(255)
   website      String?  @db.VarChar(255)
   theme_json   Json     @default("{}")
-  logo_url     String?  @db.VarChar(500)
-  version      String   @default("1.0.0") @db.VarChar(20)
+  logo_url         String?  @db.VarChar(500)
+  header_logo_url  String?  @db.Text
+  invoice_logo_url String?  @db.Text
+  version          String   @default("1.0.0") @db.VarChar(20)
   status       String   @default("published") @db.VarChar(20)
   created_at   DateTime @default(now()) @db.Timestamptz(6)
   updated_at   DateTime @updatedAt @db.Timestamptz(6)

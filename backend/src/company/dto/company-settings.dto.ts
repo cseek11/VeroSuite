@@ -74,8 +74,8 @@ export interface CompanySettingsResponseDto {
   email: string | null;
   website: string | null;
   logo_url: string | null;
-  header_logo_url?: string | null;  // Optional until database columns exist
-  invoice_logo_url?: string | null; // Optional until database columns exist
+  header_logo_url: string | null;  // Now required - database columns exist
+  invoice_logo_url: string | null; // Now required - database columns exist
   created_at: Date;
   updated_at: Date;
 }
