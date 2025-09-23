@@ -523,12 +523,36 @@ async function main() {
 
   console.log('✅ Created compliance requirements:', complianceRequirements.length);
 
+  // Seed KPI Templates
+  console.log('📊 Seeding KPI Templates...');
+  
+  // Import comprehensive KPI templates
+  const { kpiTemplates: templateDefinitions } = await import('./kpi-templates-seed');
+  
+  const kpiTemplates = await Promise.all(
+    templateDefinitions.map(template => 
+      prisma.kpiTemplate.upsert({
+        where: { id: template.id },
+        update: {},
+        create: {
+          ...template,
+          tenant_id: tenantId,
+          formula_fields: template.formula_fields,
+          status: 'published'
+        }
+      })
+    )
+  );
+
+  console.log('✅ Created KPI templates:', kpiTemplates.length);
+
   console.log('🎉 Database seeding completed successfully!');
   console.log(`📊 Created:`);
   console.log(`   - 1 Tenant`);
   console.log(`   - ${segments.length} Customer Segments`);
   console.log(`   - ${categories.length} Service Categories`);
   console.log(`   - ${serviceTypes.length} Service Types`);
+  console.log(`   - ${kpiTemplates.length} KPI Templates`);
   console.log(`   - ${pricingTiers.length} Pricing Tiers`);
   console.log(`   - ${servicePricing.length} Service Pricing Records`);
   console.log(`   - ${accounts.length} Sample Accounts`);

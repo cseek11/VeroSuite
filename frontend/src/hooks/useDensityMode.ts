@@ -8,22 +8,19 @@ const useMediaQuery = (query: string): boolean => {
 
   useEffect(() => {
     const media = window.matchMedia(query);
-    if (media.matches !== matches) {
-      setMatches(media.matches);
-    }
+    setMatches(media.matches);
     
     const listener = () => setMatches(media.matches);
     media.addEventListener('change', listener);
     
     return () => media.removeEventListener('change', listener);
-  }, [matches, query]);
+  }, [query]);
 
   return matches;
 };
 
 export const useDensityMode = () => {
   const { preferences, setDensityMode } = useUserPreferences();
-  const [localDensityMode, setLocalDensityMode] = useState<DensityMode>(preferences.densityMode);
   
   // Mobile detection
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -31,29 +28,22 @@ export const useDensityMode = () => {
   
   // Auto-adjust density mode based on screen size
   useEffect(() => {
-    if (isMobile && localDensityMode === 'dense') {
+    if (isMobile && preferences.densityMode === 'dense') {
       // Force standard mode on mobile for better usability
-      setLocalDensityMode('standard');
       setDensityMode('standard');
     }
-  }, [isMobile, localDensityMode, setDensityMode]);
-  
-  // Sync with user preferences
-  useEffect(() => {
-    setLocalDensityMode(preferences.densityMode);
-  }, [preferences.densityMode]);
+  }, [isMobile, preferences.densityMode, setDensityMode]);
   
   const toggleDensity = useCallback(() => {
-    const newMode: DensityMode = localDensityMode === 'dense' ? 'standard' : 'dense';
+    const newMode: DensityMode = preferences.densityMode === 'dense' ? 'standard' : 'dense';
     
     // Don't allow dense mode on mobile
     if (isMobile && newMode === 'dense') {
       return;
     }
     
-    setLocalDensityMode(newMode);
     setDensityMode(newMode);
-  }, [localDensityMode, isMobile, setDensityMode]);
+  }, [preferences.densityMode, isMobile, setDensityMode]);
   
   const setDensity = useCallback((mode: DensityMode) => {
     // Don't allow dense mode on mobile
@@ -61,14 +51,13 @@ export const useDensityMode = () => {
       return;
     }
     
-    setLocalDensityMode(mode);
     setDensityMode(mode);
   }, [isMobile, setDensityMode]);
   
   // Effective density mode (considering mobile constraints)
-  const effectiveMode: DensityMode = isMobile && localDensityMode === 'dense' 
+  const effectiveMode: DensityMode = isMobile && preferences.densityMode === 'dense' 
     ? 'standard' 
-    : localDensityMode;
+    : preferences.densityMode;
   
   return {
     densityMode: effectiveMode,
@@ -77,7 +66,7 @@ export const useDensityMode = () => {
     isMobile,
     isTablet,
     canUseDense: !isMobile,
-    isForcedStandard: isMobile && localDensityMode === 'dense',
+    isForcedStandard: isMobile && preferences.densityMode === 'dense',
   };
 };
 

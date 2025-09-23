@@ -2,6 +2,19 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "watchAssets": false,
+    "assets": []
+  },
+  "watchModeOptions": {
+    "watchAssets": false,
+    "ignore": [
+      "node_modules/**/*",
+      "dist/**/*",
+      "coverage/**/*",
+      "test/**/*",
+      "*.log",
+      "*.tmp"
+    ]
   }
 }

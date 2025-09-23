@@ -11,7 +11,7 @@ dotenv.config({ path: '../backend/.env' });
 
 // Configuration - Using service role key for testing
 const supabaseUrl = process.env.SUPABASE_URL || 'https://iehzwglvmbtrlhdgofew.supabase.co';
-const supabaseServiceKey = process.env.SUPABASE_SECRET_KEY || 'sb_secret_ZzGLSBjMOlOgJ5Q8a-1pMQ_9wODxv6s';
+const supabaseServiceKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 const testTenantId = '7193113e-ece2-4f7b-ae8c-176df4367e28';
 
 // Create admin client with service role key

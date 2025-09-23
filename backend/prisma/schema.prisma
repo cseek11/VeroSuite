@@ -44,6 +44,9 @@ model Tenant {
   tenantBranding          TenantBranding?
   users                   User[]
   workOrders              WorkOrder[]
+  kpiTemplates            KpiTemplate[]
+  userKpis                UserKpi[]
+  kpiTemplateUsage        KpiTemplateUsage[]
 
   @@map("tenants")
 }
@@ -85,6 +88,10 @@ model User {
   verifiedDocuments                                   TechnicianDocument[] @relation("DocumentVerifier")
   tenant                                              Tenant             @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
   assignedWorkOrders                                  WorkOrder[]        @relation("WorkOrderAssignedTo")
+  createdKpiTemplates                                 KpiTemplate[]      @relation("KpiTemplateCreator")
+  approvedKpiTemplates                                KpiTemplate[]      @relation("KpiTemplateApprover")
+  userKpis                                            UserKpi[]
+  kpiTemplateUsage                                    KpiTemplateUsage[]
 
   @@map("users")
 }
@@ -1240,4 +1247,111 @@ model TechnicianPerformance {
 
   @@unique([tenant_id, technician_id, period_start, period_end])
   @@map("technician_performance")
+}
+
+// KPI Templates System
+model KpiTemplate {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id            String    @db.Uuid
+  name                 String    @db.VarChar(255)
+  description          String?
+  category             String    @default("user") @db.VarChar(50) // 'financial' | 'operational' | 'customer' | 'compliance'
+  template_type        String    @default("user") @db.VarChar(50) // 'system' | 'user' | 'shared'
+  formula_expression   String
+  formula_fields       Json      @default("[]")
+  threshold_config     Json      @default("{}")
+  chart_config         Json      @default("{}")
+  data_source_config   Json      @default("{}")
+  tags                 String[]  @default([])
+  is_public            Boolean   @default(false)
+  is_featured          Boolean   @default(false)
+  usage_count          Int       @default(0)
+  version              String    @default("1.0.0") @db.VarChar(20)
+  status               String    @default("published") @db.VarChar(20) // 'draft' | 'published' | 'archived'
+  created_by           String?   @db.Uuid
+  approved_by          String?   @db.Uuid
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  tenant               Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  creator              User?     @relation("KpiTemplateCreator", fields: [created_by], references: [id], onDelete: SetNull)
+  approver             User?     @relation("KpiTemplateApprover", fields: [approved_by], references: [id], onDelete: SetNull)
+  templateFields       KpiTemplateField[]
+  userKpis             UserKpi[]
+  templateUsage        KpiTemplateUsage[]
+
+  @@index([tenant_id])
+  @@index([template_type])
+  @@index([category])
+  @@index([is_public])
+  @@index([usage_count(sort: Desc)])
+  @@map("kpi_templates")
+}
+
+model KpiTemplateField {
+  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  template_id       String     @db.Uuid
+  field_name        String     @db.VarChar(255)
+  field_type        String     @db.VarChar(50) // 'number' | 'text' | 'date' | 'boolean'
+  table_name        String     @db.VarChar(255)
+  column_name       String     @db.VarChar(255)
+  aggregation_type  String?    @db.VarChar(50) // 'sum' | 'count' | 'avg' | 'min' | 'max'
+  display_name      String     @db.VarChar(255)
+  description       String?
+  is_required       Boolean    @default(false)
+  sort_order        Int        @default(0)
+
+  // Relations
+  template          KpiTemplate @relation(fields: [template_id], references: [id], onDelete: Cascade)
+
+  @@map("kpi_template_fields")
+}
+
+model UserKpi {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id            String    @db.Uuid
+  user_id              String    @db.Uuid
+  template_id          String?   @db.Uuid
+  name                 String    @db.VarChar(255)
+  description          String?
+  formula_expression   String
+  formula_fields       Json      @default("[]")
+  threshold_config     Json      @default("{}")
+  chart_config         Json      @default("{}")
+  data_source_config   Json      @default("{}")
+  is_active            Boolean   @default(true)
+  last_calculated      DateTime? @db.Timestamptz(6)
+  last_value           Decimal?  @db.Decimal(15, 4)
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  tenant               Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user                 User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  template             KpiTemplate? @relation(fields: [template_id], references: [id], onDelete: SetNull)
+
+  @@index([tenant_id, user_id])
+  @@map("user_kpis")
+}
+
+model KpiTemplateUsage {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  template_id String   @db.Uuid
+  user_id     String   @db.Uuid
+  tenant_id   String   @db.Uuid
+  action      String   @db.VarChar(50) // 'viewed' | 'used' | 'favorited' | 'shared'
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  // Relations
+  template    KpiTemplate @relation(fields: [template_id], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  tenant      Tenant      @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([template_id])
+  @@index([user_id])
+  @@index([tenant_id])
+  // Prevent duplicate favorites per user/tenant/template
+  @@unique([tenant_id, user_id, template_id, action], map: "kpi_template_usage_unique_action_per_user")
+  @@map("kpi_template_usage")
 }

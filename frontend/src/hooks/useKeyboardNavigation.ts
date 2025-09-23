@@ -1,361 +1,434 @@
-import { useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useCallback, useRef, useState } from 'react';
 
-interface KeyboardShortcut {
-  key: string;
-  ctrl?: boolean;
-  shift?: boolean;
-  alt?: boolean;
-  meta?: boolean;
-  description: string;
-  action: () => void;
+export interface NavigationCard {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  type: string;
+  element?: HTMLElement;
 }
 
-interface UseKeyboardNavigationOptions {
-  enabled?: boolean;
-  onShortcut?: (shortcut: string) => void;
+interface UseKeyboardNavigationProps {
+  cards: Record<string, any>;
+  selectedCards: Set<string>;
+  onSelectCard: (cardId: string, addToSelection?: boolean) => void;
+  onDeselectAll: () => void;
+  onFocusCard: (cardId: string) => void;
+  onActivateCard: (cardId: string) => void;
+  onMoveCard?: (cardId: string, deltaX: number, deltaY: number) => void;
+  onResizeCard?: (cardId: string, deltaWidth: number, deltaHeight: number) => void;
+  gridSize?: number; // Grid snap size for arrow key movement
+  enableScreenReader?: boolean;
 }
 
-export const useKeyboardNavigation = (options: UseKeyboardNavigationOptions = {}) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { enabled = true, onShortcut } = options;
-  const shortcutsRef = useRef<KeyboardShortcut[]>([]);
-  const focusableElementsRef = useRef<HTMLElement[]>([]);
+export function useKeyboardNavigation({
+  cards,
+  selectedCards,
+  onSelectCard,
+  onDeselectAll,
+  onFocusCard,
+  onActivateCard,
+  onMoveCard,
+  onResizeCard,
+  gridSize = 20,
+  enableScreenReader = true
+}: UseKeyboardNavigationProps) {
+  const [focusedCardId, setFocusedCardId] = useState<string | null>(null);
+  const [navigationMode, setNavigationMode] = useState<'select' | 'move' | 'resize'>('select');
+  const [isNavigating, setIsNavigating] = useState(false);
+  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Navigation shortcuts
-  const navigationShortcuts: KeyboardShortcut[] = [
-    {
-      key: '1',
-      description: 'Go to Dashboard',
-      action: () => navigate('/dashboard')
-    },
-    {
-      key: '2',
-      description: 'Go to Jobs',
-      action: () => navigate('/jobs')
-    },
-    {
-      key: '3',
-      description: 'Go to Customers',
-      action: () => navigate('/customers')
-    },
-    {
-      key: '4',
-      description: 'Go to Routing',
-      action: () => navigate('/routing')
-    },
-    {
-      key: '5',
-      description: 'Go to Reports',
-      action: () => navigate('/reports')
-    },
-    {
-      key: '6',
-      description: 'Go to Search Analytics',
-      action: () => navigate('/search-analytics')
-    },
-    {
-      key: '7',
-      description: 'Go to Uploads',
-      action: () => navigate('/uploads')
-    },
-    {
-      key: '8',
-      description: 'Go to Settings',
-      action: () => navigate('/settings')
-    },
-    {
-      key: 'h',
-      description: 'Go to Dashboard (Home)',
-      action: () => navigate('/dashboard')
-    },
-    {
-      key: 'j',
-      description: 'Go to Jobs',
-      action: () => navigate('/jobs')
-    },
-    {
-      key: 'c',
-      description: 'Go to Customers',
-      action: () => navigate('/customers')
-    },
-    {
-      key: 'r',
-      description: 'Go to Reports',
-      action: () => navigate('/reports')
-    },
-    {
-      key: 's',
-      description: 'Go to Settings',
-      action: () => navigate('/settings')
+  // Convert cards to navigation-friendly format
+  const navigationCards: NavigationCard[] = Object.entries(cards || {}).map(([id, card]) => ({
+    id,
+    x: card.x,
+    y: card.y,
+    width: card.width,
+    height: card.height,
+    type: card.type,
+    element: document.querySelector(`[data-card-id="${id}"]`) as HTMLElement
+  }));
+
+  // Sort cards by position for navigation order
+  const sortedCards = navigationCards.sort((a, b) => {
+    // Sort by row first (y position), then by column (x position)
+    const rowDiff = Math.floor(a.y / 100) - Math.floor(b.y / 100);
+    if (rowDiff !== 0) return rowDiff;
+    return a.x - b.x;
+  });
+
+  // Find the currently focused card index
+  const focusedIndex = focusedCardId ? sortedCards.findIndex(card => card.id === focusedCardId) : -1;
+
+  // Navigation helper functions
+  const findNearestCard = useCallback((direction: 'up' | 'down' | 'left' | 'right', fromCard?: NavigationCard): NavigationCard | null => {
+    const referenceCard = fromCard || (focusedCardId ? navigationCards.find(c => c.id === focusedCardId) : null);
+    if (!referenceCard) return null;
+
+    const threshold = 50; // Minimum distance to consider for navigation
+    let nearestCard: NavigationCard | null = null;
+    let minDistance = Infinity;
+
+    navigationCards.forEach(card => {
+      if (card.id === referenceCard.id) return;
+
+      let shouldConsider = false;
+      let distance = 0;
+
+      switch (direction) {
+        case 'up':
+          shouldConsider = card.y < referenceCard.y - threshold;
+          distance = Math.abs(card.x - referenceCard.x) + (referenceCard.y - card.y);
+          break;
+        case 'down':
+          shouldConsider = card.y > referenceCard.y + referenceCard.height + threshold;
+          distance = Math.abs(card.x - referenceCard.x) + (card.y - (referenceCard.y + referenceCard.height));
+          break;
+        case 'left':
+          shouldConsider = card.x < referenceCard.x - threshold;
+          distance = Math.abs(card.y - referenceCard.y) + (referenceCard.x - card.x);
+          break;
+        case 'right':
+          shouldConsider = card.x > referenceCard.x + referenceCard.width + threshold;
+          distance = Math.abs(card.y - referenceCard.y) + (card.x - (referenceCard.x + referenceCard.width));
+          break;
+      }
+
+      if (shouldConsider && distance < minDistance) {
+        minDistance = distance;
+        nearestCard = card;
+      }
+    });
+
+    return nearestCard;
+  }, [navigationCards, focusedCardId]);
+
+  // Navigation actions
+  const navigateToCard = useCallback((cardId: string, addToSelection = false) => {
+    setFocusedCardId(cardId);
+    onFocusCard(cardId);
+    
+    if (addToSelection) {
+      onSelectCard(cardId, true);
+    } else {
+      onSelectCard(cardId, false);
     }
-  ];
 
-  // Action shortcuts
-  const actionShortcuts: KeyboardShortcut[] = [
-    {
-      key: 'n',
-      ctrl: true,
-      description: 'Create New Job',
-      action: () => navigate('/jobs/new')
-    },
-    {
-      key: 'n',
-      ctrl: true,
-      shift: true,
-      description: 'Create New Customer',
-      action: () => navigate('/customers/new')
-    },
-    {
-      key: 'f',
-      ctrl: true,
-      description: 'Search',
-      action: () => {
-        const searchInput = document.querySelector('input[type="search"], input[placeholder*="search"], input[placeholder*="Search"]') as HTMLInputElement;
-        if (searchInput) {
-          searchInput.focus();
-          searchInput.select();
-        }
-      }
-    },
-    {
-      key: 'r',
-      ctrl: true,
-      description: 'Refresh',
-      action: () => window.location.reload()
-    },
-    {
-      key: 'k',
-      ctrl: true,
-      description: 'Toggle Sidebar',
-      action: () => {
-        const sidebarToggle = document.querySelector('[data-sidebar-toggle]') as HTMLElement;
-        if (sidebarToggle) {
-          sidebarToggle.click();
-        }
-      }
-    },
-    {
-      key: 'Escape',
-      description: 'Close Modal/Dialog',
-      action: () => {
-        const modal = document.querySelector('[data-modal]') as HTMLElement;
-        const closeButton = document.querySelector('[data-modal-close]') as HTMLElement;
-        if (closeButton) {
-          closeButton.click();
-        } else if (modal) {
-          // Try to find any close button in the modal
-          const closeBtn = modal.querySelector('[aria-label*="close"], [title*="close"], .close, .modal-close') as HTMLElement;
-          if (closeBtn) {
-            closeBtn.click();
-          }
-        }
-      }
-    },
-    {
-      key: '?',
-      description: 'Show Keyboard Shortcuts',
-      action: () => {
-        // This will be handled by the keyboard shortcuts modal
-        const shortcutsModal = document.querySelector('[data-shortcuts-modal]') as HTMLElement;
-        if (shortcutsModal) {
-          shortcutsModal.click();
-        }
-      }
+    // Scroll card into view
+    const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
+    if (cardElement) {
+      cardElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center', 
+        inline: 'center' 
+      });
     }
-  ];
 
-  // Focus management shortcuts
-  const focusShortcuts: KeyboardShortcut[] = [
-    {
-      key: 'Tab',
-      description: 'Next Focusable Element',
-      action: () => {
-        const focusableElements = getFocusableElements();
-        const currentIndex = focusableElements.indexOf(document.activeElement as HTMLElement);
-        const nextIndex = (currentIndex + 1) % focusableElements.length;
-        focusableElements[nextIndex]?.focus();
-      }
-    },
-    {
-      key: 'Tab',
-      shift: true,
-      description: 'Previous Focusable Element',
-      action: () => {
-        const focusableElements = getFocusableElements();
-        const currentIndex = focusableElements.indexOf(document.activeElement as HTMLElement);
-        const prevIndex = currentIndex <= 0 ? focusableElements.length - 1 : currentIndex - 1;
-        focusableElements[prevIndex]?.focus();
-      }
-    },
-    {
-      key: 'Home',
-      description: 'First Focusable Element',
-      action: () => {
-        const focusableElements = getFocusableElements();
-        focusableElements[0]?.focus();
-      }
-    },
-    {
-      key: 'End',
-      description: 'Last Focusable Element',
-      action: () => {
-        const focusableElements = getFocusableElements();
-        focusableElements[focusableElements.length - 1]?.focus();
-      }
+    // Set focus for screen readers
+    if (enableScreenReader) {
+      cardElement?.setAttribute('tabindex', '0');
+      (cardElement as HTMLElement)?.focus();
     }
-  ];
+  }, [onFocusCard, onSelectCard, enableScreenReader]);
 
-  // Get all focusable elements
-  const getFocusableElements = useCallback((): HTMLElement[] => {
-    const focusableSelectors = [
-      'button:not([disabled])',
-      'input:not([disabled])',
-      'select:not([disabled])',
-      'textarea:not([disabled])',
-      'a[href]',
-      '[tabindex]:not([tabindex="-1"])',
-      '[contenteditable="true"]',
-      '[role="button"]',
-      '[role="tab"]',
-      '[role="menuitem"]',
-      '[data-focusable]'
-    ];
+  const navigateInDirection = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
+    const nearestCard = findNearestCard(direction);
+    if (nearestCard && nearestCard.id) {
+      navigateToCard(nearestCard.id);
+    }
+  }, [findNearestCard, navigateToCard]);
 
-    const elements = document.querySelectorAll(focusableSelectors.join(', '));
-    return Array.from(elements) as HTMLElement[];
-  }, []);
+  const navigateSequentially = useCallback((direction: 'next' | 'prev') => {
+    if (sortedCards.length === 0) return;
+
+    let newIndex: number;
+    if (focusedIndex === -1) {
+      newIndex = direction === 'next' ? 0 : sortedCards.length - 1;
+    } else {
+      newIndex = direction === 'next' 
+        ? (focusedIndex + 1) % sortedCards.length
+        : (focusedIndex - 1 + sortedCards.length) % sortedCards.length;
+    }
+
+    const targetCard = sortedCards[newIndex];
+    if (targetCard) {
+      navigateToCard(targetCard.id);
+    }
+  }, [sortedCards, focusedIndex, navigateToCard]);
+
+  // Move card with arrow keys
+  const moveCard = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
+    if (!focusedCardId || !onMoveCard) return;
+
+    const delta = gridSize;
+    let deltaX = 0;
+    let deltaY = 0;
+
+    switch (direction) {
+      case 'up':
+        deltaY = -delta;
+        break;
+      case 'down':
+        deltaY = delta;
+        break;
+      case 'left':
+        deltaX = -delta;
+        break;
+      case 'right':
+        deltaX = delta;
+        break;
+    }
+
+    onMoveCard(focusedCardId, deltaX, deltaY);
+  }, [focusedCardId, onMoveCard, gridSize]);
+
+  // Resize card with arrow keys
+  const resizeCard = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
+    if (!focusedCardId || !onResizeCard) return;
+
+    const delta = gridSize;
+    let deltaWidth = 0;
+    let deltaHeight = 0;
+
+    switch (direction) {
+      case 'up':
+        deltaHeight = -delta;
+        break;
+      case 'down':
+        deltaHeight = delta;
+        break;
+      case 'left':
+        deltaWidth = -delta;
+        break;
+      case 'right':
+        deltaWidth = delta;
+        break;
+    }
+
+    onResizeCard(focusedCardId, deltaWidth, deltaHeight);
+  }, [focusedCardId, onResizeCard, gridSize]);
 
   // Handle keyboard events
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (!enabled) return;
-
-    // Don't trigger shortcuts when typing in input fields
-    const target = event.target as HTMLElement;
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    // Don't trigger navigation when typing in input fields
+    const target = e.target as HTMLElement;
     const isInputField = target.tagName === 'INPUT' || 
                         target.tagName === 'TEXTAREA' || 
                         target.contentEditable === 'true' ||
-                        target.closest('[contenteditable="true"]') ||
-                        target.closest('input') ||
-                        target.closest('textarea') ||
-                        target.closest('[data-search-input]') ||
-                        target.hasAttribute('data-search-input');
+                        target.closest('[contenteditable="true"]');
     
-    // Debug logging for all key events
-    console.log('⌨️ Global keyDown:', {
-      key: event.key,
-      target: target.tagName,
-      isInputField,
-      hasDataSearchInput: target.hasAttribute('data-search-input'),
-      id: target.id,
-      name: target.getAttribute('name')
-    });
-    
-    if (isInputField) {
-      // Only allow specific shortcuts in input fields
-      if (event.key === 'Escape' || 
-          (event.ctrlKey && (event.key === 'f' || event.key === 'r')) ||
-          (event.ctrlKey && event.shiftKey && event.key === 'n')) {
-        // Continue with these specific shortcuts
-        console.log('✅ Global keyboard navigation ALLOWED specific shortcut in input field:', event.key);
-      } else {
-        // Block all other shortcuts when typing in input fields
-        console.log('🚫 Global keyboard navigation BLOCKED for input field:', event.key);
-        return;
-      }
+    if (isInputField) return;
+
+    // Clear any existing timeout
+    if (navigationTimeoutRef.current) {
+      clearTimeout(navigationTimeoutRef.current);
     }
 
-    const allShortcuts = [...navigationShortcuts, ...actionShortcuts, ...focusShortcuts];
-    
-    for (const shortcut of allShortcuts) {
-      if (
-        event.key.toLowerCase() === shortcut.key.toLowerCase() &&
-        !!event.ctrlKey === !!shortcut.ctrl &&
-        !!event.shiftKey === !!shortcut.shift &&
-        !!event.altKey === !!shortcut.alt &&
-        !!event.metaKey === !!shortcut.meta
-      ) {
-        event.preventDefault();
-        event.stopPropagation();
-        
-        onShortcut?.(shortcut.description);
-        shortcut.action();
-        return;
-      }
-    }
-  }, [enabled, onShortcut]);
+    setIsNavigating(true);
 
-  // Initialize keyboard navigation
-  useEffect(() => {
-    if (!enabled) {
-      console.log('🚫 Keyboard navigation DISABLED');
+    // Set timeout to reset navigation state
+    navigationTimeoutRef.current = setTimeout(() => {
+      setIsNavigating(false);
+    }, 150);
+
+    // Mode switching
+    if (e.key === 'Tab' && !e.shiftKey) {
+      e.preventDefault();
+      setNavigationMode('select');
+      navigateSequentially('next');
       return;
     }
 
-    console.log('✅ Keyboard navigation ENABLED');
+    if (e.key === 'Tab' && e.shiftKey) {
+      e.preventDefault();
+      setNavigationMode('select');
+      navigateSequentially('prev');
+        return;
+    }
+
+    // WASD navigation (replacing arrow keys)
+    if (['w', 'a', 's', 'd'].includes(e.key.toLowerCase()) && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      e.preventDefault();
+      
+      // Map WASD to directions
+      const keyToDirection: Record<string, 'up' | 'down' | 'left' | 'right'> = {
+        'w': 'up',
+        's': 'down', 
+        'a': 'left',
+        'd': 'right'
+      };
+      
+      const direction = keyToDirection[e.key.toLowerCase()];
+      if (!direction) return;
+      
+      // Hold Shift for multi-selection
+      const addToSelection = e.shiftKey;
+      
+      // Default: navigate between cards
+      setNavigationMode('select');
+      navigateInDirection(direction);
+      
+      if (addToSelection && focusedCardId) {
+        onSelectCard(focusedCardId, true);
+      }
+      
+      return;
+    }
+
+    // Ctrl+Shift+WASD for card movement
+    if (['w', 'a', 's', 'd'].includes(e.key.toLowerCase()) && e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey) {
+      e.preventDefault();
+      
+      const keyToDirection: Record<string, 'up' | 'down' | 'left' | 'right'> = {
+        'w': 'up',
+        's': 'down',
+        'a': 'left', 
+        'd': 'right'
+      };
+      
+      const direction = keyToDirection[e.key.toLowerCase()];
+      if (!direction) return;
+      setNavigationMode('move');
+      moveCard(direction);
+      return;
+    }
+
+    // Alt+WASD for card resizing
+    if (['w', 'a', 's', 'd'].includes(e.key.toLowerCase()) && e.altKey && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      
+      const keyToDirection: Record<string, 'up' | 'down' | 'left' | 'right'> = {
+        'w': 'up',
+        's': 'down',
+        'a': 'left',
+        'd': 'right'
+      };
+      
+      const direction = keyToDirection[e.key.toLowerCase()];
+      if (!direction) return;
+      setNavigationMode('resize');
+      resizeCard(direction);
+      return;
+    }
+
+    // Space/Enter for activation
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      if (focusedCardId) {
+        onActivateCard(focusedCardId);
+      }
+      return;
+    }
+
+    // Escape to deselect and exit navigation
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setFocusedCardId(null);
+      onDeselectAll();
+      setNavigationMode('select');
+      
+      // Remove focus from any focused card
+      document.querySelectorAll('[data-card-id]').forEach(card => {
+        card.removeAttribute('tabindex');
+      });
+        return;
+    }
+
+    // Home/End for first/last card
+    if (e.key === 'Home') {
+      e.preventDefault();
+      if (sortedCards.length > 0) {
+        const firstCard = sortedCards[0];
+        if (firstCard) {
+          navigateToCard(firstCard.id);
+        }
+      }
+      return;
+    }
+
+    if (e.key === 'End') {
+      e.preventDefault();
+      if (sortedCards.length > 0) {
+        const lastCard = sortedCards[sortedCards.length - 1];
+        if (lastCard) {
+          navigateToCard(lastCard.id);
+        }
+      }
+      return;
+    }
+
+  }, [
+    navigateSequentially,
+    navigateInDirection,
+    moveCard,
+    resizeCard,
+    focusedCardId,
+    onSelectCard,
+    onActivateCard,
+    onDeselectAll,
+    sortedCards,
+    navigateToCard
+  ]);
+
+  // Set up keyboard event listeners
+  useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
-    
-    // Update focusable elements when DOM changes
-    const updateFocusableElements = () => {
-      focusableElementsRef.current = getFocusableElements();
-    };
-
-    const observer = new MutationObserver(updateFocusableElements);
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['disabled', 'tabindex', 'hidden']
-    });
-
-    // Initial update
-    updateFocusableElements();
-
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      observer.disconnect();
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
     };
-  }, [enabled, handleKeyDown, getFocusableElements]);
+  }, [handleKeyDown]);
 
-  // Focus management utilities
-  const focusFirstElement = useCallback(() => {
-    const focusableElements = getFocusableElements();
-    focusableElements[0]?.focus();
-  }, [getFocusableElements]);
-
-  const focusLastElement = useCallback(() => {
-    const focusableElements = getFocusableElements();
-    focusableElements[focusableElements.length - 1]?.focus();
-  }, [getFocusableElements]);
-
-  const focusNextElement = useCallback(() => {
-    const focusableElements = getFocusableElements();
-    const currentIndex = focusableElements.indexOf(document.activeElement as HTMLElement);
-    const nextIndex = (currentIndex + 1) % focusableElements.length;
-    focusableElements[nextIndex]?.focus();
-  }, [getFocusableElements]);
-
-  const focusPreviousElement = useCallback(() => {
-    const focusableElements = getFocusableElements();
-    const currentIndex = focusableElements.indexOf(document.activeElement as HTMLElement);
-    const prevIndex = currentIndex <= 0 ? focusableElements.length - 1 : currentIndex - 1;
-    focusableElements[prevIndex]?.focus();
-  }, [getFocusableElements]);
-
-  // Get all available shortcuts for display
-  const getAllShortcuts = useCallback(() => {
-    return [...navigationShortcuts, ...actionShortcuts, ...focusShortcuts];
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+    };
   }, []);
 
-  return {
-    focusFirstElement,
-    focusLastElement,
-    focusNextElement,
-    focusPreviousElement,
-    getFocusableElements,
-    getAllShortcuts,
-    shortcuts: shortcutsRef.current
-  };
-};
+  // Screen reader announcements
+  useEffect(() => {
+    if (enableScreenReader && focusedCardId) {
+      const card = navigationCards.find(c => c.id === focusedCardId);
+      if (card) {
+        const announcement = `Focused on ${card.type} card, ${selectedCards.has(focusedCardId) ? 'selected' : 'not selected'}`;
+        
+        // Create or update live region for screen reader announcements
+        let liveRegion = document.getElementById('keyboard-navigation-announcements');
+        if (!liveRegion) {
+          liveRegion = document.createElement('div');
+          liveRegion.id = 'keyboard-navigation-announcements';
+          liveRegion.setAttribute('aria-live', 'polite');
+          liveRegion.setAttribute('aria-atomic', 'true');
+          liveRegion.style.position = 'absolute';
+          liveRegion.style.left = '-10000px';
+          liveRegion.style.width = '1px';
+          liveRegion.style.height = '1px';
+          liveRegion.style.overflow = 'hidden';
+          document.body.appendChild(liveRegion);
+        }
+        
+        liveRegion.textContent = announcement;
+      }
+    }
+  }, [focusedCardId, enableScreenReader, navigationCards, selectedCards]);
 
+  return {
+    focusedCardId,
+    navigationMode,
+    isNavigating,
+    navigateToCard,
+    navigateInDirection,
+    navigateSequentially,
+    moveCard,
+    resizeCard,
+    setFocusedCardId,
+    setNavigationMode
+  };
+}

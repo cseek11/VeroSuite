@@ -20,24 +20,31 @@ const KeyboardNavigationProvider: React.FC<KeyboardNavigationProviderProps> = ({
     setTimeout(() => setLastShortcut(null), 2000);
   }, []);
 
-  const { getAllShortcuts } = useKeyboardNavigation({
-    enabled,
-    onShortcut: handleShortcut
-  });
+  // Note: This provider is for global keyboard shortcuts, not card navigation
+  // Card navigation is handled directly in VeroCardsV2 component
+  const handleGlobalShortcuts = useCallback((e: KeyboardEvent) => {
+    if (!enabled) return;
+    
+    // Handle global shortcuts here
+    if (e.key === '?' && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey) {
+      e.preventDefault();
+      setShortcutsModalOpen(true);
+    }
+  }, [enabled]);
 
   // Debug logging
   React.useEffect(() => {
     console.log('🎯 KeyboardNavigationProvider enabled:', enabled);
   }, [enabled]);
 
-  // Override the ? key to open shortcuts modal
+  // Global keyboard shortcuts
   React.useEffect(() => {
     if (!enabled) {
-      console.log('🚫 Question mark handler DISABLED');
+      console.log('🚫 Global shortcuts DISABLED');
       return;
     }
 
-    const handleQuestionMark = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger when typing in input fields
       const target = e.target as HTMLElement;
       const isInputField = target.tagName === 'INPUT' || 
@@ -53,16 +60,13 @@ const KeyboardNavigationProvider: React.FC<KeyboardNavigationProviderProps> = ({
         return; // Don't trigger shortcuts when typing in input fields
       }
 
-      if (e.key === '?' && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey) {
-        e.preventDefault();
-        setShortcutsModalOpen(true);
-      }
+      handleGlobalShortcuts(e);
     };
 
-    console.log('✅ Question mark handler ENABLED');
-    document.addEventListener('keydown', handleQuestionMark);
-    return () => document.removeEventListener('keydown', handleQuestionMark);
-  }, [enabled]);
+    console.log('✅ Global shortcuts ENABLED');
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [enabled, handleGlobalShortcuts]);
 
   return (
     <>

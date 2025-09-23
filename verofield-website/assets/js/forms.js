@@ -3,7 +3,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   // ===== reCAPTCHA Configuration =====
-  const RECAPTCHA_SITE_KEY = '6LcncMcrAAAAAL3wIuJablkF2NUTTfqrAcCQAP6A';
+  const RECAPTCHA_SITE_KEY = window.RECAPTCHA_SITE_KEY || '6LcncMcrAAAAAL3wIuJablkF2NUTTfqrAcCQAP6A';
   const RECAPTCHA_ACTION = 'submit_form';
   
   // Initialize reCAPTCHA with error handling (wait for DOM)
@@ -183,11 +183,14 @@ document.addEventListener('DOMContentLoaded', () => {
       
       try {
         // Submit to Supabase function
-        const response = await fetch('https://iehzwglvmbtrlhdgofew.supabase.co/functions/v1/contact-form', {
+        const supabaseUrl = window.SUPABASE_URL || 'https://iehzwglvmbtrlhdgofew.supabase.co';
+        const supabaseAnonKey = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllaHp3Z2x2bWJ0cmxoZGdvZmV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU0MzI1NzIsImV4cCI6MjA1MTAwODU3Mn0.9tV8xQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQ';
+        
+        const response = await fetch(`${supabaseUrl}/functions/v1/contact-form`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllaHp3Z2x2bWJ0cmxoZGdvZmV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU0MzI1NzIsImV4cCI6MjA1MTAwODU3Mn0.9tV8xQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQ'
+            'Authorization': `Bearer ${supabaseAnonKey}`
           },
           body: JSON.stringify(data)
         });

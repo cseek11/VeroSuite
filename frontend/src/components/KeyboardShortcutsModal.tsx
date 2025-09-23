@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { X, Keyboard, Search, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Home, End, Tab } from 'lucide-react';
-import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 
 interface KeyboardShortcutsModalProps {
   isOpen: boolean;
@@ -21,7 +20,70 @@ interface ShortcutGroup {
 
 const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ isOpen, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { getAllShortcuts } = useKeyboardNavigation({ enabled: false }); // Disable in modal
+  
+  // Define all available shortcuts - using unique, non-conflicting keys
+  const allShortcuts = [
+    // Navigation shortcuts (using WASD for movement)
+    { key: 'W', description: 'Navigate to card above', category: 'Navigation' },
+    { key: 'S', description: 'Navigate to card below', category: 'Navigation' },
+    { key: 'A', description: 'Navigate to card on left', category: 'Navigation' },
+    { key: 'D', description: 'Navigate to card on right', category: 'Navigation' },
+    { key: 'Tab', description: 'Navigate to next card', category: 'Navigation' },
+    { key: 'Shift+Tab', description: 'Navigate to previous card', category: 'Navigation' },
+    { key: 'Home', description: 'Navigate to first card', category: 'Navigation' },
+    { key: 'End', description: 'Navigate to last card', category: 'Navigation' },
+    { key: 'Space', description: 'Activate/select card', category: 'Navigation' },
+    { key: 'Enter', description: 'Activate/select card', category: 'Navigation' },
+    { key: 'Escape', description: 'Deselect all cards', category: 'Navigation' },
+    
+    // Multi-selection shortcuts
+    { key: 'Shift+W', description: 'Add card above to selection', category: 'Selection' },
+    { key: 'Shift+S', description: 'Add card below to selection', category: 'Selection' },
+    { key: 'Shift+A', description: 'Add card on left to selection', category: 'Selection' },
+    { key: 'Shift+D', description: 'Add card on right to selection', category: 'Selection' },
+    { key: 'Ctrl+Shift+E', description: 'Select all cards', category: 'Selection' },
+    
+    // Card manipulation shortcuts (using Ctrl+WASD for moving, Alt+WASD for resizing)
+    { key: 'Ctrl+Shift+W', description: 'Move selected card up', category: 'Manipulation' },
+    { key: 'Ctrl+Shift+S', description: 'Move selected card down', category: 'Manipulation' },
+    { key: 'Ctrl+Shift+A', description: 'Move selected card left', category: 'Manipulation' },
+    { key: 'Ctrl+Shift+D', description: 'Move selected card right', category: 'Manipulation' },
+    { key: 'Alt+W', description: 'Resize selected card taller', category: 'Manipulation' },
+    { key: 'Alt+S', description: 'Resize selected card shorter', category: 'Manipulation' },
+    { key: 'Alt+A', description: 'Resize selected card narrower', category: 'Manipulation' },
+    { key: 'Alt+D', description: 'Resize selected card wider', category: 'Manipulation' },
+    
+    // Card creation shortcuts (using number keys 1-9)
+    { key: '1', description: 'Add Dashboard Metrics card', category: 'Creation' },
+    { key: '2', description: 'Add Jobs Calendar card', category: 'Creation' },
+    { key: '3', description: 'Add Recent Activity card', category: 'Creation' },
+    { key: '4', description: 'Add Customer Search card', category: 'Creation' },
+    { key: '5', description: 'Add Reports card', category: 'Creation' },
+    { key: '6', description: 'Add Quick Actions card', category: 'Creation' },
+    { key: '7', description: 'Add Routing card', category: 'Creation' },
+    { key: '8', description: 'Add Team Overview card', category: 'Creation' },
+    { key: '9', description: 'Add Financial Summary card', category: 'Creation' },
+    { key: '0', description: 'Add Smart KPI card', category: 'Creation' },
+    
+    // General shortcuts (using unique combinations)
+    { key: 'Delete', description: 'Delete selected cards', category: 'General' },
+    { key: 'Backspace', description: 'Delete selected cards', category: 'General' },
+    { key: 'Ctrl+Shift+C', description: 'Duplicate selected cards', category: 'General' },
+    { key: 'Ctrl+Shift+G', description: 'Auto-arrange cards in grid', category: 'General' },
+    { key: 'Ctrl+Shift+L', description: 'Auto-arrange cards in list', category: 'General' },
+    { key: 'Ctrl+Shift+K', description: 'Auto-arrange cards compactly', category: 'General' },
+    { key: 'Ctrl+Shift+R', description: 'Reset selected cards to default size', category: 'General' },
+    { key: 'Ctrl+Z', description: 'Undo last action', category: 'General' },
+    { key: 'Ctrl+Y', description: 'Redo last action', category: 'General' },
+    { key: '?', description: 'Show this help modal', category: 'General' },
+    
+    // Additional useful shortcuts
+    { key: 'Ctrl+Shift+Q', description: 'Toggle card locking', category: 'General' },
+    { key: 'Ctrl+Shift+T', description: 'Save current layout', category: 'General' },
+    { key: 'Ctrl+Shift+O', description: 'Load saved layout', category: 'General' },
+    { key: 'Ctrl+Shift+F', description: 'Focus search/filter', category: 'General' },
+    { key: 'Ctrl+Shift+H', description: 'Toggle help overlay', category: 'General' }
+  ];
 
   // Close modal on Escape key
   useEffect(() => {
@@ -68,28 +130,52 @@ const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ isOpen,
     };
   }, [isOpen]);
 
-  const allShortcuts = getAllShortcuts();
-
   // Group shortcuts by category
   const shortcutGroups: ShortcutGroup[] = [
     {
       title: 'Navigation',
-      shortcuts: allShortcuts.filter(s => 
-        ['1', '2', '3', '4', '5', '6', '7', 'h', 'j', 'c', 'r', 's'].includes(s.key.toLowerCase()) &&
-        !s.ctrl && !s.shift && !s.alt && !s.meta
-      )
+      shortcuts: allShortcuts
+        .filter(s => s.category === 'Navigation')
+        .map(s => ({
+          key: s.key,
+          description: s.description
+        }))
     },
     {
-      title: 'Actions',
-      shortcuts: allShortcuts.filter(s => 
-        s.ctrl || s.shift || s.alt || s.meta || ['Escape', '?'].includes(s.key)
-      )
+      title: 'Selection',
+      shortcuts: allShortcuts
+        .filter(s => s.category === 'Selection')
+        .map(s => ({
+          key: s.key,
+          description: s.description
+        }))
     },
     {
-      title: 'Focus Management',
-      shortcuts: allShortcuts.filter(s => 
-        ['Tab', 'Home', 'End'].includes(s.key)
-      )
+      title: 'Manipulation',
+      shortcuts: allShortcuts
+        .filter(s => s.category === 'Manipulation')
+        .map(s => ({
+          key: s.key,
+          description: s.description
+        }))
+    },
+    {
+      title: 'Card Creation',
+      shortcuts: allShortcuts
+        .filter(s => s.category === 'Creation')
+        .map(s => ({
+          key: s.key,
+          description: s.description
+        }))
+    },
+    {
+      title: 'General',
+      shortcuts: allShortcuts
+        .filter(s => s.category === 'General')
+        .map(s => ({
+          key: s.key,
+          description: s.description
+        }))
     }
   ];
 
@@ -102,24 +188,59 @@ const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ isOpen,
     )
   })).filter(group => group.shortcuts.length > 0);
 
-  const formatKey = (shortcut: any) => {
-    const parts = [];
-    if (shortcut.ctrl) parts.push('Ctrl');
-    if (shortcut.shift) parts.push('Shift');
-    if (shortcut.alt) parts.push('Alt');
-    if (shortcut.meta) parts.push('⌘');
+  // Debug logging
+  React.useEffect(() => {
+    if (isOpen) {
+      console.log('🎯 KeyboardShortcutsModal opened at:', new Date().toISOString());
+      console.log('📋 Total shortcuts:', allShortcuts.length);
+      console.log('📋 First few shortcuts:', allShortcuts.slice(0, 5));
+      console.log('📋 Sample WASD shortcuts:', allShortcuts.filter(s => ['W', 'A', 'S', 'D'].includes(s.key)));
+      console.log('📂 Groups:', shortcutGroups.length);
+      console.log('📂 Group titles:', shortcutGroups.map(g => g.title));
+      console.log('🔍 Filtered groups:', filteredGroups.length);
+      console.log('🔍 Filtered group titles:', filteredGroups.map(g => g.title));
+    }
+  }, [isOpen, allShortcuts.length, shortcutGroups.length, filteredGroups.length]);
+
+  const formatKey = (shortcutKey: string) => {
+    // Handle compound keys like "Ctrl+A", "Shift+Tab", etc.
+    const parts = shortcutKey.split('+').map(part => part.trim());
     
-    // Format the key
-    let key = shortcut.key;
-    if (key === ' ') key = 'Space';
-    if (key === 'Escape') key = 'Esc';
-    if (key === 'ArrowUp') key = '↑';
-    if (key === 'ArrowDown') key = '↓';
-    if (key === 'ArrowLeft') key = '←';
-    if (key === 'ArrowRight') key = '→';
+    const formattedParts = parts.map(part => {
+      // Format modifier keys
+      if (part === 'Ctrl') return 'Ctrl';
+      if (part === 'Shift') return 'Shift';
+      if (part === 'Alt') return 'Alt';
+      if (part === 'Meta') return '⌘';
+      
+      // Format special keys
+      if (part === ' ') return 'Space';
+      if (part === 'Escape') return 'Esc';
+      if (part === 'ArrowUp') return '↑';
+      if (part === 'ArrowDown') return '↓';
+      if (part === 'ArrowLeft') return '←';
+      if (part === 'ArrowRight') return '→';
+      if (part === 'Backspace') return 'Backspace';
+      if (part === 'Delete') return 'Delete';
+      if (part === 'Enter') return 'Enter';
+      if (part === 'Tab') return 'Tab';
+      if (part === 'Home') return 'Home';
+      if (part === 'End') return 'End';
+      
+      // Format function keys
+      if (part.startsWith('F') && /^F\d+$/.test(part)) {
+        return part; // Keep F1, F2, etc. as is
+      }
+      
+      // Format single letters (WASD, etc.)
+      if (part.length === 1 && /[A-Z]/.test(part)) {
+        return part;
+      }
+      
+      return part;
+    });
     
-    parts.push(key);
-    return parts.join(' + ');
+    return formattedParts.join(' + ');
   };
 
   if (!isOpen) return null;
@@ -197,7 +318,7 @@ const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ isOpen,
                             {shortcut.description}
                           </span>
                           <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-white border border-gray-300 rounded shadow-sm">
-                            {formatKey(shortcut)}
+                            {formatKey(shortcut.key)}
                           </kbd>
                         </div>
                       ))}

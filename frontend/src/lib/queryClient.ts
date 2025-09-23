@@ -85,6 +85,27 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.users.details(), id] as const,
   },
   
+  // KPI Templates related queries
+  kpiTemplates: {
+    all: ['kpiTemplates'] as const,
+    lists: () => [...queryKeys.kpiTemplates.all, 'list'] as const,
+    list: (filters: Record<string, any>) => [...queryKeys.kpiTemplates.lists(), filters] as const,
+    details: () => [...queryKeys.kpiTemplates.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.kpiTemplates.details(), id] as const,
+    popular: (limit?: number) => [...queryKeys.kpiTemplates.all, 'popular', limit] as const,
+    featured: () => [...queryKeys.kpiTemplates.all, 'featured'] as const,
+    favorites: () => [...queryKeys.kpiTemplates.all, 'favorites'] as const,
+  },
+
+  // User KPIs related queries
+  userKpis: {
+    all: ['userKpis'] as const,
+    lists: () => [...queryKeys.userKpis.all, 'list'] as const,
+    list: (filters: Record<string, any>) => [...queryKeys.userKpis.lists(), filters] as const,
+    details: () => [...queryKeys.userKpis.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.userKpis.details(), id] as const,
+  },
+
   // Dashboard related queries
   dashboard: {
     metrics: ['dashboard', 'metrics'] as const,

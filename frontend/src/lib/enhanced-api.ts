@@ -5,6 +5,7 @@
 // with multi-tenant support, type safety, and comprehensive error handling
 
 import { supabase } from './supabase-client';
+import { enhancedApiCall } from './api-utils';
 import type { 
   Account, 
   CustomerProfile, 
@@ -98,6 +99,61 @@ const getTenantId = async (): Promise<string> => {
     console.error('Error resolving tenant ID:', error);
     console.log('🔄 Using fallback tenant ID due to error');
     return '7193113e-ece2-4f7b-ae8c-176df4367e28'; // Default tenant ID
+  }
+};
+
+const getUserId = async (): Promise<string> => {
+  try {
+    // First, try to get from Supabase auth
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (user) {
+      console.log('✅ User ID retrieved from auth:', user.id);
+      return user.id;
+    }
+    
+    // Fallback: try to get from localStorage
+    const authData = localStorage.getItem('verosuite_auth');
+    if (authData) {
+      const parsed = JSON.parse(authData);
+      if (parsed.user?.id) {
+        console.log('✅ User ID retrieved from localStorage:', parsed.user.id);
+        return parsed.user.id;
+      }
+    }
+    
+    throw new Error('No authenticated user found');
+  } catch (error) {
+    console.error('❌ Error getting user ID:', error);
+    console.log('🔄 Using fallback user ID due to error');
+    return '85b4bc59-650a-4fdf-beac-1dd2ba3066f4'; // Default user ID for development
+  }
+};
+
+const getAuthToken = async (): Promise<string> => {
+  try {
+    // First, try to get from Supabase auth
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session?.access_token) {
+      console.log('✅ Auth token retrieved from session');
+      return session.access_token;
+    }
+    
+    // Fallback: try to get from localStorage
+    const authData = localStorage.getItem('verosuite_auth');
+    if (authData) {
+      const parsed = JSON.parse(authData);
+      if (parsed.token) {
+        console.log('✅ Auth token retrieved from localStorage');
+        return parsed.token;
+      }
+    }
+    
+    throw new Error('No authentication token found');
+  } catch (error) {
+    console.error('❌ Error getting auth token:', error);
+    throw new Error('Authentication required');
   }
 };
 
@@ -2271,8 +2327,419 @@ export const financial = {
       handleApiError(error, 'fetch recent transactions');
       return [];
     }
-  }
+  },
+
 };
+
+// ============================================================================
+// KPI TEMPLATES API
+// ============================================================================
+
+export const kpiTemplates = {
+    // Get all KPI templates with filtering
+    list: async (filters: any = {}): Promise<any[]> => {
+      try {
+        const token = await getAuthToken();
+        
+        // Filter out undefined values from query parameters
+        const cleanFilters = Object.fromEntries(
+          Object.entries(filters).filter(([_, value]) => value !== undefined && value !== null && value !== '')
+        );
+        
+        const data = await enhancedApiCall(`http://localhost:3001/api/v1/kpi-templates?${new URLSearchParams(cleanFilters)}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+          console.log('🌐 API Response (kpiTemplates.list):');
+          console.log('  - raw data:', data);
+          console.log('  - data.templates:', data.templates);
+          console.log('  - dataType:', typeof data);
+          console.log('  - dataIsArray:', Array.isArray(data));
+          
+          // Backend returns { templates: [...], pagination: {...} }
+          const result = data.templates || data || [];
+          console.log('  - returning:', result);
+          console.log('  - resultType:', typeof result);
+          console.log('  - resultIsArray:', Array.isArray(result));
+          return result;
+      } catch (error) {
+        handleApiError(error, 'fetch KPI templates');
+        return [];
+      }
+    },
+
+    // Get a specific KPI template
+    get: async (id: string): Promise<any | null> => {
+      try {
+        const token = await getAuthToken();
+        const response = await fetch(`http://localhost:3001/api/v1/kpi-templates/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        handleApiError(error, 'fetch KPI template');
+        return null;
+      }
+    },
+
+    // Create a new KPI template
+    create: async (templateData: any): Promise<any> => {
+      try {
+        const { data, error } = await supabase
+          .from('kpi_templates')
+          .insert({
+            ...templateData,
+            tenant_id: await getTenantId(),
+            created_by: await getUserId(),
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        handleApiError(error, 'create KPI template');
+        throw error;
+      }
+    },
+
+    // Update an existing KPI template
+    update: async (id: string, updates: any): Promise<any> => {
+      try {
+        const { data, error } = await supabase
+          .from('kpi_templates')
+          .update(updates)
+          .eq('id', id)
+          .eq('tenant_id', await getTenantId())
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        handleApiError(error, 'update KPI template');
+        throw error;
+      }
+    },
+
+    // Delete a KPI template
+    delete: async (id: string): Promise<void> => {
+      try {
+        const { error } = await supabase
+          .from('kpi_templates')
+          .delete()
+          .eq('id', id)
+          .eq('tenant_id', await getTenantId());
+
+        if (error) throw error;
+      } catch (error) {
+        handleApiError(error, 'delete KPI template');
+        throw error;
+      }
+    },
+
+    // Use a template to create a user KPI
+    useTemplate: async (templateId: string, userKpiData: any): Promise<any> => {
+      try {
+        const token = await getAuthToken();
+        const response = await fetch(`http://localhost:3001/api/v1/kpi-templates/use`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            template_id: templateId,
+            ...userKpiData
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        handleApiError(error, 'use KPI template');
+        throw error;
+      }
+    },
+
+    // Track template usage
+    trackUsage: async (templateId: string, action: string): Promise<any> => {
+      try {
+        const token = await getAuthToken();
+        const response = await fetch(`http://localhost:3001/api/v1/kpi-templates/track-usage`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            template_id: templateId,
+            action: action
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        handleApiError(error, 'track template usage');
+        throw error;
+      }
+    },
+
+    // Get user's favorited templates
+    getFavorites: async (): Promise<any[]> => {
+      try {
+        const token = await getAuthToken();
+        const response = await fetch(`http://localhost:3001/api/v1/kpi-templates/favorites`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          // Log the actual error for debugging
+          const errorText = await response.text();
+          console.error('❌ Favorites API error:', response.status, response.statusText, errorText);
+          
+          // If it's a 400 error, the table might not exist or there's a schema issue
+          if (response.status === 400) {
+            console.warn('⚠️ Favorites API returned 400 - this might be a database schema issue');
+          }
+          
+          // Gracefully degrade to empty list so UI still works
+          return [];
+        }
+
+        const data = await response.json();
+        return data || [];
+      } catch (error) {
+        console.error('❌ Favorites API network error:', error);
+        handleApiError(error, 'get favorited templates');
+        return [];
+      }
+    },
+
+    // Check if template is favorited
+    getFavoriteStatus: async (templateId: string): Promise<{ isFavorited: boolean }> => {
+      try {
+        const token = await getAuthToken();
+        const response = await fetch(`http://localhost:3001/api/v1/kpi-templates/${templateId}/favorite-status`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        handleApiError(error, 'get template favorite status');
+        return { isFavorited: false };
+      }
+    },
+
+    // Get popular templates
+    getPopular: async (limit: number = 10): Promise<any[]> => {
+      try {
+        const token = await getAuthToken();
+        const response = await fetch(`http://localhost:3001/api/v1/kpi-templates/popular?limit=${limit}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data || [];
+      } catch (error) {
+        handleApiError(error, 'fetch popular KPI templates');
+        return [];
+      }
+    },
+
+    // Get featured templates
+    getFeatured: async (): Promise<any[]> => {
+      try {
+        const token = await getAuthToken();
+        const response = await fetch(`http://localhost:3001/api/v1/kpi-templates?is_featured=true`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('🌐 API Response (kpiTemplates.list):');
+        console.log('  - raw data:', data);
+        console.log('  - data.templates:', data.templates);
+        console.log('  - dataType:', typeof data);
+        console.log('  - dataIsArray:', Array.isArray(data));
+        
+        // Backend returns { templates: [...], pagination: {...} }
+        const result = data.templates || data || [];
+        console.log('  - returning:', result);
+        console.log('  - resultType:', typeof result);
+        console.log('  - resultIsArray:', Array.isArray(result));
+        return result;
+      } catch (error) {
+        handleApiError(error, 'fetch featured KPI templates');
+        return [];
+      }
+    }
+  }
+
+// ============================================================================
+// USER KPIS API
+// ============================================================================
+
+export const userKpis = {
+    // Get user's KPIs
+    list: async (): Promise<any[]> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<any[]>(`http://localhost:3001/api/kpis/user`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        handleApiError(error, 'fetch user KPIs');
+        return [];
+      }
+    },
+
+    // Get a specific user KPI
+    get: async (id: string): Promise<any | null> => {
+      try {
+        const { data, error } = await supabase
+          .from('user_kpis')
+          .select(`
+            *,
+            template:kpi_templates(*)
+          `)
+          .eq('id', id)
+          .eq('tenant_id', await getTenantId())
+          .eq('user_id', await getUserId())
+          .single();
+
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        handleApiError(error, 'fetch user KPI');
+        return null;
+      }
+    },
+
+    // Create a new user KPI
+    create: async (kpiData: any): Promise<any> => {
+      try {
+        console.log('🔍 Enhanced API - Creating user KPI with data:', JSON.stringify(kpiData, null, 2));
+        
+        const authToken = await getAuthToken();
+        console.log('🔑 Auth token length:', authToken?.length || 0);
+        
+        const response = await fetch(`http://localhost:3001/api/kpis`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`,
+          },
+          body: JSON.stringify(kpiData),
+        });
+
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('❌ Backend error response:', errorData);
+          console.error('❌ Response status:', response.status);
+          console.error('❌ Response statusText:', response.statusText);
+          console.error('❌ Full error data:', JSON.stringify(errorData, null, 2));
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ Successfully created KPI:', result);
+        return result;
+      } catch (error) {
+        console.error('💥 Enhanced API error:', error);
+        handleApiError(error, 'create user KPI');
+        throw error;
+      }
+    },
+
+    // Update a user KPI
+    update: async (id: string, updates: any): Promise<any> => {
+      try {
+        const { data, error } = await supabase
+          .from('user_kpis')
+          .update(updates)
+          .eq('id', id)
+          .eq('tenant_id', await getTenantId())
+          .eq('user_id', await getUserId())
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        handleApiError(error, 'update user KPI');
+        throw error;
+      }
+    },
+
+    // Delete a user KPI
+    delete: async (id: string): Promise<void> => {
+      try {
+        const { error } = await supabase
+          .from('user_kpis')
+          .delete()
+          .eq('id', id)
+          .eq('tenant_id', await getTenantId())
+          .eq('user_id', await getUserId());
+
+        if (error) throw error;
+      } catch (error) {
+        handleApiError(error, 'delete user KPI');
+        throw error;
+      }
+    }
+  }
 
 // ============================================================================
 // MAIN EXPORT
@@ -2299,7 +2766,63 @@ export const enhancedApi = {
   inventory,
   financial,
   company,
-  auth: authApi
+  kpiTemplates,
+  userKpis,
+  auth: authApi,
+  // Dashboard layouts/cards persistence (server-side)
+  dashboardLayouts: {
+    getOrCreateDefault: async (): Promise<{ id: string } | null> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<{ id: string }>(`http://localhost:3001/api/dashboard/layouts/default`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error, 'load default dashboard layout');
+        return null;
+      }
+    },
+    listCards: async (layoutId: string): Promise<any[]> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<any[]>(`http://localhost:3001/api/dashboard/layouts/${layoutId}/cards`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        return data || [];
+      } catch (error) {
+        handleApiError(error, 'list dashboard cards');
+        return [];
+      }
+    },
+    upsertCard: async (layoutId: string, card: any): Promise<any> => {
+      try {
+        const token = await getAuthToken();
+        const body = { layout_id: layoutId, ...card };
+        const data = await enhancedApiCall<any>(`http://localhost:3001/api/dashboard/cards`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error, 'upsert dashboard card');
+        throw error;
+      }
+    },
+    deleteCard: async (cardId: string): Promise<void> => {
+      try {
+        const token = await getAuthToken();
+        await enhancedApiCall<void>(`http://localhost:3001/api/dashboard/cards/${cardId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+      } catch (error) {
+        handleApiError(error, 'delete dashboard card');
+        throw error;
+      }
+    }
+  }
 };
 
 export default enhancedApi;

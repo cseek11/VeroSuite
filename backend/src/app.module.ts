@@ -21,6 +21,11 @@ import { ServiceTypesModule } from './service-types/service-types.module';
 import { BillingModule } from './billing/billing.module';
 import { CompanyModule } from './company/company.module';
 import { HealthModule } from './health/health.module';
+import { LayoutsModule } from './layouts/layouts.module';
+import { KPIsModule } from './kpis/kpis.module';
+import { KpiTemplatesModule } from './kpi-templates/kpi-templates.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { WebSocketModule } from './websocket/websocket.module';
 
 @Module({
   imports: [
@@ -41,6 +46,11 @@ import { HealthModule } from './health/health.module';
     ServiceTypesModule,
     BillingModule,
     HealthModule,
+    LayoutsModule,
+    KPIsModule,
+    KpiTemplatesModule,
+    DashboardModule,
+    WebSocketModule,
   ],
   providers: [
     DatabaseService,

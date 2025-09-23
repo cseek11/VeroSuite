@@ -134,3 +134,13 @@ GRANT EXECUTE ON FUNCTION search_customers_multi_word(text, uuid, integer, integ
 
 
 
+
+
+
+
+
+
+
+
+
+

@@ -905,6 +905,10 @@ export interface RevenueAnalytics {
   growthRate: number;
 }
 
+// ============================================================================
+// KPI TEMPLATES TYPES (Re-exported from kpi-templates.ts)
+// ============================================================================
 
+export * from '@/types/kpi-templates';
 
 

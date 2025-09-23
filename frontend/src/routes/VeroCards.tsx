@@ -171,35 +171,26 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
   const [swapMode, setSwapMode] = useState<boolean>(false);
   const [swapSourceCard, setSwapSourceCard] = useState<string | null>(null);
   
-  // Hybrid layout configuration - supports both freehand and grid modes
+  // Optimized freehand layout configuration
   const layoutConfig = {
-    // Freehand mode settings
+    // Freehand mode settings - optimized for productivity
     freehand: {
-      minGap: 20, // Minimum gap between cards
-      snapDistance: 50, // Distance for snapping to other cards
-      collisionBuffer: 10, // Buffer zone for collision detection
-      autoExpandThreshold: 100, // Pixels from bottom to trigger auto-expand
-      headerOffset: 80, // Minimum distance from top (header height)
-      sidebarOffset: 240, // Minimum distance from left (sidebar width when expanded)
-      sidebarCollapsedOffset: 80, // Minimum distance from left (sidebar width when collapsed)
+      minGap: 12, // Tighter spacing for more cards
+      snapDistance: 40, // Reduced snap distance
+      collisionBuffer: 8, // Smaller buffer
+      autoExpandThreshold: 80, // Reduced threshold
+      headerOffset: 60, // Reduced since no traditional header
+      sidebarOffset: 20, // Minimal since no sidebar
+      sidebarCollapsedOffset: 20, // Minimal since no sidebar
     },
-    // Grid mode settings (for optional grid alignment)
-    grid: {
-    cellSize: { width: 300, height: 300 },
-      gap: 10,
-    columns: 4,
-      rows: 4
-    },
-    // Canvas settings
+    // Canvas settings - optimized for more content
     canvas: {
-      minHeight: 800,
+      minHeight: 600, // Reduced min height
       padding: 4,
-      autoExpandAmount: 200
+      autoExpandAmount: 150 // Smaller auto-expand
     }
   };
 
-  // For backward compatibility, keep gridLayout reference
-  const gridLayout = layoutConfig.grid;
 
   // Available card types for custom cards
   const availableCardTypes = [
@@ -227,27 +218,27 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
     const getCardSizeForType = (typeId: string) => {
       switch (typeId) {
         case 'routing':
-          return { width: 450, height: 350 };
+          return { width: 320, height: 240 }; // Reduced by ~30%
         case 'dashboard-metrics':
-          return { width: 400, height: 250 };
+          return { width: 280, height: 180 }; // Reduced by ~30%
         case 'jobs-calendar':
-          return { width: 400, height: 300 };
+          return { width: 300, height: 220 }; // Reduced by ~25%
         case 'recent-activity':
-          return { width: 350, height: 280 };
+          return { width: 260, height: 200 }; // Reduced by ~25%
         case 'customer-search':
-          return { width: 350, height: 200 };
+          return { width: 260, height: 160 }; // Reduced by ~25%
         case 'reports':
-          return { width: 350, height: 250 };
+          return { width: 280, height: 180 }; // Reduced by ~30%
         case 'dashboard-overview':
-          return { width: 400, height: 250 };
+          return { width: 300, height: 180 }; // Reduced by ~30%
         case 'quick-actions':
-          return { width: 350, height: 200 };
+          return { width: 260, height: 160 }; // Reduced by ~25%
         case 'uploads':
-          return { width: 350, height: 200 };
+          return { width: 260, height: 160 }; // Reduced by ~25%
         case 'settings':
-          return { width: 350, height: 200 };
+          return { width: 260, height: 160 }; // Reduced by ~25%
         default:
-          return { width: 400, height: 250 };
+          return { width: 280, height: 180 }; // Reduced default size
       }
     };
     
@@ -410,8 +401,7 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
   const [cardOrder, setCardOrder] = useState(loadSavedLayout().order);
   const [gridPositions, setGridPositions] = useState<Record<string, { x: number; y: number }>>(loadSavedLayout().gridPositions);
   
-  // New state for hybrid positioning system
-  const [isGridMode, setIsGridMode] = useState<boolean>(false); // Toggle between grid and freehand
+  // Simplified to freehand mode only
   const [canvasHeight, setCanvasHeight] = useState<number>(layoutConfig.canvas.minHeight);
   const [cardPositions, setCardPositions] = useState<Record<string, { x: number; y: number }>>({});
 
@@ -602,28 +592,15 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
       // Complete swap
       if (swapSourceCard && swapSourceCard !== cardId) {
         // Swap positions
-        if (isGridMode) {
-          // Grid mode swap
-          const sourcePos = gridPositions[swapSourceCard];
-          const targetPos = gridPositions[cardId];
-          if (sourcePos && targetPos) {
-            setGridPositions(prev => ({
-              ...prev,
-              [swapSourceCard]: targetPos,
-              [cardId]: sourcePos
-            }));
-          }
-        } else {
-          // Freehand mode swap
-          const sourcePos = cardPositions[swapSourceCard];
-          const targetPos = cardPositions[cardId];
-          if (sourcePos && targetPos) {
-            setCardPositions(prev => ({
-              ...prev,
-              [swapSourceCard]: targetPos,
-              [cardId]: sourcePos
-            }));
-          }
+        // Freehand mode swap
+        const sourcePos = cardPositions[swapSourceCard];
+        const targetPos = cardPositions[cardId];
+        if (sourcePos && targetPos) {
+          setCardPositions(prev => ({
+            ...prev,
+            [swapSourceCard]: targetPos,
+            [cardId]: sourcePos
+          }));
         }
       }
       // Exit swap mode
@@ -637,42 +614,6 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
     setSwapSourceCard(null);
   };
 
-  // Toggle between grid and freehand mode
-  const toggleLayoutMode = () => {
-    setIsGridMode(!isGridMode);
-    
-    // If switching to freehand mode, initialize card positions from grid positions
-    if (!isGridMode) {
-      const newCardPositions: Record<string, { x: number; y: number }> = {};
-      Object.keys(gridPositions).forEach(cardId => {
-        const gridPos = gridPositions[cardId];
-        const rawPosition = {
-          x: (sidebarCollapsed ? layoutConfig.freehand.sidebarCollapsedOffset : layoutConfig.freehand.sidebarOffset) + 
-             gridPos.x * (gridLayout.cellSize.width + gridLayout.gap),
-          y: gridPos.y * (gridLayout.cellSize.height + gridLayout.gap)
-        };
-        // Ensure positions respect boundaries
-        newCardPositions[cardId] = constrainPositionToBoundaries(rawPosition, cardId);
-      });
-      setCardPositions(newCardPositions);
-    }
-    
-    // If switching to grid mode, snap all cards to grid
-    else {
-      const sidebarOffset = sidebarCollapsed ? 80 : 240;
-      const newGridPositions: Record<string, { x: number; y: number }> = {};
-      Object.keys(cardPositions).forEach(cardId => {
-        const freePos = cardPositions[cardId];
-        const gridX = Math.round((freePos.x - sidebarOffset) / (gridLayout.cellSize.width + gridLayout.gap));
-        const gridY = Math.round(freePos.y / (gridLayout.cellSize.height + gridLayout.gap));
-        newGridPositions[cardId] = {
-          x: Math.max(0, Math.min(gridLayout.columns - 1, gridX)),
-          y: Math.max(0, Math.min(gridLayout.rows - 1, gridY))
-        };
-      });
-      setGridPositions(newGridPositions);
-    }
-  };
 
   // Reset layout to defaults
   const resetLayout = () => {
@@ -1536,6 +1477,69 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
         }
       }
 
+      // Enhanced Productivity Shortcuts for Freehand Mode
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case '1':
+            e.preventDefault();
+            addCustomCard('dashboard-metrics');
+            break;
+          case '2':
+            e.preventDefault();
+            addCustomCard('jobs-calendar');
+            break;
+          case '3':
+            e.preventDefault();
+            addCustomCard('recent-activity');
+            break;
+          case '4':
+            e.preventDefault();
+            addCustomCard('customer-search');
+            break;
+          case '5':
+            e.preventDefault();
+            addCustomCard('quick-actions');
+            break;
+          case 'd':
+            e.preventDefault();
+            // Duplicate selected cards
+            if (selectedCards.size > 0) {
+              selectedCards.forEach(cardId => {
+                const newCardId = `${cardId}-copy-${Date.now()}`;
+                const currentPos = cardPositions[cardId];
+                if (currentPos) {
+                  setCardPositions(prev => ({
+                    ...prev,
+                    [newCardId]: { x: currentPos.x + 20, y: currentPos.y + 20 }
+                  }));
+                  addCustomCard('dashboard-metrics', newCardId);
+                }
+              });
+            }
+            break;
+          case 'g':
+            e.preventDefault();
+            // Auto-arrange cards in grid
+            autoArrangeCards('grid');
+            break;
+          case 'l':
+            e.preventDefault();
+            // Auto-arrange cards in list
+            autoArrangeCards('list');
+            break;
+          case 'r':
+            e.preventDefault();
+            // Reset selected cards to default size
+            if (selectedCards.size > 0) {
+              selectedCards.forEach(cardId => {
+                setCardWidths(prev => ({ ...prev, [cardId]: 280 }));
+                setCardHeights(prev => ({ ...prev, [cardId]: 180 }));
+              });
+            }
+            break;
+        }
+      }
+
       // Arrow keys for card movement (when cards are selected)
       if (selectedCards.size > 0 && !e.ctrlKey && !e.metaKey) {
         const nudgeAmount = e.shiftKey ? 10 : 1;
@@ -1823,14 +1827,14 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
               {/* Layout Mode Indicator and Settings */}
               <div className="mb-4 flex items-start justify-between">
 
-                {/* Layout Mode Indicator and Settings */}
+                {/* Dashboard Controls */}
                 <div className="flex-shrink-0 flex items-center space-x-2">
-                  {/* Layout Mode Indicator */}
+                  {/* Freehand Mode Indicator */}
                   <div className="flex items-center gap-2 px-2 py-1 bg-white/60 backdrop-blur-sm rounded-lg border border-slate-200">
                     <span className="text-sm font-medium text-slate-700">
-                      {isGridMode ? 'Grid Mode' : 'Freehand Mode'}
+                      Customizable Dashboard
                     </span>
-                    <div className={`w-2 h-2 rounded-full ${isGridMode ? 'bg-blue-500' : 'bg-green-500'}`}></div>
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
                   </div>
 
                   {/* Swap Mode Indicator */}
@@ -1897,11 +1901,6 @@ const ResizableDashboard: React.FC<ResizableDashboardProps> = ({ showHeader = tr
                       icon: Filter,
                       onClick: () => setShowSearchPalette(true)
                     },
-                    {
-                      label: isGridMode ? 'Switch to Freehand' : 'Switch to Grid',
-                      icon: isGridMode ? Move : Grid,
-                      onClick: toggleLayoutMode
-                                         }
                    ]}
                  />
                </div>

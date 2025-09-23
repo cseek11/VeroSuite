@@ -10,6 +10,7 @@ import V4Layout from '@/components/layout/V4Layout';
 // LegacyDashboard removed as part of V4 migration
 // LegacyEnhancedDashboard removed as part of V4 migration
 import VeroCards from './VeroCards';
+import VeroCardsV2 from './VeroCardsV2';
 import V4Dashboard from './V4Dashboard';
 import V4Test from './V4Test';
 import CommunicationsPage from './Communications';
@@ -159,6 +160,18 @@ export default function App() {
             />
             <Route
               path="/resizable-dashboard"
+              element={
+                <PrivateRoute>
+                  <V4Layout>
+                    <Suspense fallback={<DashboardFallback />}>
+                      <VeroCardsV2 showHeader={false} />
+                    </Suspense>
+                  </V4Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/resizable-dashboard-legacy"
               element={
                 <PrivateRoute>
                   <V4Layout>

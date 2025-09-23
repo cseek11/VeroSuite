@@ -7,7 +7,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // Configuration
 const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://iehzwglvmbtrlhdgofew.supabase.co';
-const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_OFGfJcRCQlPh41a2MLSSgg_iEdpZKbJ';
+const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
 const testTenantId = '7193113e-ece2-4f7b-ae8c-176df4367e28';
 
 // Test credentials (you'll need to create a test user)

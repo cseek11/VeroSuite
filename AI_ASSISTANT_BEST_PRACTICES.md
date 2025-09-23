@@ -1,4 +1,4 @@
-# AI Assistant Best Practices for VeroSuite Development
+
 
 ## Overview
 This document outlines comprehensive best practices for AI-assisted development to ensure proper project analysis, efficient implementation, and maintainable code. Following these practices prevents unnecessary work, maintains project consistency, and maximizes development efficiency.
@@ -65,6 +65,25 @@ This document outlines comprehensive best practices for AI-assisted development 
 6. Ensure proper TypeScript interfaces and prop definitions"
 ```
 
+### Component Separation & Anti-Bloat Protocol
+```
+"PREVENT FILE BLOAT by extracting components when:
+1. File exceeds 500 lines of code
+2. Component has reusable functionality
+3. Component has complex internal logic (>50 lines)
+4. Component can be used in multiple places
+5. Component has its own state management
+6. Component has modal/popup functionality
+
+EXTRACTION PROCESS:
+1. Create separate component file in appropriate directory
+2. Extract with proper TypeScript interfaces
+3. Create index.ts for clean imports
+4. Update parent file to use extracted component
+5. Remove embedded component definition
+6. Test integration and fix any linting errors"
+```
+
 ### Incremental Implementation Strategy
 ```
 "Break complex features into atomic, testable components:
@@ -114,7 +133,7 @@ This document outlines comprehensive best practices for AI-assisted development 
 6. Update seed data if necessary"
 ```
 
-## 5. Risk Management & Safety
+## 5. Risk Management & Safety.
 
 ### Safe Development Practices
 - **Backup Strategy**: Read existing files before making major modifications
