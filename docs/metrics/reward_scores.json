@@ -1,11 +1,13 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-17T00:00:00Z",
+  "last_updated": "2025-11-17T21:49:19.862298Z",
   "scores": [],
   "aggregates": {
     "total_prs": 0,
     "average_score": 0.0,
     "score_distribution": {},
-    "trends": []
+    "trends": [],
+    "category_performance": {},
+    "anti_patterns": []
   }
 }
