@@ -88,15 +88,24 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
+          # Check both possible locations
           if [ -f docs/metrics/reward_scores.json ]; then
-            git status
-            git add docs/metrics/reward_scores.json
-            git status
-            git diff --cached docs/metrics/reward_scores.json | head -20
-            git commit -m "chore: update REWARD_SCORE metrics [skip ci]" || echo "No changes to commit"
-            git push origin main || echo "Push failed or no changes"
+            METRICS_FILE="docs/metrics/reward_scores.json"
+          elif [ -f .cursor/docs/metrics/reward_scores.json ]; then
+            METRICS_FILE=".cursor/docs/metrics/reward_scores.json"
           else
-            echo "File docs/metrics/reward_scores.json not found"
+            echo "Metrics file not found in either location"
+            exit 0
+          fi
+          
+          git status
+          git add "$METRICS_FILE"
+          git status
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update REWARD_SCORE metrics [skip ci]"
+            git push origin main || echo "Push failed"
           fi
 
       - name: Upload metrics artifact
