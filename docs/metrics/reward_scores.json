@@ -1,9 +1,9 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-17T23:10:09.765732Z",
+  "last_updated": "2025-11-17T23:10:36.103683Z",
   "scores": [
     {
-      "pr": "8",
+      "pr": "4",
       "score": -9,
       "breakdown": {
         "tests": 0,
@@ -13,7 +13,7 @@
         "security": -3,
         "penalties": -6
       },
-      "timestamp": "2025-11-17T23:09:50.530155Z",
+      "timestamp": "2025-11-17T23:10:17.052734Z",
       "rubric_version": "unknown",
       "author": null,
       "files_changed": 0,
@@ -54,150 +54,6 @@
             "penalties": 0
           },
           "notes": "File: .cursor/scripts/validate_workflow_triggers.py (no contributions)"
-        },
-        "backend/prisma/schema.prisma": {
-          "score": 0,
-          "breakdown": {
-            "tests": 0,
-            "bug_fix": 0,
-            "docs": 0,
-            "performance": 0,
-            "security": 0,
-            "penalties": 0
-          },
-          "notes": "File: backend/prisma/schema.prisma (no contributions)"
-        },
-        "backend/src/billing/billing.controller.ts": {
-          "score": 0,
-          "breakdown": {
-            "tests": 0,
-            "bug_fix": 0,
-            "docs": 0,
-            "performance": 0,
-            "security": 0,
-            "penalties": 0
-          },
-          "notes": "File: backend/src/billing/billing.controller.ts (no contributions)"
-        },
-        "backend/src/billing/billing.service.ts": {
-          "score": 0,
-          "breakdown": {
-            "tests": 0,
-            "bug_fix": 0,
-            "docs": 0,
-            "performance": 0,
-            "security": 0,
-            "penalties": 0
-          },
-          "notes": "File: backend/src/billing/billing.service.ts (no contributions)"
-        },
-        "backend/src/billing/dto/create-invoice-schedule.dto.ts": {
-          "score": 0,
-          "breakdown": {
-            "tests": 0,
-            "bug_fix": 0,
-            "docs": 0,
-            "performance": 0,
-            "security": 0,
-            "penalties": 0
-          },
-          "notes": "File: backend/src/billing/dto/create-invoice-schedule.dto.ts (no contributions)"
-        },
-        "backend/src/billing/dto/create-invoice-template.dto.ts": {
-          "score": 0,
-          "breakdown": {
-            "tests": 0,
-            "bug_fix": 0,
-            "docs": 0,
-            "performance": 0,
-            "security": 0,
-            "penalties": 0
-          },
-          "notes": "File: backend/src/billing/dto/create-invoice-template.dto.ts (no contributions)"
-        },
-        "backend/src/billing/dto/index.ts": {
-          "score": 0,
-          "breakdown": {
-            "tests": 0,
-            "bug_fix": 0,
-            "docs": 0,
-            "performance": 0,
-            "security": 0,
-            "penalties": 0
-          },
-          "notes": "File: backend/src/billing/dto/index.ts (no contributions)"
-        },
-        "backend/src/billing/dto/invoice-schedule-response.dto.ts": {
-          "score": 0,
-          "breakdown": {
-            "tests": 0,
-            "bug_fix": 0,
-            "docs": 0,
-            "performance": 0,
-            "security": 0,
-            "penalties": 0
-          },
-          "notes": "File: backend/src/billing/dto/invoice-schedule-response.dto.ts (no contributions)"
-        },
-        "backend/src/billing/dto/invoice-template-response.dto.ts": {
-          "score": 0,
-          "breakdown": {
-            "tests": 0,
-            "bug_fix": 0,
-            "docs": 0,
-            "performance": 0,
-            "security": 0,
-            "penalties": 0
-          },
-          "notes": "File: backend/src/billing/dto/invoice-template-response.dto.ts (no contributions)"
-        },
-        "backend/src/billing/dto/reminder-history-response.dto.ts": {
-          "score": 0,
-          "breakdown": {
-            "tests": 0,
-            "bug_fix": 0,
-            "docs": 0,
-            "performance": 0,
-            "security": 0,
-            "penalties": 0
-          },
-          "notes": "File: backend/src/billing/dto/reminder-history-response.dto.ts (no contributions)"
-        },
-        "backend/src/billing/dto/update-invoice-schedule.dto.ts": {
-          "score": 0,
-          "breakdown": {
-            "tests": 0,
-            "bug_fix": 0,
-            "docs": 0,
-            "performance": 0,
-            "security": 0,
-            "penalties": 0
-          },
-          "notes": "File: backend/src/billing/dto/update-invoice-schedule.dto.ts (no contributions)"
-        },
-        "backend/src/billing/dto/update-invoice-template.dto.ts": {
-          "score": 0,
-          "breakdown": {
-            "tests": 0,
-            "bug_fix": 0,
-            "docs": 0,
-            "performance": 0,
-            "security": 0,
-            "penalties": 0
-          },
-          "notes": "File: backend/src/billing/dto/update-invoice-template.dto.ts (no contributions)"
-        },
-        "frontend/src/components/billing/InvoiceTemplates.tsx": {
-          "score": 0,
-          "breakdown": {
-            "tests": 0,
-            "bug_fix": 0,
-            "docs": 0,
-            "performance": 0,
-            "security": 0,
-            "penalties": 0
-          },
-          "notes": "File: frontend/src/components/billing/InvoiceTemplates.tsx (no contributions)"
         }
       }
     }
@@ -249,9 +105,9 @@
     },
     "anti_patterns": [
       {
-        "pr": "8",
+        "pr": "4",
         "score": -9,
-        "timestamp": "2025-11-17T23:09:50.530155Z",
+        "timestamp": "2025-11-17T23:10:17.052734Z",
         "breakdown": {
           "tests": 0,
           "bug_fix": 0,
