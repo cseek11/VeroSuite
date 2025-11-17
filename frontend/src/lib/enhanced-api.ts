@@ -2897,7 +2897,348 @@ export const billing = {
       handleApiError(error, 'send invoice reminder');
       throw error;
     }
-  }
+  },
+
+    // Invoice Templates
+    getInvoiceTemplates: async (): Promise<any[]> => {
+      try {
+        const authData = localStorage.getItem('verofield_auth');
+        if (!authData) throw new Error('User not authenticated');
+
+        let token;
+        try {
+          const parsed = JSON.parse(authData);
+          token = parsed.token || parsed;
+        } catch {
+          token = authData;
+        }
+
+        if (!token) throw new Error('No access token found');
+
+        const response = await fetch('http://localhost:3001/api/v1/billing/invoice-templates', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch invoice templates: ${response.statusText}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        handleApiError(error, 'fetch invoice templates');
+        return [];
+      }
+    },
+
+    createInvoiceTemplate: async (templateData: any): Promise<any> => {
+      try {
+        const authData = localStorage.getItem('verofield_auth');
+        if (!authData) throw new Error('User not authenticated');
+
+        let token;
+        try {
+          const parsed = JSON.parse(authData);
+          token = parsed.token || parsed;
+        } catch {
+          token = authData;
+        }
+
+        if (!token) throw new Error('No access token found');
+
+        const response = await fetch('http://localhost:3001/api/v1/billing/invoice-templates', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(templateData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to create invoice template: ${response.statusText}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        handleApiError(error, 'create invoice template');
+        throw error;
+      }
+    },
+
+    updateInvoiceTemplate: async (id: string, templateData: any): Promise<any> => {
+      try {
+        const authData = localStorage.getItem('verofield_auth');
+        if (!authData) throw new Error('User not authenticated');
+
+        let token;
+        try {
+          const parsed = JSON.parse(authData);
+          token = parsed.token || parsed;
+        } catch {
+          token = authData;
+        }
+
+        if (!token) throw new Error('No access token found');
+
+        const response = await fetch(`http://localhost:3001/api/v1/billing/invoice-templates/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(templateData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to update invoice template: ${response.statusText}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        handleApiError(error, 'update invoice template');
+        throw error;
+      }
+    },
+
+    deleteInvoiceTemplate: async (id: string): Promise<void> => {
+      try {
+        const authData = localStorage.getItem('verofield_auth');
+        if (!authData) throw new Error('User not authenticated');
+
+        let token;
+        try {
+          const parsed = JSON.parse(authData);
+          token = parsed.token || parsed;
+        } catch {
+          token = authData;
+        }
+
+        if (!token) throw new Error('No access token found');
+
+        const response = await fetch(`http://localhost:3001/api/v1/billing/invoice-templates/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to delete invoice template: ${response.statusText}`);
+        }
+      } catch (error) {
+        handleApiError(error, 'delete invoice template');
+        throw error;
+      }
+    },
+
+    // Invoice Schedules
+    getInvoiceSchedules: async (): Promise<any[]> => {
+      try {
+        const authData = localStorage.getItem('verofield_auth');
+        if (!authData) throw new Error('User not authenticated');
+
+        let token;
+        try {
+          const parsed = JSON.parse(authData);
+          token = parsed.token || parsed;
+        } catch {
+          token = authData;
+        }
+
+        if (!token) throw new Error('No access token found');
+
+        const response = await fetch('http://localhost:3001/api/v1/billing/invoice-schedules', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch invoice schedules: ${response.statusText}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        handleApiError(error, 'fetch invoice schedules');
+        return [];
+      }
+    },
+
+    createInvoiceSchedule: async (scheduleData: any): Promise<any> => {
+      try {
+        const authData = localStorage.getItem('verofield_auth');
+        if (!authData) throw new Error('User not authenticated');
+
+        let token;
+        try {
+          const parsed = JSON.parse(authData);
+          token = parsed.token || parsed;
+        } catch {
+          token = authData;
+        }
+
+        if (!token) throw new Error('No access token found');
+
+        const response = await fetch('http://localhost:3001/api/v1/billing/invoice-schedules', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(scheduleData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to create invoice schedule: ${response.statusText}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        handleApiError(error, 'create invoice schedule');
+        throw error;
+      }
+    },
+
+    updateInvoiceSchedule: async (id: string, scheduleData: any): Promise<any> => {
+      try {
+        const authData = localStorage.getItem('verofield_auth');
+        if (!authData) throw new Error('User not authenticated');
+
+        let token;
+        try {
+          const parsed = JSON.parse(authData);
+          token = parsed.token || parsed;
+        } catch {
+          token = authData;
+        }
+
+        if (!token) throw new Error('No access token found');
+
+        const response = await fetch(`http://localhost:3001/api/v1/billing/invoice-schedules/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(scheduleData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to update invoice schedule: ${response.statusText}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        handleApiError(error, 'update invoice schedule');
+        throw error;
+      }
+    },
+
+    deleteInvoiceSchedule: async (id: string): Promise<void> => {
+      try {
+        const authData = localStorage.getItem('verofield_auth');
+        if (!authData) throw new Error('User not authenticated');
+
+        let token;
+        try {
+          const parsed = JSON.parse(authData);
+          token = parsed.token || parsed;
+        } catch {
+          token = authData;
+        }
+
+        if (!token) throw new Error('No access token found');
+
+        const response = await fetch(`http://localhost:3001/api/v1/billing/invoice-schedules/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to delete invoice schedule: ${response.statusText}`);
+        }
+      } catch (error) {
+        handleApiError(error, 'delete invoice schedule');
+        throw error;
+      }
+    },
+
+    toggleInvoiceSchedule: async (id: string): Promise<any> => {
+      try {
+        const authData = localStorage.getItem('verofield_auth');
+        if (!authData) throw new Error('User not authenticated');
+
+        let token;
+        try {
+          const parsed = JSON.parse(authData);
+          token = parsed.token || parsed;
+        } catch {
+          token = authData;
+        }
+
+        if (!token) throw new Error('No access token found');
+
+        const response = await fetch(`http://localhost:3001/api/v1/billing/invoice-schedules/${id}/toggle`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to toggle invoice schedule: ${response.statusText}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        handleApiError(error, 'toggle invoice schedule');
+        throw error;
+      }
+    },
+
+    // Reminder History
+    getReminderHistory: async (): Promise<any[]> => {
+      try {
+        const authData = localStorage.getItem('verofield_auth');
+        if (!authData) throw new Error('User not authenticated');
+
+        let token;
+        try {
+          const parsed = JSON.parse(authData);
+          token = parsed.token || parsed;
+        } catch {
+          token = authData;
+        }
+
+        if (!token) throw new Error('No access token found');
+
+        const response = await fetch('http://localhost:3001/api/v1/billing/reminder-history', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch reminder history: ${response.statusText}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        handleApiError(error, 'fetch reminder history');
+        return [];
+      }
+    },
+  };
 };
 
 // ============================================================================
