@@ -1,13 +1,135 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-17T23:09:09.449387Z",
-  "scores": [],
+  "last_updated": "2025-11-17T23:09:51.964594Z",
+  "scores": [
+    {
+      "pr": "5",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-17T23:09:31.752551Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {
+        ".cursor/scripts/analyze_metrics.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/analyze_metrics.py (no contributions)"
+        },
+        ".cursor/scripts/monitor_changes.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/monitor_changes.py (no contributions)"
+        },
+        ".cursor/scripts/validate_workflow_triggers.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/validate_workflow_triggers.py (no contributions)"
+        },
+        "backend/prisma/schema.prisma": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/prisma/schema.prisma (no contributions)"
+        }
+      }
+    }
+  ],
   "aggregates": {
-    "total_prs": 0,
-    "average_score": 0.0,
-    "score_distribution": {},
-    "trends": [],
-    "category_performance": {},
-    "anti_patterns": []
+    "total_prs": 1,
+    "average_score": -9.0,
+    "score_distribution": {
+      "negative (<0)": 1
+    },
+    "trends": [
+      {
+        "period": "2025-W46",
+        "average": -9.0,
+        "count": 1
+      }
+    ],
+    "category_performance": {
+      "tests": {
+        "average": 0.0,
+        "total": 0,
+        "count": 0
+      },
+      "bug_fix": {
+        "average": 0.0,
+        "total": 0,
+        "count": 0
+      },
+      "docs": {
+        "average": 0.0,
+        "total": 0,
+        "count": 0
+      },
+      "performance": {
+        "average": 0.0,
+        "total": 0,
+        "count": 0
+      },
+      "security": {
+        "average": -3.0,
+        "total": -3,
+        "count": 1
+      },
+      "penalties": {
+        "average": -6.0,
+        "total": -6,
+        "count": 1
+      }
+    },
+    "anti_patterns": [
+      {
+        "pr": "5",
+        "score": -9,
+        "timestamp": "2025-11-17T23:09:31.752551Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      }
+    ]
   }
 }
