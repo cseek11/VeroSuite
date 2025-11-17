@@ -28,14 +28,15 @@ jobs:
         id: get-run-id
         if: github.event_name == 'workflow_dispatch'
         run: |
-          # Get the most recent successful run
-          RUN_ID=$(gh run list --workflow="swarm_compute_reward_score.yml" --limit 10 --json databaseId,conclusion --jq '.[] | select(.conclusion == "success") | .databaseId' | head -1)
+          # Get the most recent successful run that actually completed (not skipped)
+          # Filter by conclusion == "success" and status == "completed"
+          RUN_ID=$(gh run list --workflow="swarm_compute_reward_score.yml" --limit 20 --json databaseId,conclusion,status --jq '.[] | select(.conclusion == "success" and .status == "completed") | .databaseId' | head -1)
           if [ -z "$RUN_ID" ]; then
             echo "No successful REWARD_SCORE run found"
             exit 1
           fi
           echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
-          echo "Found run ID: $RUN_ID"
+          echo "Found successful run ID: $RUN_ID"
 
       - name: Download reward artifact
         uses: actions/download-artifact@v4
