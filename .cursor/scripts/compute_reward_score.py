@@ -161,6 +161,109 @@ def parse_backend_coverage(coverage_path: str) -> Dict:
     }
 
 
+def parse_diff_files(diff: str) -> Dict[str, str]:
+    """
+    Parse diff to extract individual files and their changes.
+    
+    Returns:
+        Dictionary mapping file paths to their diff content
+    """
+    files = {}
+    if not diff:
+        return files
+    
+    current_file = None
+    current_diff = []
+    
+    for line in diff.split("\n"):
+        # Check for file header (+++ or ---)
+        if line.startswith("+++ b/") or line.startswith("--- a/"):
+            # Save previous file if exists
+            if current_file and current_diff:
+                files[current_file] = "\n".join(current_diff)
+            
+            # Extract file path
+            if line.startswith("+++ b/"):
+                current_file = line[6:].strip()  # Remove "+++ b/"
+            elif line.startswith("--- a/") and not current_file:
+                current_file = line[6:].strip()  # Remove "--- a/"
+            
+            current_diff = [line]
+        elif current_file:
+            current_diff.append(line)
+    
+    # Save last file
+    if current_file and current_diff:
+        files[current_file] = "\n".join(current_diff)
+    
+    return files
+
+
+def score_file(
+    file_path: str,
+    file_diff: str,
+    coverage: dict,
+    static_analysis: dict,
+    pr_desc: str,
+    rubric: dict
+) -> Tuple[int, dict, str]:
+    """
+    Score a single file within a PR.
+    
+    Returns:
+        Tuple of (score, breakdown, notes)
+    """
+    breakdown = {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": 0,
+        "penalties": 0,
+    }
+    
+    notes_list = []
+    
+    # Score each category for this file
+    tests_score, tests_note = score_tests(coverage, rubric, file_diff)
+    breakdown["tests"] = tests_score
+    if tests_score > 0:
+        notes_list.append(f"Tests: {tests_note}")
+    
+    bug_fix_score, bug_fix_note = detect_bug_fix(pr_desc, file_diff, rubric)
+    breakdown["bug_fix"] = bug_fix_score
+    if bug_fix_score > 0:
+        notes_list.append(f"Bug Fix: {bug_fix_note}")
+    
+    docs_score, docs_note = score_documentation(file_diff, rubric)
+    breakdown["docs"] = docs_score
+    if docs_score > 0:
+        notes_list.append(f"Docs: {docs_note}")
+    
+    performance_score, performance_note = score_performance(file_diff, rubric)
+    breakdown["performance"] = performance_score
+    if performance_score > 0:
+        notes_list.append(f"Performance: {performance_note}")
+    
+    # Security is PR-level, not file-level (static analysis is PR-wide)
+    # But we can check if this file has security-related changes
+    security_score = 0
+    security_note = "No security analysis for individual files"
+    breakdown["security"] = security_score
+    
+    # Penalties are PR-level, not file-level
+    penalties_score = 0
+    penalties_note = "Penalties applied at PR level"
+    breakdown["penalties"] = penalties_score
+    
+    # Calculate file score
+    file_score = sum(breakdown.values())
+    
+    notes = f"File: {file_path}\n" + "\n".join(notes_list) if notes_list else f"File: {file_path} (no contributions)"
+    
+    return file_score, breakdown, notes
+
+
 def detect_new_test_files(diff: str) -> int:
     """Detect new test files in PR diff."""
     if not diff:
@@ -432,9 +535,16 @@ def compute_score(
     static_analysis: dict,
     pr_desc: str,
     diff: str,
-    rubric: dict
-) -> Tuple[int, dict, str]:
-    """Compute total REWARD_SCORE and breakdown."""
+    rubric: dict,
+    include_file_level: bool = True
+) -> Tuple[int, dict, str, dict]:
+    """
+    Compute total REWARD_SCORE and breakdown with optional file-level scoring.
+    
+    Returns:
+        Tuple of (total_score, breakdown, notes, file_scores)
+        file_scores: Dict mapping file paths to their scores and breakdowns
+    """
     breakdown = {
         "tests": 0,
         "bug_fix": 0,
@@ -443,38 +553,81 @@ def compute_score(
         "security": 0,
         "penalties": 0,
     }
-    
+
     notes_list = []
-    
-    # Score each category
+    file_scores = {}
+
+    # Parse files from diff if file-level scoring enabled
+    if include_file_level and diff:
+        files = parse_diff_files(diff)
+        
+        # Score each file individually
+        for file_path, file_diff in files.items():
+            file_score, file_breakdown, file_notes = score_file(
+                file_path, file_diff, coverage, static_analysis, pr_desc, rubric
+            )
+            file_scores[file_path] = {
+                "score": file_score,
+                "breakdown": file_breakdown,
+                "notes": file_notes
+            }
+        
+        # Aggregate file scores into PR-level breakdown
+        for file_path, file_data in file_scores.items():
+            file_breakdown = file_data["breakdown"]
+            # Aggregate positive contributions (tests, bug_fix, docs, performance)
+            # Use max to avoid double-counting (file scores are already calculated)
+            breakdown["tests"] = max(breakdown["tests"], file_breakdown.get("tests", 0))
+            breakdown["bug_fix"] = max(breakdown["bug_fix"], file_breakdown.get("bug_fix", 0))
+            breakdown["docs"] = max(breakdown["docs"], file_breakdown.get("docs", 0))
+            breakdown["performance"] = max(breakdown["performance"], file_breakdown.get("performance", 0))
+        
+        # Add file-level summary to notes
+        if file_scores:
+            notes_list.append(f"\n## File-Level Breakdown ({len(file_scores)} files):")
+            for file_path, file_data in sorted(file_scores.items()):
+                file_score = file_data["score"]
+                notes_list.append(f"- **{file_path}**: {file_score:+d}/10")
+                if file_data["breakdown"]["tests"] > 0:
+                    notes_list.append(f"  - Tests: +{file_data['breakdown']['tests']}")
+                if file_data["breakdown"]["bug_fix"] > 0:
+                    notes_list.append(f"  - Bug Fix: +{file_data['breakdown']['bug_fix']}")
+                if file_data["breakdown"]["docs"] > 0:
+                    notes_list.append(f"  - Docs: +{file_data['breakdown']['docs']}")
+                if file_data["breakdown"]["performance"] > 0:
+                    notes_list.append(f"  - Performance: +{file_data['breakdown']['performance']}")
+
+    # Score each category at PR level (for aggregation and security/penalties)
     tests_score, tests_note = score_tests(coverage, rubric, diff)
-    breakdown["tests"] = tests_score
+    # Use PR-level score if higher than aggregated file scores
+    breakdown["tests"] = max(breakdown.get("tests", 0), tests_score)
     notes_list.append(f"Tests: {tests_note}")
-    
+
     bug_fix_score, bug_fix_note = detect_bug_fix(pr_desc, diff, rubric)
-    breakdown["bug_fix"] = bug_fix_score
+    breakdown["bug_fix"] = max(breakdown.get("bug_fix", 0), bug_fix_score)
     notes_list.append(f"Bug Fix: {bug_fix_note}")
-    
+
     docs_score, docs_note = score_documentation(diff, rubric)
-    breakdown["docs"] = docs_score
+    breakdown["docs"] = max(breakdown.get("docs", 0), docs_score)
     notes_list.append(f"Docs: {docs_note}")
-    
+
     # Performance scoring
     performance_score, performance_note = score_performance(diff, rubric)
-    breakdown["performance"] = performance_score
+    breakdown["performance"] = max(breakdown.get("performance", 0), performance_score)
     notes_list.append(f"Performance: {performance_note}")
-    
+
+    # Security and penalties are PR-level (not file-level)
     security_score, security_note = score_security(static_analysis, rubric)
     breakdown["security"] = security_score
     notes_list.append(f"Security: {security_note}")
-    
+
     penalties_score, penalties_note = calculate_penalties(coverage, static_analysis, rubric)
     breakdown["penalties"] = penalties_score
     notes_list.append(f"Penalties: {penalties_note}")
     
     # Calculate total score
     total_score = sum(breakdown.values())
-    
+
     # Apply security blocker rule
     if security_score <= -3:
         total_score = min(total_score, -3)
@@ -482,7 +635,7 @@ def compute_score(
     
     notes = "\n".join(f"- {note}" for note in notes_list)
     
-    return total_score, breakdown, notes
+    return total_score, breakdown, notes, file_scores
 
 
 def get_decision_recommendation(score: int, breakdown: dict, static_analysis: dict) -> Tuple[str, str]:
@@ -710,12 +863,13 @@ def main() -> None:
         diff = get_pr_diff(args.pr, repo_path)
     
     # Compute score
-    score, breakdown, notes = compute_score(
+    score, breakdown, notes, file_scores = compute_score(
         coverage,
         static_analysis,
         pr_desc,
         diff,
-        rubric
+        rubric,
+        include_file_level=True
     )
     
     # Generate comment with decision recommendation
@@ -737,10 +891,12 @@ def main() -> None:
         "score": score,
         "breakdown": breakdown,
         "comment": comment,
+        "file_scores": file_scores,  # File-level scoring breakdown
         "metadata": {
             "pr": args.pr,
             "computed_at": datetime.utcnow().isoformat() + "Z",
-            "rubric_version": rubric.get("version", "unknown")
+            "rubric_version": rubric.get("version", "unknown"),
+            "file_level_scoring": True
         }
     }
     
