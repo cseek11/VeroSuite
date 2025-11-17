@@ -99,7 +99,8 @@ jobs:
           fi
           
           git status
-          git add "$METRICS_FILE"
+          # Force add the file even if it's in .gitignore
+          git add -f "$METRICS_FILE"
           git status
           if git diff --cached --quiet; then
             echo "No changes to commit"
