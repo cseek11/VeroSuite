@@ -89,9 +89,14 @@ jobs:
           git config --local user.name "GitHub Action"
           
           if [ -f docs/metrics/reward_scores.json ]; then
+            git status
             git add docs/metrics/reward_scores.json
-            git commit -m "chore: update REWARD_SCORE metrics [skip ci]" || exit 0
-            git push || exit 0
+            git status
+            git diff --cached docs/metrics/reward_scores.json | head -20
+            git commit -m "chore: update REWARD_SCORE metrics [skip ci]" || echo "No changes to commit"
+            git push origin main || echo "Push failed or no changes"
+          else
+            echo "File docs/metrics/reward_scores.json not found"
           fi
 
       - name: Upload metrics artifact
