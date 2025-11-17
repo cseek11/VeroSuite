@@ -366,7 +366,7 @@ export class BillingController {
     }
 
     if (invoiceIds.length === 0) {
-      throw new BadRequestException('At least one invoice ID is required');
+      throw new BadRequestException('At least one invoice ID is required');     
     }
 
     return this.billingService.sendInvoiceReminder(
@@ -375,4 +375,127 @@ export class BillingController {
       sendReminderDto.message
     );
   }
-}
+
+    // ============================================================================
+    // INVOICE TEMPLATE ENDPOINTS
+    // ============================================================================
+
+    @Get('invoice-templates')
+    @ApiOperation({ summary: 'Get all invoice templates' })
+    @ApiResponse({ status: 200, description: 'Invoice templates retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async getInvoiceTemplates(@Request() req: any) {
+      const tenantId = req.user?.tenantId || req.tenantId;
+      return this.billingService.getInvoiceTemplates(tenantId);
+    }
+
+    @Post('invoice-templates')
+    @ApiOperation({ summary: 'Create a new invoice template' })
+    @ApiResponse({ status: 201, description: 'Invoice template created successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async createInvoiceTemplate(
+      @Body() createTemplateDto: any,
+      @Request() req: any
+    ) {
+      const tenantId = req.user?.tenantId || req.tenantId;
+      return this.billingService.createInvoiceTemplate(createTemplateDto, req.user.userId, tenantId);
+    }
+
+    @Put('invoice-templates/:id')
+    @ApiOperation({ summary: 'Update invoice template' })
+    @ApiResponse({ status: 200, description: 'Invoice template updated successfully' })
+    @ApiResponse({ status: 404, description: 'Invoice template not found' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async updateInvoiceTemplate(
+      @Param('id') id: string,
+      @Body() updateTemplateDto: any,
+      @Request() req: any
+    ) {
+      return this.billingService.updateInvoiceTemplate(id, updateTemplateDto, req.user.userId);
+    }
+
+    @Delete('invoice-templates/:id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Delete invoice template' })
+    @ApiResponse({ status: 204, description: 'Invoice template deleted successfully' })
+    @ApiResponse({ status: 404, description: 'Invoice template not found' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async deleteInvoiceTemplate(@Param('id') id: string) {
+      return this.billingService.deleteInvoiceTemplate(id);
+    }
+
+    // ============================================================================
+    // INVOICE SCHEDULE ENDPOINTS
+    // ============================================================================
+
+    @Get('invoice-schedules')
+    @ApiOperation({ summary: 'Get all invoice schedules' })
+    @ApiResponse({ status: 200, description: 'Invoice schedules retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async getInvoiceSchedules(@Request() req: any) {
+      const tenantId = req.user?.tenantId || req.tenantId;
+      return this.billingService.getInvoiceSchedules(tenantId);
+    }
+
+    @Post('invoice-schedules')
+    @ApiOperation({ summary: 'Create a new invoice schedule' })
+    @ApiResponse({ status: 201, description: 'Invoice schedule created successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async createInvoiceSchedule(
+      @Body() createScheduleDto: any,
+      @Request() req: any
+    ) {
+      const tenantId = req.user?.tenantId || req.tenantId;
+      return this.billingService.createInvoiceSchedule(createScheduleDto, req.user.userId, tenantId);
+    }
+
+    @Put('invoice-schedules/:id')
+    @ApiOperation({ summary: 'Update invoice schedule' })
+    @ApiResponse({ status: 200, description: 'Invoice schedule updated successfully' })
+    @ApiResponse({ status: 404, description: 'Invoice schedule not found' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async updateInvoiceSchedule(
+      @Param('id') id: string,
+      @Body() updateScheduleDto: any,
+      @Request() req: any
+    ) {
+      return this.billingService.updateInvoiceSchedule(id, updateScheduleDto, req.user.userId);
+    }
+
+    @Delete('invoice-schedules/:id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Delete invoice schedule' })
+    @ApiResponse({ status: 204, description: 'Invoice schedule deleted successfully' })
+    @ApiResponse({ status: 404, description: 'Invoice schedule not found' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async deleteInvoiceSchedule(@Param('id') id: string) {
+      return this.billingService.deleteInvoiceSchedule(id);
+    }
+
+    @Post('invoice-schedules/:id/toggle')
+    @ApiOperation({ summary: 'Toggle invoice schedule active status' })
+    @ApiResponse({ status: 200, description: 'Invoice schedule toggled successfully' })
+    @ApiResponse({ status: 404, description: 'Invoice schedule not found' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async toggleInvoiceSchedule(
+      @Param('id') id: string,
+      @Request() req: any
+    ) {
+      return this.billingService.toggleInvoiceSchedule(id, req.user.userId);
+    }
+
+    // ============================================================================
+    // REMINDER HISTORY ENDPOINTS
+    // ============================================================================
+
+    @Get('reminder-history')
+    @ApiOperation({ summary: 'Get reminder history' })
+    @ApiResponse({ status: 200, description: 'Reminder history retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async getReminderHistory(@Request() req: any) {
+      const tenantId = req.user?.tenantId || req.tenantId;
+      return this.billingService.getReminderHistory(tenantId);
+    }
+  }
