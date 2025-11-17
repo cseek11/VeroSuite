@@ -27,6 +27,8 @@ jobs:
       - name: Get latest REWARD_SCORE run ID
         id: get-run-id
         if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Get the most recent successful run that actually completed (not skipped)
           # Filter by conclusion == "success" and status == "completed", then take the first one
