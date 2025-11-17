@@ -56,10 +56,10 @@ jobs:
           PR_NUM: ${{ steps.extract-score.outputs.pr }}
           SCORE: ${{ steps.extract-score.outputs.score }}
         run: |
-            if [ "${{ steps.extract-score.outputs.found }}" = "true" ]; then
-              python .cursor/scripts/collect_metrics.py \
-                --pr "$PR_NUM" \
-                --reward-json reward.json
+          if [ "${{ steps.extract-score.outputs.found }}" = "true" ]; then
+            python .cursor/scripts/collect_metrics.py \
+              --pr "$PR_NUM" \
+              --reward-json reward.json
           else
             # Just recalculate aggregates
             python .cursor/scripts/collect_metrics.py --aggregate-only
