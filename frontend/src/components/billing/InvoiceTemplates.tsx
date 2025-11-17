@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
+import { billing } from '@/lib/enhanced-api';
 import InvoiceForm from './InvoiceForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/Dialog';
 
@@ -67,16 +68,31 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
 
   const queryClient = useQueryClient();
 
-  // Mock templates - In production, this would fetch from API
-  const { data: templates = [], isLoading } = useQuery<InvoiceTemplate[]>({
+  // Fetch templates from API
+  const { data: templates = [], isLoading } = useQuery<InvoiceTemplate[]>({     
     queryKey: ['invoice-templates'],
     queryFn: async () => {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/v1/billing/invoice-templates');
-      // return response.json();
-      
-      // Mock data for now
-      return [
+      try {
+        const data = await billing.getInvoiceTemplates();
+        return data.map(template => ({
+          id: template.id,
+          name: template.name,
+          description: template.description,
+          items: Array.isArray(template.items) ? template.items : [],
+          tags: template.tags || [],
+          created_at: template.created_at,
+          updated_at: template.updated_at,
+        }));
+      } catch (error) {
+        logger.error('Failed to fetch invoice templates', error, 'InvoiceTemplates');
+        toast.error('Failed to load templates. Please try again.');
+        return [];
+      }
+    },
+  });
+
+  // Mock data fallback (for development/testing)
+  const mockTemplates = [
         {
           id: '1',
           name: 'Standard Monthly Service',
@@ -160,24 +176,26 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
     setShowTemplateForm(true);
   };
 
+  const deleteTemplateMutation = useMutation({
+    mutationFn: async (templateId: string) => {
+      await billing.deleteInvoiceTemplate(templateId);
+    },
+    onSuccess: () => {
+      logger.debug('Template deleted', {}, 'InvoiceTemplates');
+      toast.success('Template deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['invoice-templates'] });
+    },
+    onError: (error: unknown) => {
+      logger.error('Failed to delete template', error, 'InvoiceTemplates');
+      toast.error('Failed to delete template. Please try again.');
+    },
+  });
+
   const handleDeleteTemplate = async (templateId: string) => {
     if (!confirm('Are you sure you want to delete this template?')) {
       return;
     }
-
-    try {
-      // TODO: Replace with actual API call
-      // await fetch(`/api/v1/billing/invoice-templates/${templateId}`, { method: 'DELETE' });
-      
-      logger.debug('Template deleted', { templateId }, 'InvoiceTemplates');
-      toast.success('Template deleted successfully');
-      
-      // Invalidate query to refetch
-      queryClient.invalidateQueries({ queryKey: ['invoice-templates'] });
-    } catch (error) {
-      logger.error('Failed to delete template', error, 'InvoiceTemplates');
-      toast.error('Failed to delete template. Please try again.');
-    }
+    deleteTemplateMutation.mutate(templateId);
   };
 
   const handleApplyTemplate = (template: InvoiceTemplate) => {
