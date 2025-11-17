@@ -288,11 +288,10 @@ def main():
     
     if not args.workflows_dir.exists():
         logger.error(
-            f"Workflows directory not found: {args.workflows_dir}",
+            "Workflows directory not found",
             operation="main",
             workflows_dir=str(args.workflows_dir)
         )
-        print(f"Error: Workflows directory not found: {args.workflows_dir}", file=sys.stderr)
         sys.exit(1)
     
     violations, workflow_names = validate_workflows(args.workflows_dir)
@@ -303,18 +302,38 @@ def main():
             "workflow_count": len(workflow_names),
             "violation_count": len(violations)
         }
+        # CLI output - print to stdout is acceptable for JSON output
         print(json.dumps(output, indent=2))
+        logger.info(
+            "Workflow validation completed",
+            operation="main",
+            violation_count=len(violations),
+            workflow_count=len(workflow_names)
+        )
     else:
         if violations:
+            # CLI output - print to stdout is acceptable for CLI output
             print(f"❌ Found {len(violations)} violation(s):\n")
             for i, violation in enumerate(violations, 1):
-                print(f"{i}. [{violation['severity'].upper()}] {violation['type']}")
+                print(f"{i}. [{violation['severity'].upper()}] {violation['type']}")                                                                            
                 print(f"   File: {violation['file']}")
                 print(f"   Reason: {violation['reason']}")
                 print(f"   Suggestion: {violation['suggestion']}")
                 print()
+            logger.warn(
+                f"Found {len(violations)} workflow validation violation(s)",
+                operation="main",
+                violation_count=len(violations),
+                critical_count=len([v for v in violations if v["severity"] == "critical"])
+            )
         else:
+            # CLI output - print to stdout is acceptable for CLI output
             print("✅ All workflows pass validation")
+            logger.info(
+                "All workflows pass validation",
+                operation="main",
+                workflow_count=len(workflow_names)
+            )
     
     if violations and args.exit_on_error:
         critical_violations = [v for v in violations if v["severity"] == "critical"]

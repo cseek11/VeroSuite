@@ -13,7 +13,7 @@ import pathlib
 import subprocess
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Set
 from collections import defaultdict
 
@@ -190,13 +190,18 @@ def get_changed_files(repo_path: pathlib.Path) -> Dict[str, Dict]:
                                 if len(parts) > 1:
                                     try:
                                         lines_changed = int(parts[1].strip().split()[0])
-                                    except:
-                                        pass
+                                    except (ValueError, IndexError) as e:
+                                        logger.debug(
+                                            f"Could not parse lines_changed from git diff stat: {stat_line}",
+                                            operation="get_changed_files",
+                                            error=e
+                                        )
+                                        lines_changed = 0
                     
                     changed_files[file_path] = {
                         "status": status,
                         "lines_changed": lines_changed,
-                        "last_modified": datetime.utcnow().isoformat() + "Z"
+                        "last_modified": datetime.now(UTC).isoformat()
                     }
                 except Exception as e:
                     logger.debug(
@@ -207,7 +212,7 @@ def get_changed_files(repo_path: pathlib.Path) -> Dict[str, Dict]:
                     changed_files[file_path] = {
                         "status": status,
                         "lines_changed": 0,
-                        "last_modified": datetime.utcnow().isoformat() + "Z"
+                        "last_modified": datetime.now(UTC).isoformat()
                     }
     
     except Exception as e:
@@ -277,12 +282,24 @@ def check_time_based_trigger(state: Dict, config: Dict) -> bool:
     if not state.get("last_change_time"):
         return False
     
-    last_change = datetime.fromisoformat(state["last_change_time"].replace("Z", "+00:00"))
-    now = datetime.utcnow()
+    # Parse last_change_time - handle both "Z" and "+00:00" formats
+    # Also handle malformed strings with double timezone suffixes
+    last_change_str = state["last_change_time"]
+    # Remove any double timezone suffixes (e.g., "+00:00+00:00" -> "+00:00")
+    if "+00:00+00:00" in last_change_str:
+        last_change_str = last_change_str.replace("+00:00+00:00", "+00:00")
+    elif "-00:00-00:00" in last_change_str:
+        last_change_str = last_change_str.replace("-00:00-00:00", "-00:00")
+    # Handle "Z" suffix
+    if last_change_str.endswith("Z"):
+        last_change_str = last_change_str.replace("Z", "+00:00")
+    last_change = datetime.fromisoformat(last_change_str)
+    now = datetime.now(UTC)
     
     # Check inactivity threshold
     inactivity_hours = time_config.get("inactivity_hours", 4)
-    if (now - last_change.replace(tzinfo=None)).total_seconds() >= inactivity_hours * 3600:
+    # Both datetimes are timezone-aware, compare directly
+    if (now - last_change).total_seconds() >= inactivity_hours * 3600:
         logger.info(
             f"Inactivity threshold met: {inactivity_hours} hours",
             operation="check_time_based_trigger"
@@ -291,9 +308,21 @@ def check_time_based_trigger(state: Dict, config: Dict) -> bool:
     
     # Check max work hours
     if state.get("first_change_time"):
-        first_change = datetime.fromisoformat(state["first_change_time"].replace("Z", "+00:00"))
+        # Parse first_change_time - handle both "Z" and "+00:00" formats
+        # Also handle malformed strings with double timezone suffixes
+        first_change_str = state["first_change_time"]
+        # Remove any double timezone suffixes (e.g., "+00:00+00:00" -> "+00:00")
+        if "+00:00+00:00" in first_change_str:
+            first_change_str = first_change_str.replace("+00:00+00:00", "+00:00")
+        elif "-00:00-00:00" in first_change_str:
+            first_change_str = first_change_str.replace("-00:00-00:00", "-00:00")
+        # Handle "Z" suffix
+        if first_change_str.endswith("Z"):
+            first_change_str = first_change_str.replace("Z", "+00:00")
+        first_change = datetime.fromisoformat(first_change_str)
         max_work_hours = time_config.get("max_work_hours", 8)
-        if (now - first_change.replace(tzinfo=None)).total_seconds() >= max_work_hours * 3600:
+        # Both datetimes are timezone-aware, compare directly
+        if (now - first_change).total_seconds() >= max_work_hours * 3600:
             logger.info(
                 f"Max work hours threshold met: {max_work_hours} hours",
                 operation="check_time_based_trigger"
@@ -509,7 +538,8 @@ def main() -> None:
         return
     
     # Update state
-    now = datetime.utcnow().isoformat() + "Z"
+    # datetime.now(UTC).isoformat() already includes +00:00, don't add "Z"
+    now = datetime.now(UTC).isoformat()
     state["last_change_time"] = now
     if not state.get("first_change_time"):
         state["first_change_time"] = now

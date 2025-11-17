@@ -281,28 +281,47 @@ def main() -> None:
     if args.json:
         output = {}
         if args.history:
-            output["history"] = analyze_score_history(metrics, args.history)
+            output["history"] = analyze_score_history(metrics, args.history)    
         if args.categories:
-            output["categories"] = analyze_category_performance(metrics)
+            output["categories"] = analyze_category_performance(metrics)        
         if args.anti_patterns:
             output["anti_patterns"] = analyze_anti_patterns(metrics)
+        # CLI output - print to stdout is acceptable for JSON output
         print(json.dumps(output, indent=2))
+        logger.info(
+            "Analysis completed",
+            operation="main",
+            output_format="json",
+            history_days=args.history if args.history else None
+        )
     elif args.report:
         report_path = Path(args.report)
         report = generate_trend_report(metrics, report_path)
+        # CLI output - print to stdout is acceptable for report output
         print(report)
+        logger.info(
+            "Trend report generated",
+            operation="main",
+            report_path=str(report_path)
+        )
     else:
         # Default: show all analyses
         history = analyze_score_history(metrics, args.history)
         categories = analyze_category_performance(metrics)
         anti_patterns = analyze_anti_patterns(metrics)
-        
+
+        # CLI output - print to stdout is acceptable for CLI output
         print("=== Score History ===")
         print(json.dumps(history, indent=2))
         print("\n=== Category Performance ===")
         print(json.dumps(categories, indent=2))
         print("\n=== Anti-Patterns ===")
         print(json.dumps(anti_patterns, indent=2))
+        logger.info(
+            "Analysis completed",
+            operation="main",
+            history_days=args.history
+        )
 
 
 if __name__ == "__main__":
