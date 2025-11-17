@@ -32,7 +32,9 @@ jobs:
         run: |
           # Get the most recent successful run that actually completed (not skipped)
           # Filter by conclusion == "success" and status == "completed", then take the first one
+          echo "Fetching successful REWARD_SCORE runs..."
           RUN_ID=$(gh run list --workflow="swarm_compute_reward_score.yml" --limit 50 --json databaseId,conclusion,status --jq '[.[] | select(.conclusion == "success" and .status == "completed")] | first | .databaseId')
+          echo "Query result: $RUN_ID"
           if [ -z "$RUN_ID" ] || [ "$RUN_ID" == "null" ]; then
             echo "No successful REWARD_SCORE run found"
             exit 1
