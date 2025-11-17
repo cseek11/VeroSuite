@@ -29,9 +29,9 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: |
           # Get the most recent successful run that actually completed (not skipped)
-          # Filter by conclusion == "success" and status == "completed"
-          RUN_ID=$(gh run list --workflow="swarm_compute_reward_score.yml" --limit 20 --json databaseId,conclusion,status --jq '.[] | select(.conclusion == "success" and .status == "completed") | .databaseId' | head -1)
-          if [ -z "$RUN_ID" ]; then
+          # Filter by conclusion == "success" and status == "completed", then take the first one
+          RUN_ID=$(gh run list --workflow="swarm_compute_reward_score.yml" --limit 50 --json databaseId,conclusion,status --jq '[.[] | select(.conclusion == "success" and .status == "completed")] | first | .databaseId')
+          if [ -z "$RUN_ID" ] || [ "$RUN_ID" == "null" ]; then
             echo "No successful REWARD_SCORE run found"
             exit 1
           fi
