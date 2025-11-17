@@ -1,0 +1,56 @@
+# Automated PR Creation Configuration
+# Last Updated: 2025-11-17
+
+version: 1.0
+
+# Time-based triggers
+time_based:
+  enabled: true
+  inactivity_hours: 4  # Create PR after 4 hours of no file changes
+  max_work_hours: 8    # Or after 8 hours of continuous work
+
+# Change threshold triggers
+change_threshold:
+  enabled: true
+  min_files: 5         # Create PR when 5+ files changed
+  min_lines: 200       # Or when 200+ lines changed
+  require_test_file: false  # Require at least one test file
+
+# Logical grouping
+logical_grouping:
+  enabled: true
+  group_by_directory: true   # Group files by directory (same feature area)
+  group_by_file_type: true   # Group files by type (tests, docs, etc.)
+  max_group_size: 10         # Maximum files per group
+
+# Feature detection
+feature_detection:
+  enabled: false  # Disabled by default (can be enabled later)
+  require_tests: false
+  require_docs: false
+
+# Manual override
+manual_override:
+  enabled: true
+  command: "python .cursor/scripts/create_pr.py --auto"
+
+# PR creation settings
+pr_settings:
+  base_branch: "main"
+  auto_title: true  # Generate title from changes
+  auto_body: true   # Generate body from changes
+  include_file_list: true  # Include list of changed files in PR body
+
+# Excluded paths (don't track these)
+excluded_paths:
+  - ".git/"
+  - "node_modules/"
+  - ".venv/"
+  - "__pycache__/"
+  - ".cursor/cache/"
+  - "*.log"
+  - "*.tmp"
+
+# Included paths (only track these if specified)
+included_paths: []  # Empty = track all (except excluded)
+
