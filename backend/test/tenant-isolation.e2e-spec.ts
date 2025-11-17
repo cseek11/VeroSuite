@@ -2,52 +2,106 @@ import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { getTestPrismaClient } from './utils/test-database';
+import { getTestAuthToken } from './utils/test-auth';
+import { configureTestApp } from './utils/test-app';
+import { TEST_USERS, TEST_TENANTS } from './global-setup';
 
 describe('Tenant Isolation (e2e)', () => {
   let app: INestApplication;
+  const prisma = getTestPrismaClient();
   let tokenA: string;
   let tokenB: string;
   let jobIdA: string;
+  let createdJobIds: string[] = [];
 
   beforeAll(async () => {
     const moduleFixture = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = moduleFixture.createNestApplication();
+    configureTestApp(app);
     await app.init();
 
-    // login tenant A
-    const resA = await request(app.getHttpServer()).post('/auth/login').send({ email: 'dispatcher@acepest.com', password: 'password123' });
-    tokenA = resA.body.access_token;
+    // Get tokens for different tenant users
+    tokenA = await getTestAuthToken(TEST_USERS.DISPATCHER); // Tenant 1 user
+    tokenB = await getTestAuthToken(TEST_USERS.TENANT2);    // Tenant 2 user
 
-    // login tenant B
-    const resB = await request(app.getHttpServer()).post('/auth/login').send({ email: 'dispatcher@greenshield.com', password: 'password123' });
-    tokenB = resB.body.access_token;
+    // Create a job for tenant 1
+    const customer = await prisma.account.create({
+      data: {
+        tenant_id: TEST_TENANTS.TENANT1,
+        name: 'Test Customer Tenant 1',
+        account_type: 'commercial',
+        status: 'active',
+      },
+    });
 
-    // Get a job id for tenant A (seeded for today)
-    const todayJobsA = await request(app.getHttpServer())
-      .get('/v1/jobs/today')
-      .set('Authorization', `Bearer ${tokenA}`)
-      .set('x-tenant-id', '11111111-1111-1111-1111-111111111111')
-      .expect(200);
+    const workOrder = await prisma.workOrder.create({
+      data: {
+        tenant_id: TEST_TENANTS.TENANT1,
+        customer_id: customer.id,
+        description: 'Test work order',
+        status: 'pending',
+        priority: 'medium',
+      },
+    });
 
-    if (!Array.isArray(todayJobsA.body) || todayJobsA.body.length === 0) {
-      throw new Error('No jobs seeded for Tenant A');
+    const job = await prisma.job.create({
+      data: {
+        tenant_id: TEST_TENANTS.TENANT1,
+        work_order_id: workOrder.id,
+        account_id: customer.id,
+        location_id: (await prisma.location.create({
+          data: {
+            tenant_id: TEST_TENANTS.TENANT1,
+            account_id: customer.id,
+            name: 'Test Location',
+            address_line1: '123 Test St',
+            city: 'Test City',
+            state: 'TX',
+            postal_code: '12345',
+          },
+        })).id,
+        scheduled_date: new Date(),
+        status: 'unassigned',
+        priority: 'medium',
+      },
+    });
+    jobIdA = job.id;
+    createdJobIds.push(job.id);
+  });
+
+  beforeEach(() => {
+    createdJobIds = [];
+  });
+
+  afterEach(async () => {
+    // Clean up jobs created during test
+    if (createdJobIds.length > 0) {
+      await prisma.job.deleteMany({
+        where: { id: { in: createdJobIds } }
+      });
     }
-    jobIdA = todayJobsA.body[0].id;
+  });
+
+  afterAll(async () => {
+    // Close app
+    if (app) {
+      await app.close();
+    }
+    // Prisma disconnect handled by global teardown
   });
 
   it('should allow Tenant A to access its own job', async () => {
     await request(app.getHttpServer())
-      .get(`/v1/jobs/${jobIdA}`)
+      .get(`/api/v1/jobs/${jobIdA}`)
       .set('Authorization', `Bearer ${tokenA}`)
-      .set('x-tenant-id', '11111111-1111-1111-1111-111111111111')
       .expect(200);
   });
 
   it('should not allow Tenant B to access Tenant A job (404)', async () => {
     await request(app.getHttpServer())
-      .get(`/v1/jobs/${jobIdA}`)
+      .get(`/api/v1/jobs/${jobIdA}`)
       .set('Authorization', `Bearer ${tokenB}`)
-      .set('x-tenant-id', '22222222-2222-2222-2222-222222222222')
       .expect(404);
   });
 });

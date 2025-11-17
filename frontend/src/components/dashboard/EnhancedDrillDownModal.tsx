@@ -27,6 +27,7 @@ import {
   ExportOptions 
 } from '@/utils/exportUtils';
 import { cn } from '@/lib/utils';
+import { logger } from '@/utils/logger';
 
 interface EnhancedDrillDownModalProps {
   isOpen: boolean;
@@ -51,10 +52,10 @@ const EnhancedDrillDownModal: React.FC<EnhancedDrillDownModalProps> = ({
   const drillDown = useDrillDown({
     initialData: data,
     onDataChange: (newData) => {
-      console.log('Data changed:', newData.length, 'records');
+      logger.debug('Drill-down data changed', { recordsCount: newData.length }, 'EnhancedDrillDownModal');
     },
     onLevelChange: (level) => {
-      console.log('Level changed:', level.name);
+      logger.debug('Drill-down level changed', { levelName: level.name }, 'EnhancedDrillDownModal');
     }
   });
 
@@ -157,7 +158,7 @@ const EnhancedDrillDownModal: React.FC<EnhancedDrillDownModalProps> = ({
         filters: {}
       });
     } catch (error) {
-      console.error('Failed to load drill-down data:', error);
+      logger.error('Failed to load drill-down data', error, 'EnhancedDrillDownModal');
     } finally {
       setIsLoading(false);
     }
@@ -204,7 +205,7 @@ const EnhancedDrillDownModal: React.FC<EnhancedDrillDownModalProps> = ({
           break;
       }
     } catch (error) {
-      console.error('Export failed:', error);
+      logger.error('Export failed', error, 'EnhancedDrillDownModal');
     }
   };
 

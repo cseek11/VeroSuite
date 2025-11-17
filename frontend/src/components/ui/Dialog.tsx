@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { X } from 'lucide-react';
-import { Button } from './Button';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 interface DialogContextType {
   open: boolean;
@@ -16,21 +15,27 @@ interface DialogProps {
 }
 
 export function Dialog({ open, onOpenChange, children }: DialogProps) {
-  return (
+  if (!open) return null;
+
+  const dialogContent = (
     <DialogContext.Provider value={{ open, onOpenChange }}>
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50" 
-            onClick={() => onOpenChange(false)}
-          />
-          <div className="relative z-10">
-            {children}
-          </div>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto py-4 px-4">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50" 
+          onClick={() => onOpenChange(false)}
+          style={{ zIndex: -1 }}
+        />
+        <div className="relative w-full max-w-full flex-shrink-0" style={{ zIndex: 1 }}>
+          {children}
         </div>
-      )}
+      </div>
     </DialogContext.Provider>
   );
+
+  // Render dialog at document body level using portal
+  return typeof document !== 'undefined' 
+    ? createPortal(dialogContent, document.body)
+    : dialogContent;
 }
 
 interface DialogContentProps {
@@ -39,9 +44,19 @@ interface DialogContentProps {
 }
 
 export function DialogContent({ children, className = '' }: DialogContentProps) {
+  // Extract max-width from className if provided, otherwise use default
+  const hasMaxWidth = className.includes('max-w-');
+  const defaultMaxWidth = hasMaxWidth ? '' : 'max-w-md';
+  
+  // Check if max-height is provided, if not add a default
+  const hasMaxHeight = className.includes('max-h-');
+  const defaultMaxHeight = hasMaxHeight ? '' : 'max-h-[90vh]';
+  
   return (
-    <div className={`bg-white rounded-lg shadow-xl max-w-md w-full mx-4 ${className}`}>
-      {children}
+    <div className={`bg-white rounded-lg shadow-xl ${defaultMaxWidth} ${defaultMaxHeight} w-full mx-auto min-h-[400px] ${className}`}>
+      <div className="p-6">
+        {children}
+      </div>
     </div>
   );
 }
@@ -52,7 +67,7 @@ interface DialogHeaderProps {
 
 export function DialogHeader({ children }: DialogHeaderProps) {
   return (
-    <div className="px-6 py-4 border-b border-gray-200">
+    <div className="-mx-6 -mt-6 px-6 py-4 mb-4 border-b border-gray-200">
       {children}
     </div>
   );
@@ -91,7 +106,7 @@ interface DialogFooterProps {
 
 export function DialogFooter({ children, className = '' }: DialogFooterProps) {
   return (
-    <div className={`px-6 py-4 border-t border-gray-200 flex justify-end gap-2 ${className}`}>
+    <div className={`-mx-6 -mb-6 px-6 py-4 mt-4 border-t border-gray-200 flex justify-end gap-2 ${className}`}>
       {children}
     </div>
   );

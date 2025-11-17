@@ -11,3 +11,7 @@ export * from './payment-response.dto';
 export * from './create-payment-method.dto';
 export * from './payment-method-response.dto';
 
+// Reminder DTOs
+export * from './send-reminder.dto';
+export * from './create-recurring-payment.dto';
+

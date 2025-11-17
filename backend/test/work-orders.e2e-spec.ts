@@ -2,16 +2,20 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { DatabaseService } from '../src/common/services/database.service';
+import { getTestPrismaClient } from './utils/test-database';
+import { getAdminToken } from './utils/test-auth';
+import { expectV2Response, expectV2PaginatedResponse } from './utils/validate-v2';
+import { configureTestApp } from './utils/test-app';
+import { TEST_TENANTS } from './global-setup';
 
 describe('WorkOrders (e2e)', () => {
   let app: INestApplication;
-  let db: DatabaseService;
+  const prisma = getTestPrismaClient();
   let authToken: string;
-  let tenantId: string;
   let customerId: string;
   let technicianId: string;
   let workOrderId: string;
+  let createdWorkOrderIds: string[] = [];
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -19,37 +23,16 @@ describe('WorkOrders (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    configureTestApp(app);
     await app.init();
 
-    db = moduleFixture.get<DatabaseService>(DatabaseService);
+    // Get auth token using seeded test user
+    authToken = await getAdminToken();
 
-    // Create test tenant
-    const tenant = await db.tenant.create({
+    // Create test customer (using seeded tenant)
+    const customer = await prisma.account.create({
       data: {
-        name: 'Test Tenant',
-        domain: 'test.com',
-        status: 'active',
-        subscription_tier: 'basic',
-      },
-    });
-    tenantId = tenant.id;
-
-    // Create test user for authentication
-    const user = await db.user.create({
-      data: {
-        tenant_id: tenantId,
-        email: 'test@test.com',
-        password_hash: 'hashed_password',
-        first_name: 'Test',
-        last_name: 'User',
-        roles: ['admin'],
-      },
-    });
-
-    // Create test customer
-    const customer = await db.account.create({
-      data: {
-        tenant_id: tenantId,
+        tenant_id: TEST_TENANTS.TENANT1,
         name: 'Test Customer',
         account_type: 'commercial',
         status: 'active',
@@ -57,43 +40,64 @@ describe('WorkOrders (e2e)', () => {
     });
     customerId = customer.id;
 
-    // Create test technician
-    const technician = await db.user.create({
-      data: {
-        tenant_id: tenantId,
-        email: 'tech@test.com',
-        password_hash: 'hashed_password',
-        first_name: 'Test',
-        last_name: 'Technician',
-        roles: ['technician'],
-      },
+    // Get technician ID from seeded user
+    const technician = await prisma.user.findUnique({
+      where: { email: 'test-user-technician@test.example.com' }
     });
+    if (!technician) {
+      throw new Error('Technician user not found in test setup');
+    }
     technicianId = technician.id;
+    // Verify it's a valid UUID format
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(technicianId)) {
+      throw new Error(`Invalid technicianId format: ${technicianId}`);
+    }
+  });
 
-    // Mock JWT authentication
-    authToken = 'mock-jwt-token';
+  beforeEach(() => {
+    createdWorkOrderIds = [];
+  });
+
+  afterEach(async () => {
+    // Clean up work orders created during test
+    if (createdWorkOrderIds.length > 0) {
+      await prisma.workOrder.deleteMany({
+        where: { id: { in: createdWorkOrderIds } }
+      });
+    }
   });
 
   afterAll(async () => {
-    // Clean up test data
-    await db.workOrder.deleteMany({ where: { tenant_id: tenantId } });
-    await db.account.deleteMany({ where: { tenant_id: tenantId } });
-    await db.user.deleteMany({ where: { tenant_id: tenantId } });
-    await db.tenant.delete({ where: { id: tenantId } });
-    await app.close();
+    // Clean up test customer
+    if (customerId) {
+      await prisma.account.deleteMany({
+        where: { id: customerId }
+      });
+    }
+    
+    // Close app
+    if (app) {
+      await app.close();
+    }
+    // Prisma disconnect handled by global teardown
   });
 
-  describe('/api/work-orders (POST)', () => {
+  describe('/api/v1/work-orders (POST)', () => {
     it('should create a work order', async () => {
+      // Use a future date (1 week from now)
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 7);
+      const scheduledDate = futureDate.toISOString();
+      
       const createWorkOrderDto = {
         customer_id: customerId,
         description: 'Test work order description',
         priority: 'medium',
-        scheduled_date: '2025-01-15T09:00:00Z',
+        scheduled_date: scheduledDate,
       };
 
       const response = await request(app.getHttpServer())
-        .post('/api/work-orders')
+        .post('/api/v1/work-orders')
         .set('Authorization', `Bearer ${authToken}`)
         .send(createWorkOrderDto)
         .expect(201);
@@ -105,6 +109,7 @@ describe('WorkOrders (e2e)', () => {
       expect(response.body.priority).toBe('medium');
 
       workOrderId = response.body.id;
+      createdWorkOrderIds.push(workOrderId);
     });
 
     it('should fail to create work order with invalid customer', async () => {
@@ -114,52 +119,92 @@ describe('WorkOrders (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .post('/api/work-orders')
+        .post('/api/v1/work-orders')
         .set('Authorization', `Bearer ${authToken}`)
         .send(createWorkOrderDto)
         .expect(400);
     });
 
     it('should fail to create work order with past scheduled date', async () => {
+      // Use a date in the past (1 year ago)
+      const pastDate = new Date();
+      pastDate.setFullYear(pastDate.getFullYear() - 1);
+      
       const createWorkOrderDto = {
         customer_id: customerId,
         description: 'Test work order description',
-        scheduled_date: '2020-01-15T09:00:00Z',
+        scheduled_date: pastDate.toISOString(),
       };
 
       await request(app.getHttpServer())
-        .post('/api/work-orders')
+        .post('/api/v1/work-orders')
         .set('Authorization', `Bearer ${authToken}`)
         .send(createWorkOrderDto)
         .expect(400);
     });
   });
 
-  describe('/api/work-orders/:id (GET)', () => {
+  describe('/api/v1/work-orders/:id (GET)', () => {
+    beforeEach(async () => {
+      // Create a work order for this test suite (always create new one)
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 7);
+      const workOrder = await prisma.workOrder.create({
+        data: {
+          tenant_id: TEST_TENANTS.TENANT1,
+          customer_id: customerId,
+          description: 'Test work order for GET',
+          status: 'pending',
+          priority: 'medium',
+          scheduled_date: futureDate,
+        },
+      });
+      workOrderId = workOrder.id;
+      createdWorkOrderIds.push(workOrderId);
+    });
+
     it('should get work order by ID', async () => {
       const response = await request(app.getHttpServer())
-        .get(`/api/work-orders/${workOrderId}`)
+        .get(`/api/v1/work-orders/${workOrderId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
       expect(response.body.id).toBe(workOrderId);
       expect(response.body.customer_id).toBe(customerId);
-      expect(response.body).toHaveProperty('account');
-      expect(response.body).toHaveProperty('assignedTechnician');
+      expect(response.body).toHaveProperty('customer_name');
+      expect(response.body).toHaveProperty('customer_email');
     });
 
     it('should return 404 for non-existent work order', async () => {
+      const nonExistentId = '00000000-0000-0000-0000-000000000000';
       await request(app.getHttpServer())
-        .get('/api/work-orders/non-existent-id')
+        .get(`/api/v1/work-orders/${nonExistentId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
     });
   });
 
-  describe('/api/work-orders (GET)', () => {
+  describe('/api/v1/work-orders (GET)', () => {
+    beforeEach(async () => {
+      // Create work orders for list tests
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 7);
+      const workOrder = await prisma.workOrder.create({
+        data: {
+          tenant_id: TEST_TENANTS.TENANT1,
+          customer_id: customerId,
+          description: 'Test work order for list',
+          status: 'pending',
+          priority: 'medium',
+          scheduled_date: futureDate,
+        },
+      });
+      createdWorkOrderIds.push(workOrder.id);
+    });
+
     it('should list work orders with filters', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/work-orders')
+        .get('/api/v1/work-orders')
         .set('Authorization', `Bearer ${authToken}`)
         .query({ status: 'pending', priority: 'medium' })
         .expect(200);
@@ -172,7 +217,7 @@ describe('WorkOrders (e2e)', () => {
 
     it('should list work orders with pagination', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/work-orders')
+        .get('/api/v1/work-orders')
         .set('Authorization', `Bearer ${authToken}`)
         .query({ page: 1, limit: 10 })
         .expect(200);
@@ -183,7 +228,25 @@ describe('WorkOrders (e2e)', () => {
     });
   });
 
-  describe('/api/work-orders/:id (PUT)', () => {
+  describe('/api/v1/work-orders/:id (PUT)', () => {
+    beforeEach(async () => {
+      // Create a work order for this test suite (always create new one)
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 7);
+      const workOrder = await prisma.workOrder.create({
+        data: {
+          tenant_id: TEST_TENANTS.TENANT1,
+          customer_id: customerId,
+          description: 'Test work order for UPDATE',
+          status: 'pending',
+          priority: 'medium',
+          scheduled_date: futureDate,
+        },
+      });
+      workOrderId = workOrder.id;
+      createdWorkOrderIds.push(workOrderId);
+    });
+
     it('should update work order', async () => {
       const updateWorkOrderDto = {
         status: 'in-progress',
@@ -192,7 +255,7 @@ describe('WorkOrders (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .put(`/api/work-orders/${workOrderId}`)
+        .put(`/api/v1/work-orders/${workOrderId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(updateWorkOrderDto)
         .expect(200);
@@ -203,34 +266,53 @@ describe('WorkOrders (e2e)', () => {
     });
 
     it('should fail to update non-existent work order', async () => {
+      const nonExistentId = '00000000-0000-0000-0000-000000000000';
       const updateWorkOrderDto = {
         status: 'completed',
       };
 
       await request(app.getHttpServer())
-        .put('/api/work-orders/non-existent-id')
+        .put(`/api/v1/work-orders/${nonExistentId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(updateWorkOrderDto)
         .expect(404);
     });
 
     it('should fail to set completion date without completed status', async () => {
+      // workOrderId is already set by beforeEach
       const updateWorkOrderDto = {
         completion_date: '2025-01-15T17:00:00Z',
       };
 
       await request(app.getHttpServer())
-        .put(`/api/work-orders/${workOrderId}`)
+        .put(`/api/v1/work-orders/${workOrderId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(updateWorkOrderDto)
         .expect(400);
     });
   });
 
-  describe('/api/work-orders/customer/:customerId (GET)', () => {
+  describe('/api/v1/work-orders/customer/:customerId (GET)', () => {
+    beforeEach(async () => {
+      // Create work orders for this test
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 7);
+      const workOrder = await prisma.workOrder.create({
+        data: {
+          tenant_id: TEST_TENANTS.TENANT1,
+          customer_id: customerId,
+          description: 'Test work order for customer list',
+          status: 'pending',
+          priority: 'medium',
+          scheduled_date: futureDate,
+        },
+      });
+      createdWorkOrderIds.push(workOrder.id);
+    });
+
     it('should get work orders by customer', async () => {
       const response = await request(app.getHttpServer())
-        .get(`/api/work-orders/customer/${customerId}`)
+        .get(`/api/v1/work-orders/customer/${customerId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
@@ -240,17 +322,18 @@ describe('WorkOrders (e2e)', () => {
     });
 
     it('should return 404 for non-existent customer', async () => {
+      const nonExistentId = '00000000-0000-0000-0000-000000000000';
       await request(app.getHttpServer())
-        .get('/api/work-orders/customer/non-existent-id')
+        .get(`/api/v1/work-orders/customer/${nonExistentId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
     });
   });
 
-  describe('/api/work-orders/technician/:technicianId (GET)', () => {
+  describe('/api/v1/work-orders/technician/:technicianId (GET)', () => {
     it('should get work orders by technician', async () => {
       const response = await request(app.getHttpServer())
-        .get(`/api/work-orders/technician/${technicianId}`)
+        .get(`/api/v1/work-orders/technician/${technicianId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
@@ -258,67 +341,77 @@ describe('WorkOrders (e2e)', () => {
     });
 
     it('should return 404 for non-existent technician', async () => {
+      const nonExistentId = '00000000-0000-0000-0000-000000000000';
       await request(app.getHttpServer())
-        .get('/api/work-orders/technician/non-existent-id')
+        .get(`/api/v1/work-orders/technician/${nonExistentId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
     });
   });
 
-  describe('/api/work-orders/:id (DELETE)', () => {
+  describe('/api/v1/work-orders/:id (DELETE)', () => {
+    beforeEach(async () => {
+      // Create a work order for this test suite
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 7);
+      const workOrder = await prisma.workOrder.create({
+        data: {
+          tenant_id: TEST_TENANTS.TENANT1,
+          customer_id: customerId,
+          description: 'Test work order for DELETE',
+          status: 'pending',
+          priority: 'medium',
+          scheduled_date: futureDate,
+        },
+      });
+      workOrderId = workOrder.id;
+      // Don't add to createdWorkOrderIds since we're testing deletion
+    });
+
     it('should delete work order (soft delete)', async () => {
       const response = await request(app.getHttpServer())
-        .delete(`/api/work-orders/${workOrderId}`)
+        .delete(`/api/v1/work-orders/${workOrderId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
       expect(response.body.message).toBe('Work order deleted successfully');
 
       // Verify work order is soft deleted (status = canceled)
-      const deletedWorkOrder = await db.workOrder.findFirst({
+      const deletedWorkOrder = await prisma.workOrder.findFirst({
         where: { id: workOrderId },
       });
-      expect(deletedWorkOrder.status).toBe('canceled');
+      expect(deletedWorkOrder?.status).toBe('canceled');
     });
 
     it('should return 404 for non-existent work order', async () => {
+      const nonExistentId = '00000000-0000-0000-0000-000000000000';
       await request(app.getHttpServer())
-        .delete('/api/work-orders/non-existent-id')
+        .delete(`/api/v1/work-orders/${nonExistentId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
     });
   });
 
   describe('Tenant Isolation', () => {
-    let otherTenantId: string;
+    let otherCustomerId: string;
     let otherWorkOrderId: string;
 
     beforeAll(async () => {
-      // Create another tenant
-      const otherTenant = await db.tenant.create({
+      // Create customer in other tenant (using seeded tenant 2)
+      const otherCustomer = await prisma.account.create({
         data: {
-          name: 'Other Tenant',
-          domain: 'other.com',
-          status: 'active',
-          subscription_tier: 'basic',
-        },
-      });
-      otherTenantId = otherTenant.id;
-
-      // Create customer in other tenant
-      const otherCustomer = await db.account.create({
-        data: {
-          tenant_id: otherTenantId,
+          tenant_id: TEST_TENANTS.TENANT2,
           name: 'Other Customer',
           account_type: 'commercial',
           status: 'active',
         },
       });
+      otherCustomerId = otherCustomer.id;
 
       // Create work order in other tenant
-      const otherWorkOrder = await db.workOrder.create({
+      const otherWorkOrder = await prisma.workOrder.create({
         data: {
-          tenant_id: otherTenantId,
+          tenant_id: TEST_TENANTS.TENANT2,
           customer_id: otherCustomer.id,
           description: 'Other tenant work order',
           status: 'pending',
@@ -330,14 +423,17 @@ describe('WorkOrders (e2e)', () => {
 
     afterAll(async () => {
       // Clean up other tenant data
-      await db.workOrder.deleteMany({ where: { tenant_id: otherTenantId } });
-      await db.account.deleteMany({ where: { tenant_id: otherTenantId } });
-      await db.tenant.delete({ where: { id: otherTenantId } });
+      if (otherWorkOrderId) {
+        await prisma.workOrder.deleteMany({ where: { id: otherWorkOrderId } });
+      }
+      if (otherCustomerId) {
+        await prisma.account.deleteMany({ where: { id: otherCustomerId } });
+      }
     });
 
     it('should not allow access to work orders from other tenants', async () => {
       await request(app.getHttpServer())
-        .get(`/api/work-orders/${otherWorkOrderId}`)
+        .get(`/api/v1/work-orders/${otherWorkOrderId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
     });
@@ -348,7 +444,7 @@ describe('WorkOrders (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .put(`/api/work-orders/${otherWorkOrderId}`)
+        .put(`/api/v1/work-orders/${otherWorkOrderId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(updateWorkOrderDto)
         .expect(404);
@@ -356,9 +452,81 @@ describe('WorkOrders (e2e)', () => {
 
     it('should not allow deleting work orders from other tenants', async () => {
       await request(app.getHttpServer())
-        .delete(`/api/work-orders/${otherWorkOrderId}`)
+        .delete(`/api/v1/work-orders/${otherWorkOrderId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
+    });
+  });
+
+  describe('V2 API', () => {
+    beforeEach(async () => {
+      // Create work orders for V2 tests
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 7);
+      const workOrder = await prisma.workOrder.create({
+        data: {
+          tenant_id: TEST_TENANTS.TENANT1,
+          customer_id: customerId,
+          description: 'Test work order for V2 list',
+          status: 'pending',
+          priority: 'medium',
+          scheduled_date: futureDate,
+        },
+      });
+      createdWorkOrderIds.push(workOrder.id);
+    });
+
+    it('should return work orders in V2 format', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/v2/work-orders')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      // V2 controller wraps service result in data field
+      // Service returns { data: workOrders, pagination: {...} }
+      // Controller returns { data: { data: workOrders, pagination: {...} }, meta: {...} }
+      const result = expectV2Response(response);
+      
+      // Check that result has data and pagination properties
+      expect(result).toHaveProperty('data');
+      expect(result).toHaveProperty('pagination');
+      expect(Array.isArray(result.data)).toBe(true);
+      
+      // Check pagination structure
+      expect(result.pagination).toMatchObject({
+        page: expect.any(Number),
+        limit: expect.any(Number),
+        total: expect.any(Number),
+        totalPages: expect.any(Number)
+      });
+    });
+
+    it('should create work order with V2 format', async () => {
+      // Use a future date (1 week from now)
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 7);
+      
+      const createWorkOrderDto = {
+        customer_id: customerId,
+        description: 'Test work order V2',
+        priority: 'medium',
+        scheduled_date: futureDate.toISOString(),
+      };
+
+      const response = await request(app.getHttpServer())
+        .post('/api/v2/work-orders')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(createWorkOrderDto)
+        .expect(201);
+
+      // expectV2Response expects 200 by default, but create returns 201
+      const data = expectV2Response(response, 201);
+      expect(data).toHaveProperty('id');
+      expect(data.customer_id).toBe(customerId);
+      
+      if (data.id) {
+        createdWorkOrderIds.push(data.id);
+      }
     });
   });
 });

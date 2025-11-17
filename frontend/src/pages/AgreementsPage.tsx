@@ -3,13 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { AgreementList } from '@/components/agreements/AgreementList';
 import { agreementsApi } from '@/lib/agreements-api';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import {
-  Card,
-  Typography,
-  Button,
-  Chip,
-  Alert,
-} from '@/components/ui/EnhancedUI';
+  Heading,
+  Text,
+} from '@/components/ui';
 import {
   FileText,
   TrendingUp,
@@ -46,12 +45,12 @@ export default function AgreementsPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <Typography variant="h2" className="text-gray-900">
+          <Heading level={2} className="text-gray-900">
             Service Agreements
-          </Typography>
-          <Typography variant="body1" className="text-gray-600 mt-1">
+          </Heading>
+          <Text variant="body" className="text-gray-600 mt-1">
             Manage customer service agreements and contracts
-          </Typography>
+          </Text>
         </div>
         <Button
           variant="primary"
@@ -68,12 +67,12 @@ export default function AgreementsPage() {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <Typography variant="body2" className="text-gray-600">
+                <Text variant="small" className="text-gray-600">
                   Total Agreements
-                </Typography>
-                <Typography variant="h3" className="text-gray-900">
+                </Text>
+                <Heading level={3} className="text-gray-900">
                   {stats.totalAgreements}
-                </Typography>
+                </Heading>
               </div>
               <FileText className="h-8 w-8 text-blue-600" />
             </div>
@@ -82,12 +81,12 @@ export default function AgreementsPage() {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <Typography variant="body2" className="text-gray-600">
+                <Text variant="small" className="text-gray-600">
                   Active Agreements
-                </Typography>
-                <Typography variant="h3" className="text-green-600">
+                </Text>
+                <Heading level={3} className="text-green-600">
                   {stats.activeAgreements}
-                </Typography>
+                </Heading>
               </div>
               <TrendingUp className="h-8 w-8 text-green-600" />
             </div>
@@ -96,12 +95,12 @@ export default function AgreementsPage() {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <Typography variant="body2" className="text-gray-600">
+                <Text variant="small" className="text-gray-600">
                   Total Value
-                </Typography>
-                <Typography variant="h3" className="text-gray-900">
+                </Text>
+                <Heading level={3} className="text-gray-900">
                   {formatCurrency(stats.totalValue)}
-                </Typography>
+                </Heading>
               </div>
               <DollarSign className="h-8 w-8 text-green-600" />
             </div>
@@ -110,12 +109,12 @@ export default function AgreementsPage() {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <Typography variant="body2" className="text-gray-600">
+                <Text variant="small" className="text-gray-600">
                   Expiring Soon
-                </Typography>
-                <Typography variant="h3" className="text-yellow-600">
+                </Text>
+                <Heading level={3} className="text-yellow-600">
                   {stats.expiredAgreements}
-                </Typography>
+                </Heading>
               </div>
               <AlertTriangle className="h-8 w-8 text-yellow-600" />
             </div>
@@ -125,30 +124,36 @@ export default function AgreementsPage() {
 
       {/* Expiring Agreements Alert */}
       {!expiringLoading && expiringAgreements && expiringAgreements.length > 0 && (
-        <Alert type="warning" title="Agreements Expiring Soon">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            <Heading level={5} className="text-yellow-900">
+              Agreements Expiring Soon
+            </Heading>
+          </div>
           <div className="space-y-2">
-            <Typography variant="body2">
+            <Text variant="small">
               You have {expiringAgreements.length} agreement(s) expiring in the next 30 days:
-            </Typography>
+            </Text>
             <div className="space-y-1">
               {expiringAgreements.slice(0, 3).map((agreement) => (
                 <div key={agreement.id} className="flex items-center justify-between">
-                  <Typography variant="body2" className="font-medium">
+                  <Text variant="small" className="font-medium">
                     {agreement.title} - {agreement.account.name}
-                  </Typography>
-                  <Typography variant="body2" className="text-gray-600">
+                  </Text>
+                  <Text variant="small" className="text-gray-600">
                     Expires: {new Date(agreement.end_date!).toLocaleDateString()}
-                  </Typography>
+                  </Text>
                 </div>
               ))}
               {expiringAgreements.length > 3 && (
-                <Typography variant="body2" className="text-gray-600">
+                <Text variant="small" className="text-gray-600">
                   ...and {expiringAgreements.length - 3} more
-                </Typography>
+                </Text>
               )}
             </div>
           </div>
-        </Alert>
+        </div>
       )}
 
       {/* Agreements List */}
@@ -156,9 +161,9 @@ export default function AgreementsPage() {
 
       {/* Quick Actions */}
       <Card className="p-6">
-        <Typography variant="h4" className="text-gray-900 mb-4">
+        <Heading level={4} className="text-gray-900 mb-4">
           Quick Actions
-        </Typography>
+        </Heading>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Button
             variant="outline"
@@ -166,7 +171,7 @@ export default function AgreementsPage() {
             onClick={() => navigate('/agreements/create')}
           >
             <Plus className="h-6 w-6 mb-2" />
-            <Typography variant="body2">Create Agreement</Typography>
+            <Text variant="small">Create Agreement</Text>
           </Button>
           
           <Button
@@ -178,7 +183,7 @@ export default function AgreementsPage() {
             }}
           >
             <FileText className="h-6 w-6 mb-2" />
-            <Typography variant="body2">Agreement Templates</Typography>
+            <Text variant="small">Agreement Templates</Text>
           </Button>
           
           <Button
@@ -190,7 +195,7 @@ export default function AgreementsPage() {
             }}
           >
             <Calendar className="h-6 w-6 mb-2" />
-            <Typography variant="body2">Bulk Operations</Typography>
+            <Text variant="small">Bulk Operations</Text>
           </Button>
         </div>
       </Card>

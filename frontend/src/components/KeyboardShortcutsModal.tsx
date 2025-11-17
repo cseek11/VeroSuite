@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Keyboard, Search, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Home, End, Tab } from 'lucide-react';
+import { X, Keyboard, Search } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface KeyboardShortcutsModalProps {
   isOpen: boolean;
@@ -191,14 +192,13 @@ const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ isOpen,
   // Debug logging
   React.useEffect(() => {
     if (isOpen) {
-      console.log('🎯 KeyboardShortcutsModal opened at:', new Date().toISOString());
-      console.log('📋 Total shortcuts:', allShortcuts.length);
-      console.log('📋 First few shortcuts:', allShortcuts.slice(0, 5));
-      console.log('📋 Sample WASD shortcuts:', allShortcuts.filter(s => ['W', 'A', 'S', 'D'].includes(s.key)));
-      console.log('📂 Groups:', shortcutGroups.length);
-      console.log('📂 Group titles:', shortcutGroups.map(g => g.title));
-      console.log('🔍 Filtered groups:', filteredGroups.length);
-      console.log('🔍 Filtered group titles:', filteredGroups.map(g => g.title));
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('KeyboardShortcutsModal opened', {
+          totalShortcuts: allShortcuts.length,
+          groupsCount: shortcutGroups.length,
+          filteredGroupsCount: filteredGroups.length
+        }, 'KeyboardShortcutsModal');
+      }
     }
   }, [isOpen, allShortcuts.length, shortcutGroups.length, filteredGroups.length]);
 

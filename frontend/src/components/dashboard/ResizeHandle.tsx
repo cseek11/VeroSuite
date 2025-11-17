@@ -1,4 +1,5 @@
 import React from 'react';
+import { logger } from '@/utils/logger';
 
 interface ResizeHandleProps {
   position: 'se' | 'sw' | 'ne' | 'nw' | 'e' | 'w' | 's' | 'n';
@@ -27,15 +28,17 @@ const ResizeHandle: React.FC<ResizeHandleProps> = ({ position, onResizeStart }) 
     <div
       className={`absolute ${getPositionClasses()} ${
         isCorner 
-          ? 'w-4 h-4 bg-purple-500 rounded-full opacity-80 hover:opacity-100 transition-opacity duration-100 z-20 hover:scale-110' 
+          ? 'w-4 h-4 bg-purple-500 rounded-full opacity-80 hover:opacity-100 transition-opacity duration-100 hover:scale-110' 
           : isEdge
-          ? 'bg-purple-500 opacity-80 hover:opacity-100 transition-opacity duration-100 z-20 hover:scale-110 ' +
+          ? 'bg-purple-500 opacity-80 hover:opacity-100 transition-opacity duration-100 hover:scale-110 ' +
             (position === 'e' || position === 'w' ? 'w-2 h-6' : 'w-6 h-2')
           : ''
-      } hover:bg-purple-600 shadow-lg cursor-pointer`}
+      } hover:bg-purple-600 shadow-lg cursor-pointer pointer-events-auto`}
+      style={{ zIndex: 1000 }}
       onMouseDown={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        logger.debug('Resize handle clicked', { position }, 'ResizeHandle');
         onResizeStart(position, e);
       }}
       title={`Resize ${position.toUpperCase()}`}

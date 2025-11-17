@@ -27,7 +27,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 @ApiTags('Agreements')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('agreements')
+@Controller({ path: 'agreements', version: '1' })
 export class AgreementsController {
   constructor(private readonly agreementsService: AgreementsService) {}
 

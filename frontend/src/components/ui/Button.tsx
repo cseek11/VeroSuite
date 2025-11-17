@@ -18,19 +18,19 @@ const Button: React.FC<ButtonProps> = ({
   const getVariantClasses = () => {
     switch (variant) {
       case 'primary':
-        return 'bg-purple-600 hover:bg-purple-700 text-white';
+        return 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl';
       case 'secondary':
-        return 'bg-gray-600 hover:bg-gray-700 text-white';
+        return 'bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 hover:bg-white hover:shadow-lg';
       case 'outline':
-        return 'border border-gray-300 hover:bg-gray-50 text-gray-700';
+        return 'border border-slate-200 bg-white/80 backdrop-blur-sm text-slate-700 hover:bg-white hover:shadow-lg';
       case 'ghost':
-        return 'hover:bg-gray-100 text-gray-700';
+        return 'hover:bg-slate-100 text-slate-700';
       case 'danger':
-        return 'bg-red-600 hover:bg-red-700 text-white';
+        return 'bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl';
       case 'success':
-        return 'bg-green-600 hover:bg-green-700 text-white';
+        return 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl';
       default:
-        return 'bg-gray-900 hover:bg-gray-800 text-white';
+        return 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl';
     }
   };
 
@@ -42,7 +42,7 @@ const Button: React.FC<ButtonProps> = ({
       case 'lg':
         return 'px-6 py-3 text-lg';
       default:
-        return 'px-4 py-2 text-base';
+        return 'px-3 py-1.5 text-sm';
     }
   };
 
@@ -51,7 +51,7 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${getVariantClasses()} ${getSizeClasses()} ${className}`}
+      className={`inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${getVariantClasses()} ${getSizeClasses()} ${className}`}
       disabled={isDisabled}
       onClick={onClick}
       {...props}

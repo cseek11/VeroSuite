@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useRoleBasedActions } from '@/hooks/useRoleBasedActions';
 import { RoleAction, CardContext } from '@/types/role-actions';
-import { AlertModal, ConfirmModal } from '@/components/ui/Modal';
+import { AlertDialog, ConfirmDialog } from '@/components/ui/DialogModals';
 
 interface QuickActionsProps {
   context?: CardContext;
@@ -192,19 +192,23 @@ const QuickActions: React.FC<QuickActionsProps> = ({
       )}
 
       {/* Confirmation Modal */}
-      <ConfirmModal
-        isOpen={showConfirmModal}
+      <ConfirmDialog
+        open={showConfirmModal}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleCancel();
+          }
+        }}
         onConfirm={handleConfirm}
-        onCancel={handleCancel}
         title="Confirm Action"
         message={pendingAction?.confirmMessage || 'Are you sure?'}
         type="warning"
       />
 
       {/* Alert Modal */}
-      <AlertModal
-        isOpen={showAlertModal}
-        onClose={() => setShowAlertModal(false)}
+      <AlertDialog
+        open={showAlertModal}
+        onOpenChange={(open) => setShowAlertModal(open)}
         title={lastResult?.success ? "Success" : "Error"}
         message={alertMessage}
         type={lastResult?.success ? "success" : "error"}

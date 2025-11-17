@@ -8,12 +8,12 @@ import {
   Mail,
   Phone,
   MapPin,
-  ChevronDown,
   Loader2,
   AlertCircle
 } from 'lucide-react';
 import { secureApiClient } from '@/lib/secure-api-client';
 import { Account } from '@/types/enhanced-types';
+import { logger } from '@/utils/logger';
 
 interface CustomerSearchSelectorProps {
   value?: string;
@@ -23,6 +23,8 @@ interface CustomerSearchSelectorProps {
   required?: boolean;
   className?: string;
   label?: string;
+  showSelectedBox?: boolean; // Show blue box with selected customer info
+  apiSource?: 'secure' | 'direct'; // 'secure' uses secureApiClient, 'direct' uses direct fetch
 }
 
 export default function CustomerSearchSelector({
@@ -32,7 +34,9 @@ export default function CustomerSearchSelector({
   error,
   required = false,
   className = '',
-  label = 'Customer'
+  label = 'Customer',
+  showSelectedBox = false,
+  apiSource = 'secure'
 }: CustomerSearchSelectorProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -45,10 +49,48 @@ export default function CustomerSearchSelector({
   const [localSearchResults, setLocalSearchResults] = useState<Account[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
 
-  // Fallback: Fetch all customers for local filtering
+  // Fetch all customers for local filtering
   const { data: allCustomers = [], isLoading: customersLoading } = useQuery({
-    queryKey: ['secure-customers'],
-    queryFn: () => secureApiClient.getAllAccounts(),
+    queryKey: apiSource === 'secure' ? ['secure-customers'] : ['direct-customers'],
+    queryFn: async () => {
+      if (apiSource === 'secure') {
+        return secureApiClient.getAllAccounts();
+      } else {
+        // Direct API fetch (matching WorkOrderForm pattern)
+        const getAuthToken = (): string | null => {
+          try {
+            const authData = localStorage.getItem('verofield_auth');
+            if (authData) {
+              const parsed = JSON.parse(authData);
+              if (typeof parsed?.token === 'string') return parsed.token;
+              if (typeof parsed?.accessToken === 'string') return parsed.accessToken;
+              if (typeof parsed?.state?.token === 'string') return parsed.state.token;
+              if (typeof parsed?.state?.accessToken === 'string') return parsed.state.accessToken;
+            }
+          } catch (e) {
+            logger.error('Error parsing verofield_auth', e, 'CustomerSearchSelector');
+          }
+          return localStorage.getItem('jwt') || null;
+        };
+
+        const token = getAuthToken();
+        const response = await fetch('http://localhost:3001/api/v1/crm/accounts', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'x-tenant-id': localStorage.getItem('tenantId') || '7193113e-ece2-4f7b-ae8c-176df4367e28',
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          return data || [];
+        } else {
+          logger.error('Failed to load customers', new Error(`HTTP ${response.status}`), 'CustomerSearchSelector');
+          return [];
+        }
+      }
+    },
   });
 
   // Enhanced local search with multiple field matching
@@ -213,7 +255,28 @@ export default function CustomerSearchSelector({
         </p>
       )}
 
-      {/* Customer info will be displayed in the form header instead */}
+      {/* Selected Customer Box (when showSelectedBox is true) */}
+      {showSelectedBox && value && selectedCustomer && (
+        <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-medium text-blue-900">
+                {selectedCustomer.name || 'Selected Customer'}
+              </div>
+              <div className="text-sm text-blue-700">
+                {selectedCustomer.account_type}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleClear}
+              className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              Change
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Search Dropdown */}
       {isOpen && (

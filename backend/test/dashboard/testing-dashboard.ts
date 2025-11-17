@@ -6,7 +6,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { PrismaService } from '../../src/prisma/prisma.service';
+import { PrismaService } from '../../src/common/services/prisma.service';
 
 export interface TestMetrics {
   id: string;
@@ -510,72 +510,76 @@ export class TestingDashboardService implements OnModuleInit {
 
   // Database Storage
   private async storeTestMetrics(metrics: TestMetrics): Promise<void> {
-    // Store in database
-    await this.prisma.testMetrics.create({
-      data: {
-        id: metrics.id,
-        testSuite: metrics.testSuite,
-        testName: metrics.testName,
-        status: metrics.status,
-        duration: metrics.duration,
-        timestamp: metrics.timestamp,
-        errorMessage: metrics.errorMessage,
-        performance: metrics.performance,
-        coverage: metrics.coverage,
-      },
-    });
+    // Note: testMetrics table doesn't exist in schema - skipping storage
+    // await this.prisma.testMetrics.create({
+    //   data: {
+    //     id: metrics.id,
+    //     testSuite: metrics.testSuite,
+    //     testName: metrics.testName,
+    //     status: metrics.status,
+    //     duration: metrics.duration,
+    //     timestamp: metrics.timestamp,
+    //     errorMessage: metrics.errorMessage,
+    //     performance: metrics.performance,
+    //     coverage: metrics.coverage,
+    //   },
+    // });
   }
 
   private async storeSecurityMetrics(metrics: SecurityMetrics): Promise<void> {
-    await this.prisma.securityMetrics.create({
-      data: {
-        id: metrics.id,
-        vulnerabilityType: metrics.vulnerabilityType,
-        severity: metrics.severity,
-        status: metrics.status,
-        description: metrics.description,
-        timestamp: metrics.timestamp,
-        remediation: metrics.remediation,
-      },
-    });
+    // Note: securityMetrics table doesn't exist in schema - skipping storage
+    // await this.prisma.securityMetrics.create({
+    //   data: {
+    //     id: metrics.id,
+    //     vulnerabilityType: metrics.vulnerabilityType,
+    //     severity: metrics.severity,
+    //     status: metrics.status,
+    //     description: metrics.description,
+    //     timestamp: metrics.timestamp,
+    //     remediation: metrics.remediation,
+    //   },
+    // });
   }
 
   private async storePerformanceMetrics(metrics: PerformanceMetrics): Promise<void> {
-    await this.prisma.performanceMetrics.create({
-      data: {
-        id: metrics.id,
-        endpoint: metrics.endpoint,
-        responseTime: metrics.responseTime,
-        throughput: metrics.throughput,
-        errorRate: metrics.errorRate,
-        timestamp: metrics.timestamp,
-        loadLevel: metrics.loadLevel,
-      },
-    });
+    // Note: performanceMetrics table doesn't exist in schema - skipping storage
+    // await this.prisma.performanceMetrics.create({
+    //   data: {
+    //     id: metrics.id,
+    //     endpoint: metrics.endpoint,
+    //     responseTime: metrics.responseTime,
+    //     throughput: metrics.throughput,
+    //     errorRate: metrics.errorRate,
+    //     timestamp: metrics.timestamp,
+    //     loadLevel: metrics.loadLevel,
+    //   },
+    // });
   }
 
   private async storeHourlyReport(report: any): Promise<void> {
-    await this.prisma.hourlyReport.create({
-      data: {
-        timestamp: report.timestamp,
-        systemHealth: report.systemHealth,
-        testCoverage: report.testCoverage,
-        securityMetrics: report.securityMetrics,
-        performanceMetrics: report.performanceMetrics,
-      },
-    });
+    // Note: hourlyReport table doesn't exist in schema - skipping storage
+    // await this.prisma.hourlyReport.create({
+    //   data: {
+    //     timestamp: report.timestamp,
+    //     systemHealth: report.systemHealth,
+    //     testCoverage: report.testCoverage,
+    //     securityMetrics: report.securityMetrics,
+    //     performanceMetrics: report.performanceMetrics,
+    //   },
+    // });
   }
 
   private async storeDailyReport(report: any): Promise<void> {
-    await this.prisma.dailyReport.create({
-      data: {
-        timestamp: report.timestamp,
-        systemHealth: report.systemHealth,
-        testCoverage: report.testCoverage,
-        securityMetrics: report.securityMetrics,
-        performanceMetrics: report.performanceMetrics,
-      },
-    });
+    // Note: dailyReport table doesn't exist in schema - skipping storage
+    // await this.prisma.dailyReport.create({
+    //   data: {
+    //     timestamp: report.timestamp,
+    //     systemHealth: report.systemHealth,
+    //     testCoverage: report.testCoverage,
+    //     securityMetrics: report.securityMetrics,
+    //     performanceMetrics: report.performanceMetrics,
+    //   },
+    // });
   }
 }
 

@@ -1,3 +1,5 @@
+import { logger } from '@/utils/logger';
+
 /**
  * Feature Flag System for VeroField V4 Migration
  * 
@@ -20,6 +22,17 @@ export interface FeatureFlags {
   
   // Emergency Controls
   EMERGENCY_ROLLBACK: boolean;
+  
+  // Dashboard Enterprise Features (Phase 0+)
+  DASHBOARD_NEW_STATE_MANAGEMENT: boolean;
+  DASHBOARD_VIRTUALIZATION: boolean;
+  DASHBOARD_MOBILE_BETA: boolean;
+  DASHBOARD_PWA: boolean;
+  DASHBOARD_EVENT_SOURCING: boolean;
+  DASHBOARD_SAGA_ORCHESTRATION: boolean;
+  DASHBOARD_CONFLICT_RESOLUTION: boolean;
+  DASHBOARD_AUDIT_LOGGING: boolean;
+  DASHBOARD_API_V2: boolean;
 }
 
 /**
@@ -34,6 +47,16 @@ const DEFAULT_FLAGS: FeatureFlags = {
   V4_NAVIGATION: true,
   V4_ROLLOUT_PERCENTAGE: 100, // 100% = all users see V4
   EMERGENCY_ROLLBACK: false,
+  // Dashboard Enterprise Features - all disabled by default for gradual rollout
+  DASHBOARD_NEW_STATE_MANAGEMENT: false,
+  DASHBOARD_VIRTUALIZATION: false,
+  DASHBOARD_MOBILE_BETA: false,
+  DASHBOARD_PWA: false,
+  DASHBOARD_EVENT_SOURCING: false,
+  DASHBOARD_SAGA_ORCHESTRATION: false,
+  DASHBOARD_CONFLICT_RESOLUTION: false,
+  DASHBOARD_AUDIT_LOGGING: false,
+  DASHBOARD_API_V2: false,
 };
 
 /**
@@ -100,6 +123,15 @@ export function getFeatureFlags(): FeatureFlags {
     V4_NAVIGATION: getFeatureFlag('V4_NAVIGATION') as boolean,
     V4_ROLLOUT_PERCENTAGE: getFeatureFlag('V4_ROLLOUT_PERCENTAGE') as number,
     EMERGENCY_ROLLBACK: getFeatureFlag('EMERGENCY_ROLLBACK') as boolean,
+    DASHBOARD_NEW_STATE_MANAGEMENT: getFeatureFlag('DASHBOARD_NEW_STATE_MANAGEMENT') as boolean,
+    DASHBOARD_VIRTUALIZATION: getFeatureFlag('DASHBOARD_VIRTUALIZATION') as boolean,
+    DASHBOARD_MOBILE_BETA: getFeatureFlag('DASHBOARD_MOBILE_BETA') as boolean,
+    DASHBOARD_PWA: getFeatureFlag('DASHBOARD_PWA') as boolean,
+    DASHBOARD_EVENT_SOURCING: getFeatureFlag('DASHBOARD_EVENT_SOURCING') as boolean,
+    DASHBOARD_SAGA_ORCHESTRATION: getFeatureFlag('DASHBOARD_SAGA_ORCHESTRATION') as boolean,
+    DASHBOARD_CONFLICT_RESOLUTION: getFeatureFlag('DASHBOARD_CONFLICT_RESOLUTION') as boolean,
+    DASHBOARD_AUDIT_LOGGING: getFeatureFlag('DASHBOARD_AUDIT_LOGGING') as boolean,
+    DASHBOARD_API_V2: getFeatureFlag('DASHBOARD_API_V2') as boolean,
   };
 }
 
@@ -108,9 +140,7 @@ export function getFeatureFlags(): FeatureFlags {
  */
 export function logFeatureFlags(): void {
   if (import.meta.env.DEV) {
-    console.group('🔧 VeroField Feature Flags');
-    console.table(getFeatureFlags());
-    console.groupEnd();
+    logger.debug('VeroField Feature Flags', getFeatureFlags(), 'featureFlags');
   }
 }
 
@@ -119,7 +149,7 @@ export function logFeatureFlags(): void {
  * Call this if critical issues are detected
  */
 export function enableEmergencyRollback(): void {
-  console.warn('🚨 EMERGENCY ROLLBACK ENABLED - All V4 features disabled');
+  logger.warn('EMERGENCY ROLLBACK ENABLED - All V4 features disabled', {}, 'featureFlags');
   localStorage.setItem('vero-emergency-rollback', 'true');
   window.location.reload();
 }
@@ -136,7 +166,9 @@ export function isEmergencyRollbackActive(): boolean {
  */
 export function clearEmergencyRollback(): void {
   localStorage.removeItem('vero-emergency-rollback');
-  console.log('✅ Emergency rollback cleared');
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('Emergency rollback cleared', {}, 'featureFlags');
+  }
 }
 
 // Log feature flags in development

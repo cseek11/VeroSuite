@@ -5,25 +5,25 @@ import {
   Target,
   TrendingUp,
   Users,
-  Clock,
   BarChart3,
   Settings,
   Play,
   Pause,
-  RotateCcw,
   Download,
   Eye,
   CheckCircle,
-  AlertTriangle,
-  Info,
   Grid,
   Layout,
-  Maximize2,
-  Minimize2,
   X
 } from 'lucide-react';
-import { useAdvancedAutoLayout, LayoutSuggestion, LayoutOptimization } from '@/hooks/useAdvancedAutoLayout';
-import { Typography, Button, Card, Chip } from '@/components/ui/EnhancedUI';
+import { useAdvancedAutoLayout, LayoutSuggestion } from '@/hooks/useAdvancedAutoLayout';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import {
+  Badge,
+  Heading,
+  Text,
+} from '@/components/ui';
 import { cn } from '@/lib/utils';
 
 interface AutoLayoutManagerProps {
@@ -67,17 +67,17 @@ export default function AutoLayoutManager({
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case 'high': return 'text-red-600 bg-red-100';
-      case 'medium': return 'text-yellow-600 bg-yellow-100';
-      case 'low': return 'text-green-600 bg-green-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'high': return 'bg-red-100 text-red-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'low': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) return 'text-green-600 bg-green-100';
-    if (confidence >= 0.6) return 'text-yellow-600 bg-yellow-100';
-    return 'text-red-600 bg-red-100';
+    if (confidence >= 0.8) return 'bg-green-100 text-green-800';
+    if (confidence >= 0.6) return 'bg-yellow-100 text-yellow-800';
+    return 'bg-red-100 text-red-800';
   };
 
   const handleApplySuggestion = useCallback((suggestion: LayoutSuggestion) => {
@@ -173,9 +173,9 @@ export default function AutoLayoutManager({
                 <Card className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
                   <div className="flex items-center gap-3 mb-4">
                     <Brain className="w-6 h-6 text-purple-600 animate-pulse" />
-                    <Typography variant="h6" className="text-purple-900">
+                    <Heading level={6} className="text-purple-900">
                       Learning from Usage Patterns
-                    </Typography>
+                    </Heading>
                   </div>
                   <div className="w-full bg-purple-200 rounded-full h-2 mb-2">
                     <div
@@ -183,9 +183,9 @@ export default function AutoLayoutManager({
                       style={{ width: `${learningProgress}%` }}
                     />
                   </div>
-                  <Typography variant="body2" className="text-purple-700">
+                  <Text variant="small" className="text-purple-700">
                     {learningProgress.toFixed(0)}% complete
-                  </Typography>
+                  </Text>
                 </Card>
               )}
 
@@ -227,21 +227,21 @@ export default function AutoLayoutManager({
               {/* Most Used Card */}
               {layoutInsights.mostUsedCard && (
                 <Card className="p-6">
-                  <Typography variant="h6" className="text-gray-900 mb-4">
+                  <Heading level={6} className="text-gray-900 mb-4">
                     Most Frequently Used Card
-                  </Typography>
+                  </Heading>
                   <div className="flex items-center gap-4">
                     <div className="flex-1">
-                      <Typography variant="body1" className="font-medium text-gray-900">
+                      <Text variant="body" className="font-medium text-gray-900">
                         {layoutInsights.mostUsedCard.id}
-                      </Typography>
-                      <Typography variant="body2" className="text-gray-600">
+                      </Text>
+                      <Text variant="small" className="text-gray-600">
                         Used {layoutInsights.mostUsedCard.count} times
-                      </Typography>
+                      </Text>
                     </div>
-                    <Chip color="green" variant="default">
+                    <Badge variant="default" className="bg-green-100 text-green-800">
                       Top Performer
-                    </Chip>
+                    </Badge>
                   </div>
                 </Card>
               )}
@@ -271,14 +271,14 @@ export default function AutoLayoutManager({
           {activeTab === 'suggestions' && (
             <div className="space-y-6">
               {layoutSuggestions.length === 0 ? (
-                <Card className="p-8 text-center">
+                  <Card className="p-8 text-center">
                   <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <Typography variant="h6" className="text-gray-900 mb-2">
+                  <Heading level={6} className="text-gray-900 mb-2">
                     No Suggestions Available
-                  </Typography>
-                  <Typography variant="body2" className="text-gray-600 mb-4">
+                  </Heading>
+                  <Text variant="small" className="text-gray-600 mb-4">
                     Use the dashboard more to generate intelligent layout suggestions
-                  </Typography>
+                  </Text>
                   <Button onClick={learnFromBehavior} disabled={isLearning}>
                     Generate Suggestions
                   </Button>
@@ -292,36 +292,34 @@ export default function AutoLayoutManager({
                           {suggestion.type === 'prioritize_frequent' && <TrendingUp className="w-5 h-5 text-green-600" />}
                           {suggestion.type === 'group_related' && <Users className="w-5 h-5 text-blue-600" />}
                           {suggestion.type === 'optimize_spacing' && <Layout className="w-5 h-5 text-orange-600" />}
-                          <Typography variant="h6" className="text-gray-900">
+                          <Heading level={6} className="text-gray-900">
                             {suggestion.title}
-                          </Typography>
+                          </Heading>
                         </div>
                         <div className="flex gap-2">
-                          <Chip
-                            color={getImpactColor(suggestion.impact).split(' ')[0] as any}
+                          <Badge
                             variant="default"
-                            className="text-xs"
+                            className={getImpactColor(suggestion.impact)}
                           >
                             {suggestion.impact} impact
-                          </Chip>
-                          <Chip
-                            color={getConfidenceColor(suggestion.confidence).split(' ')[0] as any}
+                          </Badge>
+                          <Badge
                             variant="default"
-                            className="text-xs"
+                            className={getConfidenceColor(suggestion.confidence)}
                           >
                             {Math.round(suggestion.confidence * 100)}% confidence
-                          </Chip>
+                          </Badge>
                         </div>
                       </div>
 
-                      <Typography variant="body2" className="text-gray-600 mb-4">
+                      <Text variant="small" className="text-gray-600 mb-4">
                         {suggestion.description}
-                      </Typography>
+                      </Text>
 
                       <div className="space-y-2 mb-4">
-                        <Typography variant="body2" className="font-medium text-gray-700">
+                        <Text variant="small" className="font-medium text-gray-700">
                           Changes ({suggestion.changes.length}):
-                        </Typography>
+                        </Text>
                         {suggestion.changes.slice(0, 3).map((change, index) => (
                           <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
                             <CheckCircle className="w-3 h-3 text-green-500" />
@@ -360,20 +358,20 @@ export default function AutoLayoutManager({
 
           {activeTab === 'optimizations' && (
             <div className="space-y-6">
-              <Typography variant="h6" className="text-gray-900">
+              <Heading level={6} className="text-gray-900">
                 Layout Optimization Algorithms
-              </Typography>
+              </Heading>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {optimizations.map((optimization) => (
                   <Card key={optimization.id} className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <Typography variant="h6" className="text-gray-900 mb-2">
+                        <Heading level={6} className="text-gray-900 mb-2">
                           {optimization.name}
-                        </Typography>
-                        <Typography variant="body2" className="text-gray-600">
+                        </Heading>
+                        <Text variant="small" className="text-gray-600">
                           {optimization.description}
-                        </Typography>
+                        </Text>
                       </div>
                       <div className="flex items-center gap-2">
                         <input
@@ -387,9 +385,9 @@ export default function AutoLayoutManager({
 
                     <div className="space-y-3">
                       <div>
-                        <Typography variant="body2" className="text-gray-700 mb-1">
+                        <Text variant="small" className="text-gray-700 mb-1">
                           Weight: {Math.round(optimization.weight * 100)}%
-                        </Typography>
+                        </Text>
                         <input
                           type="range"
                           min="0"
@@ -413,9 +411,9 @@ export default function AutoLayoutManager({
 
           {activeTab === 'analytics' && (
             <div className="space-y-6">
-              <Typography variant="h6" className="text-gray-900">
+              <Heading level={6} className="text-gray-900">
                 Usage Analytics
-              </Typography>
+              </Heading>
               
               {/* Card Usage Stats */}
               <div className="grid grid-cols-1 gap-4">
@@ -425,18 +423,18 @@ export default function AutoLayoutManager({
                     <Card key={card.id} className="p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <Typography variant="body1" className="font-medium text-gray-900">
+                          <Text variant="body" className="font-medium text-gray-900">
                             {card.id} ({card.type})
-                          </Typography>
-                          <Typography variant="body2" className="text-gray-600">
+                          </Text>
+                          <Text variant="small" className="text-gray-600">
                             {stats.totalUsage} interactions
                             {stats.avgDuration && ` • ${Math.round(stats.avgDuration)}s avg`}
-                          </Typography>
+                          </Text>
                         </div>
                         <div className="text-right">
-                          <Typography variant="body2" className="text-gray-600">
+                          <Text variant="small" className="text-gray-600">
                             Last used: {stats.lastUsed ? stats.lastUsed.toLocaleDateString() : 'Never'}
-                          </Typography>
+                          </Text>
                         </div>
                       </div>
                     </Card>
@@ -447,28 +445,28 @@ export default function AutoLayoutManager({
               {/* Relationships */}
               {cardRelationships.length > 0 && (
                 <div>
-                  <Typography variant="h6" className="text-gray-900 mb-4">
+                  <Heading level={6} className="text-gray-900 mb-4">
                     Card Relationships
-                  </Typography>
+                  </Heading>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {cardRelationships.slice(0, 10).map((rel, index) => (
                       <Card key={index} className="p-4">
                         <div className="flex items-center justify-between">
                           <div>
-                            <Typography variant="body1" className="font-medium text-gray-900">
+                            <Text variant="body" className="font-medium text-gray-900">
                               {rel.cardA} ↔ {rel.cardB}
-                            </Typography>
-                            <Typography variant="body2" className="text-gray-600">
+                            </Text>
+                            <Text variant="small" className="text-gray-600">
                               {rel.type} relationship
-                            </Typography>
+                            </Text>
                           </div>
                           <div className="text-right">
-                            <Typography variant="body2" className="text-gray-900">
+                            <Text variant="small" className="text-gray-900">
                               {Math.round(rel.strength * 100)}%
-                            </Typography>
-                            <Typography variant="body2" className="text-gray-600">
+                            </Text>
+                            <Text variant="small" className="text-gray-600">
                               confidence
-                            </Typography>
+                            </Text>
                           </div>
                         </div>
                       </Card>
@@ -496,23 +494,23 @@ export default function AutoLayoutManager({
             </div>
 
             <div className="p-6">
-              <Typography variant="h6" className="text-gray-900 mb-2">
+              <Heading level={6} className="text-gray-900 mb-2">
                 {selectedSuggestion.title}
-              </Typography>
-              <Typography variant="body2" className="text-gray-600 mb-4">
+              </Heading>
+              <Text variant="small" className="text-gray-600 mb-4">
                 {selectedSuggestion.description}
-              </Typography>
+              </Text>
 
               <div className="space-y-3">
                 {selectedSuggestion.changes.map((change, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
-                      <Typography variant="body1" className="font-medium text-gray-900">
+                      <Text variant="body" className="font-medium text-gray-900">
                         {change.cardId}
-                      </Typography>
-                      <Typography variant="body2" className="text-gray-600">
+                      </Text>
+                      <Text variant="small" className="text-gray-600">
                         {change.reason}
-                      </Typography>
+                      </Text>
                     </div>
                     <div className="text-sm text-gray-500">
                       {change.x}, {change.y}
@@ -542,6 +540,12 @@ export default function AutoLayoutManager({
     </div>
   );
 }
+
+
+
+
+
+
 
 
 

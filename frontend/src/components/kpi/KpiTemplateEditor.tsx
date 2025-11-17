@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useCreateKpiTemplate, useUpdateKpiTemplate, useKpiTemplate } from '@/hooks/useKpiTemplates';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import { Card } from '@/components/ui/EnhancedUI';
-import { Badge } from '@/components/ui/CRMComponents';
-import { Chip } from '@/components/ui/EnhancedUI';
+import Textarea from '@/components/ui/Textarea';
+import Select from '@/components/ui/Select';
+import Checkbox from '@/components/ui/Checkbox';
+import Card from '@/components/ui/Card';
+import { Badge } from '@/components/ui';
+import { Dialog, DialogContent } from '@/components/ui/Dialog';
 import { 
   Save, 
   X, 
@@ -24,6 +30,61 @@ import {
   Palette
 } from 'lucide-react';
 import type { KpiTemplate, CreateKpiTemplateDto, KpiTemplateField } from '@/types/kpi-templates';
+import { logger } from '@/utils/logger';
+import { toast } from '@/utils/toast';
+
+// KPI Template Form Schema
+const kpiTemplateFieldSchema = z.object({
+  field_name: z.string().min(1, 'Field name is required'),
+  field_type: z.enum(['number', 'text', 'date', 'boolean']),
+  table_name: z.string().min(1, 'Table name is required'),
+  column_name: z.string().min(1, 'Column name is required'),
+  aggregation_type: z.enum(['sum', 'count', 'avg', 'min', 'max']).optional(),
+  display_name: z.string().optional(),
+  description: z.string().optional(),
+  is_required: z.boolean().optional(),
+  sort_order: z.number().optional(),
+});
+
+const kpiTemplateSchema = z.object({
+  name: z.string().min(1, 'Template name is required'),
+  description: z.string().optional(),
+  category: z.enum(['financial', 'operational', 'customer', 'compliance', 'user']).default('financial'),
+  template_type: z.enum(['system', 'user', 'shared']).default('user'),
+  formula_expression: z.string().min(1, 'Formula expression is required'),
+  formula_fields: z.array(kpiTemplateFieldSchema).default([]),
+  threshold_config: z.object({
+    green: z.number().min(0),
+    yellow: z.number().min(0),
+    red: z.number().min(0),
+    unit: z.string().optional(),
+  }).default({
+    green: 80,
+    yellow: 60,
+    red: 40,
+    unit: '%'
+  }),
+  chart_config: z.object({
+    type: z.string().default('gauge'),
+    colorScheme: z.array(z.string()).default(['#ef4444', '#f59e0b', '#10b981']),
+  }).default({
+    type: 'gauge',
+    colorScheme: ['#ef4444', '#f59e0b', '#10b981']
+  }),
+  data_source_config: z.object({
+    table: z.string().default(''),
+    timeRange: z.string().default('monthly'),
+  }).default({
+    table: '',
+    timeRange: 'monthly'
+  }),
+  tags: z.array(z.string()).default([]),
+  is_public: z.boolean().default(false),
+  is_featured: z.boolean().default(false),
+  status: z.enum(['draft', 'published', 'archived']).default('draft'),
+});
+
+type KpiTemplateFormData = z.infer<typeof kpiTemplateSchema>;
 
 interface KpiTemplateEditorProps {
   templateId?: string; // If provided, edit existing template
@@ -40,34 +101,6 @@ export default function KpiTemplateEditor({
 }: KpiTemplateEditorProps) {
   const [activeTab, setActiveTab] = useState<'basic' | 'formula' | 'fields' | 'threshold' | 'chart' | 'preview'>('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Form state
-  const [formData, setFormData] = useState<CreateKpiTemplateDto>({
-    name: '',
-    description: '',
-    category: 'financial',
-    template_type: 'user',
-    formula_expression: '',
-    formula_fields: [],
-    threshold_config: {
-      green: 80,
-      yellow: 60,
-      red: 40,
-      unit: '%'
-    },
-    chart_config: {
-      type: 'gauge',
-      colorScheme: ['#ef4444', '#f59e0b', '#10b981']
-    },
-    data_source_config: {
-      table: '',
-      timeRange: 'monthly'
-    },
-    tags: [],
-    is_public: false,
-    is_featured: false,
-    status: 'draft'
-  });
 
   const [newTag, setNewTag] = useState('');
   const [newField, setNewField] = useState<Partial<KpiTemplateField>>({
@@ -87,10 +120,50 @@ export default function KpiTemplateEditor({
   const createMutation = useCreateKpiTemplate();
   const updateMutation = useUpdateKpiTemplate();
 
+  // Form setup
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    setValue,
+    reset,
+  } = useForm<KpiTemplateFormData>({
+    resolver: zodResolver(kpiTemplateSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      category: 'financial',
+      template_type: 'user',
+      formula_expression: '',
+      formula_fields: [],
+      threshold_config: {
+        green: 80,
+        yellow: 60,
+        red: 40,
+        unit: '%'
+      },
+      chart_config: {
+        type: 'gauge',
+        colorScheme: ['#ef4444', '#f59e0b', '#10b981']
+      },
+      data_source_config: {
+        table: '',
+        timeRange: 'monthly'
+      },
+      tags: [],
+      is_public: false,
+      is_featured: false,
+      status: 'draft'
+    },
+  });
+
+  const formData = watch();
+
   // Load existing template data
   useEffect(() => {
     if (existingTemplate) {
-      setFormData({
+      reset({
         name: existingTemplate.name,
         description: existingTemplate.description || '',
         category: existingTemplate.category,
@@ -106,7 +179,7 @@ export default function KpiTemplateEditor({
         status: existingTemplate.status
       });
     }
-  }, [existingTemplate]);
+  }, [existingTemplate, reset]);
 
   const categories = [
     { id: 'financial', name: 'Financial', icon: DollarSign, color: 'bg-green-100 text-green-800' },
@@ -126,29 +199,24 @@ export default function KpiTemplateEditor({
   const aggregationTypes = ['count', 'sum', 'avg', 'min', 'max'];
   const fieldTypes = ['number', 'text', 'date', 'boolean'];
 
-  const handleSubmit = async () => {
-    if (!formData.name || !formData.formula_expression) {
-      alert('Please fill in required fields');
-      return;
-    }
-
+  const onSubmit = async (data: KpiTemplateFormData) => {
     setIsSubmitting(true);
     try {
       let result;
       if (templateId) {
         result = await updateMutation.mutateAsync({
           id: templateId,
-          data: formData
+          data: data as CreateKpiTemplateDto
         });
       } else {
-        result = await createMutation.mutateAsync(formData);
+        result = await createMutation.mutateAsync(data as CreateKpiTemplateDto);
       }
       
       onSave?.(result);
       onClose();
     } catch (error) {
-      console.error('Failed to save template:', error);
-      alert('Failed to save template. Please try again.');
+      logger.error('Failed to save template', error, 'KpiTemplateEditor');
+      toast.error('Failed to save template. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -156,30 +224,21 @@ export default function KpiTemplateEditor({
 
   const addTag = () => {
     if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, newTag.trim()]
-      }));
+      setValue('tags', [...formData.tags, newTag.trim()]);
       setNewTag('');
     }
   };
 
   const removeTag = (tagToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
-    }));
+    setValue('tags', formData.tags.filter(tag => tag !== tagToRemove));
   };
 
   const addField = () => {
     if (newField.field_name && newField.table_name && newField.column_name) {
-      setFormData(prev => ({
-        ...prev,
-        formula_fields: [...prev.formula_fields, {
-          ...newField,
-          sort_order: prev.formula_fields.length
-        } as KpiTemplateField]
-      }));
+      setValue('formula_fields', [...formData.formula_fields, {
+        ...newField,
+        sort_order: formData.formula_fields.length
+      } as KpiTemplateField]);
       setNewField({
         field_name: '',
         field_type: 'number',
@@ -195,17 +254,15 @@ export default function KpiTemplateEditor({
   };
 
   const removeField = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      formula_fields: prev.formula_fields.filter((_, i) => i !== index)
-    }));
+    setValue('formula_fields', formData.formula_fields.filter((_, i) => i !== index));
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+        <div className="bg-white rounded-lg shadow-xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
@@ -236,7 +293,7 @@ export default function KpiTemplateEditor({
           ].map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as 'basic' | 'formula' | 'fields' | 'threshold' | 'chart' | 'preview')}
               className={`flex items-center space-x-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
                   ? "border-purple-500 text-purple-600"
@@ -253,29 +310,34 @@ export default function KpiTemplateEditor({
         <div className="flex-1 p-6 overflow-y-auto">
           {activeTab === 'basic' && (
             <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Template Name *
-                </label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Enter template name..."
-                />
-              </div>
+              <Controller
+                name="name"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    label="Template Name *"
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    placeholder="Enter template name..."
+                    {...(errors.name?.message ? { error: errors.name.message } : {})}
+                  />
+                )}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Describe what this template measures..."
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
+              <Controller
+                name="description"
+                control={control}
+                render={({ field }) => (
+                  <Textarea
+                    label="Description"
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    placeholder="Describe what this template measures..."
+                    rows={3}
+                    {...(errors.description?.message ? { error: errors.description.message } : {})}
+                  />
+                )}
+              />
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -287,7 +349,8 @@ export default function KpiTemplateEditor({
                     return (
                       <button
                         key={category.id}
-                        onClick={() => setFormData(prev => ({ ...prev, category: category.id as any }))}
+                        type="button"
+                        onClick={() => setValue('category', category.id as 'financial' | 'operational' | 'customer' | 'compliance' | 'user')}
                         className={`p-3 rounded-lg border-2 transition-colors ${
                           formData.category === category.id
                             ? "border-purple-500 bg-purple-50"
@@ -305,19 +368,23 @@ export default function KpiTemplateEditor({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Template Type
-                </label>
-                <select
-                  value={formData.template_type}
-                  onChange={(e) => setFormData(prev => ({ ...prev, template_type: e.target.value as any }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                  <option value="user">User Template</option>
-                  <option value="shared">Shared Template</option>
-                </select>
-              </div>
+              <Controller
+                name="template_type"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    label="Template Type"
+                    value={field.value}
+                    onChange={(value) => field.onChange(value as 'system' | 'user' | 'shared')}
+                    options={[
+                      { value: 'user', label: 'User Template' },
+                      { value: 'shared', label: 'Shared Template' },
+                      { value: 'system', label: 'System Template' },
+                    ]}
+                    {...(errors.template_type?.message ? { error: errors.template_type.message } : {})}
+                  />
+                )}
+              />
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -325,7 +392,7 @@ export default function KpiTemplateEditor({
                 </label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {formData.tags.map(tag => (
-                    <Chip key={tag} className="bg-purple-100 text-purple-800">
+                    <Badge key={tag} className="bg-purple-100 text-purple-800">
                       {tag}
                       <button
                         onClick={() => removeTag(tag)}
@@ -333,7 +400,7 @@ export default function KpiTemplateEditor({
                       >
                         <X className="h-3 w-3" />
                       </button>
-                    </Chip>
+                    </Badge>
                   ))}
                 </div>
                 <div className="flex gap-2">
@@ -350,79 +417,104 @@ export default function KpiTemplateEditor({
               </div>
 
               <div className="flex gap-4">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.is_public}
-                    onChange={(e) => setFormData(prev => ({ ...prev, is_public: e.target.checked }))}
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-gray-700">Make this template public</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.is_featured}
-                    onChange={(e) => setFormData(prev => ({ ...prev, is_featured: e.target.checked }))}
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-gray-700">Feature this template</span>
-                </label>
+                <Controller
+                  name="is_public"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={field.value}
+                        onChange={(checked) => field.onChange(checked)}
+                      />
+                      <label className="text-sm text-gray-700">Make this template public</label>
+                    </div>
+                  )}
+                />
+                <Controller
+                  name="is_featured"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={field.value}
+                        onChange={(checked) => field.onChange(checked)}
+                      />
+                      <label className="text-sm text-gray-700">Feature this template</label>
+                    </div>
+                  )}
+                />
               </div>
             </div>
           )}
 
           {activeTab === 'formula' && (
             <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Formula Expression *
-                </label>
-                <textarea
-                  value={formData.formula_expression}
-                  onChange={(e) => setFormData(prev => ({ ...prev, formula_expression: e.target.value }))}
-                  placeholder="Enter the formula expression (e.g., COUNT(jobs), AVG(revenue), etc.)"
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono"
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Use field names from the Fields tab in your formula (e.g., {`{field_name}`})
-                </p>
-              </div>
+              <Controller
+                name="formula_expression"
+                control={control}
+                render={({ field }) => (
+                  <div>
+                    <Textarea
+                      label="Formula Expression *"
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      placeholder="Enter the formula expression (e.g., COUNT(jobs), AVG(revenue), etc.)"
+                      rows={4}
+                      className="font-mono"
+                      {...(errors.formula_expression?.message ? { error: errors.formula_expression.message } : {})}
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      Use field names from the Fields tab in your formula (e.g., {`{field_name}`})
+                    </p>
+                  </div>
+                )}
+              />
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Data Source Configuration
                 </label>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-600 mb-1">Primary Table</label>
-                    <Input
-                      value={formData.data_source_config.table}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        data_source_config: { ...prev.data_source_config, table: e.target.value }
-                      }))}
-                      placeholder="e.g., jobs, invoices"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-600 mb-1">Time Range</label>
-                    <select
-                      value={formData.data_source_config.timeRange}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        data_source_config: { ...prev.data_source_config, timeRange: e.target.value }
-                      }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
-                      <option value="daily">Daily</option>
-                      <option value="weekly">Weekly</option>
-                      <option value="monthly">Monthly</option>
-                      <option value="quarterly">Quarterly</option>
-                      <option value="annually">Annually</option>
-                    </select>
-                  </div>
+                  <Controller
+                    name="data_source_config.table"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        label="Primary Table"
+                        value={field.value}
+                        onChange={(e) => {
+                          setValue('data_source_config', {
+                            ...formData.data_source_config,
+                            table: e.target.value
+                          });
+                        }}
+                        placeholder="e.g., jobs, invoices"
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="data_source_config.timeRange"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        label="Time Range"
+                        value={field.value}
+                        onChange={(value) => {
+                          setValue('data_source_config', {
+                            ...formData.data_source_config,
+                            timeRange: value
+                          });
+                        }}
+                        options={[
+                          { value: 'daily', label: 'Daily' },
+                          { value: 'weekly', label: 'Weekly' },
+                          { value: 'monthly', label: 'Monthly' },
+                          { value: 'quarterly', label: 'Quarterly' },
+                          { value: 'annually', label: 'Annually' },
+                        ]}
+                      />
+                    )}
+                  />
                 </div>
               </div>
             </div>
@@ -456,25 +548,21 @@ export default function KpiTemplateEditor({
                         value={newField.column_name}
                         onChange={(e) => setNewField(prev => ({ ...prev, column_name: e.target.value }))}
                       />
-                      <select
-                        value={newField.field_type}
-                        onChange={(e) => setNewField(prev => ({ ...prev, field_type: e.target.value as any }))}
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      >
-                        {fieldTypes.map(type => (
-                          <option key={type} value={type}>{type}</option>
-                        ))}
-                      </select>
-                      <select
+                      <Select
+                        label="Field Type"
+                        value={newField.field_type || 'number'}
+                        onChange={(value) => setNewField(prev => ({ ...prev, field_type: value as 'number' | 'text' | 'date' | 'boolean' }))}
+                        options={fieldTypes.map(type => ({ value: type, label: type }))}
+                      />
+                      <Select
+                        label="Aggregation Type"
                         value={newField.aggregation_type || ''}
-                        onChange={(e) => setNewField(prev => ({ ...prev, aggregation_type: e.target.value as any }))}
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      >
-                        <option value="">No aggregation</option>
-                        {aggregationTypes.map(type => (
-                          <option key={type} value={type}>{type}</option>
-                        ))}
-                      </select>
+                        onChange={(value) => setNewField(prev => ({ ...prev, aggregation_type: value as 'sum' | 'count' | 'avg' | 'min' | 'max' | undefined }))}
+                        options={[
+                          { value: '', label: 'No aggregation' },
+                          ...aggregationTypes.map(type => ({ value: type, label: type })),
+                        ]}
+                      />
                     </div>
                     <Button onClick={addField} className="mt-4">
                       <Plus className="h-4 w-4 mr-2" />
@@ -638,16 +726,16 @@ export default function KpiTemplateEditor({
                     <p className="text-gray-600 mb-4">{formData.description || 'No description provided'}</p>
                     
                     <div className="flex flex-wrap gap-2 mb-4">
-                      <Chip className={`${categories.find(c => c.id === formData.category)?.color}`}>
+                      <Badge className={`${categories.find(c => c.id === formData.category)?.color}`}>
                         {categories.find(c => c.id === formData.category)?.name}
-                      </Chip>
-                      <Chip className="bg-blue-100 text-blue-800">
+                      </Badge>
+                      <Badge className="bg-blue-100 text-blue-800">
                         {formData.template_type}
-                      </Chip>
+                      </Badge>
                       {formData.tags.map(tag => (
-                        <Chip key={tag} className="bg-gray-100 text-gray-600">
+                        <Badge key={tag} className="bg-gray-100 text-gray-600">
                           {tag}
-                        </Chip>
+                        </Badge>
                       ))}
                     </div>
 
@@ -691,9 +779,9 @@ export default function KpiTemplateEditor({
         <div className="flex items-center justify-between p-6 border-t border-gray-200">
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <span>Status:</span>
-            <Chip className="bg-gray-100 text-gray-800">
+            <Badge className="bg-gray-100 text-gray-800">
               {formData.status}
-            </Chip>
+            </Badge>
           </div>
           
           <div className="flex gap-3">
@@ -701,7 +789,7 @@ export default function KpiTemplateEditor({
               Cancel
             </Button>
             <Button 
-              onClick={handleSubmit}
+              onClick={handleSubmit(onSubmit)}
               disabled={isSubmitting || !formData.name || !formData.formula_expression}
             >
               <Save className="h-4 w-4 mr-2" />
@@ -709,7 +797,8 @@ export default function KpiTemplateEditor({
             </Button>
           </div>
         </div>
-      </div>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

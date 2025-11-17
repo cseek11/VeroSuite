@@ -8,27 +8,35 @@ describe('Button', () => {
     render(<Button>Click me</Button>);
     const button = screen.getByRole('button', { name: /click me/i });
     expect(button).toBeInTheDocument();
-    expect(button).toHaveClass('bg-gray-900');
+    // Default variant uses gradient classes
+    expect(button).toHaveClass('bg-gradient-to-r');
+    expect(button).toHaveClass('from-indigo-600');
   });
 
   it('renders with primary variant', () => {
     render(<Button variant="primary">Primary Button</Button>);
     const button = screen.getByRole('button', { name: /primary button/i });
-    expect(button).toHaveClass('bg-purple-600');
+    // Primary variant uses gradient classes
+    expect(button).toHaveClass('bg-gradient-to-r');
+    expect(button).toHaveClass('from-indigo-600');
+    expect(button).toHaveClass('to-purple-600');
   });
 
   it('renders with icon', () => {
     render(<Button icon={Users}>With Icon</Button>);
     const button = screen.getByRole('button', { name: /with icon/i });
     expect(button).toBeInTheDocument();
-    expect(button.querySelector('svg')).toBeInTheDocument();
+    // Icon is rendered as SVG component
+    expect(screen.getByTestId('users-icon')).toBeInTheDocument();
   });
 
   it('shows loading state', () => {
     render(<Button loading>Loading</Button>);
     const button = screen.getByRole('button', { name: /loading/i });
     expect(button).toBeDisabled();
-    expect(button.querySelector('.animate-spin')).toBeInTheDocument();
+    // Loading spinner is rendered as SVG component
+    expect(screen.getByTestId('loader2-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('loader2-icon')).toHaveClass('animate-spin');
   });
 
   it('calls onClick when clicked', () => {

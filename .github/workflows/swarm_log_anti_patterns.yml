@@ -1,0 +1,162 @@
+name: Swarm - Log Anti-Patterns
+
+on:
+  workflow_run:
+    workflows: ["Swarm - Compute Reward Score"]
+    types: [completed]
+
+jobs:
+  log-anti-patterns:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Download reward artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: reward
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+        continue-on-error: true
+
+      - name: Decide whether to log anti-patterns
+        id: check-score
+        run: |
+          if [ ! -f reward.json ]; then
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          SCORE=$(jq -r '.score' reward.json)
+          if [ "$SCORE" -le 0 ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "score=$SCORE" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Get PR number
+        id: pr
+        run: |
+          PR_NUM=$(gh pr list --head "${{ github.event.workflow_run.head_branch }}" --json number --jq '.[0].number' || echo "")
+          if [ -z "$PR_NUM" ]; then
+            PR_NUM="${{ github.event.workflow_run.pull_requests[0].number }}"
+          fi
+          echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
+
+      - name: Get PR diff
+        if: steps.check-score.outputs.found == 'true'
+        run: |
+          git fetch origin main || true
+          git diff origin/main...HEAD > anti-patterns/pr-diff.txt || echo "" > anti-patterns/pr-diff.txt
+
+      - name: Detect anti-patterns
+        if: steps.check-score.outputs.found == 'true'
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+          SCORE: ${{ steps.check-score.outputs.score }}
+        run: |
+          mkdir -p anti-patterns
+          python .cursor/scripts/detect_anti_patterns.py \
+            --pr "$PR_NUM" \
+            --score "$SCORE" \
+            --diff anti-patterns/pr-diff.txt \
+            --out anti-patterns/detection.json
+
+      - name: Generate anti-pattern report
+        if: steps.check-score.outputs.found == 'true'
+        run: |
+          python3 << 'EOF'
+          import json
+          import pathlib
+          
+          detection_path = pathlib.Path("anti-patterns/detection.json")
+          if not detection_path.exists():
+              print("No detection.json found")
+              exit(0)
+          
+          data = json.loads(detection_path.read_text())
+          violations = data.get("violations", [])
+          
+          if not violations:
+              print("No violations detected")
+              exit(0)
+          
+          # Generate markdown report
+          report = f"""# Anti-Pattern Detection Report (PR #{data.get('metadata', {}).get('pr', 'unknown')})
+          
+**REWARD_SCORE:** {data.get('metadata', {}).get('score', 'unknown')} (triggered anti-pattern detection)
+          
+## Detected Violations ({len(violations)})
+          
+"""
+          
+          # Group by type
+          by_type = {}
+          for v in violations:
+              v_type = v.get('type', 'unknown')
+              if v_type not in by_type:
+                  by_type[v_type] = []
+              by_type[v_type].append(v)
+          
+          for v_type, v_list in by_type.items():
+              report += f"""### {v_type.replace('_', ' ').title()} ({len(v_list)})
+          
+"""
+              for v in v_list:
+                  report += f"""- **{v.get('severity', 'unknown')}:** {v.get('description', 'N/A')}
+  - Pattern: `{v.get('pattern', 'N/A')[:100]}`
+  - Line: {v.get('line', 'N/A')}
+  
+"""
+          
+          report += """
+## Suggested Actions
+
+1. Review each violation above
+2. Fix empty catch blocks by adding proper error handling
+3. Add missing await keywords for async operations
+4. Add try/catch blocks around error-prone operations
+5. Remove hardcoded secrets and use environment variables
+6. Add tests for new or modified code
+7. Ensure consistent logging patterns with traceId
+
+## Next Steps
+
+This report will be appended to `.cursor/anti_patterns.md` and `.cursor/BUG_LOG.md` after human review.
+
+**Note:** Anti-pattern entries require human review before being committed.
+"""
+          
+          pathlib.Path("anti-patterns/REPORT.md").write_text(report)
+          print(f"Generated report with {len(violations)} violations")
+          EOF
+
+      - name: Upload anti-pattern artifact
+        if: steps.check-score.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: anti-pattern-detection
+          path: anti-patterns/
+          retention-days: 30
+
+      - name: Post anti-pattern comment
+        if: steps.check-score.outputs.found == 'true'
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ ! -f anti-patterns/REPORT.md ]; then
+            echo "No anti-pattern report found"
+            exit 0
+          fi
+          
+          gh pr comment "$PR_NUM" --body-file anti-patterns/REPORT.md || true
+

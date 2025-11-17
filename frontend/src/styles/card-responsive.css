@@ -1,0 +1,99 @@
+/* Card Responsive Styles */
+.card-mobile-mode {
+  /* Mobile-specific styles for cards */
+}
+
+.card-mobile-mode .customer-table {
+  /* Make table more compact in mobile mode */
+  font-size: 0.875rem;
+}
+
+.card-mobile-mode .action-buttons {
+  /* Stack action buttons vertically in mobile mode */
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.card-mobile-mode .action-button {
+  /* Make action buttons full width in mobile mode */
+  width: 100%;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Ensure proper scrolling in mobile mode */
+.card-mobile-mode .overflow-auto {
+  /* Enhanced scrolling for mobile */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.card-mobile-mode .overflow-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.card-mobile-mode .overflow-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.card-mobile-mode .overflow-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.card-mobile-mode .overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Mobile-specific table adjustments */
+.card-mobile-mode .customer-table th,
+.card-mobile-mode .customer-table td {
+  padding: 0.5rem 0.25rem;
+}
+
+/* Hide less important columns in mobile mode */
+.card-mobile-mode .contact-column,
+.card-mobile-mode .location-column {
+  display: none;
+}
+
+/* Make customer name more prominent in mobile */
+.card-mobile-mode .customer-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Compact expanded content in mobile */
+.card-mobile-mode .expanded-content {
+  padding: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.card-mobile-mode .expanded-content .grid {
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+/* Mobile-friendly quick actions */
+.card-mobile-mode .quick-actions {
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+}
+
+.card-mobile-mode .quick-actions button {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  height: auto;
+}
+
+
+
+
+
+
+
+
+
+
+

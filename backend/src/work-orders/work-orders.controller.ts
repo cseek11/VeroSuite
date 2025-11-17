@@ -27,7 +27,7 @@ import { CreateWorkOrderDto, UpdateWorkOrderDto, WorkOrderFiltersDto } from './d
 @ApiTags('Work Orders')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('work-orders')
+@Controller({ path: 'work-orders', version: '1' })
 export class WorkOrdersController {
   constructor(private readonly workOrdersService: WorkOrdersService) {}
 

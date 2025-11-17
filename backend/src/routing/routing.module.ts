@@ -45,7 +45,9 @@ export class RoutingService {
       include: { workOrder: { include: { location: true } } },
     });
 
-    const technicians = await this.techs.getAvailableTechnicians(tenantId, date);
+    // Get available technicians - using basic method for now
+    // TODO: Update to use full getAvailableTechnicians with time parameters when needed
+    const technicians = await this.techs.getAvailableTechniciansBasic(tenantId, date);
 
     const routes: OptimizedRoute[] = [];
 

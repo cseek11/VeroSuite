@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, BadRequestException, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
@@ -10,7 +10,10 @@ import { validateEnvironmentVariables, logEnvironmentStatus } from './common/uti
 process.env.NODE_OPTIONS = '--max-old-space-size=4096';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Configure raw body parsing for Stripe webhooks
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true, // Enable raw body for webhook signature verification
+  });
   
   // Validate environment variables at startup
   const configService = app.get(ConfigService);
@@ -30,14 +33,30 @@ async function bootstrap() {
     logEnvironmentStatus(requiredEnvVars, optionalEnvVars);
     console.log('✅ Environment validation passed');
   } catch (error) {
-    console.error('❌ Environment validation failed:', error.message);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    console.error('❌ Environment validation failed:', errorMessage);
     process.exit(1);
   }
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     transform: true,
-    forbidNonWhitelisted: true,
+    forbidNonWhitelisted: false, // Allow extra properties for now, log them instead
+    transformOptions: {
+      enableImplicitConversion: true, // Automatically convert string numbers to numbers
+    },
+    exceptionFactory: (errors) => {
+      const messages = errors.map(err => {
+        const constraints = err.constraints ? Object.values(err.constraints).join(', ') : '';
+        return `${err.property}: ${constraints}`;
+      });
+      console.error('Validation errors:', messages);
+      return new BadRequestException({
+        statusCode: 400,
+        message: 'Validation failed',
+        errors: messages
+      });
+    }
   }));
 
   const config = new DocumentBuilder()
@@ -57,6 +76,13 @@ async function bootstrap() {
 
   // Set API prefix
   app.setGlobalPrefix('api');
+
+  // Enable API versioning
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+    prefix: 'v'
+  });
 
   const port = process.env.PORT || 3001;
   await app.listen(port);

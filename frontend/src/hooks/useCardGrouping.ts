@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { logger } from '@/utils/logger';
 
 export interface CardGroup {
   id: string;
@@ -45,8 +46,8 @@ export function useCardGrouping(onDeleteCards?: (cardIds: string[]) => void) {
           };
         });
         setGroups(groupsWithSets);
-      } catch (error) {
-        console.warn('Failed to load card groups');
+      } catch (error: unknown) {
+        logger.warn('Failed to load card groups', { error }, 'useCardGrouping');
       }
     }
   }, []);
@@ -63,8 +64,8 @@ export function useCardGrouping(onDeleteCards?: (cardIds: string[]) => void) {
         };
       });
       localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(serializable));
-    } catch (error) {
-      console.error('Failed to save card groups:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to save card groups', error, 'useCardGrouping');
     }
   }, []);
 

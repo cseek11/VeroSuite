@@ -1,17 +1,16 @@
 import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import {
-  Typography,
-  Button,
-  Chip,
-  Alert,
-  Card,
-} from '@/components/ui/EnhancedUI';
+  Badge,
+  Heading,
+  Text,
+} from '@/components/ui';
 import {
   FileText,
   Calendar,
   DollarSign,
-  AlertTriangle,
   CheckCircle,
   Clock,
   Edit,
@@ -20,6 +19,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { agreementsApi, ServiceAgreement } from '@/lib/agreements-api';
+import { logger } from '@/utils/logger';
 
 interface AgreementDetailProps {
   agreement: ServiceAgreement;
@@ -37,7 +37,7 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
       onClose();
     },
     onError: (error) => {
-      console.error('Error deleting agreement:', error);
+      logger.error('Error deleting agreement', error, 'AgreementDetail');
     },
   });
 
@@ -130,42 +130,49 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
         <div className="flex items-center gap-3">
           <FileText className="h-6 w-6 text-blue-600" />
           <div>
-            <Typography variant="h4" className="text-gray-900">
+            <Heading level={4} className="text-gray-900">
               {agreement.title}
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-gray-600">
               Agreement #{agreement.agreement_number}
-            </Typography>
+            </Text>
           </div>
         </div>
-        <Chip
-          color={getStatusColor(agreement.status)}
-          variant="default"
-        >
+        <Badge variant={agreement.status === 'active' ? 'default' : 'secondary'}>
           {agreement.status.toUpperCase()}
-        </Chip>
+        </Badge>
       </div>
 
       {/* Expiry Alert */}
       {expiryAlert && (
-        <Alert
-          type={expiryAlert.type as any}
-          title="Agreement Notice"
-        >
-          {expiryAlert.message}
-        </Alert>
+        <div className={`border rounded-lg p-4 ${
+          expiryAlert.type === 'error' ? 'bg-red-50 border-red-200' :
+          expiryAlert.type === 'warning' ? 'bg-yellow-50 border-yellow-200' :
+          'bg-blue-50 border-blue-200'
+        }`}>
+          <h3 className={`text-sm font-medium mb-1 ${
+            expiryAlert.type === 'error' ? 'text-red-800' :
+            expiryAlert.type === 'warning' ? 'text-yellow-800' :
+            'text-blue-800'
+          }`}>Agreement Notice</h3>
+          <p className={`text-sm ${
+            expiryAlert.type === 'error' ? 'text-red-700' :
+            expiryAlert.type === 'warning' ? 'text-yellow-700' :
+            'text-blue-700'
+          }`}>{expiryAlert.message}</p>
+        </div>
       )}
 
       {/* Progress Bar */}
       {agreement.end_date && (
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
-            <Typography variant="body2" className="text-gray-600">
+            <Text variant="small" className="text-gray-600">
               Agreement Progress
-            </Typography>
-            <Typography variant="body2" className="text-gray-900">
+            </Text>
+            <Text variant="small" className="text-gray-900">
               {Math.round(progress)}%
-            </Typography>
+            </Text>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
@@ -184,27 +191,27 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
       <Card className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <User className="h-5 w-5 text-gray-600" />
-          <Typography variant="h5" className="text-gray-900">
+          <Heading level={5} className="text-gray-900">
             Customer Information
-          </Typography>
+          </Heading>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Typography variant="body2" className="text-gray-600">Customer Name</Typography>
-            <Typography variant="body1" className="font-medium">
+            <Text variant="small" className="text-gray-600">Customer Name</Text>
+            <Text variant="body" className="font-medium">
               {agreement.account.name}
-            </Typography>
+            </Text>
           </div>
           {agreement.account.email && (
             <div>
-              <Typography variant="body2" className="text-gray-600">Email</Typography>
-              <Typography variant="body1">{agreement.account.email}</Typography>
+              <Text variant="small" className="text-gray-600">Email</Text>
+              <Text variant="body">{agreement.account.email}</Text>
             </div>
           )}
           {agreement.account.phone && (
             <div>
-              <Typography variant="body2" className="text-gray-600">Phone</Typography>
-              <Typography variant="body1">{agreement.account.phone}</Typography>
+              <Text variant="small" className="text-gray-600">Phone</Text>
+              <Text variant="body">{agreement.account.phone}</Text>
             </div>
           )}
         </div>
@@ -214,30 +221,27 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
       <Card className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <Settings className="h-5 w-5 text-gray-600" />
-          <Typography variant="h5" className="text-gray-900">
+          <Heading level={5} className="text-gray-900">
             Service Information
-          </Typography>
+          </Heading>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Typography variant="body2" className="text-gray-600">Service Type</Typography>
-            <Typography variant="body1" className="font-medium">
+            <Text variant="small" className="text-gray-600">Service Type</Text>
+            <Text variant="body" className="font-medium">
               {agreement.service_types.name}
-            </Typography>
+            </Text>
             {agreement.service_types.description && (
-              <Typography variant="body2" className="text-gray-600 mt-1">
+              <Text variant="small" className="text-gray-600 mt-1">
                 {agreement.service_types.description}
-              </Typography>
+              </Text>
             )}
           </div>
           <div>
-            <Typography variant="body2" className="text-gray-600">Billing Frequency</Typography>
-            <Chip
-              color={getBillingFrequencyColor(agreement.billing_frequency)}
-              variant="default"
-            >
+            <Text variant="small" className="text-gray-600">Billing Frequency</Text>
+            <Badge variant="default">
               {agreement.billing_frequency}
-            </Chip>
+            </Badge>
           </div>
         </div>
       </Card>
@@ -246,35 +250,35 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
       <Card className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <DollarSign className="h-5 w-5 text-gray-600" />
-          <Typography variant="h5" className="text-gray-900">
+          <Heading level={5} className="text-gray-900">
             Financial Information
-          </Typography>
+          </Heading>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {agreement.pricing && (
             <div>
-              <Typography variant="body2" className="text-gray-600">Agreement Value</Typography>
-              <Typography variant="h4" className="text-green-600 font-bold">
+              <Text variant="small" className="text-gray-600">Agreement Value</Text>
+              <Heading level={4} className="text-green-600 font-bold">
                 ${agreement.pricing.toLocaleString()}
-              </Typography>
+              </Heading>
             </div>
           )}
           <div>
-            <Typography variant="body2" className="text-gray-600">Auto-renewal</Typography>
+            <Text variant="small" className="text-gray-600">Auto-renewal</Text>
             <div className="flex items-center gap-2">
               {agreement.auto_renewal ? (
                 <>
                   <CheckCircle className="h-4 w-4 text-green-600" />
-                  <Typography variant="body1" className="text-green-600">
+                  <Text variant="body" className="text-green-600">
                     Enabled
-                  </Typography>
+                  </Text>
                 </>
               ) : (
                 <>
                   <Clock className="h-4 w-4 text-gray-400" />
-                  <Typography variant="body1" className="text-gray-600">
+                  <Text variant="body" className="text-gray-600">
                     Disabled
-                  </Typography>
+                  </Text>
                 </>
               )}
             </div>
@@ -286,36 +290,36 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
       <Card className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <Calendar className="h-5 w-5 text-gray-600" />
-          <Typography variant="h5" className="text-gray-900">
+          <Heading level={5} className="text-gray-900">
             Agreement Dates
-          </Typography>
+          </Heading>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Typography variant="body2" className="text-gray-600">Start Date</Typography>
-            <Typography variant="body1" className="font-medium">
+            <Text variant="small" className="text-gray-600">Start Date</Text>
+            <Text variant="body" className="font-medium">
               {formatDate(agreement.start_date)}
-            </Typography>
+            </Text>
           </div>
           {agreement.end_date && (
             <div>
-              <Typography variant="body2" className="text-gray-600">End Date</Typography>
-              <Typography variant="body1" className="font-medium">
+              <Text variant="small" className="text-gray-600">End Date</Text>
+              <Text variant="body" className="font-medium">
                 {formatDate(agreement.end_date)}
-              </Typography>
+              </Text>
             </div>
           )}
           <div>
-            <Typography variant="body2" className="text-gray-600">Created</Typography>
-            <Typography variant="body1">
+            <Text variant="small" className="text-gray-600">Created</Text>
+            <Text variant="body">
               {formatDateTime(agreement.created_at)}
-            </Typography>
+            </Text>
           </div>
           <div>
-            <Typography variant="body2" className="text-gray-600">Last Updated</Typography>
-            <Typography variant="body1">
+            <Text variant="small" className="text-gray-600">Last Updated</Text>
+            <Text variant="body">
               {formatDateTime(agreement.updated_at)}
-            </Typography>
+            </Text>
           </div>
         </div>
       </Card>
@@ -323,42 +327,39 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
       {/* Terms and Conditions */}
       {agreement.terms && (
         <Card className="p-4">
-          <Typography variant="h5" className="text-gray-900 mb-3">
+          <Heading level={5} className="text-gray-900 mb-3">
             Terms and Conditions
-          </Typography>
-          <Typography variant="body1" className="text-gray-700 whitespace-pre-wrap">
+          </Heading>
+          <Text variant="body" className="text-gray-700 whitespace-pre-wrap">
             {agreement.terms}
-          </Typography>
+          </Text>
         </Card>
       )}
 
       {/* Related Invoices */}
       {agreement.Invoice && agreement.Invoice.length > 0 && (
         <Card className="p-4">
-          <Typography variant="h5" className="text-gray-900 mb-3">
+          <Heading level={5} className="text-gray-900 mb-3">
             Related Invoices
-          </Typography>
+          </Heading>
           <div className="space-y-2">
             {agreement.Invoice.map((invoice) => (
               <div key={invoice.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div>
-                  <Typography variant="body1" className="font-medium">
+                  <Text variant="body" className="font-medium">
                     Invoice #{invoice.invoice_number}
-                  </Typography>
-                  <Typography variant="body2" className="text-gray-600">
+                  </Text>
+                  <Text variant="small" className="text-gray-600">
                     Due: {formatDate(invoice.due_date)}
-                  </Typography>
+                  </Text>
                 </div>
                 <div className="text-right">
-                  <Typography variant="body1" className="font-medium">
+                  <Text variant="body" className="font-medium">
                     ${invoice.total_amount.toLocaleString()}
-                  </Typography>
-                  <Chip
-                    color={invoice.status === 'paid' ? 'green' : 'yellow'}
-                    variant="default"
-                  >
+                  </Text>
+                  <Badge variant={invoice.status === 'paid' ? 'default' : 'secondary'}>
                     {invoice.status}
-                  </Chip>
+                  </Badge>
                 </div>
               </div>
             ))}
@@ -368,9 +369,10 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
 
       {/* Error Display */}
       {deleteMutation.error && (
-        <Alert type="error" title="Error">
-          {deleteMutation.error.message}
-        </Alert>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-red-800 mb-1">Error</h3>
+          <p className="text-sm text-red-700">{deleteMutation.error.message}</p>
+        </div>
       )}
 
       {/* Action Buttons */}

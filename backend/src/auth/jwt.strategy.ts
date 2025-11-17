@@ -28,6 +28,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     console.log('Payload sub (user ID):', payload.sub);
     console.log('Payload tenant_id:', payload.tenant_id);
     console.log('Payload roles:', payload.roles);
+    console.log('Payload permissions:', payload.permissions);
+    console.log('Payload permissions type:', Array.isArray(payload.permissions) ? 'array' : typeof payload.permissions);
+    console.log('Payload permissions length:', Array.isArray(payload.permissions) ? payload.permissions.length : 'N/A');
     console.log('================================');
 
     if (!payload.sub || !payload.tenant_id) {
@@ -41,11 +44,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       userId: payload.sub,
       email: payload.email,
       tenantId: payload.tenant_id, // Keep consistent with JWT payload structure
-      roles: payload.roles,
-      permissions: payload.permissions,
+      roles: payload.roles || [],
+      permissions: payload.permissions || [],
     };
 
     console.log('User context created:', JSON.stringify(userContext, null, 2));
+    console.log('User context permissions:', userContext.permissions);
+    console.log('User context permissions length:', userContext.permissions.length);
     console.log('================================');
 
     return userContext;

@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCreateWorkOrder } from '@/hooks/useWorkOrders';
 import { CreateWorkOrderRequest } from '@/types/work-orders';
 import WorkOrderForm from '@/components/work-orders/WorkOrderForm';
-import { ArrowLeft } from 'lucide-react';
-import Button from '@/components/ui/Button';
+import { ArrowLeft, Plus } from 'lucide-react';
 
 export default function CreateWorkOrderPage() {
   const navigate = useNavigate();
@@ -26,24 +25,29 @@ export default function CreateWorkOrderPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate('/work-orders')}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Work Orders
-              </Button>
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/work-orders')}
+              className="px-3 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm text-slate-700 hover:bg-white hover:shadow-lg transition-all duration-200 font-medium text-sm flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg">
+                <Plus className="w-5 h-5 text-white" />
+              </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">Create Work Order</h1>
-                <p className="text-sm text-gray-600">Create a new work order for a customer</p>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  Create Work Order
+                </h1>
+                <p className="text-slate-600 text-sm mt-1">
+                  Create a new work order for a customer
+                </p>
               </div>
             </div>
           </div>
@@ -51,7 +55,7 @@ export default function CreateWorkOrderPage() {
       </div>
 
       {/* Form */}
-      <div className="py-8">
+      <div>
         <WorkOrderForm
           onSubmit={handleSubmit}
           onCancel={handleCancel}

@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth';
-import { SmartKPI, KPIConfig, KPIData, KPITrend, EnhancedDashboardMetric } from '@/types/smart-kpis';
+import { SmartKPI, KPIConfig, EnhancedDashboardMetric } from '@/types/smart-kpis';
+import { logger } from '@/utils/logger';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
@@ -141,7 +142,7 @@ export const useSmartKPIs = () => {
       
       if (!response.ok) {
         // Log the error but don't throw to prevent retries
-        console.warn(`KPI trends API unavailable (${response.status}): Using fallback data`);
+        logger.warn('KPI trends API unavailable', { status: response.status }, 'useSmartKPIs');
         return [];
       }
       
@@ -156,7 +157,9 @@ export const useSmartKPIs = () => {
   const updateKPIConfig = useMutation({
     mutationFn: async (config: Partial<KPIConfig>) => {
       // TODO: Implement real API call
-      console.log('Updating KPI config:', config);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Updating KPI config', { config }, 'useSmartKPIs');
+      }
       return config;
     },
     onSuccess: () => {
@@ -224,8 +227,8 @@ export const useSmartKPIs = () => {
       
       const data = await response.json();
       setDrillDownData(data);
-    } catch (error) {
-      console.error('Error fetching drill-down data:', error);
+    } catch (error: unknown) {
+      logger.error('Error fetching drill-down data', error, 'useSmartKPIs');
       // Fallback to mock data on error
       setDrillDownData({
         title: kpi.drillDown.title,

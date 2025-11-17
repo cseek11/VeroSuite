@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { logger } from '@/utils/logger';
 
 export interface DrillDownLevel {
   id: string;
@@ -73,7 +74,7 @@ export function useDrillDown({
   // Add a new drill-down level
   const addLevel = useCallback((levelData: Omit<DrillDownLevel, 'id' | 'breadcrumb'>) => {
     if (state.levels.length >= maxLevels) {
-      console.warn(`Maximum drill-down levels (${maxLevels}) reached`);
+      logger.warn('Maximum drill-down levels reached', { maxLevels }, 'useDrillDown');
       return;
     }
 

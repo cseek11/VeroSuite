@@ -10,7 +10,8 @@ import {
   UseGuards, 
   Request,
   HttpCode,
-  HttpStatus
+  HttpStatus,
+  BadRequestException
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -23,13 +24,14 @@ import {
   PaymentResponseDto,
   CreatePaymentMethodDto,
   PaymentMethodResponseDto,
+  SendReminderDto,
   InvoiceStatus
 } from './dto';
 
 @ApiTags('Billing')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('v1/billing')
+@Controller({ path: 'billing', version: '1' })
 export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 
@@ -62,7 +64,12 @@ export class BillingController {
     @Query('accountId') accountId?: string,
     @Query('status') status?: InvoiceStatus
   ): Promise<InvoiceResponseDto[]> {
-    return this.billingService.getInvoices(accountId, status, req.user.tenantId);
+    // Get tenantId from req.user (set by JWT guard) or req.tenantId (set by middleware)
+    const tenantId = req.user?.tenantId || req.tenantId;
+    if (!tenantId) {
+      throw new BadRequestException('Tenant ID not found in request. Please ensure you are authenticated.');
+    }
+    return this.billingService.getInvoices(accountId, status, tenantId);
   }
 
   @Get('invoices/:id')
@@ -150,8 +157,16 @@ export class BillingController {
   @ApiQuery({ name: 'accountId', required: false, description: 'Filter by account ID' })
   @ApiResponse({ status: 200, description: 'Payment methods retrieved successfully', type: [PaymentMethodResponseDto] })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getPaymentMethods(@Query('accountId') accountId?: string): Promise<PaymentMethodResponseDto[]> {
-    return this.billingService.getPaymentMethods(accountId);
+  async getPaymentMethods(
+    @Request() req: any,
+    @Query('accountId') accountId?: string
+  ): Promise<PaymentMethodResponseDto[]> {
+    // Get tenantId from req.user (set by JWT guard) or req.tenantId (set by middleware)
+    const tenantId = req.user?.tenantId || req.tenantId;
+    if (!tenantId) {
+      throw new BadRequestException('Tenant ID not found in request. Please ensure you are authenticated.');
+    }
+    return this.billingService.getPaymentMethods(accountId, tenantId);
   }
 
   @Delete('payment-methods/:id')
@@ -183,16 +198,25 @@ export class BillingController {
   @ApiResponse({ status: 200, description: 'Revenue analytics retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getRevenueAnalytics(
-    @Query('startDate') _startDate?: string,
-    @Query('endDate') _endDate?: string
+    @Request() req: any,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string
   ) {
-    // This would return revenue trends, monthly breakdowns, etc.
-    // For now, return a placeholder response
-    return {
-      monthlyRevenue: [],
-      totalRevenue: 0,
-      growthRate: 0,
-    };
+    return this.billingService.getRevenueAnalytics(req.user.tenantId, startDate, endDate);
+  }
+
+  @Get('analytics/payments')
+  @ApiOperation({ summary: 'Get payment analytics' })
+  @ApiQuery({ name: 'startDate', required: false, description: 'Start date for payment analysis' })
+  @ApiQuery({ name: 'endDate', required: false, description: 'End date for payment analysis' })
+  @ApiResponse({ status: 200, description: 'Payment analytics retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getPaymentAnalytics(
+    @Request() req: any,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string
+  ) {
+    return this.billingService.getPaymentAnalytics(req.user.tenantId, startDate, endDate);
   }
 
   // ============================================================================
@@ -219,5 +243,136 @@ export class BillingController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getStripePaymentStatus(@Param('paymentIntentId') paymentIntentId: string) {
     return this.billingService.getStripePaymentStatus(paymentIntentId);
+  }
+
+  @Post('invoices/:id/retry-payment')
+  @ApiOperation({ summary: 'Retry failed payment for invoice' })
+  @ApiResponse({ status: 200, description: 'Payment retry initiated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Invoice not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async retryFailedPayment(
+    @Param('id') invoiceId: string,
+    @Request() req: any
+  ) {
+    return this.billingService.retryFailedPayment(invoiceId, req.user.userId);
+  }
+
+  @Get('invoices/:id/payment-retry-history')
+  @ApiOperation({ summary: 'Get payment retry history for invoice' })
+  @ApiResponse({ status: 200, description: 'Payment retry history retrieved successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getPaymentRetryHistory(@Param('id') invoiceId: string) {
+    return this.billingService.getPaymentRetryHistory(invoiceId);
+  }
+
+  // ============================================================================
+  // RECURRING PAYMENT ENDPOINTS
+  // ============================================================================
+
+  @Post('invoices/:id/recurring-payment')
+  @ApiOperation({ summary: 'Create recurring payment for invoice' })
+  @ApiResponse({ status: 201, description: 'Recurring payment created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Invoice not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async createRecurringPayment(
+    @Param('id') invoiceId: string,
+    @Body() createRecurringPaymentDto: any,
+    @Request() req: any
+  ) {
+    return this.billingService.createRecurringPayment(
+      { ...createRecurringPaymentDto, invoice_id: invoiceId },
+      req.user.userId
+    );
+  }
+
+  @Get('recurring-payments/:subscriptionId')
+  @ApiOperation({ summary: 'Get recurring payment by subscription ID' })
+  @ApiResponse({ status: 200, description: 'Recurring payment retrieved successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getRecurringPayment(@Param('subscriptionId') subscriptionId: string) {
+    return this.billingService.getRecurringPayment(subscriptionId);
+  }
+
+  @Post('recurring-payments/:subscriptionId/cancel')
+  @ApiOperation({ summary: 'Cancel recurring payment' })
+  @ApiResponse({ status: 200, description: 'Recurring payment canceled successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async cancelRecurringPayment(
+    @Param('subscriptionId') subscriptionId: string,
+    @Body() body: { immediately?: boolean }
+  ) {
+    return this.billingService.cancelRecurringPayment(subscriptionId, body.immediately || false);
+  }
+
+  // ============================================================================
+  // AR MANAGEMENT ENDPOINTS
+  // ============================================================================
+
+  @Get('ar-summary')
+  @ApiOperation({ summary: 'Get AR summary with aging buckets' })
+  @ApiResponse({ status: 200, description: 'AR summary retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getARSummary(@Request() req: any) {
+    return this.billingService.getARSummary(req.user.tenantId);
+  }
+
+  @Get('overdue-invoices')
+  @ApiOperation({ summary: 'Get overdue invoices' })
+  @ApiResponse({ status: 200, description: 'Overdue invoices retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getOverdueInvoices(@Request() req: any) {
+    return this.billingService.getOverdueInvoices(req.user.tenantId);
+  }
+
+  @Get('payment-tracking')
+  @ApiOperation({ summary: 'Get payment tracking data' })
+  @ApiQuery({ name: 'startDate', required: false, description: 'Start date for payment tracking' })
+  @ApiQuery({ name: 'endDate', required: false, description: 'End date for payment tracking' })
+  @ApiResponse({ status: 200, description: 'Payment tracking data retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getPaymentTracking(
+    @Request() req: any,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string
+  ) {
+    return this.billingService.getPaymentTracking(req.user.tenantId, startDate, endDate);
+  }
+
+  // ============================================================================
+  // REMINDER ENDPOINTS
+  // ============================================================================
+
+  @Post('invoices/send-reminder')
+  @ApiOperation({ summary: 'Send reminder for overdue invoice(s)' })
+  @ApiResponse({ status: 200, description: 'Reminders sent successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async sendInvoiceReminder(
+    @Body() sendReminderDto: SendReminderDto,
+    @Request() req: any
+  ) {
+    // Extract invoice IDs from DTO
+    const invoiceIds: string[] = [];
+    if (sendReminderDto.invoice_id) {
+      invoiceIds.push(sendReminderDto.invoice_id);
+    }
+    if (sendReminderDto.invoice_ids && sendReminderDto.invoice_ids.length > 0) {
+      invoiceIds.push(...sendReminderDto.invoice_ids);
+    }
+
+    if (invoiceIds.length === 0) {
+      throw new BadRequestException('At least one invoice ID is required');
+    }
+
+    return this.billingService.sendInvoiceReminder(
+      invoiceIds,
+      req.user.userId,
+      sendReminderDto.message
+    );
   }
 }

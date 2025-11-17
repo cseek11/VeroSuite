@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { DatabaseService } from '../common/services/database.service';
 import { StripeService } from './stripe.service';
+import { EmailService } from '../common/services/email.service';
 import { 
   CreateInvoiceDto, 
   UpdateInvoiceDto, 
@@ -9,6 +11,7 @@ import {
   PaymentResponseDto,
   CreatePaymentMethodDto,
   PaymentMethodResponseDto,
+  SendReminderDto,
   InvoiceStatus
 } from './dto';
 
@@ -19,6 +22,8 @@ export class BillingService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly stripeService: StripeService,
+    private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
   ) {}
 
   // ============================================================================
@@ -139,15 +144,43 @@ export class BillingService {
   }
 
   async getInvoices(accountId?: string, status?: InvoiceStatus, tenantId?: string): Promise<InvoiceResponseDto[]> {
-    this.logger.log(`Fetching invoices${accountId ? ` for account ${accountId}` : ''}${status ? ` with status ${status}` : ''}`);
-
+    // Log raw parameters for debugging
+    this.logger.log(`[getInvoices] Raw accountId: ${JSON.stringify(accountId)}, status: ${status}, tenantId: ${tenantId ? 'provided' : 'missing'}`);
+    
     try {
+      // Require tenantId - it should be provided by the controller from req.user.tenantId
+      if (!tenantId) {
+        this.logger.error('Tenant ID is required but not provided to getInvoices');
+        throw new BadRequestException('Tenant ID is required but not found. Please ensure you are authenticated.');
+      }
+
+      // Validate and clean accountId format if provided (must be valid UUID)
+      let cleanedAccountId: string | undefined = accountId;
+      if (accountId) {
+        // Trim whitespace and remove any unexpected characters
+        cleanedAccountId = accountId.trim();
+        
+        // Remove common formatting issues (colons, braces, etc.)
+        cleanedAccountId = cleanedAccountId.replace(/^[:{]+|}+$/g, '');
+        
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(cleanedAccountId)) {
+          this.logger.warn(`[getInvoices] Invalid accountId format after cleaning: ${cleanedAccountId}. Skipping account filter.`);
+          // Don't throw error, just skip the account filter
+          cleanedAccountId = undefined;
+        } else {
+          this.logger.log(`[getInvoices] Valid accountId: ${cleanedAccountId}`);
+        }
+      }
+      
+      this.logger.log(`Fetching invoices${cleanedAccountId ? ` for account ${cleanedAccountId}` : ''}${status ? ` with status ${status}` : ''}`);
+
       const where: any = {
-        tenant_id: tenantId || await this.getCurrentTenantId(),
+        tenant_id: tenantId,
       };
 
-      if (accountId) {
-        where.account_id = accountId;
+      if (cleanedAccountId) {
+        where.account_id = cleanedAccountId;
       }
 
       if (status) {
@@ -190,7 +223,10 @@ export class BillingService {
       return invoices as unknown as InvoiceResponseDto[];
     } catch (error) {
       this.logger.error(`Failed to fetch invoices: ${(error as Error).message}`, (error as Error).stack);
-      throw new BadRequestException('Failed to fetch invoices');
+      const errorMessage = (error as Error).message || 'Unknown error';
+      this.logger.error(`Failed to fetch invoices: ${errorMessage}`, (error as Error).stack);
+      this.logger.error(`Error details: ${JSON.stringify(error)}`);
+      throw new BadRequestException(`Failed to fetch invoices: ${errorMessage}`);
     }
   }
 
@@ -517,17 +553,47 @@ export class BillingService {
     }
   }
 
-  async getPaymentMethods(accountId?: string): Promise<PaymentMethodResponseDto[]> {
-    this.logger.log(`Fetching payment methods${accountId ? ` for account ${accountId}` : ''}`);
+  async getPaymentMethods(accountId?: string, tenantId?: string): Promise<PaymentMethodResponseDto[]> {
+    // Log raw parameters for debugging
+    this.logger.log(`[getPaymentMethods] Raw accountId: ${JSON.stringify(accountId)}, tenantId: ${tenantId ? 'provided' : 'missing'}`);
 
     try {
+      // Require tenantId - it should be provided by the controller from req.user.tenantId
+      if (!tenantId) {
+        this.logger.error('Tenant ID is required but not provided to getPaymentMethods');
+        throw new BadRequestException('Tenant ID is required but not found. Please ensure you are authenticated.');
+      }
+
+      this.logger.log(`[getPaymentMethods] Using tenantId: ${tenantId}`);
+
+      // Validate and clean accountId format if provided (must be valid UUID)
+      let cleanedAccountId: string | undefined = accountId;
+      if (accountId) {
+        // Trim whitespace and remove any unexpected characters
+        cleanedAccountId = accountId.trim();
+        
+        // Remove common formatting issues (colons, braces, etc.)
+        cleanedAccountId = cleanedAccountId.replace(/^[:{]+|}+$/g, '');
+        
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(cleanedAccountId)) {
+          this.logger.warn(`[getPaymentMethods] Invalid accountId format after cleaning: ${cleanedAccountId}. Skipping account filter.`);
+          // Don't throw error, just skip the account filter
+          cleanedAccountId = undefined;
+        } else {
+          this.logger.log(`[getPaymentMethods] Valid accountId: ${cleanedAccountId}`);
+        }
+      }
+      
+      this.logger.log(`Fetching payment methods${cleanedAccountId ? ` for account ${cleanedAccountId}` : ''}`);
+
       const where: any = {
-        tenant_id: await this.getCurrentTenantId(),
+        tenant_id: tenantId,
         is_active: true,
       };
 
-      if (accountId) {
-        where.account_id = accountId;
+      if (cleanedAccountId) {
+        where.account_id = cleanedAccountId;
       }
 
       const paymentMethods = await this.databaseService.paymentMethod.findMany({
@@ -549,8 +615,10 @@ export class BillingService {
 
       return paymentMethods as unknown as PaymentMethodResponseDto[];
     } catch (error) {
-      this.logger.error(`Failed to fetch payment methods: ${(error as Error).message}`, (error as Error).stack);
-      throw new BadRequestException('Failed to fetch payment methods');
+      const errorMessage = (error as Error).message || 'Unknown error';
+      this.logger.error(`Failed to fetch payment methods: ${errorMessage}`, (error as Error).stack);
+      this.logger.error(`Error details: ${JSON.stringify(error)}`);
+      throw new BadRequestException(`Failed to fetch payment methods: ${errorMessage}`);
     }
   }
 
@@ -639,9 +707,29 @@ export class BillingService {
     this.logger.log(`Creating Stripe payment intent for invoice ${invoiceId}`);
 
     try {
+      // Validate inputs
+      if (!invoiceId || typeof invoiceId !== 'string') {
+        throw new BadRequestException('Invalid invoice ID');
+      }
+
+      if (!userId || typeof userId !== 'string') {
+        throw new BadRequestException('Invalid user ID');
+      }
+
       // Get invoice details
       const invoice = await this.getInvoiceById(invoiceId);
       
+      // Validate invoice status - don't allow payment for already paid invoices
+      if (invoice.status === InvoiceStatus.PAID) {
+        throw new BadRequestException('Invoice is already paid');
+      }
+
+      // Validate invoice amount
+      const invoiceAmount = Number(invoice.total_amount);
+      if (isNaN(invoiceAmount) || invoiceAmount <= 0) {
+        throw new BadRequestException('Invalid invoice amount');
+      }
+
       // Get customer details
       const customer = await this.databaseService.account.findFirst({
         where: {
@@ -654,27 +742,45 @@ export class BillingService {
         throw new NotFoundException('Customer not found');
       }
 
+      // Validate customer email (recommended for Stripe)
+      if (!customer.email || customer.email.trim() === '') {
+        this.logger.warn(`Customer ${customer.id} has no email address`);
+      }
+
+      // Get tenant ID
+      const tenantId = await this.getCurrentTenantId();
+      if (!tenantId) {
+        throw new BadRequestException('Tenant context not found');
+      }
+
       // Create payment intent
       const paymentIntent = await this.stripeService.createPaymentIntent({
-        amount: Number(invoice.total_amount),
+        amount: invoiceAmount,
         currency: 'usd',
         invoiceId: invoice.id,
         customerEmail: customer.email || '',
         customerName: customer.name || '',
         metadata: {
-          tenantId: await this.getCurrentTenantId(),
+          tenantId: tenantId,
           createdBy: userId,
+          invoiceNumber: invoice.invoice_number,
         }
       });
 
-      this.logger.log(`Stripe payment intent created: ${paymentIntent.paymentIntentId}`);
+      this.logger.log(`Stripe payment intent created successfully: ${paymentIntent.paymentIntentId} for invoice ${invoiceId}`);
       return paymentIntent;
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      // Re-throw known exceptions
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
-      this.logger.error(`Failed to create Stripe payment intent: ${(error as Error).message}`, (error as Error).stack);
-      throw new BadRequestException('Failed to create payment intent');
+      
+      // Log and wrap unknown errors
+      this.logger.error(
+        `Failed to create Stripe payment intent for invoice ${invoiceId}: ${(error as Error).message}`,
+        (error as Error).stack
+      );
+      throw new BadRequestException(`Failed to create payment intent: ${(error as Error).message}`);
     }
   }
 
@@ -693,6 +799,44 @@ export class BillingService {
     this.logger.log(`Creating payment record from Stripe for invoice ${paymentData.invoice_id}`);
 
     try {
+      // Validate inputs
+      if (!paymentData.invoice_id) {
+        throw new BadRequestException('Invoice ID is required');
+      }
+
+      if (!paymentData.amount || paymentData.amount <= 0) {
+        throw new BadRequestException('Invalid payment amount');
+      }
+
+      if (!paymentData.stripe_payment_intent_id) {
+        throw new BadRequestException('Stripe payment intent ID is required');
+      }
+
+      // Get invoice to retrieve account_id
+      const invoice = await this.databaseService.invoice.findFirst({
+        where: {
+          id: paymentData.invoice_id,
+          tenant_id: await this.getCurrentTenantId(),
+        }
+      });
+
+      if (!invoice) {
+        throw new NotFoundException(`Invoice ${paymentData.invoice_id} not found`);
+      }
+
+      // Check if payment already exists (idempotency check)
+      const existingPayment = await this.databaseService.payment.findFirst({
+        where: {
+          reference_number: paymentData.stripe_payment_intent_id,
+          tenant_id: await this.getCurrentTenantId(),
+        }
+      });
+
+      if (existingPayment) {
+        this.logger.warn(`Payment already exists for Stripe payment intent ${paymentData.stripe_payment_intent_id}`);
+        return existingPayment;
+      }
+
       // Create a default payment method for Stripe payments
       const stripePaymentMethod = await this.databaseService.paymentMethod.findFirst({
         where: {
@@ -706,11 +850,11 @@ export class BillingService {
       if (stripePaymentMethod) {
         paymentMethodId = stripePaymentMethod.id;
       } else {
-        // Create a default Stripe payment method
+        // Create a default Stripe payment method with correct account_id
         const newPaymentMethod = await this.databaseService.paymentMethod.create({
           data: {
             tenant_id: await this.getCurrentTenantId(),
-            account_id: paymentData.invoice_id, // We'll need to get this from the invoice
+            account_id: invoice.account_id, // Use account_id from invoice
             payment_type: 'STRIPE',
             payment_name: 'Stripe Payment',
             is_default: false,
@@ -718,6 +862,7 @@ export class BillingService {
           }
         });
         paymentMethodId = newPaymentMethod.id;
+        this.logger.log(`Created default Stripe payment method: ${paymentMethodId}`);
       }
 
       // Create payment record
@@ -728,31 +873,47 @@ export class BillingService {
           payment_method_id: paymentMethodId,
           amount: paymentData.amount,
           payment_date: paymentData.payment_date,
-          reference_number: paymentData.reference_number,
-          notes: paymentData.notes,
+          reference_number: paymentData.stripe_payment_intent_id, // Use payment intent ID as reference
+          notes: paymentData.notes || `Stripe payment: ${paymentData.stripe_payment_intent_id}`,
           created_by: 'system', // System created from webhook
         }
       });
 
+      this.logger.log(`Payment record created from Stripe: ${payment.id} for invoice ${paymentData.invoice_id}`);
+
       // Update invoice status if fully paid
       const totalPaid = await this.getTotalPaidAmount(paymentData.invoice_id);
-      const invoice = await this.databaseService.invoice.findFirst({
-        where: { id: paymentData.invoice_id }
-      });
+      const invoiceTotal = Number(invoice.total_amount);
+      
+      this.logger.log(`Payment status check - Total paid: ${totalPaid}, Invoice total: ${invoiceTotal}`);
 
-      if (invoice && totalPaid >= Number(invoice.total_amount)) {
+      if (totalPaid >= invoiceTotal) {
         await this.databaseService.invoice.update({
           where: { id: paymentData.invoice_id },
-          data: { status: InvoiceStatus.PAID }
+          data: { 
+            status: InvoiceStatus.PAID,
+            updated_at: new Date(),
+          }
         });
-        this.logger.log(`Invoice ${paymentData.invoice_id} marked as paid`);
+        this.logger.log(`Invoice ${paymentData.invoice_id} marked as paid (${totalPaid} >= ${invoiceTotal})`);
+      } else {
+        // Update to partially paid if applicable
+        const partialAmount = totalPaid / invoiceTotal;
+        this.logger.log(`Invoice ${paymentData.invoice_id} partially paid: ${(partialAmount * 100).toFixed(2)}%`);
       }
 
-      this.logger.log(`Payment record created from Stripe: ${payment.id}`);
       return payment;
     } catch (error) {
-      this.logger.error(`Failed to create payment from Stripe: ${(error as Error).message}`, (error as Error).stack);
-      throw new BadRequestException('Failed to create payment record');
+      // Re-throw known exceptions
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      
+      this.logger.error(
+        `Failed to create payment from Stripe for invoice ${paymentData.invoice_id}: ${(error as Error).message}`,
+        (error as Error).stack
+      );
+      throw new BadRequestException(`Failed to create payment record: ${(error as Error).message}`);
     }
   }
 
@@ -775,6 +936,263 @@ export class BillingService {
     } catch (error) {
       this.logger.error(`Failed to get Stripe payment status: ${(error as Error).message}`, (error as Error).stack);
       throw new BadRequestException('Failed to get payment status');
+    }
+  }
+
+  /**
+   * Retry a failed payment for an invoice
+   * Implements exponential backoff retry logic
+   */
+  async retryFailedPayment(invoiceId: string, userId: string, retryAttempt: number = 1, maxRetries: number = 3) {
+    this.logger.log(`Retrying payment for invoice ${invoiceId} (attempt ${retryAttempt}/${maxRetries})`);
+
+    try {
+      // Validate retry attempt
+      if (retryAttempt > maxRetries) {
+        throw new BadRequestException(`Maximum retry attempts (${maxRetries}) reached for invoice ${invoiceId}`);
+      }
+
+      // Get invoice to check status
+      const invoice = await this.getInvoiceById(invoiceId);
+      
+      // Don't retry if invoice is already paid
+      if (invoice.status === InvoiceStatus.PAID) {
+        throw new BadRequestException('Invoice is already paid');
+      }
+
+      // Calculate exponential backoff delay (1s, 2s, 4s, etc.)
+      const delayMs = Math.min(1000 * Math.pow(2, retryAttempt - 1), 10000); // Max 10 seconds
+      
+      if (retryAttempt > 1) {
+        this.logger.log(`Waiting ${delayMs}ms before retry attempt ${retryAttempt}`);
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+
+      // Create new payment intent
+      const paymentIntent = await this.createStripePaymentIntent(invoiceId, userId);
+
+      this.logger.log(`Payment retry successful for invoice ${invoiceId} on attempt ${retryAttempt}`);
+      
+      return {
+        success: true,
+        paymentIntent,
+        attempt: retryAttempt,
+        message: `Payment intent created successfully on attempt ${retryAttempt}`
+      };
+    } catch (error) {
+      // Check if we should retry again
+      const isRetryable = error instanceof BadRequestException && 
+        !error.message.includes('already paid') && 
+        !error.message.includes('Maximum retry attempts');
+
+      if (isRetryable && retryAttempt < maxRetries) {
+        this.logger.warn(`Payment retry attempt ${retryAttempt} failed, will retry: ${(error as Error).message}`);
+        // Recursively retry
+        return this.retryFailedPayment(invoiceId, userId, retryAttempt + 1, maxRetries);
+      }
+
+      // Log final failure
+      this.logger.error(
+        `Payment retry failed for invoice ${invoiceId} after ${retryAttempt} attempt(s): ${(error as Error).message}`,
+        (error as Error).stack
+      );
+
+      // Re-throw known exceptions
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new BadRequestException(`Payment retry failed: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Get payment retry history for an invoice
+   */
+  async getPaymentRetryHistory(invoiceId: string) {
+    this.logger.log(`Getting payment retry history for invoice ${invoiceId}`);
+
+    try {
+      const tenantId = await this.getCurrentTenantId();
+      
+      // Get all failed payment attempts from communication log
+      const retryHistory = await this.databaseService.communicationLog.findMany({
+        where: {
+          tenant_id: tenantId,
+          communication_type: 'payment_failure',
+          message_content: {
+            contains: invoiceId
+          }
+        },
+        orderBy: {
+          timestamp: 'desc'
+        },
+        take: 10 // Last 10 attempts
+      });
+
+      return {
+        invoiceId,
+        retryCount: retryHistory.length,
+        attempts: retryHistory.map((log, index) => ({
+          attempt: retryHistory.length - index,
+          timestamp: log.timestamp,
+          error: log.message_content,
+          followUpRequired: log.follow_up_required
+        }))
+      };
+    } catch (error) {
+      this.logger.error(`Failed to get payment retry history: ${(error as Error).message}`, (error as Error).stack);
+      throw new BadRequestException('Failed to get payment retry history');
+    }
+  }
+
+  /**
+   * Get payment analytics with success rates, failure reasons, and trends
+   */
+  async getPaymentAnalytics(tenantId: string, startDate?: string, endDate?: string) {
+    this.logger.log('Fetching payment analytics');
+
+    try {
+      const dateFilter: any = {};
+      if (startDate) {
+        dateFilter.gte = new Date(startDate);
+      }
+      if (endDate) {
+        dateFilter.lte = new Date(endDate);
+      }
+
+      // Get all payments in date range
+      const payments = await this.databaseService.payment.findMany({
+        where: {
+          tenant_id: tenantId,
+          ...(Object.keys(dateFilter).length > 0 && {
+            payment_date: dateFilter
+          })
+        },
+        include: {
+          Invoice: {
+            select: {
+              invoice_number: true,
+              status: true,
+            }
+          },
+          payment_methods: {
+            select: {
+              payment_type: true,
+              payment_name: true,
+            }
+          }
+        },
+        orderBy: {
+          payment_date: 'desc'
+        }
+      });
+
+      // Get payment failures from communication log
+      const paymentFailures = await this.databaseService.communicationLog.findMany({
+        where: {
+          tenant_id: tenantId,
+          communication_type: 'payment_failure',
+          ...(Object.keys(dateFilter).length > 0 && {
+            timestamp: dateFilter
+          })
+        }
+      });
+
+      // Calculate metrics
+      const totalPayments = payments.length;
+      const totalFailures = paymentFailures.length;
+      const totalAttempts = totalPayments + totalFailures;
+      const successRate = totalAttempts > 0 ? (totalPayments / totalAttempts) * 100 : 0;
+      const failureRate = totalAttempts > 0 ? (totalFailures / totalAttempts) * 100 : 0;
+
+      // Payment method breakdown
+      const paymentMethodBreakdown: Record<string, { count: number; total: number }> = {};
+      payments.forEach(payment => {
+        const methodType = payment.payment_methods?.payment_type || 'unknown';
+        if (!paymentMethodBreakdown[methodType]) {
+          paymentMethodBreakdown[methodType] = { count: 0, total: 0 };
+        }
+        paymentMethodBreakdown[methodType].count++;
+        paymentMethodBreakdown[methodType].total += Number(payment.amount);
+      });
+
+      // Failure reasons breakdown
+      const failureReasons: Record<string, number> = {};
+      paymentFailures.forEach(failure => {
+        const errorMatch = failure.message_content?.match(/Error: ([^\(]+)/);
+        const reason = errorMatch ? errorMatch[1].trim() : 'Unknown error';
+        failureReasons[reason] = (failureReasons[reason] || 0) + 1;
+      });
+
+      // Monthly trends
+      const monthlyData: Record<string, { successful: number; failed: number; total: number }> = {};
+      
+      payments.forEach(payment => {
+        const monthKey = new Date(payment.payment_date).toISOString().slice(0, 7); // YYYY-MM
+        if (!monthlyData[monthKey]) {
+          monthlyData[monthKey] = { successful: 0, failed: 0, total: 0 };
+        }
+        monthlyData[monthKey].successful++;
+        monthlyData[monthKey].total += Number(payment.amount);
+      });
+
+      paymentFailures.forEach(failure => {
+        const monthKey = new Date(failure.timestamp).toISOString().slice(0, 7);
+        if (!monthlyData[monthKey]) {
+          monthlyData[monthKey] = { successful: 0, failed: 0, total: 0 };
+        }
+        monthlyData[monthKey].failed++;
+      });
+
+      const monthlyTrends = Object.entries(monthlyData)
+        .map(([month, data]) => ({
+          month,
+          successful: data.successful,
+          failed: data.failed,
+          totalAmount: data.total,
+          successRate: data.successful + data.failed > 0 
+            ? (data.successful / (data.successful + data.failed)) * 100 
+            : 0
+        }))
+        .sort((a, b) => a.month.localeCompare(b.month));
+
+      // Calculate average payment amount
+      const totalAmount = payments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const averagePaymentAmount = totalPayments > 0 ? totalAmount / totalPayments : 0;
+
+      return {
+        summary: {
+          totalPayments,
+          totalFailures,
+          totalAttempts,
+          successRate: Math.round(successRate * 100) / 100,
+          failureRate: Math.round(failureRate * 100) / 100,
+          totalAmount,
+          averagePaymentAmount: Math.round(averagePaymentAmount * 100) / 100,
+        },
+        paymentMethodBreakdown: Object.entries(paymentMethodBreakdown).map(([method, data]) => ({
+          method,
+          count: data.count,
+          total: data.total,
+          percentage: totalPayments > 0 ? Math.round((data.count / totalPayments) * 100 * 100) / 100 : 0
+        })),
+        failureReasons: Object.entries(failureReasons)
+          .map(([reason, count]) => ({
+            reason,
+            count,
+            percentage: totalFailures > 0 ? Math.round((count / totalFailures) * 100 * 100) / 100 : 0
+          }))
+          .sort((a, b) => b.count - a.count),
+        monthlyTrends,
+        dateRange: {
+          startDate: startDate || null,
+          endDate: endDate || null
+        }
+      };
+    } catch (error) {
+      this.logger.error(`Failed to fetch payment analytics: ${(error as Error).message}`, (error as Error).stack);
+      throw new BadRequestException('Failed to fetch payment analytics');
     }
   }
 
@@ -820,17 +1238,684 @@ export class BillingService {
 
       const outstandingAmount = Number(outstandingResult._sum.total_amount || 0);
 
+      // Calculate average payment time (days from issue_date to first payment_date)
+      const paidInvoicesWithPayments = await this.databaseService.invoice.findMany({
+        where: {
+          tenant_id: tenantId,
+          status: InvoiceStatus.PAID
+        },
+        include: {
+          Payment: {
+            orderBy: {
+              payment_date: 'asc'
+            },
+            take: 1 // Only need first payment
+          }
+        }
+      });
+
+      let totalPaymentDays = 0;
+      let paymentCount = 0;
+
+      for (const invoice of paidInvoicesWithPayments) {
+        if (invoice.Payment && invoice.Payment.length > 0) {
+          const issueDate = new Date(invoice.issue_date);
+          const firstPaymentDate = new Date(invoice.Payment[0].payment_date);
+          const daysDiff = Math.floor((firstPaymentDate.getTime() - issueDate.getTime()) / (1000 * 60 * 60 * 24));
+          
+          if (daysDiff >= 0) { // Only count valid payment times
+            totalPaymentDays += daysDiff;
+            paymentCount++;
+          }
+        }
+      }
+
+      const averagePaymentTime = paymentCount > 0 ? Math.round(totalPaymentDays / paymentCount) : 0;
+
       return {
         totalRevenue,
         outstandingAmount,
         paidAmount: totalRevenue,
         totalInvoices,
         overdueInvoices,
-        averagePaymentTime: 0, // TODO: Calculate based on payment history
+        averagePaymentTime,
       };
     } catch (error) {
       this.logger.error(`Failed to fetch billing analytics: ${(error as Error).message}`, (error as Error).stack);
       throw new BadRequestException('Failed to fetch billing analytics');
+    }
+  }
+
+  /**
+   * Get revenue analytics with monthly breakdown
+   */
+  async getRevenueAnalytics(tenantId: string, startDate?: string, endDate?: string) {
+    this.logger.log('Fetching revenue analytics');
+
+    try {
+      // Get all paid invoices
+      const paidInvoices = await this.databaseService.invoice.findMany({
+        where: {
+          tenant_id: tenantId,
+          status: InvoiceStatus.PAID
+        },
+        include: {
+          Payment: {
+            orderBy: {
+              payment_date: 'desc'
+            },
+            take: 1
+          }
+        }
+      });
+
+      // Calculate monthly revenue
+      const monthlyRevenue: Record<string, number> = {};
+      let totalRevenue = 0;
+
+      paidInvoices.forEach(invoice => {
+        const paymentDate = invoice.Payment && invoice.Payment.length > 0 && invoice.Payment[0]
+          ? new Date(invoice.Payment[0].payment_date)
+          : new Date(invoice.issue_date);
+        
+        // Apply date filters if provided
+        if (startDate && paymentDate < new Date(startDate)) return;
+        if (endDate && paymentDate > new Date(endDate)) return;
+        
+        const monthKey = `${paymentDate.getFullYear()}-${String(paymentDate.getMonth() + 1).padStart(2, '0')}`;
+        monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + Number(invoice.total_amount);
+        totalRevenue += Number(invoice.total_amount);
+      });
+
+      // Convert to array format
+      const monthlyRevenueArray = Object.entries(monthlyRevenue)
+        .map(([month, revenue]) => ({
+          month,
+          revenue: Number(revenue)
+        }))
+        .sort((a, b) => a.month.localeCompare(b.month));
+
+      // Calculate growth rate (compare last two months)
+      let growthRate = 0;
+      if (monthlyRevenueArray.length >= 2) {
+        const lastMonthEntry = monthlyRevenueArray[monthlyRevenueArray.length - 1];
+        const previousMonthEntry = monthlyRevenueArray[monthlyRevenueArray.length - 2];
+        if (lastMonthEntry && previousMonthEntry && previousMonthEntry.revenue > 0) {
+          growthRate = ((lastMonthEntry.revenue - previousMonthEntry.revenue) / previousMonthEntry.revenue) * 100;
+        }
+      }
+
+      return {
+        monthlyRevenue: monthlyRevenueArray,
+        totalRevenue,
+        growthRate
+      };
+    } catch (error) {
+      this.logger.error(`Failed to fetch revenue analytics: ${(error as Error).message}`, (error as Error).stack);
+      throw new BadRequestException('Failed to fetch revenue analytics');
+    }
+  }
+
+  /**
+   * Get AR Summary with aging buckets
+   */
+  async getARSummary(tenantId: string) {
+    this.logger.log('Fetching AR summary');
+
+    try {
+      const invoices = await this.databaseService.invoice.findMany({
+        where: {
+          tenant_id: tenantId,
+          status: { in: [InvoiceStatus.SENT, InvoiceStatus.OVERDUE] }
+        },
+        include: {
+          accounts: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            }
+          },
+          Payment: true
+        }
+      });
+
+      const now = new Date();
+      const agingBuckets = {
+        '0-30': 0,
+        '31-60': 0,
+        '61-90': 0,
+        '90+': 0,
+      };
+
+      const customerAR: Record<string, {
+        customerId: string;
+        customerName: string;
+        totalAR: number;
+        invoices: any[];
+      }> = {};
+
+      invoices.forEach(invoice => {
+        const dueDate = new Date(invoice.due_date);
+        const daysPastDue = Math.floor((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+        const totalPaid = invoice.Payment?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+        const balanceDue = Number(invoice.total_amount) - totalPaid;
+
+        if (balanceDue <= 0) return;
+
+        // Calculate aging
+        if (daysPastDue <= 30) {
+          agingBuckets['0-30'] += balanceDue;
+        } else if (daysPastDue <= 60) {
+          agingBuckets['31-60'] += balanceDue;
+        } else if (daysPastDue <= 90) {
+          agingBuckets['61-90'] += balanceDue;
+        } else {
+          agingBuckets['90+'] += balanceDue;
+        }
+
+        // Group by customer
+        const customerId = invoice.account_id;
+        if (!customerAR[customerId]) {
+          customerAR[customerId] = {
+            customerId,
+            customerName: invoice.accounts?.name || 'Unknown',
+            totalAR: 0,
+            invoices: []
+          };
+        }
+        customerAR[customerId].totalAR += balanceDue;
+        customerAR[customerId].invoices.push({
+          ...invoice,
+          balanceDue,
+          daysPastDue
+        });
+      });
+
+      const totalAR = Object.values(agingBuckets).reduce((sum, val) => sum + val, 0);
+
+      return {
+        totalAR,
+        agingBuckets,
+        customerAR: Object.values(customerAR).sort((a, b) => b.totalAR - a.totalAR),
+        totalCustomers: Object.keys(customerAR).length,
+        totalInvoices: invoices.length
+      };
+    } catch (error) {
+      this.logger.error(`Failed to fetch AR summary: ${(error as Error).message}`, (error as Error).stack);
+      throw new BadRequestException('Failed to fetch AR summary');
+    }
+  }
+
+  /**
+   * Get overdue invoices
+   */
+  async getOverdueInvoices(tenantId: string) {
+    this.logger.log('Fetching overdue invoices');
+
+    try {
+      const now = new Date();
+      const invoices = await this.databaseService.invoice.findMany({
+        where: {
+          tenant_id: tenantId,
+          status: { in: [InvoiceStatus.SENT, InvoiceStatus.OVERDUE] },
+          due_date: { lt: now }
+        },
+        include: {
+          accounts: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+            }
+          },
+          Payment: true
+        },
+        orderBy: {
+          due_date: 'asc'
+        }
+      });
+
+      return invoices.map(invoice => {
+        const totalPaid = invoice.Payment?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+        const balanceDue = Number(invoice.total_amount) - totalPaid;
+        const dueDate = new Date(invoice.due_date);
+        const daysPastDue = Math.floor((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+
+        return {
+          ...invoice,
+          balanceDue,
+          daysPastDue
+        };
+      }).filter(inv => inv.balanceDue > 0);
+    } catch (error) {
+      this.logger.error(`Failed to fetch overdue invoices: ${(error as Error).message}`, (error as Error).stack);
+      throw new BadRequestException('Failed to fetch overdue invoices');
+    }
+  }
+
+  /**
+   * Get payment tracking data
+   */
+  async getPaymentTracking(tenantId: string, startDate?: string, endDate?: string) {
+    this.logger.log('Fetching payment tracking data');
+
+    try {
+      const where: any = {
+        tenant_id: tenantId
+      };
+
+      if (startDate || endDate) {
+        where.payment_date = {};
+        if (startDate) where.payment_date.gte = new Date(startDate);
+        if (endDate) where.payment_date.lte = new Date(endDate);
+      }
+
+      const payments = await this.databaseService.payment.findMany({
+        where,
+        include: {
+          Invoice: {
+            include: {
+              accounts: {
+                select: {
+                  name: true,
+                }
+              }
+            }
+          },
+          payment_methods: true
+        },
+        orderBy: {
+          payment_date: 'desc'
+        }
+      });
+
+      // Calculate trends
+      const totalAmount = payments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const paymentCount = payments.length;
+      const averagePayment = paymentCount > 0 ? totalAmount / paymentCount : 0;
+
+      // Group by date for trend analysis
+      const dailyPayments: Record<string, number> = {};
+      payments.forEach(payment => {
+        const date = new Date(payment.payment_date).toISOString().split('T')[0];
+        if (date) {
+          dailyPayments[date] = (dailyPayments[date] || 0) + Number(payment.amount);
+        }
+      });
+
+      return {
+        payments,
+        summary: {
+          totalAmount,
+          paymentCount,
+          averagePayment
+        },
+        dailyTrends: dailyPayments
+      };
+    } catch (error) {
+      this.logger.error(`Failed to fetch payment tracking: ${(error as Error).message}`, (error as Error).stack);
+      throw new BadRequestException('Failed to fetch payment tracking');
+    }
+  }
+
+  /**
+   * Send reminder for overdue invoice(s)
+   * Note: Email sending will be integrated with communication service in future
+   */
+  async sendInvoiceReminder(invoiceIds: string[], userId: string, customMessage?: string) {
+    this.logger.log(`Sending reminders for ${invoiceIds.length} invoice(s)`);
+
+    try {
+      const tenantId = await this.getCurrentTenantId();
+      const results = [];
+
+      for (const invoiceId of invoiceIds) {
+        // Get invoice with customer details
+        const invoice = await this.databaseService.invoice.findFirst({
+          where: {
+            id: invoiceId,
+            tenant_id: tenantId
+          },
+          include: {
+            accounts: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true
+              }
+            }
+          }
+        });
+
+        if (!invoice) {
+          this.logger.warn(`Invoice ${invoiceId} not found`);
+          results.push({
+            invoice_id: invoiceId,
+            success: false,
+            error: 'Invoice not found'
+          });
+          continue;
+        }
+
+        // Validate invoice is overdue or sent
+        if (invoice.status !== InvoiceStatus.SENT && invoice.status !== InvoiceStatus.OVERDUE) {
+          this.logger.warn(`Invoice ${invoiceId} is not in a state that requires reminder (status: ${invoice.status})`);
+          results.push({
+            invoice_id: invoiceId,
+            success: false,
+            error: `Invoice status is ${invoice.status}, reminders only sent for sent/overdue invoices`
+          });
+          continue;
+        }
+
+        // Check if customer has email
+        if (!invoice.accounts?.email) {
+          this.logger.warn(`Customer ${invoice.accounts?.id} has no email address for invoice ${invoiceId}`);
+          results.push({
+            invoice_id: invoiceId,
+            success: false,
+            error: 'Customer has no email address'
+          });
+          continue;
+        }
+
+        // Calculate days overdue
+        const dueDate = new Date(invoice.due_date);
+        const now = new Date();
+        const daysOverdue = Math.floor((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+
+        // Generate email content
+        const emailContent = this.emailService.generateInvoiceReminderEmail({
+          customerName: invoice.accounts.name,
+          invoiceNumber: invoice.invoice_number,
+          amount: Number(invoice.total_amount),
+          dueDate: dueDate,
+          daysOverdue: daysOverdue > 0 ? daysOverdue : undefined,
+          customMessage: customMessage,
+          // TODO: Add payment link when customer portal is implemented
+          // paymentLink: `${process.env.FRONTEND_URL}/billing/${invoice.accounts.id}/pay/${invoice.id}`
+        });
+
+        // Send email
+        const emailResult = await this.emailService.sendEmail({
+          to: invoice.accounts.email,
+          toName: invoice.accounts.name,
+          subject: `Payment Reminder - Invoice ${invoice.invoice_number}`,
+          htmlContent: emailContent,
+          replyTo: this.configService.get<string>('EMAIL_REPLY_TO') || undefined
+        });
+
+        if (emailResult.success) {
+          this.logger.log(`Reminder sent successfully to ${invoice.accounts.email} for invoice ${invoice.invoice_number}`, {
+            invoiceId: invoice.id,
+            invoiceNumber: invoice.invoice_number,
+            customerEmail: invoice.accounts.email,
+            customerName: invoice.accounts.name,
+            messageId: emailResult.messageId
+          });
+
+          // Log reminder to communication log
+          try {
+            // Get user name for staff_member field (optional, fallback to userId if lookup fails)
+            let staffMemberName = userId;
+            try {
+              const user = await this.databaseService.user.findUnique({
+                where: { id: userId },
+                select: { first_name: true, last_name: true }
+              });
+              if (user) {
+                staffMemberName = `${user.first_name} ${user.last_name}`.trim();
+              }
+            } catch {
+              // Use userId if lookup fails
+            }
+
+            await this.databaseService.communicationLog.create({
+              data: {
+                tenant_id: tenantId,
+                customer_id: invoice.account_id,
+                communication_type: 'invoice_reminder',
+                direction: 'outbound',
+                subject: `Payment Reminder - Invoice ${invoice.invoice_number}`,
+                message_content: customMessage || `Payment reminder for invoice ${invoice.invoice_number}. Amount due: $${Number(invoice.total_amount).toFixed(2)}. Due date: ${new Date(invoice.due_date).toLocaleDateString()}.`,
+                staff_member: staffMemberName.length > 100 ? staffMemberName.substring(0, 100) : staffMemberName,
+                timestamp: new Date(),
+                follow_up_required: daysOverdue > 7, // Require follow-up if more than 7 days overdue
+                follow_up_date: daysOverdue > 7 ? new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) : undefined // Follow up in 3 days if overdue
+              }
+            });
+          } catch (logError) {
+            // Log error but don't fail the reminder send
+            this.logger.warn('Failed to log reminder to communication log', {
+              invoiceId: invoice.id,
+              error: logError instanceof Error ? logError.message : String(logError)
+            });
+          }
+
+          results.push({
+            invoice_id: invoiceId,
+            invoice_number: invoice.invoice_number,
+            customer_email: invoice.accounts.email,
+            success: true,
+            message: 'Reminder sent successfully',
+            messageId: emailResult.messageId
+          });
+        } else {
+          this.logger.error(`Failed to send reminder email to ${invoice.accounts.email}`, {
+            invoiceId: invoice.id,
+            invoiceNumber: invoice.invoice_number,
+            error: emailResult.error
+          });
+
+          results.push({
+            invoice_id: invoiceId,
+            invoice_number: invoice.invoice_number,
+            customer_email: invoice.accounts.email,
+            success: false,
+            error: emailResult.error || 'Failed to send email'
+          });
+        }
+      }
+
+      return {
+        total: invoiceIds.length,
+        successful: results.filter(r => r.success).length,
+        failed: results.filter(r => !r.success).length,
+        results
+      };
+    } catch (error) {
+      this.logger.error(`Failed to send reminders: ${(error as Error).message}`, (error as Error).stack);
+      throw new BadRequestException('Failed to send reminders');
+    }
+  }
+
+  /**
+   * Create a recurring payment setup for an invoice
+   */
+  async createRecurringPayment(
+    createRecurringPaymentDto: {
+      invoice_id: string;
+      interval: 'monthly' | 'quarterly' | 'yearly' | 'weekly';
+      amount: number;
+      start_date?: string;
+      end_date?: string;
+      payment_count?: number;
+    },
+    userId: string
+  ) {
+    this.logger.log(`Creating recurring payment for invoice ${createRecurringPaymentDto.invoice_id}`);
+
+    try {
+      // Get invoice details
+      const invoice = await this.getInvoiceById(createRecurringPaymentDto.invoice_id);
+      
+      // Get customer details
+      const customer = await this.databaseService.account.findFirst({
+        where: {
+          id: invoice.account_id,
+          tenant_id: await this.getCurrentTenantId(),
+        }
+      });
+
+      if (!customer) {
+        throw new NotFoundException('Customer not found');
+      }
+
+      if (!customer.email) {
+        throw new BadRequestException('Customer email is required for recurring payments');
+      }
+
+      const tenantId = await this.getCurrentTenantId();
+
+      // Create or get Stripe customer
+      let stripeCustomerId: string;
+      try {
+        // Check if customer already has Stripe customer ID stored
+        if (customer.stripe_customer_id) {
+          stripeCustomerId = customer.stripe_customer_id;
+          this.logger.log(`Using existing Stripe customer: ${stripeCustomerId}`);
+        } else {
+          // Create new Stripe customer
+          const stripeCustomer = await this.stripeService.createCustomer(
+            customer.email,
+            customer.name,
+            {
+              tenantId,
+              accountId: customer.id,
+            }
+          );
+          stripeCustomerId = stripeCustomer.id;
+          
+          // Store Stripe customer ID in database
+          await this.databaseService.account.update({
+            where: {
+              id: customer.id,
+              tenant_id: tenantId,
+            },
+            data: {
+              stripe_customer_id: stripeCustomerId,
+            }
+          });
+          
+          this.logger.log(`Created and stored Stripe customer: ${stripeCustomerId}`);
+        }
+      } catch (error) {
+        this.logger.error(`Failed to create/get Stripe customer: ${(error as Error).message}`);
+        throw new BadRequestException('Failed to create Stripe customer for recurring payment');
+      }
+
+      // Map interval to Stripe interval
+      const stripeIntervalMap: Record<string, 'month' | 'year' | 'week' | 'day'> = {
+        monthly: 'month',
+        quarterly: 'month', // Will use interval_count: 3
+        yearly: 'year',
+        weekly: 'week',
+      };
+
+      const stripeInterval = stripeIntervalMap[createRecurringPaymentDto.interval] || 'month';
+      const intervalCount = createRecurringPaymentDto.interval === 'quarterly' ? 3 : 1;
+
+      // Create Stripe price
+      const price = await this.stripeService.createPrice(
+        createRecurringPaymentDto.amount,
+        'usd',
+        stripeInterval,
+        `Recurring Payment - Invoice ${invoice.invoice_number}`,
+        {
+          tenantId,
+          invoiceId: invoice.id,
+          accountId: customer.id,
+        }
+      );
+
+      // Create subscription with interval_count if quarterly
+      const subscriptionMetadata = {
+        tenantId,
+        invoiceId: invoice.id,
+        accountId: customer.id,
+        createdBy: userId,
+      };
+
+      // Create subscription
+      const subscription = await this.stripeService.createSubscription(
+        stripeCustomerId,
+        price.id,
+        subscriptionMetadata
+      );
+
+      // Store recurring payment info in payment notes (or create a separate tracking table)
+      // For now, we'll log it and return the subscription info
+      this.logger.log(`Recurring payment created: Subscription ${subscription.id} for invoice ${invoice.id}`);
+
+      return {
+        subscriptionId: subscription.id,
+        customerId: stripeCustomerId,
+        priceId: price.id,
+        status: subscription.status,
+        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+        interval: createRecurringPaymentDto.interval,
+        amount: createRecurringPaymentDto.amount,
+        invoiceId: invoice.id,
+        clientSecret: (subscription.latest_invoice as any)?.payment_intent?.client_secret || null,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      
+      this.logger.error(
+        `Failed to create recurring payment: ${(error as Error).message}`,
+        (error as Error).stack
+      );
+      throw new BadRequestException(`Failed to create recurring payment: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Get recurring payment by subscription ID
+   */
+  async getRecurringPayment(subscriptionId: string) {
+    this.logger.log(`Getting recurring payment: ${subscriptionId}`);
+
+    try {
+      const subscription = await this.stripeService.getSubscription(subscriptionId);
+      
+      return {
+        subscriptionId: subscription.id,
+        status: subscription.status,
+        currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
+        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+        cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
+        canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null,
+        metadata: subscription.metadata,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to get recurring payment: ${(error as Error).message}`, (error as Error).stack);
+      throw new BadRequestException('Failed to get recurring payment');
+    }
+  }
+
+  /**
+   * Cancel recurring payment
+   */
+  async cancelRecurringPayment(subscriptionId: string, immediately: boolean = false) {
+    this.logger.log(`Canceling recurring payment: ${subscriptionId}`);
+
+    try {
+      const subscription = await this.stripeService.cancelSubscription(subscriptionId, immediately);
+      
+      return {
+        subscriptionId: subscription.id,
+        status: subscription.status,
+        canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : new Date(),
+        cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to cancel recurring payment: ${(error as Error).message}`, (error as Error).stack);
+      throw new BadRequestException('Failed to cancel recurring payment');
     }
   }
 

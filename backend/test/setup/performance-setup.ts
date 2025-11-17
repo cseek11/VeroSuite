@@ -567,8 +567,6 @@ export class PerformanceTestSuite {
   }
 }
 
-// Export for use in tests
-export { PerformanceTestSuite };
 
 
 

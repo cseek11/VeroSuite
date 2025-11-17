@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
 import {
-  Card,
-  Button,
-  Typography,
-  Chip,
-  Modal,
-  Input,
-  Textarea
-} from '@/components/ui/EnhancedUI';
+  Badge,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Heading,
+  Text,
+} from '@/components/ui';
 import {
   MessageCircle,
   Phone,
@@ -20,6 +24,7 @@ import {
   Clock,
   CheckCircle
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface CommunicationHubProps {
   customerId: string;
@@ -104,7 +109,11 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
 
   const handleSendMessage = () => {
     // Mock send functionality
-    console.log('Sending message:', { selectedCommunicationType, subject, message });
+    logger.debug('Sending message', { 
+      communicationType: selectedCommunicationType, 
+      hasSubject: !!subject,
+      messageLength: message.length 
+    }, 'CommunicationHub');
     setShowNewMessageModal(false);
     setMessage('');
     setSubject('');
@@ -115,9 +124,9 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
     <>
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <Typography variant="h3" className="text-gray-900">
+          <Heading level={3} className="text-slate-900">
             Communication Hub
-          </Typography>
+          </Heading>
           <Button
             variant="primary"
             onClick={() => setShowNewMessageModal(true)}
@@ -154,43 +163,40 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Typography variant="h5" className="text-gray-900">
+                      <Heading level={5} className="text-slate-900">
                         {log.communication_type.charAt(0).toUpperCase() + log.communication_type.slice(1)}
-                      </Typography>
-                      <Chip
-                        color={getDirectionColor(log.direction)}
-                        variant="default"
-                      >
+                      </Heading>
+                      <Badge variant={log.direction === 'inbound' ? 'default' : 'secondary'}>
                         {log.direction}
-                      </Chip>
+                      </Badge>
                       {log.follow_up_required && (
-                        <Chip color="red" variant="default">
+                        <Badge variant="destructive">
                           Follow-up Required
-                        </Chip>
+                        </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                    <div className="flex items-center gap-1 text-sm text-slate-500">
                       <Clock className="h-4 w-4" />
                       <span>{formatDate(log.timestamp)}</span>
                     </div>
                   </div>
 
                   {log.subject && (
-                    <Typography variant="h6" className="text-gray-800 mb-2">
+                    <Heading level={6} className="text-slate-800 mb-2">
                       {log.subject}
-                    </Typography>
+                    </Heading>
                   )}
 
                   {log.message_content && (
-                    <Typography variant="body1" className="text-gray-700 mb-2">
+                    <Text variant="body" className="text-slate-700 mb-2">
                       {log.message_content}
-                    </Typography>
+                    </Text>
                   )}
 
                   <div className="flex items-center justify-between">
-                    <Typography variant="body2" className="text-gray-600">
+                    <Text variant="small" className="text-slate-600">
                       {log.staff_member}
-                    </Typography>
+                    </Text>
                     
                     {log.follow_up_required && log.follow_up_date && (
                       <div className="flex items-center gap-1 text-sm text-red-600">
@@ -216,7 +222,7 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
             }}
           >
             <Phone className="h-6 w-6 mb-2 text-blue-600" />
-            <Typography variant="body2">Call Customer</Typography>
+            <Text variant="small">Call Customer</Text>
           </Button>
           
           <Button
@@ -228,7 +234,7 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
             }}
           >
             <Mail className="h-6 w-6 mb-2 text-green-600" />
-            <Typography variant="body2">Send Email</Typography>
+            <Text variant="small">Send Email</Text>
           </Button>
           
           <Button
@@ -240,7 +246,7 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
             }}
           >
             <MessageCircle className="h-6 w-6 mb-2 text-purple-600" />
-            <Typography variant="body2">Send SMS</Typography>
+            <Text variant="small">Send SMS</Text>
           </Button>
           
           <Button
@@ -252,25 +258,26 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
             }}
           >
             <User className="h-6 w-6 mb-2 text-orange-600" />
-            <Typography variant="body2">In-Person</Typography>
+            <Text variant="small">In-Person</Text>
           </Button>
         </div>
       </Card>
 
-      {/* New Message Modal */}
-      <Modal
-        isOpen={showNewMessageModal}
-        onClose={() => setShowNewMessageModal(false)}
-        title={`New ${selectedCommunicationType ? selectedCommunicationType.charAt(0).toUpperCase() + selectedCommunicationType.slice(1) : 'Communication'}`}
-        size="lg"
-      >
+      {/* New Message Dialog */}
+      <Dialog open={showNewMessageModal} onOpenChange={(open) => !open && setShowNewMessageModal(false)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              New {selectedCommunicationType ? selectedCommunicationType.charAt(0).toUpperCase() + selectedCommunicationType.slice(1) : 'Communication'}
+            </DialogTitle>
+          </DialogHeader>
         <div className="space-y-6">
           {/* Communication Type Selection */}
           {!selectedCommunicationType && (
             <div>
-              <Typography variant="body2" className="text-gray-600 mb-2">
+              <Text variant="small" className="text-slate-600 mb-2">
                 Communication Type
-              </Typography>
+              </Text>
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   variant="outline"
@@ -278,7 +285,7 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
                   onClick={() => setSelectedCommunicationType('call')}
                 >
                   <Phone className="h-6 w-6 mb-2 text-blue-600" />
-                  <Typography variant="body2">Call</Typography>
+                  <Text variant="small">Call</Text>
                 </Button>
                 
                 <Button
@@ -287,7 +294,7 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
                   onClick={() => setSelectedCommunicationType('email')}
                 >
                   <Mail className="h-6 w-6 mb-2 text-green-600" />
-                  <Typography variant="body2">Email</Typography>
+                  <Text variant="small">Email</Text>
                 </Button>
                 
                 <Button
@@ -296,7 +303,7 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
                   onClick={() => setSelectedCommunicationType('sms')}
                 >
                   <MessageCircle className="h-6 w-6 mb-2 text-purple-600" />
-                  <Typography variant="body2">SMS</Typography>
+                  <Text variant="small">SMS</Text>
                 </Button>
                 
                 <Button
@@ -305,7 +312,7 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
                   onClick={() => setSelectedCommunicationType('in-person')}
                 >
                   <User className="h-6 w-6 mb-2 text-orange-600" />
-                  <Typography variant="body2">In-Person</Typography>
+                  <Text variant="small">In-Person</Text>
                 </Button>
               </div>
             </div>
@@ -317,9 +324,9 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
               {/* Subject (for email) */}
               {selectedCommunicationType === 'email' && (
                 <div>
-                  <Typography variant="body2" className="text-gray-600 mb-2">
+                  <Text variant="small" className="text-slate-600 mb-2">
                     Subject
-                  </Typography>
+                  </Text>
                   <Input
                     value={subject}
                     onChange={(e) => setSubject(e)}
@@ -330,9 +337,9 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
 
               {/* Message Content */}
               <div>
-                <Typography variant="body2" className="text-gray-600 mb-2">
+                <Text variant="small" className="text-slate-600 mb-2">
                   Message
-                </Typography>
+                </Text>
                 <Textarea
                   value={message}
                   onChange={(e) => setMessage(e)}
@@ -361,11 +368,11 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
               <div className="flex items-center gap-4">
                 <label className="flex items-center gap-2">
                   <input type="checkbox" className="rounded" />
-                  <Typography variant="body2">Requires follow-up</Typography>
+                  <Text variant="small">Requires follow-up</Text>
                 </label>
                 <input
                   type="date"
-                  className="p-2 border border-gray-300 rounded-md"
+                  className="p-2 border border-slate-300 rounded-md"
                   placeholder="Follow-up date"
                 />
               </div>
@@ -394,7 +401,8 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
             </Button>
           </div>
         </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

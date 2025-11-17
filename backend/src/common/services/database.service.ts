@@ -4,11 +4,36 @@ import { PrismaClient } from '@prisma/client';
 @Injectable()
 export class DatabaseService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
+    // Add connection pool parameters to DATABASE_URL (merge safely with existing params)
+    const databaseUrl = process.env.DATABASE_URL || 'postgresql://localhost:5432/verofield';
+    let urlWithPooling = databaseUrl;
+    try {
+      const url = new URL(databaseUrl);
+      const searchParams = url.searchParams;
+      // Defaults; allow overrides via env
+      const defaultConnectionLimit = process.env.DB_CONNECTION_LIMIT || '10';
+      const defaultPoolTimeout = process.env.DB_POOL_TIMEOUT || '60';
+      const defaultConnectTimeout = process.env.DB_CONNECT_TIMEOUT || '60';
+      if (!searchParams.has('connection_limit')) {
+        searchParams.set('connection_limit', defaultConnectionLimit);
+      }
+      // Always ensure a sensible pool_timeout (override too-low values)
+      searchParams.set('pool_timeout', defaultPoolTimeout);
+      if (!searchParams.has('connect_timeout')) {
+        searchParams.set('connect_timeout', defaultConnectTimeout);
+      }
+      url.search = searchParams.toString();
+      urlWithPooling = url.toString();
+    } catch {
+      // Fallback to original string if URL parsing fails
+      urlWithPooling = databaseUrl;
+    }
+    
     super({
       log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['warn', 'error'],
       datasources: { 
         db: { 
-          url: process.env.DATABASE_URL || 'postgresql://localhost:5432/verosuite'
+          url: urlWithPooling
         } 
       },
     });
@@ -55,7 +80,7 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
             // Set tenant context for this operation
             await this.query(`SET LOCAL app.tenant_id = $1`, [tenantId]);
             // Skip setting the role for now - we'll rely on RLS policies instead
-            // await this.query(`SET LOCAL ROLE verosuite_app`);
+            // await this.query(`SET LOCAL ROLE verofield_app`);
             
             try {
               return await operation();

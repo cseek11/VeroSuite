@@ -1,0 +1,1488 @@
+﻿node.exe : npm warn Unknown env config 
+"msvs-version". This will stop working in 
+the next major version of npm.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Users\ashse\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecifie 
+   d: (npm warn Unknow...version of npm.  
+  :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeComma 
+   ndError
+ 
+npm warn Unknown env config "python". 
+This will stop working in the next major 
+version of npm.
+
+> verofield-api@1.0.0 test:e2e
+> jest --config ./test/jest-e2e.json
+
+[dotenv@17.2.2] injecting env (0) from test\.env.test -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+≡ƒöº Starting global test setup...
+≡ƒôª Verifying database connection...
+≡ƒº╣ Cleaning up existing test data...
+≡ƒöÉ Hashing test password...
+≡ƒÅó Creating test tenants...
+≡ƒæÑ Creating test users...
+Γ£à Global test setup completed successfully
+   Tenants: [
+  '11111111-1111-1111-1111-111111111111',
+  '22222222-2222-2222-2222-222222222222'
+]
+   Users: [
+  'test-user-admin@test.example.com',
+  'test-user-dispatcher@test.example.com',
+  'test-user-technician@test.example.com',
+  'test-user-tenant2@test.example.com'
+]
+FAIL test/dashboard-regions.e2e-spec.ts 
+(9.479 s)
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ 
+POST /api/v2/dashboard/layouts/:layoutId/r
+egions - Create Region ΓÇ║ should create 
+a new scheduling region
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ 
+POST /api/v2/dashboard/layouts/:layoutId/r
+egions - Create Region ΓÇ║ should reject 
+overlapping regions
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ 
+POST /api/v2/dashboard/layouts/:layoutId/r
+egions - Create Region ΓÇ║ should 
+validate grid bounds
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ 
+POST /api/v2/dashboard/layouts/:layoutId/r
+egions - Create Region ΓÇ║ should require 
+authentication
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ GET 
+/api/v2/dashboard/layouts/:layoutId/region
+s - List Regions ΓÇ║ should return all 
+regions for a layout
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ GET 
+/api/v2/dashboard/layouts/:layoutId/region
+s - List Regions ΓÇ║ should return empty 
+array for layout with no regions
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ GET 
+/api/v2/dashboard/layouts/:layoutId/region
+s - List Regions ΓÇ║ should respect 
+tenant isolation
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ PUT 
+/api/v2/dashboard/layouts/:layoutId/region
+s/:id - Update Region ΓÇ║ should update 
+region position
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ PUT 
+/api/v2/dashboard/layouts/:layoutId/region
+s/:id - Update Region ΓÇ║ should update 
+region size
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ PUT 
+/api/v2/dashboard/layouts/:layoutId/region
+s/:id - Update Region ΓÇ║ should require 
+version field
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ PUT 
+/api/v2/dashboard/layouts/:layoutId/region
+s/:id - Update Region ΓÇ║ should detect 
+version conflicts
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ PUT 
+/api/v2/dashboard/layouts/:layoutId/region
+s/:id - Update Region ΓÇ║ should prevent 
+overlapping on update
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ 
+DELETE /api/v2/dashboard/layouts/:layoutId
+/regions/:id - Delete Region ΓÇ║ should 
+soft delete a region
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ 
+DELETE /api/v2/dashboard/layouts/:layoutId
+/regions/:id - Delete Region ΓÇ║ should 
+return 404 for non-existent region
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ 
+DELETE /api/v2/dashboard/layouts/:layoutId
+/regions/:id - Delete Region ΓÇ║ should 
+require authentication
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+  ΓùÅ Dashboard Regions E2E Tests ΓÇ║ 
+Complete Workflow ΓÇ║ should complete 
+full CRUD workflow
+
+    PrismaClientKnownRequestError: 
+    Invalid 
+`prisma.dashboardLayout.create()` 
+invocation in
+    C:\Users\ashse\Documents\VeroPest Suit
+e\Training\VeroSuite\backend\test\dashboar
+d-regions.e2e-spec.ts:476:49
+
+      473 // Helper functions
+      474 
+      475 async function 
+createTestLayout(userId: string, 
+tenantId: string): Promise<string> {
+    ΓåÆ 476   const layout = await 
+prisma.dashboardLayout.create(
+    Unique constraint failed on the 
+fields: (`tenant_id`,`user_id`,`name`)
+
+    [0m [90m 474 |[39m
+     [90m 475 |[39m   [36masync[39m 
+[36mfunction[39m 
+createTestLayout(userId[33m:[39m 
+string[33m,[39m tenantId[33m:[39m 
+string)[33m:[39m [33mPromise[39m[33m<
+[39m[33mstring[39m[33m>[39m {
+    [31m[1m>[22m[39m[90m 476 |[39m  
+   [36mconst[39m layout [33m=[39m 
+[36mawait[39m prisma[33m.[39mdashboard
+Layout[33m.[39mcreate({
+     [90m     |[39m                    
+[31m[1m^[22m[39m
+     [90m 477 |[39m       
+data[33m:[39m {
+     [90m 478 |[39m         
+tenant_id[33m:[39m tenantId[33m,[39m
+     [90m 479 |[39m         
+user_id[33m:[39m userId[33m,[39m[0m
+
+      at $n.handleRequestError (node_modul
+es/@prisma/client/runtime/library.js:121:7
+315)
+      at $n.handleAndLogRequestError (node
+_modules/@prisma/client/runtime/library.js
+:121:6623)
+      at $n.request (node_modules/@prisma/
+client/runtime/library.js:121:6307)
+      at l (node_modules/@prisma/client/ru
+ntime/library.js:130:9633)
+      at createTestLayout (test/dashboard-
+regions.e2e-spec.ts:476:20)
+      at Object.<anonymous> 
+(test/dashboard-regions.e2e-spec.ts:45:16)
+
+FAIL test/work-orders.e2e-spec.ts (11.128 
+s)
+  ΓùÅ WorkOrders (e2e) ΓÇ║ 
+/api/v1/work-orders/:id (GET) ΓÇ║ should 
+get work order by ID
+
+    expected 200 "OK", got 404 "Not Found"
+
+    [0m [90m 143 |[39m         [33m.[
+39m[36mget[39m([32m`/api/v1/work-orders
+/${workOrderId}`[39m)
+     [90m 144 |[39m         [33m.[39m
+[36mset[39m([32m'Authorization'[39m[33
+m,[39m [32m`Bearer ${authToken}`[39m)
+    [31m[1m>[22m[39m[90m 145 |[39m  
+       [33m.[39mexpect([35m200[39m)[3
+3m;[39m
+     [90m     |[39m          
+[31m[1m^[22m[39m
+     [90m 146 |[39m
+     [90m 147 |[39m       expect(respons
+e[33m.[39mbody[33m.[39mid)[33m.[39mt
+oBe(workOrderId)[33m;[39m
+     [90m 148 |[39m       expect(respons
+e[33m.[39mbody[33m.[39mcustomer_id)[3
+3m.[39mtoBe(customerId)[33m;[39m[0m
+
+      at Object.<anonymous> 
+(test/work-orders.e2e-spec.ts:145:10)
+      ----
+      at Test._assertStatus (node_modules/
+supertest/lib/test.js:252:14)
+      at 
+node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (node_module
+s/supertest/lib/test.js:285:13)
+      at Test.assert (node_modules/superte
+st/lib/test.js:164:23)
+      at Server.localAssert (node_modules/
+supertest/lib/test.js:120:14)
+
+  ΓùÅ WorkOrders (e2e) ΓÇ║ 
+/api/v1/work-orders/:id (GET) ΓÇ║ should 
+return 404 for non-existent work order
+
+    expected 404 "Not Found", got 400 
+"Bad Request"
+
+    [0m [90m 155 |[39m         [33m.[
+39m[36mget[39m([32m'/api/v1/work-orders
+/non-existent-id'[39m)
+     [90m 156 |[39m         [33m.[39m
+[36mset[39m([32m'Authorization'[39m[33
+m,[39m [32m`Bearer ${authToken}`[39m)
+    [31m[1m>[22m[39m[90m 157 |[39m  
+       [33m.[39mexpect([35m404[39m)[3
+3m;[39m
+     [90m     |[39m          
+[31m[1m^[22m[39m
+     [90m 158 |[39m     })[33m;[39m
+     [90m 159 |[39m   })[33m;[39m
+     [90m 160 |[39m[0m
+
+      at Object.<anonymous> 
+(test/work-orders.e2e-spec.ts:157:10)
+      ----
+      at Test._assertStatus (node_modules/
+supertest/lib/test.js:252:14)
+      at 
+node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (node_module
+s/supertest/lib/test.js:285:13)
+      at Test.assert (node_modules/superte
+st/lib/test.js:164:23)
+      at Server.localAssert (node_modules/
+supertest/lib/test.js:120:14)
+
+  ΓùÅ WorkOrders (e2e) ΓÇ║ 
+/api/v1/work-orders (GET) ΓÇ║ should list 
+work orders with filters
+
+    
+expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+    [0m [90m 170 |[39m       expect(res
+ponse[33m.[39mbody)[33m.[39mtoHaveProp
+erty([32m'pagination'[39m)[33m;[39m
+     [90m 171 |[39m       expect([33mAr
+ray[39m[33m.[39misArray(response[33m.
+[39mbody[33m.[39mdata))[33m.[39mtoBe(
+[36mtrue[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 172 |[39m  
+     expect(response[33m.[39mbody[33m.
+[39mdata[33m.[39mlength)[33m.[39mtoBeG
+reaterThan([35m0[39m)[33m;[39m
+     [90m     |[39m                     
+                    [31m[1m^[22m[39m
+     [90m 173 |[39m     })[33m;[39m
+     [90m 174 |[39m
+     [90m 175 |[39m     it([32m'should 
+list work orders with 
+pagination'[39m[33m,[39m 
+[36masync[39m () [33m=>[39m {[0m
+
+      at Object.<anonymous> 
+(test/work-orders.e2e-spec.ts:172:41)
+
+  ΓùÅ WorkOrders (e2e) ΓÇ║ 
+/api/v1/work-orders (GET) ΓÇ║ should list 
+work orders with pagination
+
+    
+expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+    [0m [90m 182 |[39m       expect(res
+ponse[33m.[39mbody[33m.[39mpagination
+[33m.[39mpage)[33m.[39mtoBe([35m1[39m
+)[33m;[39m
+     [90m 183 |[39m       expect(respons
+e[33m.[39mbody[33m.[39mpagination[33m
+.[39mlimit)[33m.[39mtoBe([35m10[39m)
+[33m;[39m
+    [31m[1m>[22m[39m[90m 184 |[39m  
+     expect(response[33m.[39mbody[33m.
+[39mpagination[33m.[39mtotal)[33m.[39m
+toBeGreaterThan([35m0[39m)[33m;[39m
+     [90m     |[39m                     
+                         
+[31m[1m^[22m[39m
+     [90m 185 |[39m     })[33m;[39m
+     [90m 186 |[39m   })[33m;[39m
+     [90m 187 |[39m[0m
+
+      at Object.<anonymous> 
+(test/work-orders.e2e-spec.ts:184:46)
+
+  ΓùÅ WorkOrders (e2e) ΓÇ║ 
+/api/v1/work-orders/:id (PUT) ΓÇ║ should 
+update work order
+
+    expected 200 "OK", got 400 "Bad 
+Request"
+
+    [0m [90m 198 |[39m         [33m.[
+39m[36mset[39m([32m'Authorization'[39m
+[33m,[39m [32m`Bearer 
+${authToken}`[39m)
+     [90m 199 |[39m         
+[33m.[39msend(updateWorkOrderDto)
+    [31m[1m>[22m[39m[90m 200 |[39m  
+       [33m.[39mexpect([35m200[39m)[3
+3m;[39m
+     [90m     |[39m          
+[31m[1m^[22m[39m
+     [90m 201 |[39m
+     [90m 202 |[39m       expect(respons
+e[33m.[39mbody[33m.[39mstatus)[33m.[
+39mtoBe([32m'in-progress'[39m)[33m;[39
+m
+     [90m 203 |[39m       expect(respons
+e[33m.[39mbody[33m.[39massigned_to)[3
+3m.[39mtoBe(technicianId)[33m;[39m[0m
+
+      at Object.<anonymous> 
+(test/work-orders.e2e-spec.ts:200:10)
+      ----
+      at Test._assertStatus (node_modules/
+supertest/lib/test.js:252:14)
+      at 
+node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (node_module
+s/supertest/lib/test.js:285:13)
+      at Test.assert (node_modules/superte
+st/lib/test.js:164:23)
+      at Server.localAssert (node_modules/
+supertest/lib/test.js:120:14)
+
+  ΓùÅ WorkOrders (e2e) ΓÇ║ 
+/api/v1/work-orders/:id (PUT) ΓÇ║ should 
+fail to update non-existent work order
+
+    expected 404 "Not Found", got 400 
+"Bad Request"
+
+    [0m [90m 214 |[39m         [33m.[
+39m[36mset[39m([32m'Authorization'[39m
+[33m,[39m [32m`Bearer 
+${authToken}`[39m)
+     [90m 215 |[39m         
+[33m.[39msend(updateWorkOrderDto)
+    [31m[1m>[22m[39m[90m 216 |[39m  
+       [33m.[39mexpect([35m404[39m)[3
+3m;[39m
+     [90m     |[39m          
+[31m[1m^[22m[39m
+     [90m 217 |[39m     })[33m;[39m
+     [90m 218 |[39m
+     [90m 219 |[39m     it([32m'should 
+fail to set completion date without 
+completed status'[39m[33m,[39m 
+[36masync[39m () [33m=>[39m {[0m
+
+      at Object.<anonymous> 
+(test/work-orders.e2e-spec.ts:216:10)
+      ----
+      at Test._assertStatus (node_modules/
+supertest/lib/test.js:252:14)
+      at 
+node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (node_module
+s/supertest/lib/test.js:285:13)
+      at Test.assert (node_modules/superte
+st/lib/test.js:164:23)
+      at Server.localAssert (node_modules/
+supertest/lib/test.js:120:14)
+
+  ΓùÅ WorkOrders (e2e) ΓÇ║ 
+/api/v1/work-orders/:id (PUT) ΓÇ║ should 
+fail to set completion date without 
+completed status
+
+    expected 400 "Bad Request", got 404 
+"Not Found"
+
+    [0m [90m 226 |[39m         [33m.[
+39m[36mset[39m([32m'Authorization'[39m
+[33m,[39m [32m`Bearer 
+${authToken}`[39m)
+     [90m 227 |[39m         
+[33m.[39msend(updateWorkOrderDto)
+    [31m[1m>[22m[39m[90m 228 |[39m  
+       [33m.[39mexpect([35m400[39m)[3
+3m;[39m
+     [90m     |[39m          
+[31m[1m^[22m[39m
+     [90m 229 |[39m     })[33m;[39m
+     [90m 230 |[39m   })[33m;[39m
+     [90m 231 |[39m[0m
+
+      at Object.<anonymous> 
+(test/work-orders.e2e-spec.ts:228:10)
+      ----
+      at Test._assertStatus (node_modules/
+supertest/lib/test.js:252:14)
+      at 
+node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (node_module
+s/supertest/lib/test.js:285:13)
+      at Test.assert (node_modules/superte
+st/lib/test.js:164:23)
+      at Server.localAssert (node_modules/
+supertest/lib/test.js:120:14)
+
+  ΓùÅ WorkOrders (e2e) ΓÇ║ 
+/api/v1/work-orders/customer/:customerId 
+(GET) ΓÇ║ should get work orders by 
+customer
+
+    
+expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+    [0m [90m 238 |[39m
+     [90m 239 |[39m       expect([33mAr
+ray[39m[33m.[39misArray(response[33m.
+[39mbody))[33m.[39mtoBe([36mtrue[39m)
+[33m;[39m
+    [31m[1m>[22m[39m[90m 240 |[39m  
+     expect(response[33m.[39mbody[33m.
+[39mlength)[33m.[39mtoBeGreaterThan([35
+m0[39m)[33m;[39m
+     [90m     |[39m                     
+               [31m[1m^[22m[39m
+     [90m 241 |[39m       expect(respons
+e[33m.[39mbody[[35m0[39m][33m.[39mcu
+stomer_id)[33m.[39mtoBe(customerId)[33m
+;[39m
+     [90m 242 |[39m     })[33m;[39m
+     [90m 243 |[39m[0m
+
+      at Object.<anonymous> 
+(test/work-orders.e2e-spec.ts:240:36)
+
+  ΓùÅ WorkOrders (e2e) ΓÇ║ 
+/api/v1/work-orders/customer/:customerId 
+(GET) ΓÇ║ should return 404 for 
+non-existent customer
+
+    expected 404 "Not Found", got 400 
+"Bad Request"
+
+    [0m [90m 246 |[39m         [33m.[
+39m[36mget[39m([32m'/api/v1/work-orders
+/customer/non-existent-id'[39m)
+     [90m 247 |[39m         [33m.[39m
+[36mset[39m([32m'Authorization'[39m[33
+m,[39m [32m`Bearer ${authToken}`[39m)
+    [31m[1m>[22m[39m[90m 248 |[39m  
+       [33m.[39mexpect([35m404[39m)[3
+3m;[39m
+     [90m     |[39m          
+[31m[1m^[22m[39m
+     [90m 249 |[39m     })[33m;[39m
+     [90m 250 |[39m   })[33m;[39m
+     [90m 251 |[39m[0m
+
+      at Object.<anonymous> 
+(test/work-orders.e2e-spec.ts:248:10)
+      ----
+      at Test._assertStatus (node_modules/
+supertest/lib/test.js:252:14)
+      at 
+node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (node_module
+s/supertest/lib/test.js:285:13)
+      at Test.assert (node_modules/superte
+st/lib/test.js:164:23)
+      at Server.localAssert (node_modules/
+supertest/lib/test.js:120:14)
+
+  ΓùÅ WorkOrders (e2e) ΓÇ║ /api/v1/work-or
+ders/technician/:technicianId (GET) ΓÇ║ 
+should return 404 for non-existent 
+technician
+
+    expected 404 "Not Found", got 400 
+"Bad Request"
+
+    [0m [90m 264 |[39m         [33m.[
+39m[36mget[39m([32m'/api/v1/work-orders
+/technician/non-existent-id'[39m)
+     [90m 265 |[39m         [33m.[39m
+[36mset[39m([32m'Authorization'[39m[33
+m,[39m [32m`Bearer ${authToken}`[39m)
+    [31m[1m>[22m[39m[90m 266 |[39m  
+       [33m.[39mexpect([35m404[39m)[3
+3m;[39m
+     [90m     |[39m          
+[31m[1m^[22m[39m
+     [90m 267 |[39m     })[33m;[39m
+     [90m 268 |[39m   })[33m;[39m
+     [90m 269 |[39m[0m
+
+      at Object.<anonymous> 
+(test/work-orders.e2e-spec.ts:266:10)
+      ----
+      at Test._assertStatus (node_modules/
+supertest/lib/test.js:252:14)
+      at 
+node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (node_module
+s/supertest/lib/test.js:285:13)
+      at Test.assert (node_modules/superte
+st/lib/test.js:164:23)
+      at Server.localAssert (node_modules/
+supertest/lib/test.js:120:14)
+
+  ΓùÅ WorkOrders (e2e) ΓÇ║ 
+/api/v1/work-orders/:id (DELETE) ΓÇ║ 
+should delete work order (soft delete)
+
+    expected 200 "OK", got 404 "Not Found"
+
+    [0m [90m 273 |[39m         [33m.[
+39m[36mdelete[39m([32m`/api/v1/work-ord
+ers/${workOrderId}`[39m)
+     [90m 274 |[39m         [33m.[39m
+[36mset[39m([32m'Authorization'[39m[33
+m,[39m [32m`Bearer ${authToken}`[39m)
+    [31m[1m>[22m[39m[90m 275 |[39m  
+       [33m.[39mexpect([35m200[39m)[3
+3m;[39m
+     [90m     |[39m          
+[31m[1m^[22m[39m
+     [90m 276 |[39m
+     [90m 277 |[39m       expect(respons
+e[33m.[39mbody[33m.[39mmessage)[33m.
+[39mtoBe([32m'Work order deleted 
+successfully'[39m)[33m;[39m
+     [90m 278 |[39m[0m
+
+      at Object.<anonymous> 
+(test/work-orders.e2e-spec.ts:275:10)
+      ----
+      at Test._assertStatus (node_modules/
+supertest/lib/test.js:252:14)
+      at 
+node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (node_module
+s/supertest/lib/test.js:285:13)
+      at Test.assert (node_modules/superte
+st/lib/test.js:164:23)
+      at Server.localAssert (node_modules/
+supertest/lib/test.js:120:14)
+
+  ΓùÅ WorkOrders (e2e) ΓÇ║ 
+/api/v1/work-orders/:id (DELETE) ΓÇ║ 
+should return 404 for non-existent work 
+order
+
+    expected 404 "Not Found", got 400 
+"Bad Request"
+
+    [0m [90m 288 |[39m         [33m.[
+39m[36mdelete[39m([32m'/api/v1/work-ord
+ers/non-existent-id'[39m)
+     [90m 289 |[39m         [33m.[39m
+[36mset[39m([32m'Authorization'[39m[33
+m,[39m [32m`Bearer ${authToken}`[39m)
+    [31m[1m>[22m[39m[90m 290 |[39m  
+       [33m.[39mexpect([35m404[39m)[3
+3m;[39m
+     [90m     |[39m          
+[31m[1m^[22m[39m
+     [90m 291 |[39m     })[33m;[39m
+     [90m 292 |[39m   })[33m;[39m
+     [90m 293 |[39m[0m
+
+      at Object.<anonymous> 
+(test/work-orders.e2e-spec.ts:290:10)
+      ----
+      at Test._assertStatus (node_modules/
+supertest/lib/test.js:252:14)
+      at 
+node_modules/supertest/lib/test.js:308:13
+      at Test._assertFunction (node_module
+s/supertest/lib/test.js:285:13)
+      at Test.assert (node_modules/superte
+st/lib/test.js:164:23)
+      at Server.localAssert (node_modules/
+supertest/lib/test.js:120:14)
+
+  ΓùÅ WorkOrders (e2e) ΓÇ║ V2 API ΓÇ║ 
+should return work orders in V2 format
+
+    expect(received).toBe(expected) // 
+Object.is equality
+
+    Expected: true
+    Received: false
+
+    [0m [90m 367 |[39m       [90m// 
+Work orders V2 may return count or 
+pagination - check what's actually 
+returned[39m
+     [90m 368 |[39m       
+[36mconst[39m data [33m=[39m 
+expectV2Response(response)[33m;[39m
+    [31m[1m>[22m[39m[90m 369 |[39m  
+     expect([33mArray[39m[33m.[39misAr
+ray(data))[33m.[39mtoBe([36mtrue[39m)
+[33m;[39m
+     [90m     |[39m                     
+              [31m[1m^[22m[39m
+     [90m 370 |[39m       
+     [90m 371 |[39m       [90m// Check 
+if pagination exists, otherwise check for 
+count[39m
+     [90m 372 |[39m       [36mif[39m (
+response[33m.[39mbody[33m.[39mmeta[33
+m.[39mpagination) {[0m
+
+      at Object.<anonymous> 
+(test/work-orders.e2e-spec.ts:369:35)
+
+  ΓùÅ WorkOrders (e2e) ΓÇ║ V2 API ΓÇ║ 
+should create work order with V2 format
+
+    expect(received).toBe(expected) // 
+Object.is equality
+
+    Expected: 200
+    Received: 201
+
+    [0m [90m  9 |[39m [90m */[39m
+     [90m 10 |[39m [36mexport[39m 
+[36mfunction[39m 
+expectV2Response(response[33m:[39m 
+any[33m,[39m expectedStatus [33m=[39m 
+[35m200[39m) {
+    [31m[1m>[22m[39m[90m 11 |[39m   
+expect(response[33m.[39mstatus)[33m.[3
+9mtoBe(expectedStatus)[33m;[39m
+     [90m    |[39m                      
+     [31m[1m^[22m[39m
+     [90m 12 |[39m   expect(response[33
+m.[39mbody)[33m.[39mtoMatchObject({
+     [90m 13 |[39m     data[33m:[39m 
+expect[33m.[39manything()[33m,[39m
+     [90m 14 |[39m     meta[33m:[39m 
+{[0m
+
+      at expectV2Response 
+(test/utils/validate-v2.ts:11:27)
+      at Object.<anonymous> 
+(test/work-orders.e2e-spec.ts:402:36)
+
+PASS test/auth.e2e-spec.ts (5.797 s)
+PASS test/tenant-isolation.e2e-spec.ts 
+(7.255 s)
+
+Test Suites: 2 failed, 2 passed, 4 total
+Tests:       30 failed, 12 passed, 42 
+total
+Snapshots:   0 total
+Time:        33.809 s, estimated 114 s
+Ran all test suites.
+≡ƒº╣ Starting global test teardown...
+ΓÜá∩╕Å  Found 2 work orders not cleaned 
+up by tests
+≡ƒùæ∩╕Å  Cleaning up test data...
+Γ£à Global test teardown completed

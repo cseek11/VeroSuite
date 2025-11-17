@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from '@/utils/toast';
 
 export default function JobsScheduler() {
   const [jobs, setJobs] = useState([]);
@@ -127,7 +128,7 @@ export default function JobsScheduler() {
               <button 
                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                 onClick={() => {
-                  alert('Edit functionality would be implemented here');
+                  toast.info('Edit functionality would be implemented here');
                 }}
               >
                 Edit

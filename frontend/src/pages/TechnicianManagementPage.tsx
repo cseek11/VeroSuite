@@ -10,11 +10,8 @@ import {
   Calendar, 
   BarChart3, 
   UserPlus,
-  Settings,
-  Filter,
-  Search
+  Settings
 } from 'lucide-react';
-import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 
 type ViewMode = 'list' | 'assignment' | 'calendar' | 'dashboard';
@@ -75,62 +72,64 @@ export default function TechnicianManagementPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg">
+              <Users className="w-5 h-5 text-white" />
+            </div>
             <div>
-              <h1 className="text-xl font-semibold text-gray-900">Technician Management</h1>
-              <p className="text-sm text-gray-600">Manage your technician team and assignments</p>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Technician Management
+              </h1>
+              <p className="text-slate-600 text-sm mt-1">
+                Manage your technician team and assignments
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {/* Navigate to create technician */}}
-              >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Add Technician
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {/* Navigate to settings */}}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
-            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {/* Navigate to create technician */}}
+              className="px-3 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm text-slate-700 hover:bg-white hover:shadow-lg transition-all duration-200 font-medium text-sm flex items-center gap-2"
+            >
+              <UserPlus className="h-4 w-4" />
+              Add Technician
+            </button>
+            <button
+              onClick={() => {/* Navigate to settings */}}
+              className="px-3 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm text-slate-700 hover:bg-white hover:shadow-lg transition-all duration-200 font-medium text-sm flex items-center gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </button>
           </div>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-8">
-            {(['dashboard', 'list', 'calendar', 'assignment'] as ViewMode[]).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  viewMode === mode
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {getViewModeIcon(mode)}
-                {getViewModeTitle(mode)}
-              </button>
-            ))}
-          </nav>
-        </div>
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <nav className="flex space-x-8">
+          {(['dashboard', 'list', 'calendar', 'assignment'] as ViewMode[]).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm transition-all duration-200 ${
+                viewMode === mode
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              }`}
+            >
+              {getViewModeIcon(mode)}
+              {getViewModeTitle(mode)}
+            </button>
+          ))}
+        </nav>
       </div>
 
       {/* Content */}
-      <div className="py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div>
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card className="p-6">
@@ -214,7 +213,6 @@ export default function TechnicianManagementPage() {
               />
             )}
           </div>
-        </div>
       </div>
     </div>
   );

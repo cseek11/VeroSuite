@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Region Dashboard Comprehensive User Guide - VeroField</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 280px;
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: #8b5cf6;
+            border-bottom: 2px solid #8b5cf6;
+            padding-bottom: 0.5rem;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar nav a {
+            color: #555;
+            text-decoration: none;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar nav a:hover {
+            background: #f3e8ff;
+            color: #8b5cf6;
+            padding-left: 1rem;
+        }
+
+        .sidebar nav a.active {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .sidebar nav .section-title {
+            font-weight: 600;
+            color: #8b5cf6;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Main Content */
+        .content {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            padding: 3rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .content h1 {
+            color: #8b5cf6;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 3px solid #8b5cf6;
+            padding-bottom: 1rem;
+        }
+
+        .content h2 {
+            color: #7c3aed;
+            font-size: 2rem;
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-top: 1rem;
+            border-top: 2px solid #e9d5ff;
+        }
+
+        .content h3 {
+            color: #6d28d9;
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h4 {
+            color: #5b21b6;
+            font-size: 1.25rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .content p {
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+
+        .content ul, .content ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .content table th {
+            background: #8b5cf6;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .content table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .content table tr:hover {
+            background: #f9fafb;
+        }
+
+        .content table tr:nth-child(even) {
+            background: #faf5ff;
+        }
+
+        .content code {
+            background: #f3e8ff;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #7c3aed;
+        }
+
+        .content pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .content pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        .quick-links {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .quick-links h2 {
+            color: white;
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .quick-links a {
+            color: white;
+            text-decoration: none;
+            padding: 1rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 6px;
+            display: block;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .quick-links a:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: white;
+            transform: translateY(-2px);
+        }
+
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .info {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .success {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .tip {
+            background: #f3e8ff;
+            border-left: 4px solid #8b5cf6;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .tip::before {
+            content: "💡 Tip: ";
+            font-weight: 600;
+            color: #7c3aed;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #8b5cf6;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .back-to-top:hover {
+            background: #7c3aed;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.6);
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: relative;
+                top: 0;
+            }
+
+            .content {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(to right, #8b5cf6, transparent);
+            margin: 3rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h2>Quick Navigation</h2>
+            <nav>
+                <div class="section-title">Quick Start</div>
+                <ul>
+                    <li><a href="#getting-started">Getting Started</a></li>
+                    <li><a href="#first-dashboard">Your First Dashboard</a></li>
+                    <li><a href="#essential-actions">Essential Actions</a></li>
+                </ul>
+
+                <div class="section-title">Core Features</div>
+                <ul>
+                    <li><a href="#adding-regions">Adding Regions</a></li>
+                    <li><a href="#resizing-regions">Resizing Regions</a></li>
+                    <li><a href="#moving-regions">Moving Regions</a></li>
+                    <li><a href="#collapsing-regions">Collapsing Regions</a></li>
+                    <li><a href="#locking-regions">Locking Regions</a></li>
+                    <li><a href="#duplicating-regions">Duplicating Regions</a></li>
+                    <li><a href="#region-settings">Region Settings</a></li>
+                </ul>
+
+                <div class="section-title">Advanced Features</div>
+                <ul>
+                    <li><a href="#dashboard-fab">Dashboard FAB</a></li>
+                    <li><a href="#zoom-pan">Zoom & Pan</a></li>
+                    <li><a href="#command-palette">Command Palette</a></li>
+                    <li><a href="#versioning">Versioning</a></li>
+                    <li><a href="#collaboration">Collaboration</a></li>
+                </ul>
+
+                <div class="section-title">Productivity</div>
+                <ul>
+                    <li><a href="#keyboard-shortcuts">Keyboard Shortcuts</a></li>
+                    <li><a href="#undo-redo">Undo/Redo</a></li>
+                    <li><a href="#export-import">Export/Import</a></li>
+                </ul>
+
+                <div class="section-title">Help & Support</div>
+                <ul>
+                    <li><a href="#troubleshooting">Troubleshooting</a></li>
+                    <li><a href="#best-practices">Best Practices</a></li>
+                    <li><a href="#reference">Reference Tables</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <h1>Region Dashboard Comprehensive User Guide</h1>
+            <p style="font-size: 1.1rem; color: #666; margin-bottom: 2rem;">
+                Complete guide to using the Region Dashboard system in VeroField. Learn how to create, customize, and manage your dashboard regions for maximum productivity.
+            </p>
+
+            <!-- Quick Links Section -->
+            <div class="quick-links">
+                <h2>🚀 Quick Links to Most Important Topics</h2>
+                <div class="quick-links-grid">
+                    <a href="#getting-started">Getting Started in 5 Minutes</a>
+                    <a href="#first-dashboard">Your First Dashboard</a>
+                    <a href="#adding-regions">Adding Regions</a>
+                    <a href="#resizing-regions">Resizing Regions</a>
+                    <a href="#moving-regions">Moving Regions</a>
+                    <a href="#dashboard-fab">Dashboard Settings</a>
+                    <a href="#keyboard-shortcuts">Keyboard Shortcuts</a>
+                    <a href="#region-settings">Region Settings</a>
+                    <a href="#versioning">Version Control</a>
+                    <a href="#collaboration">Collaboration</a>
+                    <a href="#troubleshooting">Troubleshooting</a>
+                    <a href="#reference">Reference Tables</a>
+                </div>
+            </div>
+
+            <!-- Part 1: Quick Start -->
+            <section id="getting-started">
+                <h2>Part 1: Quick Start</h2>
+                
+                <h3 id="getting-started">Getting Started in 5 Minutes</h3>
+                
+                <h4>What are Regions?</h4>
+                <p>Regions are organized containers in your dashboard that hold widgets and content. Unlike the previous card system, regions are arranged in a structured grid layout that you can customize. Each region can be:</p>
+                <ul>
+                    <li><strong>Moved</strong> anywhere on the grid</li>
+                    <li><strong>Resized</strong> to fit your needs</li>
+                    <li><strong>Collapsed</strong> to save space</li>
+                    <li><strong>Locked</strong> to prevent changes</li>
+                    <li><strong>Customized</strong> with colors and titles</li>
+                    <li><strong>Shared</strong> with specific users, roles, or teams</li>
+                </ul>
+
+                <div class="info">
+                    <strong>Key Concepts:</strong> Regions snap to a grid system for clean organization. All changes save automatically after 500ms. Real-time collaboration lets you see who else is viewing or editing.
+                </div>
+
+                <h3 id="first-dashboard">Your First Dashboard</h3>
+                
+                <h4>Step 1: Navigate to Dashboard</h4>
+                <ol>
+                    <li>Click on <strong>Dashboard</strong> in the main navigation</li>
+                    <li>If this is your first time, you'll see an empty dashboard with a message: "No regions configured"</li>
+                </ol>
+
+                <h4>Step 2: Add Your First Region</h4>
+                <ol>
+                    <li><strong>Click the purple Settings button</strong> (⚙️) in the top-left corner of the screen</li>
+                    <li>In the settings panel that appears, click <strong>"Add Region"</strong></li>
+                    <li>A dialog will appear showing available region types</li>
+                    <li>Select a region type (e.g., "Scheduling", "Reports", "Customer Search")</li>
+                    <li>The region will appear in your dashboard grid at the next available position</li>
+                </ol>
+
+                <div class="tip">
+                    The region has resize handles (purple squares) on corners and edges. A drag handle (⋮⋮) appears in the top-left when you hover over the header.
+                </div>
+
+                <h4>Step 3: Customize Your Region</h4>
+                <ol>
+                    <li><strong>Click the Settings icon</strong> (⚙️) in the region header</li>
+                    <li>In the settings dialog:
+                        <ul>
+                            <li>Change the <strong>Title</strong> (up to 100 characters)</li>
+                            <li>Select <strong>Region Type</strong> from the dropdown</li>
+                            <li>Customize <strong>Background Color</strong>, <strong>Header Color</strong>, and <strong>Border Color</strong></li>
+                        </ul>
+                    </li>
+                    <li>Click <strong>"Save"</strong> to apply changes</li>
+                </ol>
+
+                <h4>Step 4: Arrange Your Layout</h4>
+                <ul>
+                    <li><strong>Move a region:</strong> Click and drag the region header (⋮⋮ icon) to a new position</li>
+                    <li><strong>Resize a region:</strong> Drag any of the purple resize handles on the corners or edges</li>
+                    <li><strong>Collapse a region:</strong> Click the collapse button (▼) in the region header</li>
+                    <li><strong>Lock a region:</strong> Click the lock button (🔒) to prevent accidental changes</li>
+                </ul>
+
+                <h3 id="essential-actions">Essential Actions</h3>
+                
+                <h4>Adding Regions</h4>
+                <p><strong>Method 1: Dashboard Settings Panel</strong></p>
+                <ol>
+                    <li>Click the purple Settings button (⚙️) in top-left</li>
+                    <li>Click "Add Region"</li>
+                    <li>Select a region type</li>
+                </ol>
+
+                <p><strong>Method 2: Keyboard Shortcut</strong></p>
+                <ul>
+                    <li>Press <code>Ctrl+K</code> (or <code>Cmd+K</code> on Mac) to open Command Palette</li>
+                    <li>Type "add region" and select the command</li>
+                    <li>Choose region type</li>
+                </ul>
+
+                <p><strong>Method 3: Quick Number Keys</strong></p>
+                <ul>
+                    <li>Press number keys <code>1-9</code> to quickly add common region types (when not typing in input fields)</li>
+                </ul>
+
+                <h4>Moving Regions</h4>
+                <p><strong>Drag and Drop:</strong></p>
+                <ol>
+                    <li>Hover over a region header</li>
+                    <li>Click and hold the drag handle (⋮⋮ icon) that appears</li>
+                    <li>Drag to the desired grid position</li>
+                    <li>Release to drop</li>
+                </ol>
+
+                <div class="info">
+                    <strong>What happens:</strong> Other regions automatically shift to make room. The grid layout prevents overlapping. Changes save automatically.
+                </div>
+
+                <h4>Resizing Regions</h4>
+                <ol>
+                    <li>Hover over a region to see resize handles</li>
+                    <li><strong>Corner handles</strong> (purple circles): Resize both width and height</li>
+                    <li><strong>Edge handles</strong> (purple rectangles): Resize width (left/right) or height (top/bottom)</li>
+                    <li>Drag the handle to the desired size</li>
+                    <li>Release to apply</li>
+                </ol>
+
+                <div class="warning">
+                    <strong>Constraints:</strong> Regions have minimum size limits. The grid enforces consistent spacing. Very large regions may require scrolling the canvas.
+                </div>
+
+                <h4>Deleting Regions</h4>
+                <ol>
+                    <li>Click the <strong>More Options</strong> button (⋮) in the region header</li>
+                    <li>Select <strong>"Delete"</strong> from the context menu</li>
+                    <li>Confirm the deletion</li>
+                </ol>
+
+                <div class="info">
+                    <strong>Note:</strong> Regions are soft-deleted and can be restored from version history.
+                </div>
+            </section>
+
+            <div class="section-divider"></div>
+
+            <!-- Part 2: Core Features -->
+            <section id="core-features">
+                <h2>Part 2: Core Features</h2>
+
+                <h3 id="adding-regions">Adding Regions</h3>
+                
+                <h4>Available Region Types</h4>
+                <p>When adding a region, you can choose from:</p>
+                <ul>
+                    <li><strong>Scheduling</strong> - Calendar and schedule management</li>
+                    <li><strong>Reports</strong> - Report generation and viewing</li>
+                    <li><strong>Customer Search</strong> - Search and filter customers</li>
+                    <li><strong>Settings</strong> - Configuration options</li>
+                    <li><strong>Quick Actions</strong> - Common task shortcuts</li>
+                    <li><strong>Analytics</strong> - Data visualization and metrics</li>
+                    <li><strong>Team Overview</strong> - Team performance and status</li>
+                    <li><strong>Financial Summary</strong> - Financial data and summaries</li>
+                    <li><strong>Custom</strong> - Custom widget configuration</li>
+                </ul>
+
+                <h3 id="resizing-regions">Resizing Regions</h3>
+                
+                <h4>Resize Handles</h4>
+                <p>Regions have <strong>8 resize handles</strong>:</p>
+                <ul>
+                    <li><strong>4 corner handles</strong> (16px × 16px purple circles): Resize both dimensions</li>
+                    <li><strong>4 edge handles</strong> (rectangular purple bars): Resize one dimension
+                        <ul>
+                            <li>Top/Bottom edges: Resize height</li>
+                            <li>Left/Right edges: Resize width</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h4>Resize Behavior</h4>
+                <ul>
+                    <li><strong>Minimum Size:</strong> Each region has a minimum width and height</li>
+                    <li><strong>Grid Snapping:</strong> Resizing snaps to grid increments</li>
+                    <li><strong>Visual Feedback:</strong> The handle highlights on hover (opacity 0.8)</li>
+                    <li><strong>Smooth Animation:</strong> Resize operations are animated</li>
+                </ul>
+
+                <h3 id="moving-regions">Moving/Reordering Regions</h3>
+                
+                <h4>Drag and Drop</h4>
+                <ol>
+                    <li><strong>Hover</strong> over a region header to reveal the drag handle</li>
+                    <li><strong>Click and hold</strong> the drag handle (⋮⋮ icon)</li>
+                    <li><strong>Drag</strong> to the desired grid position</li>
+                    <li><strong>Release</strong> to drop</li>
+                </ol>
+
+                <div class="info">
+                    <strong>Visual Feedback:</strong> The region becomes semi-transparent while dragging. A preview shows where it will be placed. Other regions shift automatically.
+                </div>
+
+                <h4>Swap Behavior</h4>
+                <ul>
+                    <li>If you drag a region onto another region's position, they <strong>swap positions</strong></li>
+                    <li>This is enabled by default</li>
+                    <li>Prevents accidental overlapping</li>
+                </ul>
+
+                <h3 id="collapsing-regions">Collapsing/Minimizing Regions</h3>
+                
+                <h4>Collapse a Region</h4>
+                <ol>
+                    <li>Click the <strong>collapse button</strong> (▼) in the region header</li>
+                    <li>The region collapses to show only its header</li>
+                    <li>The collapsed region is moved off-screen (to column 1000)</li>
+                    <li>A minimized version appears in the <strong>Minimized Region Dock</strong> (top-right corner)</li>
+                </ol>
+
+                <h4>Minimized Region Dock</h4>
+                <p><strong>Location:</strong> Fixed position at top-right of screen</p>
+                <ul>
+                    <li>Shows all collapsed regions as compact cards</li>
+                    <li>Each card displays the region type name</li>
+                    <li>Click the <strong>restore button</strong> (⛶) to restore a region</li>
+                    <li>Horizontal scrolling if many regions are minimized</li>
+                    <li>Auto-hides when no regions are minimized</li>
+                </ul>
+
+                <h3 id="locking-regions">Locking Regions</h3>
+                
+                <h4>Lock a Region</h4>
+                <ol>
+                    <li>Click the <strong>lock button</strong> (🔒) in the region header</li>
+                    <li>The button changes to a locked state (🔒)</li>
+                    <li>The region border changes to red</li>
+                    <li>The region background becomes semi-transparent red</li>
+                </ol>
+
+                <h4>Locked Region Behavior</h4>
+                <ul>
+                    <li><strong>Cannot be moved</strong> - Drag handle is disabled</li>
+                    <li><strong>Cannot be resized</strong> - Resize handles are hidden</li>
+                    <li><strong>Cannot be deleted</strong> - Delete option is disabled</li>
+                    <li><strong>Can be viewed</strong> - Content remains visible</li>
+                    <li><strong>Can be unlocked</strong> - Click lock button again</li>
+                </ul>
+
+                <h3 id="duplicating-regions">Duplicating Regions</h3>
+                
+                <h4>Duplicate a Region</h4>
+                <ol>
+                    <li>Click the <strong>More Options</strong> button (⋮) in the region header</li>
+                    <li>Select <strong>"Duplicate"</strong> from the context menu</li>
+                    <li>A new region is created with:
+                        <ul>
+                            <li>Same region type</li>
+                            <li>Same configuration</li>
+                            <li>Offset position (row+1, col+1)</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div class="success">
+                    <strong>Visual Feedback:</strong> Button shows "Duplicating..." while processing. Success toast notification appears. New region appears at offset position.
+                </div>
+
+                <h3 id="region-settings">Region Customization</h3>
+                
+                <h4>Region Settings Dialog</h4>
+                
+                <h5>Opening Settings</h5>
+                <ol>
+                    <li>Click the <strong>Settings icon</strong> (⚙️) in the region header</li>
+                    <li>The Region Settings Dialog appears as a modal overlay</li>
+                </ol>
+
+                <h5>Settings Options</h5>
+                <ul>
+                    <li><strong>Title</strong> - Text input field (max 100 characters)</li>
+                    <li><strong>Region Type</strong> - Dropdown selector with all available types</li>
+                    <li><strong>Background Color</strong> - Color picker (default: white)</li>
+                    <li><strong>Header Color</strong> - Color picker (default: gray-50)</li>
+                    <li><strong>Border Color</strong> - Color picker (default: gray-200)</li>
+                    <li><strong>Reset to Defaults</strong> - Button to reset all colors</li>
+                </ul>
+            </section>
+
+            <div class="section-divider"></div>
+
+            <!-- Part 3: Advanced Features -->
+            <section id="advanced-features">
+                <h2>Part 3: Advanced Features</h2>
+
+                <h3 id="dashboard-fab">Dashboard FAB (Floating Action Button)</h3>
+                
+                <p><strong>Location:</strong> Top-left corner</p>
+                
+                <h4>Opening the Settings Panel</h4>
+                <ol>
+                    <li>Click the purple Settings button</li>
+                    <li>Settings panel slides in from the left</li>
+                    <li>Backdrop overlay appears (10% black opacity)</li>
+                </ol>
+
+                <h4>Settings Panel Contents</h4>
+                <ul>
+                    <li><strong>Add Region Button</strong> - Opens region type selector</li>
+                    <li><strong>Collaboration Status</strong> - Shows connection status and active collaborators</li>
+                    <li><strong>Undo/Redo Controls</strong> - Revert or reapply actions</li>
+                    <li><strong>Export/Import Layout</strong> - Download or upload layout JSON files</li>
+                    <li><strong>Zoom Controls</strong> - Zoom in, out, or reset view</li>
+                    <li><strong>Reset All Button</strong> - Resets zoom/pan and loads default layout</li>
+                    <li><strong>Fullscreen Toggle</strong> - Enter or exit fullscreen mode</li>
+                </ul>
+
+                <h3 id="zoom-pan">Zoom and Pan</h3>
+                
+                <h4>Zoom Controls</h4>
+                <ul>
+                    <li><strong>Zoom In:</strong> Click "+" button in Dashboard FAB (maximum: 200%)</li>
+                    <li><strong>Zoom Out:</strong> Click "-" button in Dashboard FAB (minimum: 25%)</li>
+                    <li><strong>Reset Zoom:</strong> Click "Reset" (↻) button - returns to 100%</li>
+                </ul>
+
+                <h4>Pan Controls</h4>
+                <p><strong>Mouse Panning:</strong></p>
+                <ol>
+                    <li>Click and hold anywhere on the canvas (not on a region)</li>
+                    <li>Drag to pan the view</li>
+                    <li>Release to stop panning</li>
+                </ol>
+
+                <div class="tip">
+                    Cursor changes to "grabbing" hand. Canvas moves smoothly. Regions maintain their positions.
+                </div>
+
+                <h3 id="command-palette">Command Palette</h3>
+                
+                <p><strong>Keyboard Shortcut:</strong> <code>Ctrl+K</code> (Windows/Linux) or <code>Cmd+K</code> (Mac)</p>
+                
+                <h4>Opening the Command Palette</h4>
+                <ol>
+                    <li>Press <code>Ctrl+K</code> / <code>Cmd+K</code> from anywhere in the dashboard</li>
+                    <li>A modal overlay appears with search input</li>
+                    <li>Start typing to search commands</li>
+                </ol>
+
+                <h4>Available Commands</h4>
+                <ul>
+                    <li>Add Region</li>
+                    <li>Toggle Collaboration</li>
+                    <li>Export Layout</li>
+                    <li>Import Layout</li>
+                    <li>Reset All</li>
+                    <li>Toggle Fullscreen</li>
+                    <li>Show Keyboard Shortcuts</li>
+                    <li>And more...</li>
+                </ul>
+
+                <div class="tip">
+                    Partial matching works (e.g., "add" finds "Add Region"). Commands are categorized. Recently used commands appear first.
+                </div>
+
+                <h3 id="versioning">Versioning System</h3>
+                
+                <h4>Creating Versions</h4>
+                <p><strong>When to Create Versions:</strong></p>
+                <ul>
+                    <li>Before making major layout changes</li>
+                    <li>After completing a set of changes</li>
+                    <li>Before sharing with team</li>
+                    <li>As backup points</li>
+                </ul>
+
+                <h4>Create a Version</h4>
+                <ol>
+                    <li>Make your dashboard changes</li>
+                    <li>Open <strong>Version History</strong> (from Dashboard FAB or Command Palette)</li>
+                    <li>Click <strong>"Create Version"</strong></li>
+                    <li>Fill in version details:
+                        <ul>
+                            <li><strong>Status:</strong> Draft, Preview, or Published</li>
+                            <li><strong>Notes:</strong> Optional description</li>
+                        </ul>
+                    </li>
+                    <li>Click <strong>"Create"</strong></li>
+                </ol>
+
+                <h4>Version Statuses</h4>
+                <ul>
+                    <li><strong>Draft</strong> - Work in progress, only visible to you</li>
+                    <li><strong>Preview</strong> - Ready for review, visible to team members</li>
+                    <li><strong>Published</strong> - Active version, visible to all users with access</li>
+                </ul>
+
+                <h4>Publishing Versions</h4>
+                <ol>
+                    <li>Open Version History</li>
+                    <li>Find the version you want to publish</li>
+                    <li>Click <strong>"Publish"</strong> button</li>
+                    <li>Add publish notes (optional)</li>
+                    <li>Confirm publication</li>
+                </ol>
+
+                <div class="warning">
+                    <strong>What happens:</strong> Previous published version becomes "Archived". New version becomes active. All users see the new layout.
+                </div>
+
+                <h3 id="collaboration">Collaboration Features</h3>
+                
+                <h4>Real-Time Presence</h4>
+                <ul>
+                    <li><strong>Viewing Indicators:</strong> User avatars appear on regions being viewed</li>
+                    <li><strong>Editing Indicators:</strong> Yellow highlight on regions being edited</li>
+                    <li><strong>Connection Status:</strong> Green WiFi icon = connected, Red = disconnected</li>
+                </ul>
+
+                <h4>Region Locking (Collaboration)</h4>
+                <p><strong>How it works:</strong></p>
+                <ul>
+                    <li>When you start editing a region, a soft lock is acquired</li>
+                    <li>Other users see the lock indicator</li>
+                    <li>Lock expires after 5 minutes of inactivity</li>
+                    <li>Automatically released when you finish editing</li>
+                </ul>
+
+                <h4>Conflict Resolution</h4>
+                <p><strong>Editing Conflicts:</strong></p>
+                <ul>
+                    <li>If someone else is editing, you'll see a conflict alert</li>
+                    <li>Options: Wait for them to finish, Request to take over, Work on a different region</li>
+                    <li>Locks expire after 5 minutes automatically</li>
+                </ul>
+            </section>
+
+            <div class="section-divider"></div>
+
+            <!-- Part 4: Productivity Features -->
+            <section id="productivity">
+                <h2>Part 4: Productivity Features</h2>
+
+                <h3 id="keyboard-shortcuts">Keyboard Shortcuts</h3>
+                
+                <h4>Navigation Shortcuts</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Shortcut</th>
+                            <th>Action</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>W</code></td>
+                            <td>Navigate Up</td>
+                            <td>Move focus to region above</td>
+                        </tr>
+                        <tr>
+                            <td><code>S</code></td>
+                            <td>Navigate Down</td>
+                            <td>Move focus to region below</td>
+                        </tr>
+                        <tr>
+                            <td><code>A</code></td>
+                            <td>Navigate Left</td>
+                            <td>Move focus to region on left</td>
+                        </tr>
+                        <tr>
+                            <td><code>D</code></td>
+                            <td>Navigate Right</td>
+                            <td>Move focus to region on right</td>
+                        </tr>
+                        <tr>
+                            <td><code>Tab</code></td>
+                            <td>Next Region</td>
+                            <td>Move to next region in sequence</td>
+                        </tr>
+                        <tr>
+                            <td><code>Shift+Tab</code></td>
+                            <td>Previous Region</td>
+                            <td>Move to previous region</td>
+                        </tr>
+                        <tr>
+                            <td><code>Ctrl+K</code> / <code>Cmd+K</code></td>
+                            <td>Command Palette</td>
+                            <td>Open command palette</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Region Action Shortcuts</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Shortcut</th>
+                            <th>Action</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>Ctrl+D</code> / <code>Cmd+D</code></td>
+                            <td>Duplicate</td>
+                            <td>Duplicate selected region(s)</td>
+                        </tr>
+                        <tr>
+                            <td><code>Delete</code></td>
+                            <td>Delete</td>
+                            <td>Delete selected region(s)</td>
+                        </tr>
+                        <tr>
+                            <td><code>Ctrl+L</code> / <code>Cmd+L</code></td>
+                            <td>Lock/Unlock</td>
+                            <td>Toggle lock on selected region</td>
+                        </tr>
+                        <tr>
+                            <td><code>Ctrl+S</code> / <code>Cmd+S</code></td>
+                            <td>Settings</td>
+                            <td>Open region settings</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Quick Region Creation</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Key</th>
+                            <th>Region Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>1</code></td><td>Scheduling</td></tr>
+                        <tr><td><code>2</code></td><td>Reports</td></tr>
+                        <tr><td><code>3</code></td><td>Customer Search</td></tr>
+                        <tr><td><code>4</code></td><td>Settings</td></tr>
+                        <tr><td><code>5</code></td><td>Quick Actions</td></tr>
+                        <tr><td><code>6</code></td><td>Analytics</td></tr>
+                        <tr><td><code>7</code></td><td>Team Overview</td></tr>
+                        <tr><td><code>8</code></td><td>Financial Summary</td></tr>
+                        <tr><td><code>9</code></td><td>Custom</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="warning">
+                    <strong>Note:</strong> Number keys only work when not typing in input fields.
+                </div>
+
+                <h3 id="undo-redo">Undo/Redo System</h3>
+                
+                <h4>How It Works</h4>
+                <ul>
+                    <li>Tracks up to 50 state changes</li>
+                    <li>Saves state after each action</li>
+                    <li>Debounced (500ms) to avoid excessive saves</li>
+                    <li>Automatically clears old history when limit reached</li>
+                </ul>
+
+                <h4>Using Undo/Redo</h4>
+                <p><strong>Undo:</strong> Press <code>Ctrl+Z</code> (Windows/Linux) or <code>Cmd+Z</code> (Mac)</p>
+                <p><strong>Redo:</strong> Press <code>Ctrl+Shift+Z</code> (Windows/Linux) or <code>Cmd+Shift+Z</code> (Mac)</p>
+
+                <div class="info">
+                    <strong>What Can Be Undone:</strong> Add/delete/move/resize regions, change settings, collapse/expand, lock/unlock. Version operations and import/export cannot be undone.
+                </div>
+
+                <h3 id="export-import">Export/Import Layouts</h3>
+                
+                <h4>Export Your Dashboard</h4>
+                <ol>
+                    <li>Open <strong>Dashboard FAB</strong> (top-left)</li>
+                    <li>In settings panel, find "Layout" section</li>
+                    <li>Click <strong>"Export"</strong> button</li>
+                    <li>JSON file downloads automatically</li>
+                    <li>File named: <code>dashboard-layout-YYYY-MM-DD.json</code></li>
+                </ol>
+
+                <h4>Import a Dashboard</h4>
+                <ol>
+                    <li>Open <strong>Dashboard FAB</strong></li>
+                    <li>In settings panel, find "Layout" section</li>
+                    <li>Click <strong>"Import"</strong> button</li>
+                    <li>File picker opens</li>
+                    <li>Select JSON file (`.json` extension)</li>
+                    <li>File is validated and imported</li>
+                </ol>
+
+                <div class="warning">
+                    <strong>Best Practices:</strong> Export current layout before importing. Validate JSON file before importing. Test import in preview environment first. Keep backup of working layouts.
+                </div>
+            </section>
+
+            <div class="section-divider"></div>
+
+            <!-- Part 6: Troubleshooting -->
+            <section id="troubleshooting">
+                <h2>Part 6: Troubleshooting & Best Practices</h2>
+
+                <h3 id="troubleshooting">Common Issues</h3>
+                
+                <h4>Region Not Loading</h4>
+                <p><strong>Symptoms:</strong> Region appears but content is blank, loading spinner never completes, error message displayed.</p>
+                
+                <p><strong>Solutions:</strong></p>
+                <ol>
+                    <li><strong>Check Internet Connection</strong> - Verify network connectivity</li>
+                    <li><strong>Refresh the Page</strong> - Press <code>F5</code> or <code>Ctrl+R</code></li>
+                    <li><strong>Check Browser Console</strong> - Open Developer Tools (<code>F12</code>) and check for errors</li>
+                    <li><strong>Check Region Configuration</strong> - Verify widget type is set correctly</li>
+                    <li><strong>Check Permissions</strong> - Verify you have read access to the region</li>
+                </ol>
+
+                <h4>Can't Edit Region</h4>
+                <p><strong>Symptoms:</strong> Buttons are disabled, can't move or resize, settings dialog won't open.</p>
+                
+                <p><strong>Solutions:</strong></p>
+                <ol>
+                    <li><strong>Check Lock Status</strong> - Look for lock icon (🔒) in header</li>
+                    <li><strong>Check Permissions</strong> - Verify you have edit permissions</li>
+                    <li><strong>Check Collaboration Status</strong> - See if someone else is editing</li>
+                    <li><strong>Check Connection</strong> - Verify collaboration is connected</li>
+                </ol>
+
+                <h4>Performance Issues</h4>
+                <p><strong>Symptoms:</strong> Slow region loading, laggy interactions, high CPU usage.</p>
+                
+                <p><strong>Solutions:</strong></p>
+                <ol>
+                    <li><strong>Lazy Loading</strong> - Regions load as you scroll</li>
+                    <li><strong>Reduce Region Count</strong> - Too many regions can slow performance</li>
+                    <li><strong>Check Widget Performance</strong> - Some widgets are heavier than others</li>
+                    <li><strong>Browser Optimization</strong> - Close other tabs, clear cache, update browser</li>
+                </ol>
+
+                <h3 id="best-practices">Best Practices</h3>
+                
+                <h4>Layout Organization</h4>
+                <ul>
+                    <li><strong>Group Related Regions</strong> - Place related regions together</li>
+                    <li><strong>Use Consistent Sizing</strong> - Similar regions should be similar sizes</li>
+                    <li><strong>Leave Breathing Room</strong> - Don't pack regions too tightly</li>
+                    <li><strong>Prioritize Important Regions</strong> - Place critical regions at top-left</li>
+                </ul>
+
+                <h4>Performance Optimization</h4>
+                <ul>
+                    <li><strong>Limit Region Count</strong> - Aim for 10-15 regions maximum</li>
+                    <li><strong>Lazy Loading</strong> - Regions load as needed</li>
+                    <li><strong>Optimize Widgets</strong> - Use lightweight widgets when possible</li>
+                    <li><strong>Monitor Performance</strong> - Check Analytics dashboard</li>
+                </ul>
+
+                <h4>Collaboration Etiquette</h4>
+                <ul>
+                    <li><strong>Communicate Changes</strong> - Let team know before major changes</li>
+                    <li><strong>Respect Locks</strong> - Don't force unlock regions</li>
+                    <li><strong>Use Versions</strong> - Create versions before major changes</li>
+                    <li><strong>Check Presence</strong> - Look for presence indicators</li>
+                </ul>
+            </section>
+
+            <div class="section-divider"></div>
+
+            <!-- Part 7: Reference -->
+            <section id="reference">
+                <h2>Part 7: Reference</h2>
+
+                <h3 id="reference">Region Types Reference</h3>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Key</th>
+                            <th>Description</th>
+                            <th>Use Cases</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Scheduling</td>
+                            <td><code>scheduling</code></td>
+                            <td>Calendar and schedule management</td>
+                            <td>Daily schedules, appointments, availability</td>
+                        </tr>
+                        <tr>
+                            <td>Reports</td>
+                            <td><code>reports</code></td>
+                            <td>Report generation and viewing</td>
+                            <td>Custom reports, templates, exports</td>
+                        </tr>
+                        <tr>
+                            <td>Customer Search</td>
+                            <td><code>customer-search</code></td>
+                            <td>Search and filter customers</td>
+                            <td>Quick lookup, advanced search, history</td>
+                        </tr>
+                        <tr>
+                            <td>Settings</td>
+                            <td><code>settings</code></td>
+                            <td>Configuration options</td>
+                            <td>App settings, preferences, system config</td>
+                        </tr>
+                        <tr>
+                            <td>Quick Actions</td>
+                            <td><code>quick-actions</code></td>
+                            <td>Common task shortcuts</td>
+                            <td>One-click actions, workflows</td>
+                        </tr>
+                        <tr>
+                            <td>Analytics</td>
+                            <td><code>analytics</code></td>
+                            <td>Data visualization and metrics</td>
+                            <td>Dashboards, KPIs, trends, charts</td>
+                        </tr>
+                        <tr>
+                            <td>Team Overview</td>
+                            <td><code>team-overview</code></td>
+                            <td>Team performance and status</td>
+                            <td>Member status, metrics, workload</td>
+                        </tr>
+                        <tr>
+                            <td>Financial Summary</td>
+                            <td><code>financial-summary</code></td>
+                            <td>Financial data and summaries</td>
+                            <td>Revenue, reports, budgets</td>
+                        </tr>
+                        <tr>
+                            <td>Custom</td>
+                            <td><code>custom</code></td>
+                            <td>Custom widget configuration</td>
+                            <td>Third-party widgets, integrations</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Complete Keyboard Shortcuts Reference</h3>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Shortcut</th>
+                            <th>Action</th>
+                            <th>Context</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>W</code></td>
+                            <td>Navigate Up</td>
+                            <td>Region focused</td>
+                        </tr>
+                        <tr>
+                            <td><code>S</code></td>
+                            <td>Navigate Down</td>
+                            <td>Region focused</td>
+                        </tr>
+                        <tr>
+                            <td><code>A</code></td>
+                            <td>Navigate Left</td>
+                            <td>Region focused</td>
+                        </tr>
+                        <tr>
+                            <td><code>D</code></td>
+                            <td>Navigate Right</td>
+                            <td>Region focused</td>
+                        </tr>
+                        <tr>
+                            <td><code>Tab</code></td>
+                            <td>Next Region</td>
+                            <td>Anywhere</td>
+                        </tr>
+                        <tr>
+                            <td><code>Shift+Tab</code></td>
+                            <td>Previous Region</td>
+                            <td>Anywhere</td>
+                        </tr>
+                        <tr>
+                            <td><code>Ctrl+K</code> / <code>Cmd+K</code></td>
+                            <td>Command Palette</td>
+                            <td>Anywhere</td>
+                        </tr>
+                        <tr>
+                            <td><code>Ctrl+Z</code> / <code>Cmd+Z</code></td>
+                            <td>Undo</td>
+                            <td>Anywhere</td>
+                        </tr>
+                        <tr>
+                            <td><code>Ctrl+Shift+Z</code> / <code>Cmd+Shift+Z</code></td>
+                            <td>Redo</td>
+                            <td>Anywhere</td>
+                        </tr>
+                        <tr>
+                            <td><code>Ctrl+D</code> / <code>Cmd+D</code></td>
+                            <td>Duplicate</td>
+                            <td>Region selected</td>
+                        </tr>
+                        <tr>
+                            <td><code>Delete</code></td>
+                            <td>Delete</td>
+                            <td>Region selected</td>
+                        </tr>
+                        <tr>
+                            <td><code>F11</code></td>
+                            <td>Fullscreen</td>
+                            <td>Anywhere</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <div class="section-divider"></div>
+
+            <!-- Support Section -->
+            <section id="support">
+                <h2>Support & Additional Resources</h2>
+                
+                <h3>Getting Help</h3>
+                <ul>
+                    <li><strong>Documentation:</strong> Check this guide and architecture docs</li>
+                    <li><strong>System Administrator:</strong> Contact for permissions and configuration</li>
+                    <li><strong>Audit Logs:</strong> Review change history in admin panel</li>
+                    <li><strong>Error Logs:</strong> Check browser console (F12) for errors</li>
+                </ul>
+
+                <h3>Related Documentation</h3>
+                <ul>
+                    <li><a href="../DASHBOARD_REGIONS.md">Architecture Documentation</a> - Technical details</li>
+                    <li><a href="../developer/WIDGET_SDK.md">Widget SDK Guide</a> - Creating custom widgets</li>
+                    <li><a href="../security/WIDGET_SECURITY.md">Security Guide</a> - Security best practices</li>
+                </ul>
+
+                <div class="info">
+                    <strong>Last Updated:</strong> 2024-01-15<br>
+                    <strong>Version:</strong> 2.0<br>
+                    <strong>Author:</strong> VeroField Documentation Team
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Back to Top Button -->
+    <a href="#getting-started" class="back-to-top" title="Back to top">↑</a>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Highlight active navigation link
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.sidebar nav a[href^="#"]');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+

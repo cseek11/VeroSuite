@@ -500,23 +500,45 @@ interface DialogTitleProps {
 }
 
 export const DialogTitle: React.FC<DialogTitleProps> = ({ children, className }) => {
+    return (
+      <h2 className={cn('text-lg font-semibold text-gray-900', className)}>     
+        {children}
+      </h2>
+    );
+  };
+
+interface DialogFooterProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const DialogFooter: React.FC<DialogFooterProps> = ({ children, className }) => {
   return (
-    <h2 className={cn('text-lg font-semibold text-gray-900', className)}>
+    <div className={cn('mt-4 pt-4 border-t border-gray-200 flex justify-end gap-2', className)}>
       {children}
-    </h2>
+    </div>
   );
 };
 
 interface DialogTriggerProps {
-  children: React.ReactNode;
-  asChild?: boolean;
-}
+    children: React.ReactNode;
+    asChild?: boolean;
+  }
 
 export const DialogTrigger: React.FC<DialogTriggerProps> = ({ children, asChild }) => {
-  return <>{children}</>;
-};
+    return <>{children}</>;
+  };
 
 // ===== SELECT COMPOUND COMPONENTS =====
+interface SelectContextType {
+  value?: string;
+  onValueChange?: (value: string) => void;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}
+
+const SelectContext = React.createContext<SelectContextType | null>(null);
+
 interface SelectCompoundProps {
   value?: string;
   onValueChange?: (value: string) => void;
@@ -524,7 +546,30 @@ interface SelectCompoundProps {
 }
 
 export const Select: React.FC<SelectCompoundProps> = ({ value, onValueChange, children }) => {
-  return <>{children}</>;
+  const [open, setOpen] = React.useState(false);
+  
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    if (!open) return;
+    
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('[data-select-container]')) {
+        setOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
+  
+  return (
+    <SelectContext.Provider value={{ value, onValueChange, open, setOpen }}>
+      <div className="relative" data-select-container>
+        {children}
+      </div>
+    </SelectContext.Provider>
+  );
 };
 
 interface SelectTriggerProps {
@@ -533,9 +578,29 @@ interface SelectTriggerProps {
 }
 
 export const SelectTrigger: React.FC<SelectTriggerProps> = ({ children, className }) => {
+  const context = React.useContext(SelectContext);
+  
+  if (!context) {
+    throw new Error('SelectTrigger must be used within a Select component');
+  }
+  
   return (
-    <button className={cn('flex items-center justify-between w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50', className)}>
+    <button 
+      type="button"
+      onClick={() => context.setOpen(!context.open)}
+      className={cn('flex items-center justify-between w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500', className)}
+      aria-expanded={context.open}
+      aria-haspopup="listbox"
+    >
       {children}
+      <svg 
+        className={cn('w-4 h-4 transition-transform', context.open && 'rotate-180')}
+        fill="none" 
+        stroke="currentColor" 
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+      </svg>
     </button>
   );
 };
@@ -546,8 +611,21 @@ interface SelectContentProps {
 }
 
 export const SelectContent: React.FC<SelectContentProps> = ({ children, className }) => {
+  const context = React.useContext(SelectContext);
+  
+  if (!context) {
+    throw new Error('SelectContent must be used within a Select component');
+  }
+  
+  if (!context.open) {
+    return null;
+  }
+  
   return (
-    <div className={cn('absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg', className)}>
+    <div 
+      className={cn('absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto', className)}
+      role="listbox"
+    >
       {children}
     </div>
   );
@@ -560,8 +638,30 @@ interface SelectItemProps {
 }
 
 export const SelectItem: React.FC<SelectItemProps> = ({ value, children, className }) => {
+  const context = React.useContext(SelectContext);
+  
+  if (!context) {
+    throw new Error('SelectItem must be used within a Select component');
+  }
+  
+  const isSelected = context.value === value;
+  
+  const handleClick = () => {
+    context.onValueChange?.(value);
+    context.setOpen(false);
+  };
+  
   return (
-    <div className={cn('px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer', className)}>
+    <div 
+      onClick={handleClick}
+      className={cn(
+        'px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer',
+        isSelected && 'bg-blue-50 text-blue-600',
+        className
+      )}
+      role="option"
+      aria-selected={isSelected}
+    >
       {children}
     </div>
   );
@@ -569,10 +669,23 @@ export const SelectItem: React.FC<SelectItemProps> = ({ value, children, classNa
 
 interface SelectValueProps {
   placeholder?: string;
+  children?: React.ReactNode;
 }
 
-export const SelectValue: React.FC<SelectValueProps> = ({ placeholder }) => {
-  return <span>{placeholder}</span>;
+export const SelectValue: React.FC<SelectValueProps> = ({ placeholder, children }) => {
+  const context = React.useContext(SelectContext);
+  
+  if (!context) {
+    throw new Error('SelectValue must be used within a Select component');
+  }
+  
+  // If children are provided, use them (for custom display)
+  if (children) {
+    return <>{children}</>;
+  }
+  
+  // Otherwise show the selected value or placeholder
+  return <span>{context.value || placeholder || 'Select...'}</span>;
 };
 
 // ===== LOADING COMPONENTS =====

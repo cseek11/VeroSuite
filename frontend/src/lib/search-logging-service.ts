@@ -4,7 +4,7 @@
 // Service for logging search queries and analytics
 
 import { supabase } from './supabase-client';
-import { useAuthStore } from '@/stores/auth';
+import { logger } from '@/utils/logger';
 
 // Types for search logging
 export interface SearchLogEntry {
@@ -100,14 +100,16 @@ class SearchLoggingService {
         .single();
 
       if (error) {
-        console.error('Failed to log search:', error);
+        logger.error('Failed to log search', error, 'search-logging-service');
         throw error;
       }
 
-      console.log('✅ Search logged:', { query: params.query, logId: logData.id });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Search logged', { query: params.query, logId: logData.id }, 'search-logging-service');
+      }
       return logData.id;
-    } catch (error) {
-      console.error('Error logging search:', error);
+    } catch (error: unknown) {
+      logger.error('Error logging search', error, 'search-logging-service');
       throw error;
     }
   };
@@ -123,13 +125,15 @@ class SearchLoggingService {
         .eq('id', logId);
 
       if (error) {
-        console.error('Failed to log click:', error);
+        logger.error('Failed to log click', error, 'search-logging-service');
         throw error;
       }
 
-      console.log('✅ Click logged:', { logId, recordId });
-    } catch (error) {
-      console.error('Error logging click:', error);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Click logged', { logId, recordId }, 'search-logging-service');
+      }
+    } catch (error: unknown) {
+      logger.error('Error logging click', error, 'search-logging-service');
       throw error;
     }
   };
@@ -150,7 +154,7 @@ class SearchLoggingService {
         .gte('created_at', cutoffDate);
 
       if (statsError) {
-        console.error('Failed to get search stats:', statsError);
+        logger.error('Failed to get search stats', statsError, 'search-logging-service');
         throw statsError;
       }
 
@@ -162,7 +166,7 @@ class SearchLoggingService {
         .gte('created_at', cutoffDate);
 
       if (popularError) {
-        console.error('Failed to get popular queries:', popularError);
+        logger.error('Failed to get popular queries', popularError, 'search-logging-service');
         throw popularError;
       }
 
@@ -201,8 +205,8 @@ class SearchLoggingService {
         zero_result_queries: zeroResultQueries,
         click_through_rate: clickThroughRate
       };
-    } catch (error) {
-      console.error('Error getting search analytics:', error);
+    } catch (error: unknown) {
+      logger.error('Error getting search analytics', error, 'search-logging-service');
       throw error;
     }
   };
@@ -224,15 +228,15 @@ class SearchLoggingService {
         .limit(limit);
 
       if (error) {
-        console.error('Failed to get recent searches:', error);
+        logger.error('Failed to get recent searches', error, 'search-logging-service');
         throw error;
       }
 
       // Return unique queries
       const uniqueQueries = [...new Set(data.map(item => item.query))];
       return uniqueQueries;
-    } catch (error) {
-      console.error('Error getting recent searches:', error);
+    } catch (error: unknown) {
+      logger.error('Error getting recent searches', error, 'search-logging-service');
       return [];
     }
   };
@@ -251,7 +255,7 @@ class SearchLoggingService {
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()); // Last 30 days
 
       if (error) {
-        console.error('Failed to get popular searches:', error);
+        logger.error('Failed to get popular searches', error, 'search-logging-service');
         throw error;
       }
 
@@ -266,8 +270,8 @@ class SearchLoggingService {
         .map(([query, count]) => ({ query, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, limit);
-    } catch (error) {
-      console.error('Error getting popular searches:', error);
+    } catch (error: unknown) {
+      logger.error('Error getting popular searches', error, 'search-logging-service');
       return [];
     }
   };
@@ -286,13 +290,13 @@ class SearchLoggingService {
         .order('confidence_score', { ascending: false });
 
       if (error) {
-        console.error('Failed to get search corrections:', error);
+        logger.error('Failed to get search corrections', error, 'search-logging-service');
         throw error;
       }
 
       return data || [];
-    } catch (error) {
-      console.error('Error getting search corrections:', error);
+    } catch (error: unknown) {
+      logger.error('Error getting search corrections', error, 'search-logging-service');
       return [];
     }
   };
@@ -351,9 +355,11 @@ class SearchLoggingService {
         }
       }
 
-      console.log('✅ Search correction logged:', params);
-    } catch (error) {
-      console.error('Error adding search correction:', error);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Search correction logged', params, 'search-logging-service');
+      }
+    } catch (error: unknown) {
+      logger.error('Error adding search correction', error, 'search-logging-service');
       throw error;
     }
   };

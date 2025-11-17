@@ -12,25 +12,19 @@ import {
   Search, 
   Filter, 
   Plus, 
-  MoreVertical, 
-  Calendar, 
-  User, 
-  Clock,
-  DollarSign,
+  Calendar,
   ChevronDown,
   ChevronUp,
   Eye,
   Edit,
   Trash2,
-  CheckCircle,
-  AlertCircle,
-  XCircle,
-  Play
+  AlertCircle
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { logger } from '@/utils/logger';
 
 interface WorkOrdersListProps {
   onCreateWorkOrder?: () => void;
@@ -301,7 +295,7 @@ export default function WorkOrdersList({
           <WorkOrderStatusManager
             workOrderIds={selectedWorkOrders}
             onBulkStatusChange={(workOrderIds, newStatus) => {
-              console.log('Bulk status change:', workOrderIds, newStatus);
+              logger.debug('Bulk status change', { workOrderIds, newStatus }, 'WorkOrdersList');
               setSelectedWorkOrders([]);
             }}
             mode="bulk"

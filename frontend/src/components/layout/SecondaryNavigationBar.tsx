@@ -1,5 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { usePageCardContext } from '@/contexts/PageCardContext';
+import { useAuthStore } from '@/stores/auth';
+import { logger } from '@/utils/logger';
 import { 
   Home,
   Users,
@@ -24,18 +27,11 @@ import {
   Archive,
   Upload,
   Download,
-  Eye,
-  Edit,
-  Trash2,
-  Copy,
-  Share2,
   Filter,
   RefreshCw,
   BookOpen,
   HelpCircle,
   ChevronDown,
-  Grid,
-  Layout,
   User,
   Mail
 } from 'lucide-react';
@@ -69,6 +65,188 @@ export default function SecondaryNavigationBar({ className = '' }: SecondaryNavi
   const navRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuthStore();
+  
+  // Try to get page card context, but don't fail if not available
+  let pageCardContext;
+  try {
+    pageCardContext = usePageCardContext();
+  } catch (error) {
+    // Page card context not available, use regular navigation
+    pageCardContext = null;
+    logger.debug('Page card context not available in navigation', { error: error instanceof Error ? error.message : String(error) }, 'SecondaryNavigationBar');
+  }
+
+  // Role-based access control helper - DENY BY DEFAULT
+  const hasAccess = (itemId: string): boolean => {
+    if (!user) return false;
+    
+    const userRoles = user.roles || [];
+    const userPermissions = user.permissions || [];
+    
+    // Admin has access to everything
+    if (userRoles.includes('admin')) {
+      return true;
+    }
+
+    // Comprehensive access rules - ALL navigation items must be explicitly defined
+    const accessRules: Record<string, { roles?: string[]; permissions?: string[]; allUsers?: boolean }> = {
+      // ===== DASHBOARD - All authenticated users =====
+      'main-dashboard': { allUsers: true },
+      'analytics-overview': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['reports:view'] },
+      'performance-metrics': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['reports:view'] },
+      
+      // ===== CUSTOMERS - All users can view, admin/owner/dispatcher can create/edit =====
+      'all-customers': { allUsers: true },
+      'add-customer': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['customers:create'] },
+      'search-customers': { allUsers: true },
+      'customer-analytics': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['reports:view'] },
+      'customer-map': { allUsers: true },
+      'customer-segments': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['customers:view'] },
+      'import-customers': { roles: ['admin', 'owner'], permissions: ['customers:import'] },
+      'export-customers': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['customers:export'] },
+      
+      // ===== WORK ORDERS - All users can view, admin/owner/dispatcher can create/edit =====
+      'all-work-orders': { allUsers: true },
+      'create-work-order': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['jobs:create'] },
+      'emergency-job': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['jobs:create'] },
+      'job-templates': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['jobs:view'] },
+      'recurring-jobs': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['jobs:view'] },
+      'job-history': { allUsers: true },
+      'agreements': { allUsers: true },
+      'create-agreement': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['jobs:create'] },
+      
+      // ===== SCHEDULING - admin/owner/dispatcher (full), technician (view only) =====
+      'scheduler': { roles: ['admin', 'owner', 'dispatcher', 'technician'], permissions: ['jobs:view'] },
+      'todays-schedule': { roles: ['admin', 'owner', 'dispatcher', 'technician'], permissions: ['jobs:view'] },
+      'weekly-view': { roles: ['admin', 'owner', 'dispatcher', 'technician'], permissions: ['jobs:view'] },
+      'route-optimization': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['jobs:assign'] },
+      'technician-availability': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['technicians:view'] },
+      'emergency-dispatch': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['jobs:assign'] },
+      'calendar-settings': { roles: ['admin', 'owner'], permissions: ['settings:update'] },
+      
+      // ===== TEAM - admin/owner/dispatcher only =====
+      'all-technicians': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['technicians:view'] },
+      'add-technician': { roles: ['admin', 'owner'], permissions: ['technicians:manage'] },
+      'technician-profiles': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['technicians:view'] },
+      'availability-management': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['technicians:view'] },
+      'performance-reports': { roles: ['admin', 'owner'], permissions: ['reports:generate'] },
+      'training-records': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['technicians:view'] },
+      'payroll-integration': { roles: ['admin', 'owner'], permissions: ['financial:view'] },
+      
+      // ===== FINANCIAL - admin/owner only =====
+      'finance-overview': { roles: ['admin', 'owner'], permissions: ['financial:view'] },
+      'billing-management': { roles: ['admin', 'owner'], permissions: ['invoices:view'] },
+      'create-invoice': { roles: ['admin', 'owner'], permissions: ['invoices:create'] },
+      'process-payment': { roles: ['admin', 'owner'], permissions: ['invoices:update'] },
+      'payment-history': { roles: ['admin', 'owner'], permissions: ['invoices:view'] },
+      'financial-reports': { roles: ['admin', 'owner'], permissions: ['reports:generate'] },
+      'tax-reports': { roles: ['admin', 'owner'], permissions: ['reports:generate'] },
+      'profit-analysis': { roles: ['admin', 'owner'], permissions: ['reports:generate'] },
+      
+      // ===== COMMUNICATIONS - All authenticated users =====
+      'messages': { allUsers: true },
+      'email-campaigns': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['communications:manage'] },
+      'sms-campaigns': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['communications:manage'] },
+      'templates': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['communications:manage'] },
+      'automation': { roles: ['admin', 'owner'], permissions: ['settings:update'] },
+      'communication-history': { allUsers: true },
+      
+      // ===== REPORTS - admin/owner/dispatcher only =====
+      'all-reports': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['reports:view'] },
+      'business-analytics': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['reports:view'] },
+      'customer-reports': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['reports:view'] },
+      'technician-reports': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['reports:view'] },
+      'service-reports': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['reports:view'] },
+      'custom-reports': { roles: ['admin', 'owner'], permissions: ['reports:generate'] },
+      'scheduled-reports': { roles: ['admin', 'owner'], permissions: ['reports:generate'] },
+      'export-data': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['reports:export'] },
+      
+      // ===== TOOLS =====
+      'global-search': { allUsers: true },
+      'knowledge-base': { allUsers: true }, // All users
+      'file-uploads': { allUsers: true }, // All users
+      'system-settings': { roles: ['admin', 'owner'], permissions: ['settings:view'] },
+      'user-management': { roles: ['admin', 'owner'], permissions: ['users:manage'] },
+      'company-settings': { roles: ['admin', 'owner'], permissions: ['settings:update'] },
+      'help-support': { allUsers: true }, // All users
+      'keyboard-shortcuts': { allUsers: true }, // All users (UI feature)
+    };
+
+    const rule = accessRules[itemId];
+    
+    // DENY BY DEFAULT - if no rule is defined, deny access
+    if (!rule) {
+      logger.warn('Navigation item has no access rule defined', { itemId }, 'SecondaryNavigationBar');
+      return false;
+    }
+
+    // If marked as accessible to all users, allow access
+    if (rule.allUsers === true) {
+      return true;
+    }
+
+    // Check if user has required role OR permission
+    // If both roles and permissions are specified, user needs EITHER one (not both)
+    let hasRequiredRole = false;
+    let hasRequiredPermission = false;
+
+    // Check roles
+    if (rule.roles && rule.roles.length > 0) {
+      hasRequiredRole = rule.roles.some(role => userRoles.includes(role));
+    }
+
+    // Check permissions (with wildcard support)
+    if (rule.permissions && rule.permissions.length > 0) {
+      hasRequiredPermission = rule.permissions.some(permission => {
+        if (userPermissions.includes(permission)) return true;
+        const [resource] = permission.split(':');
+        if (userPermissions.includes(`${resource}:*`)) return true;
+        if (userPermissions.includes('*:*')) return true;
+        return false;
+      });
+    }
+
+    // If both roles and permissions are specified, user needs EITHER
+    if (rule.roles && rule.roles.length > 0 && rule.permissions && rule.permissions.length > 0) {
+      const hasAccess = hasRequiredRole || hasRequiredPermission;
+      if (!hasAccess && process.env.NODE_ENV === 'development') {
+        logger.debug('Access check failed (role OR permission required)', {
+          itemId,
+          requiredRoles: rule.roles,
+          requiredPermissions: rule.permissions,
+          userRoles,
+          userPermissions,
+          hasRequiredRole,
+          hasRequiredPermission
+        }, 'SecondaryNavigationBar');
+      }
+      return hasAccess;
+    }
+
+    // If only roles are specified, user must have the role
+    if (rule.roles && rule.roles.length > 0) {
+      if (!hasRequiredRole) return false;
+    }
+
+    // If only permissions are specified, user must have the permission
+    if (rule.permissions && rule.permissions.length > 0) {
+      if (!hasRequiredPermission) {
+        // Debug logging for permission issues
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Permission check failed', {
+            itemId,
+            requiredPermissions: rule.permissions,
+            userPermissions,
+            userRoles
+          }, 'SecondaryNavigationBar');
+        }
+        return false;
+      }
+    }
+
+    return true;
+  };
 
   // Comprehensive dropdown categories
   const dropdownCategories: DropdownCategory[] = [
@@ -79,7 +257,6 @@ export default function SecondaryNavigationBar({ className = '' }: SecondaryNavi
       color: 'hover:bg-purple-50 hover:text-purple-700',
       items: [
         { id: 'main-dashboard', label: 'Main Dashboard', icon: Home, path: '/dashboard', description: 'Overview and key metrics' },
-        { id: 'vero-cards', label: 'VeroCards View', icon: Grid, path: '/resizable-dashboard', description: 'Customizable widget dashboard' },
         { divider: true, id: 'div1', label: '', icon: Home },
         { id: 'analytics-overview', label: 'Analytics Overview', icon: TrendingUp, path: '/charts', description: 'Business intelligence dashboard' },
         { id: 'performance-metrics', label: 'Performance Metrics', icon: BarChart3, path: '/reports/performance', description: 'KPI and performance tracking' }
@@ -223,10 +400,29 @@ export default function SecondaryNavigationBar({ className = '' }: SecondaryNavi
         { id: 'company-settings', label: 'Company Settings', icon: Settings, path: '/settings/company', description: 'Company profile and branding' },
         { divider: true, id: 'div17', label: '', icon: Settings },
         { id: 'help-support', label: 'Help & Support', icon: HelpCircle, path: '/help', description: 'Get help and support' },
-        { id: 'keyboard-shortcuts', label: 'Keyboard Shortcuts', icon: Settings, action: () => console.log('Show shortcuts'), description: 'View available shortcuts' }
+        { id: 'keyboard-shortcuts', label: 'Keyboard Shortcuts', icon: Settings, action: () => {
+          logger.debug('Keyboard shortcuts requested', {}, 'SecondaryNavigationBar');
+          // TODO: Open keyboard shortcuts modal
+        }, description: 'View available shortcuts' }
       ]
     }
   ];
+
+  // Filter navigation items based on user roles and permissions
+  const filteredCategories = useMemo(() => {
+    return dropdownCategories.map(category => ({
+      ...category,
+      items: category.items.filter(item => {
+        // Don't filter dividers
+        if (item.divider) return true;
+        return hasAccess(item.id);
+      })
+    })).filter(category => {
+      // Remove categories that only contain dividers (no actual navigable items)
+      const hasNavigableItems = category.items.some(item => !item.divider);
+      return hasNavigableItems;
+    });
+  }, [user]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -247,6 +443,37 @@ export default function SecondaryNavigationBar({ className = '' }: SecondaryNavi
 
   // Handle item click
   const handleItemClick = (item: DropdownItem) => {
+    logger.debug('Navigation item clicked', { itemId: item.id, currentPath: location.pathname }, 'SecondaryNavigationBar');
+    
+    // Special handling for customers page - add as canvas card if on dashboard
+    if (item.id === 'all-customers' && location.pathname === '/dashboard') {
+      logger.debug('Adding customers page as canvas card', {}, 'SecondaryNavigationBar');
+      // Dispatch a custom event to add the card to the canvas
+      const addCardEvent = new CustomEvent('addCanvasCard', {
+        detail: { type: 'customers-page', position: { x: 0, y: 0 } }
+      });
+      window.dispatchEvent(addCardEvent);
+      setActiveDropdown(null);
+      return;
+    }
+    
+    // Special handling for customers page - open as popup if page card context available
+    if (item.id === 'all-customers' && pageCardContext) {
+      logger.debug('Opening customers page as popup card', {}, 'SecondaryNavigationBar');
+      // Import the component dynamically
+      import('@/components/dashboard/CustomersPageCard').then(({ default: CustomersPageCard }) => {
+        pageCardContext.openPageCard({
+          title: 'Customers',
+          icon: Users,
+          component: CustomersPageCard,
+          size: { width: 1200, height: 800 },
+        });
+        logger.debug('Customers page popup card opened', {}, 'SecondaryNavigationBar');
+      });
+      setActiveDropdown(null);
+      return;
+    }
+    
     if (item.path) {
       navigate(item.path);
     } else if (item.action) {
@@ -258,7 +485,7 @@ export default function SecondaryNavigationBar({ className = '' }: SecondaryNavi
   // Get current active category based on route
   const getActiveCategory = () => {
     const path = location.pathname;
-    if (path === '/dashboard' || path === '/' || path === '/resizable-dashboard') return 'dashboard';
+    if (path === '/dashboard' || path === '/') return 'dashboard';
     if (path.startsWith('/customers')) return 'customers';
     if (path.startsWith('/work-orders') || path.startsWith('/agreements')) return 'work-orders';
     if (path.startsWith('/scheduler') || path.startsWith('/routing')) return 'scheduling';
@@ -275,11 +502,11 @@ export default function SecondaryNavigationBar({ className = '' }: SecondaryNavi
   return (
     <div className={`bg-white border-b border-gray-200 shadow-sm ${className}`} ref={navRef}>
       <div className="flex items-center px-6 py-2 gap-1">
-        {dropdownCategories.map((category, index) => {
+        {filteredCategories.map((category, index) => {
           const CategoryIcon = category.icon;
           const isActive = activeCategory === category.id;
           const isDropdownOpen = activeDropdown === category.id;
-          const isRightAligned = index >= dropdownCategories.length - 2; // Last 2 categories align right
+          const isRightAligned = index >= filteredCategories.length - 2; // Last 2 categories align right
           
           return (
             <div key={category.id} className="relative">

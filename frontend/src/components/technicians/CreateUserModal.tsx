@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { userApi, CreateUserDto } from '../../lib/user-api';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import { useDialog } from '../../hooks/useDialog';
 
 interface CreateUserModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface CreateUserModalProps {
 const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onUserCreated }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { showAlert, DialogComponents } = useDialog();
 
   const {
     register,
@@ -26,7 +28,27 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onUs
     setError(null);
 
     try {
-      const result = await userApi.createUser(data);
+      // Remove password field if it's empty to avoid validation issues
+      const userData: CreateUserDto = {
+        email: data.email,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone: data.phone || undefined,
+        ...(data.password && data.password.trim() !== '' ? { password: data.password } : {}),
+      };
+      
+      const result = await userApi.createUser(userData);
+      
+      // Display success message with employee ID if generated
+      if (result.user.employee_id) {
+        // Show success message with employee ID
+        await showAlert({
+          title: 'User Created Successfully',
+          message: `User created successfully!\nEmployee ID: ${result.user.employee_id}`,
+          type: 'success',
+        });
+      }
+      
       onUserCreated(result.user);
       reset();
       onClose();
@@ -40,8 +62,10 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onUs
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+    <>
+      <DialogComponents />
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-900">Create New User</h2>
           <button
@@ -156,6 +180,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onUs
         </form>
       </div>
     </div>
+    </>
   );
 };
 

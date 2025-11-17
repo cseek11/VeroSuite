@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { secureApiClient } from '@/lib/secure-api-client';
+import { logger } from '@/utils/logger';
 
 /**
  * Secure hook for fetching accounts with automatic tenant isolation
@@ -43,8 +44,8 @@ export function useCreateAccount() {
       // Invalidate accounts query to refetch data
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
     },
-    onError: (error) => {
-      console.error('Failed to create account:', error);
+    onError: (error: unknown) => {
+      logger.error('Failed to create account', error, 'useSecureAccounts');
     },
   });
 }
@@ -63,8 +64,8 @@ export function useUpdateAccount() {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
       queryClient.invalidateQueries({ queryKey: ['accounts', variables.id] });
     },
-    onError: (error) => {
-      console.error('Failed to update account:', error);
+    onError: (error: unknown) => {
+      logger.error('Failed to update account', error, 'useSecureAccounts');
     },
   });
 }
@@ -80,8 +81,8 @@ export function useDeleteAccount() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
     },
-    onError: (error) => {
-      console.error('Failed to delete account:', error);
+    onError: (error: unknown) => {
+      logger.error('Failed to delete account', error, 'useSecureAccounts');
     },
   });
 }

@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import {
-  Card,
-  Button,
-  Typography,
-  Chip,
-  Modal,
-  ProgressBar,
-  Alert
-} from '@/components/ui/EnhancedUI';
+  Badge,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Heading,
+  Text,
+} from '@/components/ui';
 import {
   Shield,
   AlertTriangle,
@@ -156,12 +158,12 @@ export default function ComplianceCenter({ customerId }: ComplianceCenterProps) 
     <>
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <Typography variant="h3" className="text-gray-900">
+          <Heading level={3} className="text-slate-900">
             Compliance Center
-          </Typography>
-          <Chip variant="default">
+          </Heading>
+          <Badge variant="default">
             Regulatory Tracking
-          </Chip>
+          </Badge>
         </div>
 
         {/* Compliance Overview */}
@@ -171,22 +173,23 @@ export default function ComplianceCenter({ customerId }: ComplianceCenterProps) 
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Shield className="h-6 w-6 text-green-600" />
-                <Typography variant="h4" className="text-gray-900">
+                <Heading level={4} className="text-slate-900">
                   Compliance Score
-                </Typography>
+                </Heading>
               </div>
               {getTrendIcon(complianceData.overallScore, 90)}
             </div>
             
-            <Typography variant="h2" className="text-green-900 font-bold mb-2">
+            <Heading level={2} className="text-green-900 font-bold mb-2">
               {complianceData.overallScore}%
-            </Typography>
+            </Heading>
             
-            <ProgressBar
-              value={complianceData.overallScore}
-              color="success"
-              className="h-3"
-            />
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className="bg-green-500 h-3 rounded-full"
+                style={{ width: `${complianceData.overallScore}%` }}
+              />
+            </div>
           </div>
 
           {/* Critical Issues */}
@@ -194,19 +197,19 @@ export default function ComplianceCenter({ customerId }: ComplianceCenterProps) 
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-6 w-6 text-red-600" />
-                <Typography variant="h4" className="text-gray-900">
+                <Heading level={4} className="text-slate-900">
                   Critical Issues
-                </Typography>
+                </Heading>
               </div>
             </div>
             
-            <Typography variant="h2" className="text-red-900 font-bold mb-2">
+            <Heading level={2} className="text-red-900 font-bold mb-2">
               {complianceData.criticalIssues}
-            </Typography>
+            </Heading>
             
-            <Typography variant="body2" className="text-gray-600">
+            <Text variant="small" className="text-slate-600">
               Requires immediate attention
-            </Typography>
+            </Text>
           </div>
 
           {/* Pending Actions */}
@@ -214,19 +217,19 @@ export default function ComplianceCenter({ customerId }: ComplianceCenterProps) 
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Clock className="h-6 w-6 text-yellow-600" />
-                <Typography variant="h4" className="text-gray-900">
+                <Heading level={4} className="text-slate-900">
                   Pending Actions
-                </Typography>
+                </Heading>
               </div>
             </div>
             
-            <Typography variant="h2" className="text-yellow-900 font-bold mb-2">
+            <Heading level={2} className="text-yellow-900 font-bold mb-2">
               {complianceData.pendingActions}
-            </Typography>
+            </Heading>
             
-            <Typography variant="body2" className="text-gray-600">
+            <Text variant="small" className="text-slate-600">
               Awaiting completion
-            </Typography>
+            </Text>
           </div>
 
           {/* Upcoming Deadlines */}
@@ -234,147 +237,150 @@ export default function ComplianceCenter({ customerId }: ComplianceCenterProps) 
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Calendar className="h-6 w-6 text-blue-600" />
-                <Typography variant="h4" className="text-gray-900">
+                <Heading level={4} className="text-slate-900">
                   Due Soon
-                </Typography>
+                </Heading>
               </div>
             </div>
             
-            <Typography variant="h2" className="text-blue-900 font-bold mb-2">
+            <Heading level={2} className="text-blue-900 font-bold mb-2">
               {complianceData.upcomingDeadlines}
-            </Typography>
+            </Heading>
             
-            <Typography variant="body2" className="text-gray-600">
+            <Text variant="small" className="text-slate-600">
               Within 30 days
-            </Typography>
+            </Text>
           </div>
         </div>
 
         {/* Regulatory Compliance */}
         <div className="mb-8">
-          <Typography variant="h4" className="text-gray-900 mb-4">
+          <Heading level={4} className="text-slate-900 mb-4">
             Regulatory Compliance
-          </Typography>
+          </Heading>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-lg border border-slate-200">
               <div className="flex items-center justify-between mb-4">
-                <Typography variant="h5" className="text-gray-900">
+                <Heading level={5} className="text-slate-900">
                   EPA Compliance
-                </Typography>
+                </Heading>
                 {getTrendIcon(complianceData.regulatoryCompliance.epaCompliance, 95)}
               </div>
               
-              <Typography variant="h3" className="text-green-900 font-bold mb-2">
+              <Heading level={3} className="text-green-900 font-bold mb-2">
                 {complianceData.regulatoryCompliance.epaCompliance}%
-              </Typography>
+              </Heading>
               
-              <ProgressBar
-                value={complianceData.regulatoryCompliance.epaCompliance}
-                color="green"
-                className="h-2"
-              />
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-green-500 h-2 rounded-full"
+                  style={{ width: `${complianceData.regulatoryCompliance.epaCompliance}%` }}
+                />
+              </div>
             </div>
             
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-lg border border-slate-200">
               <div className="flex items-center justify-between mb-4">
-                <Typography variant="h5" className="text-gray-900">
+                <Heading level={5} className="text-slate-900">
                   State Compliance
-                </Typography>
+                </Heading>
                 {getTrendIcon(complianceData.regulatoryCompliance.stateCompliance, 90)}
               </div>
               
-              <Typography variant="h3" className="text-blue-900 font-bold mb-2">
+              <Heading level={3} className="text-blue-900 font-bold mb-2">
                 {complianceData.regulatoryCompliance.stateCompliance}%
-              </Typography>
+              </Heading>
               
-              <ProgressBar
-                value={complianceData.regulatoryCompliance.stateCompliance}
-                color="blue"
-                className="h-2"
-              />
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-blue-500 h-2 rounded-full"
+                  style={{ width: `${complianceData.regulatoryCompliance.stateCompliance}%` }}
+                />
+              </div>
             </div>
             
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-lg border border-slate-200">
               <div className="flex items-center justify-between mb-4">
-                <Typography variant="h5" className="text-gray-900">
+                <Heading level={5} className="text-slate-900">
                   Local Compliance
-                </Typography>
+                </Heading>
                 {getTrendIcon(complianceData.regulatoryCompliance.localCompliance, 85)}
               </div>
               
-              <Typography variant="h3" className="text-yellow-900 font-bold mb-2">
+              <Heading level={3} className="text-yellow-900 font-bold mb-2">
                 {complianceData.regulatoryCompliance.localCompliance}%
-              </Typography>
+              </Heading>
               
-              <ProgressBar
-                value={complianceData.regulatoryCompliance.localCompliance}
-                color="yellow"
-                className="h-2"
-              />
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-yellow-500 h-2 rounded-full"
+                  style={{ width: `${complianceData.regulatoryCompliance.localCompliance}%` }}
+                />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Chemical Usage Monitoring */}
         <div className="mb-8">
-          <Typography variant="h4" className="text-gray-900 mb-4">
+          <Heading level={4} className="text-slate-900 mb-4">
             Chemical Usage Monitoring
-          </Typography>
+          </Heading>
           
           <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-lg border border-purple-200">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <Typography variant="h5" className="text-gray-900 mb-2">
+                <Heading level={5} className="text-slate-900 mb-2">
                   Total Applications
-                </Typography>
-                <Typography variant="h3" className="text-purple-900 font-bold">
+                </Heading>
+                <Heading level={3} className="text-purple-900 font-bold">
                   {complianceData.chemicalUsage.totalApplications}
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                </Heading>
+                <Text variant="small" className="text-slate-600">
                   This quarter
-                </Typography>
+                </Text>
               </div>
               
               <div>
-                <Typography variant="h5" className="text-gray-900 mb-2">
+                <Heading level={5} className="text-slate-900 mb-2">
                   Chemicals Used
-                </Typography>
+                </Heading>
                 <div className="space-y-1">
                   {complianceData.chemicalUsage.chemicalsUsed.map((chemical, index) => (
-                    <Chip key={index} color="purple" variant="default" size="sm">
+                    <Badge key={index} variant="default" className="bg-purple-100 text-purple-800">
                       {chemical}
-                    </Chip>
+                    </Badge>
                   ))}
                 </div>
               </div>
               
               <div>
-                <Typography variant="h5" className="text-gray-900 mb-2">
+                <Heading level={5} className="text-slate-900 mb-2">
                   Safety Record
-                </Typography>
-                <Typography variant="h3" className="text-green-900 font-bold">
+                </Heading>
+                <Heading level={3} className="text-green-900 font-bold">
                   {complianceData.chemicalUsage.safetyIncidents}
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                </Heading>
+                <Text variant="small" className="text-slate-600">
                   Safety incidents
-                </Typography>
+                </Text>
               </div>
             </div>
             
             <div className="mt-4 pt-4 border-t border-purple-200">
-              <Typography variant="body2" className="text-gray-600">
+              <Text variant="small" className="text-slate-600">
                 Last inspection: {formatDate(complianceData.chemicalUsage.lastInspection)}
-              </Typography>
+              </Text>
             </div>
           </div>
         </div>
 
         {/* Compliance Records */}
         <div>
-          <Typography variant="h4" className="text-gray-900 mb-4">
+          <Heading level={4} className="text-slate-900 mb-4">
             Compliance Records
-          </Typography>
+          </Heading>
           
           <div className="space-y-4">
             {complianceRecords.map((record) => {
@@ -384,7 +390,7 @@ export default function ComplianceCenter({ customerId }: ComplianceCenterProps) 
                 <div
                   key={record.id}
                   className={`border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer ${
-                    record.is_critical ? 'border-red-200 bg-red-50' : 'border-gray-200'
+                    record.is_critical ? 'border-red-200 bg-red-50' : 'border-slate-200'
                   }`}
                   onClick={() => {
                     setSelectedRecord(record);
@@ -402,39 +408,41 @@ export default function ComplianceCenter({ customerId }: ComplianceCenterProps) 
                       </div>
                       
                       <div>
-                        <Typography variant="h5" className="text-gray-900">
+                        <Heading level={5} className="text-slate-900">
                           {record.record_type}
-                        </Typography>
-                        <Typography variant="body2" className="text-gray-600">
+                        </Heading>
+                        <Text variant="small" className="text-slate-600">
                           {record.regulatory_body}
-                        </Typography>
+                        </Text>
                       </div>
                     </div>
                     
                     <div className="flex items-center gap-2">
-                                  <Chip
+                                  <Badge
               variant="default"
             >
               {record.status}
-            </Chip>
-                      <Chip
-                        color={getPriorityColor(record.priority)}
+            </Badge>
+                      <Badge
                         variant="default"
+                        className={getPriorityColor(record.priority) === 'red' ? 'bg-red-100 text-red-800' : 
+                                   getPriorityColor(record.priority) === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 
+                                   'bg-green-100 text-green-800'}
                       >
                         {record.priority}
-                      </Chip>
+                      </Badge>
                       {record.is_critical && (
                         <AlertTriangle className="h-5 w-5 text-red-500" />
                       )}
                     </div>
                   </div>
                   
-                  <Typography variant="body1" className="text-gray-800 mb-3">
+                  <Text variant="body" className="text-slate-800 mb-3">
                     {record.description}
-                  </Typography>
+                  </Text>
                   
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-4 text-sm text-slate-600">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         <span>Due: {formatDate(record.due_date)}</span>
@@ -451,7 +459,7 @@ export default function ComplianceCenter({ customerId }: ComplianceCenterProps) 
                     {record.status !== 'completed' && (
                       <div className={`text-sm font-medium ${
                         daysUntilDue < 0 ? 'text-red-600' :
-                        daysUntilDue <= 7 ? 'text-yellow-600' : 'text-gray-600'
+                        daysUntilDue <= 7 ? 'text-yellow-600' : 'text-slate-600'
                       }`}>
                         {daysUntilDue < 0 ? `${Math.abs(daysUntilDue)} days overdue` :
                          daysUntilDue === 0 ? 'Due today' :
@@ -466,64 +474,72 @@ export default function ComplianceCenter({ customerId }: ComplianceCenterProps) 
         </div>
       </Card>
 
-      {/* Compliance Record Detail Modal */}
-      <Modal
-        isOpen={showRecordModal}
-        onClose={() => setShowRecordModal(false)}
-        title={`Compliance Record - ${selectedRecord?.record_type}`}
-        size="lg"
-      >
+      {/* Compliance Record Detail Dialog */}
+      <Dialog open={showRecordModal} onOpenChange={(open) => !open && setShowRecordModal(false)}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Compliance Record - {selectedRecord?.record_type}</DialogTitle>
+          </DialogHeader>
         {selectedRecord && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Typography variant="body2" className="text-gray-600">Status</Typography>
-                <Chip color={getStatusColor(selectedRecord.status)}>
+                <Text variant="small" className="text-slate-600">Status</Text>
+                <Badge variant="default" className={
+                  getStatusColor(selectedRecord.status) === 'green' ? 'bg-green-100 text-green-800' :
+                  getStatusColor(selectedRecord.status) === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                  getStatusColor(selectedRecord.status) === 'red' ? 'bg-red-100 text-red-800' :
+                  'bg-gray-100 text-gray-800'
+                }>
                   {selectedRecord.status}
-                </Chip>
+                </Badge>
               </div>
               <div>
-                <Typography variant="body2" className="text-gray-600">Priority</Typography>
-                <Chip color={getPriorityColor(selectedRecord.priority)}>
+                <Text variant="small" className="text-slate-600">Priority</Text>
+                <Badge variant="default" className={
+                  getPriorityColor(selectedRecord.priority) === 'red' ? 'bg-red-100 text-red-800' :
+                  getPriorityColor(selectedRecord.priority) === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-green-100 text-green-800'
+                }>
                   {selectedRecord.priority}
-                </Chip>
+                </Badge>
               </div>
               <div>
-                <Typography variant="body2" className="text-gray-600">Regulatory Body</Typography>
-                <Typography variant="body1">{selectedRecord.regulatory_body}</Typography>
+                <Text variant="small" className="text-slate-600">Regulatory Body</Text>
+                <Text variant="body">{selectedRecord.regulatory_body}</Text>
               </div>
               <div>
-                <Typography variant="body2" className="text-gray-600">Due Date</Typography>
-                <Typography variant="body1">{formatDate(selectedRecord.due_date)}</Typography>
+                <Text variant="small" className="text-slate-600">Due Date</Text>
+                <Text variant="body">{formatDate(selectedRecord.due_date)}</Text>
               </div>
             </div>
 
             <div>
-              <Typography variant="body2" className="text-gray-600 mb-2">Description</Typography>
-              <Typography variant="body1">{selectedRecord.description}</Typography>
+              <Text variant="small" className="text-slate-600 mb-2">Description</Text>
+              <Text variant="body">{selectedRecord.description}</Text>
             </div>
 
             {selectedRecord.chemical_used && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Typography variant="body2" className="text-gray-600">Chemical Used</Typography>
-                  <Typography variant="body1">{selectedRecord.chemical_used}</Typography>
+                  <Text variant="small" className="text-slate-600">Chemical Used</Text>
+                  <Text variant="body">{selectedRecord.chemical_used}</Text>
                 </div>
                 <div>
-                  <Typography variant="body2" className="text-gray-600">Application Rate</Typography>
-                  <Typography variant="body1">{selectedRecord.application_rate}</Typography>
+                  <Text variant="small" className="text-slate-600">Application Rate</Text>
+                  <Text variant="body">{selectedRecord.application_rate}</Text>
                 </div>
               </div>
             )}
 
             {selectedRecord.safety_measures && (
               <div>
-                <Typography variant="body2" className="text-gray-600 mb-2">Safety Measures</Typography>
+                <Text variant="small" className="text-slate-600 mb-2">Safety Measures</Text>
                 <div className="space-y-1">
                   {selectedRecord.safety_measures.map((measure, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-500" />
-                      <Typography variant="body2">{measure}</Typography>
+                      <Text variant="small">{measure}</Text>
                     </div>
                   ))}
                 </div>
@@ -531,9 +547,12 @@ export default function ComplianceCenter({ customerId }: ComplianceCenterProps) 
             )}
 
             {selectedRecord.is_critical && (
-              <Alert type="warning" title="Critical Compliance Issue">
-                This record requires immediate attention to maintain regulatory compliance.
-              </Alert>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-yellow-800 mb-1">Critical Compliance Issue</h3>
+                <p className="text-sm text-yellow-700">
+                  This record requires immediate attention to maintain regulatory compliance.
+                </p>
+              </div>
             )}
 
             <div className="flex gap-2 justify-end">
@@ -554,7 +573,8 @@ export default function ComplianceCenter({ customerId }: ComplianceCenterProps) 
             </div>
           </div>
         )}
-      </Modal>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

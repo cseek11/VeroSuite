@@ -1,7 +1,6 @@
 import React from 'react';
 import { Account } from '@/types/enhanced-types';
 import { Phone, Mail, Calendar, DollarSign } from 'lucide-react';
-import type { DensityMode } from '@/stores/userPreferences';
 
 interface CustomerListItemProps {
   customer: Account;

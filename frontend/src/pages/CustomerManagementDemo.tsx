@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { UserGroupIcon, PlusIcon, MagnifyingGlassIcon, ChartBarIcon } from '@heroicons/react/24/outline';
+import { Users, Plus, Search, BarChart3 } from 'lucide-react';
 
 export default function CustomerManagementDemo() {
   return (
@@ -21,7 +21,7 @@ export default function CustomerManagementDemo() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-lg mb-4">
-              <UserGroupIcon className="h-6 w-6 text-purple-600" />
+              <Users className="h-6 w-6 text-purple-600" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Customer Management</h3>
             <p className="text-gray-600 mb-4">
@@ -29,7 +29,7 @@ export default function CustomerManagementDemo() {
             </p>
             <Link
               to="/customer-management"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Manage Customers
             </Link>
@@ -37,7 +37,7 @@ export default function CustomerManagementDemo() {
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mb-4">
-              <MagnifyingGlassIcon className="h-6 w-6 text-green-600" />
+              <Search className="h-6 w-6 text-green-600" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Advanced Search</h3>
             <p className="text-gray-600 mb-4">
@@ -53,7 +53,7 @@ export default function CustomerManagementDemo() {
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mb-4">
-              <ChartBarIcon className="h-6 w-6 text-blue-600" />
+              <BarChart3 className="h-6 w-6 text-blue-600" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Analytics</h3>
             <p className="text-gray-600 mb-4">
@@ -103,16 +103,16 @@ export default function CustomerManagementDemo() {
           <div className="flex flex-wrap gap-4">
             <Link
               to="/customer-management"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              <UserGroupIcon className="h-4 w-4 mr-2" />
+              <Users className="h-4 w-4 mr-2" />
               View All Customers
             </Link>
             <Link
               to="/customer-management"
               className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
-              <PlusIcon className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-2" />
               Add New Customer
             </Link>
             <Link

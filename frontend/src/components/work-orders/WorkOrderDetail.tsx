@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useWorkOrder, useUpdateWorkOrder, useDeleteWorkOrder } from '@/hooks/useWorkOrders';
-import { WorkOrder, WorkOrderStatus, WorkOrderPriority } from '@/types/work-orders';
+import { useCreateJob } from '@/hooks/useJobs';
+import { WorkOrder, WorkOrderStatus } from '@/types/work-orders';
+import { CreateJobRequest, JobStatus } from '@/types/jobs';
 import { 
   getStatusColor, 
   getStatusLabel, 
   getPriorityColor, 
   getPriorityLabel,
-  getNextStatuses,
-  canChangeStatus
+  getNextStatuses
 } from '@/types/work-orders';
 import WorkOrderStatusManager from './WorkOrderStatusManager';
 import { 
@@ -15,8 +16,7 @@ import {
   User, 
   Clock, 
   DollarSign, 
-  FileText, 
-  MapPin,
+  FileText,
   Phone,
   Mail,
   Edit,
@@ -26,16 +26,15 @@ import {
   AlertCircle,
   XCircle,
   Play,
-  Pause,
-  RotateCcw,
   History,
-  MessageSquare,
   Building,
   Home,
-  Briefcase
+  Briefcase,
+  Plus
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import Input from '@/components/ui/Input';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { 
   Dialog, 
@@ -45,6 +44,8 @@ import {
   DialogHeader, 
   DialogTitle 
 } from '@/components/ui/Dialog';
+import { logger } from '@/utils/logger';
+import { useDialog } from '@/hooks/useDialog';
 
 interface WorkOrderDetailProps {
   workOrderId: string;
@@ -61,11 +62,15 @@ export default function WorkOrderDetail({
   onStatusChange,
   onClose
 }: WorkOrderDetailProps) {
+  const { showAlert, DialogComponents } = useDialog();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCreateJobDialog, setShowCreateJobDialog] = useState(false);
+  const [jobFormData, setJobFormData] = useState<Partial<CreateJobRequest>>({});
 
   const { data: workOrder, isLoading, error, refetch } = useWorkOrder(workOrderId);
   const updateWorkOrderMutation = useUpdateWorkOrder();
   const deleteWorkOrderMutation = useDeleteWorkOrder();
+  const createJobMutation = useCreateJob();
 
 
   const handleDelete = async () => {
@@ -76,13 +81,103 @@ export default function WorkOrderDetail({
       setShowDeleteDialog(false);
       onDelete?.(workOrder);
     } catch (error) {
-      console.error('Failed to delete work order:', error);
+      logger.error('Failed to delete work order', error, 'WorkOrderDetail');
     }
   };
 
   const handlePrint = () => {
     window.print();
   };
+
+  const handleCreateJobClick = () => {
+    if (!workOrder) return;
+    
+    // Pre-fill job form data from work order
+    const scheduledDate = workOrder.scheduled_date 
+      ? new Date(workOrder.scheduled_date).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0];
+    
+    // Calculate default start/end times based on estimated duration or defaults
+    const estimatedDuration = workOrder.estimated_duration || 60; // default 60 minutes
+    const defaultStartTime = '09:00';
+    const defaultEndTime = new Date(Date.now() + estimatedDuration * 60000).toTimeString().slice(0, 5);
+    
+    setJobFormData({
+      work_order_id: workOrder.id,
+      technician_id: workOrder.assigned_to || undefined,
+      scheduled_date: scheduledDate,
+      scheduled_start_time: defaultStartTime,
+      scheduled_end_time: defaultEndTime,
+      status: JobStatus.SCHEDULED,
+      notes: `Job created from work order: ${workOrder.description}`
+    });
+    
+    setShowCreateJobDialog(true);
+  };
+
+  const handleCreateJobSubmit = async () => {
+    if (!workOrder || !jobFormData.work_order_id || !jobFormData.scheduled_date) {
+      logger.error('Missing required fields for job creation', {}, 'WorkOrderDetail');
+      return;
+    }
+
+    try {
+      // Ensure we have account_id and location_id from work order
+      const accountId = workOrder.account?.id || workOrder.customer_id;
+      const locationId = workOrder.location_id;
+
+      if (!accountId || !locationId) {
+        logger.error('Work order missing account_id or location_id', { accountId, locationId }, 'WorkOrderDetail');
+        await showAlert({
+          title: 'Cannot Create Job',
+          message: 'Work order must have a customer and location assigned.',
+          type: 'error',
+        });
+        return;
+      }
+
+      // Create job with required fields
+      const jobData: CreateJobRequest = {
+        work_order_id: jobFormData.work_order_id!,
+        account_id: accountId,
+        location_id: locationId,
+        technician_id: jobFormData.technician_id,
+        scheduled_date: jobFormData.scheduled_date,
+        scheduled_start_time: jobFormData.scheduled_start_time || '09:00',
+        scheduled_end_time: jobFormData.scheduled_end_time || '10:00',
+        priority: workOrder.priority || 'medium',
+        status: jobFormData.status || JobStatus.SCHEDULED,
+        notes: jobFormData.notes
+      };
+
+      await createJobMutation.mutateAsync(jobData);
+      
+      // Show success message
+      await showAlert({
+        title: 'Success',
+        message: 'Job created successfully!',
+        type: 'success',
+      });
+      
+      // Close dialog and refresh work order data
+      setShowCreateJobDialog(false);
+      refetch();
+    } catch (error) {
+      logger.error('Failed to create job', error, 'WorkOrderDetail');
+      await showAlert({
+        title: 'Error',
+        message: 'Failed to create job. Please check the console for details.',
+        type: 'error',
+      });
+    }
+  };
+
+  // Check if work order has required data for job creation
+  const canCreateJob = workOrder && 
+    (workOrder.account?.id || workOrder.customer_id) && 
+    workOrder.location_id && 
+    workOrder.status !== WorkOrderStatus.COMPLETED && 
+    workOrder.status !== WorkOrderStatus.CANCELED;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -172,7 +267,9 @@ export default function WorkOrderDetail({
   const canEdit = workOrder.status !== WorkOrderStatus.COMPLETED && workOrder.status !== WorkOrderStatus.CANCELED;
 
   return (
-    <div className="space-y-6 print:space-y-4">
+    <>
+      <DialogComponents />
+      <div className="space-y-6 print:space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -198,6 +295,16 @@ export default function WorkOrderDetail({
             >
               <Edit className="h-4 w-4" />
               Edit
+            </Button>
+          )}
+          {canCreateJob && (
+            <Button
+              variant="primary"
+              onClick={handleCreateJobClick}
+              className="flex items-center gap-2 print:hidden"
+            >
+              <Plus className="h-4 w-4" />
+              Create Job
             </Button>
           )}
           {canEdit && (
@@ -457,6 +564,118 @@ export default function WorkOrderDetail({
         </Card>
       )}
 
+      {/* Create Job Dialog */}
+      <Dialog open={showCreateJobDialog} onOpenChange={setShowCreateJobDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Create Job from Work Order
+            </DialogTitle>
+            <DialogDescription>
+              Create a scheduled job for this work order. The job will appear on the schedule.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <div className="font-medium text-blue-900">Work Order Details</div>
+              <div className="text-sm text-blue-700 mt-1">{workOrder.description}</div>
+              <div className="text-sm text-blue-600 mt-1">
+                Customer: {workOrder.account?.name || 'Unknown'} | 
+                Priority: {getPriorityLabel(workOrder.priority)}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Scheduled Date <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="date"
+                  value={jobFormData.scheduled_date || ''}
+                  onChange={(e) => setJobFormData({ ...jobFormData, scheduled_date: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Assigned Technician
+                </label>
+                <div className="text-sm text-gray-600 py-2">
+                  {workOrder.assignedTechnician 
+                    ? `${workOrder.assignedTechnician.first_name} ${workOrder.assignedTechnician.last_name}`
+                    : 'No technician assigned'}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Start Time
+                </label>
+                <Input
+                  type="time"
+                  value={jobFormData.scheduled_start_time || '09:00'}
+                  onChange={(e) => setJobFormData({ ...jobFormData, scheduled_start_time: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  End Time
+                </label>
+                <Input
+                  type="time"
+                  value={jobFormData.scheduled_end_time || '10:00'}
+                  onChange={(e) => setJobFormData({ ...jobFormData, scheduled_end_time: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Notes
+              </label>
+              <textarea
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                rows={3}
+                value={jobFormData.notes || ''}
+                onChange={(e) => setJobFormData({ ...jobFormData, notes: e.target.value })}
+                placeholder="Additional notes for this job..."
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowCreateJobDialog(false)}
+              disabled={createJobMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleCreateJobSubmit}
+              disabled={createJobMutation.isPending || !jobFormData.scheduled_date}
+              className="flex items-center gap-2"
+            >
+              {createJobMutation.isPending ? (
+                <>
+                  <LoadingSpinner text="Creating..." />
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  Create Job
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -500,5 +719,6 @@ export default function WorkOrderDetail({
         </DialogContent>
       </Dialog>
     </div>
+    </>
   );
 }

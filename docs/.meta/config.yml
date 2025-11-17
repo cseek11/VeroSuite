@@ -1,0 +1,23 @@
+# Documentation Governance Configuration
+
+reviewers:
+  - lead_engineer
+  - documentation_admin
+
+# Auto-archive completed work after this many days
+auto_archive_after_days: 60
+
+# Flag docs as stale if not updated in this many days
+stale_threshold_days: 90
+
+# Path to lint rules configuration
+lint_rules: docs/.meta/lint-rules.yml
+
+# Path to changelog file
+changelog: docs/CHANGELOG.md
+
+
+
+
+
+

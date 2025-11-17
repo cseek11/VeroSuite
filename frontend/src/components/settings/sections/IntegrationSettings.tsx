@@ -67,7 +67,7 @@ export const IntegrationSettings: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
             <div>
-              <h3 className="font-semibold text-blue-800">VeroSuite Mobile</h3>
+              <h3 className="font-semibold text-blue-800">VeroField Mobile</h3>
               <p className="text-sm text-blue-600">Sync settings with mobile app</p>
             </div>
             <button className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">

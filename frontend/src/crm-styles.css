@@ -60,18 +60,18 @@
 @layer components {
   /* ===== FORM COMPONENTS ===== */
   .crm-input {
-    @apply w-full px-3 py-2 rounded-lg text-slate-800 placeholder-slate-500 transition-all duration-200;
+    @apply w-full px-2 py-1.5 rounded-md text-slate-800 placeholder-slate-500 transition-all duration-200;
     background-color: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(4px);
-    min-height: 44px;
-    font-size: 0.875rem;
+    height: calc(32px * var(--density-scale, 1)); /* Density-aware: scales with mode */
+    font-size: calc(0.875rem * var(--density-scale, 1));
   }
 
   .crm-input:focus {
     @apply outline-none;
-    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
-    border-color: rgba(34, 197, 94, 0.5);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3); /* indigo-500 */
+    border-color: rgba(99, 102, 241, 0.5); /* indigo-500 */
     background-color: rgba(255, 255, 255, 0.95);
   }
 
@@ -90,7 +90,7 @@
   }
 
   .crm-textarea {
-    @apply w-full px-3 py-2 rounded-lg text-slate-800 placeholder-slate-500 transition-all duration-200 resize-vertical;
+    @apply w-full px-2 py-1.5 rounded-md text-slate-800 placeholder-slate-500 transition-all duration-200 resize-vertical;
     background-color: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(4px);
@@ -100,8 +100,8 @@
 
   .crm-textarea:focus {
     @apply outline-none;
-    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
-    border-color: rgba(34, 197, 94, 0.5);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3); /* indigo-500 */
+    border-color: rgba(99, 102, 241, 0.5); /* indigo-500 */
     background-color: rgba(255, 255, 255, 0.95);
   }
 
@@ -120,18 +120,18 @@
   }
 
   .crm-select {
-    @apply w-full px-3 py-2 rounded-lg text-slate-800 transition-all duration-200;
+    @apply w-full px-2 py-1.5 rounded-md text-slate-800 transition-all duration-200;
     background-color: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(4px);
-    min-height: 44px;
-    font-size: 0.875rem;
+    height: calc(32px * var(--density-scale, 1)); /* Density-aware: scales with mode */
+    font-size: calc(0.875rem * var(--density-scale, 1));
   }
 
   .crm-select:focus {
     @apply outline-none;
-    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
-    border-color: rgba(34, 197, 94, 0.5);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3); /* indigo-500 */
+    border-color: rgba(99, 102, 241, 0.5); /* indigo-500 */
     background-color: rgba(255, 255, 255, 0.95);
   }
 
@@ -151,7 +151,9 @@
 
   /* ===== BUTTON COMPONENTS ===== */
   .crm-button {
-    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply px-3 py-1.5 rounded-md font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    height: calc(32px * var(--density-scale, 1)); /* Density-aware: scales with mode */
+    font-size: calc(0.875rem * var(--density-scale, 1));
   }
 
   .crm-button-primary {
@@ -256,7 +258,7 @@
   }
 
   .crm-table-header-cell {
-    @apply px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider;
+    @apply px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider;
   }
 
   .crm-table-body {
@@ -265,10 +267,11 @@
 
   .crm-table-row {
     @apply hover:bg-slate-50;
+    height: var(--row-height, 44px); /* Density-aware: 40px/44px/48px */
   }
 
   .crm-table-cell {
-    @apply px-6 py-4 whitespace-nowrap text-sm text-slate-900;
+    @apply px-3 py-2 whitespace-nowrap text-sm text-slate-900;
   }
 
   /* ===== MODAL COMPONENTS ===== */
@@ -337,8 +340,8 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
 textarea:focus,
 select:focus {
   background-color: rgba(255, 255, 255, 0.95) !important;
-  border-color: rgba(34, 197, 94, 0.5) !important;
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3) !important;
+  border-color: rgba(99, 102, 241, 0.5) !important; /* indigo-500 */
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3) !important; /* indigo-500 */
 }
 
 /* Override Tailwind's default form styles */
@@ -352,12 +355,12 @@ select:focus {
   background-color: rgba(255, 255, 255, 0.9) !important;
 }
 
-/* Override focus ring colors */
+/* Override focus ring colors - Use indigo per DESIGN_SYSTEM.md */
 .focus\:ring-blue-500:focus {
-  --tw-ring-color: rgba(34, 197, 94, 0.3) !important;
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3) !important;
+  --tw-ring-color: rgba(99, 102, 241, 0.3) !important; /* indigo-500 */
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3) !important; /* indigo-500 */
 }
 
 .focus\:border-blue-500:focus {
-  border-color: rgba(34, 197, 94, 0.5) !important;
+  border-color: rgba(99, 102, 241, 0.5) !important; /* indigo-500 */
 }

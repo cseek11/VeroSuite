@@ -17,8 +17,10 @@ Please use the following instead:
 All mock data and functions have been removed.
 `;
 
+import { logger } from '@/utils/logger';
+
 // Export a warning function to help developers migrate
 export const showDeprecationWarning = () => {
-  console.warn('⚠️ DEPRECATED: api.ts is no longer supported. Use enhanced-api.ts instead.');
-  console.warn(DEPRECATED_API_NOTICE);
+  logger.warn('DEPRECATED: api.ts is no longer supported. Use enhanced-api.ts instead.', {}, 'api');
+  logger.warn('DEPRECATED API NOTICE', { notice: DEPRECATED_API_NOTICE }, 'api');
 };

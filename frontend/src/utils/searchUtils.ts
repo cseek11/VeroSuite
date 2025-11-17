@@ -162,7 +162,6 @@ export class SearchUtils {
     if (!searchTerm.trim()) return '';
     
     const phoneDigits = searchTerm.replace(/\D/g, '');
-    const searchLower = searchTerm.toLowerCase();
     
     let query = `name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`;
     

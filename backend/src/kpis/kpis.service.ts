@@ -57,8 +57,8 @@ export class KPIsService {
 
   async getKPIs(tenantId: string): Promise<KPIResponseDto[]> {
     // Try to get from cache first
-    const cachedKPIs = await this.cacheService.getKPIConfigs(tenantId);
-    if (cachedKPIs) {
+    const cachedKPIs = await this.cacheService.getKPIConfigs<KPIResponseDto[]>(tenantId);
+    if (cachedKPIs && Array.isArray(cachedKPIs)) {
       this.logger.debug(`KPI configs served from cache for tenant: ${tenantId}`);
       return cachedKPIs;
     }
@@ -177,8 +177,8 @@ export class KPIsService {
   // NEW: Batch KPI data fetching for dashboard performance
   async getBatchKPIData(tenantId: string, kpiIds: string[]): Promise<Record<string, KPIDataResponseDto[]>> {
     // Try to get from batch cache first
-    const cachedData = await this.cacheService.getBatchKPIData(tenantId, kpiIds);
-    if (cachedData) {
+    const cachedData = await this.cacheService.getBatchKPIData<Record<string, KPIDataResponseDto[]>>(tenantId, kpiIds);
+    if (cachedData && typeof cachedData === 'object' && Object.keys(cachedData).length > 0) {
       this.logger.debug(`Batch KPI data served from cache for tenant: ${tenantId}, kpis: ${kpiIds.length}`);
       return cachedData;
     }
@@ -191,8 +191,8 @@ export class KPIsService {
     
     // Check which KPIs are not in cache
     for (const kpiId of kpiIds) {
-      const cached = await this.cacheService.getKPIData(tenantId, kpiId);
-      if (cached) {
+      const cached = await this.cacheService.getKPIData<KPIDataResponseDto[]>(tenantId, kpiId);
+      if (cached && Array.isArray(cached)) {
         results[kpiId] = cached;
       } else {
         uncachedKpis.push(kpiId);
@@ -219,10 +219,12 @@ export class KPIsService {
 
   async getKPIData(tenantId: string, kpiId?: string): Promise<KPIDataResponseDto[]> {
     // Try to get from cache first
-    const cachedData = await this.cacheService.getKPIData(tenantId, kpiId);
-    if (cachedData) {
-      this.logger.debug(`KPI data served from cache for tenant: ${tenantId}, kpi: ${kpiId || 'all'}`);
-      return cachedData;
+    if (kpiId) {
+      const cachedData = await this.cacheService.getKPIData<KPIDataResponseDto[]>(tenantId, kpiId);
+      if (cachedData && Array.isArray(cachedData)) {
+        this.logger.debug(`KPI data served from cache for tenant: ${tenantId}, kpi: ${kpiId}`);
+        return cachedData;
+      }
     }
 
     // Cache miss - fetch from database
@@ -323,7 +325,9 @@ export class KPIsService {
     }
 
     // Cache the results
-    await this.cacheService.setKPIData(tenantId, results, kpiId);
+    if (kpiId) {
+      await this.cacheService.setKPIData(tenantId, results, kpiId);
+    }
     
     // Throttled broadcast to prevent spam
     const throttleKey = `${tenantId}:${kpiId || 'all'}`;
@@ -345,8 +349,8 @@ export class KPIsService {
 
   async getKPITrends(tenantId: string, period: string = '24h'): Promise<KPITrendResponseDto[]> {
     // Try to get from cache first
-    const cachedTrends = await this.cacheService.getKPITrends(tenantId, period);
-    if (cachedTrends) {
+    const cachedTrends = await this.cacheService.getKPITrends<KPITrendResponseDto[]>(tenantId, period);
+    if (cachedTrends && Array.isArray(cachedTrends)) {
       this.logger.debug(`KPI trends served from cache for tenant: ${tenantId}, period: ${period}`);
       return cachedTrends;
     }

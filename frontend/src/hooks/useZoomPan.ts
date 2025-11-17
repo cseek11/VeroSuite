@@ -182,13 +182,44 @@ export function useZoomPan({
     };
   }, [handleWheel, handlePanMove, handlePanEnd, state.isDragging]);
 
-  // Get transform style
+  // Calculate canvas size based on content bounds
+  const calculateCanvasSize = useCallback((contentBounds?: { width: number; height: number; minX?: number; minY?: number; maxX?: number; maxY?: number }) => {
+    if (!contentBounds || !containerRef.current) {
+      return { width: 0, height: 0 };
+    }
+
+    const container = containerRef.current.getBoundingClientRect();
+    const viewportWidth = container.width;
+    const viewportHeight = container.height;
+    
+    // Calculate bounding box with padding (20% of viewport)
+    const paddingX = viewportWidth * 0.2;
+    const paddingY = viewportHeight * 0.2;
+    
+    const minX = contentBounds.minX ?? 0;
+    const minY = contentBounds.minY ?? 0;
+    const maxX = contentBounds.maxX ?? contentBounds.width;
+    const maxY = contentBounds.maxY ?? contentBounds.height;
+    
+    const contentWidth = Math.max(maxX - minX, viewportWidth);
+    const contentHeight = Math.max(maxY - minY, viewportHeight);
+    
+    return {
+      width: Math.max(contentWidth + paddingX * 2, viewportWidth),
+      height: Math.max(contentHeight + paddingY * 2, viewportHeight)
+    };
+  }, []);
+
+  // Get transform style with improved rendering
   const getTransformStyle = useCallback(() => {
     return {
-      transform: `translate(${state.pan.x}px, ${state.pan.y}px) scale(${state.zoom})`,
+      transform: `translate3d(${state.pan.x}px, ${state.pan.y}px, 0) scale3d(${state.zoom}, ${state.zoom}, 1)`,
       transformOrigin: '0 0',
-      transition: state.isDragging ? 'none' : 'transform 0.1s ease-out'
-    };
+      transition: state.isDragging ? 'none' : 'transform 0.1s ease-out',
+      willChange: 'transform',
+      backfaceVisibility: 'hidden',
+      perspective: '1000px'
+    } as React.CSSProperties;
   }, [state.zoom, state.pan, state.isDragging]);
 
   return {
@@ -204,6 +235,7 @@ export function useZoomPan({
     fitToView,
     handlePanStart,
     getTransformStyle,
+    calculateCanvasSize,
     canZoomIn: state.zoom < maxZoom,
     canZoomOut: state.zoom > minZoom
   };

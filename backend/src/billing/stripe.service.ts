@@ -44,14 +44,33 @@ export class StripeService {
     this.logger.log(`Creating payment intent for invoice ${createPaymentIntentDto.invoiceId}`);
 
     try {
+      // Validate inputs
+      if (!createPaymentIntentDto.invoiceId) {
+        throw new BadRequestException('Invoice ID is required');
+      }
 
+      if (!createPaymentIntentDto.amount || createPaymentIntentDto.amount <= 0) {
+        throw new BadRequestException('Amount must be greater than 0');
+      }
+
+      if (!createPaymentIntentDto.currency) {
+        throw new BadRequestException('Currency is required');
+      }
+
+      // Validate amount is within Stripe's limits (minimum $0.50, maximum varies by currency)
+      const amountInCents = Math.round(createPaymentIntentDto.amount * 100);
+      if (amountInCents < 50) {
+        throw new BadRequestException('Amount must be at least $0.50');
+      }
+
+      // Create payment intent with Stripe
       const paymentIntent = await this.stripe.paymentIntents.create({
-        amount: Math.round(createPaymentIntentDto.amount * 100), // Convert to cents
+        amount: amountInCents,
         currency: createPaymentIntentDto.currency.toLowerCase(),
         metadata: {
           invoiceId: createPaymentIntentDto.invoiceId,
-          customerEmail: createPaymentIntentDto.customerEmail,
-          customerName: createPaymentIntentDto.customerName,
+          customerEmail: createPaymentIntentDto.customerEmail || '',
+          customerName: createPaymentIntentDto.customerName || '',
           ...createPaymentIntentDto.metadata,
         },
         automatic_payment_methods: {
@@ -59,18 +78,38 @@ export class StripeService {
         },
       });
 
-      this.logger.log(`Payment intent created: ${paymentIntent.id}`);
+      if (!paymentIntent.client_secret) {
+        throw new BadRequestException('Payment intent created but no client secret returned');
+      }
+
+      this.logger.log(`Payment intent created successfully: ${paymentIntent.id} (Status: ${paymentIntent.status})`);
 
       return {
-        clientSecret: paymentIntent.client_secret!,
+        clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
         amount: createPaymentIntentDto.amount,
         currency: createPaymentIntentDto.currency,
         status: paymentIntent.status,
       };
     } catch (error) {
-      this.logger.error(`Failed to create payment intent: ${(error as Error).message}`, (error as Error).stack);
-      throw new BadRequestException('Failed to create payment intent');
+      // Re-throw known exceptions
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      // Handle Stripe-specific errors
+      const stripeError = error as any;
+      if (stripeError?.type === 'StripeInvalidRequestError') {
+        this.logger.error(`Stripe API error: ${stripeError.message}`, stripeError.stack);
+        throw new BadRequestException(`Stripe error: ${stripeError.message}`);
+      }
+
+      // Log and wrap unknown errors
+      this.logger.error(
+        `Failed to create payment intent for invoice ${createPaymentIntentDto.invoiceId}: ${(error as Error).message}`,
+        (error as Error).stack
+      );
+      throw new BadRequestException(`Failed to create payment intent: ${(error as Error).message}`);
     }
   }
 
@@ -175,6 +214,127 @@ export class StripeService {
     } catch (error) {
       this.logger.error(`Webhook signature verification failed: ${(error as Error).message}`);
       throw new BadRequestException('Invalid webhook signature');
+    }
+  }
+
+  /**
+   * Create a Stripe subscription for recurring payments
+   */
+  async createSubscription(
+    customerId: string,
+    priceId: string,
+    metadata?: Record<string, string>
+  ): Promise<Stripe.Subscription> {
+    this.logger.log(`Creating Stripe subscription for customer ${customerId}`);
+
+    try {
+      if (!this.stripe) {
+        throw new BadRequestException('Stripe not configured');
+      }
+
+      const subscription = await this.stripe.subscriptions.create({
+        customer: customerId,
+        items: [{ price: priceId }],
+        metadata: metadata || {},
+        expand: ['latest_invoice.payment_intent'],
+      });
+
+      this.logger.log(`Stripe subscription created: ${subscription.id}`);
+      return subscription;
+    } catch (error) {
+      this.logger.error(`Failed to create Stripe subscription: ${(error as Error).message}`, (error as Error).stack);
+      throw new BadRequestException('Failed to create subscription');
+    }
+  }
+
+  /**
+   * Create a Stripe price for recurring payments
+   */
+  async createPrice(
+    amount: number,
+    currency: string,
+    interval: 'month' | 'year' | 'week' | 'day',
+    productName: string,
+    metadata?: Record<string, string>
+  ): Promise<Stripe.Price> {
+    this.logger.log(`Creating Stripe price: ${amount} ${currency} per ${interval}`);
+
+    try {
+      if (!this.stripe) {
+        throw new BadRequestException('Stripe not configured');
+      }
+
+      // Create or get product
+      const products = await this.stripe.products.list({ limit: 100 });
+      let product = products.data.find(p => p.name === productName);
+
+      if (!product) {
+        product = await this.stripe.products.create({
+          name: productName,
+          metadata: metadata || {},
+        });
+      }
+
+      // Create price
+      const price = await this.stripe.prices.create({
+        unit_amount: Math.round(amount * 100), // Convert to cents
+        currency: currency.toLowerCase(),
+        recurring: {
+          interval: interval,
+        },
+        product: product.id,
+        metadata: metadata || {},
+      });
+
+      this.logger.log(`Stripe price created: ${price.id}`);
+      return price;
+    } catch (error) {
+      this.logger.error(`Failed to create Stripe price: ${(error as Error).message}`, (error as Error).stack);
+      throw new BadRequestException('Failed to create price');
+    }
+  }
+
+  /**
+   * Cancel a Stripe subscription
+   */
+  async cancelSubscription(subscriptionId: string, immediately: boolean = false): Promise<Stripe.Subscription> {
+    this.logger.log(`Canceling Stripe subscription: ${subscriptionId}`);
+
+    try {
+      if (!this.stripe) {
+        throw new BadRequestException('Stripe not configured');
+      }
+
+      const subscription = immediately
+        ? await this.stripe.subscriptions.cancel(subscriptionId)
+        : await this.stripe.subscriptions.update(subscriptionId, {
+            cancel_at_period_end: true,
+          });
+
+      this.logger.log(`Stripe subscription canceled: ${subscriptionId}`);
+      return subscription;
+    } catch (error) {
+      this.logger.error(`Failed to cancel Stripe subscription: ${(error as Error).message}`, (error as Error).stack);
+      throw new BadRequestException('Failed to cancel subscription');
+    }
+  }
+
+  /**
+   * Get a Stripe subscription
+   */
+  async getSubscription(subscriptionId: string): Promise<Stripe.Subscription> {
+    this.logger.log(`Retrieving Stripe subscription: ${subscriptionId}`);
+
+    try {
+      if (!this.stripe) {
+        throw new BadRequestException('Stripe not configured');
+      }
+
+      const subscription = await this.stripe.subscriptions.retrieve(subscriptionId);
+      return subscription;
+    } catch (error) {
+      this.logger.error(`Failed to retrieve Stripe subscription: ${(error as Error).message}`, (error as Error).stack);
+      throw new BadRequestException('Failed to retrieve subscription');
     }
   }
 

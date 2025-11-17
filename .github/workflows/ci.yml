@@ -8,7 +8,7 @@ on:
 
 jobs:
   frontend:
-    name: Frontend Lint, Typecheck & Build
+    name: Frontend Lint, Typecheck, Test & Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -34,6 +34,26 @@ jobs:
       - name: Lint
         run: |
           npm run lint || true
+
+      - name: Run unit tests with coverage
+        run: npm run test:ci
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./frontend/coverage/coverage-final.json
+          flags: frontend
+          name: frontend-coverage
+          fail_ci_if_error: false
+
+      - name: Upload frontend coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/coverage-final.json
+          retention-days: 7
 
       - name: Build
         run: npm run build
@@ -102,3 +122,12 @@ jobs:
 
       - name: Run e2e tests
         run: npm run test:e2e
+
+      - name: Upload backend coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: backend/coverage/coverage-summary.json
+          retention-days: 7
+        continue-on-error: true

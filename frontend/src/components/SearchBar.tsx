@@ -5,7 +5,7 @@
 // with the unified search service and provides real-time search capabilities
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, X, Clock, TrendingUp, Filter, Loader2 } from 'lucide-react';
+import { Search, X, Clock, TrendingUp, Loader2 } from 'lucide-react';
 import { useSearchIntegration } from '@/lib/search-integration';
 import type { SearchResult } from '@/lib/unified-search-service';
 
@@ -424,7 +424,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   // ============================================================================
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative overflow-visible ${className}`}>
       {/* Search Input */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -458,7 +458,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute z-50 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-96 overflow-y-auto"
+          className="absolute z-50 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-48 overflow-y-auto"
         >
           {renderSearchResults()}
           {renderSearchHistory()}

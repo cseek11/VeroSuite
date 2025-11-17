@@ -1,8 +1,8 @@
 {
-  "name": "verosuite",
+  "name": "verofield",
   "version": "1.0.0",
   "private": true,
-  "description": "VeroSuite - Complete Pest Control Operations Platform",
+  "description": "VeroField - Complete Pest Control Operations Platform",
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run start:dev",
@@ -19,5 +19,8 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "sonner": "^2.0.7"
   }
 }

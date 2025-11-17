@@ -1,15 +1,12 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import { Badge, Heading, Text } from '@/components/ui';
+import Checkbox from '@/components/ui/Checkbox';
+import { useCardResponsive } from '@/hooks/useCardResponsive';
 import {
-  Typography,
-  Button,
-  Card,
-  Chip,
-  Checkbox
-} from '@/components/ui/EnhancedUI';
-import {
-  Filter,
   Eye,
   Edit,
   Phone,
@@ -27,6 +24,7 @@ import {
   X,
   AlertTriangle
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 import { useQuery } from '@tanstack/react-query';
 import { Account } from '@/types/enhanced-types';
 import CustomerPagePopup from './CustomerPagePopup';
@@ -38,7 +36,7 @@ interface CustomerListViewProps {
   onViewDetails: (customer: Account) => void;
   onSelectionChange?: (selectedCustomers: Set<string>) => void;
   isLoading?: boolean;
-  error?: any;
+  error?: Error | null;
 }
 
 // Tab types for the navigation
@@ -70,13 +68,20 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [mapPopupCustomerId, setMapPopupCustomerId] = useState<string | null>(null);
   const [selectedCustomerForPopup, setSelectedCustomerForPopup] = useState<string | null>(null);
+  
+  // Get responsive state - we'll need to pass cardId from parent
+  const responsiveState = useCardResponsive({ 
+    cardId: 'customers-page', // This should be passed as prop in real implementation
+    threshold: 50 
+  });
 
   // Fetch account details using enhanced API
   const { data: accountDetails } = useQuery({
     queryKey: ['enhanced-account-details', customers?.length],
     queryFn: async () => {
       if (!customers) return [];
-      console.log('Starting to fetch account details for', Array.isArray(customers) ? customers.length : 0, 'customers');
+      const customersCount = Array.isArray(customers) ? customers.length : 0;
+      logger.debug('Fetching account details', { customersCount }, 'CustomerListView');
       
       // For now, return empty details - will be enhanced when agreements and payments APIs are updated
       const details = Array.isArray(customers) ? customers.map((customer) => ({
@@ -85,7 +90,6 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
         overdue_days: 0
       })) : [];
       
-      console.log('All account details:', details);
       return details;
     },
     enabled: !!customers && Array.isArray(customers) && customers.length > 0,
@@ -95,12 +99,9 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
   const AgreementIndicator = ({ agreementType }: { agreementType: string }) => {
     const config = AGREEMENT_CONFIG[agreementType as AgreementType];
     
-    // Debug log to see what agreement types we're getting
-    console.log('AgreementIndicator render:', { agreementType, config });
-    
     // If config is undefined, use a default fallback
     if (!config) {
-      console.warn(`Unknown agreement type: ${agreementType}`);
+      logger.warn('Unknown agreement type', { agreementType }, 'CustomerListView');
       return (
         <div
           className="cursor-help"
@@ -152,15 +153,17 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
     const hasOutstandingBalance = (customer.ar_balance || 0) > 0;
     const isOverdue = hasOverduePayments || hasOutstandingBalance;
 
-    console.log('AgreementIndicators render:', {
-      customerName: customer.name,
-      agreements,
-      overdueDays,
-      hasOverduePayments,
-      hasOutstandingBalance,
-      arBalance: customer.ar_balance,
-      isOverdue
-    });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('AgreementIndicators render', {
+        customerName: customer.name,
+        agreements,
+        overdueDays,
+        hasOverduePayments,
+        hasOutstandingBalance,
+        arBalance: customer.ar_balance,
+        isOverdue
+      }, 'CustomerListView');
+    }
 
     return (
       <div className="flex items-center gap-1">
@@ -217,6 +220,13 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
       newExpanded.add(customerId);
     }
     setExpandedRows(newExpanded);
+    
+    // Dispatch custom event for auto-scroll
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('customerRowExpanded', {
+        detail: { customerId, isExpanded: newExpanded.has(customerId) }
+      }));
+    }, 100);
   };
 
   // Get selected customers data
@@ -269,12 +279,12 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
         <Card className="p-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-            <Typography variant="h6" className="text-gray-900 mb-2">
+            <Heading level={6} className="text-gray-900 mb-2">
               Loading Customers...
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-gray-600">
               Please wait while we fetch your customer data.
-            </Typography>
+            </Text>
           </div>
         </Card>
       </div>
@@ -288,12 +298,12 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
         <Card className="p-8">
           <div className="text-center">
             <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <Typography variant="h6" className="text-gray-900 mb-2">
+            <Heading level={6} className="text-gray-900 mb-2">
               Error Loading Customers
-            </Typography>
-            <Typography variant="body2" className="text-gray-600 mb-4">
+            </Heading>
+            <Text variant="small" className="text-gray-600 mb-4">
               {error?.message || 'An error occurred while loading customer data.'}
-            </Typography>
+            </Text>
             <Button 
               onClick={() => window.location.reload()} 
               variant="outline"
@@ -308,16 +318,16 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="h-full flex flex-col space-y-4">
 
       {/* Tabbed Navigation (only shown when customers are selected) */}
       {selectedCustomers.size > 0 && (
         <Card className="p-0 sticky-tabs">
           <div className="border-b border-gray-200">
             <div className="flex items-center justify-between px-4 py-3 bg-gray-50">
-              <Typography variant="h6" className="text-gray-900">
+              <Heading level={6} className="text-gray-900">
                 {selectedCustomers.size} Customer{selectedCustomers.size !== 1 ? 's' : ''} Selected
-              </Typography>
+              </Heading>
               <Button
                 variant="outline"
                 size="sm"
@@ -360,46 +370,46 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
            <div className="tab-content">
              {activeTab === 'overview' && (
                <div className="space-y-4">
-                 <Typography variant="h6" className="text-gray-900">
+                 <Heading level={6} className="text-gray-900">
                    Selected Customers Overview
-                 </Typography>
+                 </Heading>
                  <div className="overview-grid">
                    <div className="overview-card blue">
-                     <Typography variant="body2" className="font-medium">
+                     <Text variant="small" className="font-medium">
                        Total Customers
-                     </Typography>
-                     <Typography variant="h4">
+                     </Text>
+                     <Heading level={4}>
                        {selectedCustomersData.length}
-                     </Typography>
+                     </Heading>
                    </div>
                    <div className="overview-card green">
-                     <Typography variant="body2" className="font-medium">
+                     <Text variant="small" className="font-medium">
                        Commercial
-                     </Typography>
-                     <Typography variant="h4">
+                     </Text>
+                     <Heading level={4}>
                        {selectedCustomersData.filter(c => c.account_type === 'commercial').length}
-                     </Typography>
+                     </Heading>
                    </div>
                    <div className="overview-card purple">
-                     <Typography variant="body2" className="font-medium">
+                     <Text variant="small" className="font-medium">
                        Residential
-                     </Typography>
-                     <Typography variant="h4">
+                     </Text>
+                     <Heading level={4}>
                        {selectedCustomersData.filter(c => c.account_type === 'residential').length}
-                     </Typography>
+                     </Heading>
                    </div>
                  </div>
                  <div className="overview-card">
-                   <Typography variant="body2" className="text-gray-600 mb-2">
+                   <Text variant="small" className="text-gray-600 mb-2">
                      Selected Customers:
-                   </Typography>
+                   </Text>
                    <div className="space-y-1">
                      {selectedCustomersData.map(customer => (
                        <div key={customer.id} className="flex items-center justify-between text-sm">
                          <span className="font-medium">{customer.name}</span>
-                         <Chip variant={customer.account_type === 'commercial' ? 'primary' : 'success'} className="text-xs">
+                         <Badge variant={customer.account_type === 'commercial' ? 'default' : 'secondary'} className="text-xs">
                            {customer.account_type}
-                         </Chip>
+                         </Badge>
                        </div>
                      ))}
                    </div>
@@ -410,48 +420,48 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
             {activeTab === 'jobs' && (
               <div className="text-center py-8">
                 <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <Typography variant="h6" className="text-gray-900 mb-2">
+                <Heading level={6} className="text-gray-900 mb-2">
                   Jobs & Service History
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                </Heading>
+                <Text variant="small" className="text-gray-600">
                   Service history for selected customers will be displayed here.
-                </Typography>
+                </Text>
               </div>
             )}
             
             {activeTab === 'billing' && (
               <div className="text-center py-8">
                 <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <Typography variant="h6" className="text-gray-900 mb-2">
+                <Heading level={6} className="text-gray-900 mb-2">
                   Billing & AR Information
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                </Heading>
+                <Text variant="small" className="text-gray-600">
                   Billing and accounts receivable data for selected customers will be displayed here.
-                </Typography>
+                </Text>
               </div>
             )}
             
             {activeTab === 'notes' && (
               <div className="text-center py-8">
                 <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <Typography variant="h6" className="text-gray-900 mb-2">
+                <Heading level={6} className="text-gray-900 mb-2">
                   Notes & Communications
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                </Heading>
+                <Text variant="small" className="text-gray-600">
                   Notes and communication history for selected customers will be displayed here.
-                </Typography>
+                </Text>
               </div>
             )}
             
             {activeTab === 'documents' && (
               <div className="text-center py-8">
                 <FolderOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <Typography variant="h6" className="text-gray-900 mb-2">
+                <Heading level={6} className="text-gray-900 mb-2">
                   Documents
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                </Heading>
+                <Text variant="small" className="text-gray-600">
                   Documents and files for selected customers will be displayed here.
-                </Typography>
+                </Text>
               </div>
             )}
           </div>
@@ -459,24 +469,24 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
       )}
 
       {/* Customer List Table */}
-      <Card className="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full customer-table">
+      <Card className="p-0 flex-1 flex flex-col max-h-full">
+        <div className="flex-1">
+          <table className={`w-full customer-table ${responsiveState.isMobile ? 'table-auto' : 'table-fixed'}`}>
             <thead>
               <tr>
-                <th>
+                <th className={responsiveState.isMobile ? 'w-8' : ''}>
                   <Checkbox
                     checked={allSelected}
                     onChange={(checked) => handleSelectAll(checked)}
                     className="h-4 w-4"
                   />
                 </th>
-                <th>Customer</th>
-                <th>Type</th>
-                <th className="contact-column">Contact</th>
-                <th className="location-column">Location</th>
-                <th>AR Balance</th>
-                <th>Actions</th>
+                <th className={responsiveState.isMobile ? 'w-32' : ''}>Customer</th>
+                {!responsiveState.isMobile && <th>Type</th>}
+                {!responsiveState.isMobile && <th className="contact-column">Contact</th>}
+                {!responsiveState.isMobile && <th className="location-column">Location</th>}
+                {!responsiveState.isMobile && <th>AR Balance</th>}
+                <th className={responsiveState.isMobile ? 'w-16' : ''}>Actions</th>
                 <th className="w-8"></th>
               </tr>
             </thead>
@@ -505,23 +515,26 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
                           >
                             <div className="flex items-center gap-2">
                               <Building className="h-4 w-4 text-blue-500" />
-                              <Typography variant="body2" className="font-medium text-gray-900">
+                              <Text variant="small" className="font-medium text-gray-900">
                                 {customer.name}
-                              </Typography>
+                              </Text>
                             </div>
                             <div className="mt-1">
                               <AgreementIndicators customer={customer} />
                             </div>
                           </button>
                         </td>
+                       {!responsiveState.isMobile && (
                        <td>
-                         <Chip
-                           variant={customer.account_type === 'commercial' ? 'primary' : 'success'}
+                         <Badge
+                           variant={customer.account_type === 'commercial' ? 'default' : 'secondary'}
                            className="text-xs"
                          >
                            {customer.account_type}
-                         </Chip>
+                         </Badge>
                        </td>
+                       )}
+                       {!responsiveState.isMobile && (
                        <td className="contact-column">
                          <div className="space-y-1">
                            <div className="flex items-center gap-1 text-sm text-gray-600">
@@ -534,12 +547,16 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
                            </div>
                          </div>
                        </td>
+                       )}
+                       {!responsiveState.isMobile && (
                        <td className="location-column">
                          <div className="flex items-center gap-1 text-sm text-gray-600">
                            <MapPin className="h-3 w-3" />
                            <span>{customer.city}, {customer.state}</span>
                          </div>
                        </td>
+                       )}
+                       {!responsiveState.isMobile && (
                        <td>
                          <div className="flex items-center gap-1">
                            <DollarSign className="h-3 w-3 text-gray-500" />
@@ -548,25 +565,26 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
                            </span>
                          </div>
                        </td>
+                       )}
                        <td>
-                         <div className="action-buttons">
+                         <div className={`action-buttons ${responsiveState.isMobile ? 'flex flex-col gap-1' : 'flex gap-2'}`}>
                            <Button
                              variant="outline"
                              size="sm"
                              onClick={() => onViewHistory(customer)}
-                             className="action-button"
+                             className={`action-button ${responsiveState.isMobile ? 'w-full text-xs px-2 py-1' : ''}`}
                            >
                              <Eye className="h-3 w-3" />
-                             History
+                             {!responsiveState.isMobile && 'History'}
                            </Button>
                            <Button
                              variant="outline"
                              size="sm"
                              onClick={() => onEdit(customer)}
-                             className="action-button"
+                             className={`action-button ${responsiveState.isMobile ? 'w-full text-xs px-2 py-1' : ''}`}
                            >
                              <Edit className="h-3 w-3" />
-                             Edit
+                             {!responsiveState.isMobile && 'Edit'}
                            </Button>
                          </div>
                        </td>
@@ -584,33 +602,36 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
                        </td>
                      </tr>
                      
-                     {/* Expanded Row Content */}
-                     {isExpanded && (
-                       <tr className={`expanded-row expanded-active ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}>
-                         <td colSpan={8}>
-                           <div className="expanded-content">
-                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Expanded Row Content */}
+                      {isExpanded && (
+                        <tr className={`expanded-row expanded-active ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`} data-customer-id={customer.id}>
+                          <td colSpan={8} className="p-0">
+                            <div className="expanded-content max-h-48 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 bg-gray-50">
+                             <div className="flex gap-3">
+                               {/* Left side - Quick Actions and Info */}
+                               <div className="flex-1">
+                                 <div className="grid grid-cols-2 gap-2">
                                <div>
-                                 <Typography variant="body2" className="font-medium text-gray-900 mb-2">
+                                    <Text variant="small" className="font-medium text-gray-900 mb-1 text-xs">
                                    Quick Actions
-                                 </Typography>
-                                                                   <div className="space-y-2">
-                                    <Button variant="outline" size="sm" className="w-full justify-start h-8">
-                                      <Calendar className="h-3 w-3 mr-2" />
-                                      Schedule Service
+                                 </Text>
+                                                                       <div className="grid grid-cols-2 gap-1">
+                                      <Button variant="outline" size="sm" className="justify-start h-5 text-xs px-2">
+                                        <Calendar className="h-3 w-3 mr-1" />
+                                        Schedule
                                     </Button>
-                                    <Button variant="outline" size="sm" className="w-full justify-start h-8">
-                                      <FileText className="h-3 w-3 mr-2" />
-                                      Create Invoice
+                                      <Button variant="outline" size="sm" className="justify-start h-5 text-xs px-2">
+                                        <FileText className="h-3 w-3 mr-1" />
+                                        Invoice
                                     </Button>
-                                    <Button variant="outline" size="sm" className="w-full justify-start h-8">
-                                      <MessageSquare className="h-3 w-3 mr-2" />
-                                      Send Message
+                                      <Button variant="outline" size="sm" className="justify-start h-5 text-xs px-2">
+                                        <MessageSquare className="h-3 w-3 mr-1" />
+                                        Message
                                     </Button>
                                                                          <Button 
                                        variant="outline" 
                                        size="sm" 
-                                       className="w-full justify-start h-8"
+                                        className="justify-start h-5 text-xs px-2"
                                        onClick={() => {
                                          if (mapPopupCustomerId === customer.id) {
                                            setMapPopupCustomerId(null);
@@ -619,38 +640,44 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
                                          }
                                        }}
                                      >
-                                       <MapPin className="h-3 w-3 mr-2" />
-                                       {mapPopupCustomerId === customer.id ? 'Hide Map' : 'View on Map'}
+                                        <MapPin className="h-3 w-3 mr-1" />
+                                        {mapPopupCustomerId === customer.id ? 'Hide' : 'Map'}
                                      </Button>
                                   </div>
                                </div>
-                                                               {mapPopupCustomerId !== customer.id ? (
-                                  <>
+                                   
+                                   {mapPopupCustomerId !== customer.id && (
+                                     <div className="col-span-2 grid grid-cols-2 gap-2">
                                     <div>
-                                      <Typography variant="body2" className="font-medium text-gray-900 mb-2">
+                                         <Text variant="small" className="font-medium text-gray-900 mb-1 text-xs">
                                         Recent Activity
-                                      </Typography>
-                                      <div className="space-y-1 text-sm text-gray-600">
+                                      </Text>
+                                         <div className="space-y-0.5 text-xs text-gray-600">
                                         <div>Last service: 2 weeks ago</div>
                                         <div>Last payment: 1 month ago</div>
                                         <div>Next scheduled: Next week</div>
                                       </div>
                                     </div>
                                     <div>
-                                      <Typography variant="body2" className="font-medium text-gray-900 mb-2">
+                                         <Text variant="small" className="font-medium text-gray-900 mb-1 text-xs">
                                         Notes
-                                      </Typography>
-                                      <div className="text-sm text-gray-600">
+                                      </Text>
+                                         <div className="text-xs text-gray-600">
                                         <p>Customer prefers morning appointments. Has a dog in the backyard.</p>
                                       </div>
                                     </div>
-                                  </>
-                                ) : (
-                                  <div className="col-span-2 relative">
-                                    <div className="flex items-center justify-between mb-2">
-                                      <Typography variant="body2" className="font-medium text-gray-900">
+                                     </div>
+                                   )}
+                                 </div>
+                               </div>
+                               
+                               {/* Right side - Map (when shown) */}
+                               {mapPopupCustomerId === customer.id && (
+                                 <div className="w-48 flex-shrink-0">
+                                   <div className="flex items-center justify-between mb-1">
+                                     <Text variant="small" className="font-medium text-gray-900 text-xs">
                                         Customer Location
-                                      </Typography>
+                                      </Text>
                                                                              <button
                                          onClick={() => setMapPopupCustomerId(null)}
                                          className="p-1 hover:bg-gray-100 rounded transition-colors"
@@ -658,7 +685,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
                                         <X className="h-4 w-4 text-gray-600" />
                                       </button>
                                     </div>
-                                    <div className="w-full h-48 rounded-lg overflow-hidden border border-gray-200">
+                                   <div className="w-full h-32 rounded-lg overflow-hidden border border-gray-200">
                                       {mapPopupCustomer && (
                                         <MapContainer
                                           center={getCustomerCoordinates(mapPopupCustomer)}
@@ -673,9 +700,9 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
                                           <Marker position={getCustomerCoordinates(mapPopupCustomer)}>
                                             <Popup>
                                               <div className="p-2">
-                                                <Typography variant="h6" className="text-gray-900 mb-1">
+                                                <Heading level={6} className="text-gray-900 mb-1">
                                                   {mapPopupCustomer.name}
-                                                </Typography>
+                                                </Heading>
                                                 <div className="text-sm text-gray-600">
                                                   <div>{mapPopupCustomer.city}, {mapPopupCustomer.state}</div>
                                                   <div>{mapPopupCustomer.email}</div>
@@ -704,12 +731,12 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
         {filteredCustomers.length === 0 && (
           <div className="text-center py-8">
             <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <Typography variant="h6" className="text-gray-900 mb-2">
+            <Heading level={6} className="text-gray-900 mb-2">
               No Customers Found
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-gray-600">
               No customers have been added yet.
-            </Typography>
+            </Text>
           </div>
                  )}
                </Card>

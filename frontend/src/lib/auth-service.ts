@@ -1,7 +1,17 @@
+import { logger } from '@/utils/logger';
+
 // Authentication service for backend API integration
 class AuthService {
-  private baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
-  private tokenKey = 'verosuite_auth';
+  private baseUrl: string;
+  private tokenKey = 'verofield_auth';
+
+  constructor() {
+    // Normalize base URL to ensure it targets versioned API (/api/v1)
+    const rawBase = (import.meta.env.VITE_API_BASE_URL as string | undefined) || 'http://localhost:3001/api';
+    const trimmed = rawBase.replace(/\/+$/, '');
+    // If base already ends with /v{n}, keep it; otherwise append /v1
+    this.baseUrl = /\/v\d+$/.test(trimmed) ? trimmed : `${trimmed}/v1`;
+  }
 
   /**
    * Login with email and password
@@ -30,8 +40,8 @@ class AuthService {
         user: data.user,
         token: data.access_token,
       };
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (error: unknown) {
+      logger.error('Login error', error, 'auth-service');
       throw error;
     }
   }
@@ -67,8 +77,8 @@ class AuthService {
         user: data.user,
         token: data.access_token,
       };
-    } catch (error) {
-      console.error('Token exchange error:', error);
+    } catch (error: unknown) {
+      logger.error('Token exchange error', error, 'auth-service');
       throw error;
     }
   }
@@ -122,7 +132,9 @@ class AuthService {
       if (!response.ok) {
         // If refresh endpoint doesn't exist (404) or fails, try to get a new token
         if (response.status === 404) {
-          console.log('🔄 Refresh endpoint not available, attempting to get new token...');
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('Refresh endpoint not available, attempting to get new token', {}, 'auth-service');
+          }
           return await this.getNewToken();
         }
         throw new Error('Token refresh failed');
@@ -138,8 +150,8 @@ class AuthService {
       }));
       
       return newToken;
-    } catch (error) {
-      console.error('Token refresh error:', error);
+    } catch (error: unknown) {
+      logger.error('Token refresh error', error, 'auth-service');
       // If refresh fails, try to get a new token
       return await this.getNewToken();
     }
@@ -152,11 +164,13 @@ class AuthService {
     try {
       // Try to get stored credentials (this would need to be implemented)
       // For now, we'll return null to force re-login
-      console.log('🔄 No stored credentials available, user needs to re-login');
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('No stored credentials available, user needs to re-login', {}, 'auth-service');
+      }
       this.logout();
       return null;
-    } catch (error) {
-      console.error('Failed to get new token:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to get new token', error, 'auth-service');
       this.logout();
       return null;
     }
@@ -190,19 +204,27 @@ class AuthService {
 
     // Check if token is expired and refresh if needed
     if (this.isTokenExpired(token)) {
-      console.log('🔄 Token expired, attempting refresh...');
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Token expired, attempting refresh', {}, 'auth-service');
+      }
       try {
         const newToken = await this.refreshToken();
         if (newToken) {
           token = newToken;
-          console.log('✅ Token refreshed successfully');
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('Token refreshed successfully', {}, 'auth-service');
+          }
         } else {
           // If refresh fails, try to extend the current token for development
-          console.log('🔄 Refresh failed, extending current token for development...');
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('Refresh failed, extending current token for development', {}, 'auth-service');
+          }
           token = this.extendTokenForDevelopment(token);
         }
-      } catch (error) {
-        console.log('🔄 Token refresh failed, extending for development:', error);
+      } catch (error: unknown) {
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Token refresh failed, extending for development', { error }, 'auth-service');
+        }
         token = this.extendTokenForDevelopment(token);
       }
     }
@@ -236,10 +258,12 @@ class AuthService {
         user: payload
       }));
       
-      console.log('✅ Token extended for development');
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Token extended for development', {}, 'auth-service');
+      }
       return newToken;
-    } catch (error) {
-      console.error('Failed to extend token:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to extend token', error, 'auth-service');
       return token;
     }
   }

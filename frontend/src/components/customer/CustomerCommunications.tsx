@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MessageSquare, Phone, Mail, Send, Plus, Clock, CheckCircle } from 'lucide-react';
 import { Button, Typography, Input, Textarea } from '@/components/ui';
+import { logger } from '@/utils/logger';
 
 interface CustomerCommunicationsProps {
   customerId: string;
@@ -86,7 +87,7 @@ const CustomerCommunications: React.FC<CustomerCommunicationsProps> = ({ custome
   const handleSendMessage = () => {
     if (newMessage.trim()) {
       // Here you would typically send the message via API
-      console.log('Sending message:', newMessage);
+      logger.debug('Sending message', { messageLength: newMessage.length }, 'CustomerCommunications');
       setNewMessage('');
     }
   };

@@ -6,37 +6,34 @@ import {
   CustomerProfile, 
   CustomerContact 
 } from '@/types/enhanced-types';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import {
-  Card,
-  Button,
-  Input,
-  Typography,
-  Alert,
-  Chip,
-  Avatar,
-  Tooltip,
-  Modal
-} from '@/components/ui/EnhancedUI';
+  Badge,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Heading,
+  Text,
+} from '@/components/ui';
+import { DialogFooter } from '@/components/ui/Dialog';
 import {
   User,
   Phone,
   Mail,
   MapPin,
-  Calendar,
   Building,
   Edit,
   Camera,
   Save,
-  X,
   Star,
   AlertTriangle,
-  CheckCircle,
-  Clock,
-  DollarSign,
-  TrendingUp,
   CreditCard
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { logger } from '@/utils/logger';
 
 interface CustomerProfileCardProps {
   customer: Account;
@@ -88,7 +85,7 @@ export default function CustomerProfileCard({
   const uploadPhoto = useMutation({
     mutationFn: async (file: File) => {
       // Placeholder - will be implemented when photo API is enhanced
-      console.log('Uploading photo:', file);
+      logger.debug('Uploading photo', { fileName: file.name, fileSize: file.size }, 'CustomerProfileCard');
       return { success: true };
     },
     onSuccess: () => {
@@ -139,24 +136,20 @@ export default function CustomerProfileCard({
       <Card className="p-6">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Avatar className="w-16 h-16">
-              <User className="w-8 h-8" />
-            </Avatar>
+            <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center">
+              <User className="w-8 h-8 text-purple-600" />
+            </div>
             <div>
-              <Typography variant="h4" className="text-gray-900">
+              <Heading level={4} className="text-slate-900">
                 {customer.name}
-              </Typography>
+              </Heading>
               <div className="flex items-center gap-4 mt-1">
-                <Chip 
-                  variant="outline" 
-                  color={getStatusColor(customer.status)}
-                  className="text-sm"
-                >
+                <Badge variant="outline" className="text-sm">
                   {customer.status.replace('_', ' ').toUpperCase()}
-                </Chip>
-                <Typography variant="body2" className="text-gray-600">
+                </Badge>
+                <Text variant="small" className="text-slate-600">
                   {customer.account_type} • Customer since {customerSince.toLocaleDateString()}
-                </Typography>
+                </Text>
               </div>
             </div>
           </div>
@@ -202,42 +195,42 @@ export default function CustomerProfileCard({
         {/* Contact Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="space-y-4">
-            <Typography variant="h6" className="text-gray-900">
+            <Heading level={6} className="text-slate-900">
               Contact Information
-            </Typography>
+            </Heading>
             
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-gray-500" />
+                <Phone className="w-4 h-4 text-slate-500" />
                 {isEditing ? (
                   <Input
                     value={editedCustomer.phone || ''}
-                    onChange={(value) => setEditedCustomer(prev => ({ ...prev, phone: value }))}
+                    onChange={(e) => setEditedCustomer(prev => ({ ...prev, phone: e.target.value }))}
                     placeholder="Phone number"
                     className="flex-1"
                   />
                 ) : (
-                  <span className="text-gray-700">{customer.phone || 'Not provided'}</span>
+                  <span className="text-slate-700">{customer.phone || 'Not provided'}</span>
                 )}
               </div>
               
               <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-gray-500" />
+                <Mail className="w-4 h-4 text-slate-500" />
                 {isEditing ? (
                   <Input
                     value={editedCustomer.email || ''}
-                    onChange={(value) => setEditedCustomer(prev => ({ ...prev, email: value }))}
+                    onChange={(e) => setEditedCustomer(prev => ({ ...prev, email: e.target.value }))}
                     placeholder="Email address"
                     className="flex-1"
                   />
                 ) : (
-                  <span className="text-gray-700">{customer.email || 'Not provided'}</span>
+                  <span className="text-slate-700">{customer.email || 'Not provided'}</span>
                 )}
               </div>
               
               <div className="flex items-center gap-3">
-                <MapPin className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700">
+                <MapPin className="w-4 h-4 text-slate-500" />
+                <span className="text-slate-700">
                   {customer.address ? `${customer.address}, ${customer.city}, ${customer.state} ${customer.zip_code}` : 'Address not provided'}
                 </span>
               </div>
@@ -245,36 +238,36 @@ export default function CustomerProfileCard({
           </div>
 
           <div className="space-y-4">
-            <Typography variant="h6" className="text-gray-900">
+            <Heading level={6} className="text-slate-900">
               Business Information
-            </Typography>
+            </Heading>
             
             <div className="space-y-3">
               {profile?.business_name && (
                 <div className="flex items-center gap-3">
-                  <Building className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-700">{profile.business_name}</span>
+                  <Building className="w-4 h-4 text-slate-500" />
+                  <span className="text-slate-700">{profile.business_name}</span>
                 </div>
               )}
               
               {profile?.business_type && (
                 <div className="flex items-center gap-3">
-                  <Building className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-700">{profile.business_type}</span>
+                  <Building className="w-4 h-4 text-slate-500" />
+                  <span className="text-slate-700">{profile.business_type}</span>
                 </div>
               )}
               
               {primaryContact && (
                 <div className="flex items-center gap-3">
-                  <User className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-700">Primary: {primaryContact.name}</span>
+                  <User className="w-4 h-4 text-slate-500" />
+                  <span className="text-slate-700">Primary: {primaryContact.name}</span>
                 </div>
               )}
               
               {emergencyContact && (
                 <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-700">Emergency: {emergencyContact.phone}</span>
+                  <AlertTriangle className="w-4 h-4 text-slate-500" />
+                  <span className="text-slate-700">Emergency: {emergencyContact.phone}</span>
                 </div>
               )}
             </div>
@@ -283,100 +276,99 @@ export default function CustomerProfileCard({
 
         {/* Customer Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <Typography variant="h4" className="text-purple-600 font-bold">
+          <div className="text-center p-4 bg-slate-50 rounded-lg">
+            <Heading level={4} className="text-purple-600 font-bold">
               {customerStats.totalServices}
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-slate-600">
               Total Services
-            </Typography>
+            </Text>
           </div>
           
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <Typography variant="h4" className="text-green-600 font-bold">
+          <div className="text-center p-4 bg-slate-50 rounded-lg">
+            <Heading level={4} className="text-green-600 font-bold">
               {customerStats.activeContracts}
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-slate-600">
               Active Contracts
-            </Typography>
+            </Text>
           </div>
           
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
+          <div className="text-center p-4 bg-slate-50 rounded-lg">
             <div className="flex items-center justify-center gap-1">
               <Star className="w-4 h-4 text-yellow-500" />
-              <Typography variant="h4" className="text-yellow-600 font-bold">
+              <Heading level={4} className="text-yellow-600 font-bold">
                 {customerStats.satisfactionScore}
-              </Typography>
+              </Heading>
             </div>
-            <Typography variant="body2" className="text-gray-600">
+            <Text variant="small" className="text-slate-600">
               Satisfaction
-            </Typography>
+            </Text>
           </div>
           
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <Typography variant="h4" className="text-blue-600 font-bold">
+          <div className="text-center p-4 bg-slate-50 rounded-lg">
+            <Heading level={4} className="text-blue-600 font-bold">
               ${customerStats.lifetimeValue.toLocaleString()}
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-slate-600">
               Lifetime Value
-            </Typography>
+            </Text>
           </div>
         </div>
 
         {/* Risk Assessment */}
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+        <div className="mt-6 p-4 bg-slate-50 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
-              <Typography variant="h6" className="text-gray-900">
+              <Heading level={6} className="text-slate-900">
                 Churn Risk Assessment
-              </Typography>
-              <Typography variant="body2" className="text-gray-600">
+              </Heading>
+              <Text variant="small" className="text-slate-600">
                 Based on service history and engagement
-              </Typography>
+              </Text>
             </div>
-            <Chip 
-              variant="outline" 
-              color={getChurnRiskColor(customerStats.churnRisk)}
-              className="text-sm font-medium"
-            >
+            <Badge variant="outline" className="text-sm font-medium">
               {customerStats.churnRisk.toUpperCase()} RISK
-            </Chip>
+            </Badge>
           </div>
         </div>
       </Card>
 
-      {/* Photo Upload Modal */}
-      <Modal
-        isOpen={showPhotoModal}
-        onClose={() => setShowPhotoModal(false)}
-        title="Upload Customer Photo"
+      {/* Photo Upload Dialog */}
+      <Dialog
+        open={showPhotoModal}
+        onOpenChange={setShowPhotoModal}
       >
-        <div className="space-y-4">
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setSelectedPhoto(e.target.files?.[0] || null)}
-              className="hidden"
-              id="photo-upload"
-            />
-            <label htmlFor="photo-upload" className="cursor-pointer">
-              <Camera className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-              <Typography variant="body2" className="text-gray-600">
-                Click to select a photo or drag and drop
-              </Typography>
-            </label>
-          </div>
-          
-          {selectedPhoto && (
-            <div className="text-center">
-              <Typography variant="body2" className="text-gray-600">
-                Selected: {selectedPhoto.name}
-              </Typography>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Upload Customer Photo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setSelectedPhoto(e.target.files?.[0] || null)}
+                className="hidden"
+                id="photo-upload"
+              />
+              <label htmlFor="photo-upload" className="cursor-pointer">
+                <Camera className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                <Text variant="small" className="text-slate-600">
+                  Click to select a photo or drag and drop
+                </Text>
+              </label>
             </div>
-          )}
-          
-          <div className="flex justify-end gap-2">
+            
+            {selectedPhoto && (
+              <div className="text-center">
+                <Text variant="small" className="text-slate-600">
+                  Selected: {selectedPhoto.name}
+                </Text>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
             <Button
               variant="outline"
               onClick={() => setShowPhotoModal(false)}
@@ -390,9 +382,9 @@ export default function CustomerProfileCard({
             >
               Upload Photo
             </Button>
-          </div>
-        </div>
-      </Modal>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

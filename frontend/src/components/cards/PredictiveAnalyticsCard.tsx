@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import PredictiveAnalyticsEngine from '@/components/analytics/PredictiveAnalyticsEngine';
+import { logger } from '@/utils/logger';
 
 const PredictiveAnalyticsCard: React.FC = () => {
   const [showAnalytics, setShowAnalytics] = useState(false);
@@ -43,7 +44,7 @@ const PredictiveAnalyticsCard: React.FC = () => {
               <PredictiveAnalyticsEngine 
                 showAdvanced={true}
                 onPredictionSelect={(prediction) => {
-                  console.log('Selected prediction:', prediction);
+                  logger.debug('Selected prediction', { prediction }, 'PredictiveAnalyticsCard');
                 }}
               />
             </div>
@@ -55,6 +56,12 @@ const PredictiveAnalyticsCard: React.FC = () => {
 };
 
 export default PredictiveAnalyticsCard;
+
+
+
+
+
+
 
 
 

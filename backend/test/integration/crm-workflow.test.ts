@@ -7,13 +7,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../../src/app.module';
-import { TestDatabase, MockFactory, PerformanceTestUtils } from '../setup/enterprise-setup';
+import { TestDatabase, MockFactory } from '../setup/enterprise-setup';
+import { JwtService } from '@nestjs/jwt';
 
 describe('CRM Workflow Integration Tests', () => {
   let app: INestApplication;
   let testDb: TestDatabase;
   let authToken: string;
-  let tenantId: string;
   let customerId: string;
   let workOrderId: string;
   let technicianId: string;
@@ -28,7 +28,17 @@ describe('CRM Workflow Integration Tests', () => {
 
     testDb = TestDatabase.getInstance();
     await testDb.setup();
-    await testDb.seedTestData();
+    const { testUser, testTenant } = await testDb.seedTestData();
+
+    // Generate JWT token for test user
+    const jwtService = moduleFixture.get<JwtService>(JwtService);
+    authToken = jwtService.sign({
+      userId: testUser.id,
+      email: testUser.email,
+      tenantId: testTenant.id,
+      role: testUser.role,
+      permissions: testUser.permissions
+    });
   });
 
   afterAll(async () => {
@@ -185,7 +195,7 @@ describe('CRM Workflow Integration Tests', () => {
         .expect(200);
 
       const tenant2Customers = tenant2CustomersResponse.body.customers;
-      expect(tenant2Customers.find(c => c.id === tenant1CustomerId)).toBeUndefined();
+      expect(tenant2Customers.find((c: any) => c.id === tenant1CustomerId)).toBeUndefined();
     });
   });
 

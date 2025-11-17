@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { 
-  CreateWorkOrderRequest, 
+  CreateWorkOrderRequest,
+  UpdateWorkOrderRequest,
   WorkOrderStatus, 
   WorkOrderPriority 
 } from '@/types/work-orders';
 import { 
-  Calendar, 
-  User, 
-  Clock, 
   DollarSign, 
-  FileText, 
   AlertCircle,
   Save,
   X
@@ -20,7 +17,10 @@ import {
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
+import CustomerSearchSelector from '@/components/ui/CustomerSearchSelector';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { logger } from '@/utils/logger';
+import { enhancedApi } from '@/lib/enhanced-api';
 
 // Form validation schema
 const workOrderSchema = z.object({
@@ -71,12 +71,10 @@ export default function WorkOrderForm({
   isLoading = false,
   mode = 'create'
 }: WorkOrderFormProps) {
-  const [customers, setCustomers] = useState<Customer[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
-  const [loadingCustomers, setLoadingCustomers] = useState(true);
   const [loadingTechnicians, setLoadingTechnicians] = useState(true);
-  const [customerSearch, setCustomerSearch] = useState('');
   const [technicianSearch, setTechnicianSearch] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   const {
     control,
@@ -84,9 +82,12 @@ export default function WorkOrderForm({
     formState: { errors, isDirty },
     watch,
     setValue,
-    reset
+    reset,
+    trigger
   } = useForm<WorkOrderFormData>({
     resolver: zodResolver(workOrderSchema),
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
     defaultValues: {
       customer_id: initialData?.customer_id || '',
       assigned_to: initialData?.assigned_to || '',
@@ -105,227 +106,90 @@ export default function WorkOrderForm({
   const selectedTechnicianId = watch('assigned_to');
   const scheduledDate = watch('scheduled_date');
 
-  // Load customers
-  useEffect(() => {
-    const loadCustomers = async () => {
-      try {
-        setLoadingCustomers(true);
-        // Get token from possible locations
-        const getAuthToken = (): string | null => {
-          try {
-            const authData = localStorage.getItem('verosuite_auth');
-            if (authData) {
-              const parsed = JSON.parse(authData);
-              // try common shapes
-              if (typeof parsed?.token === 'string') return parsed.token;
-              if (typeof parsed?.accessToken === 'string') return parsed.accessToken;
-              if (typeof parsed?.state?.token === 'string') return parsed.state.token;
-              if (typeof parsed?.state?.accessToken === 'string') return parsed.state.accessToken;
-            }
-          } catch (e) {
-            console.error('Error parsing verosuite_auth:', e);
-          }
-          const direct = localStorage.getItem('jwt');
-          return direct || null;
-        };
-
-        const token = getAuthToken();
-
-        const response = await fetch('http://localhost:3001/api/v1/crm/accounts', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'x-tenant-id': localStorage.getItem('tenantId') || '7193113e-ece2-4f7b-ae8c-176df4367e28',
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          // Try to load current auth user to backfill names when tech.user is omitted
-          let authUser: any = null;
-          try {
-            const authRaw = localStorage.getItem('verosuite_auth');
-            if (authRaw) {
-              const parsed = JSON.parse(authRaw);
-              authUser = parsed.user || parsed.profile || parsed.state?.user || null;
-            }
-          } catch {}
-          setCustomers(data || []);
-        } else if (response.status === 401) {
-          console.warn('Unauthorized while loading customers (401).');
-          setCustomers([]);
-        } else {
-          console.error('Failed to load customers');
-        }
-      } catch (error) {
-        console.error('Error loading customers:', error);
-      } finally {
-        setLoadingCustomers(false);
-      }
-    };
-
-    loadCustomers();
-  }, []);
-
-  // Load technicians
+  // Load technicians using enhancedApi
   useEffect(() => {
     const loadTechnicians = async () => {
       try {
-        console.log('🔧 Starting technician load...');
+        logger.debug('Starting technician load', {}, 'WorkOrderForm');
         setLoadingTechnicians(true);
         
-        // Get token from possible locations
-        const getAuthToken = (): string | null => {
-          try {
-            const authData = localStorage.getItem('verosuite_auth');
-            if (authData) {
-              const parsed = JSON.parse(authData);
-              if (typeof parsed?.token === 'string') return parsed.token;
-              if (typeof parsed?.accessToken === 'string') return parsed.accessToken;
-              if (typeof parsed?.state?.token === 'string') return parsed.state.token;
-              if (typeof parsed?.state?.accessToken === 'string') return parsed.state.accessToken;
-            }
-          } catch (e) {
-            console.error('Error parsing verosuite_auth:', e);
-          }
-          const direct = localStorage.getItem('jwt');
-          return direct || null;
-        };
-        const token = getAuthToken();
-
-        const tenantId = localStorage.getItem('tenantId') || '7193113e-ece2-4f7b-ae8c-176df4367e28';
-        console.log('🔧 Making request to technicians API with:', {
-          url: 'http://localhost:3001/api/technicians',
-          token: token ? 'present' : 'missing',
-          tenantId
-        });
-
-        const response = await fetch('http://localhost:3001/api/technicians', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'x-tenant-id': tenantId,
-            'Content-Type': 'application/json',
-          },
-        });
+        // Use enhancedApi.technicians.list() for consistent API access
+        const techniciansData = await enhancedApi.technicians.list();
         
-        console.log('🔧 Response status:', response.status, response.statusText);
+        logger.debug('Technician API response received', { techniciansCount: techniciansData?.length || 0 }, 'WorkOrderForm');
         
-        if (response.ok) {
-          const data = await response.json();
-          console.log('🔧 Technician API response:', data);
-          console.log('🔧 Raw technicians array:', data.technicians);
-          // Try to load current auth user to backfill names when tech.user is omitted
-          let authUser: any = null;
-          try {
-            const authRaw = localStorage.getItem('verosuite_auth');
-            if (authRaw) {
-              const parsed = JSON.parse(authRaw);
-              authUser = parsed.user || parsed.profile || parsed.state?.user || null;
-            }
-          } catch {}
+        // Transform technician data to match our interface
+        const transformedTechnicians: Technician[] = techniciansData?.map((tech: any) => {
+          logger.debug('Processing technician', { techId: tech.id || tech.user_id }, 'WorkOrderForm');
+          const id = tech.id || tech.user_id || '';
+          const email = tech.email || tech.user?.email || '';
+          // Try multiple possible name keys
+          const firstName = tech.first_name || tech.firstName || tech.user?.first_name || tech.user?.firstName || '';
+          const lastName = tech.last_name || tech.lastName || tech.user?.last_name || tech.user?.lastName || '';
+          // Derive fallback name
+          const emailLocal = email && email.includes('@') ? email.split('@')[0] : '';
+          const idTail = id ? id.slice(0, 8) : 'tech';
+          const safeFirst = firstName || (emailLocal ? emailLocal : 'Technician');
+          const safeLast = lastName || (!firstName && id ? idTail : '');
           
-          // Transform technician data to match our interface
-          const transformedTechnicians: Technician[] = data.technicians?.map((tech: any) => {
-            console.log('🔧 Processing technician:', tech);
-            const id = tech.user_id || tech.id || '';
-            const email = tech.email || tech.user?.email || tech.users?.email || '';
-            // Try multiple possible name keys
-            const firstName = tech.first_name || tech.firstName || tech.given_name || tech.givenName || tech.user?.first_name || tech.user?.firstName || tech.users?.first_name || tech.users?.firstName || '';
-            const lastName = tech.last_name || tech.lastName || tech.family_name || tech.familyName || tech.user?.last_name || tech.user?.lastName || tech.users?.last_name || tech.users?.lastName || '';
-            // Derive fallback name
-            const emailLocal = email && email.includes('@') ? email.split('@')[0] : '';
-            const idTail = id ? id.slice(0, 8) : 'tech';
-            let safeFirst = firstName;
-            let safeLast = lastName;
-            let safeEmail = email;
-            // If missing, backfill from current auth user when matching
-            if ((!safeFirst || !safeLast || !safeEmail) && authUser && (authUser.id === id || authUser.user_id === id)) {
-              safeFirst = safeFirst || authUser.first_name || authUser.firstName || '';
-              safeLast = safeLast || authUser.last_name || authUser.lastName || '';
-              safeEmail = safeEmail || authUser.email || '';
-            }
-            safeFirst = safeFirst || (emailLocal ? emailLocal : 'Technician');
-            safeLast = safeLast || (!firstName && id ? idTail : '');
-            return {
-              id,
-              first_name: safeFirst,
-              last_name: safeLast,
-              email: safeEmail,
-              phone: tech.phone || tech.user?.phone || tech.users?.phone || '',
-              skills: ['general'],
-              status: String(tech.status || '').toUpperCase() === 'ACTIVE' ? 'available' : 'off'
-            };
-          }) || [];
-          
-          console.log('🔧 Transformed technicians:', transformedTechnicians);
-          console.log('🔧 Setting technicians state with', transformedTechnicians.length, 'technicians');
-          setTechnicians(transformedTechnicians);
-          // Auto-select if only one technician is available and none selected
-          if (transformedTechnicians.length === 1) {
-            try { setValue('assigned_to', transformedTechnicians[0].id); } catch {}
-          }
-        } else if (response.status === 401) {
-          console.warn('Unauthorized while loading technicians (401). Using mock fallback.');
-          setTechnicians([]);
-        } else {
-          console.error('🔧 Failed to load technicians:', response.status, response.statusText);
-          const errorText = await response.text();
-          console.error('🔧 Error response:', errorText);
-          // Fallback to empty array if API fails
-          console.log('🔧 API failed, using empty technicians list');
-          setTechnicians([]);
+          return {
+            id,
+            first_name: safeFirst,
+            last_name: safeLast,
+            email: email || '',
+            phone: tech.phone || tech.user?.phone || '',
+            skills: ['general'],
+            status: String(tech.status || '').toUpperCase() === 'ACTIVE' ? 'available' : 'off'
+          };
+        }) || [];
+        
+        logger.debug('Technicians transformed', { count: transformedTechnicians.length }, 'WorkOrderForm');
+        setTechnicians(transformedTechnicians);
+        // Auto-select if only one technician is available and none selected
+        if (transformedTechnicians.length === 1) {
+          try { setValue('assigned_to', transformedTechnicians[0].id); } catch {}
         }
       } catch (error) {
-        console.error('🔧 Error loading technicians:', error);
-        // Fallback to empty array on error
-        console.log('🔧 Error occurred, using empty technicians list');
+        logger.error('Error loading technicians', { 
+          error, 
+          errorMessage: error?.message, 
+          errorStatus: error?.status,
+          errorStack: error?.stack 
+        }, 'WorkOrderForm');
         setTechnicians([]);
       } finally {
-        console.log('🔧 Finished loading technicians');
         setLoadingTechnicians(false);
       }
     };
 
     loadTechnicians();
-  }, []);
+  }, [setValue]);
 
-  // Filter customers based on search
-  const filteredCustomers = customers.filter(customer =>
-    customer.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
-    customer.account_type.toLowerCase().includes(customerSearch.toLowerCase())
-  );
+  // Find the selected technician object for display
+  const selectedTechnician = useMemo(() => {
+    return technicians.find(tech => tech.id === selectedTechnicianId);
+  }, [selectedTechnicianId, technicians]);
 
-  // Filter technicians based on search
-  const filteredTechnicians = technicians.filter(technician =>
-    `${technician.first_name} ${technician.last_name}`.toLowerCase().includes(technicianSearch.toLowerCase()) ||
-    technician.email.toLowerCase().includes(technicianSearch.toLowerCase())
-  );
-
-  // Debug logging for technicians
-  console.log('🔧 Current technicians state:', technicians);
-  console.log('🔧 Filtered technicians:', filteredTechnicians);
-  console.log('🔧 Technician search term:', technicianSearch);
-
+  // Handle form submission
   const handleFormSubmit = async (data: WorkOrderFormData) => {
+    logger.debug('Work order form submitted', { data }, 'WorkOrderForm');
     try {
-      const submitData = {
+      // Ensure estimated_duration and service_price are numbers if present
+      const submissionData = {
         ...data,
-        assigned_to: data.assigned_to || undefined,
-        scheduled_date: data.scheduled_date || undefined,
-        notes: data.notes || undefined,
-        service_type: data.service_type || undefined,
-        estimated_duration: data.estimated_duration || undefined,
-        service_price: data.service_price === '' ? undefined : data.service_price,
+        estimated_duration: data.estimated_duration !== undefined && data.estimated_duration !== null && data.estimated_duration !== ''
+          ? Number(data.estimated_duration)
+          : undefined,
+        service_price: data.service_price !== undefined && data.service_price !== null && data.service_price !== ''
+          ? Number(data.service_price)
+          : undefined,
       };
-      
-      await onSubmit(submitData);
+      await onSubmit(submissionData as CreateWorkOrderRequest | UpdateWorkOrderRequest);
+      reset(submissionData); // Reset form with submitted data to mark as not dirty
     } catch (error) {
-      console.error('Form submission error:', error);
+      logger.error('Work order form submission failed', error, 'WorkOrderForm');
     }
   };
-
-  const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
-  const selectedTechnician = technicians.find(t => t.id === selectedTechnicianId);
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -347,97 +211,38 @@ export default function WorkOrderForm({
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
           {/* Customer Selection */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Customer <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <Controller
-                name="customer_id"
-                control={control}
-                render={({ field }) => (
-                  <>
-                    <Input
-                      placeholder="Search customers..."
-                      value={customerSearch}
-                      onChange={(e) => setCustomerSearch(e.target.value)}
-                      className="w-full"
-                    />
-                    {field.value && (
-                      <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-medium text-blue-900">
-                              {selectedCustomer?.name || 'Selected Customer'}
-                            </div>
-                            <div className="text-sm text-blue-700">
-                              {selectedCustomer?.account_type}
-                            </div>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setValue('customer_id', '');
-                              setCustomerSearch('');
-                            }}
-                          >
-                            Change
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                    {customerSearch && !field.value && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                        {loadingCustomers ? (
-                          <div className="p-4 text-center">
-                            <LoadingSpinner text="Loading customers..." />
-                          </div>
-                        ) : filteredCustomers.length > 0 ? (
-                          filteredCustomers.map((customer) => (
-                            <button
-                              key={customer.id}
-                              type="button"
-                              className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
-                              onClick={() => {
-                                setValue('customer_id', customer.id);
-                                setCustomerSearch('');
-                              }}
-                            >
-                              <div className="font-medium text-gray-900">{customer.name}</div>
-                              <div className="text-sm text-gray-600">{customer.account_type}</div>
-                              {customer.phone && (
-                                <div className="text-sm text-gray-500">{customer.phone}</div>
-                              )}
-                            </button>
-                          ))
-                        ) : (
-                          <div className="p-4 text-gray-500 text-center">No customers found</div>
-                        )}
-                      </div>
-                    )}
-                  </>
-                )}
-              />
-            </div>
-            {errors.customer_id && (
-              <p className="text-sm text-red-600 flex items-center gap-1">
-                <AlertCircle className="h-4 w-4" />
-                {errors.customer_id.message}
-              </p>
-            )}
+            <Controller
+              name="customer_id"
+              control={control}
+              render={({ field }) => (
+                <CustomerSearchSelector
+                  value={field.value}
+                  onChange={(customerId, customer) => {
+                    field.onChange(customerId);
+                    setSelectedCustomer(customer as Customer | null);
+                  }}
+                  label="Customer"
+                  required
+                  showSelectedBox={true}
+                  apiSource="direct"
+                  error={errors.customer_id?.message}
+                  placeholder="Search customers..."
+                />
+              )}
+            />
           </div>
 
           {/* Service Type and Priority */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Service Type</label>
+              <label htmlFor="service_type" className="block text-sm font-medium text-gray-700">Service Type</label>
               <Controller
                 name="service_type"
                 control={control}
                 render={({ field }) => (
                   <select
                     {...field}
+                    id="service_type"
                     className="crm-input"
                   >
                     <option value="">Select service type</option>
@@ -454,13 +259,14 @@ export default function WorkOrderForm({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Priority</label>
+              <label htmlFor="priority" className="block text-sm font-medium text-gray-700">Priority</label>
               <Controller
                 name="priority"
                 control={control}
                 render={({ field }) => (
                   <select
                     {...field}
+                    id="priority"
                     className="crm-input"
                   >
                     <option value={WorkOrderPriority.LOW}>Low</option>
@@ -475,7 +281,7 @@ export default function WorkOrderForm({
 
           {/* Description */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
               Description <span className="text-red-500">*</span>
             </label>
             <Controller
@@ -484,6 +290,7 @@ export default function WorkOrderForm({
               render={({ field }) => (
                 <textarea
                   {...field}
+                  id="description"
                   rows={4}
                   className="crm-textarea"
                   placeholder="Describe the work to be performed..."
@@ -500,13 +307,14 @@ export default function WorkOrderForm({
 
           {/* Technician Assignment */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Assigned Technician</label>
+            <label htmlFor="assigned_to" className="block text-sm font-medium text-gray-700">Assigned Technician</label>
             <Controller
               name="assigned_to"
               control={control}
               render={({ field }) => (
                 <select
                   {...field}
+                  id="assigned_to"
                   className="crm-input w-full"
                   disabled={loadingTechnicians}
                 >
@@ -535,13 +343,14 @@ export default function WorkOrderForm({
           {/* Scheduling and Duration */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Scheduled Date & Time</label>
+              <label htmlFor="scheduled_date" className="block text-sm font-medium text-gray-700">Scheduled Date & Time</label>
               <Controller
                 name="scheduled_date"
                 control={control}
                 render={({ field }) => (
                   <Input
                     {...field}
+                    id="scheduled_date"
                     type="datetime-local"
                     className="w-full"
                   />
@@ -550,19 +359,33 @@ export default function WorkOrderForm({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Estimated Duration (minutes)</label>
+              <label htmlFor="estimated_duration" className="block text-sm font-medium text-gray-700">Estimated Duration (minutes)</label>
               <Controller
                 name="estimated_duration"
                 control={control}
                 render={({ field }) => (
                   <Input
                     {...field}
+                    id="estimated_duration"
                     type="number"
                     min="15"
                     max="480"
                     step="15"
                     className="w-full"
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    value={field.value || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === '') {
+                        field.onChange(undefined);
+                      } else {
+                        const numValue = parseInt(value, 10);
+                        field.onChange(isNaN(numValue) ? undefined : numValue);
+                      }
+                    }}
+                    onBlur={() => {
+                      field.onBlur();
+                      trigger('estimated_duration');
+                    }}
                   />
                 )}
               />
@@ -577,7 +400,7 @@ export default function WorkOrderForm({
 
           {/* Service Price */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Service Price</label>
+            <label htmlFor="service_price" className="block text-sm font-medium text-gray-700">Service Price</label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Controller
@@ -586,6 +409,7 @@ export default function WorkOrderForm({
                 render={({ field }) => (
                   <Input
                     {...field}
+                    id="service_price"
                     type="number"
                     min="0"
                     step="0.01"
@@ -614,13 +438,14 @@ export default function WorkOrderForm({
 
           {/* Notes */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Additional Notes</label>
+            <label htmlFor="notes" className="block text-sm font-medium text-gray-700">Additional Notes</label>
             <Controller
               name="notes"
               control={control}
               render={({ field }) => (
                 <textarea
                   {...field}
+                  id="notes"
                   rows={3}
                   className="crm-textarea"
                   placeholder="Any additional information or special instructions..."

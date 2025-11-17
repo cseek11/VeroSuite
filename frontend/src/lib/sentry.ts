@@ -1,11 +1,12 @@
 import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
 import { config } from './config';
+import { logger } from '@/utils/logger';
 
 // Initialize Sentry
 export function initSentry() {
   if (!config.monitoring.sentry.dsn) {
-    console.warn('Sentry DSN not configured - error tracking disabled');
+    logger.warn('Sentry DSN not configured - error tracking disabled', {}, 'sentry');
     return;
   }
 
@@ -29,7 +30,7 @@ export function initSentry() {
     enableTracing: true,
     
     // Error filtering
-    beforeSend(event, hint) {
+    beforeSend(event: any, _hint: any) {
       // Filter out certain errors
       if (event.exception) {
         const exception = event.exception.values?.[0];
@@ -53,7 +54,7 @@ export function initSentry() {
     },
     
     // Breadcrumbs for better debugging
-    beforeBreadcrumb(breadcrumb) {
+    beforeBreadcrumb(breadcrumb: any) {
       // Filter out sensitive data
       if (breadcrumb.category === 'http' && breadcrumb.data) {
         // Remove sensitive headers

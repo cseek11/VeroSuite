@@ -1,0 +1,66 @@
+name: Validate File Organization
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Get PR number
+        id: pr
+        run: |
+          echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate file organization
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+        run: |
+          python .cursor/scripts/validate_file_organization.py \
+            --pr "$PR_NUM" \
+            --out validation.json
+
+      - name: Upload validation artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: file-organization-validation
+          path: validation.json
+          retention-days: 7
+
+      - name: Post validation comment
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ ! -f validation.json ]; then
+            echo "No validation.json found"
+            exit 0
+          fi
+          
+          REPORT=$(jq -r '.report' validation.json)
+          COMPLIANCE=$(jq -r '.compliance' validation.json)
+          
+          if [ "$COMPLIANCE" = "false" ]; then
+            gh pr comment "$PR_NUM" --body "$REPORT" || true
+            # Check for critical/high violations
+            CRITICAL_HIGH=$(jq '[.violations[] | select(.severity == "critical" or .severity == "high")] | length' validation.json)
+            if [ "$CRITICAL_HIGH" -gt 0 ]; then
+              echo "::error::Found $CRITICAL_HIGH critical/high severity file organization violations"
+              exit 1
+            fi
+          else
+            gh pr comment "$PR_NUM" --body "$REPORT" || true
+          fi
+

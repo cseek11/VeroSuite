@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, Eye, EyeOff } from 'lucide-react';
 import { SettingsCard } from '../shared/SettingsCard';
 
 interface ProfileData {

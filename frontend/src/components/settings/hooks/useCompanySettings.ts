@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { company } from '@/lib/enhanced-api';
+import { logger } from '@/utils/logger';
 
 export interface CompanyData {
   company_name: string;
@@ -43,28 +44,19 @@ export const useCompanySettings = () => {
 
   // Update company settings mutation
   const updateCompanyMutation = useMutation({
-    mutationFn: (data: any) => {
-      console.log('🔄 Mutation starting with data:', data);
+    mutationFn: (data: Record<string, unknown>) => {
       return company.updateSettings(data);
     },
     onSuccess: (result) => {
-      console.log('✅ Mutation success:', result);
       queryClient.invalidateQueries({ queryKey: ['company', 'settings'] });
     },
     onError: (error) => {
-      console.error('❌ Mutation error:', error);
-    },
-    onMutate: (variables) => {
-      console.log('🚀 Mutation starting with variables:', variables);
-    },
-    onSettled: (data, error) => {
-      console.log('🏁 Mutation settled - data:', data, 'error:', error);
+      // Error handling is done at component level
     }
   });
 
   // Load company data when fetched
   useEffect(() => {
-    console.log('🔄 useCompanySettings: Raw companySettings from API:', companySettings);
     if (companySettings) {
       const newCompanyData = {
         company_name: companySettings.company_name || '',
@@ -80,7 +72,6 @@ export const useCompanySettings = () => {
         header_logo_url: companySettings.header_logo_url || '',
         invoice_logo_url: companySettings.invoice_logo_url || '',
       };
-      console.log('🔄 useCompanySettings: Setting companyData to:', newCompanyData);
       setCompanyData(newCompanyData);
     }
   }, [companySettings]);
@@ -91,8 +82,6 @@ export const useCompanySettings = () => {
 
   const saveCompanySettings = async () => {
     try {
-      console.log('🚀 Starting company settings save...');
-      
       // Clean data for validation - convert empty strings to undefined for optional fields
       const cleanedData = {
         ...companyData,
@@ -105,19 +94,14 @@ export const useCompanySettings = () => {
         zip_code: companyData.zip_code.trim() || undefined,
       };
 
-      console.log('💾 Attempting to save company data:', cleanedData);
-      
-      // Try direct API call instead of mutation
-      console.log('📡 Making direct API call...');
-      const result = await company.updateSettings(cleanedData);
-      console.log('✅ Direct API call completed:', result);
+      await company.updateSettings(cleanedData);
       
       // Manually invalidate queries
       queryClient.invalidateQueries({ queryKey: ['company', 'settings'] });
       
       return true;
     } catch (error) {
-      console.error('❌ Company settings save failed:', error);
+      logger.error('Company settings save failed', error, 'useCompanySettings');
       throw error;
     }
   };

@@ -7,41 +7,26 @@ import {
   X, 
   Phone, 
   Mail, 
-  MapPin, 
   Calendar, 
   User, 
-  Building, 
   CreditCard, 
   FileText,
   AlertCircle,
   CheckCircle,
   Clock,
-  DollarSign,
-  Shield,
-  Settings,
-  MessageSquare,
-  Home,
-  Briefcase,
-  CreditCard as CreditCardIcon,
-  Wrench,
-  MessageCircle,
-  History
+  Shield
 } from 'lucide-react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { enhancedApi } from '@/lib/enhanced-api';
 import { 
   Account, 
   CustomerProfile, 
-  CustomerContact, 
-  ServiceType as EnhancedServiceType, 
-  CustomerSegment,
-  PaymentMethod as PaymentMethodType
+  CustomerContact
 } from '@/types/enhanced-types';
 import {
   Typography,
   Button,
   Input,
-  Textarea,
   Chip,
   Badge
 } from '@/components/ui';

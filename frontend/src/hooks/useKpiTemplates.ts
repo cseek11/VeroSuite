@@ -1,14 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { enhancedApi } from '@/lib/enhanced-api';
-import { queryKeys, invalidateQueries } from '@/lib/queryClient';
+import { queryKeys } from '@/lib/queryClient';
+import { logger } from '@/utils/logger';
 import type {
-  KpiTemplate,
-  UserKpi,
   CreateKpiTemplateDto,
   UpdateKpiTemplateDto,
   KpiTemplateFilters,
-  UseKpiTemplateDto,
-  KpiTemplateUsageDto
+  UseKpiTemplateDto
 } from '@/types/kpi-templates';
 
 // ============================================================================
@@ -20,17 +18,20 @@ export const useKpiTemplates = (filters: KpiTemplateFilters = {}) => {
   const result = useQuery({
     queryKey: queryKeys.kpiTemplates.list(filters),
     queryFn: () => {
-      console.log('🚀 useKpiTemplates calling API with filters:', filters);
+      logger.debug('useKpiTemplates calling API', { filters }, 'useKpiTemplates');
       return enhancedApi.kpiTemplates.list(filters);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Reduced debug logging for performance
-  console.log('📊 useKpiTemplates result:');
-  console.log('  - data count:', Array.isArray(result.data) ? result.data.length : 'not array');
-  console.log('  - isLoading:', result.isLoading);
-  console.log('  - status:', result.status);
+  // Reduced debug logging for performance (development only)
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('useKpiTemplates result', {
+      dataCount: Array.isArray(result.data) ? result.data.length : 0,
+      isLoading: result.isLoading,
+      status: result.status
+    }, 'useKpiTemplates');
+  }
 
   return result;
 };
@@ -74,8 +75,8 @@ export const useCreateKpiTemplate = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.kpiTemplates.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.kpiTemplates.featured() });
     },
-    onError: (error) => {
-      console.error('Failed to create KPI template:', error);
+    onError: (error: unknown) => {
+      logger.error('Failed to create KPI template', error, 'useKpiTemplates');
     },
   });
 };
@@ -97,7 +98,7 @@ export const useUpdateKpiTemplate = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.kpiTemplates.lists() });
     },
     onError: (error) => {
-      console.error('Failed to update KPI template:', error);
+      logger.error('Failed to update KPI template', error, 'useKpiTemplates');
     },
   });
 };
@@ -115,7 +116,7 @@ export const useDeleteKpiTemplate = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.kpiTemplates.lists() });
     },
     onError: (error) => {
-      console.error('Failed to delete KPI template:', error);
+      logger.error('Failed to delete KPI template', error, 'useKpiTemplates');
     },
   });
 };
@@ -134,7 +135,7 @@ export const useUseKpiTemplate = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.kpiTemplates.popular() });
     },
     onError: (error) => {
-      console.error('Failed to use KPI template:', error);
+      logger.error('Failed to use KPI template', error, 'useKpiTemplates');
     },
   });
 };
@@ -145,7 +146,7 @@ export const useTrackTemplateUsage = () => {
     mutationFn: ({ templateId, action }: { templateId: string; action: string }) =>
       enhancedApi.kpiTemplates.trackUsage(templateId, action),
     onError: (error) => {
-      console.error('Failed to track template usage:', error);
+      logger.error('Failed to track template usage', error, 'useKpiTemplates');
     },
   });
 };
@@ -157,12 +158,11 @@ export const useFavoriteTemplate = () => {
   return useMutation({
     mutationFn: ({ templateId, isFavorited }: { templateId: string; isFavorited: boolean }) => {
       const action = isFavorited ? 'favorited' : 'unfavorited';
-      console.log('💖 API Call - Template ID:', templateId, 'Action:', action);
+      logger.debug('Favorite API call', { templateId, action }, 'useKpiTemplates');
       return enhancedApi.kpiTemplates.trackUsage(templateId, action);
     },
     onSuccess: (data, variables) => {
-      console.log('✅ Favorite mutation successful:', data);
-      console.log('✅ Variables:', variables);
+      logger.debug('Favorite mutation successful', { templateId: variables.templateId, action: variables.isFavorited ? 'favorited' : 'unfavorited' }, 'useKpiTemplates');
       // Invalidate template queries to refresh the data
       queryClient.invalidateQueries({ queryKey: queryKeys.kpiTemplates.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.kpiTemplates.featured() });
@@ -172,7 +172,7 @@ export const useFavoriteTemplate = () => {
       queryClient.invalidateQueries({ queryKey: ['kpi-templates', 'favorite-status', variables.templateId] });
     },
     onError: (error) => {
-      console.error('❌ Failed to favorite/unfavorite template:', error);
+      logger.error('Failed to favorite/unfavorite template', error, 'useKpiTemplates');
     },
   });
 };
@@ -182,7 +182,7 @@ export const useFavoritedTemplates = () => {
   return useQuery({
     queryKey: queryKeys.kpiTemplates.favorites(),
     queryFn: () => {
-      console.log('🚀 useFavoritedTemplates calling API');
+      logger.debug('useFavoritedTemplates calling API', {}, 'useKpiTemplates');
       return enhancedApi.kpiTemplates.getFavorites();
     },
     staleTime: 1 * 60 * 1000, // 1 minute (shorter for favorites)
@@ -210,17 +210,20 @@ export const useUserKpis = (filters: Record<string, any> = {}) => {
   const result = useQuery({
     queryKey: queryKeys.userKpis.list(filters),
     queryFn: () => {
-      console.log('🚀 useUserKpis calling API with filters:', filters);
+      logger.debug('useUserKpis calling API', { filters }, 'useKpiTemplates');
       return enhancedApi.userKpis.list();
     },
     staleTime: 2 * 60 * 1000, // 2 minutes (user KPIs change more frequently)
   });
 
   // Reduced debug logging for performance
-  console.log('📊 useUserKpis result:');
-  console.log('  - data count:', Array.isArray(result.data) ? result.data.length : 'not array');
-  console.log('  - isLoading:', result.isLoading);
-  console.log('  - status:', result.status);
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('useUserKpis result', {
+      dataCount: Array.isArray(result.data) ? result.data.length : 0,
+      isLoading: result.isLoading,
+      status: result.status
+    }, 'useKpiTemplates');
+  }
 
   return result;
 };
@@ -245,7 +248,7 @@ export const useCreateUserKpi = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.userKpis.all });
     },
     onError: (error) => {
-      console.error('Failed to create user KPI:', error);
+      logger.error('Failed to create user KPI', error, 'useKpiTemplates');
     },
   });
 };
@@ -265,7 +268,7 @@ export const useUpdateUserKpi = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.userKpis.lists() });
     },
     onError: (error) => {
-      console.error('Failed to update user KPI:', error);
+      logger.error('Failed to update user KPI', error, 'useKpiTemplates');
     },
   });
 };
@@ -281,7 +284,7 @@ export const useDeleteUserKpi = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.userKpis.lists() });
     },
     onError: (error) => {
-      console.error('Failed to delete user KPI:', error);
+      logger.error('Failed to delete user KPI', error, 'useKpiTemplates');
     },
   });
 };

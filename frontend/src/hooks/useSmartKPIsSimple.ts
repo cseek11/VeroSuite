@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { SmartKPI, KPIConfig, KPIData, KPITrend, EnhancedDashboardMetric } from '@/types/smart-kpis';
+import { SmartKPI, EnhancedDashboardMetric } from '@/types/smart-kpis';
+import { logger } from '@/utils/logger';
 
 // Mock data for development - will be replaced with real API calls
 const mockKPIData: SmartKPI[] = [
@@ -135,8 +136,10 @@ export const useSmartKPIsSimple = () => {
   const enhancedMetrics = mockKPIData.map(convertToEnhancedMetric);
 
   // Debug logging
-  console.log('useSmartKPIsSimple - mockKPIData:', mockKPIData);
-  console.log('useSmartKPIsSimple - enhancedMetrics:', enhancedMetrics);
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('useSmartKPIsSimple - mockKPIData', { mockKPIData }, 'useSmartKPIsSimple');
+    logger.debug('useSmartKPIsSimple - enhancedMetrics', { enhancedMetrics }, 'useSmartKPIsSimple');
+  }
 
   return {
     // Data

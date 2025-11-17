@@ -10,6 +10,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { optimizedSearch, OptimizedSearchResult, SearchOptions, SearchPerformanceMetrics } from '@/lib/optimized-search-service';
+import { logger } from '@/utils/logger';
 
 export interface UseOptimizedSearchOptions extends SearchOptions {
   // Debouncing options
@@ -113,7 +114,7 @@ export const useOptimizedSearch = (
     data: searchData,
     isLoading,
     error,
-    refetch
+    refetch: _refetch
   } = useQuery({
     queryKey,
     queryFn: async () => {
@@ -177,7 +178,9 @@ export const useOptimizedSearch = (
       search(correction);
       setSuggestion(null);
       
-      console.log('Accepted suggestion:', { original: debouncedQuery, correction });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Accepted suggestion', { original: debouncedQuery, correction }, 'useOptimizedSearch');
+      }
     }
   }, [suggestion, debouncedQuery, search]);
 
@@ -188,7 +191,9 @@ export const useOptimizedSearch = (
       await optimizedSearch.learnCorrection(debouncedQuery, suggestion, false);
       setSuggestion(null);
       
-      console.log('Rejected suggestion:', { original: debouncedQuery, suggestion });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Rejected suggestion', { original: debouncedQuery, suggestion }, 'useOptimizedSearch');
+      }
     }
   }, [suggestion, debouncedQuery]);
 
@@ -211,22 +216,22 @@ export const useOptimizedSearch = (
     if (metrics) {
       // Log slow searches for monitoring
       if (metrics.totalTime > 1000) {
-        console.warn('Slow search detected:', {
+        logger.warn('Slow search detected', {
           query: debouncedQuery,
           metrics,
           searchOptions
-        });
+        }, 'useOptimizedSearch');
       }
       
       // Log search patterns for optimization
       if (process.env.NODE_ENV === 'development') {
-        console.log('Search metrics:', {
+        logger.debug('Search metrics', {
           query: debouncedQuery,
           strategy: metrics.searchStrategy,
           time: Math.round(metrics.totalTime),
           results: metrics.resultCount,
           cached: metrics.cacheHit
-        });
+        }, 'useOptimizedSearch');
       }
     }
   }, [metrics, debouncedQuery, searchOptions]);
@@ -302,6 +307,12 @@ export const useSearchMonitoring = () => {
     recordSearch
   };
 };
+
+
+
+
+
+
 
 
 

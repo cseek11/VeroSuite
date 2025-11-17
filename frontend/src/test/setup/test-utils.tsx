@@ -1,24 +1,31 @@
 import React from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// Mock QueryClient and QueryClientProvider
-const MockQueryClient = class {
-  constructor() {}
-};
-
-const MockQueryClientProvider = ({ children }: { children: React.ReactNode }) => {
-  return <div data-testid="query-client-provider">{children}</div>;
-};
+// Create a test QueryClient with default options
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        gcTime: 0,
+      },
+      mutations: {
+        retry: false,
+      },
+    },
+  });
 
 // Create a custom render function that includes providers
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = createTestQueryClient();
   return (
-    <MockQueryClientProvider>
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         {children}
       </BrowserRouter>
-    </MockQueryClientProvider>
+    </QueryClientProvider>
   );
 };
 

@@ -1,27 +1,28 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   TrendingUp,
   TrendingDown,
   Target,
   BarChart3,
   Brain,
-  Calendar,
   AlertTriangle,
   CheckCircle,
   Zap,
   Activity,
   Users,
   DollarSign,
-  Clock,
-  MapPin,
   Thermometer,
   Cloud,
-  Wind,
   Droplets,
-  Sun,
-  Moon
+  Sun
 } from 'lucide-react';
-import { Typography, Chip, Button, Card } from '@/components/ui/EnhancedUI';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import {
+  Badge,
+  Heading,
+  Text,
+} from '@/components/ui';
 import { cn } from '@/lib/utils';
 
 interface PredictionData {
@@ -218,10 +219,10 @@ export default function PredictiveAnalyticsEngine({
 
   const getRiskColor = (risk: string) => {
     switch (risk.toLowerCase()) {
-      case 'low': return 'green';
-      case 'medium': return 'yellow';
-      case 'high': return 'red';
-      default: return 'gray';
+      case 'low': return 'bg-green-100 text-green-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'high': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -289,9 +290,9 @@ export default function PredictiveAnalyticsEngine({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Brain className="h-6 w-6 text-purple-600" />
-          <Typography variant="h4" className="text-gray-900">
+          <Heading level={4} className="text-gray-900">
             Predictive Analytics Engine
-          </Typography>
+          </Heading>
         </div>
         
         <div className="flex items-center gap-2">
@@ -360,44 +361,43 @@ export default function PredictiveAnalyticsEngine({
               <div className="flex items-center gap-3">
                 {getPredictionIcon(prediction.type)}
                 <div>
-                  <Typography variant="h6" className="text-gray-900 mb-1">
+                  <Heading level={6} className="text-gray-900 mb-1">
                     {prediction.title}
-                  </Typography>
-                  <Typography variant="body2" className="text-gray-600">
+                  </Heading>
+                  <Text variant="small" className="text-gray-600">
                     {prediction.timeframe}
-                  </Typography>
+                  </Text>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 {getTrendIcon(prediction.trend)}
-                <Chip
-                  color={getRiskColor(prediction.riskLevel)}
+                <Badge
                   variant="default"
-                  className="text-xs"
+                  className={`text-xs ${getRiskColor(prediction.riskLevel)}`}
                 >
                   {prediction.riskLevel}
-                </Chip>
+                </Badge>
               </div>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <Typography variant="body2" className="text-gray-600">Current</Typography>
-                  <Typography variant="h5" className="font-bold text-gray-900">
+                  <Text variant="small" className="text-gray-600">Current</Text>
+                  <Heading level={5} className="font-bold text-gray-900">
                     {formatValue(prediction.currentValue, prediction.type)}
-                  </Typography>
+                  </Heading>
                 </div>
                 <div className="text-right">
-                  <Typography variant="body2" className="text-gray-600">Predicted</Typography>
-                  <Typography variant="h5" className="font-bold text-purple-600">
+                  <Text variant="small" className="text-gray-600">Predicted</Text>
+                  <Heading level={5} className="font-bold text-purple-600">
                     {formatValue(prediction.predictedValue, prediction.type)}
-                  </Typography>
+                  </Heading>
                 </div>
               </div>
 
               <div className="flex items-center justify-between">
-                <Typography variant="body2" className="text-gray-600">Confidence</Typography>
+                <Text variant="small" className="text-gray-600">Confidence</Text>
                 <div className="flex items-center gap-2">
                   <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div
@@ -405,16 +405,16 @@ export default function PredictiveAnalyticsEngine({
                       style={{ width: `${prediction.confidence}%` }}
                     />
                   </div>
-                  <Typography variant="body2" className="font-medium text-gray-900">
+                  <Text variant="small" className="font-medium text-gray-900">
                     {prediction.confidence}%
-                  </Typography>
+                  </Text>
                 </div>
               </div>
 
               <div>
-                <Typography variant="body2" className="text-gray-600 mb-2">
+                <Text variant="small" className="text-gray-600 mb-2">
                   Key Factors:
-                </Typography>
+                </Text>
                 <div className="flex flex-wrap gap-1">
                   {prediction.factors.slice(0, 2).map((factor, index) => (
                     <span
@@ -443,12 +443,12 @@ export default function PredictiveAnalyticsEngine({
             <div className="flex items-center gap-3">
               {getPredictionIcon(selectedPrediction.type)}
               <div>
-                <Typography variant="h5" className="text-gray-900">
+                <Heading level={5} className="text-gray-900">
                   {selectedPrediction.title}
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                </Heading>
+                <Text variant="small" className="text-gray-600">
                   {selectedPrediction.description}
-                </Typography>
+                </Text>
               </div>
             </div>
             <Button
@@ -462,9 +462,9 @@ export default function PredictiveAnalyticsEngine({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Typography variant="h6" className="text-gray-900 mb-4">
+              <Heading level={6} className="text-gray-900 mb-4">
                 Prediction Details
-              </Typography>
+              </Heading>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Current Value:</span>
@@ -484,28 +484,27 @@ export default function PredictiveAnalyticsEngine({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Risk Level:</span>
-                  <Chip
-                    color={getRiskColor(selectedPrediction.riskLevel)}
+                  <Badge
                     variant="default"
-                    className="text-xs"
+                    className={`text-xs ${getRiskColor(selectedPrediction.riskLevel)}`}
                   >
                     {selectedPrediction.riskLevel}
-                  </Chip>
+                  </Badge>
                 </div>
               </div>
             </div>
 
             <div>
-              <Typography variant="h6" className="text-gray-900 mb-4">
+              <Heading level={6} className="text-gray-900 mb-4">
                 AI Recommendations
-              </Typography>
+              </Heading>
               <div className="space-y-2">
                 {selectedPrediction.recommendations.map((recommendation, index) => (
                   <div key={index} className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <Typography variant="body2" className="text-gray-700">
+                    <Text variant="small" className="text-gray-700">
                       {recommendation}
-                    </Typography>
+                    </Text>
                   </div>
                 ))}
               </div>
@@ -513,25 +512,25 @@ export default function PredictiveAnalyticsEngine({
           </div>
 
           <div className="mt-6">
-            <Typography variant="h6" className="text-gray-900 mb-4">
+            <Heading level={6} className="text-gray-900 mb-4">
               Influencing Factors
-            </Typography>
+            </Heading>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {selectedPrediction.factors.map((factor, index) => (
                 <div key={index} className="flex items-center gap-2 p-3 bg-white rounded-lg border border-gray-200">
                   <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0" />
-                  <Typography variant="body2" className="text-gray-700">
+                  <Text variant="small" className="text-gray-700">
                     {factor}
-                  </Typography>
+                  </Text>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="mt-6 pt-4 border-t border-gray-200">
-            <Typography variant="body2" className="text-gray-500 text-center">
+            <Text variant="small" className="text-gray-500 text-center">
               Last updated: {selectedPrediction.lastUpdated.toLocaleString()}
-            </Typography>
+            </Text>
           </div>
         </Card>
       )}
@@ -539,9 +538,9 @@ export default function PredictiveAnalyticsEngine({
       {/* Advanced ML Controls */}
       {showAdvanced && (
         <Card className="p-6 bg-gradient-to-br from-gray-50 to-blue-50 border-gray-200">
-          <Typography variant="h6" className="text-gray-900 mb-4">
+          <Heading level={6} className="text-gray-900 mb-4">
             Advanced ML Controls
-          </Typography>
+          </Heading>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button variant="outline" className="justify-start">
               <Brain className="h-4 w-4 mr-2" />
@@ -561,6 +560,12 @@ export default function PredictiveAnalyticsEngine({
     </div>
   );
 }
+
+
+
+
+
+
 
 
 

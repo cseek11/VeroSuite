@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/auth';
+import { logger } from '@/utils/logger';
 
 // Types for Phase 2 role-based customization
 export interface FABCustomization {
@@ -64,7 +65,7 @@ export function useFABCustomization() {
       setCustomization(updated);
       
       // In Phase 2, this would save to backend
-      console.log('FAB customization updated:', updated);
+      logger.debug('FAB customization updated', { customization: updated }, 'useFABCustomization');
     }
   };
 

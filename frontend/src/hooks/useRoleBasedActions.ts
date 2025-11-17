@@ -24,13 +24,20 @@ export const useRoleBasedActions = (cardContext?: CardContext) => {
     return user.roles[0]; // Use first role for now
   }, [authStore.user]);
 
-  // Get user's permissions based on role
+  // Get user's permissions from auth store (includes custom permissions already combined by backend)
   const userPermissions = useMemo(() => {
+    const user = authStore.user;
+    // Use permissions directly from the user object, which includes custom permissions
+    // combined with role-based permissions by the backend PermissionsService
+    if (user && user.permissions && Array.isArray(user.permissions)) {
+      return user.permissions;
+    }
+    // Fallback to role-based permissions if user.permissions is not available
     const role = PREDEFINED_ROLES.find(r => r.id === userRole);
     if (!role) return [];
     
     return role.permissions.map(p => `${p.resource}:${p.action}`);
-  }, [userRole]);
+  }, [authStore.user, userRole]);
 
   // Filter actions based on user's role and permissions
   const availableActions = useMemo(() => {

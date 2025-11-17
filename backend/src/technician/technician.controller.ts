@@ -10,7 +10,8 @@ import {
   UseGuards,
   Request,
   HttpCode,
-  HttpStatus
+  HttpStatus,
+  UseInterceptors
 } from '@nestjs/common';
 import { TechnicianService } from './technician.service';
 import { 
@@ -18,12 +19,16 @@ import {
   UpdateTechnicianProfileDto,
   TechnicianQueryDto,
   TechnicianProfileResponseDto,
-  TechnicianListResponseDto
+  TechnicianListResponseDto,
+  GetAvailabilityQueryDto,
+  CreateAvailabilityDto
 } from './dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { DeprecationInterceptor } from '../common/interceptors/deprecation.interceptor';
 
-@Controller('technicians')
+@Controller({ path: 'technicians', version: '1' })
 @UseGuards(JwtAuthGuard)
+@UseInterceptors(DeprecationInterceptor)
 export class TechnicianController {
   constructor(private readonly technicianService: TechnicianService) {}
 
@@ -91,5 +96,53 @@ export class TechnicianController {
   async getAvailabilityData(@Request() req: any) {
     const tenantId = req.tenantId;
     return this.technicianService.getAvailabilityData(tenantId);
+  }
+
+  // ===== AVAILABILITY MANAGEMENT ENDPOINTS =====
+
+  @Get(':id/availability')
+  async getTechnicianAvailability(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Query() query: GetAvailabilityQueryDto
+  ) {
+    const tenantId = req.tenantId;
+    return this.technicianService.getTechnicianAvailability(
+      tenantId,
+      id,
+      query.start_date,
+      query.end_date
+    );
+  }
+
+  @Post(':id/availability')
+  async setAvailability(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() dto: CreateAvailabilityDto
+  ) {
+    const tenantId = req.tenantId;
+    return this.technicianService.setAvailability(
+      tenantId,
+      id,
+      dto.day_of_week,
+      dto.start_time,
+      dto.end_time,
+      dto.is_active ?? true
+    );
+  }
+
+  @Get('available')
+  async getAvailableTechnicians(
+    @Request() req: any,
+    @Query() query: { date: string; start_time: string; end_time: string }
+  ) {
+    const tenantId = req.tenantId;
+    return this.technicianService.getAvailableTechnicians(
+      tenantId,
+      query.date,
+      query.start_time,
+      query.end_time
+    );
   }
 }

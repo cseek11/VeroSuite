@@ -6,6 +6,7 @@
 import { secureApiClient } from './secure-api-client';
 import type { EnhancedIntentResult } from './enhanced-intent-service';
 import { queryClient } from './queryClient';
+import { logger } from '@/utils/logger';
 
 export interface EnhancedActionResult {
   success: boolean;
@@ -54,11 +55,13 @@ class EnhancedActionHandler {
     const startTime = Date.now();
     const transactionId = crypto.randomUUID();
     
-    console.log('🚀 Enhanced action execution started:', {
-      intent: intentResult.intent,
-      transactionId,
-      entities: intentResult.entities
-    });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Enhanced action execution started', {
+        intent: intentResult.intent,
+        transactionId,
+        entities: intentResult.entities
+      }, 'enhanced-action-handler');
+    }
 
     try {
       // 1. Pre-execution validation
@@ -93,8 +96,8 @@ class EnhancedActionHandler {
 
       return result;
 
-    } catch (error) {
-      console.error('🔴 Enhanced action execution failed:', error);
+    } catch (error: unknown) {
+      logger.error('Enhanced action execution failed', error, 'enhanced-action-handler');
       
       // Attempt rollback if transaction exists
       const transaction = this.activeTransactions.get(transactionId);
@@ -220,8 +223,8 @@ class EnhancedActionHandler {
       
       return partialMatch || null;
 
-    } catch (error) {
-      console.error('🔴 Error finding customer:', error);
+    } catch (error: unknown) {
+      logger.error('Error finding customer', error, 'enhanced-action-handler');
       throw new Error('Failed to search for customer');
     }
   }
@@ -290,14 +293,18 @@ class EnhancedActionHandler {
       });
 
       // Execute update
-      console.log('🔧 Executing customer update:', { 
-        customerId: customer.id, 
-        updateData 
-      });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Executing customer update', { 
+          customerId: customer.id, 
+          updateData 
+        }, 'enhanced-action-handler');
+      }
 
       const result = await secureApiClient.updateAccount(customer.id, updateData);
       
-      console.log('🔧 Update result:', result);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Update result', { result }, 'enhanced-action-handler');
+      }
 
       // Validate result
       if (!result || typeof result !== 'object') {
@@ -313,8 +320,8 @@ class EnhancedActionHandler {
         suggestions: []
       };
 
-    } catch (error) {
-      console.error('🔴 Customer update failed:', error);
+    } catch (error: unknown) {
+      logger.error('Customer update failed', error, 'enhanced-action-handler');
       
       return {
         success: false,
@@ -361,9 +368,11 @@ class EnhancedActionHandler {
   private async commitTransaction(transaction: TransactionContext): Promise<void> {
     try {
       transaction.status = 'committed';
-      console.log('✅ Transaction committed:', transaction.id);
-    } catch (error) {
-      console.error('🔴 Transaction commit failed:', error);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Transaction committed', { transactionId: transaction.id }, 'enhanced-action-handler');
+      }
+    } catch (error: unknown) {
+      logger.error('Transaction commit failed', error, 'enhanced-action-handler');
       transaction.status = 'failed';
       throw error;
     }
@@ -374,7 +383,9 @@ class EnhancedActionHandler {
    */
   private async rollbackTransaction(transaction: TransactionContext): Promise<void> {
     try {
-      console.log('🔄 Rolling back transaction:', transaction.id);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Rolling back transaction', { transactionId: transaction.id }, 'enhanced-action-handler');
+      }
       
       // Reverse operations in reverse order
       for (let i = transaction.operations.length - 1; i >= 0; i--) {
@@ -383,10 +394,12 @@ class EnhancedActionHandler {
       }
       
       transaction.status = 'rolled_back';
-      console.log('✅ Transaction rolled back:', transaction.id);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Transaction rolled back', { transactionId: transaction.id }, 'enhanced-action-handler');
+      }
       
-    } catch (error) {
-      console.error('🔴 Transaction rollback failed:', error);
+    } catch (error: unknown) {
+      logger.error('Transaction rollback failed', error, 'enhanced-action-handler');
       transaction.status = 'failed';
     }
   }
@@ -413,8 +426,8 @@ class EnhancedActionHandler {
           }
           break;
       }
-    } catch (error) {
-      console.error('🔴 Failed to rollback operation:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to rollback operation', error, 'enhanced-action-handler');
     }
   }
 
@@ -431,8 +444,8 @@ class EnhancedActionHandler {
           await queryClient.invalidateQueries({ queryKey: ['customers'] });
           break;
       }
-    } catch (error) {
-      console.error('🔴 Cache invalidation failed:', error);
+    } catch (error: unknown) {
+      logger.error('Cache invalidation failed', error, 'enhanced-action-handler');
     }
   }
 

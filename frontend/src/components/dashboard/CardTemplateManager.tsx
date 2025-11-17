@@ -20,11 +20,11 @@ import {
   Tag,
   Download,
   Upload,
-  GitBranch,
-  MoreVertical
+  GitBranch
 } from 'lucide-react';
 import { useCardTemplates, CardTemplate } from '@/hooks/useCardTemplates';
 import { cn } from '@/lib/utils';
+import { toast } from '@/utils/toast';
 
 interface CardTemplateManagerProps {
   isOpen: boolean;
@@ -88,7 +88,7 @@ const CardTemplateManager: React.FC<CardTemplateManagerProps> = ({
 
   const handleSaveCurrentLayout = () => {
     if (currentCards.length === 0) {
-      alert('No cards to save as template');
+      toast.warning('No cards to save as template');
       return;
     }
 
@@ -108,7 +108,7 @@ const CardTemplateManager: React.FC<CardTemplateManagerProps> = ({
       tags
     );
 
-    alert('Template saved successfully!');
+    toast.success('Template saved successfully!');
   };
 
   if (!isOpen) return null;

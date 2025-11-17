@@ -5,6 +5,7 @@
 // when customer data is updated, ensuring real-time updates across the app
 
 import { QueryClient } from '@tanstack/react-query';
+import { logger } from '@/utils/logger';
 
 // ============================================================================
 // CACHE INVALIDATION FUNCTIONS
@@ -17,7 +18,9 @@ export function invalidateCustomerQueries(
   queryClient: QueryClient, 
   customerId: string
 ): void {
-  console.log('🔄 Invalidating customer queries for:', customerId);
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('Invalidating customer queries', { customerId }, 'cache-invalidation');
+  }
   
   // Invalidate specific customer queries
   queryClient.invalidateQueries({ 
@@ -75,14 +78,18 @@ export function invalidateCustomerQueries(
     queryKey: ['service-history', customerId] 
   });
   
-  console.log('✅ All customer queries invalidated');
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('All customer queries invalidated', {}, 'cache-invalidation');
+  }
 }
 
 /**
  * Invalidate all customer queries (for global updates)
  */
 export function invalidateAllCustomerQueries(queryClient: QueryClient): void {
-  console.log('🔄 Invalidating all customer queries');
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('Invalidating all customer queries', {}, 'cache-invalidation');
+  }
   
   // Invalidate all customer-related queries
   queryClient.invalidateQueries({ 
@@ -109,14 +116,18 @@ export function invalidateAllCustomerQueries(queryClient: QueryClient): void {
     queryKey: ['unified-search'] 
   });
   
-  console.log('✅ All customer queries invalidated');
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('All customer queries invalidated', {}, 'cache-invalidation');
+  }
 }
 
 /**
  * Invalidate search queries specifically
  */
 export function invalidateSearchQueries(queryClient: QueryClient): void {
-  console.log('🔄 Invalidating search queries');
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('Invalidating search queries', {}, 'cache-invalidation');
+  }
   
   queryClient.invalidateQueries({ 
     queryKey: ['search'] 
@@ -130,14 +141,18 @@ export function invalidateSearchQueries(queryClient: QueryClient): void {
     queryKey: ['search-results'] 
   });
   
-  console.log('✅ Search queries invalidated');
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('Search queries invalidated', {}, 'cache-invalidation');
+  }
 }
 
 /**
  * Invalidate customer list queries specifically
  */
 export function invalidateCustomerListQueries(queryClient: QueryClient): void {
-  console.log('🔄 Invalidating customer list queries');
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('Invalidating customer list queries', {}, 'cache-invalidation');
+  }
   
   queryClient.invalidateQueries({ 
     queryKey: ['customers'] 
@@ -151,7 +166,9 @@ export function invalidateCustomerListQueries(queryClient: QueryClient): void {
     queryKey: ['enhanced-customers'] 
   });
   
-  console.log('✅ Customer list queries invalidated');
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('Customer list queries invalidated', {}, 'cache-invalidation');
+  }
 }
 
 // ============================================================================
@@ -172,7 +189,9 @@ export function useUpdateCustomer() {
     mutationFn: ({ id, updates }: { id: string; updates: Partial<Account> }) => 
       enhancedApi.customers.update(id, updates),
     onSuccess: (data, variables) => {
-      console.log('✅ Customer updated successfully:', data.name);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Customer updated successfully', { name: data.name }, 'cache-invalidation');
+      }
       
       // Invalidate all related queries
       invalidateCustomerQueries(queryClient, variables.id);
@@ -185,8 +204,8 @@ export function useUpdateCustomer() {
         detail: { customerId: variables.id, customer: data }
       }));
     },
-    onError: (error) => {
-      console.error('❌ Customer update failed:', error);
+    onError: (error: unknown) => {
+      logger.error('Customer update failed', error, 'cache-invalidation');
     }
   });
 }
@@ -201,7 +220,9 @@ export function useCreateCustomer() {
     mutationFn: (customerData: Partial<Account>) => 
       enhancedApi.customers.create(customerData),
     onSuccess: (data) => {
-      console.log('✅ Customer created successfully:', data.name);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Customer created successfully', { name: data.name }, 'cache-invalidation');
+      }
       
       // Invalidate all customer queries
       invalidateAllCustomerQueries(queryClient);
@@ -211,8 +232,8 @@ export function useCreateCustomer() {
         detail: { customer: data }
       }));
     },
-    onError: (error) => {
-      console.error('❌ Customer creation failed:', error);
+    onError: (error: unknown) => {
+      logger.error('Customer creation failed', error, 'cache-invalidation');
     }
   });
 }
@@ -226,7 +247,9 @@ export function useDeleteCustomer() {
   return useMutation({
     mutationFn: (id: string) => enhancedApi.customers.delete(id),
     onSuccess: (_, customerId) => {
-      console.log('✅ Customer deleted successfully:', customerId);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Customer deleted successfully', { customerId }, 'cache-invalidation');
+      }
       
       // Invalidate all customer queries
       invalidateAllCustomerQueries(queryClient);
@@ -236,8 +259,8 @@ export function useDeleteCustomer() {
         detail: { customerId }
       }));
     },
-    onError: (error) => {
-      console.error('❌ Customer deletion failed:', error);
+    onError: (error: unknown) => {
+      logger.error('Customer deletion failed', error, 'cache-invalidation');
     }
   });
 }
@@ -252,17 +275,23 @@ export function useDeleteCustomer() {
 export function setupCustomerUpdateListeners(queryClient: QueryClient): () => void {
   const handleCustomerUpdate = (event: CustomEvent) => {
     const { customerId } = event.detail;
-    console.log('🔄 Real-time customer update received:', customerId);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Real-time customer update received', { customerId }, 'cache-invalidation');
+    }
     invalidateCustomerQueries(queryClient, customerId);
   };
   
-  const handleCustomerCreate = (event: CustomEvent) => {
-    console.log('🔄 Real-time customer creation received');
+  const handleCustomerCreate = (_event: CustomEvent) => {
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Real-time customer creation received', {}, 'cache-invalidation');
+    }
     invalidateAllCustomerQueries(queryClient);
   };
   
-  const handleCustomerDelete = (event: CustomEvent) => {
-    console.log('🔄 Real-time customer deletion received');
+  const handleCustomerDelete = (_event: CustomEvent) => {
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Real-time customer deletion received', {}, 'cache-invalidation');
+    }
     invalidateAllCustomerQueries(queryClient);
   };
   

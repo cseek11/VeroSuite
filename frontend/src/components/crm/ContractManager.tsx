@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import {
-  Card,
-  Button,
-  Typography,
-  Chip,
-  Modal,
-  ProgressBar,
-  Alert
-} from '@/components/ui/EnhancedUI';
+  Badge,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Heading,
+  Text,
+} from '@/components/ui';
 import {
   FileText,
   Calendar,
-  DollarSign,
   AlertTriangle,
   CheckCircle,
   Clock,
@@ -58,20 +59,20 @@ export default function ContractManager({ contracts, customerId, isLoading }: Co
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'active': return 'green';
-      case 'expired': return 'red';
-      case 'cancelled': return 'gray';
-      case 'pending': return 'yellow';
-      default: return 'gray';
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'expired': return 'bg-red-100 text-red-800';
+      case 'cancelled': return 'bg-gray-100 text-gray-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getContractTypeColor = (type: string) => {
     switch (type.toLowerCase()) {
-      case 'monthly': return 'blue';
-      case 'quarterly': return 'purple';
-      case 'annual': return 'green';
-      default: return 'gray';
+      case 'monthly': return 'bg-blue-100 text-blue-800';
+      case 'quarterly': return 'bg-purple-100 text-purple-800';
+      case 'annual': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -120,9 +121,9 @@ export default function ContractManager({ contracts, customerId, isLoading }: Co
     return (
       <Card className="p-6">
         <div className="text-center py-8">
-          <Typography variant="body1" className="text-gray-600">
+          <Text variant="body" className="text-slate-600">
             Loading contracts...
-          </Typography>
+          </Text>
         </div>
       </Card>
     );
@@ -132,9 +133,9 @@ export default function ContractManager({ contracts, customerId, isLoading }: Co
     <>
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <Typography variant="h3" className="text-gray-900">
+          <Heading level={3} className="text-slate-900">
             Contract Management
-          </Typography>
+          </Heading>
           <Button
             variant="primary"
             onClick={() => setShowNewContractModal(true)}
@@ -146,13 +147,13 @@ export default function ContractManager({ contracts, customerId, isLoading }: Co
 
         {contracts.length === 0 ? (
           <div className="text-center py-8">
-            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <Typography variant="h4" className="text-gray-900 mb-2">
+            <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+            <Heading level={4} className="text-slate-900 mb-2">
               No Contracts
-            </Typography>
-            <Typography variant="body1" className="text-gray-600 mb-4">
+            </Heading>
+            <Text variant="body" className="text-slate-600 mb-4">
               This customer doesn't have any contracts yet.
-            </Typography>
+            </Text>
             <Button
               variant="outline"
               onClick={() => setShowNewContractModal(true)}
@@ -169,7 +170,7 @@ export default function ContractManager({ contracts, customerId, isLoading }: Co
               return (
                 <div
                   key={contract.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                  className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
                   onClick={() => {
                     setSelectedContract(contract);
                     setShowContractModal(true);
@@ -179,48 +180,48 @@ export default function ContractManager({ contracts, customerId, isLoading }: Co
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <FileText className="h-5 w-5 text-blue-600" />
-                      <Typography variant="h5" className="text-gray-900">
+                      <Heading level={5} className="text-slate-900">
                         {contract.contract_type}
-                      </Typography>
+                      </Heading>
                     </div>
-                    <Chip
-                      color={getStatusColor(contract.status)}
+                    <Badge
                       variant="default"
+                      className={getStatusColor(contract.status)}
                     >
                       {contract.status}
-                    </Chip>
+                    </Badge>
                   </div>
 
                   {/* Contract Details */}
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center justify-between">
-                      <Typography variant="body2" className="text-gray-600">
+                      <Text variant="small" className="text-slate-600">
                         Service Frequency
-                      </Typography>
-                      <Chip
-                        color={getContractTypeColor(contract.service_frequency)}
+                      </Text>
+                      <Badge
                         variant="default"
+                        className={getContractTypeColor(contract.service_frequency)}
                       >
                         {contract.service_frequency}
-                      </Chip>
+                      </Badge>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <Typography variant="body2" className="text-gray-600">
+                      <Text variant="small" className="text-slate-600">
                         Contract Value
-                      </Typography>
-                      <Typography variant="body1" className="font-semibold text-green-600">
+                      </Text>
+                      <Text variant="body" className="font-semibold text-green-600">
                         ${contract.contract_value.toLocaleString()}
-                      </Typography>
+                      </Text>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <Typography variant="body2" className="text-gray-600">
+                      <Text variant="small" className="text-slate-600">
                         Payment Schedule
-                      </Typography>
-                      <Typography variant="body2" className="text-gray-900">
+                      </Text>
+                      <Text variant="small" className="text-slate-900">
                         {contract.payment_schedule}
-                      </Typography>
+                      </Text>
                     </div>
                   </div>
 
@@ -228,18 +229,21 @@ export default function ContractManager({ contracts, customerId, isLoading }: Co
                   {contract.end_date && (
                     <div className="mb-3">
                       <div className="flex items-center justify-between mb-1">
-                        <Typography variant="body2" className="text-gray-600">
+                        <Text variant="small" className="text-slate-600">
                           Contract Progress
-                        </Typography>
-                        <Typography variant="body2" className="text-gray-900">
+                        </Text>
+                        <Text variant="small" className="text-slate-900">
                           {Math.round(progress)}%
-                        </Typography>
+                        </Text>
                       </div>
-                      <ProgressBar
-                        value={progress}
-                        color={progress > 80 ? 'red' : progress > 60 ? 'yellow' : 'green'}
-                        className="h-2"
-                      />
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full ${
+                            progress > 80 ? 'bg-red-500' : progress > 60 ? 'bg-yellow-500' : 'bg-green-500'
+                          }`}
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
                     </div>
                   )}
 
@@ -272,7 +276,7 @@ export default function ContractManager({ contracts, customerId, isLoading }: Co
                   )}
 
                   {/* Contract dates */}
-                  <div className="mt-3 text-xs text-gray-500">
+                  <div className="mt-3 text-xs text-slate-500">
                     <div>Start: {formatDate(contract.start_date)}</div>
                     {contract.end_date && (
                       <div>End: {formatDate(contract.end_date)}</div>
@@ -289,115 +293,119 @@ export default function ContractManager({ contracts, customerId, isLoading }: Co
       </Card>
 
       {/* Contract Detail Modal */}
-      <Modal
-        isOpen={showContractModal}
-        onClose={() => setShowContractModal(false)}
-        title={`Contract Details - ${selectedContract?.contract_type}`}
-        size="lg"
-      >
-        {selectedContract && (
+      <Dialog open={showContractModal} onOpenChange={(open) => !open && setShowContractModal(false)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{`Contract Details - ${selectedContract?.contract_type}`}</DialogTitle>
+          </DialogHeader>
+          {selectedContract && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Text variant="small" className="text-slate-600">Contract Type</Text>
+                  <Text variant="body">{selectedContract.contract_type}</Text>
+                </div>
+                <div>
+                  <Text variant="small" className="text-slate-600">Status</Text>
+                  <Badge variant="default" className={getStatusColor(selectedContract.status)}>
+                    {selectedContract.status}
+                  </Badge>
+                </div>
+                <div>
+                  <Text variant="small" className="text-slate-600">Service Frequency</Text>
+                  <Text variant="body">{selectedContract.service_frequency}</Text>
+                </div>
+                <div>
+                  <Text variant="small" className="text-slate-600">Contract Value</Text>
+                  <Text variant="body">${selectedContract.contract_value.toLocaleString()}</Text>
+                </div>
+                <div>
+                  <Text variant="small" className="text-slate-600">Payment Schedule</Text>
+                  <Text variant="body">{selectedContract.payment_schedule}</Text>
+                </div>
+                <div>
+                  <Text variant="small" className="text-slate-600">Auto-renewal</Text>
+                  <Text variant="body">
+                    {selectedContract.auto_renewal ? 'Enabled' : 'Disabled'}
+                  </Text>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Text variant="small" className="text-slate-600">Start Date</Text>
+                  <Text variant="body">{formatDate(selectedContract.start_date)}</Text>
+                </div>
+                {selectedContract.end_date && (
+                  <div>
+                    <Text variant="small" className="text-slate-600">End Date</Text>
+                    <Text variant="body">{formatDate(selectedContract.end_date)}</Text>
+                  </div>
+                )}
+                {selectedContract.signed_date && (
+                  <div>
+                    <Text variant="small" className="text-slate-600">Signed Date</Text>
+                    <Text variant="body">{formatDate(selectedContract.signed_date)}</Text>
+                  </div>
+                )}
+              </div>
+
+              {/* Renewal Alert */}
+              {getRenewalAlert(selectedContract) && (
+                <div className={`p-4 rounded-lg border ${
+                  getRenewalAlert(selectedContract)?.type === 'error' 
+                    ? 'bg-red-50 border-red-200 text-red-800'
+                    : getRenewalAlert(selectedContract)?.type === 'warning'
+                    ? 'bg-yellow-50 border-yellow-200 text-yellow-800'
+                    : 'bg-blue-50 border-blue-200 text-blue-800'
+                }`}>
+                  <div className="font-semibold mb-1">Renewal Notice</div>
+                  <div>{getRenewalAlert(selectedContract)?.message}</div>
+                </div>
+              )}
+
+              <div className="flex gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowContractModal(false)}
+                >
+                  Close
+                </Button>
+                <Button>
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit Contract
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* New Contract Modal */}
+      <Dialog open={showNewContractModal} onOpenChange={(open) => !open && setShowNewContractModal(false)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create New Contract</DialogTitle>
+          </DialogHeader>
           <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Typography variant="body2" className="text-gray-600">Contract Type</Typography>
-                <Typography variant="body1">{selectedContract.contract_type}</Typography>
-              </div>
-              <div>
-                <Typography variant="body2" className="text-gray-600">Status</Typography>
-                <Chip color={getStatusColor(selectedContract.status)}>
-                  {selectedContract.status}
-                </Chip>
-              </div>
-              <div>
-                <Typography variant="body2" className="text-gray-600">Service Frequency</Typography>
-                <Typography variant="body1">{selectedContract.service_frequency}</Typography>
-              </div>
-              <div>
-                <Typography variant="body2" className="text-gray-600">Contract Value</Typography>
-                <Typography variant="body1">${selectedContract.contract_value.toLocaleString()}</Typography>
-              </div>
-              <div>
-                <Typography variant="body2" className="text-gray-600">Payment Schedule</Typography>
-                <Typography variant="body1">{selectedContract.payment_schedule}</Typography>
-              </div>
-              <div>
-                <Typography variant="body2" className="text-gray-600">Auto-renewal</Typography>
-                <Typography variant="body1">
-                  {selectedContract.auto_renewal ? 'Enabled' : 'Disabled'}
-                </Typography>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Typography variant="body2" className="text-gray-600">Start Date</Typography>
-                <Typography variant="body1">{formatDate(selectedContract.start_date)}</Typography>
-              </div>
-              {selectedContract.end_date && (
-                <div>
-                  <Typography variant="body2" className="text-gray-600">End Date</Typography>
-                  <Typography variant="body1">{formatDate(selectedContract.end_date)}</Typography>
-                </div>
-              )}
-              {selectedContract.signed_date && (
-                <div>
-                  <Typography variant="body2" className="text-gray-600">Signed Date</Typography>
-                  <Typography variant="body1">{formatDate(selectedContract.signed_date)}</Typography>
-                </div>
-              )}
-            </div>
-
-            {/* Renewal Alert */}
-            {getRenewalAlert(selectedContract) && (
-              <Alert
-                type={getRenewalAlert(selectedContract)?.type as any}
-                title="Renewal Notice"
-              >
-                {getRenewalAlert(selectedContract)?.message}
-              </Alert>
-            )}
-
+            <Text variant="body" className="text-slate-600">
+              Contract creation functionality will be implemented in Phase 2.
+            </Text>
+            
             <div className="flex gap-2 justify-end">
               <Button
                 variant="outline"
-                onClick={() => setShowContractModal(false)}
+                onClick={() => setShowNewContractModal(false)}
               >
-                Close
+                Cancel
               </Button>
-              <Button>
-                <Edit className="h-4 w-4 mr-1" />
-                Edit Contract
+              <Button disabled>
+                Create Contract
               </Button>
             </div>
           </div>
-        )}
-      </Modal>
-
-      {/* New Contract Modal */}
-      <Modal
-        isOpen={showNewContractModal}
-        onClose={() => setShowNewContractModal(false)}
-        title="Create New Contract"
-        size="lg"
-      >
-        <div className="space-y-6">
-          <Typography variant="body1" className="text-gray-600">
-            Contract creation functionality will be implemented in Phase 2.
-          </Typography>
-          
-          <div className="flex gap-2 justify-end">
-            <Button
-              variant="outline"
-              onClick={() => setShowNewContractModal(false)}
-            >
-              Cancel
-            </Button>
-            <Button disabled>
-              Create Contract
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

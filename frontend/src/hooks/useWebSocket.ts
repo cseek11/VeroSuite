@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '@/stores/auth';
+import { logger } from '@/utils/logger';
 
 interface KPIDataUpdate {
   tenantId: string;
@@ -97,7 +98,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
 
     // Connection event handlers
     socket.on('connect', () => {
-      console.log('WebSocket connected');
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('WebSocket connected', {}, 'useWebSocket');
+      }
       setIsConnected(true);
       setConnectionStatus('connected');
       setLastError(null);
@@ -105,18 +108,24 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     });
 
     socket.on('connected', (data) => {
-      console.log('WebSocket authenticated:', data);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('WebSocket authenticated', { data }, 'useWebSocket');
+      }
     });
 
     socket.on('disconnect', (reason) => {
-      console.log('WebSocket disconnected:', reason);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('WebSocket disconnected', { reason }, 'useWebSocket');
+      }
       setIsConnected(false);
       setConnectionStatus('disconnected');
       
       // Attempt reconnection if not manual disconnect
       if (reason !== 'io client disconnect' && reconnectAttemptsRef.current < reconnectAttempts) {
         reconnectAttemptsRef.current++;
-        console.log(`Attempting reconnection ${reconnectAttemptsRef.current}/${reconnectAttempts}`);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Attempting reconnection', { attempt: reconnectAttemptsRef.current, max: reconnectAttempts }, 'useWebSocket');
+        }
         
         reconnectTimeoutRef.current = setTimeout(() => {
           connect();
@@ -125,41 +134,53 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     });
 
     socket.on('connect_error', (error) => {
-      console.warn('WebSocket connection error (graceful degradation):', error.message);
+      logger.warn('WebSocket connection error (graceful degradation)', { error: error.message }, 'useWebSocket');
       setLastError(`WebSocket unavailable: ${error.message}`);
       setConnectionStatus('disconnected');
       setIsConnected(false);
       // Don't spam reconnection attempts - just log and continue without WebSocket
-      console.log('📡 Continuing without WebSocket - real-time features disabled');
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Continuing without WebSocket - real-time features disabled', {}, 'useWebSocket');
+      }
     });
 
     socket.on('error', (error) => {
-      console.error('WebSocket error:', error);
+      logger.error('WebSocket error', error, 'useWebSocket');
       setLastError(error.message || 'Unknown WebSocket error');
     });
 
     // KPI update handlers
     socket.on('kpi-update', (update: KPIDataUpdate) => {
-      console.log('KPI update received:', update);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('KPI update received', { update }, 'useWebSocket');
+      }
       // This will be handled by the callback registered via onKPIUpdate
     });
 
     socket.on('kpi-alert', (alert: KPIThresholdAlert) => {
-      console.log('KPI alert received:', alert);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('KPI alert received', { alert }, 'useWebSocket');
+      }
       // This will be handled by the callback registered via onKPIAlert
     });
 
     socket.on('connection-stats', (stats: ConnectionStats) => {
-      console.log('Connection stats received:', stats);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Connection stats received', { stats }, 'useWebSocket');
+      }
       setConnectionStats(stats);
     });
 
     socket.on('heartbeat', (data) => {
-      console.log('Heartbeat received:', data);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Heartbeat received', { data }, 'useWebSocket');
+      }
     });
 
     socket.on('pong', (data) => {
-      console.log('Pong received:', data);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Pong received', { data }, 'useWebSocket');
+      }
     });
 
   }, [token, tenantId, namespace, reconnectAttempts, reconnectDelay]);

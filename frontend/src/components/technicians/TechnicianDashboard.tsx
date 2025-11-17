@@ -2,23 +2,16 @@ import React, { useState, useMemo } from 'react';
 import { useTechnicians, useTechnicianDashboardStats, useTechnicianPerformanceMetrics, useTechnicianAvailabilityData } from '@/hooks/useTechnicians';
 import { useJobs } from '@/hooks/useJobs';
 import { TechnicianProfile, TechnicianStatus } from '@/types/technician';
-import { Job, JobStatus } from '@/types/jobs';
+import { JobStatus } from '@/types/jobs';
 import { 
   Users, 
   TrendingUp, 
-  Clock, 
   CheckCircle, 
   AlertCircle, 
   XCircle,
   Activity,
-  MapPin,
-  Award,
   Star,
-  Filter,
   Search,
-  Calendar,
-  BarChart3,
-  PieChart,
   Target
 } from 'lucide-react';
 import Button from '@/components/ui/Button';

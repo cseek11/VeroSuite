@@ -1,9 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
 import { secureApiClient } from '@/lib/secure-api-client';
 import { Customer } from '@/types/customer';
-import { ArrowLeftIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ArrowLeft, Check } from 'lucide-react';
+import { logger } from '@/utils/logger';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import Select from '@/components/ui/Select';
+import Checkbox from '@/components/ui/Checkbox';
 
 interface CustomerFormProps {
   customer?: Customer;
@@ -11,91 +21,100 @@ interface CustomerFormProps {
   onCancel: () => void;
 }
 
-interface FormData {
-  name: string;
-  account_type: 'residential' | 'commercial' | 'industrial';
-  status: 'active' | 'inactive';
-  phone: string;
-  email: string;
-  address: string;
-  city: string;
-  state: string;
-  zip_code: string;
-  billing_address: {
-    address_line1: string;
-    city: string;
-    state: string;
-    zip_code: string;
-  };
-  payment_method: 'credit_card' | 'bank_transfer' | 'invoice' | 'cash';
-  billing_cycle: 'monthly' | 'quarterly' | 'annually';
-  property_type: string;
-  property_size: string;
-  access_instructions: string;
-  emergency_contact: string;
-  preferred_contact_method: 'phone' | 'email' | 'text';
-  ar_balance: number;
-  // Profile fields
-  business_name: string;
-  business_type: string;
-  segment_id: string;
-  access_codes: string;
-  special_instructions: string;
-  preferred_language: string;
-  timezone: string;
-  contract_start_date: string;
-  contract_type: 'monthly' | 'quarterly' | 'annually';
-  contract_value: number;
-  auto_renew: boolean;
-  account_status: 'active' | 'inactive' | 'suspended';
-  payment_status: 'current' | 'past_due' | 'overdue';
-  service_status: 'active' | 'inactive' | 'suspended';
-}
+// Zod validation schema
+const customerFormSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  account_type: z.enum(['residential', 'commercial', 'industrial']),
+  status: z.enum(['active', 'inactive']),
+  phone: z.string().min(1, 'Phone is required'),
+  email: z.string().email('Invalid email format').min(1, 'Email is required'),
+  address: z.string().min(1, 'Address is required'),
+  city: z.string().min(1, 'City is required'),
+  state: z.string().min(1, 'State is required'),
+  zip_code: z.string().min(1, 'ZIP code is required'),
+  billing_address: z.object({
+    address_line1: z.string().optional(),
+    city: z.string().optional(),
+    state: z.string().optional(),
+    zip_code: z.string().optional(),
+  }).optional(),
+  payment_method: z.enum(['credit_card', 'bank_transfer', 'invoice', 'cash']),
+  billing_cycle: z.enum(['monthly', 'quarterly', 'annually']),
+  property_type: z.string().optional(),
+  property_size: z.string().optional(),
+  access_instructions: z.string().optional(),
+  emergency_contact: z.string().optional(),
+  preferred_contact_method: z.enum(['phone', 'email', 'text']),
+  ar_balance: z.number().min(0).default(0),
+  business_name: z.string().optional(),
+  business_type: z.string().optional(),
+  segment_id: z.string().optional(),
+  access_codes: z.string().optional(),
+  special_instructions: z.string().optional(),
+  preferred_language: z.string().optional(),
+  timezone: z.string().optional(),
+  contract_start_date: z.string().optional(),
+  contract_type: z.enum(['monthly', 'quarterly', 'annually']).optional(),
+  contract_value: z.number().min(0).default(0),
+  auto_renew: z.boolean().default(true),
+  account_status: z.enum(['active', 'inactive', 'suspended']).optional(),
+  payment_status: z.enum(['current', 'past_due', 'overdue']).optional(),
+  service_status: z.enum(['active', 'inactive', 'suspended']).optional(),
+});
+
+type FormData = z.infer<typeof customerFormSchema>;
 
 export default function CustomerForm({ customer, onSave, onCancel }: CustomerFormProps) {
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    account_type: 'residential',
-    status: 'active',
-    phone: '',
-    email: '',
-    address: '',
-    city: '',
-    state: '',
-    zip_code: '',
-    billing_address: {
-      address_line1: '',
+  
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+    watch,
+  } = useForm<FormData>({
+    resolver: zodResolver(customerFormSchema),
+    defaultValues: {
+      name: '',
+      account_type: 'residential',
+      status: 'active',
+      phone: '',
+      email: '',
+      address: '',
       city: '',
       state: '',
       zip_code: '',
+      billing_address: {
+        address_line1: '',
+        city: '',
+        state: '',
+        zip_code: '',
+      },
+      payment_method: 'credit_card',
+      billing_cycle: 'monthly',
+      property_type: '',
+      property_size: '',
+      access_instructions: '',
+      emergency_contact: '',
+      preferred_contact_method: 'phone',
+      ar_balance: 0,
+      business_name: '',
+      business_type: '',
+      segment_id: '',
+      access_codes: '',
+      special_instructions: '',
+      preferred_language: 'English',
+      timezone: 'America/Chicago',
+      contract_start_date: '',
+      contract_type: 'monthly',
+      contract_value: 0,
+      auto_renew: true,
+      account_status: 'active',
+      payment_status: 'current',
+      service_status: 'active',
     },
-    payment_method: 'credit_card',
-    billing_cycle: 'monthly',
-    property_type: '',
-    property_size: '',
-    access_instructions: '',
-    emergency_contact: '',
-    preferred_contact_method: 'phone',
-    ar_balance: 0,
-    business_name: '',
-    business_type: '',
-    segment_id: '',
-    access_codes: '',
-    special_instructions: '',
-    preferred_language: 'English',
-    timezone: 'America/Chicago',
-    contract_start_date: '',
-    contract_type: 'monthly',
-    contract_value: 0,
-    auto_renew: true,
-    account_status: 'active',
-    payment_status: 'current',
-    service_status: 'active',
   });
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch segments for dropdown
   const { data: segments } = useQuery({
@@ -120,7 +139,7 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
         .eq('tenant_id', '7193113e-ece2-4f7b-ae8c-176df4367e28')
         .limit(1);
       if (error) {
-        console.error('Test query error:', error);
+        logger.error('Test query error', error, 'CustomerForm');
         return null;
       }
       return data;
@@ -137,7 +156,7 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
         .eq('id', '7193113e-ece2-4f7b-ae8c-176df4367e28')
         .single();
       if (error) {
-        console.error('Tenant query error:', error);
+        logger.error('Tenant query error', error, 'CustomerForm');
         return null;
       }
       return data;
@@ -151,12 +170,12 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
       try {
         const { data, error } = await supabase.auth.getUser();
         if (error) {
-          console.error('Auth test error:', error);
+          logger.error('Auth test error', error, 'CustomerForm');
           return { success: false, error: error.message };
         }
         return { success: true, user: data.user };
       } catch (err) {
-        console.error('Connection test error:', err);
+        logger.error('Connection test error', err, 'CustomerForm');
         return { success: false, error: 'Connection failed' };
       }
     },
@@ -166,7 +185,7 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
   useEffect(() => {
     if (customer) {
       const profile = customer.customer_profiles?.[0];
-      setFormData({
+      reset({
         name: customer.name || '',
         account_type: customer.account_type || 'residential',
         status: customer.status || 'active',
@@ -206,7 +225,7 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
         service_status: profile?.service_status || 'active',
       });
     }
-  }, [customer]);
+  }, [customer, reset]);
 
   // Create/Update customer mutation
   const createCustomerMutation = useMutation({
@@ -233,11 +252,11 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
         ar_balance: data.ar_balance || 0,
       };
 
-      console.log('Creating account via backend API:', accountData);
+      logger.debug('Creating account via backend API', { accountData }, 'CustomerForm');
 
       // Use backend API to create account
       const account = await secureApiClient.accounts.create(accountData);
-      console.log('Account created successfully:', account);
+      logger.debug('Account created successfully', { accountId: account.id }, 'CustomerForm');
 
       // Create customer profile
       if (data.segment_id) {
@@ -368,64 +387,16 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
     },
   });
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    if (!formData.phone.trim()) newErrors.phone = 'Phone is required';
-    if (!formData.address.trim()) newErrors.address = 'Address is required';
-    if (!formData.city.trim()) newErrors.city = 'City is required';
-    if (!formData.state.trim()) newErrors.state = 'State is required';
-    if (!formData.zip_code.trim()) newErrors.zip_code = 'ZIP code is required';
-
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    setIsSubmitting(true);
+  const onSubmit = async (data: FormData) => {
     try {
       if (customer) {
-        await updateCustomerMutation.mutateAsync(formData);
+        await updateCustomerMutation.mutateAsync(data);
       } else {
-        await createCustomerMutation.mutateAsync(formData);
+        await createCustomerMutation.mutateAsync(data);
       }
     } catch (error) {
-      console.error('Error saving customer:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
-      setErrors({ submit: `Error saving customer: ${error.message || 'Unknown error'}` });
-    } finally {
-      setIsSubmitting(false);
+      logger.error('Error saving customer', error, 'CustomerForm');
     }
-  };
-
-  const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
-
-  const handleBillingAddressChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      billing_address: {
-        ...prev.billing_address,
-        [field]: value,
-      },
-    }));
   };
 
   const isEditMode = !!customer;
@@ -433,16 +404,17 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
-      <div className="bg-white shadow-sm border border-gray-200 rounded-lg mb-6">
+      <Card className="mb-6">
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <button
+              <Button
+                variant="ghost"
                 onClick={onCancel}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md"
+                className="p-2"
               >
-                <ArrowLeftIcon className="h-5 w-5" />
-              </button>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
                   {isEditMode ? 'Edit Customer' : 'Add New Customer'}
@@ -452,15 +424,14 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
                 </p>
               </div>
             </div>
-
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Basic Information */}
-        <div className="bg-white shadow-sm border border-gray-200 rounded-lg">
+        <Card>
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
             {/* Debug Info */}
@@ -472,360 +443,422 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
           </div>
           <div className="px-6 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name *</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 ${
-                    errors.name ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
-              </div>
+              <Controller
+                name="name"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    label="Name *"
+                    error={errors.name?.message}
+                  />
+                )}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Account Type *</label>
-                <select
-                  value={formData.account_type}
-                  onChange={(e) => handleInputChange('account_type', e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                >
-                  <option value="residential">Residential</option>
-                  <option value="commercial">Commercial</option>
-                  <option value="industrial">Industrial</option>
-                </select>
-              </div>
+              <Controller
+                name="account_type"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onChange={(value) => field.onChange(value)}
+                    label="Account Type *"
+                    options={[
+                      { value: 'residential', label: 'Residential' },
+                      { value: 'commercial', label: 'Commercial' },
+                      { value: 'industrial', label: 'Industrial' },
+                    ]}
+                    error={errors.account_type?.message}
+                  />
+                )}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => handleInputChange('status', e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onChange={(value) => field.onChange(value)}
+                    label="Status"
+                    options={[
+                      { value: 'active', label: 'Active' },
+                      { value: 'inactive', label: 'Inactive' },
+                    ]}
+                    error={errors.status?.message}
+                  />
+                )}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Segment</label>
-                <select
-                  value={formData.segment_id}
-                  onChange={(e) => handleInputChange('segment_id', e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                >
-                  <option value="">Select a segment</option>
-                  {segments?.map((segment) => (
-                    <option key={segment.id} value={segment.id}>
-                      {segment.segment_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <Controller
+                name="segment_id"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value || ''}
+                    onChange={(value) => field.onChange(value)}
+                    label="Segment"
+                    placeholder="Select a segment"
+                    options={[
+                      { value: '', label: 'Select a segment' },
+                      ...(segments?.map((segment) => ({
+                        value: segment.id,
+                        label: segment.segment_name,
+                      })) || []),
+                    ]}
+                    error={errors.segment_id?.message}
+                  />
+                )}
+              />
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Contact Information */}
-        <div className="bg-white shadow-sm border border-gray-200 rounded-lg">
+        <Card>
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Contact Information</h3>
           </div>
           <div className="px-6 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email *</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-              </div>
+              <Controller
+                name="email"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    type="email"
+                    label="Email *"
+                    error={errors.email?.message}
+                  />
+                )}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Phone *</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 ${
-                    errors.phone ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
-              </div>
+              <Controller
+                name="phone"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    type="tel"
+                    label="Phone *"
+                    error={errors.phone?.message}
+                  />
+                )}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Preferred Contact Method</label>
-                <select
-                  value={formData.preferred_contact_method}
-                  onChange={(e) => handleInputChange('preferred_contact_method', e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                >
-                  <option value="phone">Phone</option>
-                  <option value="email">Email</option>
-                  <option value="text">Text</option>
-                </select>
-              </div>
+              <Controller
+                name="preferred_contact_method"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onChange={(value) => field.onChange(value)}
+                    label="Preferred Contact Method"
+                    options={[
+                      { value: 'phone', label: 'Phone' },
+                      { value: 'email', label: 'Email' },
+                      { value: 'text', label: 'Text' },
+                    ]}
+                    error={errors.preferred_contact_method?.message}
+                  />
+                )}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Emergency Contact</label>
-                <input
-                  type="text"
-                  value={formData.emergency_contact}
-                  onChange={(e) => handleInputChange('emergency_contact', e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                />
-              </div>
+              <Controller
+                name="emergency_contact"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    label="Emergency Contact"
+                    error={errors.emergency_contact?.message}
+                  />
+                )}
+              />
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Address Information */}
-        <div className="bg-white shadow-sm border border-gray-200 rounded-lg">
+        <Card>
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Address Information</h3>
           </div>
           <div className="px-6 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Address *</label>
-                <input
-                  type="text"
-                  value={formData.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 ${
-                    errors.address ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                {errors.address && <p className="mt-1 text-sm text-red-600">{errors.address}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">City *</label>
-                <input
-                  type="text"
-                  value={formData.city}
-                  onChange={(e) => handleInputChange('city', e.target.value)}
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 ${
-                    errors.city ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">State *</label>
-                <input
-                  type="text"
-                  value={formData.state}
-                  onChange={(e) => handleInputChange('state', e.target.value)}
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 ${
-                    errors.state ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                {errors.state && <p className="mt-1 text-sm text-red-600">{errors.state}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">ZIP Code *</label>
-                <input
-                  type="text"
-                  value={formData.zip_code}
-                  onChange={(e) => handleInputChange('zip_code', e.target.value)}
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 ${
-                    errors.zip_code ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                {errors.zip_code && <p className="mt-1 text-sm text-red-600">{errors.zip_code}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Property Type</label>
-                <input
-                  type="text"
-                  value={formData.property_type}
-                  onChange={(e) => handleInputChange('property_type', e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                <Controller
+                  name="address"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      label="Address *"
+                      error={errors.address?.message}
+                    />
+                  )}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Property Size</label>
-                <input
-                  type="text"
-                  value={formData.property_size}
-                  onChange={(e) => handleInputChange('property_size', e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                />
-              </div>
+              <Controller
+                name="city"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    label="City *"
+                    error={errors.city?.message}
+                  />
+                )}
+              />
+
+              <Controller
+                name="state"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    label="State *"
+                    error={errors.state?.message}
+                  />
+                )}
+              />
+
+              <Controller
+                name="zip_code"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    label="ZIP Code *"
+                    error={errors.zip_code?.message}
+                  />
+                )}
+              />
+
+              <Controller
+                name="property_type"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    label="Property Type"
+                    error={errors.property_type?.message}
+                  />
+                )}
+              />
+
+              <Controller
+                name="property_size"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    label="Property Size"
+                    error={errors.property_size?.message}
+                  />
+                )}
+              />
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Access Instructions</label>
-                <textarea
-                  value={formData.access_instructions}
-                  onChange={(e) => handleInputChange('access_instructions', e.target.value)}
-                  rows={3}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                <Controller
+                  name="access_instructions"
+                  control={control}
+                  render={({ field }) => (
+                    <Textarea
+                      {...field}
+                      label="Access Instructions"
+                      rows={3}
+                      error={errors.access_instructions?.message}
+                    />
+                  )}
                 />
               </div>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Business & Contract Information */}
-        <div className="bg-white shadow-sm border border-gray-200 rounded-lg">
+        <Card>
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Business & Contract Information</h3>
           </div>
           <div className="px-6 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Business Name</label>
-                <input
-                  type="text"
-                  value={formData.business_name}
-                  onChange={(e) => handleInputChange('business_name', e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                />
-              </div>
+              <Controller
+                name="business_name"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    label="Business Name"
+                    error={errors.business_name?.message}
+                  />
+                )}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Business Type</label>
-                <input
-                  type="text"
-                  value={formData.business_type}
-                  onChange={(e) => handleInputChange('business_type', e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                />
-              </div>
+              <Controller
+                name="business_type"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    label="Business Type"
+                    error={errors.business_type?.message}
+                  />
+                )}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Contract Type</label>
-                <select
-                  value={formData.contract_type}
-                  onChange={(e) => handleInputChange('contract_type', e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                >
-                  <option value="monthly">Monthly</option>
-                  <option value="quarterly">Quarterly</option>
-                  <option value="annually">Annually</option>
-                </select>
-              </div>
+              <Controller
+                name="contract_type"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value || ''}
+                    onChange={(value) => field.onChange(value)}
+                    label="Contract Type"
+                    options={[
+                      { value: 'monthly', label: 'Monthly' },
+                      { value: 'quarterly', label: 'Quarterly' },
+                      { value: 'annually', label: 'Annually' },
+                    ]}
+                    error={errors.contract_type?.message}
+                  />
+                )}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Contract Value ($)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.contract_value}
-                  onChange={(e) => handleInputChange('contract_value', parseFloat(e.target.value) || 0)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                />
-              </div>
+              <Controller
+                name="contract_value"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    type="number"
+                    step="0.01"
+                    label="Contract Value ($)"
+                    value={field.value?.toString() || ''}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    error={errors.contract_value?.message}
+                  />
+                )}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Contract Start Date</label>
-                <input
-                  type="date"
-                  value={formData.contract_start_date}
-                  onChange={(e) => handleInputChange('contract_start_date', e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                />
-              </div>
+              <Controller
+                name="contract_start_date"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    type="date"
+                    label="Contract Start Date"
+                    error={errors.contract_start_date?.message}
+                  />
+                )}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Payment Method</label>
-                <select
-                  value={formData.payment_method}
-                  onChange={(e) => handleInputChange('payment_method', e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                >
-                  <option value="credit_card">Credit Card</option>
-                  <option value="bank_transfer">Bank Transfer</option>
-                  <option value="invoice">Invoice</option>
-                  <option value="cash">Cash</option>
-                </select>
-              </div>
+              <Controller
+                name="payment_method"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onChange={(value) => field.onChange(value)}
+                    label="Payment Method"
+                    options={[
+                      { value: 'credit_card', label: 'Credit Card' },
+                      { value: 'bank_transfer', label: 'Bank Transfer' },
+                      { value: 'invoice', label: 'Invoice' },
+                      { value: 'cash', label: 'Cash' },
+                    ]}
+                    error={errors.payment_method?.message}
+                  />
+                )}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Billing Cycle</label>
-                <select
-                  value={formData.billing_cycle}
-                  onChange={(e) => handleInputChange('billing_cycle', e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                >
-                  <option value="monthly">Monthly</option>
-                  <option value="quarterly">Quarterly</option>
-                  <option value="annually">Annually</option>
-                </select>
-              </div>
+              <Controller
+                name="billing_cycle"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onChange={(value) => field.onChange(value)}
+                    label="Billing Cycle"
+                    options={[
+                      { value: 'monthly', label: 'Monthly' },
+                      { value: 'quarterly', label: 'Quarterly' },
+                      { value: 'annually', label: 'Annually' },
+                    ]}
+                    error={errors.billing_cycle?.message}
+                  />
+                )}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">AR Balance ($)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.ar_balance}
-                  onChange={(e) => handleInputChange('ar_balance', parseFloat(e.target.value) || 0)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                />
-              </div>
+              <Controller
+                name="ar_balance"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    type="number"
+                    step="0.01"
+                    label="AR Balance ($)"
+                    value={field.value?.toString() || ''}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    error={errors.ar_balance?.message}
+                  />
+                )}
+              />
 
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={formData.auto_renew}
-                  onChange={(e) => handleInputChange('auto_renew', e.target.checked)}
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                />
-                <label className="ml-2 block text-sm text-gray-900">Auto Renew</label>
-              </div>
+              <Controller
+                name="auto_renew"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    checked={field.value}
+                    onChange={field.onChange}
+                    label="Auto Renew"
+                    error={errors.auto_renew?.message}
+                  />
+                )}
+              />
             </div>
 
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700">Special Instructions</label>
-              <textarea
-                value={formData.special_instructions}
-                onChange={(e) => handleInputChange('special_instructions', e.target.value)}
-                rows={3}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+              <Controller
+                name="special_instructions"
+                control={control}
+                render={({ field }) => (
+                  <Textarea
+                    {...field}
+                    label="Special Instructions"
+                    rows={3}
+                    error={errors.special_instructions?.message}
+                  />
+                )}
               />
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Form Actions */}
         <div className="flex items-center justify-end space-x-3">
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
-            disabled={isSubmitting}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            variant="primary"
+            loading={isSubmitting}
+            icon={Check}
           >
-            <CheckIcon className="h-4 w-4 mr-2" />
             {isSubmitting ? 'Saving...' : (isEditMode ? 'Update Customer' : 'Create Customer')}
-          </button>
+          </Button>
         </div>
-
-        {errors.submit && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <p className="text-sm text-red-800">{errors.submit}</p>
-          </div>
-        )}
       </form>
     </div>
   );

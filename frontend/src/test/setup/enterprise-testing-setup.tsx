@@ -144,11 +144,11 @@ expect.extend({
                                 received.classList.contains('desktop');
     const hasMediaQueries = window.getComputedStyle(received).getPropertyValue('--breakpoint');
     
-    const isResponsive = hasResponsiveClasses || hasMediaQueries;
+    const isResponsive = hasResponsiveClasses || !!hasMediaQueries;
     
     return {
       message: () => `expected element to be responsive`,
-      pass: isResponsive
+      pass: isResponsive as boolean
     };
   },
 
@@ -174,7 +174,7 @@ export class TestUtils {
       defaultOptions: {
         queries: {
           retry: false,
-          cacheTime: 0,
+          gcTime: 0, // React Query v4+ uses gcTime instead of cacheTime
         },
         mutations: {
           retry: false,
@@ -374,7 +374,7 @@ export class PerformanceTestUtils {
     return end - start;
   }
 
-  static async measureComponentMount(component: React.ComponentType): Promise<number> {
+  static async measureComponentMount(_component: React.ComponentType): Promise<number> {
     const start = performance.now();
     // In a real implementation, you would mount the component
     const end = performance.now();
@@ -429,10 +429,5 @@ export class SecurityTestUtils {
   }
 }
 
-// Export utilities for use in tests
-export {
-  TestUtils,
-  AccessibilityTestUtils,
-  PerformanceTestUtils,
-  SecurityTestUtils
-};
+// Utilities already exported as class declarations above
+// No need for duplicate export statement

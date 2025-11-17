@@ -16,12 +16,15 @@ describe('LoadingSpinner', () => {
 
   it('renders with different sizes', () => {
     const { rerender } = render(<LoadingSpinner size="sm" />);
-    let spinner = screen.getByRole('status', { hidden: true });
-    expect(spinner.querySelector('.w-4.h-4')).toBeInTheDocument();
+    // Loader2 icon has the size classes
+    const loaderIcon = screen.getByTestId('loader2-icon');
+    expect(loaderIcon).toHaveClass('w-4');
+    expect(loaderIcon).toHaveClass('h-4');
 
     rerender(<LoadingSpinner size="lg" />);
-    spinner = screen.getByRole('status', { hidden: true });
-    expect(spinner.querySelector('.w-8.h-8')).toBeInTheDocument();
+    const loaderIconLarge = screen.getByTestId('loader2-icon');
+    expect(loaderIconLarge).toHaveClass('w-8');
+    expect(loaderIconLarge).toHaveClass('h-8');
   });
 
   it('applies custom className', () => {

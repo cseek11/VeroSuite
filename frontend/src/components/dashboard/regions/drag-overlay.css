@@ -1,0 +1,161 @@
+/* Drag and Drop Visual Feedback Styles */
+
+.drag-overlay {
+  border: 2px dashed var(--color-primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.drag-overlay.valid {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.drag-overlay.invalid {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.validity-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: white;
+  border-radius: 50%;
+  padding: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.drag-message {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.drag-message::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid rgba(0, 0, 0, 0.9);
+}
+
+.drag-grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.drag-preview {
+  border: 2px dashed var(--color-primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.drag-preview.valid {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.drag-preview.invalid {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.snap-guide {
+  width: 2px;
+  height: 100%;
+  background: var(--color-primary, #3b82f6);
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.snap-guide.horizontal {
+  width: 100%;
+  height: 2px;
+}
+
+.drop-zone {
+  border: 2px dashed var(--color-border, #e5e7eb);
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.drop-zone.active {
+  border-color: var(--color-primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.drop-zone.invalid {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.region-dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+  transition: all 0.2s ease;
+}
+
+.region-drag-handle {
+  cursor: grab;
+  transition: transform 0.2s ease;
+}
+
+.region-drag-handle:hover {
+  transform: scale(1.1);
+}
+
+.region-drag-handle:active,
+.region-drag-handle.dragging {
+  cursor: grabbing;
+  transform: scale(1.05);
+}
+
+/* Validity indicators */
+.validity-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  z-index: 100;
+}
+
+.validity-indicator.valid {
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.validity-indicator.invalid {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.validity-indicator.warning {
+  background: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+

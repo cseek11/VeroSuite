@@ -3,6 +3,7 @@
 
 import { supabase } from './supabase-client';
 import { useAuthStore } from '../stores/auth';
+import { logger } from '@/utils/logger';
 
 // ===== TYPES =====
 
@@ -108,7 +109,7 @@ export class SearchAnalyticsService {
   ): Promise<string | null> {
     const startTime = this.searchStartTimes.get(queryId);
     if (!startTime) {
-      console.warn('Search tracking not started for query:', queryId);
+      logger.warn('Search tracking not started for query', { queryId }, 'search-analytics-service');
       return null;
     }
 
@@ -124,8 +125,8 @@ export class SearchAnalyticsService {
     try {
       const logId = await this.logSearchQuery(fullAnalyticsData);
       return logId;
-    } catch (error) {
-      console.error('Failed to log search analytics:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to log search analytics', error, 'search-analytics-service');
       return null;
     }
   }
@@ -141,13 +142,15 @@ export class SearchAnalyticsService {
     }
 
     // Debug logging
-    console.log('🔍 Analytics - Logging search query:', {
-      queryText: analyticsData.queryText,
-      queryType: analyticsData.queryType,
-      searchMode: analyticsData.searchMode,
-      resultsCount: analyticsData.resultsCount,
-      executionTimeMs: analyticsData.executionTimeMs
-    });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Analytics - Logging search query', {
+        queryText: analyticsData.queryText,
+        queryType: analyticsData.queryType,
+        searchMode: analyticsData.searchMode,
+        resultsCount: analyticsData.resultsCount,
+        executionTimeMs: analyticsData.executionTimeMs
+      }, 'search-analytics-service');
+    }
 
     const { data, error } = await supabase.rpc('log_search_query', {
       p_tenant_id: authStore.tenantId,
@@ -185,10 +188,10 @@ export class SearchAnalyticsService {
       });
 
       if (error) {
-        console.error('Failed to log search click:', error);
+        logger.error('Failed to log search click', error, 'search-analytics-service');
       }
-    } catch (error) {
-      console.error('Failed to log search click:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to log search click', error, 'search-analytics-service');
     }
   }
 
@@ -205,7 +208,7 @@ export class SearchAnalyticsService {
       const authStore = useAuthStore.getState();
       const user = authStore.user;
       if (!user) {
-        console.warn('User not authenticated, cannot log search error');
+        logger.warn('User not authenticated, cannot log search error', {}, 'search-analytics-service');
         return null;
       }
 
@@ -222,13 +225,13 @@ export class SearchAnalyticsService {
       });
 
       if (error) {
-        console.error('Failed to log search error:', error);
+        logger.error('Failed to log search error', error, 'search-analytics-service');
         return null;
       }
 
       return data;
-    } catch (error) {
-      console.error('Failed to log search error:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to log search error', error, 'search-analytics-service');
       return null;
     }
   }
@@ -260,8 +263,8 @@ export class SearchAnalyticsService {
       }
 
       return null;
-    } catch (error) {
-      console.error('Failed to get search performance summary:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to get search performance summary', error, 'search-analytics-service');
       return null;
     }
   }
@@ -287,8 +290,8 @@ export class SearchAnalyticsService {
       }
 
       return data || [];
-    } catch (error) {
-      console.error('Failed to get trending searches:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to get trending searches', error, 'search-analytics-service');
       return [];
     }
   }
@@ -314,8 +317,8 @@ export class SearchAnalyticsService {
       }
 
       return data || [];
-    } catch (error) {
-      console.error('Failed to get search error summary:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to get search error summary', error, 'search-analytics-service');
       return [];
     }
   }
@@ -345,8 +348,8 @@ export class SearchAnalyticsService {
       }
 
       return null;
-    } catch (error) {
-      console.error('Failed to get user search insights:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to get user search insights', error, 'search-analytics-service');
       return null;
     }
   }
@@ -419,7 +422,7 @@ export class SearchAnalyticsService {
       const authStore = useAuthStore.getState();
       const user = authStore.user;
       if (!user) {
-        console.warn('User not authenticated, cannot update popular searches');
+        logger.warn('User not authenticated, cannot update popular searches', {}, 'search-analytics-service');
         return;
       }
 
@@ -434,13 +437,13 @@ export class SearchAnalyticsService {
       if (error) {
         // Handle duplicate key constraint errors (23505) - these are non-critical
         if (error.code === '23505' || error.code === '409' || error.message?.includes('duplicate key')) {
-          console.warn('Popular searches already exists (non-critical):', error.message);
+          logger.warn('Popular searches already exists (non-critical)', { error: error.message }, 'search-analytics-service');
         } else {
-          console.error('Failed to update popular searches:', error);
+          logger.error('Failed to update popular searches', error, 'search-analytics-service');
         }
       }
-    } catch (error) {
-      console.error('Error updating popular searches:', error);
+    } catch (error: unknown) {
+      logger.error('Error updating popular searches', error, 'search-analytics-service');
     }
   }
 }

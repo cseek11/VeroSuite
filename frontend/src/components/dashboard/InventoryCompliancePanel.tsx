@@ -1,5 +1,10 @@
 import React from 'react';
-import { Card, Typography, Chip, ProgressBar } from '@/components/ui/EnhancedUI';
+import Card from '@/components/ui/Card';
+import {
+  Badge,
+  Heading,
+  Text,
+} from '@/components/ui';
 import { Package, AlertTriangle, CheckCircle, Clock, Thermometer, Shield, Zap } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { enhancedApi } from '@/lib/enhanced-api';
@@ -39,13 +44,13 @@ const InventoryCompliancePanel: React.FC = () => {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'high':
-        return 'danger';
+        return 'bg-red-100 text-red-800';
       case 'medium':
-        return 'warning';
+        return 'bg-yellow-100 text-yellow-800';
       case 'low':
-        return 'primary';
+        return 'bg-blue-100 text-blue-800';
       default:
-        return 'default';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -84,42 +89,42 @@ const InventoryCompliancePanel: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div className="text-center">
             <Package className="mx-auto h-8 w-8 text-blue-500 mb-2" />
-            <Typography variant="h3" className="font-bold text-blue-600">
+            <Heading level={3} className="font-bold text-blue-600">
               {inventoryData.totalItems}
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-gray-600">
               Total Items
-            </Typography>
+            </Text>
           </div>
 
           <div className="text-center">
             <AlertTriangle className="mx-auto h-8 w-8 text-yellow-500 mb-2" />
-            <Typography variant="h3" className="font-bold text-yellow-600">
+            <Heading level={3} className="font-bold text-yellow-600">
               {inventoryData.lowStock}
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-gray-600">
               Low Stock
-            </Typography>
+            </Text>
           </div>
 
           <div className="text-center">
             <Shield className="mx-auto h-8 w-8 text-green-500 mb-2" />
-            <Typography variant="h3" className="font-bold text-green-600">
+            <Heading level={3} className="font-bold text-green-600">
               {inventoryData.complianceRate}%
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-gray-600">
               Compliance Rate
-            </Typography>
+            </Text>
           </div>
 
           <div className="text-center">
             <CheckCircle className="mx-auto h-8 w-8 text-purple-500 mb-2" />
-            <Typography variant="h3" className="font-bold text-purple-600">
+            <Heading level={3} className="font-bold text-purple-600">
               {inventoryData.safetyScore}%
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-gray-600">
               Safety Score
-            </Typography>
+            </Text>
           </div>
         </div>
       </Card>
@@ -130,48 +135,52 @@ const InventoryCompliancePanel: React.FC = () => {
           {inventoryCategories.map((category, index) => (
             <div key={index} className="border rounded-lg p-4">
               <div className="flex justify-between items-center mb-3">
-                <Typography variant="body1" className="font-medium">
+                <Text variant="body" className="font-medium">
                   {category.name}
-                </Typography>
+                </Text>
                 <div className="flex items-center space-x-2">
-                  <Chip variant={category.compliance >= 95 ? 'success' : 'warning' as any}>
+                  <Badge variant="default" className={category.compliance >= 95 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
                     {category.compliance}%
-                  </Chip>
+                  </Badge>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4 mb-3">
                 <div className="text-center">
-                  <Typography variant="body2" className="font-medium text-blue-600">
+                  <Text variant="small" className="font-medium text-blue-600">
                     {category.total}
-                  </Typography>
-                  <Typography variant="caption" className="text-gray-500">
+                  </Text>
+                  <Text variant="small" className="text-gray-500">
                     Total Items
-                  </Typography>
+                  </Text>
                 </div>
                 <div className="text-center">
-                  <Typography variant="body2" className="font-medium text-yellow-600">
+                  <Text variant="small" className="font-medium text-yellow-600">
                     {category.lowStock}
-                  </Typography>
-                  <Typography variant="caption" className="text-gray-500">
+                  </Text>
+                  <Text variant="small" className="text-gray-500">
                     Low Stock
-                  </Typography>
+                  </Text>
                 </div>
                 <div className="text-center">
-                  <Typography variant="body2" className="font-medium text-red-600">
+                  <Text variant="small" className="font-medium text-red-600">
                     {category.outOfStock}
-                  </Typography>
-                  <Typography variant="caption" className="text-gray-500">
+                  </Text>
+                  <Text variant="small" className="text-gray-500">
                     Out of Stock
-                  </Typography>
+                  </Text>
                 </div>
               </div>
 
-              <ProgressBar
-                value={category.compliance}
-                color={category.compliance >= 95 ? 'success' : 'warning' as any}
-                showLabel
-              />
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className={`h-2 rounded-full ${category.compliance >= 95 ? 'bg-green-500' : 'bg-yellow-500'}`}
+                  style={{ width: `${category.compliance}%` }}
+                />
+              </div>
+              <div className="text-sm text-gray-600 text-center">
+                {category.compliance}%
+              </div>
             </div>
           ))}
         </div>
@@ -188,21 +197,21 @@ const InventoryCompliancePanel: React.FC = () => {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
-                    <Typography variant="body1" className="font-medium">
+                    <Text variant="body" className="font-medium">
                       {alert.item}
-                    </Typography>
+                    </Text>
                     {getSeverityIcon(alert.severity)}
                   </div>
-                  <Typography variant="body2" className="text-gray-600 mb-1">
+                  <Text variant="small" className="text-gray-600 mb-1">
                     {alert.message}
-                  </Typography>
+                  </Text>
                   <div className="flex items-center justify-between">
-                    <Typography variant="caption" className="text-gray-500">
+                    <Text variant="small" className="text-gray-500">
                       {new Date(alert.date).toLocaleDateString()}
-                    </Typography>
-                    <Chip variant={getSeverityColor(alert.severity) as any}>
+                    </Text>
+                    <Badge variant="default" className={getSeverityColor(alert.severity)}>
                       {alert.severity.charAt(0).toUpperCase() + alert.severity.slice(1)}
-                    </Chip>
+                    </Badge>
                   </div>
                 </div>
               </div>
@@ -216,25 +225,25 @@ const InventoryCompliancePanel: React.FC = () => {
               <div key={inspection.id} className="border rounded-lg p-4">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <Typography variant="body1" className="font-medium">
+                    <Text variant="body" className="font-medium">
                       {inspection.inspector}
-                    </Typography>
-                    <Typography variant="body2" className="text-gray-500">
+                    </Text>
+                    <Text variant="small" className="text-gray-500">
                       {new Date(inspection.date).toLocaleDateString()}
-                    </Typography>
+                    </Text>
                   </div>
                   <div className="text-right">
-                    <Typography variant="h4" className="font-bold text-green-600">
+                    <Heading level={4} className="font-bold text-green-600">
                       {inspection.score}%
-                    </Typography>
-                    <Chip variant="success">
+                    </Heading>
+                    <Badge variant="default" className="bg-green-100 text-green-800">
                       {inspection.status.charAt(0).toUpperCase() + inspection.status.slice(1)}
-                    </Chip>
+                    </Badge>
                   </div>
                 </div>
-                <Typography variant="body2" className="text-gray-600">
+                <Text variant="small" className="text-gray-600">
                   {inspection.notes}
-                </Typography>
+                </Text>
               </div>
             ))}
           </div>
@@ -246,45 +255,53 @@ const InventoryCompliancePanel: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
             <Shield className="mx-auto h-8 w-8 text-green-500 mb-2" />
-            <Typography variant="h3" className="font-bold text-green-600">
+            <Heading level={3} className="font-bold text-green-600">
               {inventoryData.complianceRate}%
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-gray-600">
               Overall Compliance
-            </Typography>
-            <ProgressBar
-              value={inventoryData.complianceRate}
-              color="success"
-              showLabel
-            />
+            </Text>
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+              <div
+                className="bg-green-500 h-2 rounded-full"
+                style={{ width: `${inventoryData.complianceRate}%` }}
+              />
+            </div>
+            <div className="text-sm text-gray-600 text-center mt-1">
+              {inventoryData.complianceRate}%
+            </div>
           </div>
 
           <div className="text-center">
             <CheckCircle className="mx-auto h-8 w-8 text-blue-500 mb-2" />
-            <Typography variant="h3" className="font-bold text-blue-600">
+            <Heading level={3} className="font-bold text-blue-600">
               {inventoryData.safetyScore}%
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-gray-600">
               Safety Score
-            </Typography>
-            <ProgressBar
-              value={inventoryData.safetyScore}
-              color="primary"
-              showLabel
-            />
+            </Text>
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+              <div
+                className="bg-blue-500 h-2 rounded-full"
+                style={{ width: `${inventoryData.safetyScore}%` }}
+              />
+            </div>
+            <div className="text-sm text-gray-600 text-center mt-1">
+              {inventoryData.safetyScore}%
+            </div>
           </div>
 
           <div className="text-center">
             <AlertTriangle className="mx-auto h-8 w-8 text-orange-500 mb-2" />
-            <Typography variant="h3" className="font-bold text-orange-600">
+            <Heading level={3} className="font-bold text-orange-600">
               {inventoryData.expiringSoon}
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-gray-600">
               Items Expiring Soon
-            </Typography>
-            <Typography variant="caption" className="text-gray-500">
+            </Text>
+            <Text variant="small" className="text-gray-500">
               Requires immediate attention
-            </Typography>
+            </Text>
           </div>
         </div>
       </Card>

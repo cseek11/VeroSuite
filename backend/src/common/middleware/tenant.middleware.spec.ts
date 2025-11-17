@@ -65,7 +65,7 @@ describe('TenantMiddleware', () => {
       await middleware.use(mockRequest as Request, mockResponse as Response, mockNext);
 
       expect(databaseService.query).toHaveBeenCalledWith('SET LOCAL app.tenant_id = $1', [tenantId]);
-      expect(databaseService.query).toHaveBeenCalledWith('SET LOCAL ROLE verosuite_app');
+      expect(databaseService.query).toHaveBeenCalledWith('SET LOCAL ROLE verofield_app');
       expect(mockRequest.tenantId).toBe(tenantId);
       expect(mockNext).toHaveBeenCalled();
     });
@@ -83,7 +83,7 @@ describe('TenantMiddleware', () => {
       await middleware.use(mockRequest as Request, mockResponse as Response, mockNext);
 
       expect(databaseService.query).toHaveBeenCalledWith('SET LOCAL app.tenant_id = $1', [tenantId]);
-      expect(databaseService.query).toHaveBeenCalledWith('SET LOCAL ROLE verosuite_app');
+      expect(databaseService.query).toHaveBeenCalledWith('SET LOCAL ROLE verofield_app');
       expect(mockRequest.tenantId).toBe(tenantId);
       expect(mockNext).toHaveBeenCalled();
     });

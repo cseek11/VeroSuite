@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import KeyboardShortcutsModal from './KeyboardShortcutsModal';
+import { logger } from '@/utils/logger';
 
 interface KeyboardNavigationProviderProps {
   children: React.ReactNode;
@@ -21,7 +21,7 @@ const KeyboardNavigationProvider: React.FC<KeyboardNavigationProviderProps> = ({
   }, []);
 
   // Note: This provider is for global keyboard shortcuts, not card navigation
-  // Card navigation is handled directly in VeroCardsV2 component
+  // Card navigation is handled directly in VeroCardsV3 component
   const handleGlobalShortcuts = useCallback((e: KeyboardEvent) => {
     if (!enabled) return;
     
@@ -32,15 +32,9 @@ const KeyboardNavigationProvider: React.FC<KeyboardNavigationProviderProps> = ({
     }
   }, [enabled]);
 
-  // Debug logging
-  React.useEffect(() => {
-    console.log('🎯 KeyboardNavigationProvider enabled:', enabled);
-  }, [enabled]);
-
   // Global keyboard shortcuts
   React.useEffect(() => {
     if (!enabled) {
-      console.log('🚫 Global shortcuts DISABLED');
       return;
     }
 
@@ -63,7 +57,7 @@ const KeyboardNavigationProvider: React.FC<KeyboardNavigationProviderProps> = ({
       handleGlobalShortcuts(e);
     };
 
-    console.log('✅ Global shortcuts ENABLED');
+    logger.debug('Global shortcuts enabled', {}, 'KeyboardNavigationProvider');
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [enabled, handleGlobalShortcuts]);

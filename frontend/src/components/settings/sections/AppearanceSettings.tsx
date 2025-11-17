@@ -1,6 +1,7 @@
 import React from 'react';
-import { Palette, Eye, Globe } from 'lucide-react';
+import { Palette, Eye, Globe, LayoutGrid } from 'lucide-react';
 import { SettingsCard } from '../shared/SettingsCard';
+import { DensityModeSelector } from '@/components/ui/DensityModeSelector';
 
 interface AppearanceSettingsProps {
   formData: {
@@ -83,6 +84,11 @@ export const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({
             ))}
           </div>
         </div>
+      </SettingsCard>
+
+      {/* Display Density */}
+      <SettingsCard title="Display Density" icon={LayoutGrid}>
+        <DensityModeSelector />
       </SettingsCard>
 
       {/* Display Settings */}

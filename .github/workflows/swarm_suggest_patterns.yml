@@ -1,0 +1,161 @@
+name: Swarm - Suggest Patterns
+
+on:
+  workflow_run:
+    workflows: ["Swarm - Compute Reward Score"]
+    types: [completed]
+
+jobs:
+  suggest-patterns:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Download reward artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: reward
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+        continue-on-error: true
+
+      - name: Decide whether to suggest patterns
+        id: check-score
+        run: |
+          if [ ! -f reward.json ]; then
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          SCORE=$(jq -r '.score' reward.json)
+          if [ "$SCORE" -ge 6 ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "score=$SCORE" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Get PR number
+        id: pr
+        run: |
+          # Try to get PR number from workflow_run
+          PR_NUM=$(gh pr list --head "${{ github.event.workflow_run.head_branch }}" --json number --jq '.[0].number' || echo "")
+          if [ -z "$PR_NUM" ]; then
+            PR_NUM="${{ github.event.workflow_run.pull_requests[0].number }}"
+          fi
+          echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
+
+      - name: Get PR diff
+        if: steps.check-score.outputs.found == 'true'
+        run: |
+          git fetch origin main || true
+          git diff origin/main...HEAD > suggestions/pr-diff.txt || echo "" > suggestions/pr-diff.txt
+
+      - name: Extract pattern suggestions
+        if: steps.check-score.outputs.found == 'true'
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+        run: |
+          mkdir -p suggestions
+          python .cursor/scripts/extract_patterns.py \
+            --pr "$PR_NUM" \
+            --diff suggestions/pr-diff.txt \
+            --out suggestions/patterns.json
+
+      - name: Generate suggestion summary
+        if: steps.check-score.outputs.found == 'true'
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+          SCORE: ${{ steps.check-score.outputs.score }}
+        run: |
+          python3 << 'EOF'
+          import json
+          import pathlib
+          
+          patterns_path = pathlib.Path("suggestions/patterns.json")
+          if not patterns_path.exists():
+              print("No patterns.json found")
+              exit(0)
+          
+          data = json.loads(patterns_path.read_text())
+          candidates = data.get("candidates", [])
+          
+          if not candidates:
+              print("No candidate patterns found")
+              exit(0)
+          
+          # Generate markdown summary
+          summary = f"""# Pattern Extraction Suggestions (PR #{pathlib.Path().cwd().name})
+          
+**REWARD_SCORE:** {pathlib.Path().cwd().name} (triggered pattern extraction)
+          
+## Candidate Patterns ({len(candidates)})
+          
+"""
+          
+          for i, pattern in enumerate(candidates, 1):
+              summary += f"""### {i}. {pattern.get('pattern', 'Unknown Pattern')}
+          
+**When:** {pattern.get('when', 'N/A')}
+          
+**Do:**
+"""
+              for step in pattern.get('do', []):
+                  summary += f"- {step}\n"
+          
+              summary += f"""
+**Why:** {pattern.get('why', 'N/A')}
+          
+**Example:** `{pattern.get('example', 'N/A')}`
+          
+**Metadata:**
+- Domain: {pattern.get('metadata', {}).get('domain', 'unknown')}
+- Complexity: {pattern.get('metadata', {}).get('complexity', 'unknown')}
+- Source PR: #{pattern.get('metadata', {}).get('source_pr', 'unknown')}
+          
+---
+          
+"""
+          
+          summary += """
+## Next Steps
+
+1. Review each candidate pattern above
+2. If approved, create pattern file in `.cursor/patterns/` with naming: `NNN_domain_short-name.md`
+3. Update pattern metadata with human reviewer approval
+4. Merge pattern file to make it available for future use
+
+**Note:** Patterns require human review before being added to the pattern library.
+"""
+          
+          pathlib.Path("suggestions/README.md").write_text(summary)
+          print(f"Generated summary with {len(candidates)} patterns")
+          EOF
+
+      - name: Upload suggestions artifact
+        if: steps.check-score.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pattern-suggestions
+          path: suggestions/
+          retention-days: 30
+
+      - name: Post pattern suggestion comment
+        if: steps.check-score.outputs.found == 'true'
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ ! -f suggestions/README.md ]; then
+            echo "No pattern suggestions found"
+            exit 0
+          fi
+          
+          gh pr comment "$PR_NUM" --body-file suggestions/README.md || true

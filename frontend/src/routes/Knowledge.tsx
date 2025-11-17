@@ -1,16 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuthStore } from '@/stores/auth';
+import { logger } from '@/utils/logger';
+import { toast } from '@/utils/toast';
+import { useDialog } from '@/hooks/useDialog';
 import { 
   BookOpen, 
   Search, 
   Plus, 
-  Edit, 
-  Trash2, 
   Eye, 
   Download, 
   Filter,
-  Tag,
-  Calendar,
   User,
   Star,
   ThumbsUp,
@@ -18,14 +17,11 @@ import {
   Share2,
   Bookmark,
   FileText,
-  Video,
-  Image,
   HelpCircle,
   ChevronRight,
   ChevronDown,
   MoreVertical,
   FolderOpen,
-  Lightbulb,
   AlertTriangle,
   CheckCircle,
   Clock,
@@ -38,6 +34,7 @@ import { fetchKnowledgeArticles, fetchKnowledgeCategories, createKnowledgeArticl
 // Articles will be fetched from API
 
 const KnowledgePage: React.FC = () => {
+  const { showConfirm, DialogComponents } = useDialog();
   const { user } = useAuthStore();
   const isAdmin = !!(user && Array.isArray(user.roles) && user.roles.includes('admin'));
   const [activeTab, setActiveTab] = useState('articles');
@@ -65,7 +62,7 @@ const KnowledgePage: React.FC = () => {
 
   const tabs = [
     { id: 'articles', label: 'Articles', icon: FileText },
-    { id: 'verosuite', label: 'VeroField', icon: BookOpen },
+    { id: 'verofield', label: 'VeroField', icon: BookOpen },
     { id: 'categories', label: 'Categories', icon: FolderOpen },
     { id: 'faqs', label: 'FAQs', icon: HelpCircle },
     { id: 'favorites', label: 'Favorites', icon: Bookmark }
@@ -143,7 +140,9 @@ const KnowledgePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
+    <>
+      <DialogComponents />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
         <div className="flex items-center justify-between mb-3">
@@ -162,7 +161,7 @@ const KnowledgePage: React.FC = () => {
             </button>
             <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 font-medium text-sm"
               onClick={() => {
-                setEditorData({ id: undefined, title: '', category_id: (fetchedCategories.find((c:any)=>c.slug==='verosuite-training')?.id)||'', author: 'VeroField Team', read_time: '5 min', difficulty: 'beginner', tags: [], content: '', featured: false });
+                setEditorData({ id: undefined, title: '', category_id: (fetchedCategories.find((c:any)=>c.slug==='verofield-training')?.id)||'', author: 'VeroField Team', read_time: '5 min', difficulty: 'beginner', tags: [], content: '', featured: false });
                 setIsEditorOpen(true);
               }}
             >
@@ -371,15 +370,15 @@ const KnowledgePage: React.FC = () => {
                             className="h-6 px-2 bg-white/80 backdrop-blur-sm border border-rose-200 text-rose-700 rounded hover:bg-white hover:shadow-lg transition-all duration-200"
                             onClick={async (e) => {
                               e.stopPropagation();
-                              if (!confirm('Delete this article?')) return;
+                              // Confirm dialog will be handled by showConfirm
                               try {
                                 if (!article.id) return;
                                 await deleteKnowledgeArticle(article.id);
                                 const arts = await fetchKnowledgeArticles();
                                 setFetchedArticles(arts);
-                              } catch (err) {
-                                console.error(err);
-                                alert('Failed to delete article');
+                              } catch (err: unknown) {
+                                logger.error('Failed to delete article', err, 'Knowledge');
+                                toast.error('Failed to delete article');
                               }
                             }}
                           >
@@ -395,7 +394,7 @@ const KnowledgePage: React.FC = () => {
           </div>
         )}
 
-          {activeTab === 'verosuite' && (
+          {activeTab === 'verofield' && (
             <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
               <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
                 <div className="p-1 bg-purple-100 rounded-md">
@@ -404,7 +403,7 @@ const KnowledgePage: React.FC = () => {
                 VeroField Training
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {articles.filter((a: any) => (usingFetched ? a.category_slug === 'verosuite-training' : a.category === 'verosuite-training')).map((article: any) => (
+                {articles.filter((a: any) => (usingFetched ? a.category_slug === 'verofield-training' : a.category === 'verofield-training')).map((article: any) => (
                   <div
                     key={article.id}
                     className="p-3 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm cursor-pointer"
@@ -720,11 +719,11 @@ const KnowledgePage: React.FC = () => {
                 <div className="flex items-center justify-end gap-2">
                   <button className="px-3 py-1.5 border border-slate-200 rounded text-slate-700 text-sm" onClick={() => setIsEditorOpen(false)}>Cancel</button>
                   <button
-                    className="px-3 py-1.5 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700"
+                    className="px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-sm"
                     onClick={async () => {
                       try {
                         if (!editorData.title || !editorData.category_id || !editorData.content) {
-                          alert('Title, Category, and Content are required');
+                          toast.warning('Title, Category, and Content are required');
                           return;
                         }
                         if (editorData.id) {
@@ -758,9 +757,9 @@ const KnowledgePage: React.FC = () => {
                         const arts = await fetchKnowledgeArticles();
                         setFetchedArticles(arts);
                         setIsEditorOpen(false);
-                      } catch (e) {
-                        console.error(e);
-                        alert('Failed to save article');
+                      } catch (e: unknown) {
+                        logger.error('Failed to save article', e, 'Knowledge');
+                        toast.error('Failed to save article');
                       }
                     }}
                   >
@@ -773,6 +772,7 @@ const KnowledgePage: React.FC = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

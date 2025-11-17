@@ -6,7 +6,7 @@
 // This component extends the AdvancedSearchBar to support natural language
 // commands like "create customer", "schedule appointment", etc.
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAdvancedSearch } from '@/hooks/useAdvancedSearch';
 import { 
   Search, 
@@ -30,13 +30,15 @@ import {
   Settings,
   HelpCircle
 } from 'lucide-react';
-import { Card, Button } from '@/components/ui/EnhancedUI';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import type { SearchFilters } from '@/types/enhanced-types';
 import type { IntentResult, IntentType } from '@/lib/intent-classification-service';
 import type { ActionResult, ConfirmationData } from '@/lib/action-handlers';
 import { intentClassificationService } from '@/lib/intent-classification-service';
 import { actionExecutorService } from '@/lib/action-handlers';
 import CommandHelpModal from '@/components/CommandHelpModal';
+import { logger } from '@/utils/logger';
 
 interface GlobalSearchBarProps {
   onResultsChange?: (results: any[]) => void;
@@ -191,7 +193,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
         setCurrentIntent(null);
       }
     } catch (error) {
-      console.error('Action execution failed:', error);
+      logger.error('Action execution failed', error, 'GlobalSearchBar');
     } finally {
       setIsExecutingAction(false);
     }

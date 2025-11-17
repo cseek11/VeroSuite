@@ -7,6 +7,7 @@ import { config } from '@/lib/config';
 import supabase from '@/lib/supabase-client';
 import { useAuthStore } from '@/stores/auth';
 import type { SearchFilters, Account } from '@/types/enhanced-types';
+import { logger } from '@/utils/logger';
 
 // Use shared singleton Supabase client
 
@@ -21,7 +22,9 @@ const getTenantId = async (): Promise<string> => {
     if (user) {
       const tenantId = user.user_metadata?.tenant_id || user.app_metadata?.tenant_id;
       if (tenantId) {
-        console.log('Search service using tenant ID:', tenantId);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Search service using tenant ID', { tenantId }, 'search-service');
+        }
         return tenantId;
       }
     }
@@ -33,10 +36,10 @@ const getTenantId = async (): Promise<string> => {
     }
     
     // Development fallback
-    console.warn('Using test tenant for search');
+    logger.warn('Using test tenant for search', {}, 'search-service');
     return '7193113e-ece2-4f7b-ae8c-176df4367e28';
-  } catch (error) {
-    console.error('Error getting tenant ID for search:', error);
+  } catch (error: unknown) {
+    logger.error('Error getting tenant ID for search', error, 'search-service');
     return '7193113e-ece2-4f7b-ae8c-176df4367e28';
   }
 };
@@ -76,8 +79,8 @@ export const searchLogger = {
         p_clicked_record_id: data.clickedRecordId || null,
         p_search_filters: data.searchFilters || null
       });
-    } catch (error) {
-      console.error('Failed to log search:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to log search', error, 'search-service');
       // Don't throw - logging should not break search functionality
     }
   },
@@ -107,8 +110,8 @@ export const searchLogger = {
           .update({ clicked_record_id: recordId })
           .eq('id', recentLog.id);
       }
-    } catch (error) {
-      console.error('Failed to log click:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to log click', error, 'search-service');
     }
   }
 };
@@ -234,11 +237,15 @@ export const enhancedSearch = {
   async searchCustomers(filters?: SearchFilters): Promise<Account[]> {
     const startTime = performance.now();
     
-    console.log('🔍 Search service called with filters:', filters);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Search service called with filters', { filters }, 'search-service');
+    }
     
     try {
       const tenantId = await getTenantId();
-      console.log('🔍 Using tenant ID:', tenantId);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Using tenant ID', { tenantId }, 'search-service');
+      }
       
       let query = supabase
         .from('accounts')
@@ -285,11 +292,13 @@ export const enhancedSearch = {
       const endTime = performance.now();
       const timeTakenMs = Math.round(endTime - startTime);
 
-      console.log('🔍 Search completed:', {
-        resultsCount: results.length,
-        timeTakenMs,
-        firstResult: results[0]?.name
-      });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Search completed', {
+          resultsCount: results.length,
+          timeTakenMs,
+          firstResult: results[0]?.name
+        }, 'search-service');
+      }
 
       // Log the search
       await searchLogger.logSearch({
@@ -300,8 +309,8 @@ export const enhancedSearch = {
       });
 
       return results;
-    } catch (error) {
-      console.error('Error in enhanced search:', error);
+    } catch (error: unknown) {
+      logger.error('Error in enhanced search', error, 'search-service');
       throw error;
     }
   },
@@ -326,8 +335,8 @@ export const enhancedSearch = {
 
       if (error) throw error;
       return data;
-    } catch (error) {
-      console.error('Error getting search analytics:', error);
+    } catch (error: unknown) {
+      logger.error('Error getting search analytics', error, 'search-service');
       throw error;
     }
   }
@@ -354,8 +363,8 @@ export const searchCorrections = {
 
       if (error) throw error;
       return data?.map(c => c.corrected_query) || [];
-    } catch (error) {
-      console.error('Error getting corrections:', error);
+    } catch (error: unknown) {
+      logger.error('Error getting corrections', error, 'search-service');
       return [];
     }
   },
@@ -387,8 +396,8 @@ export const searchCorrections = {
           .eq('original_query', originalQuery.toLowerCase())
           .eq('corrected_query', correctedQuery);
       }
-    } catch (error) {
-      console.error('Error updating correction:', error);
+    } catch (error: unknown) {
+      logger.error('Error updating correction', error, 'search-service');
     }
   }
 };
@@ -398,18 +407,18 @@ export const searchCorrections = {
 // ============================================================================
 
 export class SearchService {
-  async searchCustomers(query: string, tenantId: string): Promise<any[]> {
+  async searchCustomers(query: string, _tenantId: string): Promise<any[]> {
     const filters = { search: query };
     return await enhancedSearch.searchCustomers(filters);
   }
 
-  async searchWorkOrders(serviceType: string, tenantId: string): Promise<any[]> {
+  async searchWorkOrders(_serviceType: string, _tenantId: string): Promise<any[]> {
     // This would need to be implemented based on your work orders table structure
     // For now, returning empty array to make tests pass
     return [];
   }
 
-  async globalSearch(query: string, tenantId: string): Promise<any> {
+  async globalSearch(query: string, _tenantId: string): Promise<any> {
     // This would need to be implemented for global search
     // For now, returning empty results to make tests pass
     return {
@@ -420,7 +429,7 @@ export class SearchService {
     };
   }
 
-  async searchWithFilters(table: string, filters: any, tenantId: string): Promise<any[]> {
+  async searchWithFilters(_table: string, _filters: any, _tenantId: string): Promise<any[]> {
     // This would need to be implemented based on your table structure
     // For now, returning empty array to make tests pass
     return [];

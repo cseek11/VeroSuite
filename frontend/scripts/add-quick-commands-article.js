@@ -10,7 +10,7 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const ARTICLE_TITLE = 'Quick Commands: Natural Language Actions';
-const CATEGORY_SLUG = 'verosuite-training';
+const CATEGORY_SLUG = 'verofield-training';
 
 const html = `
   <h2>Overview</h2>

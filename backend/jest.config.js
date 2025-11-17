@@ -1,24 +1,30 @@
 module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
-  rootDir: 'src',
-  testRegex: '.*\\.spec\\.ts$',
+  rootDir: '.',
+  roots: ['<rootDir>/src', '<rootDir>/test'],
+  testMatch: [
+    '**/__tests__/**/*.ts',
+    '**/?(*.)+(spec|test).ts',
+    '**/test/**/*.test.ts',
+    '**/test/**/*.spec.ts'
+  ],
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
   collectCoverageFrom: [
-    '**/*.(t|j)s',
-    '!**/*.spec.ts',
-    '!**/*.e2e-spec.ts',
+    'src/**/*.(t|j)s',
+    '!src/**/*.spec.ts',
+    '!src/**/*.e2e-spec.ts',
+    '!src/**/*.test.ts',
     '!**/node_modules/**',
     '!**/dist/**',
   ],
-  coverageDirectory: '../coverage',
+  coverageDirectory: './coverage',
   testEnvironment: 'node',
-  moduleNameMapping: {
-    '^@/(.*)$': '<rootDir>/$1',
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
-  setupFilesAfterEnv: ['<rootDir>/../test/setup.js'],
-  testTimeout: 10000,
+  setupFilesAfterEnv: ['<rootDir>/test/setup.js'],
+  testTimeout: 30000,
   verbose: true,
-  allowJs: true,
 };

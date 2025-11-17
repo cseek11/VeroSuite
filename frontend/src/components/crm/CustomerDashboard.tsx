@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { enhancedApi } from '@/lib/enhanced-api';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -11,22 +11,22 @@ import DualNotesSystem from './DualNotesSystem';
 import PhotoGallery from './PhotoGallery';
 import BusinessIntelligenceDashboard from './BusinessIntelligenceDashboard';
 import ComplianceCenter from './ComplianceCenter';
+import Card from '@/components/ui/Card';
 import {
-  Card,
   Tabs,
-  Typography,
-  Alert,
-  Button
-} from '@/components/ui/EnhancedUI';
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  Text,
+  Heading,
+} from '@/components/ui';
 import {
   User,
-  Calendar,
   FileText,
   MessageCircle,
   Camera,
   BarChart3,
-  Shield,
-  Settings
+  Shield
 } from 'lucide-react';
 
 interface CustomerDashboardProps {
@@ -76,17 +76,19 @@ export default function CustomerDashboard({ customerId }: CustomerDashboardProps
 
   if (customerError) {
     return (
-      <Alert type="error" title="Error Loading Customer">
-        Failed to load customer data. Please try again.
-      </Alert>
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <h3 className="text-sm font-medium text-red-800 mb-1">Error Loading Customer</h3>
+        <p className="text-sm text-red-700">Failed to load customer data. Please try again.</p>
+      </div>
     );
   }
 
   if (!customer) {
     return (
-      <Alert type="warning" title="Customer Not Found">
-        The requested customer could not be found.
-      </Alert>
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <h3 className="text-sm font-medium text-yellow-800 mb-1">Customer Not Found</h3>
+        <p className="text-sm text-yellow-700">The requested customer could not be found.</p>
+      </div>
     );
   }
 
@@ -169,41 +171,37 @@ export default function CustomerDashboard({ customerId }: CustomerDashboardProps
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Header */}
       <div className="mb-6">
-        <Typography variant="h1" className="text-gray-900">
+        <Heading level={1} className="text-slate-900">
           {customer.name}
-        </Typography>
-        <Typography variant="body1" className="text-gray-600 mt-2">
+        </Heading>
+        <Text variant="body" className="text-slate-600 mt-2">
           Customer ID: {customer.id} • {customer.account_type} • {customer.status}
-        </Typography>
+        </Text>
       </div>
 
       {/* Tabs */}
       <Card className="mb-6">
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="w-full"
-        >
-          <div className="flex flex-wrap gap-2 p-4 border-b border-gray-200">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="flex flex-wrap gap-2 p-4 border-b border-slate-200">
             {tabs.map((tab) => (
-              <Button
+              <TabsTrigger
                 key={tab.id}
-                variant={activeTab === tab.id ? "primary" : "outline"}
-                onClick={() => setActiveTab(tab.id)}
+                value={tab.id}
                 className="flex items-center gap-2"
               >
                 <tab.icon className="h-4 w-4" />
                 {tab.label}
-              </Button>
+              </TabsTrigger>
             ))}
-          </div>
+          </TabsList>
+          {tabs.map((tab) => (
+            <TabsContent key={tab.id} value={tab.id}>
+              {tab.component}
+            </TabsContent>
+          ))}
         </Tabs>
       </Card>
 
-      {/* Tab Content */}
-      <div className="min-h-[600px]">
-        {tabs.find(tab => tab.id === activeTab)?.component}
-      </div>
     </div>
   );
 }

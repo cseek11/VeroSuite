@@ -8,7 +8,7 @@
 const { execSync } = require('child_process');
 const path = require('path');
 
-console.log('🚀 Generating VeroSuite Enterprise Testing Dashboard...\n');
+console.log('🚀 Generating VeroField Enterprise Testing Dashboard...\n');
 
 try {
   // Run the dashboard generator

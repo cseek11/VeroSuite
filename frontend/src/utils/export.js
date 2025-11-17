@@ -1,3 +1,6 @@
+/* eslint-env browser */
+/* eslint-disable no-undef */
+// Legacy JS export utility - to be migrated to TS
 export function exportCsv(events) {
   const header = ["id","title","start","end","resourceId","location","notes","rrule"].join(",");
   const rows = events.map(e => [e.id,e.title,e.start,e.end,e.resourceId||"",e.location||"",(e.notes||"").replace(/\n/g," "),e.rrule||""].map(v=>`"${String(v).replace(/"/g,'""') }"`).join(","));

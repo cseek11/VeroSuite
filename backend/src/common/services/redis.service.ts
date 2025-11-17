@@ -86,7 +86,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
     try {
       const value = await this.client.get(key);
-      return value ? JSON.parse(value) : null;
+      return value ? JSON.parse(value as string) : null;
     } catch (error) {
       this.isConnected = false; // Mark as disconnected on error
       return null;
@@ -162,7 +162,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
     try {
       const values = await this.client.mGet(keys);
-      return values.map(value => value ? JSON.parse(value) : null);
+      return values.map(value => value ? JSON.parse(value as string) : null);
     } catch (error) {
       this.logger.error('Error getting multiple cache keys:', error);
       return keys.map(() => null);

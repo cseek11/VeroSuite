@@ -15,9 +15,10 @@ import {
   Info,
   Loader2
 } from 'lucide-react';
-import { Button, Input, Textarea, Badge } from '@/components/ui';
+import { Button, Textarea, Badge } from '@/components/ui';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { enhancedApi } from '@/lib/enhanced-api';
+import { logger } from '@/utils/logger';
 
 interface CustomerNotesHistoryProps {
   customerId: string;
@@ -74,7 +75,7 @@ const CustomerNotesHistory: React.FC<CustomerNotesHistoryProps> = ({ customerId 
       setIsSubmittingNote(false);
     },
     onError: (error) => {
-      console.error('Error creating note:', error);
+      logger.error('Error creating note', error, 'CustomerNotesHistory');
       setIsSubmittingNote(false);
     },
   });

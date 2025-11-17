@@ -1,0 +1,89 @@
+name: Update Metrics Dashboard
+
+on:
+  workflow_run:
+    workflows: ["Swarm - Compute Reward Score"]
+    types: [completed]
+  schedule:
+    # Run daily at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Download reward artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: reward
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+        continue-on-error: true
+        if: github.event_name == 'workflow_run'
+
+      - name: Extract score data
+        id: extract-score
+        if: github.event_name == 'workflow_run'
+        run: |
+          if [ -f reward.json ]; then
+            PR_NUM=$(jq -r '.metadata.pr' reward.json)
+            SCORE=$(jq -r '.score' reward.json)
+            echo "pr=$PR_NUM" >> "$GITHUB_OUTPUT"
+            echo "score=$SCORE" >> "$GITHUB_OUTPUT"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            
+            # Save breakdown and metadata
+            jq '.breakdown' reward.json > breakdown.json
+            jq '.metadata' reward.json > metadata.json
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update metrics
+        env:
+          PR_NUM: ${{ steps.extract-score.outputs.pr }}
+          SCORE: ${{ steps.extract-score.outputs.score }}
+        run: |
+          if [ "${{ steps.extract-score.outputs.found }}" = "true" ]; then
+            python .cursor/scripts/collect_metrics.py \
+              --pr "$PR_NUM" \
+              --score "$SCORE" \
+              --breakdown breakdown.json \
+              --metadata metadata.json
+          else
+            # Just recalculate aggregates
+            python .cursor/scripts/collect_metrics.py --aggregate-only
+          fi
+
+      - name: Commit and push metrics
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          if [ -f docs/metrics/reward_scores.json ]; then
+            git add docs/metrics/reward_scores.json
+            git commit -m "chore: update REWARD_SCORE metrics [skip ci]" || exit 0
+            git push || exit 0
+          fi
+
+      - name: Upload metrics artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: metrics-data
+          path: docs/metrics/reward_scores.json
+          retention-days: 30
+        continue-on-error: true
+

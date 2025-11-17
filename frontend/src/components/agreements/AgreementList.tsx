@@ -1,27 +1,27 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import {
-  Card,
-  Button,
-  Typography,
-  Chip,
-  Modal,
-  ProgressBar,
-  Alert,
-  Input,
-  Select,
-} from '@/components/ui/EnhancedUI';
+  Badge,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  CRMSelect,
+  Heading,
+  Text,
+} from '@/components/ui';
 import {
   FileText,
   Calendar,
-  DollarSign,
   AlertTriangle,
   CheckCircle,
   Clock,
   Edit,
   Plus,
   Search,
-  Filter,
   Eye,
 } from 'lucide-react';
 import { agreementsApi } from '@/lib/agreements-api';
@@ -170,9 +170,9 @@ export function AgreementList({ customerId }: AgreementListProps) {
     return (
       <Card className="p-6">
         <div className="text-center py-8">
-          <Typography variant="body1" className="text-gray-600">
+          <Text variant="body" className="text-gray-600">
             Loading agreements...
-          </Typography>
+          </Text>
         </div>
       </Card>
     );
@@ -181,9 +181,10 @@ export function AgreementList({ customerId }: AgreementListProps) {
   if (error) {
     return (
       <Card className="p-6">
-        <Alert type="error" title="Error loading agreements">
-          {error.message}
-        </Alert>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-red-800 mb-1">Error loading agreements</h3>
+          <p className="text-sm text-red-700">{error.message}</p>
+        </div>
       </Card>
     );
   }
@@ -192,9 +193,9 @@ export function AgreementList({ customerId }: AgreementListProps) {
     <>
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <Typography variant="h3" className="text-gray-900">
+          <Heading level={3} className="text-gray-900">
             Service Agreements
-          </Typography>
+          </Heading>
           <Button
             variant="primary"
             onClick={() => setShowNewAgreementModal(true)}
@@ -214,33 +215,31 @@ export function AgreementList({ customerId }: AgreementListProps) {
               icon={Search}
             />
           </div>
-          <Select
+          <CRMSelect
             value={statusFilter}
             onChange={(value) => setStatusFilter(value)}
-            placeholder="Filter by status"
-            icon={<Filter className="h-4 w-4" />}
-          >
-            <option value="">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="pending">Pending</option>
-            <option value="expired">Expired</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="inactive">Inactive</option>
-          </Select>
+            options={[
+              { value: '', label: 'All Statuses' },
+              { value: 'active', label: 'Active' },
+              { value: 'pending', label: 'Pending' },
+              { value: 'expired', label: 'Expired' },
+              { value: 'cancelled', label: 'Cancelled' },
+              { value: 'inactive', label: 'Inactive' },
+            ]}
+          />
         </div>
 
         {filteredAgreements.length === 0 ? (
           <div className="text-center py-8">
             <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <Typography variant="h4" className="text-gray-900 mb-2">
+            <Heading level={4} className="text-gray-900 mb-2">
               No Agreements Found
-            </Typography>
-            <Typography variant="body1" className="text-gray-600 mb-4">
+            </Heading>
+            <Text variant="body" className="text-gray-600 mb-4">
               {searchTerm || statusFilter 
                 ? 'No agreements match your search criteria.'
-                : 'No service agreements have been created yet.'
-              }
-            </Typography>
+                : 'No service agreements have been created yet.'}
+            </Text>
             {!searchTerm && !statusFilter && (
               <Button
                 variant="outline"
@@ -269,58 +268,52 @@ export function AgreementList({ customerId }: AgreementListProps) {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <FileText className="h-5 w-5 text-blue-600" />
-                      <Typography variant="h5" className="text-gray-900 truncate">
+                      <Heading level={5} className="text-gray-900 truncate">
                         {agreement.title}
-                      </Typography>
+                      </Heading>
                     </div>
-                    <Chip
-                      color={getStatusColor(agreement.status)}
-                      variant="default"
-                    >
+                    <Badge variant={agreement.status === 'active' ? 'default' : 'secondary'}>
                       {agreement.status}
-                    </Chip>
+                    </Badge>
                   </div>
 
                   {/* Agreement Details */}
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center justify-between">
-                      <Typography variant="body2" className="text-gray-600">
+                      <Text variant="small" className="text-gray-600">
                         Customer
-                      </Typography>
-                      <Typography variant="body2" className="text-gray-900 truncate">
+                      </Text>
+                      <Text variant="small" className="text-gray-900 truncate">
                         {agreement.account.name}
-                      </Typography>
+                      </Text>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <Typography variant="body2" className="text-gray-600">
+                      <Text variant="small" className="text-gray-600">
                         Service Type
-                      </Typography>
-                      <Typography variant="body2" className="text-gray-900 truncate">
+                      </Text>
+                      <Text variant="small" className="text-gray-900 truncate">
                         {agreement.service_types.name}
-                      </Typography>
+                      </Text>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <Typography variant="body2" className="text-gray-600">
+                      <Text variant="small" className="text-gray-600">
                         Billing
-                      </Typography>
-                      <Chip
-                        color={getBillingFrequencyColor(agreement.billing_frequency)}
-                        variant="default"
-                      >
+                      </Text>
+                      <Badge variant="default">
                         {agreement.billing_frequency}
-                      </Chip>
+                      </Badge>
                     </div>
 
                     {agreement.pricing && (
                       <div className="flex items-center justify-between">
-                        <Typography variant="body2" className="text-gray-600">
+                        <Text variant="small" className="text-gray-600">
                           Pricing
-                        </Typography>
-                        <Typography variant="body1" className="font-semibold text-green-600">
+                        </Text>
+                        <Text variant="body" className="font-semibold text-green-600">
                           ${agreement.pricing.toLocaleString()}
-                        </Typography>
+                        </Text>
                       </div>
                     )}
                   </div>
@@ -329,18 +322,23 @@ export function AgreementList({ customerId }: AgreementListProps) {
                   {agreement.end_date && (
                     <div className="mb-3">
                       <div className="flex items-center justify-between mb-1">
-                        <Typography variant="body2" className="text-gray-600">
+                        <Text variant="small" className="text-gray-600">
                           Agreement Progress
-                        </Typography>
-                        <Typography variant="body2" className="text-gray-900">
+                        </Text>
+                        <Text variant="small" className="text-gray-900">
                           {Math.round(progress)}%
-                        </Typography>
+                        </Text>
                       </div>
-                      <ProgressBar
-                        value={progress}
-                        color={progress > 80 ? 'red' : progress > 60 ? 'yellow' : 'green'}
-                        className="h-2"
-                      />
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full ${
+                            progress > 80 ? 'bg-red-500' : 
+                            progress > 60 ? 'bg-yellow-500' : 
+                            'bg-green-500'
+                          }`}
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
                     </div>
                   )}
 
@@ -439,13 +437,12 @@ export function AgreementList({ customerId }: AgreementListProps) {
         )}
       </Card>
 
-      {/* Agreement Detail Modal */}
-      <Modal
-        isOpen={showAgreementModal}
-        onClose={() => setShowAgreementModal(false)}
-        title={`Agreement Details - ${selectedAgreement?.title}`}
-        size="lg"
-      >
+      {/* Agreement Detail Dialog */}
+      <Dialog open={showAgreementModal} onOpenChange={(open) => !open && setShowAgreementModal(false)}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Agreement Details - {selectedAgreement?.title}</DialogTitle>
+          </DialogHeader>
         {selectedAgreement && (
           <AgreementDetail
             agreement={selectedAgreement}
@@ -456,30 +453,30 @@ export function AgreementList({ customerId }: AgreementListProps) {
             onClose={() => setShowAgreementModal(false)}
           />
         )}
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
-      {/* New Agreement Modal */}
-      <Modal
-        isOpen={showNewAgreementModal}
-        onClose={() => setShowNewAgreementModal(false)}
-        title="Create New Agreement"
-        size="lg"
-      >
+      {/* New Agreement Dialog */}
+      <Dialog open={showNewAgreementModal} onOpenChange={(open) => !open && setShowNewAgreementModal(false)}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Create New Agreement</DialogTitle>
+          </DialogHeader>
         <AgreementForm
           onSuccess={() => {
             setShowNewAgreementModal(false);
           }}
           onCancel={() => setShowNewAgreementModal(false)}
         />
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
-      {/* Edit Agreement Modal */}
-      <Modal
-        isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
-        title="Edit Agreement"
-        size="lg"
-      >
+      {/* Edit Agreement Dialog */}
+      <Dialog open={showEditModal} onOpenChange={(open) => !open && setShowEditModal(false)}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Edit Agreement</DialogTitle>
+          </DialogHeader>
         {selectedAgreement && (
           <AgreementForm
             agreement={selectedAgreement}
@@ -489,7 +486,8 @@ export function AgreementList({ customerId }: AgreementListProps) {
             onCancel={() => setShowEditModal(false)}
           />
         )}
-      </Modal>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

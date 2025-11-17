@@ -6,6 +6,7 @@
 
 import { supabase } from './supabase-client';
 import { enhancedApiCall } from './api-utils';
+import { logger } from '@/utils/logger';
 import type { 
   Account, 
   CustomerProfile, 
@@ -27,10 +28,6 @@ import type {
   TechnicianSkill,
   CustomerAnalytics,
   ServiceAnalytics,
-  Tenant,
-  User,
-  ApiResponse,
-  PaginatedResponse,
   SearchFilters,
   Invoice,
   Payment,
@@ -39,7 +36,8 @@ import type {
   CreatePaymentDto,
   CreatePaymentMethodDto,
   BillingAnalytics,
-  RevenueAnalytics
+  RevenueAnalytics,
+  ARSummary
 } from '@/types/enhanced-types';
 
 
@@ -57,47 +55,22 @@ const getTenantId = async (): Promise<string> => {
       // Try to get tenant ID from user metadata first (fallback)
       const tenantIdFromMetadata = user.user_metadata?.tenant_id;
       if (tenantIdFromMetadata) {
-        console.log('✅ User tenant ID retrieved from metadata:', tenantIdFromMetadata);
+        logger.debug('User tenant ID retrieved from metadata', { tenantId: tenantIdFromMetadata }, 'enhanced-api');
         return tenantIdFromMetadata;
       }
       
-      // Get the user's valid tenant ID from database (not from metadata)
-      try {
-        const { data: validTenantId, error: tenantError } = await supabase
-          .rpc('get_user_tenant_id', {
-            user_email: user.email
-          });
-        
-        if (tenantError) {
-          console.error('Failed to get user tenant ID:', tenantError.message);
-          // Fallback to a default tenant ID for development
-          console.log('🔄 Using fallback tenant ID for development');
-          return '7193113e-ece2-4f7b-ae8c-176df4367e28'; // Default tenant ID
-        }
-        
-        if (validTenantId) {
-          console.log('✅ User tenant ID retrieved from database:', validTenantId);
-          return validTenantId;
-        } else {
-          // Fallback to a default tenant ID for development
-          console.log('🔄 Using fallback tenant ID for development');
-          return '7193113e-ece2-4f7b-ae8c-176df4367e28'; // Default tenant ID
-        }
-      } catch (tenantError: any) {
-        console.error('Error getting user tenant ID:', tenantError);
-        // Fallback to a default tenant ID for development
-        console.log('🔄 Using fallback tenant ID for development');
-        return '7193113e-ece2-4f7b-ae8c-176df4367e28'; // Default tenant ID
-      }
+      // For development, use a default tenant ID since RPC function doesn't exist
+      logger.debug('No authenticated user found, using fallback tenant ID for development', {}, 'enhanced-api');
+      return '7193113e-ece2-4f7b-ae8c-176df4367e28'; // Default tenant ID
     }
     
     // If no user, use fallback tenant ID for development
-    console.log('🔄 No authenticated user found, using fallback tenant ID for development');
+    logger.debug('No authenticated user found, using fallback tenant ID for development', {}, 'enhanced-api');
     return '7193113e-ece2-4f7b-ae8c-176df4367e28'; // Default tenant ID
     
-  } catch (error: any) {
-    console.error('Error resolving tenant ID:', error);
-    console.log('🔄 Using fallback tenant ID due to error');
+  } catch (error: unknown) {
+    logger.error('Error resolving tenant ID', error, 'enhanced-api');
+    logger.debug('Using fallback tenant ID due to error', {}, 'enhanced-api');
     return '7193113e-ece2-4f7b-ae8c-176df4367e28'; // Default tenant ID
   }
 };
@@ -108,57 +81,90 @@ const getUserId = async (): Promise<string> => {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (user) {
-      console.log('✅ User ID retrieved from auth:', user.id);
+      logger.debug('User ID retrieved from auth', { userId: user.id }, 'enhanced-api');
       return user.id;
     }
     
     // Fallback: try to get from localStorage
-    const authData = localStorage.getItem('verosuite_auth');
+    const authData = localStorage.getItem('verofield_auth');
     if (authData) {
       const parsed = JSON.parse(authData);
       if (parsed.user?.id) {
-        console.log('✅ User ID retrieved from localStorage:', parsed.user.id);
+        logger.debug('User ID retrieved from localStorage', { userId: parsed.user.id }, 'enhanced-api');
         return parsed.user.id;
       }
     }
     
     throw new Error('No authenticated user found');
-  } catch (error) {
-    console.error('❌ Error getting user ID:', error);
-    console.log('🔄 Using fallback user ID due to error');
+  } catch (error: unknown) {
+    logger.error('Error getting user ID', error, 'enhanced-api');
+    logger.debug('Using fallback user ID due to error', {}, 'enhanced-api');
     return '85b4bc59-650a-4fdf-beac-1dd2ba3066f4'; // Default user ID for development
   }
 };
 
 const getAuthToken = async (): Promise<string> => {
   try {
-    // First, try to get from Supabase auth
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (session?.access_token) {
-      console.log('✅ Auth token retrieved from session');
-      return session.access_token;
-    }
-    
-    // Fallback: try to get from localStorage
-    const authData = localStorage.getItem('verosuite_auth');
+    // First, try to get backend token from localStorage (preferred for backend API)
+    const authData = localStorage.getItem('verofield_auth');
     if (authData) {
-      const parsed = JSON.parse(authData);
-      if (parsed.token) {
-        console.log('✅ Auth token retrieved from localStorage');
-        return parsed.token;
+      try {
+        const parsed = JSON.parse(authData);
+        if (parsed.token) {
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('Auth token retrieved from localStorage (backend token)', {}, 'enhanced-api');
+          }
+          return parsed.token;
+        }
+      } catch (parseError) {
+        // If parsing fails, try as direct token string
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Auth data is not JSON, trying as direct token', {}, 'enhanced-api');
+        }
       }
     }
     
-    throw new Error('No authentication token found');
-  } catch (error) {
-    console.error('❌ Error getting auth token:', error);
-    throw new Error('Authentication required');
+    // Fallback: try to get from Supabase auth (for Supabase-based auth)
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.access_token) {
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Auth token retrieved from Supabase session', {}, 'enhanced-api');
+        }
+        return session.access_token;
+      }
+    } catch (supabaseError) {
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Supabase session check failed', { error: supabaseError }, 'enhanced-api');
+      }
+    }
+    
+    // Additional fallback: try direct jwt key
+    const jwtToken = localStorage.getItem('jwt');
+    if (jwtToken) {
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Auth token retrieved from jwt key', {}, 'enhanced-api');
+      }
+      return jwtToken;
+    }
+    
+    // If no token found, throw a more specific error
+    const error = new Error('No authentication token found. Please log in again.');
+    (error as any).isAuthError = true;
+    throw error;
+  } catch (error: unknown) {
+    if ((error as any)?.isAuthError) {
+      logger.warn('No auth token available - user may not be logged in', {}, 'enhanced-api');
+      throw error;
+    }
+    logger.error('Error getting auth token', error, 'enhanced-api');
+    throw new Error('Authentication required. Please log in again.');
   }
 };
 
 // New function to validate tenant access for a specific claimed tenant ID
-const validateTenantAccess = async (claimedTenantId: string): Promise<boolean> => {
+const _validateTenantAccess = async (claimedTenantId: string): Promise<boolean> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -174,20 +180,93 @@ const validateTenantAccess = async (claimedTenantId: string): Promise<boolean> =
       });
     
     if (validationError) {
-      console.error('Tenant validation failed:', validationError.message);
+      logger.error('Tenant validation failed', new Error(validationError.message), 'enhanced-api');
       return false;
     }
     
     return validationResult === true;
-  } catch (error: any) {
-    console.error('Error validating tenant access:', error);
+  } catch (error: unknown) {
+    logger.error('Error validating tenant access', error, 'enhanced-api');
     return false;
   }
 };
 
-const handleApiError = (error: any, context: string) => {
-  console.error(`API Error in ${context}:`, error);
-  throw new Error(`Failed to ${context}: ${error.message || 'Unknown error'}`);
+const handleApiError = (error: unknown, context: string) => {
+  let errorMessage = 'Unknown error';
+  let errorDetails: any = null;
+
+  if (error && typeof error === 'object') {
+    if ('response' in error) {
+      const response = (error as any).response;
+      errorMessage = response.statusText || `HTTP ${response.status}`;
+      // Try to extract error details if available
+      if (response._bodyInit) {
+        try {
+          const errorBody = JSON.parse(response._bodyInit);
+          errorDetails = errorBody;
+          if (errorBody.message) {
+            if (Array.isArray(errorBody.message)) {
+              errorMessage = errorBody.message.join(', ');
+            } else {
+              errorMessage = errorBody.message;
+            }
+          } else if (errorBody.error) {
+            errorMessage = errorBody.error;
+          }
+        } catch {
+          // If parsing fails, use status text
+        }
+      }
+    } else if ('message' in error) {
+      errorMessage = (error as any).message;
+    }
+  } else if (error instanceof Error) {
+    errorMessage = error.message;
+    // Check if error has validation details from api-utils
+    if ((error as any).details) {
+      if (Array.isArray((error as any).details)) {
+        errorDetails = (error as any).details;
+        errorMessage = `${errorMessage}\n${errorDetails.join('\n')}`;
+      } else if (typeof (error as any).details === 'object' && (error as any).details.errors) {
+        // NestJS ValidationPipe format nested in details
+        errorDetails = (error as any).details.errors;
+        errorMessage = (error as any).details.message || errorMessage;
+      }
+    }
+    // Check if error has response data attached
+    if ((error as any).response?.data) {
+      const responseData = (error as any).response.data;
+      if (responseData.errors && Array.isArray(responseData.errors)) {
+        errorDetails = responseData.errors;
+        errorMessage = responseData.message || errorMessage;
+      } else if (responseData.message) {
+        errorMessage = Array.isArray(responseData.message) 
+          ? responseData.message.join(', ')
+          : responseData.message;
+      }
+    }
+  }
+
+  // Combine message and details for full error message
+  let fullMessage = errorMessage;
+  if (errorDetails && Array.isArray(errorDetails) && errorDetails.length > 0) {
+    fullMessage = `${errorMessage}\n\nValidation errors:\n${errorDetails.map((e, i) => `  ${i + 1}. ${e}`).join('\n')}`;
+  }
+
+  logger.error(`API Error in ${context}`, { 
+    error, 
+    details: errorDetails, 
+    message: errorMessage,
+    fullMessage,
+    responseData: error?.response?.data 
+  }, 'enhanced-api');
+  
+  // Create error with validation details if available
+  const finalError = new Error(`Failed to ${context}: ${fullMessage}`);
+  if (errorDetails) {
+    (finalError as any).validationErrors = errorDetails;
+  }
+  throw finalError;
 };
 
 
@@ -213,7 +292,7 @@ export const customers = {
         if (searchTerm.length > 0) {
           // Enhanced search for phone numbers (strip non-numeric) and addresses
           const phoneDigits = searchTerm.replace(/\D/g, '');
-          const searchLower = searchTerm.toLowerCase();
+          const _searchLower = searchTerm.toLowerCase();
           
           // Build comprehensive search query with multiple variations
           let searchQuery = `name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`;
@@ -263,8 +342,8 @@ export const customers = {
       const { data, error } = await query.order('name');
       if (error) throw error;
       return data || [];
-    } catch (error) {
-      console.error('Error fetching customers:', error);
+    } catch (error: unknown) {
+      logger.error('Error fetching customers', error, 'enhanced-api');
       throw error;
     }
   },
@@ -275,7 +354,7 @@ export const customers = {
       const tenantId = await getTenantId();
       
       // Primary: Fetch from accounts table (real customer data)
-      console.log('🔍 Fetching customer from accounts table...');
+      logger.debug('Fetching customer from accounts table', { customerId: id }, 'enhanced-api');
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
         .select('*')
@@ -284,12 +363,12 @@ export const customers = {
         .single();
 
       if (accountData && !accountError) {
-        console.log('✅ Customer loaded from accounts table:', accountData.name);
+        logger.debug('Customer loaded from accounts table', { customerName: accountData.name }, 'enhanced-api');
         return accountData;
       }
 
       // Fallback: Try customers table (test data)
-      console.log('🔄 Customer not found in accounts table, trying customers table...');
+      logger.debug('Customer not found in accounts table, trying customers table', { customerId: id }, 'enhanced-api');
       const { data: customerData, error: customerError } = await supabase
         .from('customers')
         .select('*')
@@ -331,11 +410,11 @@ export const customers = {
           billing_cycle: null
         };
         
-        console.log('✅ Customer loaded from customers table:', transformedCustomer.name);
+        logger.debug('Customer loaded from customers table', { customerName: transformedCustomer.name }, 'enhanced-api');
         return transformedCustomer;
       }
 
-      console.error('❌ Customer not found in either table:', accountError || customerError);
+      logger.error('Customer not found in either table', accountError || customerError, 'enhanced-api');
       throw accountError || customerError;
     } catch (error) {
       handleApiError(error, 'fetch customer');
@@ -367,7 +446,7 @@ export const customers = {
       const tenantId = await getTenantId();
       
       // Primary: Update in accounts table (real customer data)
-      console.log('🔍 Updating customer in accounts table...');
+      logger.debug('Updating customer in accounts table', { customerId: id }, 'enhanced-api');
       // Only include columns that exist in Supabase 'accounts' schema
       const allowedAccountColumns = [
         'name', 'email', 'phone', 'address', 'city', 'state', 'zip_code',
@@ -392,12 +471,12 @@ export const customers = {
         .single();
 
       if (accountData && !accountError) {
-        console.log('✅ Customer updated in accounts table:', accountData.name);
+        logger.debug('Customer updated in accounts table', { customerName: accountData.name }, 'enhanced-api');
         return accountData;
       }
 
       // Fallback: Try customers table (test data)
-      console.log('🔄 Customer not found in accounts table, trying customers table...');
+      logger.debug('Customer not found in accounts table, trying customers table', { customerId: id }, 'enhanced-api');
       const allowedCustomerColumns = [
         'first_name', 'last_name', 'email', 'phone', 'address', 'city', 'state',
         'zip_code', 'country', 'status', 'account_type', 'notes'
@@ -459,11 +538,11 @@ export const customers = {
           billing_cycle: updates.billing_cycle || null
         };
         
-        console.log('✅ Customer updated in customers table:', transformedCustomer.name);
+        logger.debug('Customer updated in customers table', { customerName: transformedCustomer.name }, 'enhanced-api');
         return transformedCustomer;
       }
 
-      console.error('❌ Customer not found in either table:', accountError || customerError);
+      logger.error('Customer not found in either table', accountError || customerError, 'enhanced-api');
       throw accountError || customerError;
     } catch (error) {
       handleApiError(error, 'update customer');
@@ -840,6 +919,59 @@ export const jobs = {
     }
   },
 
+  getByDateRange: async (startDate: string, endDate: string): Promise<Job[]> => {
+    try {
+      const tenantId = await getTenantId();
+      logger.debug('Jobs API Debug', { tenantId, startDate, endDate }, 'enhanced-api');
+      
+      // First, try a simple query to check if jobs table exists
+      const { data: testData, error: testError } = await supabase
+        .from('jobs')
+        .select('id')
+        .limit(1);
+
+      if (testError) {
+        logger.error('Jobs table test failed', testError, 'enhanced-api');
+        // If jobs table doesn't exist, return empty array instead of throwing error
+        if (testError.code === 'PGRST116' || testError.message?.includes('relation "jobs" does not exist')) {
+          logger.warn('Jobs table does not exist, returning empty array', {}, 'enhanced-api');
+          return [];
+        }
+        throw testError;
+      }
+
+      logger.debug('Jobs table exists, proceeding with full query', {}, 'enhanced-api');
+      
+      const { data, error } = await supabase
+        .from('jobs')
+        .select(`
+          *,
+          accounts (name, email, phone),
+          work_orders (*),
+          technicians (first_name, last_name, email)
+        `)
+        .eq('tenant_id', tenantId)
+        .gte('scheduled_date', startDate)
+        .lte('scheduled_date', endDate)
+        .order('scheduled_date', { ascending: true });
+
+      logger.debug('Supabase Query Result', { hasData: !!data, hasError: !!error, dataCount: data?.length || 0 }, 'enhanced-api');
+      
+      if (error) {
+        logger.error('Supabase Error Details', error, 'enhanced-api');
+        throw error;
+      }
+
+      logger.debug('Jobs fetched successfully', { jobCount: data?.length || 0 }, 'enhanced-api');
+      return data || [];
+    } catch (error) {
+      logger.error('Jobs API Error Details', error, 'enhanced-api');
+      // Instead of throwing error, return empty array to prevent UI crashes
+      logger.warn('Returning empty array due to error', {}, 'enhanced-api');
+      return [];
+    }
+  },
+
   getByCustomerId: async (customerId: string): Promise<Job[]> => {
     try {
       const tenantId = await getTenantId();
@@ -931,7 +1063,228 @@ export const jobs = {
     } catch (error) {
       handleApiError(error, 'delete job');
     }
-  }
+  },
+
+  /**
+   * Check for scheduling conflicts before assigning a job
+   * @param technicianId - Technician ID to check
+   * @param scheduledDate - Date of the job (ISO string)
+   * @param startTime - Start time (HH:mm format)
+   * @param endTime - End time (HH:mm format)
+   * @param excludeJobIds - Job IDs to exclude from conflict check (for rescheduling)
+   * @returns Conflict detection result
+   */
+  checkConflicts: async (
+    technicianId: string,
+    scheduledDate: string,
+    startTime: string,
+    endTime: string,
+    excludeJobIds?: string[]
+  ): Promise<{
+    has_conflicts: boolean;
+    conflicts: Array<{
+      type: 'time_overlap' | 'technician_double_booking' | 'location_conflict';
+      severity: 'low' | 'medium' | 'high' | 'critical';
+      description: string;
+      conflicting_job_ids: string[];
+      conflicting_jobs: Array<{
+        id: string;
+        scheduled_date: string;
+        scheduled_start_time: string;
+        scheduled_end_time: string;
+        customer_name?: string;
+        location_address?: string;
+      }>;
+    }>;
+    can_proceed: boolean;
+  }> => {
+    try {
+      const token = await getAuthToken();
+      return await enhancedApiCall<{
+        has_conflicts: boolean;
+        conflicts: Array<{
+          type: 'time_overlap' | 'technician_double_booking' | 'location_conflict';
+          severity: 'low' | 'medium' | 'high' | 'critical';
+          description: string;
+          conflicting_job_ids: string[];
+          conflicting_jobs: Array<{
+            id: string;
+            scheduled_date: string;
+            scheduled_start_time: string;
+            scheduled_end_time: string;
+            customer_name?: string;
+            location_address?: string;
+          }>;
+        }>;
+        can_proceed: boolean;
+      }>('/api/v1/jobs/check-conflicts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          technician_id: technicianId,
+          scheduled_date: scheduledDate,
+          scheduled_start_time: startTime,
+          scheduled_end_time: endTime,
+          exclude_job_ids: excludeJobIds || [],
+        }),
+      });
+    } catch (error) {
+      handleApiError(error, 'check job conflicts');
+      throw error;
+    }
+  },
+
+  // Recurring jobs
+  recurring: {
+    /**
+     * Create a recurring job template
+     */
+    createTemplate: async (templateData: CreateRecurringJobTemplateDto): Promise<RecurringJobTemplate> => {
+      try {
+        const token = await getAuthToken();
+        return await enhancedApiCall<RecurringJobTemplate>('/api/v1/jobs/recurring', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(templateData),
+        });
+      } catch (error) {
+        handleApiError(error, 'create recurring job template');
+        throw error;
+      }
+    },
+
+    /**
+     * Get all recurring job templates
+     */
+    list: async (activeOnly: boolean = false): Promise<RecurringJobTemplate[]> => {
+      try {
+        const token = await getAuthToken();
+        const url = `/api/v1/jobs/recurring${activeOnly ? '?active_only=true' : ''}`;
+        const data = await enhancedApiCall<RecurringJobTemplate[]>(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        return data || [];
+      } catch (error) {
+        handleApiError(error, 'list recurring job templates');
+        return [];
+      }
+    },
+
+    /**
+     * Get a specific recurring job template
+     */
+    get: async (templateId: string): Promise<RecurringJobTemplate> => {
+      try {
+        const token = await getAuthToken();
+        return await enhancedApiCall<RecurringJobTemplate>(`/api/v1/jobs/recurring/${templateId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (error) {
+        handleApiError(error, 'get recurring job template');
+        throw error;
+      }
+    },
+
+    /**
+     * Update a recurring job template
+     */
+    update: async (templateId: string, updates: UpdateRecurringJobTemplateDto): Promise<RecurringJobTemplate> => {
+      try {
+        const token = await getAuthToken();
+        return await enhancedApiCall<RecurringJobTemplate>(`/api/v1/jobs/recurring/${templateId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(updates),
+        });
+      } catch (error) {
+        handleApiError(error, 'update recurring job template');
+        throw error;
+      }
+    },
+
+    /**
+     * Delete a recurring job template
+     */
+    delete: async (templateId: string, deleteAllJobs: boolean = false): Promise<void> => {
+      try {
+        const token = await getAuthToken();
+        const url = `/api/v1/jobs/recurring/${templateId}${deleteAllJobs ? '?delete_all_jobs=true' : ''}`;
+        await enhancedApiCall<void>(url, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (error) {
+        handleApiError(error, 'delete recurring job template');
+        throw error;
+      }
+    },
+
+    /**
+     * Generate jobs from a recurring template
+     */
+    generate: async (
+      templateId: string,
+      generateUntil: string
+    ): Promise<{ generated: number; skipped: number }> => {
+      try {
+        const token = await getAuthToken();
+        return await enhancedApiCall<{ generated: number; skipped: number }>(
+          `/api/v1/jobs/recurring/${templateId}/generate`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              generate_until: generateUntil,
+              skip_existing: true,
+            }),
+          }
+        );
+      } catch (error) {
+        handleApiError(error, 'generate recurring jobs');
+        throw error;
+      }
+    },
+
+    /**
+     * Skip a single occurrence of a recurring job
+     */
+    skipOccurrence: async (jobId: string): Promise<void> => {
+      try {
+        const token = await getAuthToken();
+        await enhancedApiCall<void>(`/api/v1/jobs/${jobId}/skip-recurrence`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (error) {
+        handleApiError(error, 'skip recurring job occurrence');
+        throw error;
+      }
+    },
+  },
 };
 
 // ============================================================================
@@ -1434,7 +1787,7 @@ export const analytics = {
 export const authApi = {
   signIn: async (email: string, password: string) => {
     // Use backend API instead of Supabase
-    const response = await fetch('http://localhost:3001/api/auth/login', {
+    const response = await fetch('http://localhost:3001/api/v1/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1451,7 +1804,7 @@ export const authApi = {
     return data;
   },
 
-  signUp: async (email: string, password: string, metadata?: any) => {
+  signUp: async (email: string, password: string, metadata?: Record<string, unknown>) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -1470,7 +1823,7 @@ export const authApi = {
 
   getCurrentUser: async () => {
     // Use backend API instead of Supabase
-    const authData = localStorage.getItem('verosuite_auth');
+    const authData = localStorage.getItem('verofield_auth');
     if (!authData) {
       throw new Error('No authentication token found');
     }
@@ -1487,7 +1840,7 @@ export const authApi = {
       throw new Error('No authentication token found');
     }
     
-    const response = await fetch('http://localhost:3001/auth/me', {
+    const response = await fetch('http://localhost:3001/api/v1/auth/me', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -1517,7 +1870,7 @@ export const company = {
   // Get company settings
   getSettings: async () => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -1542,8 +1895,8 @@ export const company = {
       }
 
       return await response.json();
-    } catch (error) {
-      console.error('Failed to fetch company settings:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to fetch company settings', error, 'enhanced-api');
       throw error;
     }
   },
@@ -1551,7 +1904,7 @@ export const company = {
   // Upload company logo with type
   uploadLogo: async (file: File, logoType: 'header' | 'invoice' = 'header') => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -1564,8 +1917,7 @@ export const company = {
 
       if (!token) throw new Error('No access token found');
 
-      console.log(`📸 Uploading ${logoType} logo file:`, file.name, file.size, 'bytes');
-      console.log('🔑 Using auth token for logo:', token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
+      logger.debug(`Uploading ${logoType} logo file`, { fileName: file.name, fileSize: file.size }, 'enhanced-api');
 
       const formData = new FormData();
       formData.append('logo', file);
@@ -1581,14 +1933,13 @@ export const company = {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Logo upload failed:', response.status, response.statusText);
-        console.error('❌ Error details:', errorText);
+        logger.error('Logo upload failed', new Error(`${response.status} ${response.statusText}: ${errorText}`), 'enhanced-api');
         throw new Error(`Failed to upload logo: ${response.statusText}`);
       }
 
       return await response.json();
-    } catch (error) {
-      console.error('Failed to upload logo:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to upload logo', error, 'enhanced-api');
       throw error;
     }
   },
@@ -1596,7 +1947,7 @@ export const company = {
   // Delete company logo
   deleteLogo: async (logoType: 'header' | 'invoice') => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -1609,9 +1960,7 @@ export const company = {
 
       if (!token) throw new Error('No access token found');
 
-      console.log(`🗑️ Deleting ${logoType} logo`);
-      console.log(`🌐 Making DELETE request to: http://localhost:3001/api/v1/company/logo/${logoType}`);
-      console.log(`🔑 Using token: ${token ? token.substring(0, 20) + '...' : 'NO TOKEN'}`);
+      logger.debug(`Deleting ${logoType} logo`, {}, 'enhanced-api');
 
       const response = await fetch(`http://localhost:3001/api/v1/company/logo/${logoType}`, {
         method: 'DELETE',
@@ -1621,29 +1970,25 @@ export const company = {
         },
       });
 
-      console.log(`📡 Delete response status: ${response.status}`);
-      console.log(`📡 Delete response headers:`, response.headers);
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Logo deletion failed:', response.status, response.statusText);
-        console.error('❌ Error details:', errorText);
+        logger.error('Logo deletion failed', new Error(`${response.status} ${response.statusText}: ${errorText}`), 'enhanced-api');
         throw new Error(`Failed to delete logo: ${response.statusText}`);
       }
 
       const result = await response.json();
-      console.log(`✅ Delete response data:`, result);
+      logger.debug('Delete response received', { success: !!result }, 'enhanced-api');
       return result;
-    } catch (error) {
-      console.error('Failed to delete logo:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to delete logo', error, 'enhanced-api');
       throw error;
     }
   },
 
   // Update company settings
-  updateSettings: async (settings: any) => {
+  updateSettings: async (settings: Record<string, unknown>): Promise<void> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -1656,8 +2001,7 @@ export const company = {
 
       if (!token) throw new Error('No access token found');
 
-      console.log('🔍 Sending company settings data:', settings);
-      console.log('🔑 Using auth token:', token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
+      logger.debug('Sending company settings data', { hasSettings: !!settings }, 'enhanced-api');
 
       const response = await fetch(`http://localhost:3001/api/v1/company/settings`, {
         method: 'PUT',
@@ -1670,14 +2014,13 @@ export const company = {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Server response:', response.status, response.statusText);
-        console.error('❌ Error details:', errorText);
+        logger.error('Server response error', new Error(`${response.status} ${response.statusText}: ${errorText}`), 'enhanced-api');
         throw new Error(`Failed to update company settings: ${response.statusText} - ${errorText}`);
       }
 
       return await response.json();
-    } catch (error) {
-      console.error('Failed to update company settings:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to update company settings', error, 'enhanced-api');
       throw error;
     }
   },
@@ -1690,7 +2033,7 @@ export const billing = {
   // Invoice Management
   getInvoices: async (accountId?: string, status?: string): Promise<Invoice[]> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -1727,7 +2070,7 @@ export const billing = {
 
   getInvoiceById: async (id: string): Promise<Invoice | null> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -1761,7 +2104,7 @@ export const billing = {
 
   createInvoice: async (invoiceData: CreateInvoiceDto): Promise<Invoice> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -1785,10 +2128,10 @@ export const billing = {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('🔥 Backend error response:', errorText);
+        logger.error('Backend error response', new Error(errorText), 'enhanced-api');
         try {
           const errorData = JSON.parse(errorText);
-          console.error('🔥 Parsed error data:', errorData);
+          logger.error('Parsed error data', errorData, 'enhanced-api');
           throw new Error(`Failed to create invoice: ${errorData.message || response.statusText}`);
         } catch {
           throw new Error(`Failed to create invoice: ${response.statusText} - ${errorText}`);
@@ -1804,7 +2147,7 @@ export const billing = {
 
   updateInvoice: async (id: string, updates: UpdateInvoiceDto): Promise<Invoice> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -1839,7 +2182,7 @@ export const billing = {
 
   deleteInvoice: async (id: string): Promise<void> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -1872,7 +2215,7 @@ export const billing = {
   // Payment Management
   getPayments: async (invoiceId?: string): Promise<Payment[]> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -1908,7 +2251,7 @@ export const billing = {
 
   processPayment: async (invoiceId: string, paymentData: CreatePaymentDto): Promise<Payment> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -1944,7 +2287,7 @@ export const billing = {
   // Payment Method Management
   getPaymentMethods: async (accountId?: string): Promise<PaymentMethod[]> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -1980,7 +2323,7 @@ export const billing = {
 
   createPaymentMethod: async (paymentMethodData: CreatePaymentMethodDto): Promise<PaymentMethod> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -2015,7 +2358,7 @@ export const billing = {
 
   deletePaymentMethod: async (id: string): Promise<void> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -2048,7 +2391,7 @@ export const billing = {
   // Billing Analytics
   getBillingAnalytics: async (): Promise<BillingAnalytics> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -2088,7 +2431,7 @@ export const billing = {
 
   getRevenueAnalytics: async (startDate?: string, endDate?: string): Promise<RevenueAnalytics> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -2130,7 +2473,7 @@ export const billing = {
   // Stripe Payment Integration
   createStripePaymentIntent: async (invoiceId: string): Promise<any> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -2164,7 +2507,7 @@ export const billing = {
 
   getStripePaymentStatus: async (paymentIntentId: string): Promise<any> => {
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
 
       let token;
@@ -2193,6 +2536,367 @@ export const billing = {
       handleApiError(error, 'get Stripe payment status');
       throw error;
     }
+  },
+
+  // AR Management
+  getARSummary: async (): Promise<ARSummary> => {
+    try {
+      const authData = localStorage.getItem('verofield_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/ar-summary`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get AR summary: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'get AR summary');
+      throw error;
+    }
+  },
+
+  retryFailedPayment: async (invoiceId: string): Promise<any> => {
+    try {
+      const authData = localStorage.getItem('verofield_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/invoices/${invoiceId}/retry-payment`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to retry payment: ${errorText || response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'retry failed payment');
+      throw error;
+    }
+  },
+
+  getPaymentAnalytics: async (startDate?: string, endDate?: string): Promise<any> => {
+    try {
+      const authData = localStorage.getItem('verofield_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+
+      const url = `http://localhost:3001/api/v1/billing/analytics/payments${params.toString() ? `?${params.toString()}` : ''}`;
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get payment analytics: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'get payment analytics');
+      throw error;
+    }
+  },
+
+  createRecurringPayment: async (invoiceId: string, data: any): Promise<any> => {
+    try {
+      const authData = localStorage.getItem('verofield_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/invoices/${invoiceId}/recurring-payment`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to create recurring payment: ${errorText || response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'create recurring payment');
+      throw error;
+    }
+  },
+
+  getRecurringPayment: async (subscriptionId: string): Promise<any> => {
+    try {
+      const authData = localStorage.getItem('verofield_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/recurring-payments/${subscriptionId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get recurring payment: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'get recurring payment');
+      throw error;
+    }
+  },
+
+  cancelRecurringPayment: async (subscriptionId: string, immediately: boolean = false): Promise<any> => {
+    try {
+      const authData = localStorage.getItem('verofield_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/recurring-payments/${subscriptionId}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ immediately }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to cancel recurring payment: ${errorText || response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'cancel recurring payment');
+      throw error;
+    }
+  },
+
+  getPaymentRetryHistory: async (invoiceId: string): Promise<any> => {
+    try {
+      const authData = localStorage.getItem('verofield_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/invoices/${invoiceId}/payment-retry-history`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get payment retry history: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'get payment retry history');
+      throw error;
+    }
+  },
+
+  getOverdueInvoices: async (): Promise<any> => {
+    try {
+      const authData = localStorage.getItem('verofield_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/overdue-invoices`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get overdue invoices: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'get overdue invoices');
+      throw error;
+    }
+  },
+
+  getPaymentTracking: async (startDate?: string, endDate?: string): Promise<any> => {
+    try {
+      const authData = localStorage.getItem('verofield_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/payment-tracking?${params.toString()}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get payment tracking: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'get payment tracking');
+      throw error;
+    }
+  },
+
+  sendInvoiceReminder: async (invoiceIds: string[], message?: string): Promise<any> => {
+    try {
+      const authData = localStorage.getItem('verofield_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const payload: any = {};
+      if (invoiceIds.length === 1) {
+        payload.invoice_id = invoiceIds[0];
+      } else {
+        payload.invoice_ids = invoiceIds;
+      }
+      if (message) {
+        payload.message = message;
+      }
+
+      const response = await fetch('http://localhost:3001/api/v1/billing/invoices/send-reminder', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to send reminder: ${errorText || response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'send invoice reminder');
+      throw error;
+    }
   }
 };
 
@@ -2200,8 +2904,29 @@ export const billing = {
 // INVENTORY API (Dashboard Components)
 // ============================================================================
 
+import type { 
+  InventoryComplianceData, 
+  InventoryCategory, 
+  ComplianceAlert, 
+  Inspection 
+} from '@/types/inventory';
+import type { 
+  KpiTemplate, 
+  CreateKpiTemplateDto, 
+  UpdateKpiTemplateDto,
+  UserKpi,
+  KpiTemplateFilters,
+  UseKpiTemplateDto
+} from '@/types/kpi-templates';
+import type {
+  RecurringJobTemplate,
+  CreateRecurringJobTemplateDto,
+  UpdateRecurringJobTemplateDto
+} from '@/types/recurring-jobs';
+import type { DashboardCard } from '@/routes/dashboard/types/dashboard.types';
+
 export const inventory = {
-  getComplianceData: async (): Promise<any> => {
+  getComplianceData: async (): Promise<InventoryComplianceData> => {
     try {
       // TODO: Replace with actual inventory data when inventory system is implemented
       return {
@@ -2225,7 +2950,7 @@ export const inventory = {
     }
   },
 
-  getCategories: async (): Promise<any[]> => {
+  getCategories: async (): Promise<InventoryCategory[]> => {
     try {
       // TODO: Replace with actual inventory categories when implemented
       return [];
@@ -2235,7 +2960,7 @@ export const inventory = {
     }
   },
 
-  getComplianceAlerts: async (): Promise<any[]> => {
+  getComplianceAlerts: async (): Promise<ComplianceAlert[]> => {
     try {
       // TODO: Replace with actual compliance alerts when implemented
       return [];
@@ -2245,7 +2970,7 @@ export const inventory = {
     }
   },
 
-  getRecentInspections: async (): Promise<any[]> => {
+  getRecentInspections: async (): Promise<Inspection[]> => {
     try {
       // TODO: Replace with actual inspection data when implemented
       return [];
@@ -2337,7 +3062,7 @@ export const financial = {
 
 export const kpiTemplates = {
     // Get all KPI templates with filtering
-    list: async (filters: any = {}): Promise<any[]> => {
+    list: async (filters: KpiTemplateFilters = {}): Promise<KpiTemplate[]> => {
       try {
         const token = await getAuthToken();
         
@@ -2346,23 +3071,32 @@ export const kpiTemplates = {
           Object.entries(filters).filter(([_, value]) => value !== undefined && value !== null && value !== '')
         );
         
-        const data = await enhancedApiCall(`http://localhost:3001/api/v1/kpi-templates?${new URLSearchParams(cleanFilters)}`, {
+        const response = await enhancedApiCall<{ data: any; meta: any }>(`http://localhost:3001/api/v2/kpi-templates?${new URLSearchParams(cleanFilters)}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         });
-          console.log('🌐 API Response (kpiTemplates.list):');
-          console.log('  - raw data:', data);
-          console.log('  - data.templates:', data.templates);
-          console.log('  - dataType:', typeof data);
-          console.log('  - dataIsArray:', Array.isArray(data));
+        // Handle v2 response format: { data, meta }
+        const data = response?.data || response;
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('API Response (kpiTemplates.list)', {
+              hasData: !!data,
+              hasTemplates: !!data.templates,
+              dataType: typeof data,
+              dataIsArray: Array.isArray(data)
+            }, 'enhanced-api');
+          }
           
           // Backend returns { templates: [...], pagination: {...} }
           const result = data.templates || data || [];
-          console.log('  - returning:', result);
-          console.log('  - resultType:', typeof result);
-          console.log('  - resultIsArray:', Array.isArray(result));
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('Returning KPI templates', {
+              resultType: typeof result,
+              resultIsArray: Array.isArray(result),
+              resultCount: Array.isArray(result) ? result.length : 0
+            }, 'enhanced-api');
+          }
           return result;
       } catch (error) {
         handleApiError(error, 'fetch KPI templates');
@@ -2371,10 +3105,10 @@ export const kpiTemplates = {
     },
 
     // Get a specific KPI template
-    get: async (id: string): Promise<any | null> => {
+    get: async (id: string): Promise<KpiTemplate | null> => {
       try {
         const token = await getAuthToken();
-        const response = await fetch(`http://localhost:3001/api/v1/kpi-templates/${id}`, {
+        const response = await fetch(`http://localhost:3001/api/v2/kpi-templates/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -2385,8 +3119,9 @@ export const kpiTemplates = {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-        return data;
+        const result = await response.json();
+        // Handle v2 response format: { data, meta }
+        return result?.data || result;
       } catch (error) {
         handleApiError(error, 'fetch KPI template');
         return null;
@@ -2394,7 +3129,7 @@ export const kpiTemplates = {
     },
 
     // Create a new KPI template
-    create: async (templateData: any): Promise<any> => {
+    create: async (templateData: CreateKpiTemplateDto): Promise<KpiTemplate> => {
       try {
         const { data, error } = await supabase
           .from('kpi_templates')
@@ -2415,7 +3150,7 @@ export const kpiTemplates = {
     },
 
     // Update an existing KPI template
-    update: async (id: string, updates: any): Promise<any> => {
+    update: async (id: string, updates: UpdateKpiTemplateDto): Promise<KpiTemplate> => {
       try {
         const { data, error } = await supabase
           .from('kpi_templates')
@@ -2450,10 +3185,10 @@ export const kpiTemplates = {
     },
 
     // Use a template to create a user KPI
-    useTemplate: async (templateId: string, userKpiData: any): Promise<any> => {
+    useTemplate: async (templateId: string, userKpiData: UseKpiTemplateDto): Promise<UserKpi> => {
       try {
         const token = await getAuthToken();
-        const response = await fetch(`http://localhost:3001/api/v1/kpi-templates/use`, {
+        const response = await fetch(`http://localhost:3001/api/v2/kpi-templates/use`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -2469,8 +3204,9 @@ export const kpiTemplates = {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-        return data;
+        const result = await response.json();
+        // Handle v2 response format: { data, meta }
+        return result?.data || result;
       } catch (error) {
         handleApiError(error, 'use KPI template');
         throw error;
@@ -2481,7 +3217,7 @@ export const kpiTemplates = {
     trackUsage: async (templateId: string, action: string): Promise<any> => {
       try {
         const token = await getAuthToken();
-        const response = await fetch(`http://localhost:3001/api/v1/kpi-templates/track-usage`, {
+        const response = await fetch(`http://localhost:3001/api/v2/kpi-templates/track-usage`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -2497,8 +3233,9 @@ export const kpiTemplates = {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-        return data;
+        const result = await response.json();
+        // Handle v2 response format: { data, meta }
+        return result?.data || result;
       } catch (error) {
         handleApiError(error, 'track template usage');
         throw error;
@@ -2509,7 +3246,7 @@ export const kpiTemplates = {
     getFavorites: async (): Promise<any[]> => {
       try {
         const token = await getAuthToken();
-        const response = await fetch(`http://localhost:3001/api/v1/kpi-templates/favorites`, {
+        const response = await fetch(`http://localhost:3001/api/v2/kpi-templates/favorites`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -2519,21 +3256,23 @@ export const kpiTemplates = {
         if (!response.ok) {
           // Log the actual error for debugging
           const errorText = await response.text();
-          console.error('❌ Favorites API error:', response.status, response.statusText, errorText);
+          logger.error('Favorites API error', new Error(`${response.status} ${response.statusText}: ${errorText}`), 'enhanced-api');
           
           // If it's a 400 error, the table might not exist or there's a schema issue
           if (response.status === 400) {
-            console.warn('⚠️ Favorites API returned 400 - this might be a database schema issue');
+            logger.warn('Favorites API returned 400 - this might be a database schema issue', {}, 'enhanced-api');
           }
           
           // Gracefully degrade to empty list so UI still works
           return [];
         }
 
-        const data = await response.json();
-        return data || [];
-      } catch (error) {
-        console.error('❌ Favorites API network error:', error);
+        const result = await response.json();
+        // Handle v2 response format: { data, meta }
+        const data = result?.data || result;
+        return Array.isArray(data) ? data : [];
+      } catch (error: unknown) {
+        logger.error('Favorites API network error', error, 'enhanced-api');
         handleApiError(error, 'get favorited templates');
         return [];
       }
@@ -2543,7 +3282,7 @@ export const kpiTemplates = {
     getFavoriteStatus: async (templateId: string): Promise<{ isFavorited: boolean }> => {
       try {
         const token = await getAuthToken();
-        const response = await fetch(`http://localhost:3001/api/v1/kpi-templates/${templateId}/favorite-status`, {
+        const response = await fetch(`http://localhost:3001/api/v2/kpi-templates/${templateId}/favorite-status`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -2554,8 +3293,10 @@ export const kpiTemplates = {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-        return data;
+        const result = await response.json();
+        // Handle v2 response format: { data, meta }
+        const data = result?.data || result;
+        return data?.isFavorited !== undefined ? data : { isFavorited: data?.isFavorited || false };
       } catch (error) {
         handleApiError(error, 'get template favorite status');
         return { isFavorited: false };
@@ -2566,7 +3307,7 @@ export const kpiTemplates = {
     getPopular: async (limit: number = 10): Promise<any[]> => {
       try {
         const token = await getAuthToken();
-        const response = await fetch(`http://localhost:3001/api/v1/kpi-templates/popular?limit=${limit}`, {
+        const response = await fetch(`http://localhost:3001/api/v2/kpi-templates/popular?limit=${limit}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -2577,8 +3318,10 @@ export const kpiTemplates = {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-        return data || [];
+        const result = await response.json();
+        // Handle v2 response format: { data, meta }
+        const data = result?.data || result;
+        return Array.isArray(data) ? data : [];
       } catch (error) {
         handleApiError(error, 'fetch popular KPI templates');
         return [];
@@ -2589,7 +3332,7 @@ export const kpiTemplates = {
     getFeatured: async (): Promise<any[]> => {
       try {
         const token = await getAuthToken();
-        const response = await fetch(`http://localhost:3001/api/v1/kpi-templates?is_featured=true`, {
+        const response = await fetch(`http://localhost:3001/api/v2/kpi-templates?is_featured=true`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -2600,19 +3343,28 @@ export const kpiTemplates = {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-        console.log('🌐 API Response (kpiTemplates.list):');
-        console.log('  - raw data:', data);
-        console.log('  - data.templates:', data.templates);
-        console.log('  - dataType:', typeof data);
-        console.log('  - dataIsArray:', Array.isArray(data));
+        const result = await response.json();
+        // Handle v2 response format: { data, meta }
+        const data = result?.data || result;
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('API Response (kpiTemplates.list)', {
+            hasData: !!data,
+            hasTemplates: !!data.templates,
+            dataType: typeof data,
+            dataIsArray: Array.isArray(data)
+          }, 'enhanced-api');
+        }
         
         // Backend returns { templates: [...], pagination: {...} }
-        const result = data.templates || data || [];
-        console.log('  - returning:', result);
-        console.log('  - resultType:', typeof result);
-        console.log('  - resultIsArray:', Array.isArray(result));
-        return result;
+        const templates = data.templates || data || [];
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Returning KPI templates', {
+            resultType: typeof templates,
+            resultIsArray: Array.isArray(templates),
+            resultCount: Array.isArray(templates) ? templates.length : 0
+          }, 'enhanced-api');
+        }
+        return templates;
       } catch (error) {
         handleApiError(error, 'fetch featured KPI templates');
         return [];
@@ -2629,12 +3381,14 @@ export const userKpis = {
     list: async (): Promise<any[]> => {
       try {
         const token = await getAuthToken();
-        const data = await enhancedApiCall<any[]>(`http://localhost:3001/api/kpis/user`, {
+        const response = await enhancedApiCall<{ data: any[]; meta: any }>(`http://localhost:3001/api/v2/kpis/user`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         });
+        // Handle v2 response format: { data, meta }
+        const data = response?.data || response;
         return Array.isArray(data) ? data : [];
       } catch (error) {
         handleApiError(error, 'fetch user KPIs');
@@ -2665,12 +3419,11 @@ export const userKpis = {
     },
 
     // Create a new user KPI
-    create: async (kpiData: any): Promise<any> => {
+    create: async (kpiData: Record<string, unknown>): Promise<Record<string, unknown>> => {
       try {
-        console.log('🔍 Enhanced API - Creating user KPI with data:', JSON.stringify(kpiData, null, 2));
+        logger.debug('Enhanced API - Creating user KPI', { hasKpiData: !!kpiData }, 'enhanced-api');
         
         const authToken = await getAuthToken();
-        console.log('🔑 Auth token length:', authToken?.length || 0);
         
         const response = await fetch(`http://localhost:3001/api/kpis`, {
           method: 'POST',
@@ -2681,30 +3434,24 @@ export const userKpis = {
           body: JSON.stringify(kpiData),
         });
 
-        console.log('📡 Response status:', response.status);
-        console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
-
         if (!response.ok) {
           const errorData = await response.json();
-          console.error('❌ Backend error response:', errorData);
-          console.error('❌ Response status:', response.status);
-          console.error('❌ Response statusText:', response.statusText);
-          console.error('❌ Full error data:', JSON.stringify(errorData, null, 2));
-          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+          logger.error('Backend error response', errorData, 'enhanced-api');
+          throw new Error((errorData as { message?: string }).message || `HTTP error! status: ${response.status}`);
         }
 
         const result = await response.json();
-        console.log('✅ Successfully created KPI:', result);
+        logger.debug('Successfully created KPI', { hasResult: !!result }, 'enhanced-api');
         return result;
-      } catch (error) {
-        console.error('💥 Enhanced API error:', error);
+      } catch (error: unknown) {
+        logger.error('Enhanced API error', error, 'enhanced-api');
         handleApiError(error, 'create user KPI');
         throw error;
       }
     },
 
     // Update a user KPI
-    update: async (id: string, updates: any): Promise<any> => {
+    update: async (id: string, updates: Partial<UserKpi>): Promise<UserKpi> => {
       try {
         const { data, error } = await supabase
           .from('user_kpis')
@@ -2738,8 +3485,209 @@ export const userKpis = {
         handleApiError(error, 'delete user KPI');
         throw error;
       }
+  }
+}
+
+// ============================================================================
+// TECHNICIANS API
+// ============================================================================
+
+const technicians = {
+  // Get all technicians
+  list: async (): Promise<any[]> => {
+    try {
+      const token = await getAuthToken();
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+      const url = `${baseUrl}/v2/technicians`;
+      
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Fetching technicians', { url, baseUrl }, 'enhanced-api');
+      }
+      
+      const response = await enhancedApiCall<{ data: any; meta: any }>(url, {
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+      
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Technicians API response', { response, responseType: typeof response, isArray: Array.isArray(response) }, 'enhanced-api');
+      }
+      
+      // Handle paginated response - extract data array if present
+      // Backend controller wraps TechnicianListResponseDto in { data: result, meta: {...} }
+      // TechnicianListResponseDto has structure: { data: [...], pagination: {...}, success: true, ... }
+      // So final response is: { data: { data: [...], pagination: {...}, ... }, meta: {...} }
+      
+      // Check if response.data.data exists (double-nested structure from controller wrapping DTO)
+      if (response && response.data && response.data.data && Array.isArray(response.data.data)) {
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Extracted technicians from response.data.data (controller-wrapped DTO)', { count: response.data.data.length }, 'enhanced-api');
+        }
+        return response.data.data;
+      }
+      // Check if response.data.technicians exists (alternative nested structure)
+      else if (response && response.data && response.data.technicians && Array.isArray(response.data.technicians)) {
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Extracted technicians from response.data.technicians', { count: response.data.technicians.length }, 'enhanced-api');
+        }
+        return response.data.technicians;
+      }
+      // Check if response.data is a direct array
+      else if (response && response.data && Array.isArray(response.data)) {
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Extracted technicians from response.data (direct array)', { count: response.data.length }, 'enhanced-api');
+        }
+        return response.data;
+      }
+      // Check if response is a direct array
+      else if (Array.isArray(response)) {
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Response is direct array', { count: response.length }, 'enhanced-api');
+        }
+        return response;
+      }
+      // Check if response.technicians exists (alternative format)
+      else if (response && response.technicians && Array.isArray(response.technicians)) {
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Extracted technicians from response.technicians', { count: response.technicians.length }, 'enhanced-api');
+        }
+        return response.technicians;
+      }
+      
+      if (process.env.NODE_ENV === 'development') {
+        logger.warn('Unexpected response format for technicians', { response }, 'enhanced-api');
+      }
+      return [];
+    } catch (error) {
+      logger.error('Error fetching technicians', { error, message: error?.message, status: error?.status }, 'enhanced-api');
+      handleApiError(error, 'list technicians');
+      return [];
+    }
+  },
+
+  // Get technician availability
+  getAvailability: async (technicianId: string, startDate?: string, endDate?: string): Promise<any> => {
+    try {
+      const token = await getAuthToken();
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+      let url = `${baseUrl}/v2/technicians/${technicianId}/availability`;
+      if (startDate && endDate) {
+        url += `?start_date=${startDate}&end_date=${endDate}`;
+      }
+      const response = await enhancedApiCall<{ data: any; meta: any }>(url, {
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+      // Handle v2 response format
+      const data = response?.data || response;
+      return data;
+    } catch (error) {
+      handleApiError(error, 'get technician availability');
+      throw error;
+    }
+  },
+
+  // Set availability pattern
+  setAvailability: async (
+    technicianId: string,
+    dayOfWeek: number,
+    startTime: string,
+    endTime: string,
+    isActive: boolean = true
+  ): Promise<any> => {
+    try {
+      const token = await getAuthToken();
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+      const url = `${baseUrl}/v2/technicians/${technicianId}/availability`;
+      const response = await enhancedApiCall<{ data: any; meta: any }>(url, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          day_of_week: dayOfWeek,
+          start_time: startTime,
+          end_time: endTime,
+          is_active: isActive
+        })
+      });
+      // Handle v2 response format
+      return response?.data || response;
+    } catch (error) {
+      handleApiError(error, 'set technician availability');
+      throw error;
+    }
+  },
+
+  // Get available technicians for a time slot
+  getAvailable: async (date: string, startTime: string, endTime: string): Promise<any[]> => {
+    try {
+      const token = await getAuthToken();
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+      const url = `${baseUrl}/v2/technicians/available?date=${date}&start_time=${startTime}&end_time=${endTime}`;
+      const response = await enhancedApiCall<{ data: any[]; meta: any }>(url,
+        {
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        }
+      );
+      // Handle v2 response format
+      const data = response?.data || response;
+      return data || [];
+    } catch (error) {
+      handleApiError(error, 'get available technicians');
+      return [];
     }
   }
+};
+
+// ============================================================================
+// ROUTING API
+// ============================================================================
+
+const routing = {
+  // Get routes for a specific date or all routes
+  getRoutes: async (date?: string): Promise<any[]> => {
+    try {
+      const token = await getAuthToken();
+      const url = date 
+        ? `http://localhost:3001/api/v1/routing/routes?date=${date}`
+        : 'http://localhost:3001/api/v1/routing/routes';
+      
+      const data = await enhancedApiCall<any[]>(url, {
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+      return data || [];
+    } catch (error) {
+      handleApiError(error, 'get routes');
+      return [];
+    }
+  },
+
+  // Optimize route for a specific technician
+  optimizeRoute: async (technicianId: string, date: string): Promise<any> => {
+    try {
+      const token = await getAuthToken();
+      const data = await enhancedApiCall<any>(`http://localhost:3001/api/v1/routing/optimize/${technicianId}?date=${date}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+      return data;
+    } catch (error) {
+      handleApiError(error, 'optimize route');
+      throw error;
+    }
+  },
+
+  // Get route metrics for a date range
+  getMetrics: async (startDate: string, endDate: string): Promise<any> => {
+    try {
+      const token = await getAuthToken();
+      const data = await enhancedApiCall<any>(`http://localhost:3001/api/v1/routing/metrics?start_date=${startDate}&end_date=${endDate}`, {
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+      return data;
+    } catch (error) {
+      handleApiError(error, 'get route metrics');
+      throw error;
+    }
+  }
+};
 
 // ============================================================================
 // MAIN EXPORT
@@ -2761,6 +3709,7 @@ export const enhancedApi = {
   compliance,
   serviceAreas,
   technicianSkills,
+  technicians,
   analytics,
   billing,
   inventory,
@@ -2768,13 +3717,14 @@ export const enhancedApi = {
   company,
   kpiTemplates,
   userKpis,
+  routing,
   auth: authApi,
   // Dashboard layouts/cards persistence (server-side)
   dashboardLayouts: {
     getOrCreateDefault: async (): Promise<{ id: string } | null> => {
       try {
         const token = await getAuthToken();
-        const data = await enhancedApiCall<{ id: string }>(`http://localhost:3001/api/dashboard/layouts/default`, {
+        const data = await enhancedApiCall<{ id: string }>(`http://localhost:3001/api/v1/dashboard/layouts/default`, {
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
         return data;
@@ -2783,10 +3733,10 @@ export const enhancedApi = {
         return null;
       }
     },
-    listCards: async (layoutId: string): Promise<any[]> => {
+    listCards: async (layoutId: string): Promise<DashboardCard[]> => {
       try {
         const token = await getAuthToken();
-        const data = await enhancedApiCall<any[]>(`http://localhost:3001/api/dashboard/layouts/${layoutId}/cards`, {
+        const data = await enhancedApiCall<DashboardCard[]>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/cards`, {
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
         return data || [];
@@ -2795,11 +3745,368 @@ export const enhancedApi = {
         return [];
       }
     },
-    upsertCard: async (layoutId: string, card: any): Promise<any> => {
+    // Region methods
+    listRegions: async (layoutId: string): Promise<any[]> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<any[]>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/regions`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        return data || [];
+      } catch (error) {
+        handleApiError(error, 'list dashboard regions');
+        return [];
+      }
+    },
+    createRegion: async (layoutId: string, regionData: any): Promise<any> => {
+      try {
+        const token = await getAuthToken();
+        // Ensure numbers are numbers, not strings, and clamp to valid ranges
+        const sanitizedData = {
+          ...regionData,
+          grid_row: Math.max(0, typeof regionData.grid_row === 'string' ? parseInt(regionData.grid_row, 10) : (regionData.grid_row ?? 0)),
+          grid_col: Math.max(0, Math.min(11, typeof regionData.grid_col === 'string' ? parseInt(regionData.grid_col, 10) : (regionData.grid_col ?? 0))), // Max 11 (0-indexed)
+          row_span: Math.max(1, Math.min(20, typeof regionData.row_span === 'string' ? parseInt(regionData.row_span, 10) : (regionData.row_span ?? 1))),
+          col_span: Math.max(1, Math.min(12, typeof regionData.col_span === 'string' ? parseInt(regionData.col_span, 10) : (regionData.col_span ?? 1))),
+          min_width: typeof regionData.min_width === 'string' ? parseInt(regionData.min_width, 10) : (regionData.min_width ?? 200),
+          min_height: typeof regionData.min_height === 'string' ? parseInt(regionData.min_height, 10) : (regionData.min_height ?? 150),
+          display_order: typeof regionData.display_order === 'string' ? parseInt(regionData.display_order, 10) : (regionData.display_order ?? 0),
+        };
+        
+        // Ensure col + span doesn't exceed 12
+        if (sanitizedData.grid_col + sanitizedData.col_span > 12) {
+          sanitizedData.col_span = 12 - sanitizedData.grid_col;
+        }
+        
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Creating region', { layoutId, sanitizedData }, 'enhanced-api');
+        }
+        
+        const data = await enhancedApiCall<any>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/regions`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(sanitizedData)
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error, 'create dashboard region');
+        throw error;
+      }
+    },
+    updateRegion: async (layoutId: string, regionId: string, updates: any): Promise<any> => {
+      try {
+        const token = await getAuthToken();
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Updating region', { layoutId, regionId, updates }, 'enhanced-api');
+        }
+        const data = await enhancedApiCall<any>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/regions/${regionId}`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates)
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error, 'update dashboard region');
+        throw error;
+      }
+    },
+    deleteRegion: async (layoutId: string, regionId: string): Promise<{ success: boolean }> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<{ success: boolean }>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/regions/${regionId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error, 'delete dashboard region');
+        throw error;
+      }
+    },
+    reorderRegions: async (layoutId: string, regionIds: string[]): Promise<{ success: boolean }> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<{ success: boolean }>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/regions/reorder`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ region_ids: regionIds })
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error, 'reorder dashboard regions');
+        throw error;
+      }
+    },
+    getRoleDefaults: async (role: string): Promise<any[]> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<any[]>(`http://localhost:3001/api/v1/dashboard/regions/defaults/${role}`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        return data || [];
+      } catch (error) {
+        handleApiError(error, 'get role defaults');
+        return [];
+      }
+    },
+    // Versioning methods
+    getVersions: async (layoutId: string): Promise<any[]> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<any[]>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/versions`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        return data || [];
+      } catch (error) {
+        handleApiError(error, 'get layout versions');
+        return [];
+      }
+    },
+    createVersion: async (layoutId: string, status: string, notes?: string): Promise<any> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<any>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/versions`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status, notes })
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error, 'create layout version');
+        throw error;
+      }
+    },
+    publishVersion: async (layoutId: string, versionId: string, notes?: string): Promise<any> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<any>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/publish`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ version_id: versionId, notes })
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error, 'publish layout version');
+        throw error;
+      }
+    },
+    revertToVersion: async (layoutId: string, versionId: string): Promise<{ success: boolean }> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<{ success: boolean }>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/revert/${versionId}`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error, 'revert to version');
+        throw error;
+      }
+    },
+    // Undo/Redo methods
+    undoLayout: async (layoutId: string): Promise<{ regions: any[], version: number }> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<{ regions: any[], version: number }>(`http://localhost:3001/api/v2/dashboard/layouts/${layoutId}/undo`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error, 'undo layout');
+        throw error;
+      }
+    },
+    redoLayout: async (layoutId: string): Promise<{ regions: any[], version: number }> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<{ regions: any[], version: number }>(`http://localhost:3001/api/v2/dashboard/layouts/${layoutId}/redo`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error, 'redo layout');
+        throw error;
+      }
+    },
+    getLayoutHistory: async (layoutId: string, limit: number = 50): Promise<{ canUndo: boolean, canRedo: boolean, recentEvents: any[] }> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<{ canUndo: boolean, canRedo: boolean, recentEvents: any[] }>(`http://localhost:3001/api/v2/dashboard/layouts/${layoutId}/history?limit=${limit}`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error, 'get layout history');
+        return { canUndo: false, canRedo: false, recentEvents: [] };
+      }
+    },
+    // Widget registry methods
+    getApprovedWidgets: async (): Promise<any[]> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<any[]>(`http://localhost:3001/api/v1/dashboard/widgets/approved`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        return data || [];
+      } catch (error) {
+        handleApiError(error, 'get approved widgets');
+        return [];
+      }
+    },
+    registerWidget: async (widgetData: any): Promise<any> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<any>(`http://localhost:3001/api/v1/dashboard/widgets/register`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(widgetData)
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error, 'register widget');
+        throw error;
+      }
+    },
+    // Presence methods
+    getPresence: async (regionId: string): Promise<any[]> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<any[]>(`http://localhost:3001/api/dashboard/regions/${regionId}/presence`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        return data || [];
+      } catch (error) {
+        handleApiError(error, 'get region presence');
+        return [];
+      }
+    },
+    updatePresence: async (regionId: string, userId: string, sessionId: string, isEditing: boolean): Promise<void> => {
+      try {
+        const token = await getAuthToken();
+        await enhancedApiCall(`http://localhost:3001/api/dashboard/regions/${regionId}/presence`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, sessionId, isEditing })
+        });
+      } catch (error) {
+        handleApiError(error, 'update region presence');
+      }
+    },
+    // Template methods
+    templates: {
+      list: async (): Promise<any[]> => {
+        try {
+          const token = await getAuthToken();
+          const response = await enhancedApiCall<{ data: any[] }>(`http://localhost:3001/api/v2/dashboard/templates`, {
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+          });
+          return response?.data || [];
+        } catch (error) {
+          handleApiError(error, 'list templates');
+          return [];
+        }
+      },
+      get: async (id: string): Promise<any> => {
+        try {
+          const token = await getAuthToken();
+          const response = await enhancedApiCall<{ data: any }>(`http://localhost:3001/api/v2/dashboard/templates/${id}`, {
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+          });
+          return response?.data;
+        } catch (error) {
+          handleApiError(error, 'get template');
+          throw error;
+        }
+      },
+      create: async (template: { name: string; description?: string; thumbnail?: string; is_public?: boolean; regions: any[] }): Promise<any> => {
+        try {
+          const token = await getAuthToken();
+          const response = await enhancedApiCall<{ data: any }>(`http://localhost:3001/api/v2/dashboard/templates`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(template)
+          });
+          return response?.data;
+        } catch (error) {
+          handleApiError(error, 'create template');
+          throw error;
+        }
+      },
+      update: async (id: string, template: { name?: string; description?: string; thumbnail?: string; is_public?: boolean; regions?: any[] }): Promise<any> => {
+        try {
+          const token = await getAuthToken();
+          const response = await enhancedApiCall<{ data: any }>(`http://localhost:3001/api/v2/dashboard/templates/${id}`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(template)
+          });
+          return response?.data;
+        } catch (error) {
+          handleApiError(error, 'update template');
+          throw error;
+        }
+      },
+      delete: async (id: string): Promise<void> => {
+        try {
+          const token = await getAuthToken();
+          await enhancedApiCall(`http://localhost:3001/api/v2/dashboard/templates/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+          });
+        } catch (error) {
+          handleApiError(error, 'delete template');
+          throw error;
+        }
+      }
+    },
+    acquireLock: async (regionId: string): Promise<{ success: boolean; lockedBy?: string }> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<{ success: boolean; lockedBy?: string }>(`http://localhost:3001/api/dashboard/regions/${regionId}/lock`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'acquire' })
+        });
+        return data || { success: false };
+      } catch (error) {
+        handleApiError(error, 'acquire region lock');
+        return { success: false };
+      }
+    },
+    releaseLock: async (regionId: string): Promise<void> => {
+      try {
+        const token = await getAuthToken();
+        await enhancedApiCall(`http://localhost:3001/api/dashboard/regions/${regionId}/lock`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'release' })
+        });
+      } catch (error) {
+        handleApiError(error, 'release region lock');
+      }
+    },
+    // Migration method
+    migrateCardsToRegions: async (layoutId: string): Promise<any> => {
+      try {
+        const token = await getAuthToken();
+        const data = await enhancedApiCall<any>(`http://localhost:3001/api/dashboard/migrate/cards-to-regions`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ layoutId })
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error, 'migrate cards to regions');
+        throw error;
+      }
+    },
+    upsertCard: async (layoutId: string, card: Partial<DashboardCard>): Promise<DashboardCard> => {
       try {
         const token = await getAuthToken();
         const body = { layout_id: layoutId, ...card };
-        const data = await enhancedApiCall<any>(`http://localhost:3001/api/dashboard/cards`, {
+        const data = await enhancedApiCall<DashboardCard>(`http://localhost:3001/api/dashboard/cards`, {
           method: 'PUT',
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
           body: JSON.stringify(body)

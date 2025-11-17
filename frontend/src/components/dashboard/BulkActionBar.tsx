@@ -8,7 +8,6 @@ import {
   Maximize2, 
   Users, 
   UserMinus,
-  MoreHorizontal,
   X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';

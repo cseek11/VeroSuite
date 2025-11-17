@@ -5,6 +5,7 @@
 
 import { supabase } from './supabase';
 import { getTenantId } from './enhanced-api';
+import { logger } from '@/utils/logger';
 
 export interface SimpleSearchResult {
   id: string;
@@ -40,7 +41,9 @@ export class SimpleSearchService {
       const tenantId = await getTenantId();
       const { search = '', status, segmentId } = options;
       
-      console.log('🔍 Simple search called:', { search, status, segmentId, tenantId });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Simple search called', { search, status, segmentId, tenantId }, 'simple-search-service');
+      }
       
       // Build the query
       let query = supabase
@@ -83,7 +86,7 @@ export class SimpleSearchService {
         .limit(50);
       
       if (error) {
-        console.error('Search error:', error);
+        logger.error('Search error', error, 'simple-search-service');
         return [];
       }
       
@@ -108,16 +111,18 @@ export class SimpleSearchService {
       const endTime = performance.now();
       const timeTakenMs = Math.round(endTime - startTime);
       
-      console.log('🔍 Simple search completed:', {
-        resultsCount: transformedResults.length,
-        timeTakenMs,
-        searchTerm: search
-      });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Simple search completed', {
+          resultsCount: transformedResults.length,
+          timeTakenMs,
+          searchTerm: search
+        }, 'simple-search-service');
+      }
       
       return transformedResults;
       
-    } catch (error) {
-      console.error('Error in simple search:', error);
+    } catch (error: unknown) {
+      logger.error('Error in simple search', error, 'simple-search-service');
       return [];
     }
   }
@@ -125,6 +130,12 @@ export class SimpleSearchService {
 
 // Export singleton instance
 export const simpleSearch = new SimpleSearchService();
+
+
+
+
+
+
 
 
 

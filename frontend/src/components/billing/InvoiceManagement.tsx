@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
 import {
-  Card,
-  Typography,
-  Button,
-  Input,
-  Alert,
-  Tabs
-} from '@/components/ui/EnhancedUI';
+  Heading,
+  Text,
+} from '@/components/ui';
 import {
   Plus,
   Search,
-  Filter,
   Download,
   Eye,
   Edit,
@@ -26,18 +25,26 @@ import {
   User,
   Loader2,
   MoreVertical,
-  MapPin
+  MapPin,
+  ArrowUpDown,
+  Filter,
+  X
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
 import { Invoice, InvoiceStatus } from '@/types/enhanced-types';
 import InvoiceForm from './InvoiceForm';
 import InvoiceViewer from './InvoiceViewer';
+import { logger } from '@/utils/logger';
 
 type TabType = 'all' | 'draft' | 'sent' | 'paid' | 'overdue';
+type SortField = 'date' | 'amount' | 'customer' | 'status' | 'due_date';
+type SortOrder = 'asc' | 'desc';
 
 export default function InvoiceManagement() {
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<SortField>('date');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [showInvoiceForm, setShowInvoiceForm] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
@@ -58,7 +65,7 @@ export default function InvoiceManagement() {
       queryClient.invalidateQueries({ queryKey: ['billing'] });
     },
     onError: (error) => {
-      console.error('Failed to delete invoice:', error);
+      logger.error('Failed to delete invoice', error, 'InvoiceManagement');
     }
   });
 
@@ -70,19 +77,61 @@ export default function InvoiceManagement() {
       queryClient.invalidateQueries({ queryKey: ['billing'] });
     },
     onError: (error) => {
-      console.error('Failed to update invoice status:', error);
+      logger.error('Failed to update invoice status', error, 'InvoiceManagement');
     }
   });
 
-  // Filter invoices based on active tab and search
-  const filteredInvoices = invoices.filter((invoice) => {
-    const matchesSearch = invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         invoice.accounts?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesTab = activeTab === 'all' || invoice.status === activeTab;
-    
-    return matchesSearch && matchesTab;
-  });
+  // Filter and sort invoices
+  const filteredAndSortedInvoices = useMemo(() => {
+    // Filter by tab and search
+    let filtered = invoices.filter((invoice) => {
+      const matchesSearch = 
+        invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        invoice.accounts?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        invoice.total_amount.toString().includes(searchTerm);
+
+      const matchesTab = activeTab === 'all' || invoice.status === activeTab;
+
+      return matchesSearch && matchesTab;
+    });
+
+    // Sort invoices
+    filtered.sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortField) {
+        case 'date':
+          aValue = new Date(a.issue_date).getTime();
+          bValue = new Date(b.issue_date).getTime();
+          break;
+        case 'due_date':
+          aValue = new Date(a.due_date).getTime();
+          bValue = new Date(b.due_date).getTime();
+          break;
+        case 'amount':
+          aValue = Number(a.total_amount);
+          bValue = Number(b.total_amount);
+          break;
+        case 'customer':
+          aValue = a.accounts?.name || '';
+          bValue = b.accounts?.name || '';
+          break;
+        case 'status':
+          aValue = a.status;
+          bValue = b.status;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  }, [invoices, activeTab, searchTerm, sortField, sortOrder]);
 
   // Calculate statistics
   const stats = {
@@ -165,18 +214,18 @@ export default function InvoiceManagement() {
           <div className="flex items-center space-x-3 mb-3">
             <FileText className="w-5 h-5 text-gray-600" />
             <div>
-              <Typography variant="h4" className="font-semibold">
+              <Heading level={4} className="font-semibold">
                 {invoice.invoice_number}
-              </Typography>
-              <Typography variant="body2" className="text-gray-600">
+              </Heading>
+              <Text variant="small" className="text-gray-600">
                 {invoice.accounts?.name || 'Unknown Customer'}
-              </Typography>
+              </Text>
               {invoice.accounts?.address && (
-                <Typography variant="body2" className="text-gray-500 text-xs mt-1 flex items-center">
+                <Text variant="small" className="text-gray-500 text-xs mt-1 flex items-center">
                   <MapPin className="w-3 h-3 mr-1" />
                   {[invoice.accounts.address, invoice.accounts.city, invoice.accounts.state, invoice.accounts.zip_code]
                     .filter(Boolean).join(', ')}
-                </Typography>
+                </Text>
               )}
             </div>
             <div className="flex items-center space-x-2">
@@ -282,12 +331,12 @@ export default function InvoiceManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <Typography variant="h1" className="font-bold text-gray-900">
+          <Heading level={1} className="font-bold text-gray-900">
             Invoice Management
-          </Typography>
-          <Typography variant="body1" className="text-gray-600 mt-2">
+          </Heading>
+          <Text variant="body" className="text-gray-600 mt-2">
             Create, manage, and track all customer invoices
-          </Typography>
+          </Text>
         </div>
         <Button
           variant="primary"
@@ -307,12 +356,12 @@ export default function InvoiceManagement() {
           <div className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <Typography variant="body2" className="text-blue-700 font-medium">
+                <Text variant="small" className="text-blue-700 font-medium">
                   Total Revenue
-                </Typography>
-                <Typography variant="h2" className="text-blue-800 font-bold mt-1">
+                </Text>
+                <Heading level={2} className="text-blue-800 font-bold mt-1">
                   ${stats.totalAmount.toFixed(2)}
-                </Typography>
+                </Heading>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                 <DollarSign className="w-6 h-6 text-blue-600" />
@@ -325,12 +374,12 @@ export default function InvoiceManagement() {
           <div className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <Typography variant="body2" className="text-green-700 font-medium">
+                <Text variant="small" className="text-green-700 font-medium">
                   Paid Amount
-                </Typography>
-                <Typography variant="h2" className="text-green-800 font-bold mt-1">
+                </Text>
+                <Heading level={2} className="text-green-800 font-bold mt-1">
                   ${stats.paidAmount.toFixed(2)}
-                </Typography>
+                </Heading>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                 <CheckCircle className="w-6 h-6 text-green-600" />
@@ -343,12 +392,12 @@ export default function InvoiceManagement() {
           <div className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <Typography variant="body2" className="text-orange-700 font-medium">
+                <Text variant="small" className="text-orange-700 font-medium">
                   Outstanding
-                </Typography>
-                <Typography variant="h2" className="text-orange-800 font-bold mt-1">
+                </Text>
+                <Heading level={2} className="text-orange-800 font-bold mt-1">
                   ${stats.outstandingAmount.toFixed(2)}
-                </Typography>
+                </Heading>
               </div>
               <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
                 <AlertCircle className="w-6 h-6 text-orange-600" />
@@ -361,12 +410,12 @@ export default function InvoiceManagement() {
           <div className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <Typography variant="body2" className="text-purple-700 font-medium">
+                <Text variant="small" className="text-purple-700 font-medium">
                   Total Invoices
-                </Typography>
-                <Typography variant="h2" className="text-purple-800 font-bold mt-1">
+                </Text>
+                <Heading level={2} className="text-purple-800 font-bold mt-1">
                   {stats.total}
-                </Typography>
+                </Heading>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                 <FileText className="w-6 h-6 text-purple-600" />
@@ -396,21 +445,45 @@ export default function InvoiceManagement() {
               ))}
             </div>
             
-            <div className="flex gap-3 w-full md:w-auto">
-              <div className="relative flex-1 md:flex-none">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder="Search invoices..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-full md:w-64"
-                />
+              <div className="flex gap-3 w-full md:w-auto flex-wrap">
+                <div className="relative flex-1 md:flex-none">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Search invoices..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 w-full md:w-64"
+                  />
+                </div>
+                  <div className="flex gap-2">
+                    <Select
+                      value={sortField}
+                      onChange={(value) => setSortField(value as SortField)}
+                      className="w-32"
+                      options={[
+                        { value: 'date', label: 'Date' },
+                        { value: 'due_date', label: 'Due Date' },
+                        { value: 'amount', label: 'Amount' },
+                        { value: 'customer', label: 'Customer' },
+                        { value: 'status', label: 'Status' },
+                      ]}
+                      placeholder="Sort by"
+                    />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={ArrowUpDown}
+                    onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                    title={`Sort ${sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
+                  >
+                    {sortOrder === 'asc' ? '↑' : '↓'}
+                  </Button>
+                </div>
+                <Button variant="outline" size="sm" icon={Download}>
+                  Export
+                </Button>
               </div>
-              <Button variant="outline" size="sm" icon={Download}>
-                Export
-              </Button>
-            </div>
           </div>
         </div>
       </Card>
@@ -424,23 +497,24 @@ export default function InvoiceManagement() {
               <span className="ml-3 text-gray-600">Loading invoices...</span>
             </div>
           ) : error ? (
-            <Alert type="error" title="Error Loading Invoices">
-              Unable to load invoices. Please try again later.
-              <Button variant="outline" size="sm" onClick={() => refetch()} className="ml-3">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-red-800 mb-1">Error Loading Invoices</h3>
+              <p className="text-sm text-red-700 mb-3">Unable to load invoices. Please try again later.</p>
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
                 Retry
               </Button>
-            </Alert>
-          ) : filteredInvoices.length === 0 ? (
+            </div>
+          ) : filteredAndSortedInvoices.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <Typography variant="h4" className="text-gray-500 mb-2">
+              <Heading level={4} className="text-gray-500 mb-2">
                 {invoices.length === 0 ? 'No invoices found' : 'No invoices match your filters'}
-              </Typography>
-              <Typography variant="body2" className="text-gray-400 mb-6">
+              </Heading>
+              <Text variant="small" className="text-gray-400 mb-6">
                 {invoices.length === 0 
                   ? "Get started by creating your first invoice." 
                   : "Try adjusting your search or filter criteria."}
-              </Typography>
+              </Text>
               {invoices.length === 0 && (
                 <Button
                   variant="primary"
@@ -453,7 +527,7 @@ export default function InvoiceManagement() {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredInvoices.map(renderInvoiceCard)}
+              {filteredAndSortedInvoices.map(renderInvoiceCard)}
             </div>
           )}
         </div>

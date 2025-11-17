@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeroField REWARD_SCORE Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <link rel="stylesheet" href="dashboard.css">
+    <!-- Chart.js - Use local copy if available, fallback to CDN -->
+    <script>
+        // Load Chart.js with proper fallback
+        (function() {
+            const loadChartJs = () => {
+                // Try local copy first
+                const localScript = document.createElement('script');
+                localScript.src = 'lib/chart.umd.min.js';
+                localScript.onerror = () => {
+                    // Fallback to CDN if local copy fails
+                    const cdnScript = document.createElement('script');
+                    cdnScript.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+                    cdnScript.crossOrigin = 'anonymous';
+                    cdnScript.onload = () => {
+                        console.log('Chart.js loaded from CDN');
+                        if (typeof Chart !== 'undefined') {
+                            initDashboard();
+                        }
+                    };
+                    cdnScript.onerror = () => {
+                        console.error('Failed to load Chart.js from both local and CDN');
+                        document.body.innerHTML = '<div class="error">Failed to load Chart.js library. Please run download-chartjs.ps1 or check your internet connection.</div>';
+                    };
+                    document.head.appendChild(cdnScript);
+                };
+                localScript.onload = () => {
+                    console.log('Chart.js loaded from local file');
+                    if (typeof Chart !== 'undefined') {
+                        initDashboard();
+                    }
+                };
+                document.head.appendChild(localScript);
+            };
+            
+            // Store init function globally
+            window.initDashboard = function() {
+                // Dashboard initialization will happen after Chart.js loads
+                if (typeof loadMetrics === 'function') {
+                    loadMetrics();
+                }
+            };
+            
+            loadChartJs();
+        })();
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>VeroField REWARD_SCORE Dashboard</h1>
+            <p class="subtitle">Code Quality Metrics & Trends</p>
+            <p class="last-updated">Last Updated: <span id="lastUpdated">Loading...</span></p>
+        </header>
+
+        <div class="filters-section">
+            <h3>Filters</h3>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="dateRange">Date Range:</label>
+                    <select id="dateRange">
+                        <option value="7">Last 7 days</option>
+                        <option value="30" selected>Last 30 days</option>
+                        <option value="90">Last 90 days</option>
+                        <option value="all">All time</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="authorFilter">Author:</label>
+                    <select id="authorFilter">
+                        <option value="all">All authors</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="categoryFilter">Category:</label>
+                    <select id="categoryFilter">
+                        <option value="all">All categories</option>
+                        <option value="tests">Tests</option>
+                        <option value="bug_fix">Bug Fix</option>
+                        <option value="docs">Documentation</option>
+                        <option value="performance">Performance</option>
+                        <option value="security">Security</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="scoreRange">Score Range:</label>
+                    <select id="scoreRange">
+                        <option value="all">All scores</option>
+                        <option value="high">High (6+)</option>
+                        <option value="medium">Medium (0-5)</option>
+                        <option value="low">Low (<0)</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <button id="applyFilters" class="btn-primary">Apply Filters</button>
+                    <button id="resetFilters" class="btn-secondary">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>Total PRs</h3>
+                <div class="metric-value" id="totalPRs">0</div>
+            </div>
+            <div class="metric-card">
+                <h3>Average Score</h3>
+                <div class="metric-value" id="averageScore">0.0</div>
+            </div>
+            <div class="metric-card">
+                <h3>High Scores (6+)</h3>
+                <div class="metric-value" id="highScores">0</div>
+            </div>
+            <div class="metric-card">
+                <h3>Low Scores (<0)</h3>
+                <div class="metric-value" id="lowScores">0</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Score Distribution</h3>
+                <canvas id="distributionChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Score Trends</h3>
+                <canvas id="trendsChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Category Performance</h3>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card full-width">
+                <h3>Recent Scores</h3>
+                <div class="table-container">
+                    <table id="recentScoresTable">
+                        <thead>
+                            <tr>
+                                <th>PR #</th>
+                                <th>Author</th>
+                                <th>Score</th>
+                                <th>Tests</th>
+                                <th>Bug Fix</th>
+                                <th>Docs</th>
+                                <th>Performance</th>
+                                <th>Security</th>
+                                <th>Penalties</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentScoresBody">
+                            <tr>
+                                <td colspan="10">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-card full-width">
+            <h3>Anti-Patterns (Score ≤ 0)</h3>
+            <div class="table-container">
+                <table id="antiPatternsTable">
+                    <thead>
+                        <tr>
+                            <th>PR #</th>
+                            <th>Score</th>
+                            <th>Penalties</th>
+                            <th>Breakdown</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="antiPatternsBody">
+                        <tr>
+                            <td colspan="5">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer>
+            <p>Data source: <code>docs/metrics/reward_scores.json</code></p>
+            <p>See <a href="REWARD_SCORE_GUIDE.md">REWARD_SCORE_GUIDE.md</a> for scoring details</p>
+        </footer>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
+

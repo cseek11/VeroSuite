@@ -1,12 +1,14 @@
-import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Request, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { LoginDto, ExchangeTokenDto, AuthResponseDto, RefreshTokenResponseDto } from './dto';
+import { DeprecationInterceptor } from '../common/interceptors/deprecation.interceptor';
 
-@ApiTags('Authentication')
-@Controller('auth')
+@ApiTags('Authentication V1 (Deprecated)')
+@Controller({ path: 'auth', version: '1' })
+@UseInterceptors(DeprecationInterceptor)
 export class AuthController {
   constructor(private readonly authService: AuthService, private readonly jwtService: JwtService) {}
 
@@ -33,13 +35,18 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Token refreshed successfully', type: RefreshTokenResponseDto })
   @ApiResponse({ status: 401, description: 'Invalid or expired token' })
   async refresh(@Request() req: any): Promise<RefreshTokenResponseDto> {
-    // Re-issue a new access token using the current authenticated principal
+    // Get latest user data from database to ensure roles/permissions are up to date
+    // This already includes combined permissions from PermissionsService
+    const currentUser = await this.authService.getCurrentUser(req.user.userId);
+    const userData = currentUser.user;
+
+    // Re-issue a new access token with latest user data (permissions already combined)
     const payload = {
-      sub: req.user.userId,
-      email: req.user.email,
-      tenant_id: req.user.tenantId,
-      roles: req.user.roles,
-      permissions: req.user.permissions || [],
+      sub: userData.id,
+      email: userData.email,
+      tenant_id: userData.tenant_id,
+      roles: userData.roles || [],
+      permissions: userData.permissions || [], // Already combined in getCurrentUser
     };
 
     const accessToken = this.jwtService.sign(payload);
@@ -50,5 +57,15 @@ export class AuthController {
       expires_at: expiresAt,
       token_type: 'Bearer'
     });
+  }
+
+  @Get('me')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get current authenticated user profile' })
+  @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Invalid or expired token' })
+  async getCurrentUser(@Request() req: any) {
+    return this.authService.getCurrentUser(req.user.userId);
   }
 }

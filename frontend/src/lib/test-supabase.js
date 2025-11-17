@@ -1,4 +1,6 @@
-// Test script to debug Supabase connection
+/* eslint-env node */
+/* eslint-disable no-undef */
+// Test-only supabase helper
 import { createClient } from '@supabase/supabase-js';
 
 // This will help us test the connection without the full app

@@ -3,7 +3,7 @@
 // ============================================================================
 // React hook for advanced search functionality with fuzzy matching and suggestions
 
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
   advancedSearchService, 
@@ -13,6 +13,7 @@ import {
 } from '@/lib/advanced-search-service';
 import type { SearchFilters } from '@/types/enhanced-types';
 import { searchAnalyticsService } from '@/lib/search-analytics-service';
+import { logger } from '@/utils/logger';
 
 export interface UseAdvancedSearchOptions {
   enableAutoCorrection?: boolean;
@@ -62,14 +63,18 @@ export const useAdvancedSearch = (options: UseAdvancedSearchOptions = {}) => {
     data: searchData,
     isLoading: isSearching,
     error: searchError,
-    refetch: refetchSearch
+    refetch: _refetchSearch
   } = useQuery({
     queryKey: ['advanced-search', debouncedQuery, filters, searchMode],
     queryFn: async () => {
-      console.log('🔍 useQuery queryFn called with debouncedQuery:', debouncedQuery);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('useQuery queryFn called with debouncedQuery', { debouncedQuery }, 'useAdvancedSearch');
+      }
       
       if (!debouncedQuery.trim()) {
-        console.log('🔍 Empty search query, returning empty results');
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Empty search query, returning empty results', {}, 'useAdvancedSearch');
+        }
         return {
           results: [],
           suggestions: [],
@@ -119,18 +124,20 @@ export const useAdvancedSearch = (options: UseAdvancedSearchOptions = {}) => {
         // Update popular searches in the database
         try {
           await searchAnalyticsService.updatePopularSearches(debouncedQuery, searchResult.results?.length || 0, true);
-        } catch (analyticsError) {
-          console.warn('Failed to update popular searches:', analyticsError);
+        } catch (analyticsError: unknown) {
+          logger.warn('Failed to update popular searches', { error: analyticsError }, 'useAdvancedSearch');
         }
         
-        console.log('🔍 useQuery search completed:', {
-          resultsCount: searchResult.results?.length || 0,
-          suggestionsCount: searchResult.suggestions?.length || 0,
-          correctedQuery: searchResult.correctedQuery
-        });
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('useQuery search completed', {
+            resultsCount: searchResult.results?.length || 0,
+            suggestionsCount: searchResult.suggestions?.length || 0,
+            correctedQuery: searchResult.correctedQuery
+          }, 'useAdvancedSearch');
+        }
         
         return searchResult;
-      } catch (error) {
+      } catch (error: unknown) {
         // Log search error to analytics
         await searchAnalyticsService.logSearchError(
           'search_execution_error',
@@ -139,7 +146,7 @@ export const useAdvancedSearch = (options: UseAdvancedSearchOptions = {}) => {
           searchMode
         );
         
-        console.error('🔍 useQuery search failed:', error);
+        logger.error('useQuery search failed', error, 'useAdvancedSearch');
         throw error;
       }
     },
@@ -150,7 +157,7 @@ export const useAdvancedSearch = (options: UseAdvancedSearchOptions = {}) => {
   // Suggestions query (separate from main search)
   const {
     data: suggestionsData,
-    isLoading: isSuggestionsLoading
+    isLoading: _isSuggestionsLoading
   } = useQuery({
     queryKey: ['search-suggestions', query],
     queryFn: () => advancedSearchService.getSearchSuggestions(query, 5),
@@ -160,18 +167,22 @@ export const useAdvancedSearch = (options: UseAdvancedSearchOptions = {}) => {
 
   // Debug logging - moved after all hooks are declared
   useEffect(() => {
-    console.log('🔄 useAdvancedSearch state:', {
-      query,
-      debouncedQuery,
-      hasSearched,
-      isLoading: isSearching,
-      resultsLength: searchData?.results?.length || 0
-    });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('useAdvancedSearch state', {
+        query,
+        debouncedQuery,
+        hasSearched,
+        isLoading: isSearching,
+        resultsLength: searchData?.results?.length || 0
+      }, 'useAdvancedSearch');
+    }
   }, [query, debouncedQuery, hasSearched, isSearching, searchData?.results?.length]);
 
   // Debounced search function - FIXED: Remove refetchSearch to prevent infinite loops
   const performSearch = useCallback((searchText: string, searchFilters?: SearchFilters) => {
-    console.log('🔍 performSearch called with:', searchText);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('performSearch called', { searchText }, 'useAdvancedSearch');
+    }
     
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
@@ -185,7 +196,9 @@ export const useAdvancedSearch = (options: UseAdvancedSearchOptions = {}) => {
 
     debounceTimeoutRef.current = setTimeout(() => {
       if (isMountedRef.current) {
-        console.log('🔍 Executing search for:', searchText);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Executing search', { searchText }, 'useAdvancedSearch');
+        }
         setDebouncedQuery(searchText); // This will trigger useQuery via queryKey change
         setHasSearched(true);
       }
@@ -228,8 +241,8 @@ export const useAdvancedSearch = (options: UseAdvancedSearchOptions = {}) => {
     
     try {
       return await advancedSearchService.getSearchSuggestions(searchQuery, 5);
-    } catch (error) {
-      console.error('Failed to get suggestions:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to get suggestions', error, 'useAdvancedSearch');
       return [];
     }
   }, [enableSuggestions]);
@@ -285,13 +298,15 @@ export const useAdvancedSearch = (options: UseAdvancedSearchOptions = {}) => {
   const results = searchData?.results || [];
   const suggestions = searchData?.suggestions || suggestionsData || [];
   
-  console.log('🔍 Final state preparation:', {
-    resultsLength: results.length,
-    suggestionsLength: suggestions.length,
-    isLoading: isSearching,
-    hasSearched,
-    error: searchError?.message
-  });
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('Final state preparation', {
+      resultsLength: results.length,
+      suggestionsLength: suggestions.length,
+      isLoading: isSearching,
+      hasSearched,
+      error: searchError?.message
+    }, 'useAdvancedSearch');
+  }
   
   const state: AdvancedSearchState = {
     results,

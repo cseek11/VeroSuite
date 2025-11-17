@@ -7,7 +7,7 @@ import { PresignUploadDto, UploadPresignResponseDto } from './dto';
 @ApiTags('Uploads')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('v1/uploads')
+@Controller({ path: 'uploads', version: '1' })
 export class UploadsController {
   @Post('presign')
   @ApiOperation({ summary: 'Get mock presigned upload URL (demo only)' })

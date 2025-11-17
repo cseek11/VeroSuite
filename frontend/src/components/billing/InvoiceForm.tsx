@@ -1,40 +1,48 @@
-// @ts-nocheck
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useForm, Controller, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import {
-  Card,
-  Typography,
-  Button,
-  Alert
-} from '@/components/ui/EnhancedUI';
 import {
   X,
   Plus,
   Trash2,
   Save,
   FileText,
-  Loader2,
   Mail,
   Phone,
   MapPin
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
-import { Invoice } from '@/types/enhanced-types';
+import { Invoice, Account } from '@/types/enhanced-types';
 import CustomerSearchSelector from '@/components/ui/CustomerSearchSelector';
+import { logger } from '@/utils/logger';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import Select from '@/components/ui/Select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/Dialog';
 
 interface InvoiceFormProps {
   invoice?: Invoice | null;
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-}
-
-interface InvoiceItem {
-  service_type_id: string;
-  description: string;
-  quantity: number;
-  unit_price: number;
-  total_price: number;
+  initialData?: {
+    account_id?: string;
+    work_order_id?: string;
+    job_id?: string;
+    issue_date?: string;
+    due_date?: string;
+    notes?: string;
+    items?: Array<{
+      service_type_id: string;
+      description: string;
+      quantity: number;
+      unit_price: number;
+    }>;
+  };
 }
 
 interface ServiceType {
@@ -44,6 +52,35 @@ interface ServiceType {
   service_code: string;
   description: string;
 }
+
+// Zod validation schema
+const invoiceItemSchema = z.object({
+  service_type_id: z.string().uuid('Please select a valid service type'),
+  description: z.string().min(1, 'Description is required'),
+  quantity: z.number().min(1, 'Quantity must be greater than 0'),
+  unit_price: z.number().min(0, 'Unit price cannot be negative'),
+  total_price: z.number().min(0).default(0),
+});
+
+const invoiceFormSchema = z.object({
+  account_id: z.string().uuid('Please select a valid customer'),
+  invoice_number: z.string().optional(),
+  issue_date: z.string().min(1, 'Issue date is required'),
+  due_date: z.string().min(1, 'Due date is required'),
+  notes: z.string().optional(),
+  items: z.array(invoiceItemSchema).min(1, 'At least one service item is required'),
+}).refine((data) => {
+  if (data.due_date && data.issue_date) {
+    return new Date(data.due_date) >= new Date(data.issue_date);
+  }
+  return true;
+}, {
+  message: 'Due date must be after issue date',
+  path: ['due_date'],
+});
+
+type InvoiceFormData = z.infer<typeof invoiceFormSchema>;
+type InvoiceItem = z.infer<typeof invoiceItemSchema>;
 
 // Helper functions for customer display
 const getCustomerTypeColor = (type: string) => {
@@ -55,7 +92,8 @@ const getCustomerTypeColor = (type: string) => {
   return colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800';
 };
 
-const formatAddress = (customer: any) => {
+const formatAddress = (customer: Account | null) => {
+  if (!customer) return 'No address provided';
   const parts = [
     customer.address,
     customer.city,
@@ -71,18 +109,35 @@ const isValidUUID = (uuid: string) => {
   return uuidRegex.test(uuid);
 };
 
-export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess }: InvoiceFormProps) {
-  const [formData, setFormData] = useState({
-    account_id: '',
-    invoice_number: '',
-    issue_date: new Date().toISOString().split('T')[0],
-    due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    notes: '',
-    items: [{ service_type_id: '', description: '', quantity: 1, unit_price: 0, total_price: 0 }] as InvoiceItem[]
+export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initialData }: InvoiceFormProps) {
+  const [selectedCustomer, setSelectedCustomer] = React.useState<Account | null>(null);
+  const [submitError, setSubmitError] = React.useState<string>('');
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch,
+    setValue,
+  } = useForm<InvoiceFormData>({
+    resolver: zodResolver(invoiceFormSchema),
+    defaultValues: {
+      account_id: '',
+      invoice_number: '',
+      issue_date: new Date().toISOString().split('T')[0],
+      due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      notes: '',
+      items: [{ service_type_id: '', description: '', quantity: 1, unit_price: 0, total_price: 0 }],
+    },
   });
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitError, setSubmitError] = useState<string>('');
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'items',
+  });
+
+  const watchedItems = watch('items');
 
   // Fetch service types from API
   const { data: serviceTypes = [] } = useQuery<ServiceType[]>({
@@ -99,14 +154,14 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess }: Inv
         
         if (response.ok) {
           const data = await response.json();
-          console.log('✅ Fetched service types from API:', data);
+          logger.debug('Fetched service types from API', { count: data?.length || 0 }, 'InvoiceForm');
           return data;
         } else {
-          console.log('⚠️ API call failed, using fallback service types');
+          logger.warn('API call failed, using fallback service types', {}, 'InvoiceForm');
           throw new Error('API call failed');
         }
       } catch (error) {
-        console.log('⚠️ Using fallback service types due to error:', error);
+        logger.warn('Using fallback service types due to error', error, 'InvoiceForm');
         // Use real service types from database
         return [
           { 
@@ -152,189 +207,113 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess }: Inv
 
   // Create/Update invoice mutation
   const submitMutation = useMutation({
-    mutationFn: async (data: any) => {
-      console.log('🔧 Inside mutation function with data:', data);
+    mutationFn: async (data: Record<string, unknown>) => {
       if (invoice) {
-        console.log('📝 Updating existing invoice:', invoice.id);
+        logger.debug('Updating existing invoice', { invoiceId: invoice.id }, 'InvoiceForm');
         return billing.updateInvoice(invoice.id, data);
       } else {
-        console.log('🆕 Creating new invoice');
+        logger.debug('Creating new invoice', {}, 'InvoiceForm');
         return billing.createInvoice(data);
       }
     },
     onSuccess: (result) => {
-      console.log('🎉 Mutation onSuccess called with result:', result);
+      logger.debug('Invoice mutation successful', { invoiceId: result?.id }, 'InvoiceForm');
       onSuccess();
     },
-    onError: (error: any) => {
-      console.log('💥 Mutation onError called with error:', error);
-      setSubmitError(error.message || 'Failed to save invoice');
+    onError: (error: unknown) => {
+      logger.error('Invoice mutation failed', error, 'InvoiceForm');
+      setSubmitError(error instanceof Error ? error.message : 'Failed to save invoice');
     }
   });
 
   // Initialize form data when editing
   useEffect(() => {
-    if (invoice) {
-      setFormData({
+    if (invoice && isOpen) {
+      const invoiceItems = invoice.InvoiceItem?.map(item => ({
+        service_type_id: item.service_type_id || '',
+        description: item.description || '',
+        quantity: Number(item.quantity) || 1,
+        unit_price: Number(item.unit_price) || 0,
+        total_price: Number(item.quantity || 1) * Number(item.unit_price || 0),
+      })) || [{ service_type_id: '', description: '', quantity: 1, unit_price: 0, total_price: 0 }];
+      
+      reset({
         account_id: invoice.account_id || '',
         invoice_number: invoice.invoice_number || '',
         issue_date: new Date(invoice.issue_date || new Date()).toISOString().split('T')[0],
         due_date: new Date(invoice.due_date || new Date()).toISOString().split('T')[0],
         notes: invoice.notes || '',
-        items: invoice.InvoiceItem?.map(item => ({
-          service_type_id: item.service_type_id || '',
-          description: item.description || '',
-          quantity: Number(item.quantity) || 1,
-          unit_price: Number(item.unit_price) || 0,
-          total_price: Number(item.total_price) || 0
-        } as InvoiceItem)) || [{ service_type_id: '', description: '', quantity: 1, unit_price: 0, total_price: 0 }]
+        items: invoiceItems,
       });
+      
       // Set customer from invoice if available
       if (invoice.accounts) {
         setSelectedCustomer(invoice.accounts);
       }
-    } else {
-      // Clear customer when creating new invoice
-      setSelectedCustomer(null);
-    }
-  }, [invoice, isOpen]);
+    } else if (!invoice && isOpen) {
+      // Use initialData if provided, otherwise use defaults
+      if (initialData) {
+        const initialItems = initialData.items && initialData.items.length > 0
+          ? initialData.items.map(item => ({
+              service_type_id: item.service_type_id || '',
+              description: item.description || '',
+              quantity: item.quantity || 1,
+              unit_price: item.unit_price || 0,
+              total_price: (item.quantity || 1) * (item.unit_price || 0),
+            }))
+          : [{ service_type_id: '', description: '', quantity: 1, unit_price: 0, total_price: 0 }];
 
-  const updateFormData = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
+        reset({
+          account_id: initialData.account_id || '',
+          invoice_number: '',
+          issue_date: initialData.issue_date || new Date().toISOString().split('T')[0],
+          due_date: initialData.due_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          notes: initialData.notes || '',
+          items: initialItems,
+        });
 
-  const updateItem = (index: number, field: keyof InvoiceItem, value: any) => {
-    const newItems = [...formData.items];
-    newItems[index] = { ...newItems[index], [field]: value };
-    
-    // Recalculate total price for this item
-    if (field === 'quantity' || field === 'unit_price') {
-      newItems[index].total_price = newItems[index].quantity * newItems[index].unit_price;
+        // Set customer if account_id is provided
+        if (initialData.account_id) {
+          // Customer will be set when CustomerSearchSelector loads
+        }
+      } else {
+        // Clear customer when creating new invoice
+        setSelectedCustomer(null);
+        reset({
+          account_id: '',
+          invoice_number: '',
+          issue_date: new Date().toISOString().split('T')[0],
+          due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          notes: '',
+          items: [{ service_type_id: '', description: '', quantity: 1, unit_price: 0, total_price: 0 }],
+        });
+      }
     }
-    
-    setFormData(prev => ({ ...prev, items: newItems }));
-  };
+  }, [invoice, isOpen, reset, initialData]);
 
   const addItem = () => {
-    const newItem: InvoiceItem = { 
-      service_type_id: '', 
-      description: '', 
-      quantity: 1, 
-      unit_price: 0, 
-      total_price: 0 
-    };
-    setFormData(prev => ({
-      ...prev,
-      items: [...prev.items, newItem]
-    }));
+    append({ service_type_id: '', description: '', quantity: 1, unit_price: 0, total_price: 0 });
   };
 
   const removeItem = (index: number) => {
-    if (formData.items.length > 1) {
-      setFormData(prev => ({
-        ...prev,
-        items: prev.items.filter((_, i) => i !== index)
-      }));
+    if (fields.length > 1) {
+      remove(index);
     }
   };
 
-  const handleServiceTypeChange = (index: number, serviceTypeId: string) => {
-    // Update the service_type_id first
-    const newItems = [...formData.items];
-    newItems[index] = { ...newItems[index], service_type_id: serviceTypeId };
-    
-    // Find the service type and update other fields
-    const serviceType = serviceTypes.find(st => st.id === serviceTypeId);
-    
-    if (serviceType) {
-      // Only update price, keep description empty for user to fill
-      newItems[index].unit_price = serviceType.base_price;
-      newItems[index].total_price = newItems[index].quantity * serviceType.base_price;
-      // Clear description so user can enter their own
-      if (!newItems[index].description) {
-        newItems[index].description = '';
-      }
-    }
-    
-    // Update the entire items array at once
-    setFormData(prev => ({ ...prev, items: newItems }));
-  };
-
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    console.log('🔍 Starting form validation...');
-
-    if (!formData.account_id) {
-      newErrors.account_id = 'Customer is required';
-    }
-    if (!formData.issue_date) {
-      newErrors.issue_date = 'Issue date is required';
-    }
-    if (!formData.due_date) {
-      newErrors.due_date = 'Due date is required';
-    }
-    if (formData.due_date && formData.issue_date && new Date(formData.due_date) < new Date(formData.issue_date)) {
-      newErrors.due_date = 'Due date must be after issue date';
-    }
-
-    // Validate items
-    formData.items.forEach((item, index) => {
-      if (!item.service_type_id) {
-        newErrors[`item_${index}_service_type`] = 'Service type is required';
-      } else if (!isValidUUID(item.service_type_id)) {
-        newErrors[`item_${index}_service_type`] = 'Invalid service type selection';
-      }
-      if (!item.description) {
-        newErrors[`item_${index}_description`] = 'Description is required';
-      }
-      if (item.quantity <= 0) {
-        newErrors[`item_${index}_quantity`] = 'Quantity must be greater than 0';
-      }
-      if (item.unit_price < 0) {
-        newErrors[`item_${index}_unit_price`] = 'Unit price cannot be negative';
-      }
-    });
-
-    // Validate at least one item exists
-    if (formData.items.length === 0) {
-      newErrors.items = 'At least one service item is required';
-    }
-
-    // Additional UUID validation
-    if (formData.account_id && !isValidUUID(formData.account_id)) {
-      newErrors.account_id = 'Invalid customer selection';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('🎯 Form submission triggered!');
+  const onSubmit = async (data: InvoiceFormData) => {
     setSubmitError('');
-
-    if (!validateForm()) {
-      console.log('❌ Form validation failed - check form fields');
-      return;
-    }
-    
-    console.log('✅ Form validation passed, proceeding with submission...');
-
-    // Debug: Log the data being sent
-    console.log('📤 Submitting invoice data:', formData);
     
     // Ensure all required fields are properly formatted for the API
     const apiData = {
-      account_id: formData.account_id,
-      issue_date: formData.issue_date,
-      due_date: formData.due_date,
-      ...(formData.invoice_number && { invoice_number: formData.invoice_number }),
-      ...(formData.notes && { notes: formData.notes }),
-      items: formData.items.map(item => ({
+      account_id: data.account_id,
+      issue_date: data.issue_date,
+      due_date: data.due_date,
+      ...(data.invoice_number && { invoice_number: data.invoice_number }),
+      ...(data.notes && { notes: data.notes }),
+      ...(initialData?.work_order_id && { work_order_id: initialData.work_order_id }),
+      ...(initialData?.job_id && { job_id: initialData.job_id }),
+      items: data.items.map(item => ({
         service_type_id: item.service_type_id,
         description: item.description,
         quantity: Number(item.quantity),
@@ -342,75 +321,57 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess }: Inv
       }))
     };
 
-    console.log('📤 API formatted data:', apiData);
-    console.log('📋 Items being sent:', apiData.items);
-    console.log('🔍 First item details:', apiData.items[0]);
-    console.log('🔍 Service type ID being sent:', apiData.items[0]?.service_type_id);
-    console.log('🔍 Available service types:', serviceTypes.map(st => ({ id: st.id, name: st.service_name })));
+    logger.debug('Submitting invoice', { 
+      itemsCount: apiData.items.length,
+      accountId: apiData.account_id 
+    }, 'InvoiceForm');
     
     try {
-      console.log('🚀 Attempting to submit invoice with data:', apiData);
-      console.log('🔄 Calling submitMutation.mutateAsync...');
-      
       // Check authentication using the correct localStorage key
-      console.log('🔍 All localStorage keys:', Object.keys(localStorage));
-      const verosuitAuth = localStorage.getItem('verosuite_auth');
-      console.log('🔐 VeroSuite auth data exists:', !!verosuitAuth);
-      
-      // Also check other possible auth keys
-      const supabaseAuth = localStorage.getItem('supabase.auth.token');
-      const jwtToken = localStorage.getItem('jwt');
-      console.log('🔍 Other auth keys - supabase.auth.token:', !!supabaseAuth, 'jwt:', !!jwtToken);
+      const verosuitAuth = localStorage.getItem('verofield_auth');
       
       if (!verosuitAuth) {
-        console.error('❌ No authentication data found in verosuite_auth!');
+        logger.error('No authentication data found', new Error('verofield_auth missing'), 'InvoiceForm');
         setSubmitError('Authentication required. Please log in again.');
         return;
       }
       
       try {
         const authData = JSON.parse(verosuitAuth);
-        console.log('🔐 Auth token exists:', !!authData.token);
-        console.log('🏢 Tenant ID from auth:', authData.tenantId);
-        console.log('👤 User ID from auth:', authData.user?.id);
         
         if (!authData.token) {
-          console.error('❌ No token in authentication data!');
+          logger.error('No token in authentication data', new Error('Token missing'), 'InvoiceForm');
           setSubmitError('Authentication token missing. Please log in again.');
           return;
         }
       } catch (error) {
-        console.error('❌ Failed to parse authentication data:', error);
+        logger.error('Failed to parse authentication data', error, 'InvoiceForm');
         setSubmitError('Invalid authentication data. Please log in again.');
         return;
       }
       
-      const result = await submitMutation.mutateAsync(apiData);
-      console.log('✅ Invoice submitted successfully:', result);
+      await submitMutation.mutateAsync(apiData);
       
       // Form will close via onSuccess callback
     } catch (error) {
-      console.error('❌ Invoice submission failed:', error);
-      console.error('📋 Failed submission data:', apiData);
+      logger.error('Invoice submission failed', error, 'InvoiceForm');
       
       // Check if it's a network error
-      if (error.message?.includes('fetch')) {
-        console.error('🌐 Network error - check if backend server is running on port 3001');
+      if (error instanceof Error && error.message?.includes('fetch')) {
+        logger.error('Network error - backend server may not be running', error, 'InvoiceForm');
       }
       
       // Log validation details
-      if (error.message?.includes('Bad Request')) {
-        console.error('🔍 Validation might have failed. Check:');
-        console.error('  - service_type_id must be valid UUID');
-        console.error('  - account_id must be valid UUID');
-        console.error('  - quantity must be >= 1');
-        console.error('  - unit_price must be >= 0');
+      if (error instanceof Error && error.message?.includes('Bad Request')) {
+        logger.warn('Validation failed', {
+          message: 'Check: service_type_id (UUID), account_id (UUID), quantity (>=1), unit_price (>=0)'
+        }, 'InvoiceForm');
       }
     }
   };
 
   const calculateTotals = () => {
-    const subtotal = formData.items.reduce((sum, item) => sum + item.total_price, 0);
+    const subtotal = watchedItems.reduce((sum, item) => sum + (item.total_price || 0), 0);
     const tax = 0; // Tax calculation can be added here
     const total = subtotal + tax;
     return { subtotal, tax, total };
@@ -418,24 +379,22 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess }: Inv
 
   const { subtotal, tax, total } = calculateTotals();
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 max-w-5xl w-full h-[92vh] flex flex-col overflow-hidden">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-5xl max-h-[92vh] overflow-hidden flex flex-col p-0">
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border-b border-white/20">
-          <div className="flex items-center justify-between p-6">
+        <DialogHeader className="bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border-b border-white/20 p-6">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 flex-1">
               <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg">
                 <FileText className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
-                <Typography variant="h3" className="font-bold text-slate-800 mb-1">
+                <DialogTitle className="text-2xl font-bold text-slate-800 mb-1">
                   {invoice ? 'Edit Invoice' : 'Create New Invoice'}
-                </Typography>
+                </DialogTitle>
                 {selectedCustomer && (
-                  <div className="flex flex-col space-y-2">
+                  <div className="flex flex-col space-y-2 mt-2">
                     <div className="flex items-center space-x-3">
                       <span className="font-semibold text-slate-700 text-lg">{selectedCustomer.name}</span>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium shadow-sm ${getCustomerTypeColor(selectedCustomer.account_type)}`}>
@@ -471,230 +430,254 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess }: Inv
               <X className="w-5 h-5" />
             </button>
           </div>
-        </div>
+        </DialogHeader>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50/50 to-white">
-          <form id="invoice-form" onSubmit={handleSubmit} className="h-full">
+          <form id="invoice-form" onSubmit={handleSubmit(onSubmit)} className="h-full">
             <div className="p-6 space-y-6">
               {submitError && (
-                <Alert type="error" title="Error">
-                  {submitError}
-                </Alert>
+                <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                  <p className="text-sm text-red-800">{submitError}</p>
+                </div>
               )}
 
               {/* Basic Information */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/30">
+              <Card>
                 <div className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 p-5 rounded-t-2xl">
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-6 bg-gradient-to-b from-purple-500 to-indigo-600 rounded-full"></div>
-                    <Typography variant="h4" className="font-semibold text-slate-800">
+                    <h3 className="text-lg font-semibold text-slate-800">
                       Invoice Information
-                    </Typography>
+                    </h3>
                   </div>
                 </div>
                 <div className="p-6">
-                  
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                    <div>
-                      <CustomerSearchSelector
-                        label="Customer"
-                        value={formData.account_id}
-                        onChange={(customerId, customer) => {
-                          updateFormData('account_id', customerId);
-                          setSelectedCustomer(customer);
-                        }}
-                        placeholder="Search customers by name, email, or phone..."
-                        error={errors.account_id}
-                        required={true}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="crm-label">
-                        Invoice Number
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.invoice_number}
-                        onChange={(e) => updateFormData('invoice_number', e.target.value)}
-                        placeholder="Auto-generated if left blank"
-                        className="crm-input"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="crm-label">
-                        Issue Date *
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.issue_date}
-                        onChange={(e) => updateFormData('issue_date', e.target.value)}
-                        className={`crm-input ${errors.issue_date ? 'border-red-500' : ''}`}
-                      />
-                      {errors.issue_date && (
-                        <p className="crm-error">{errors.issue_date}</p>
+                    <Controller
+                      name="account_id"
+                      control={control}
+                      render={({ field }) => (
+                        <CustomerSearchSelector
+                          label="Customer"
+                          value={field.value}
+                          onChange={(customerId, customer) => {
+                            field.onChange(customerId);
+                            setSelectedCustomer(customer);
+                          }}
+                          placeholder="Search customers by name, email, or phone..."
+                          error={errors.account_id?.message}
+                          required={true}
+                        />
                       )}
-                    </div>
+                    />
+
+                    <Controller
+                      name="invoice_number"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          label="Invoice Number"
+                          placeholder="Auto-generated if left blank"
+                          error={errors.invoice_number?.message}
+                        />
+                      )}
+                    />
+
+                    <Controller
+                      name="issue_date"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          type="date"
+                          label="Issue Date *"
+                          error={errors.issue_date?.message}
+                        />
+                      )}
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                    <div>
-                      <label className="crm-label">
-                        Due Date *
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.due_date}
-                        onChange={(e) => updateFormData('due_date', e.target.value)}
-                        className={`crm-input ${errors.due_date ? 'border-red-500' : ''}`}
-                      />
-                      {errors.due_date && (
-                        <p className="crm-error">{errors.due_date}</p>
+                    <Controller
+                      name="due_date"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          type="date"
+                          label="Due Date *"
+                          error={errors.due_date?.message}
+                        />
                       )}
-                    </div>
+                    />
 
                     <div className="md:col-span-2">
-                      <label className="crm-label">
-                        Notes
-                      </label>
-                      <textarea
-                        value={formData.notes}
-                        onChange={(e) => updateFormData('notes', e.target.value)}
-                        placeholder="Additional notes or terms..."
-                        className="crm-textarea"
-                        style={{ minHeight: '44px', resize: 'vertical', width: '100%' }}
-                        rows={1}
+                      <Controller
+                        name="notes"
+                        control={control}
+                        render={({ field }) => (
+                          <Textarea
+                            {...field}
+                            label="Notes"
+                            placeholder="Additional notes or terms..."
+                            rows={1}
+                            error={errors.notes?.message}
+                          />
+                        )}
                       />
                     </div>
                   </div>
                 </div>
-              </div>
+              </Card>
 
               {/* Line Items */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/30">
+              <Card>
                 <div className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 p-5 rounded-t-2xl">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-6 bg-gradient-to-b from-purple-500 to-indigo-600 rounded-full"></div>
-                      <Typography variant="h4" className="font-semibold text-slate-800">
+                      <h3 className="text-lg font-semibold text-slate-800">
                         Services
-                      </Typography>
+                      </h3>
                     </div>
-                    <button
+                    <Button
                       type="button"
+                      variant="primary"
                       onClick={addItem}
-                      className="flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-2 rounded-xl hover:from-purple-600 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-medium"
+                      icon={Plus}
                     >
-                      <Plus className="w-4 h-4" />
-                      <span>Add Item</span>
-                    </button>
+                      Add Item
+                    </Button>
                   </div>
                 </div>
                 <div className="p-6">
-
                   <div className="space-y-4">
-                    {formData.items.map((item, index) => (
-                      <div key={`item-${index}-${item.service_type_id}`} className="bg-gradient-to-r from-white to-slate-50/50 border border-slate-200/60 rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200">
-                        {/* Compact Single Row Layout */}
-                        <div className="grid grid-cols-1 lg:grid-cols-6 gap-3 items-end">
-                          <div className="lg:col-span-2">
-                            <label className="crm-label">
-                              Service Type *
-                            </label>
-                            <select
-                              value={item.service_type_id || ''}
-                              onChange={(e) => handleServiceTypeChange(index, e.target.value)}
-                              className={`crm-select ${errors[`item_${index}_service_type`] ? 'border-red-500' : ''}`}
-                            >
-                              <option value="">Select service type</option>
-                              {serviceTypes.map((serviceType) => (
-                                <option key={serviceType.id} value={serviceType.id}>
-                                  {serviceType.service_name}
-                                </option>
-                              ))}
-                            </select>
-                            {errors[`item_${index}_service_type`] && (
-                              <p className="crm-error">{errors[`item_${index}_service_type`]}</p>
-                            )}
-                          </div>
+                    {fields.map((field, index) => {
+                      const item = watchedItems[index];
+                      const totalPrice = (item?.quantity || 0) * (item?.unit_price || 0);
+                      
+                      return (
+                        <div key={field.id} className="bg-gradient-to-r from-white to-slate-50/50 border border-slate-200/60 rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200">
+                          {/* Compact Single Row Layout */}
+                          <div className="grid grid-cols-1 lg:grid-cols-6 gap-3 items-end">
+                            <div className="lg:col-span-2">
+                              <Controller
+                                name={`items.${index}.service_type_id`}
+                                control={control}
+                                render={({ field: itemField }) => (
+                                  <Select
+                                    value={itemField.value || ''}
+                                    onChange={(value) => {
+                                      itemField.onChange(value);
+                                      const serviceType = serviceTypes.find(st => st.id === value);
+                                      if (serviceType) {
+                                        setValue(`items.${index}.unit_price`, serviceType.base_price);
+                                        const qty = watchedItems[index]?.quantity || 1;
+                                        setValue(`items.${index}.total_price`, qty * serviceType.base_price);
+                                      }
+                                    }}
+                                    label="Service Type *"
+                                    placeholder="Select service type"
+                                    options={[
+                                      { value: '', label: 'Select service type' },
+                                      ...serviceTypes.map((serviceType) => ({
+                                        value: serviceType.id,
+                                        label: serviceType.service_name,
+                                      })),
+                                    ]}
+                                    error={errors.items?.[index]?.service_type_id?.message}
+                                  />
+                                )}
+                              />
+                            </div>
 
-                          <div>
-                            <label className="crm-label">
-                              Qty
-                            </label>
-                            <input
-                              type="number"
-                              min="1"
-                              value={item.quantity}
-                              onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
-                              className={`crm-input ${errors[`item_${index}_quantity`] ? 'border-red-500' : ''}`}
+                            <Controller
+                              name={`items.${index}.quantity`}
+                              control={control}
+                              render={({ field: itemField }) => (
+                                <Input
+                                  {...itemField}
+                                  type="number"
+                                  min="1"
+                                  label="Qty"
+                                  value={itemField.value?.toString() || ''}
+                                  onChange={(e) => {
+                                    const qty = parseInt(e.target.value) || 1;
+                                    itemField.onChange(qty);
+                                    const unitPrice = watchedItems[index]?.unit_price || 0;
+                                    setValue(`items.${index}.total_price`, qty * unitPrice);
+                                  }}
+                                  error={errors.items?.[index]?.quantity?.message}
+                                />
+                              )}
                             />
-                            {errors[`item_${index}_quantity`] && (
-                              <p className="crm-error">{errors[`item_${index}_quantity`]}</p>
-                            )}
-                          </div>
 
-                          <div>
-                            <label className="crm-label">
-                              Price ($)
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              value={item.unit_price}
-                              onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
-                              className={`crm-input ${errors[`item_${index}_unit_price`] ? 'border-red-500' : ''}`}
+                            <Controller
+                              name={`items.${index}.unit_price`}
+                              control={control}
+                              render={({ field: itemField }) => (
+                                <Input
+                                  {...itemField}
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  label="Price ($)"
+                                  value={itemField.value?.toString() || ''}
+                                  onChange={(e) => {
+                                    const price = parseFloat(e.target.value) || 0;
+                                    itemField.onChange(price);
+                                    const qty = watchedItems[index]?.quantity || 1;
+                                    setValue(`items.${index}.total_price`, qty * price);
+                                  }}
+                                  error={errors.items?.[index]?.unit_price?.message}
+                                />
+                              )}
                             />
-                            {errors[`item_${index}_unit_price`] && (
-                              <p className="crm-error">{errors[`item_${index}_unit_price`]}</p>
-                            )}
-                          </div>
 
-                          <div>
-                            <label className="crm-label">
-                              Total
-                            </label>
-                            <div className="crm-input bg-slate-50 font-medium cursor-default">
-                              ${item.total_price.toFixed(2)}
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Total
+                              </label>
+                              <div className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-slate-50 font-medium cursor-default">
+                                ${totalPrice.toFixed(2)}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-center">
+                              {fields.length > 1 && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  onClick={() => removeItem(index)}
+                                  className="p-2 text-red-400 hover:text-red-600"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-center">
-                            {formData.items.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => removeItem(index)}
-                                className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group"
-                                title="Remove item"
-                              >
-                                <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                              </button>
-                            )}
+                          {/* Description Row - Full Width */}
+                          <div className="mt-3">
+                            <Controller
+                              name={`items.${index}.description`}
+                              control={control}
+                              render={({ field: itemField }) => (
+                                <Textarea
+                                  {...itemField}
+                                  label="Description *"
+                                  placeholder="Service description..."
+                                  rows={1}
+                                  error={errors.items?.[index]?.description?.message}
+                                />
+                              )}
+                            />
                           </div>
                         </div>
-
-                        {/* Description Row - Full Width */}
-                        <div className="mt-3">
-                          <label className="crm-label">
-                            Description *
-                          </label>
-                          <textarea
-                            value={item.description}
-                            onChange={(e) => updateItem(index, 'description', e.target.value)}
-                            placeholder="Service description..."
-                            className={`crm-textarea ${errors[`item_${index}_description`] ? 'border-red-500' : ''}`}
-                            style={{ minHeight: '44px', resize: 'vertical', width: '100%' }}
-                            rows={1}
-                          />
-                          {errors[`item_${index}_description`] && (
-                            <p className="crm-error">{errors[`item_${index}_description`]}</p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {/* Totals */}
@@ -721,14 +704,14 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess }: Inv
                     </div>
                   </div>
                 </div>
-              </div>
+              </Card>
             </div>
           </form>
         </div>
 
         {/* Footer */}
-        <div className="border-t border-white/20 bg-gradient-to-r from-slate-50 to-white backdrop-blur-xl p-6 flex-shrink-0">
-          <div className="flex items-center justify-between">
+        <DialogFooter className="border-t border-white/20 bg-gradient-to-r from-slate-50 to-white backdrop-blur-xl p-6 flex-shrink-0">
+          <div className="flex items-center justify-between w-full">
             <div className="flex items-center space-x-4">
               <span className="text-sm font-medium text-slate-600">Invoice Total:</span>
               <div className="px-4 py-2 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
@@ -738,35 +721,27 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess }: Inv
               </div>
             </div>
             <div className="flex space-x-3">
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={onClose}
-                className="px-6 py-3 bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 rounded-xl hover:bg-white hover:shadow-lg transition-all duration-200 text-sm font-medium flex items-center gap-2"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 form="invoice-form"
+                variant="primary"
+                loading={submitMutation.isPending}
+                icon={Save}
                 disabled={submitMutation.isPending}
-                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {submitMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    {invoice ? 'Update Invoice' : 'Create Invoice'}
-                  </>
-                )}
-              </button>
+                {invoice ? 'Update Invoice' : 'Create Invoice'}
+              </Button>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

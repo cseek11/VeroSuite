@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase-client';
 import { useAuthStore } from '@/stores/auth';
 import { authService } from '@/lib/auth-service';
+import { logger } from '@/utils/logger';
 
 class SecureApiClient {
   private baseUrl: string;
@@ -18,8 +19,10 @@ class SecureApiClient {
       if (authService.isAuthenticated()) {
         return await authService.getAuthHeaders();
       }
-    } catch (error) {
-      console.log('🔄 Backend auth failed, trying to exchange Supabase token:', error);
+    } catch (error: unknown) {
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Backend auth failed, trying to exchange Supabase token', { error }, 'secure-api-client');
+      }
     }
 
     // Fallback: Try to exchange Supabase token for backend token
@@ -31,7 +34,9 @@ class SecureApiClient {
 
     try {
       // Exchange Supabase token for backend token
-      console.log('🔄 Exchanging Supabase token for backend token...');
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Exchanging Supabase token for backend token', {}, 'secure-api-client');
+      }
       const backendAuth = await authService.exchangeSupabaseToken(session.access_token);
       
       return {
@@ -39,8 +44,8 @@ class SecureApiClient {
         'Content-Type': 'application/json',
         'x-tenant-id': '7193113e-ece2-4f7b-ae8c-176df4367e28', // Development tenant ID
       };
-    } catch (error) {
-      console.error('❌ Token exchange failed:', error);
+    } catch (error: unknown) {
+      logger.error('Token exchange failed', error, 'secure-api-client');
       throw new Error('Failed to authenticate with backend. Please login again.');
     }
   }
@@ -51,8 +56,12 @@ class SecureApiClient {
   private async handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
       if (response.status === 401) {
-        // Token expired or invalid - force logout
-        useAuthStore.getState().clear();
+        // Token expired or invalid - only clear if we're not on login page
+        // This prevents clearing auth during the login flow
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/login') {
+          useAuthStore.getState().clear();
+        }
         throw new Error('Authentication failed');
       }
       
@@ -81,14 +90,19 @@ class SecureApiClient {
    * Secure POST request with automatic tenant context
    */
   async post<T>(endpoint: string, data: any): Promise<T> {
-    console.log('🔍 secureApiClient.post - endpoint:', endpoint);
-    console.log('🔍 secureApiClient.post - data:', data);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('secureApiClient.post', { endpoint, data }, 'secure-api-client');
+    }
     
     const headers = await this.getAuthHeaders();
-    console.log('🔍 secureApiClient.post - headers:', headers);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('secureApiClient.post headers', { headers }, 'secure-api-client');
+    }
     
     const url = `${this.baseUrl}${endpoint}`;
-    console.log('🔍 secureApiClient.post - full URL:', url);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('secureApiClient.post full URL', { url }, 'secure-api-client');
+    }
     
     const response = await fetch(url, {
       method: 'POST',
@@ -96,8 +110,9 @@ class SecureApiClient {
       body: JSON.stringify(data),
     });
 
-    console.log('🔍 secureApiClient.post - response status:', response.status);
-    console.log('🔍 secureApiClient.post - response headers:', response.headers);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('secureApiClient.post response', { status: response.status, headers: Object.fromEntries(response.headers.entries()) }, 'secure-api-client');
+    }
 
     return this.handleResponse<T>(response);
   }
@@ -106,15 +121,19 @@ class SecureApiClient {
    * Secure PUT request with automatic tenant context
    */
   async put<T>(endpoint: string, data: any): Promise<T> {
-    console.log('🔧 secureApiClient.put - endpoint:', endpoint);
-      console.log('🔧 secureApiClient.put - data:', data);
-      console.log('🔧 secureApiClient.put - data phone:', data?.phone);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('secureApiClient.put', { endpoint, data, phone: data?.phone }, 'secure-api-client');
+    }
     
     const headers = await this.getAuthHeaders();
-    console.log('🔧 secureApiClient.put - headers:', headers);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('secureApiClient.put headers', { headers }, 'secure-api-client');
+    }
     
     const url = `${this.baseUrl}${endpoint}`;
-    console.log('🔧 secureApiClient.put - full URL:', url);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('secureApiClient.put full URL', { url }, 'secure-api-client');
+    }
     
     const response = await fetch(url, {
       method: 'PUT',
@@ -122,8 +141,9 @@ class SecureApiClient {
       body: JSON.stringify(data),
     });
 
-      console.log('🔧 secureApiClient.put - response status:', response.status);
-      console.log('🔧 secureApiClient.put - response headers:', response.headers);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('secureApiClient.put response', { status: response.status, headers: Object.fromEntries(response.headers.entries()) }, 'secure-api-client');
+    }
       
       // Check if response is ok
       if (!response.ok) {
@@ -133,8 +153,9 @@ class SecureApiClient {
       
       // Get the response data for debugging
       const responseData = await response.clone().json();
-      console.log('🔧 secureApiClient.put - response data:', responseData);
-      console.log('🔧 secureApiClient.put - response data phone:', responseData?.phone);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('secureApiClient.put response data', { responseData, phone: responseData?.phone }, 'secure-api-client');
+      }
       
       // Return the response data directly instead of calling handleResponse
       return responseData;
@@ -162,35 +183,35 @@ class SecureApiClient {
    * Get all accounts for the authenticated user's tenant
    */
   async getAllAccounts(): Promise<any[]> {
-    return this.get<any[]>('/accounts');
+    return this.get<any[]>('/v1/accounts');
   }
 
   /**
    * Get a specific account by ID
    */
   async getAccountById(id: string): Promise<any> {
-    return this.get<any>(`/accounts/${id}`);
+    return this.get<any>(`/v1/accounts/${id}`);
   }
 
   /**
    * Create a new account
    */
   async createAccount(accountData: any): Promise<any> {
-    return this.post<any>('/accounts', accountData);
+    return this.post<any>('/v1/accounts', accountData);
   }
 
   /**
    * Update an existing account
    */
   async updateAccount(id: string, accountData: any): Promise<any> {
-    return this.put<any>(`/accounts/${id}`, accountData);
+    return this.put<any>(`/v1/accounts/${id}`, accountData);
   }
 
   /**
    * Delete an account
    */
   async deleteAccount(id: string): Promise<void> {
-    return this.delete<void>(`/accounts/${id}`);
+    return this.delete<void>(`/v1/accounts/${id}`);
   }
 
   // ============================================================================

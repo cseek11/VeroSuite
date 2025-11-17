@@ -9,6 +9,7 @@
 import { secureApiClient } from './secure-api-client';
 import type { IntentResult } from './intent-classification-service';
 import { invalidateQueries, queryClient } from './queryClient';
+import { logger } from '@/utils/logger';
 
 // ============================================================================
 // TYPES
@@ -324,7 +325,7 @@ class ActionExecutorService {
    */
   async executeAction(intentResult: IntentResult): Promise<ActionResult> {
     try {
-      console.log('🚀 Executing action:', intentResult.intent, intentResult.entities);
+      logger.debug('Executing action', { intent: intentResult.intent, entities: intentResult.entities }, 'action-handlers');
 
       switch (intentResult.intent) {
         case 'createCustomer':
@@ -550,8 +551,8 @@ class ActionExecutorService {
             error: `Action type "${intentResult.intent}" is not supported`
           };
       }
-    } catch (error) {
-      console.error('❌ Action execution failed:', error);
+    } catch (error: unknown) {
+      logger.error('Action execution failed', error, 'action-handlers');
       return {
         success: false,
         message: 'Action execution failed',
@@ -566,11 +567,9 @@ class ActionExecutorService {
 
   private async createCustomer(intentResult: IntentResult): Promise<ActionResult> {
     try {
-      console.log('🔍 createCustomer - intentResult:', intentResult);
-      console.log('🔍 createCustomer - actionData:', intentResult.actionData);
+      logger.debug('createCustomer - processing intent', { intent: intentResult.intent }, 'action-handlers');
       
       const customerData = intentResult.actionData?.customerData;
-      console.log('🔍 createCustomer - customerData:', customerData);
       
       if (!customerData) {
         throw new Error('Customer data not found');
@@ -588,12 +587,12 @@ class ActionExecutorService {
         account_type: 'residential'
       };
       
-      console.log('🔍 createCustomer - API request data:', requestData);
+      logger.debug('createCustomer - API request prepared', { hasRequestData: !!requestData }, 'action-handlers');
 
       // Create customer via backend API
       const result = await secureApiClient.post('/accounts', requestData);
       
-      console.log('🔍 createCustomer - API response:', result);
+      logger.debug('createCustomer - API response received', { customerId: (result as Record<string, unknown>)?.id }, 'action-handlers');
 
       // Invalidate customer-related queries to refresh the UI
       await Promise.all([
@@ -606,14 +605,14 @@ class ActionExecutorService {
         queryClient.invalidateQueries({ queryKey: ['customers-for-filter'] }),
         queryClient.invalidateQueries({ queryKey: ['customer-search'] })
       ]);
-      console.log('🔄 All customer-related caches invalidated after creation');
+      logger.debug('All customer-related caches invalidated after creation', {}, 'action-handlers');
 
       // Check if the response contains a materialized view permission error
       // This is a non-critical error that occurs after successful customer creation
       if (result && typeof result === 'object' && 'error' in result && 
-          typeof (result as any).error === 'string' && 
-          (result as any).error.includes('permission denied for materialized view')) {
-        console.warn('⚠️ Materialized view permission error (non-critical):', (result as any).error);
+          typeof (result as Record<string, unknown>).error === 'string' && 
+          (result as Record<string, unknown>).error.toString().includes('permission denied for materialized view')) {
+        logger.warn('Materialized view permission error (non-critical)', (result as Record<string, unknown>).error, 'action-handlers');
         return {
           success: true,
           message: `Customer "${customerData.name}" created successfully`,
@@ -636,8 +635,8 @@ class ActionExecutorService {
           message: `Navigating to ${customerData.name}'s customer page...`
         }
       };
-    } catch (error) {
-      console.error('❌ createCustomer - Error:', error);
+    } catch (error: unknown) {
+      logger.error('createCustomer - Error', error, 'action-handlers');
       return {
         success: false,
         message: 'Failed to create customer',
@@ -648,10 +647,9 @@ class ActionExecutorService {
 
   private async deleteCustomer(intentResult: IntentResult): Promise<ActionResult> {
     try {
-      console.log('🔍 deleteCustomer - intentResult:', intentResult);
+      logger.debug('deleteCustomer - processing intent', { intent: intentResult.intent }, 'action-handlers');
       
       const customerName = intentResult.entities.customerName;
-      console.log('🔍 deleteCustomer - customerName:', customerName);
       
       if (!customerName) {
         throw new Error('Customer name not found');
@@ -663,7 +661,7 @@ class ActionExecutorService {
         throw new Error(`No customer found matching "${customerName}". Please check the spelling and try again.`);
       }
 
-      console.log('🔍 deleteCustomer - found best match:', bestMatch);
+      logger.debug('deleteCustomer - found best match', { customerId: bestMatch?.customer?.id, score: bestMatch?.score }, 'action-handlers');
 
       // Return confirmation request with the actual customer name found
       return {
@@ -683,8 +681,8 @@ class ActionExecutorService {
           action: 'deleteCustomer'
         }
       };
-    } catch (error) {
-      console.error('❌ deleteCustomer - Error:', error);
+    } catch (error: unknown) {
+      logger.error('deleteCustomer - Error', error, 'action-handlers');
     return {
         success: false,
         message: 'Failed to delete customer',
@@ -695,20 +693,20 @@ class ActionExecutorService {
 
   private async confirmDeleteCustomer(intentResult: IntentResult): Promise<ActionResult> {
     try {
-      console.log('🔍 confirmDeleteCustomer - intentResult:', intentResult);
+      logger.debug('confirmDeleteCustomer - processing intent', { intent: intentResult.intent }, 'action-handlers');
       
-      const { customerId, customerName } = intentResult.actionData || intentResult as any;
+      const { customerId, customerName } = intentResult.actionData || intentResult as Record<string, unknown>;
       
       if (!customerId || !customerName) {
         throw new Error('Customer ID or name not found in confirmation data');
       }
 
-      console.log('🔍 confirmDeleteCustomer - deleting customer:', customerId, customerName);
+      logger.debug('confirmDeleteCustomer - deleting customer', { customerId, customerName }, 'action-handlers');
 
       // Delete customer via backend API
-      const result = await secureApiClient.deleteAccount(customerId);
+      const result = await secureApiClient.deleteAccount(customerId as string);
       
-      console.log('🔍 confirmDeleteCustomer - API response:', result);
+      logger.debug('confirmDeleteCustomer - API response received', { success: !!result }, 'action-handlers');
 
       // Invalidate customer-related queries to refresh the UI
       await Promise.all([
@@ -721,7 +719,7 @@ class ActionExecutorService {
         queryClient.invalidateQueries({ queryKey: ['customers-for-filter'] }),
         queryClient.invalidateQueries({ queryKey: ['customer-search'] })
       ]);
-      console.log('🔄 All customer-related caches invalidated after deletion');
+      logger.debug('All customer-related caches invalidated after deletion', {}, 'action-handlers');
 
       return {
         success: true,
@@ -733,8 +731,8 @@ class ActionExecutorService {
           message: 'Redirecting to customer search page...'
         }
       };
-    } catch (error) {
-      console.error('❌ confirmDeleteCustomer - Error:', error);
+    } catch (error: unknown) {
+      logger.error('confirmDeleteCustomer - Error', error, 'action-handlers');
       return {
         success: false,
         message: 'Failed to delete customer',
@@ -1178,7 +1176,7 @@ class ActionExecutorService {
 
       // Check for work orders from the service agreement
       if (serviceAgreementId) {
-        const workOrders = await secureApiClient.get(`/work-orders?service_agreement_id=${serviceAgreementId}&status=completed`);
+        const workOrders = await secureApiClient.get(`/v1/work-orders?service_agreement_id=${serviceAgreementId}&status=completed`);
         const workOrdersData = (workOrders as any).data || [];
         if (!workOrdersData || workOrdersData.length === 0) {
           missingItems.push('Completed Work Order (Instructions for Technician)');
@@ -1224,8 +1222,8 @@ class ActionExecutorService {
         ...(jobId && { jobId }),
         ...(serviceTypeId && { serviceTypeId })
       };
-    } catch (error) {
-      console.error('Error checking invoice prerequisites:', error);
+    } catch (error: unknown) {
+      logger.error('Error checking invoice prerequisites', error, 'action-handlers');
       return {
         canCreateInvoice: false,
         missingItems: ['Unable to verify prerequisites - system error']
@@ -1267,7 +1265,7 @@ class ActionExecutorService {
       }
 
       const updateData = intentResult.actionData?.customerData || {};
-      console.log('🔧 Updating customer:', customer.name, 'with data:', updateData);
+      logger.debug('Updating customer', { customerName: customer.name, hasUpdateData: !!updateData }, 'action-handlers');
       
       // Filter out empty/undefined values and handle field mapping
       const filteredUpdateData = Object.fromEntries(
@@ -1275,13 +1273,10 @@ class ActionExecutorService {
       );
       
       // Ensure we're using the correct field names for the database
-      console.log('🔧 Filtered update data:', filteredUpdateData);
+      logger.debug('Filtered update data prepared', { fieldCount: Object.keys(filteredUpdateData).length }, 'action-handlers');
       
       const result = await secureApiClient.put(`/accounts/${customer.id}`, filteredUpdateData);
-      console.log('🔧 Update result:', result);
-      
-      // Let's also check what the customer data looks like after the update
-      console.log('🔧 Customer data after update:', customer);
+      logger.debug('Update result received', { success: !!result }, 'action-handlers');
 
       // Dispatch custom event to invalidate React Query cache
       window.dispatchEvent(new CustomEvent('customerUpdated', { 
@@ -1293,8 +1288,8 @@ class ActionExecutorService {
         message: `Customer "${customerName}" updated successfully`,
         data: result
       };
-    } catch (error) {
-      console.error('🔧 Update error:', error);
+    } catch (error: unknown) {
+      logger.error('Update error', error, 'action-handlers');
       return {
         success: false,
         message: 'Failed to update customer',
@@ -1912,8 +1907,8 @@ class ActionExecutorService {
       }
       
       return null;
-    } catch (error) {
-      console.error('Failed to find customer:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to find customer', error, 'action-handlers');
       return null;
     }
   }
@@ -1966,13 +1961,13 @@ class ActionExecutorService {
       // Only return matches with a score above 30 (reasonable threshold)
       const bestMatch = scoredMatches[0];
       if (bestMatch && bestMatch.score >= 30) {
-        console.log(`🔍 Best match for "${searchName}": "${bestMatch.customer.name}" (score: ${bestMatch.score})`);
+        logger.debug('Best customer match found', { searchName, matchedName: bestMatch.customer.name, score: bestMatch.score }, 'action-handlers');
         return bestMatch.customer;
       }
       
       return null;
-    } catch (error) {
-      console.error('Failed to find best customer match:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to find best customer match', error, 'action-handlers');
       return null;
     }
   }
@@ -2013,17 +2008,20 @@ class ActionExecutorService {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     
     switch (dateString.toLowerCase()) {
-      case 'today':
+      case 'today': {
         return today.toISOString().split('T')[0] || '';
-      case 'tomorrow':
+      }
+      case 'tomorrow': {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
         return tomorrow.toISOString().split('T')[0] || '';
-      case 'yesterday':
+      }
+      case 'yesterday': {
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
         return yesterday.toISOString().split('T')[0] || '';
-      default:
+      }
+      default: {
         // Try to parse as date
         const parsed = new Date(dateString);
         if (!isNaN(parsed.getTime())) {
@@ -2033,6 +2031,7 @@ class ActionExecutorService {
         const defaultDate = new Date(today);
         defaultDate.setDate(defaultDate.getDate() + 1);
         return defaultDate.toISOString().split('T')[0] || '';
+      }
     }
   }
 }

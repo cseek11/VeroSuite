@@ -9,11 +9,24 @@ import { config } from './lib/config';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import KeyboardNavigationProvider from './components/KeyboardNavigationProvider';
 import { LayoutProvider } from './context/LayoutContext';
+import { DensityModeProvider } from './context/DensityModeContext';
 import { initSentry, SentryErrorBoundary } from './lib/sentry';
+import { Toaster } from 'sonner';
+import { initPWA } from './utils/pwa';
 import './index.css';
 
 // Initialize Sentry for error tracking
 initSentry();
+
+// Initialize PWA features (service worker, install prompt, etc.)
+if (typeof window !== 'undefined') {
+  initPWA();
+  
+  // Migrate templates from localStorage to backend
+  import('./utils/migrate-templates').then(({ initTemplateMigration }) => {
+    initTemplateMigration();
+  });
+}
 
 // Error boundary for initialization errors
 function ErrorFallback({ error }: { error: Error }) {
@@ -59,12 +72,15 @@ try {
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
               <KeyboardNavigationProvider>
-                <LayoutProvider>
-                  <App />
-                </LayoutProvider>
+                <DensityModeProvider>
+                  <LayoutProvider>
+                    <App />
+                  </LayoutProvider>
+                </DensityModeProvider>
               </KeyboardNavigationProvider>
             </BrowserRouter>
             {config.features.enableDebugMode && <ReactQueryDevtools initialIsOpen={false} />}
+            <Toaster position="top-right" richColors />
           </QueryClientProvider>
         </ErrorBoundary>
       </SentryErrorBoundary>

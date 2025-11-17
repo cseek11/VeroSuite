@@ -5,6 +5,7 @@ interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>
   error?: string;
   helperText?: string;
   onChange?: (checked: boolean) => void;
+  indeterminate?: boolean;
 }
 
 const Checkbox: React.FC<CheckboxProps> = ({
@@ -15,13 +16,24 @@ const Checkbox: React.FC<CheckboxProps> = ({
   className = '',
   id,
   checked,
+  disabled,
+  indeterminate,
   ...props
 }) => {
   const checkboxId = id || `checkbox-${Math.random().toString(36).substr(2, 9)}`;
   const errorId = error ? `${checkboxId}-error` : undefined;
   const helperId = helperText ? `${checkboxId}-helper` : undefined;
+  const checkboxRef = React.useRef<HTMLInputElement>(null);
+
+  // Handle indeterminate state
+  React.useEffect(() => {
+    if (checkboxRef.current) {
+      checkboxRef.current.indeterminate = indeterminate === true;
+    }
+  }, [indeterminate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     onChange?.(e.target.checked);
   };
 
@@ -30,9 +42,11 @@ const Checkbox: React.FC<CheckboxProps> = ({
       <div className="flex items-start">
         <div className="flex items-center h-5">
           <input
+            ref={checkboxRef}
             id={checkboxId}
             type="checkbox"
             checked={checked}
+            disabled={disabled}
             onChange={handleChange}
             className="crm-checkbox"
             aria-invalid={error ? 'true' : 'false'}

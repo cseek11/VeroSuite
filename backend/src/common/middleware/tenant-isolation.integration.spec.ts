@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { DatabaseService } from '../services/database.service';
 import { TenantMiddleware } from './tenant.middleware';
+import { JwtService } from '@nestjs/jwt';
 import { Request, Response, NextFunction } from 'express';
 
 describe('Tenant Isolation Integration', () => {
@@ -22,6 +23,20 @@ describe('Tenant Isolation Integration', () => {
             query: jest.fn(),
             withTenant: jest.fn(),
             getCurrentTenantId: jest.fn(),
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn(),
+            verify: jest.fn(),
+            decode: jest.fn((token: string) => {
+              // Mock JWT decode for testing
+              if (token === 'valid-token-with-tenant') {
+                return { tenant_id: '123e4567-e89b-12d3-a456-426614174000', user_id: 'user-123' };
+              }
+              return null;
+            }),
           },
         },
       ],
@@ -55,6 +70,7 @@ describe('Tenant Isolation Integration', () => {
           tenantId: tenant1Id,
           roles: ['admin'],
         },
+        headers: {},
       };
 
       (databaseService.query as jest.Mock).mockResolvedValue([]);
@@ -62,7 +78,8 @@ describe('Tenant Isolation Integration', () => {
       await tenantMiddleware.use(mockRequest as Request, mockResponse as Response, mockNext);
 
       expect(databaseService.query).toHaveBeenCalledWith('SET LOCAL app.tenant_id = $1', [tenant1Id]);
-      expect(databaseService.query).toHaveBeenCalledWith('SET LOCAL ROLE verosuite_app');
+      expect(databaseService.query).toHaveBeenCalledWith('SET LOCAL app.user_id = $1', ['user-123']);
+      expect(databaseService.query).toHaveBeenCalledWith('SET LOCAL app.user_roles = $1', ['admin']);
       expect(mockRequest.tenantId).toBe(tenant1Id);
       expect(mockNext).toHaveBeenCalled();
     });
@@ -79,7 +96,6 @@ describe('Tenant Isolation Integration', () => {
       await tenantMiddleware.use(mockRequest as Request, mockResponse as Response, mockNext);
 
       expect(databaseService.query).toHaveBeenCalledWith('SET LOCAL app.tenant_id = $1', [tenant2Id]);
-      expect(databaseService.query).toHaveBeenCalledWith('SET LOCAL ROLE verosuite_app');
       expect(mockRequest.tenantId).toBe(tenant2Id);
       expect(mockNext).toHaveBeenCalled();
     });

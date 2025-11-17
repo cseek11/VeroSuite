@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo, useCallback, useState } from 'react';
+import React, { useRef, useEffect, useMemo, useCallback } from 'react';
 import * as ReactWindow from 'react-window';
 const { FixedSizeGrid: Grid } = ReactWindow;
 import { useVirtualScrolling } from '@/hooks/useVirtualScrolling';

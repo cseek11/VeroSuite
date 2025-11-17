@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 export interface Account {
   id: string;
@@ -44,19 +44,19 @@ export interface AccountListResponse {
 }
 
 class AccountsApi {
-  private baseUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'}/accounts`;
+  private baseUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'}/v1/accounts`;
 
   private async getAuthHeaders(): Promise<HeadersInit> {
     // Get token from auth store (stored as JSON)
     let token = null;
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (authData) {
         const parsed = JSON.parse(authData);
         token = parsed.token;
       }
-    } catch (error) {
-      console.error('Error parsing auth data:', error);
+    } catch (error: unknown) {
+      logger.error('Error parsing auth data', error, 'accounts-api');
     }
     
     // Fallback to direct jwt key
@@ -67,9 +67,13 @@ class AccountsApi {
     const tenantId = localStorage.getItem('tenantId') || '7193113e-ece2-4f7b-ae8c-176df4367e28';
     
     // Debug logging
-    console.log('AccountsApi - Token found:', !!token);
-    console.log('AccountsApi - Token preview:', token ? token.substring(0, 20) + '...' : 'null');
-    console.log('AccountsApi - Tenant ID:', tenantId);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('AccountsApi auth headers', { 
+        tokenFound: !!token, 
+        tokenPreview: token ? token.substring(0, 20) + '...' : 'null',
+        tenantId 
+      }, 'accounts-api');
+    }
     
     return {
       'Content-Type': 'application/json',
@@ -92,17 +96,20 @@ class AccountsApi {
       headers: await this.getAuthHeaders(),
     });
 
-    console.log('AccountsApi - Response status:', response.status);
-    console.log('AccountsApi - Response ok:', response.ok);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('AccountsApi response', { status: response.status, ok: response.ok }, 'accounts-api');
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AccountsApi - Error response:', errorText);
+      logger.error('AccountsApi error response', { errorText, status: response.status }, 'accounts-api');
       throw new Error(`Failed to fetch accounts: ${response.statusText}`);
     }
 
     const data = await response.json();
-    console.log('AccountsApi - Response data:', data);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('AccountsApi response data', { data }, 'accounts-api');
+    }
     
     // Handle the backend response format: { value: [...], Count: number }
     if (data.value && Array.isArray(data.value)) {

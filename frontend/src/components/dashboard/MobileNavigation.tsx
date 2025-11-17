@@ -11,8 +11,6 @@ import {
   Bell,
   User,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
   Grid,
   List,
   Maximize2,

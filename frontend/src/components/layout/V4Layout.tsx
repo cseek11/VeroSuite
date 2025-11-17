@@ -5,12 +5,32 @@ import V4TopBar from './V4TopBar';
 import SecondaryNavigationBar from './SecondaryNavigationBar';
 import ExpandableFABSystem from './ExpandableFABSystem';
 import ExpandableActivityFABSystem from './ExpandableActivityFABSystem';
+import { PageCardProvider } from '@/contexts/PageCardContext';
+import { usePageCards } from '@/routes/dashboard/hooks/usePageCards';
+import PageCardWrapper from '@/components/dashboard/PageCardWrapper';
 
 interface V4LayoutProps {
   children: React.ReactNode;
 }
 
-export default function V4Layout({ children }: V4LayoutProps) {
+interface V4LayoutContentProps extends V4LayoutProps {
+  pageCards?: any[];
+  updatePageCard?: (id: string, updates: any) => void;
+  closePageCard?: (id: string) => void;
+}
+
+// Wrapper component that provides page card context (for non-dashboard routes)
+function V4LayoutWithPageCards({ children }: V4LayoutProps) {
+  const { pageCards, openPageCard, closePageCard, updatePageCard } = usePageCards();
+  
+  return (
+    <PageCardProvider value={{ openPageCard, closePageCard, updatePageCard, isPageCardOpen: () => false }}>
+      <V4LayoutContent pageCards={pageCards} updatePageCard={updatePageCard} closePageCard={closePageCard}>{children}</V4LayoutContent>
+    </PageCardProvider>
+  );
+}
+
+function V4LayoutContent({ children, pageCards = [], updatePageCard, closePageCard }: V4LayoutContentProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const { user, clear } = useAuthStore();
@@ -71,6 +91,26 @@ export default function V4Layout({ children }: V4LayoutProps) {
         </div>
       </div>
 
+      {/* Page Cards Overlay */}
+      {pageCards.map((pageCard) => {
+        const PageComponent = pageCard.component;
+        return (
+          <PageCardWrapper
+            key={pageCard.id}
+            pageId={pageCard.id}
+            title={pageCard.title}
+            {...(pageCard.icon && { icon: pageCard.icon })}
+            onClose={() => closePageCard?.(pageCard.id)}
+            onResize={(size) => updatePageCard?.(pageCard.id, { size })}
+            initialSize={pageCard.size}
+          >
+            <PageComponent {...pageCard.props} />
+          </PageCardWrapper>
+        );
+      })}
+
     </div>
   );
 }
+
+export default V4LayoutWithPageCards;

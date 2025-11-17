@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, TrendingUp, TrendingDown, Calendar, Users, DollarSign } from 'lucide-react';
 import { SmartKPI } from '@/types/smart-kpis';
+import { logger } from '@/utils/logger';
 
 interface DrillDownModalProps {
   isOpen: boolean;
@@ -202,7 +203,7 @@ const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose, kpi, d
           <button
             onClick={() => {
               // TODO: Implement export functionality
-              console.log('Export KPI data');
+              logger.debug('Export KPI data', { kpiId: kpi?.id }, 'DrillDownModal');
             }}
             className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
           >

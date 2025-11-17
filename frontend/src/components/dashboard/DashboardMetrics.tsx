@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TrendingUp, ChevronDown, AlertTriangle, CheckCircle, Clock, Users, Calendar } from 'lucide-react';
 import { DashboardMetric } from '@/types';
-import { EnhancedDashboardMetric } from '@/types/smart-kpis';
+import { EnhancedDashboardMetric, SmartKPI } from '@/types/smart-kpis';
 import { useSmartKPIs } from '@/hooks/useSmartKPIs';
 
 interface DashboardMetricsProps {
@@ -18,15 +18,11 @@ const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ metrics, enableSmar
     (smartKPIs.enhancedMetrics && smartKPIs.enhancedMetrics.length > 0 ? smartKPIs.enhancedMetrics : metrics) : 
     metrics;
 
-  // Debug logging (remove in production)
-  // console.log('DashboardMetrics - enableSmartKPIs:', enableSmartKPIs);
-  // console.log('DashboardMetrics - smartKPIs:', smartKPIs);
-  // console.log('DashboardMetrics - displayMetrics:', displayMetrics);
 
   const handleDrillDown = (metric: EnhancedDashboardMetric, _index: number) => {
     if (enableSmartKPIs && metric.drillDown) {
       // Find the corresponding Smart KPI
-      const smartKPI = smartKPIs.kpiData.find((kpi: any) => kpi.metric === metric.title);
+      const smartKPI = smartKPIs.kpiData.find((kpi: SmartKPI) => kpi.metric === metric.title);
       if (smartKPI) {
         smartKPIs.handleDrillDown(smartKPI);
       }
@@ -88,7 +84,7 @@ const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ metrics, enableSmar
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 p-2">
-      {displayMetrics.map((metric: any, index: number) => {
+      {displayMetrics.map((metric: EnhancedDashboardMetric, index: number) => {
         const isEnhanced = enableSmartKPIs && 'threshold' in metric;
         const enhancedMetric = metric as EnhancedDashboardMetric;
         

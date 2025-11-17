@@ -1,0 +1,56 @@
+# Documentation Linting Rules
+
+markdownlint:
+  # Line length
+  line_length: 120
+  
+  # Headings
+  heading_increment: true
+  heading_style: atx
+  
+  # Lists
+  ul_style: dash
+  list_indent: 2
+  
+  # Links
+  no_bare_urls: true
+  
+  # Code blocks
+  code_block_style: fenced
+  code_fence_style: backtick
+
+# Frontmatter validation
+frontmatter:
+  required_fields:
+    - title
+    - category
+    - status
+    - last_reviewed
+    - owner
+  
+  valid_categories:
+    - Development
+    - Reference
+    - Architecture
+    - Deployment
+    - API
+  
+  valid_statuses:
+    - active
+    - deprecated
+    - archived
+
+# Link checking
+links:
+  check_internal: true
+  check_external: true
+  allow_relative: true
+  ignore_patterns:
+    - "http://localhost*"
+    - "https://localhost*"
+
+
+
+
+
+

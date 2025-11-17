@@ -6,3 +6,14 @@ export class UpdateKpiTemplateDto extends PartialType(CreateKpiTemplateDto) {}
 
 
 
+
+
+
+
+
+
+
+
+
+
+

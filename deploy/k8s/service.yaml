@@ -1,0 +1,67 @@
+# VeroField Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: verofield-api
+  namespace: verofield
+  labels:
+    app: verofield-api
+    tier: backend
+spec:
+  type: LoadBalancer
+  selector:
+    app: verofield-api
+    version: blue  # Switch to 'green' for blue-green deployment
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+    protocol: TCP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+---
+# Frontend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: verofield-frontend
+  namespace: verofield
+  labels:
+    app: verofield-frontend
+    tier: frontend
+spec:
+  type: LoadBalancer
+  selector:
+    app: verofield-frontend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 80
+    protocol: TCP
+---
+# Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: verofield-redis
+  namespace: verofield
+  labels:
+    app: verofield-redis
+    tier: cache
+spec:
+  type: ClusterIP
+  selector:
+    app: verofield-redis
+  ports:
+  - name: redis
+    port: 6379
+    targetPort: 6379
+    protocol: TCP
+
+

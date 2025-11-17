@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import SchedulerPro from '../components/scheduler/SchedulerPro';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
@@ -11,9 +10,6 @@ import {
   Users,
   Plus,
   Route,
-
-
-  
   MapPin,
   ChevronDown,
   Search,
@@ -21,13 +17,14 @@ import {
   MoreVertical,
   FileText,
   CheckCircle,
-  AlertTriangle,
-  TrendingUp,
-  Settings
+  AlertTriangle
 } from 'lucide-react';
 
 // Real data will be fetched from API
 import { enhancedApi } from '@/lib/enhanced-api';
+import { logger } from '@/utils/logger';
+import { ScheduleCalendar } from '@/components/scheduling/ScheduleCalendar';
+import { ResourceTimeline } from '@/components/scheduling/ResourceTimeline';
 
 const SchedulerPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -51,6 +48,7 @@ const SchedulerPage: React.FC = () => {
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Calendar },
+    { id: 'timeline', label: 'Timeline', icon: Clock },
     { id: 'technicians', label: 'Technicians', icon: Users },
     { id: 'routes', label: 'Routes', icon: Route },
     { id: 'reports', label: 'Reports', icon: FileText }
@@ -63,11 +61,15 @@ const SchedulerPage: React.FC = () => {
   }, []);
 
   const handleAddJob = () => {
-    console.log('Add new job');
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Add new job', {}, 'Scheduler');
+    }
   };
 
   const handleOptimizeRoute = () => {
-    console.log('Optimize route');
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Optimize route', {}, 'Scheduler');
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -169,12 +171,12 @@ const SchedulerPage: React.FC = () => {
     : [40.44, -79.99]; // Default to Pittsburgh
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+      <div className="bg-white/80 backdrop-blur-xl rounded-md shadow-sm border border-white/20 p-4 mb-4">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
               Scheduling Dashboard
             </h1>
             <p className="text-slate-600 text-sm">
@@ -182,11 +184,11 @@ const SchedulerPage: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-medium text-sm">
+            <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-1.5 rounded-md hover:bg-white hover:shadow-sm transition-all duration-200 flex items-center gap-2 font-medium text-sm h-8">
               <Route className="h-3 w-3" />
               Optimize Routes
             </button>
-            <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 font-medium text-sm">
+            <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-md hover:from-indigo-700 hover:to-purple-700 shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2 font-medium text-sm h-8">
               <Plus className="h-3 w-3" />
               New Job
             </button>
@@ -196,7 +198,7 @@ const SchedulerPage: React.FC = () => {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-md shadow-sm p-3 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-2">
@@ -209,7 +211,7 @@ const SchedulerPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-md shadow-sm p-3 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-2">
@@ -222,7 +224,7 @@ const SchedulerPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-violet-500 to-violet-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-br from-violet-500 to-violet-600 rounded-md shadow-sm p-3 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-2">
@@ -237,7 +239,7 @@ const SchedulerPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-xl p-3 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-md shadow-sm p-3 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-2">
@@ -254,7 +256,7 @@ const SchedulerPage: React.FC = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+      <div className="bg-white/80 backdrop-blur-xl rounded-md shadow-sm border border-white/20 p-3 mb-4">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-slate-400" />
@@ -263,20 +265,20 @@ const SchedulerPage: React.FC = () => {
               placeholder="Search jobs, customers, or technicians..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
+              className="w-full pl-10 pr-4 py-1.5 border border-slate-200 rounded-md bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm h-8"
             />
           </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="border border-slate-200 rounded-lg px-2 py-1.5 min-w-[120px] bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm"
+            className="border border-slate-200 rounded-md px-2 py-1.5 min-w-[120px] bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm h-8"
           >
             <option value="all">All Status</option>
             <option value="scheduled">Scheduled</option>
             <option value="completed">Completed</option>
             <option value="overdue">Overdue</option>
           </select>
-          <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-medium text-sm">
+          <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-1.5 rounded-md hover:bg-white hover:shadow-sm transition-all duration-200 flex items-center gap-2 font-medium text-sm h-8">
             <Filter className="h-3 w-3" />
             Filters
           </button>
@@ -312,9 +314,9 @@ const SchedulerPage: React.FC = () => {
           {activeTab === 'overview' && (
             <>
               {/* Map and Calendar Section */}
-              <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
+              <div className="bg-white/80 backdrop-blur-xl rounded-md shadow-sm border border-white/20 p-3">
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <h2 className="text-base font-semibold text-slate-800 flex items-center gap-2">
                     <div className="p-1 bg-indigo-100 rounded-md">
                       <MapPin className="h-4 w-4 text-indigo-600" />
                     </div>
@@ -322,14 +324,14 @@ const SchedulerPage: React.FC = () => {
                   </h2>
                   <div className="flex gap-2">
                     <button 
-                      className="px-2 py-1.5 text-xs bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-1"
+                      className="px-2 py-1.5 text-xs bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 transition-colors flex items-center gap-1 h-8"
                       onClick={handleAddJob}
                     >
                       <Plus className="w-3 h-3" />
                       Add Job
                     </button>
                     <button 
-                      className="px-2 py-1.5 text-xs bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors flex items-center gap-1"
+                      className="px-2 py-1.5 text-xs bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 transition-colors flex items-center gap-1 h-8"
                       onClick={handleOptimizeRoute}
                     >
                       <Route className="w-3 h-3" />
@@ -401,163 +403,96 @@ const SchedulerPage: React.FC = () => {
                     </Suspense>
                   </div>
 
-                  {/* Calendar Overlay - Now properly synced with job data */}
+                  {/* Calendar Overlay - Using ScheduleCalendar */}
                   <div 
-                    className={`absolute z-10 bg-white/30 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300 ${mapInteracting ? 'opacity-0' : 'opacity-100'}`}
+                    className={`absolute z-10 bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 ${mapInteracting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
                     style={{ 
                       top: '20px',
                       left: '20px',
                       width: '400px', 
                       height: '500px',
-                      minWidth: '400px',
-                      minHeight: '500px',
-                      maxWidth: '600px',
-                      maxHeight: '700px'
+                      minWidth: '350px',
+                      minHeight: '400px',
+                      maxWidth: '450px',
+                      maxHeight: '550px'
                     }}
                   >
-                    <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-gray-50/30">
-                      <div className="flex items-center space-x-1">
-                        <button 
-                          onClick={() => setCalendarView('day')}
-                          className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
-                            calendarView === 'day' 
-                              ? 'bg-blue-600 text-white' 
-                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                          }`}
-                        >
-                          Day
-                        </button>
-                        <button 
-                          onClick={() => setCalendarView('week')}
-                          className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
-                            calendarView === 'week' 
-                              ? 'bg-blue-600 text-white' 
-                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                          }`}
-                        >
-                          Week
-                        </button>
-                        <button 
-                          onClick={() => setCalendarView('month')}
-                          className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
-                            calendarView === 'month' 
-                              ? 'bg-blue-600 text-white' 
-                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                          }`}
-                        >
-                          Month
-                        </button>
-                        <button 
-                          onClick={() => setCalendarView('timeline')}
-                          className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0 w-auto min-w-0 ${
-                            calendarView === 'timeline' 
-                              ? 'bg-blue-600 text-white' 
-                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                          }`}
-                        >
-                          Timeline
-                        </button>
-                      </div>
-                      <div className="flex space-x-1">
-                        <button 
-                          className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
-                          onClick={() => setMapInteracting(!mapInteracting)}
-                        >
-                          <ChevronDown className="w-4 h-4" />
-                        </button>
-                      </div>
+                    <div className="flex items-center justify-between p-2 border-b border-gray-200 bg-gray-50">
+                      <span className="text-sm font-medium text-gray-700">Schedule Calendar</span>
+                      <button 
+                        className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
+                        onClick={() => setMapInteracting(!mapInteracting)}
+                        title="Hide calendar"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
                     </div>
-                    
-                    <div className="h-full">
-                      <SchedulerPro
-                        initialView={calendarView}
-                        resources={technicianResources}
-                        dataAdapter={{
-                          source: calendarEvents
-                        }}
-                        hideToolbar={true}
+                    <div className="h-[calc(100%-45px)] overflow-auto">
+                      <ScheduleCalendar
+                        selectedDate={selectedDate}
+                        onDateChange={setSelectedDate}
+                        searchQuery={searchQuery}
+                        filterStatus={filterStatus}
+                        filterPriority="all"
+                        showAnalytics={false}
+                        showMap={false}
                       />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Today's Schedule - Now shows filtered jobs */}
-              <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <div className="p-1 bg-emerald-100 rounded-md">
-                      <Calendar className="h-4 w-4 text-emerald-600" />
-                    </div>
-                    Today's Schedule ({filteredJobs.length} jobs)
-                  </h2>
-                  <div className="flex gap-2">
-                    <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-medium text-xs">
-                      <Plus className="h-3 w-3" />
-                      Add Job
-                    </button>
-                    <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-medium text-xs">
-                      <Route className="h-3 w-3" />
-                      Optimize Route
-                    </button>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {filteredJobs.map((job) => (
-                    <div key={job.id} className="p-3 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-slate-600" />
-                          <span className={`px-1.5 py-0.5 text-xs rounded-full ${getStatusColor(job.status)}`}>
-                            {job.status}
-                          </span>
-                          {job.overdue && (
-                            <span className="px-1.5 py-0.5 text-xs rounded-full bg-red-100 text-red-800">
-                              {job.overdueDays} days overdue
-                            </span>
-                          )}
-                        </div>
-                        <button className="p-1 text-slate-400 hover:text-slate-600 transition-colors">
-                          <MoreVertical className="h-3 w-3" />
-                        </button>
-                      </div>
-                      <div className="mb-2">
-                        <h3 className="text-sm font-semibold text-slate-900 mb-1">
-                          {job.customer}
-                        </h3>
-                        <p className="text-xs text-slate-600 mb-1">
-                          {job.service}
-                        </p>
-                        <p className="text-xs text-slate-600 mb-2">
-                          {job.time} • {job.technician || 'Unassigned'}
-                        </p>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(job.status)}
-                          <span className="text-xs text-slate-500">
-                            {job.agreements.join(', ')}
-                          </span>
-                        </div>
-                        <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-xs">
-                          View
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              {/* Schedule Calendar - Full Calendar View */}
+              <div className="bg-white/80 backdrop-blur-xl rounded-md shadow-sm border border-white/20 p-3">
+                <ScheduleCalendar
+                  selectedDate={selectedDate}
+                  onDateChange={setSelectedDate}
+                  searchQuery={searchQuery}
+                  filterStatus={filterStatus}
+                  filterPriority="all"
+                  showAnalytics={true}
+                  analyticsMode="embedded"
+                  showMap={false}
+                />
               </div>
             </>
           )}
 
+          {activeTab === 'timeline' && (
+            <div className="bg-white/80 backdrop-blur-xl rounded-md shadow-sm border border-white/20 p-3">
+              <ResourceTimeline
+                selectedDate={selectedDate}
+                onDateChange={setSelectedDate}
+                onJobSelect={(job) => {
+                  logger.debug('Job selected from timeline', { jobId: job.id }, 'Scheduler');
+                }}
+                onJobUpdate={(jobId, updates) => {
+                  logger.debug('Job updated from timeline', { jobId, updates }, 'Scheduler');
+                }}
+              />
+            </div>
+          )}
+
           {activeTab === 'technicians' && (
-            <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
-              <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+            <div className="bg-white/80 backdrop-blur-xl rounded-md shadow-sm border border-white/20 p-3">
+              <h2 className="text-base font-semibold text-slate-800 mb-3 flex items-center gap-2">
                 <div className="p-1 bg-emerald-100 rounded-md">
                   <Users className="h-4 w-4 text-emerald-600" />
                 </div>
-                Technicians
+                Technicians Schedule
               </h2>
+              <div className="mb-4">
+                <ScheduleCalendar
+                  selectedDate={selectedDate}
+                  onDateChange={setSelectedDate}
+                  searchQuery={searchQuery}
+                  filterStatus={filterStatus}
+                  filterPriority="all"
+                  showAnalytics={false}
+                  showMap={false}
+                  showTechnicianMetrics={true}
+                />
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {technicians.filter(tech => tech.id !== 'unassigned').map((technician) => (
                   <div key={technician.id} className="p-3 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
@@ -590,7 +525,7 @@ const SchedulerPage: React.FC = () => {
                           Active
                         </span>
                       </div>
-                      <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 text-xs">
+                      <button className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded-md hover:bg-white hover:shadow-sm transition-all duration-200 text-xs h-8">
                         Schedule
                       </button>
                     </div>
@@ -601,8 +536,8 @@ const SchedulerPage: React.FC = () => {
           )}
 
           {activeTab === 'routes' && (
-            <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
-              <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+            <div className="bg-white/80 backdrop-blur-xl rounded-md shadow-sm border border-white/20 p-3">
+              <h2 className="text-base font-semibold text-slate-800 mb-3 flex items-center gap-2">
                 <div className="p-1 bg-indigo-100 rounded-md">
                   <Route className="h-4 w-4 text-indigo-600" />
                 </div>
@@ -616,7 +551,7 @@ const SchedulerPage: React.FC = () => {
                 <p className="text-sm text-slate-600 mb-4">
                   Optimize technician routes for maximum efficiency
                 </p>
-                <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-sm" onClick={handleOptimizeRoute}>
+                <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-md hover:from-indigo-700 hover:to-purple-700 shadow-sm hover:shadow-md transition-all duration-200 font-medium text-sm h-8" onClick={handleOptimizeRoute}>
                   Optimize Routes
                 </button>
               </div>
@@ -624,8 +559,8 @@ const SchedulerPage: React.FC = () => {
           )}
 
           {activeTab === 'reports' && (
-            <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4">
-              <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+            <div className="bg-white/80 backdrop-blur-xl rounded-md shadow-sm border border-white/20 p-3">
+              <h2 className="text-base font-semibold text-slate-800 mb-3 flex items-center gap-2">
                 <div className="p-1 bg-violet-100 rounded-md">
                   <FileText className="h-4 w-4 text-violet-600" />
                 </div>
@@ -639,7 +574,7 @@ const SchedulerPage: React.FC = () => {
                 <p className="text-sm text-slate-600 mb-4">
                   Generate reports on scheduling efficiency and technician performance
                 </p>
-                <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-sm">
+                <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-md hover:from-indigo-700 hover:to-purple-700 shadow-sm hover:shadow-md transition-all duration-200 font-medium text-sm h-8">
                   Generate Report
                 </button>
               </div>

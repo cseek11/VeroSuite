@@ -1,17 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { enhancedApi } from '@/lib/enhanced-api';
 import { queryKeys, invalidateQueries } from '@/lib/queryClient';
 import { Location } from '@/types';
+import { logger } from '@/utils/logger';
 
 // TODO: Implement locations API in enhanced API
 // For now, using placeholder functions
 const crmApi = {
   accountLocations: async (accountId: string) => {
-    console.log('TODO: Implement locations API in enhanced API');
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('TODO: Implement locations API in enhanced API', {}, 'useLocations');
+    }
     return [];
   },
   createLocation: async (locationData: Partial<Location>) => {
-    console.log('TODO: Implement locations API in enhanced API');
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('TODO: Implement locations API in enhanced API', {}, 'useLocations');
+    }
     return null;
   }
 };

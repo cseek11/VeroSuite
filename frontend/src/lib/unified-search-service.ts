@@ -6,6 +6,7 @@
 import { supabase } from './supabase-client';
 import { searchErrorLogger } from './search-error-logger';
 import type { SearchFilters, Account } from '@/types/enhanced-types';
+import { logger } from '@/utils/logger';
 
 export interface SearchResult {
   data: Account[];
@@ -81,8 +82,8 @@ class UnifiedSearchService {
               searchMethod: method
             };
           }
-        } catch (methodError) {
-          console.warn(`Search method ${method} failed:`, methodError);
+        } catch (methodError: unknown) {
+          logger.warn('Search method failed', { method, error: methodError }, 'unified-search-service');
           await searchErrorLogger.logError(
             methodError as Error,
             {
@@ -315,16 +316,16 @@ class UnifiedSearchService {
           if (validTenantId) {
             return validTenantId;
           }
-        } catch (dbError) {
-          console.warn('Failed to get tenant ID from database:', dbError);
+        } catch (dbError: unknown) {
+          logger.warn('Failed to get tenant ID from database', { error: dbError }, 'unified-search-service');
         }
       }
       
       // Fallback to development tenant ID
       return '7193113e-ece2-4f7b-ae8c-176df4367e28';
       
-    } catch (error) {
-      console.error('Error getting tenant ID:', error);
+    } catch (error: unknown) {
+      logger.error('Error getting tenant ID', error, 'unified-search-service');
       return '7193113e-ece2-4f7b-ae8c-176df4367e28';
     }
   }
@@ -347,8 +348,8 @@ class UnifiedSearchService {
         errorRate: stats.total > 0 ? (stats.unresolved / stats.total) * 100 : 0,
         methodDistribution: stats.byType
       };
-    } catch (error) {
-      console.error('Failed to get search stats:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to get search stats', error, 'unified-search-service');
       return {
         totalSearches: 0,
         avgExecutionTime: 0,
@@ -363,7 +364,9 @@ class UnifiedSearchService {
    */
   async clearCache(): Promise<void> {
     // Placeholder for cache clearing
-    console.log('Search cache cleared');
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Search cache cleared', {}, 'unified-search-service');
+    }
   }
 }
 

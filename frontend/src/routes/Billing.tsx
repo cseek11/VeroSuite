@@ -1,29 +1,46 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import {
-  Card,
-  Typography,
-  Button,
   Tabs,
-  Alert
-} from '@/components/ui/EnhancedUI';
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  Heading,
+  Text,
+} from '@/components/ui';
 import {
   CreditCard,
   FileText,
   Users,
   BarChart3,
-  ArrowLeft,
   Settings,
-  Shield
+  Shield,
+  DollarSign,
+  RefreshCw,
+  PlusCircle,
+  Calendar,
+  Mail,
+  FileCheck
 } from 'lucide-react';
 import {
   CustomerPaymentPortal,
-  InvoiceManagement
+  InvoiceManagement,
+  InvoiceGenerator,
+  InvoiceTemplates,
+  InvoiceScheduler,
+  InvoiceReminders,
+  ARManagement,
+  PaymentTracking,
+  OverdueAlerts
 } from '@/components/billing';
+import RecurringPayments from '@/components/billing/RecurringPayments';
+import PaymentAnalytics from '@/components/billing/PaymentAnalytics';
 import { useQuery } from '@tanstack/react-query';
 import { billing } from '@/lib/enhanced-api';
 
-type TabType = 'invoices' | 'payments' | 'customers' | 'analytics' | 'settings';
+type TabType = 'invoices' | 'generate' | 'templates' | 'scheduler' | 'reminders' | 'ar' | 'payments' | 'overdue' | 'customers' | 'analytics' | 'recurring' | 'settings';
 
 export default function Billing() {
   const [activeTab, setActiveTab] = useState<TabType>('invoices');
@@ -31,7 +48,7 @@ export default function Billing() {
   const { customerId } = useParams();
 
   // Fetch billing analytics for overview
-  const { data: analytics, isLoading: analyticsLoading } = useQuery({
+  const { data: analytics } = useQuery({
     queryKey: ['billing', 'analytics'],
     queryFn: () => billing.getBillingAnalytics(),
   });
@@ -39,7 +56,7 @@ export default function Billing() {
   // If customerId is provided, show customer payment portal
   if (customerId) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
         <CustomerPaymentPortal
           customerId={customerId}
           onClose={() => navigate('/billing')}
@@ -56,6 +73,48 @@ export default function Billing() {
       component: <InvoiceManagement />
     },
     {
+      id: 'generate' as TabType,
+      label: 'Generate Invoice',
+      icon: PlusCircle,
+      component: <InvoiceGenerator onSuccess={() => setActiveTab('invoices')} />
+    },
+    {
+      id: 'templates' as TabType,
+      label: 'Templates',
+      icon: FileCheck,
+      component: <InvoiceTemplates />
+    },
+    {
+      id: 'scheduler' as TabType,
+      label: 'Scheduler',
+      icon: Calendar,
+      component: <InvoiceScheduler />
+    },
+    {
+      id: 'reminders' as TabType,
+      label: 'Reminders',
+      icon: Mail,
+      component: <InvoiceReminders />
+    },
+    {
+      id: 'ar' as TabType,
+      label: 'AR Management',
+      icon: DollarSign,
+      component: <ARManagement />
+    },
+    {
+      id: 'payments' as TabType,
+      label: 'Payment Tracking',
+      icon: CreditCard,
+      component: <PaymentTracking />
+    },
+    {
+      id: 'overdue' as TabType,
+      label: 'Overdue Alerts',
+      icon: Shield,
+      component: <OverdueAlerts />
+    },
+    {
       id: 'customers' as TabType,
       label: 'Customer Billing',
       icon: Users,
@@ -63,12 +122,12 @@ export default function Billing() {
         <Card>
           <div className="p-8 text-center">
             <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <Typography variant="h3" className="text-gray-500 mb-2">
+            <Heading level={3} className="text-gray-500 mb-2">
               Customer Billing Management
-            </Typography>
-            <Typography variant="body2" className="text-gray-400 mb-6">
+            </Heading>
+            <Text variant="small" className="text-gray-400 mb-6">
               Manage customer payment portals, payment methods, and billing preferences.
-            </Typography>
+            </Text>
             <Button variant="outline">
               Coming Soon
             </Button>
@@ -88,12 +147,12 @@ export default function Billing() {
               <div className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Typography variant="body2" className="text-green-700 font-medium">
+                    <Text variant="small" className="text-green-700 font-medium">
                       Total Revenue
-                    </Typography>
-                    <Typography variant="h2" className="text-green-800 font-bold mt-1">
+                    </Text>
+                    <Heading level={2} className="text-green-800 font-bold mt-1">
                       ${analytics?.totalRevenue?.toFixed(2) || '0.00'}
-                    </Typography>
+                    </Heading>
                   </div>
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                     <BarChart3 className="w-6 h-6 text-green-600" />
@@ -106,12 +165,12 @@ export default function Billing() {
               <div className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Typography variant="body2" className="text-blue-700 font-medium">
+                    <Text variant="small" className="text-blue-700 font-medium">
                       Outstanding
-                    </Typography>
-                    <Typography variant="h2" className="text-blue-800 font-bold mt-1">
+                    </Text>
+                    <Heading level={2} className="text-blue-800 font-bold mt-1">
                       ${analytics?.outstandingAmount?.toFixed(2) || '0.00'}
-                    </Typography>
+                    </Heading>
                   </div>
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                     <CreditCard className="w-6 h-6 text-blue-600" />
@@ -124,12 +183,12 @@ export default function Billing() {
               <div className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Typography variant="body2" className="text-purple-700 font-medium">
+                    <Text variant="small" className="text-purple-700 font-medium">
                       Total Invoices
-                    </Typography>
-                    <Typography variant="h2" className="text-purple-800 font-bold mt-1">
+                    </Text>
+                    <Heading level={2} className="text-purple-800 font-bold mt-1">
                       {analytics?.totalInvoices || 0}
-                    </Typography>
+                    </Heading>
                   </div>
                   <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                     <FileText className="w-6 h-6 text-purple-600" />
@@ -142,12 +201,12 @@ export default function Billing() {
               <div className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Typography variant="body2" className="text-orange-700 font-medium">
+                    <Text variant="small" className="text-orange-700 font-medium">
                       Overdue
-                    </Typography>
-                    <Typography variant="h2" className="text-orange-800 font-bold mt-1">
+                    </Text>
+                    <Heading level={2} className="text-orange-800 font-bold mt-1">
                       {analytics?.overdueInvoices || 0}
-                    </Typography>
+                    </Heading>
                   </div>
                   <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
                     <Shield className="w-6 h-6 text-orange-600" />
@@ -157,19 +216,15 @@ export default function Billing() {
             </Card>
           </div>
 
-          <Card>
-            <div className="p-8 text-center">
-              <BarChart3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <Typography variant="h3" className="text-gray-500 mb-2">
-                Detailed Analytics Coming Soon
-              </Typography>
-              <Typography variant="body2" className="text-gray-400">
-                Revenue trends, payment analytics, and financial reporting will be available here.
-              </Typography>
-            </div>
-          </Card>
+          <PaymentAnalytics />
         </div>
       )
+    },
+    {
+      id: 'recurring' as TabType,
+      label: 'Recurring Payments',
+      icon: RefreshCw,
+      component: <RecurringPayments />
     },
     {
       id: 'settings' as TabType,
@@ -179,12 +234,12 @@ export default function Billing() {
         <Card>
           <div className="p-8 text-center">
             <Settings className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <Typography variant="h3" className="text-gray-500 mb-2">
+            <Heading level={3} className="text-gray-500 mb-2">
               Billing Settings
-            </Typography>
-            <Typography variant="body2" className="text-gray-400 mb-6">
+            </Heading>
+            <Text variant="small" className="text-gray-400 mb-6">
               Configure billing preferences, payment gateways, and invoice templates.
-            </Typography>
+            </Text>
             <Button variant="outline">
               Coming Soon
             </Button>
@@ -195,47 +250,69 @@ export default function Billing() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <Typography variant="h1" className="font-bold text-gray-900">
-                Billing & Payments
-              </Typography>
-              <Typography variant="body1" className="text-gray-600 mt-2">
-                Manage invoices, payments, and billing operations
-              </Typography>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
+      {/* Header */}
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="p-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg">
+            <CreditCard className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Billing & Payments
+            </h1>
+            <p className="text-slate-600 text-sm mt-1">
+              Manage invoices, payments, and billing operations
+            </p>
           </div>
         </div>
+      </div>
 
-        {/* Security Notice */}
-        <Alert type="info" className="mb-6">
-          <div className="flex items-center">
-            <Shield className="w-5 h-5 mr-2" />
-            <span className="font-medium">Secure Billing System</span>
+      {/* Security Notice */}
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <div className="flex items-start">
+          <div className="p-1.5 bg-blue-100 rounded-lg mr-3 flex-shrink-0">
+            <Shield className="w-4 h-4 text-blue-600" />
           </div>
-          <div className="mt-1 text-sm">
-            All payment processing is secured with bank-level encryption and PCI compliance standards.
+          <div>
+            <h3 className="text-sm font-semibold text-slate-800 mb-1">Secure Billing System</h3>
+            <p className="text-sm text-slate-600">
+              All payment processing is secured with bank-level encryption and PCI compliance standards.
+            </p>
           </div>
-        </Alert>
-
-        {/* Tabs */}
-        <Tabs
-          tabs={tabs}
-          active={activeTab}
-          onTabChange={(tabId) => setActiveTab(tabId as TabType)}
-          variant="pills"
-          size="lg"
-          className="mb-8"
-        />
-
-        {/* Tab Content */}
-        <div className="tab-content">
-          {tabs.find(tab => tab.id === activeTab)?.component}
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)}>
+          <TabsList className="flex flex-wrap gap-2 p-2">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <TabsTrigger
+                  key={tab.id}
+                  value={tab.id}
+                  className="flex items-center gap-2"
+                >
+                  <Icon className="h-4 w-4" />
+                  {tab.label}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </Tabs>
+      </div>
+
+      {/* Tab Content */}
+      <div>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)}>
+          {tabs.map((tab) => (
+            <TabsContent key={tab.id} value={tab.id}>
+              {tab.component}
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
     </div>
   );

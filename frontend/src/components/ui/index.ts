@@ -1,4 +1,23 @@
-// Export existing EnhancedUI components (excluding duplicates)
+// ============================================================================
+// DEPRECATED: EnhancedUI Components
+// ============================================================================
+// ⚠️  These components are DEPRECATED and should NOT be used in new code.
+// 
+// Migration Status: 100% Complete (38/38 files migrated)
+// - All identified files have been migrated to standard UI components
+// - Last migrated: AgreementsPage.tsx
+//
+// Migration Guide:
+// - Typography → Heading/Text from '@/components/ui'
+// - Chip → Badge from '@/components/ui'
+// - Modal → Dialog components from '@/components/ui'
+// - Alert → Inline styled divs
+// - ProgressBar → Inline styled divs
+// - Card, Button, Input → Direct imports from '@/components/ui/Card', etc.
+//
+// These exports are kept temporarily for backward compatibility only.
+// They will be removed in a future version.
+// ============================================================================
 export {
   Alert,
   AlertDescription,
@@ -41,6 +60,7 @@ export {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
   DialogTrigger,
   Select,
   SelectTrigger,
@@ -59,3 +79,4 @@ export * from './Form';
 export { default as Checkbox } from './Checkbox';
 export { default as ReusablePopup } from './ReusablePopup';
 export { default as CustomerSearchSelector } from './CustomerSearchSelector';
+export { AlertDialog, ConfirmDialog, PromptDialog } from './DialogModals';

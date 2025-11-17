@@ -1,4 +1,5 @@
 import React from 'react';
+import { logger } from '@/utils/logger';
 
 interface SelectOption {
   value: string;
@@ -27,9 +28,38 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
   value,
   ...props
 }, ref) => {
-  const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`;
+  const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`;   
   const errorId = error ? `${selectId}-error` : undefined;
   const helperId = helperText ? `${selectId}-helper` : undefined;
+
+  // Guard: Validate options prop
+  if (!options || !Array.isArray(options)) {
+    const errorMessage = `Select component: options prop is required and must be an array. Received: ${options === undefined ? 'undefined' : options === null ? 'null' : typeof options}`;
+    logger.error(errorMessage, new Error('INVALID_OPTIONS'), 'Select');
+    return (
+      <div className={`crm-field ${className}`}>
+        {label && (
+          <label htmlFor={selectId} className="crm-label">
+            {label}
+          </label>
+        )}
+        <select
+          ref={ref}
+          id={selectId}
+          disabled
+          className="crm-select crm-input-error"
+          aria-invalid="true"
+        >
+          <option value="">Invalid options provided</option>
+        </select>
+        {error && (
+          <p id={errorId} className="crm-error">
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChange?.(e.target.value);

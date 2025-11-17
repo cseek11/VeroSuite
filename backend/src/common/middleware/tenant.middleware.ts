@@ -11,6 +11,7 @@ declare global {
       tenantId: string;
       roles: string[];
       permissions?: string[];
+      teams?: string[]; // User's team UUIDs for ACL-based access
     }
     interface Request {
       user?: UserContext;
@@ -73,7 +74,7 @@ export class TenantMiddleware implements NestMiddleware {
       }
 
       // Set tenant context in database session
-      await this.setTenantContext(tenantId);
+      await this.setTenantContext(tenantId, req);
 
       // Set tenant ID in request for easy access by services
       req.tenantId = tenantId;
@@ -86,14 +87,43 @@ export class TenantMiddleware implements NestMiddleware {
     }
   }
 
-  private async setTenantContext(tenantId: string): Promise<void> {
+  private async setTenantContext(tenantId: string, req: Request): Promise<void> {
     try {
-      // Set PostgreSQL session variable for RLS
+      // Set PostgreSQL session variables for RLS
       await this.databaseService.query(`SET LOCAL app.tenant_id = $1`, [tenantId]);
+      
+      // Set user context for RLS policies that check user_id
+      const userId = req.user?.userId;
+      if (userId) {
+        await this.databaseService.query(`SET LOCAL app.user_id = $1`, [userId]);
+        this.logger.debug(`Database user context set for user: ${userId}`);
+      }
+      
+      // Set user roles for ACL-based access (comma-separated UUIDs)
+      // Note: roles might be role names (strings) or role UUIDs
+      // For ACL matching, we need role UUIDs - this will be handled by the service layer
+      // if roles are provided as names, they'll need to be resolved to UUIDs
+      const userRoles = req.user?.roles || [];
+      if (userRoles.length > 0) {
+        // Join roles as comma-separated string
+        // If roles are UUIDs, use directly; if names, they'll need conversion in service layer
+        const rolesString = userRoles.join(',');
+        await this.databaseService.query(`SET LOCAL app.user_roles = $1`, [rolesString]);
+        this.logger.debug(`Database user roles set: ${rolesString}`);
+      }
+      
+      // Set user teams for ACL-based access (comma-separated UUIDs)
+      // Teams should be populated by auth middleware if available
+      const userTeams = (req.user as any)?.teams || [];
+      if (userTeams.length > 0) {
+        const teamsString = userTeams.join(',');
+        await this.databaseService.query(`SET LOCAL app.user_teams = $1`, [teamsString]);
+        this.logger.debug(`Database user teams set: ${teamsString}`);
+      }
       
       // Skip setting the role for now - we'll rely on RLS policies instead
       // This avoids the permission issue with role setting
-      // await this.databaseService.query(`SET LOCAL ROLE verosuite_app`);
+      // await this.databaseService.query(`SET LOCAL ROLE verofield_app`);
       
       this.logger.debug(`Database tenant context set for tenant: ${tenantId}`);
     } catch (err) {

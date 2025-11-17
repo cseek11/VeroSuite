@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '@/lib/enhanced-api';
-import { queryKeys, invalidateQueries } from '@/lib/queryClient';
+import { queryKeys } from '@/lib/queryClient';
 import { useAuthStore } from '@/stores/auth';
 import { LoginFormData } from '@/lib/validation';
 

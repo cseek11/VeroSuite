@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Plus,
@@ -22,11 +22,10 @@ import {
   CheckSquare,
   AlertCircle,
   Star,
-  BarChart3,
-  Eye,
-  Phone,
-  Mail
+  BarChart3
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
+import { useAuthStore } from '@/stores/auth';
 
 interface FABAction {
   id: string;
@@ -56,9 +55,128 @@ export default function ExpandableFABSystem({ className = '' }: ExpandableFABSys
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const fabRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
 
+  // Role-based access control helper - DENY BY DEFAULT
+  const hasAccess = useCallback((actionId: string): boolean => {
+    if (!user) return false;
+    
+    const userRoles = user.roles || [];
+    const userPermissions = user.permissions || [];
+    
+    // Admin has access to everything
+    if (userRoles.includes('admin')) {
+      return true;
+    }
 
-  // FAB Categories with VeroSuite-specific actions
+    // Debug logging for permission checks (development only)
+    if (process.env.NODE_ENV === 'development' && userPermissions.length > 0) {
+      logger.debug('FAB Permission check', {
+        actionId,
+        userRoles,
+        userPermissionsCount: userPermissions.length,
+        userPermissions: userPermissions.slice(0, 10) // Log first 10 permissions
+      }, 'ExpandableFABSystem');
+    }
+
+    // Comprehensive access rules - ALL FAB actions must be explicitly defined
+    const accessRules: Record<string, { roles?: string[]; permissions?: string[]; allUsers?: boolean }> = {
+      // ===== CUSTOMER OPERATIONS =====
+      'view-customers': { allUsers: true },
+      'add-customer': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['customers:create'] },
+      'search-customers': { allUsers: true },
+      'customer-analytics': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['reports:view'] },
+      'customer-map': { allUsers: true },
+      
+      // ===== WORK MANAGEMENT =====
+      'create-work-order': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['jobs:create'] },
+      'view-work-orders': { allUsers: true },
+      'emergency-job': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['jobs:create'] },
+      'create-agreement': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['jobs:create'] },
+      'job-templates': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['jobs:view'] },
+      
+      // ===== SCHEDULING =====
+      'todays-schedule': { roles: ['admin', 'owner', 'dispatcher', 'technician'], permissions: ['jobs:view'] },
+      'schedule-job': { roles: ['admin', 'owner', 'dispatcher', 'technician'], permissions: ['jobs:view'] },
+      'route-optimization': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['jobs:assign'] },
+      'technician-availability': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['technicians:view'] },
+      'emergency-dispatch': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['jobs:assign'] },
+      
+      // ===== FINANCIAL =====
+      'create-invoice': { roles: ['admin', 'owner'], permissions: ['invoices:create'] },
+      'process-payment': { roles: ['admin', 'owner'], permissions: ['invoices:update'] },
+      'financial-reports': { roles: ['admin', 'owner'], permissions: ['reports:generate'] },
+      'billing-overview': { roles: ['admin', 'owner'], permissions: ['invoices:view'] },
+      'payment-history': { roles: ['admin', 'owner'], permissions: ['invoices:view'] },
+      
+      // ===== TEAM MANAGEMENT =====
+      'view-technicians': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['technicians:view'] },
+      'add-technician': { roles: ['admin', 'owner'], permissions: ['technicians:manage'] },
+      'manage-availability': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['technicians:view'] },
+      'performance-reports': { roles: ['admin', 'owner'], permissions: ['reports:generate'] },
+      'training-records': { roles: ['admin', 'owner', 'dispatcher'], permissions: ['technicians:view'] },
+      
+      // ===== QUICK ACTIONS =====
+      'global-search': { allUsers: true },
+      'notifications': { allUsers: true },
+      'recent-items': { allUsers: true },
+      'settings': { roles: ['admin', 'owner'], permissions: ['settings:view'] },
+      'help-support': { allUsers: true }, // All users
+    };
+
+    const rule = accessRules[actionId];
+    
+    // DENY BY DEFAULT - if no rule is defined, deny access
+    if (!rule) {
+      logger.warn('FAB action has no access rule defined', { actionId }, 'ExpandableFABSystem');
+      return false;
+    }
+
+    // If marked as accessible to all users, allow access
+    if (rule.allUsers === true) {
+      return true;
+    }
+
+    // Check if user has required role OR permission
+    // If both roles and permissions are specified, user needs EITHER one (not both)
+    let hasRequiredRole = false;
+    let hasRequiredPermission = false;
+
+    // Check roles
+    if (rule.roles && rule.roles.length > 0) {
+      hasRequiredRole = rule.roles.some(role => userRoles.includes(role));
+    }
+
+    // Check permissions (with wildcard support)
+    if (rule.permissions && rule.permissions.length > 0) {
+      hasRequiredPermission = rule.permissions.some(permission => {
+        if (userPermissions.includes(permission)) return true;
+        const [resource] = permission.split(':');
+        if (userPermissions.includes(`${resource}:*`)) return true;
+        if (userPermissions.includes('*:*')) return true;
+        return false;
+      });
+    }
+
+    // If both roles and permissions are specified, user needs EITHER
+    if (rule.roles && rule.roles.length > 0 && rule.permissions && rule.permissions.length > 0) {
+      return hasRequiredRole || hasRequiredPermission;
+    }
+
+    // If only roles are specified, user must have the role
+    if (rule.roles && rule.roles.length > 0) {
+      return hasRequiredRole;
+    }
+
+    // If only permissions are specified, user must have the permission
+    if (rule.permissions && rule.permissions.length > 0) {
+      return hasRequiredPermission;
+    }
+
+    return true;
+  }, [user]);
+
+  // FAB Categories with VeroField-specific actions
   const fabCategories: FABCategory[] = [
     {
       id: 'customers',
@@ -314,17 +432,17 @@ export default function ExpandableFABSystem({ className = '' }: ExpandableFABSys
           badge: 3,
           action: () => {
             // Open notifications panel
-            console.log('Opening notifications');
+            logger.debug('Opening notifications', {}, 'ExpandableFABSystem');
           },
           description: 'View recent notifications'
         },
         { 
           id: 'recent-items', 
           label: 'Recent Items', 
-          icon: Clock,
+          icon: Clock, 
           action: () => {
             // Show recent items modal
-            console.log('Showing recent items');
+            logger.debug('Showing recent items', {}, 'ExpandableFABSystem');
           },
           description: 'Recently viewed items'
         },
@@ -345,6 +463,14 @@ export default function ExpandableFABSystem({ className = '' }: ExpandableFABSys
       ]
     }
   ];
+
+  // Filter FAB categories and actions based on user roles and permissions
+  const filteredCategories = useMemo(() => {
+    return fabCategories.map(category => ({
+      ...category,
+      actions: category.actions.filter(action => hasAccess(action.id))
+    })).filter(category => category.actions.length > 0); // Remove categories with no accessible actions
+  }, [user, hasAccess]);
 
   // Close FAB system when clicking outside
   useEffect(() => {
@@ -407,7 +533,7 @@ export default function ExpandableFABSystem({ className = '' }: ExpandableFABSys
         {isExpanded && expandedCategory && (
           <div className="fixed bottom-6 left-24 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 animate-in slide-in-from-left duration-200">
             {(() => {
-              const selectedCategory = fabCategories.find(cat => cat.id === expandedCategory);
+              const selectedCategory = filteredCategories.find(cat => cat.id === expandedCategory);
               if (!selectedCategory) return null;
               
               const CategoryIcon = selectedCategory.icon;
@@ -507,7 +633,7 @@ export default function ExpandableFABSystem({ className = '' }: ExpandableFABSys
           {/* Category Selection Buttons - Vertical Stack */}
           {isExpanded && (
             <div className="flex flex-col-reverse gap-2">
-              {fabCategories.map((category, index) => {
+              {filteredCategories.map((category, index) => {
                 const CategoryIcon = category.icon;
                 const isCategoryExpanded = expandedCategory === category.id;
                 

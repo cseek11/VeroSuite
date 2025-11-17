@@ -4,11 +4,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 // import { enhancedApi } from '@/lib/enhanced-api';
 
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { logger } from '@/utils/logger';
+import { toast } from '@/utils/toast';
 
 import {
   Calendar,
   RefreshCw,
-  Upload,
   User,
   MapPin,
   Clock,
@@ -48,11 +49,14 @@ export default function Jobs() {
     setUploading(true);
     try {
       // TODO: Implement file upload using enhanced API
-      console.log('Uploading file:', file.name);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Uploading file', { fileName: file.name }, 'Jobs');
+      }
       uploadedUrlRef.current = 'mock-upload-url';
-      alert('Upload complete');
-    } catch (e: any) {
-      alert('Upload failed');
+      toast.success('Upload complete');
+    } catch (e: unknown) {
+      logger.error('Upload failed', e, 'Jobs');
+      toast.error('Upload failed');
     } finally {
       setUploading(false);
     }

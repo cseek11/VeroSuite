@@ -5,6 +5,8 @@ import { TechnicianStatus, EmploymentType } from '../../types/technician';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import Input from '../ui/Input';
+import { logger } from '@/utils/logger';
+import { toast } from '@/utils/toast';
 
 const TechnicianList: React.FC = () => {
   const navigate = useNavigate();
@@ -36,8 +38,8 @@ const TechnicianList: React.FC = () => {
       try {
         await deleteTechnicianMutation.mutateAsync(id);
       } catch (error) {
-        console.error('Failed to delete technician:', error);
-        alert('Failed to delete technician. Please try again.');
+        logger.error('Failed to delete technician', error, 'TechnicianList');
+        toast.error('Failed to delete technician. Please try again.');
       }
     }
   };

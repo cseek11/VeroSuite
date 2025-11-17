@@ -5,7 +5,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateLayoutDto, UpdateLayoutDto, SearchLayoutsDto } from './dto';
 
 @ApiTags('Layouts')
-@Controller('layouts')
+@Controller({ path: 'layouts', version: '1' })
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class LayoutsController {

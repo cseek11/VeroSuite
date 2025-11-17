@@ -1,18 +1,20 @@
 
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { Spinner } from '@/ui/Spinner';
 import SkipLink from '@/components/SkipLink';
+import { useWebVitals } from '@/hooks/useWebVitals';
+import { useUserRefresh } from '@/hooks/useUserRefresh';
+import { logger } from '@/utils/logger';
+import { RoleProtectedRoute } from '@/components/auth/RoleProtectedRoute';
 
 // LayoutWrapper removed as part of V4 migration
 import V4Layout from '@/components/layout/V4Layout';
 // LegacyDashboard removed as part of V4 migration
 // LegacyEnhancedDashboard removed as part of V4 migration
-import VeroCards from './VeroCards';
-import VeroCardsV2 from './VeroCardsV2';
-import V4Dashboard from './V4Dashboard';
-import V4Test from './V4Test';
+import VeroCardsV3 from './VeroCardsV3';
+import { RegionDashboardPage } from './dashboard/RegionDashboardPage';
 import CommunicationsPage from './Communications';
 import FinancePage from './Finance';
 import BillingPage from './Billing';
@@ -24,9 +26,7 @@ import RoutingPage from './Routing';
 import ReportsPage from './Reports';
 import UploadsPage from './Uploads';
 import SettingsPage from './Settings';
-import CRMDemo from './CRMDemo';
 import ChartsPage from './Charts';
-import ChartsTestPage from './ChartsTest';
 import WorkOrdersPage from '@/pages/WorkOrdersPage';
 import CreateWorkOrderPage from '@/pages/CreateWorkOrderPage';
 import WorkOrderDetailPage from '@/pages/WorkOrderDetailPage';
@@ -36,15 +36,12 @@ import TechniciansPage from '@/pages/TechniciansPage';
 import CreateTechnicianPage from '@/pages/CreateTechnicianPage';
 import EditTechnicianPage from '@/pages/EditTechnicianPage';
 import TechnicianDetailPage from '@/pages/TechnicianDetailPage';
-import { CustomerListTest } from './CustomerListTest';
 import SearchAnalyticsDashboard from '@/components/analytics/SearchAnalyticsDashboard';
-import AdvancedSearchDemo from './AdvancedSearchDemo';
-import GlobalSearchDemo from './GlobalSearchDemo';
 import CustomerManagement from '@/pages/CustomerManagement';
 import ServiceManagement from '@/pages/ServiceManagement';
-import TestingDashboardPage from '@/pages/TestingDashboardPage';
 import AgreementsPage from '@/pages/AgreementsPage';
 import CreateAgreementPage from '@/pages/CreateAgreementPage';
+import UserManagement from '@/pages/UserManagement';
 
 const LoginPage = lazy(() => import('@/routes/Login'));
 
@@ -54,7 +51,7 @@ function PrivateRoute({ children }: { children: JSX.Element }) {
   
   // More strict authentication check
   if (!token || !user) {
-    console.log('PrivateRoute: No token or user, redirecting to login');
+    logger.debug('PrivateRoute: No token or user, redirecting to login', {}, 'App');
     return <Navigate to="/login" replace />;
   }
   
@@ -79,39 +76,126 @@ export default function App() {
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
   const clearAuth = useAuthStore((s) => s.clear);
+  const refreshUser = useAuthStore((s) => s.refreshUser);
   const hasInitialized = useRef(false);
+  const location = useLocation();
+  
+  // Monitor Web Vitals for performance tracking
+  useWebVitals(process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'development');
 
-  // Force clear auth only once on app start
+  // Force clear auth only once on app start (not on every navigation)
+  // This should only run once when the app first loads, not when navigating
   useEffect(() => {
     if (hasInitialized.current) return;
-    hasInitialized.current = true;
     
-    console.log('App mounted - initial cleanup');
-    console.log('Initial token:', token);
-    console.log('Initial user:', user);
-    
-    // Only clear if there's no valid authentication
-    if (!token || !user) {
-      console.log('No valid auth found, clearing all data');
-      clearAuth();
-      localStorage.clear(); // Clear all localStorage
-      sessionStorage.clear(); // Clear all sessionStorage
+    // Wait a bit to allow Zustand to load persisted state from localStorage
+    const checkAuth = setTimeout(() => {
+      if (hasInitialized.current) return;
+      hasInitialized.current = true;
       
-      // Force redirect to login
-      setTimeout(() => {
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
+      // Don't clear auth if we're on the login page (user might be logging in)
+      const currentPath = window.location.pathname;
+      if (currentPath === '/login') {
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('On login page, skipping auth check', {}, 'App');
         }
-      }, 100);
-    } else {
-      console.log('Valid auth found, keeping user logged in');
-    }
-  }, []);
+        return;
+      }
+      
+      // Check localStorage directly to avoid race conditions with Zustand
+      const storedAuth = localStorage.getItem('verofield_auth');
+      let hasStoredAuth = false;
+      if (storedAuth) {
+        try {
+          const parsed = JSON.parse(storedAuth);
+          hasStoredAuth = !!(parsed.token && parsed.user);
+        } catch {
+          // Invalid JSON, treat as no auth
+        }
+      }
+      
+      // Also check current Zustand state (might have loaded by now)
+      const currentToken = useAuthStore.getState().token;
+      const currentUser = useAuthStore.getState().user;
+      
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('App mounted - initial cleanup', {}, 'App');
+        logger.debug('Initial token', { tokenFound: !!token, currentTokenFound: !!currentToken }, 'App');
+        logger.debug('Initial user', { userFound: !!user, currentUserFound: !!currentUser }, 'App');
+        logger.debug('Stored auth', { hasStoredAuth }, 'App');
+      }
+      
+      // Only clear if there's no valid authentication in Zustand state, localStorage, OR current state
+      // This prevents clearing auth during the brief moment when Zustand hasn't loaded yet
+      const hasAnyAuth = hasStoredAuth || currentToken || currentUser || token || user;
+      
+      if (!hasAnyAuth) {
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('No valid auth found anywhere, clearing all data', {}, 'App');
+        }
+        clearAuth();
+        localStorage.clear(); // Clear all localStorage
+        sessionStorage.clear(); // Clear all sessionStorage
+        
+        // Force redirect to login
+        setTimeout(() => {
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
+        }, 100);
+      } else {
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Valid auth found, keeping user logged in', {}, 'App');
+        }
+      }
+    }, 500); // Wait 500ms for Zustand to load
+    
+    return () => clearTimeout(checkAuth);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount, not on every navigation
+
+  // Set up periodic user refresh
+  useUserRefresh();
+
+  // Refresh user data on navigation to key routes (but not immediately after login)
+  // This is now disabled to prevent logout issues - periodic refresh is sufficient
+  // const previousPathRef = useRef<string | null>(null);
+  // useEffect(() => {
+  //   if (!user || !token) {
+  //     previousPathRef.current = location.pathname;
+  //     return;
+  //   }
+
+  //   // Don't refresh if we just navigated from login or if path hasn't changed
+  //   if (previousPathRef.current === location.pathname) {
+  //     return;
+  //   }
+
+  //   const keyRoutes = ['/dashboard', '/settings', '/settings/users'];
+  //   const shouldRefresh = keyRoutes.some(route => location.pathname.startsWith(route));
+
+  //   if (shouldRefresh && previousPathRef.current !== '/login') {
+  //     // Add a small delay to avoid refreshing too frequently
+  //     const refreshTimeout = setTimeout(() => {
+  //       refreshUser().catch((error) => {
+  //         logger.error('Error refreshing user on navigation', error, 'App');
+  //       });
+  //     }, 500);
+
+  //     previousPathRef.current = location.pathname;
+      
+  //     return () => clearTimeout(refreshTimeout);
+  //   } else {
+  //     previousPathRef.current = location.pathname;
+  //   }
+  // }, [location.pathname, user, token, refreshUser]);
 
   // Check if user is properly authenticated
   const isAuthenticated = token && user;
   
-  console.log('App render - token:', token, 'user:', user, 'isAuthenticated:', isAuthenticated);
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('App render', { tokenFound: !!token, userFound: !!user, isAuthenticated }, 'App');
+  }
 
     return (
       <div
@@ -140,7 +224,7 @@ export default function App() {
                 <PrivateRoute>
                   <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
-                      <V4Dashboard />
+                      <VeroCardsV3 showHeader={true} />
                     </Suspense>
                   </V4Layout>
                 </PrivateRoute>
@@ -152,7 +236,7 @@ export default function App() {
                 <PrivateRoute>
                   <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
-                      <V4Dashboard />
+                      <VeroCardsV3 showHeader={false} />
                     </Suspense>
                   </V4Layout>
                 </PrivateRoute>
@@ -164,43 +248,19 @@ export default function App() {
                 <PrivateRoute>
                   <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
-                      <VeroCardsV2 showHeader={false} />
+                      <VeroCardsV3 showHeader={false} />
                     </Suspense>
                   </V4Layout>
                 </PrivateRoute>
               }
             />
             <Route
-              path="/resizable-dashboard-legacy"
+              path="/region-dashboard"
               element={
                 <PrivateRoute>
                   <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
-                      <VeroCards showHeader={false} />
-                    </Suspense>
-                  </V4Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/v4-dashboard"
-              element={
-                <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <V4Dashboard />
-                    </Suspense>
-                  </V4Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/v4-test"
-              element={
-                <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <V4Test />
+                      <RegionDashboardPage />
                     </Suspense>
                   </V4Layout>
                 </PrivateRoute>
@@ -210,11 +270,13 @@ export default function App() {
               path="/scheduler"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <SchedulerPage />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner', 'dispatcher', 'technician']} requiredPermissions={['jobs:view']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <SchedulerPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -258,11 +320,13 @@ export default function App() {
               path="/work-orders/:id/edit"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <EditWorkOrderPage />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner', 'dispatcher']} requiredPermissions={['jobs:update']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <EditWorkOrderPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -270,11 +334,13 @@ export default function App() {
               path="/work-orders/new"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <CreateWorkOrderPage />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner', 'dispatcher']} requiredPermissions={['jobs:create']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <CreateWorkOrderPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -282,11 +348,13 @@ export default function App() {
               path="/technicians"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <TechniciansPage />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner', 'dispatcher']} requiredPermissions={['technicians:view']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <TechniciansPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -294,11 +362,13 @@ export default function App() {
               path="/technicians/new"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <CreateTechnicianPage />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner']} requiredPermissions={['technicians:manage']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <CreateTechnicianPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -318,11 +388,13 @@ export default function App() {
               path="/technicians/:id/edit"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <EditTechnicianPage />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner']} requiredPermissions={['technicians:manage']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <EditTechnicianPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -342,23 +414,13 @@ export default function App() {
               path="/customers/new"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <CustomersPage />
-                    </Suspense>
-                  </V4Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/customers-old"
-              element={
-                <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <CustomersPage />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner', 'dispatcher']} requiredPermissions={['customers:create']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <CustomersPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -414,23 +476,13 @@ export default function App() {
               path="/agreements/create"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <CreateAgreementPage />
-                    </Suspense>
-                  </V4Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/customer-list-test"
-              element={
-                <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <CustomerListTest />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner', 'dispatcher']} requiredPermissions={['jobs:create']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <CreateAgreementPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -438,11 +490,13 @@ export default function App() {
               path="/routing"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <RoutingPage />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner', 'dispatcher']} requiredPermissions={['jobs:assign']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <RoutingPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -450,11 +504,13 @@ export default function App() {
               path="/reports"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <ReportsPage />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner', 'dispatcher']} requiredPermissions={['reports:view']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <ReportsPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -474,23 +530,27 @@ export default function App() {
               path="/settings"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <SettingsPage />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner']} requiredPermissions={['settings:view']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <SettingsPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
             <Route
-              path="/crm-demo"
+              path="/settings/users"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <CRMDemo />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner']} requiredPermissions={['users:manage']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <UserManagement />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -510,11 +570,13 @@ export default function App() {
               path="/finance"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <FinancePage />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner']} requiredPermissions={['financial:view']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <FinancePage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -522,11 +584,13 @@ export default function App() {
               path="/billing"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <BillingPage />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner']} requiredPermissions={['invoices:view']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <BillingPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -534,11 +598,13 @@ export default function App() {
               path="/billing/:customerId"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <BillingPage />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner']} requiredPermissions={['invoices:view']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <BillingPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -558,47 +624,13 @@ export default function App() {
               path="/charts"
               element={
                 <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <ChartsPage />
-                    </Suspense>
-                  </V4Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/charts-test"
-              element={
-                <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <ChartsTestPage />
-                    </Suspense>
-                  </V4Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/advanced-search-demo"
-              element={
-                <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <AdvancedSearchDemo />
-                    </Suspense>
-                  </V4Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/global-search-demo"
-              element={
-                <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <GlobalSearchDemo />
-                    </Suspense>
-                  </V4Layout>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner', 'dispatcher']} requiredPermissions={['reports:view']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <ChartsPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
                 </PrivateRoute>
               }
             />
@@ -615,24 +647,12 @@ export default function App() {
               }
             />
             <Route
-              path="/testing-dashboard"
-              element={
-                <PrivateRoute>
-                  <V4Layout>
-                    <Suspense fallback={<DashboardFallback />}>
-                      <TestingDashboardPage />
-                    </Suspense>
-                  </V4Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
               path="/*"
               element={
                 <PrivateRoute>
                   <V4Layout>
                     <Suspense fallback={<DashboardFallback />}>
-                      <V4Dashboard />
+                      <VeroCardsV3 showHeader={true} />
                     </Suspense>
                   </V4Layout>
                 </PrivateRoute>

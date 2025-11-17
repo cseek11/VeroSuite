@@ -33,9 +33,11 @@ interface UseCardDragDropProps {
   onDragEnd?: () => void;
   zoom?: number;
   canvasHeight?: number;
+  onAutoScroll?: (cardId: string, mouseY: number) => void;
+  onStopAutoScroll?: () => void;
 }
 
-export function useCardDragDrop({ onUpdatePosition, onUpdateMultiplePositions, cards, selectedCards, isCardLocked, getCardGroup, onDragEnd, zoom = 1, canvasHeight = 600 }: UseCardDragDropProps) {
+export function useCardDragDrop({ onUpdatePosition, onUpdateMultiplePositions, cards, selectedCards, isCardLocked, getCardGroup, onDragEnd, zoom = 1, canvasHeight = 600, onAutoScroll, onStopAutoScroll }: UseCardDragDropProps) {
   const [draggingCard, setDraggingCard] = useState<string | null>(null);
   const [dragStartPosition, setDragStartPosition] = useState<{ x: number; y: number } | null>(null);
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -167,7 +169,7 @@ export function useCardDragDrop({ onUpdatePosition, onUpdateMultiplePositions, c
   // Apply snap and alignment
   const applySnapAndAlignment = useCallback((position: { x: number; y: number }, draggedCardId: string, size: { width: number; height: number }) => {
     const guides = calculateAlignmentGuides(draggedCardId, position, size);
-    let snappedPosition = { ...position };
+    const snappedPosition = { ...position };
     const snapDistance = 10;
 
     guides.forEach(guide => {
@@ -221,6 +223,11 @@ export function useCardDragDrop({ onUpdatePosition, onUpdateMultiplePositions, c
     const mouseX = (e.clientX - canvasRect.left) / zoom;
     const mouseY = (e.clientY - canvasRect.top) / zoom;
 
+            // Trigger auto-scroll if enabled (use screen Y coordinate for edge detection)
+            if (onAutoScroll) {
+              onAutoScroll(draggingCard, e.clientY);
+            }
+
     if (isDraggingMultiple) {
       // Handle multiple card dragging
       const updates: Array<{ cardId: string; x: number; y: number }> = [];
@@ -239,30 +246,62 @@ export function useCardDragDrop({ onUpdatePosition, onUpdateMultiplePositions, c
           y: mouseY - cardOffset.y
         };
 
-        // Fast boundary constraints with group support
-        const effectiveCanvasWidth = canvasRect.width / zoom;
-        const effectiveCanvasHeight = Math.max(canvasHeight, canvasRect.height) / zoom;
-        
-        let minX = 8;
-        let minY = 8;
-        let maxX = effectiveCanvasWidth - card.width - 16;
-        let maxY = effectiveCanvasHeight - card.height - 8;
+      // Calculate dynamic canvas height based on current card positions
+      // This allows the canvas to shrink naturally as cards move up
+      const CANVAS_MIN_HEIGHT = 600;
+      const CANVAS_PADDING = 20;
+      const CANVAS_AUTO_EXPAND = 30;
+      const allCardBottoms = Object.values(cards).map((c: any) => {
+        if (c.id === cardId) {
+          // Use the new position for the card being dragged
+          return rawPosition.y + c.height;
+        }
+        return c.y + c.height;
+      });
+      const dynamicCanvasHeight = Math.max(
+        Math.max(...allCardBottoms, 0) + CANVAS_PADDING + CANVAS_AUTO_EXPAND,
+        canvasRect.height / zoom, // Don't shrink below viewport
+        CANVAS_MIN_HEIGHT // Minimum height
+      );
+      
+      // Fast boundary constraints with group support
+      const effectiveCanvasWidth = canvasRect.width / zoom;
+      // Use dynamic height but allow upward movement (don't constrain to bottom too strictly)
+      const effectiveCanvasHeight = Math.max(dynamicCanvasHeight, canvasRect.height / zoom);
+      
+      let minX = 8;
+      let minY = 8;
+      let maxX = effectiveCanvasWidth - card.width - 16;
+      // Allow upward movement: only constrain bottom if card is moving down or at bottom
+      // If moving up, allow it to move freely (canvas will shrink to follow)
+      const isMovingUp = rawPosition.y < initialPos.y;
+      let maxY = isMovingUp 
+        ? Infinity // Allow free upward movement
+        : effectiveCanvasHeight - card.height - 8; // Constrain downward movement
         
         // Check if card is in a group and constrain to group boundaries
-        if (getCardGroup) {
+        // BUT preserve upward movement freedom - don't constrain if moving up
+        if (getCardGroup && !isMovingUp) {
           const cardGroup = getCardGroup(cardId);
           if (cardGroup && !cardGroup.locked) {
             // Only apply group constraints if the card is actually in a group
             minX = Math.max(minX, cardGroup.x + 5);
             minY = Math.max(minY, cardGroup.y + 5);
             maxX = Math.min(maxX, cardGroup.x + cardGroup.width - card.width - 5);
-            maxY = Math.min(maxY, cardGroup.y + cardGroup.height - card.height - 5);
+            // Only apply group maxY if it's more restrictive than current maxY
+            const groupMaxY = cardGroup.y + cardGroup.height - card.height - 5;
+            if (maxY !== Infinity && groupMaxY < maxY) {
+              maxY = groupMaxY;
+            }
           }
           // If cardGroup is null/undefined, card is not in a group - only canvas constraints apply
         }
         
         const constrainedX = Math.max(minX, Math.min(maxX, rawPosition.x));
-        const constrainedY = Math.max(minY, Math.min(maxY, rawPosition.y));
+        // Handle Infinity properly - if maxY is Infinity, just use rawPosition.y (clamped to minY)
+        const constrainedY = maxY === Infinity 
+          ? Math.max(minY, rawPosition.y)
+          : Math.max(minY, Math.min(maxY, rawPosition.y));
 
         updates.push({ cardId, x: constrainedX, y: constrainedY });
       });
@@ -280,30 +319,59 @@ export function useCardDragDrop({ onUpdatePosition, onUpdateMultiplePositions, c
         y: mouseY - dragOffset.y
       };
 
+      // Calculate dynamic canvas height based on current card positions
+      // This allows the canvas to shrink naturally as cards move up
+      const allCardBottoms = Object.values(cards).map((c: any) => {
+        if (c.id === draggingCard) {
+          // Use the new position for the card being dragged
+          return rawPosition.y + c.height;
+        }
+        return c.y + c.height;
+      });
+      const dynamicCanvasHeight = Math.max(
+        Math.max(...allCardBottoms, 0) + 50, // Add padding
+        canvasRect.height / zoom, // Don't shrink below viewport
+        600 // Minimum height
+      );
+      
       // Fast boundary constraints with group support
       const effectiveCanvasWidth = canvasRect.width / zoom;
-      const effectiveCanvasHeight = Math.max(canvasHeight, canvasRect.height) / zoom;
+      // Use dynamic height but allow upward movement (don't constrain to bottom too strictly)
+      const effectiveCanvasHeight = Math.max(dynamicCanvasHeight, canvasRect.height / zoom);
       
       let minX = 8;
       let minY = 8;
       let maxX = effectiveCanvasWidth - card.width - 16;
-      let maxY = effectiveCanvasHeight - card.height - 8;
+      // Allow upward movement: only constrain bottom if card is moving down or at bottom
+      // If moving up, allow it to move freely (canvas will shrink to follow)
+      const isMovingUp = rawPosition.y < card.y;
+      let maxY = isMovingUp 
+        ? Infinity // Allow free upward movement
+        : effectiveCanvasHeight - card.height - 8; // Constrain downward movement
       
       // Check if card is in a group and constrain to group boundaries
-      if (getCardGroup) {
+      // BUT preserve upward movement freedom - don't constrain if moving up
+      if (getCardGroup && !isMovingUp) {
         const cardGroup = getCardGroup(draggingCard);
         if (cardGroup && !cardGroup.locked) {
           // Only apply group constraints if the card is actually in a group
           minX = Math.max(minX, cardGroup.x + 5);
           minY = Math.max(minY, cardGroup.y + 5);
           maxX = Math.min(maxX, cardGroup.x + cardGroup.width - card.width - 5);
-          maxY = Math.min(maxY, cardGroup.y + cardGroup.height - card.height - 5);
+          // Only apply group maxY if it's more restrictive than current maxY
+          const groupMaxY = cardGroup.y + cardGroup.height - card.height - 5;
+          if (maxY !== Infinity && groupMaxY < maxY) {
+            maxY = groupMaxY;
+          }
         }
         // If cardGroup is null/undefined, card is not in a group - only canvas constraints apply
       }
       
       const constrainedX = Math.max(minX, Math.min(maxX, rawPosition.x));
-      const constrainedY = Math.max(minY, Math.min(maxY, rawPosition.y));
+      // Handle Infinity properly - if maxY is Infinity, just use rawPosition.y (clamped to minY)
+      const constrainedY = maxY === Infinity 
+        ? Math.max(minY, rawPosition.y)
+        : Math.max(minY, Math.min(maxY, rawPosition.y));
 
       // Direct update for responsive tracking - RAF was causing flashing
       onUpdatePosition(draggingCard, constrainedX, constrainedY);
@@ -319,6 +387,11 @@ export function useCardDragDrop({ onUpdatePosition, onUpdateMultiplePositions, c
   // Handle card drag end
   const handleCardDragEnd = useCallback(() => {
     if (draggingCard) {
+      // Stop auto-scroll when drag ends
+      if (onStopAutoScroll) {
+        onStopAutoScroll();
+      }
+
       // Reset all dragging styles
       const cardElement = document.querySelector(`[data-card-id="${draggingCard}"]`) as HTMLElement;
       if (cardElement) {

@@ -6,6 +6,7 @@
 
 import supabase from '@/lib/supabase-client';
 import type { SearchFilters, Account } from '@/types/enhanced-types';
+import { logger } from '@/utils/logger';
 
 // Use shared singleton Supabase client
 
@@ -55,7 +56,9 @@ const getTenantId = async (): Promise<string> => {
   const knownTenantId = '7193113e-ece2-4f7b-ae8c-176df4367e28';
   
   // For now, always use the known tenant ID since the user's tenant doesn't have customers
-  console.log('Using known tenant ID for customers:', knownTenantId);
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('Using known tenant ID for customers', { tenantId: knownTenantId }, 'enhanced-search-service');
+  }
   return knownTenantId;
 };
 
@@ -96,8 +99,8 @@ export const searchLogger = {
         p_clicked_record_id: data.clickedRecordId || null,
         p_search_filters: data.searchFilters || null
       });
-    } catch (error) {
-      console.error('Failed to log search:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to log search', error, 'enhanced-search-service');
       // Don't throw - logging should not break search functionality
     }
   },
@@ -127,8 +130,8 @@ export const searchLogger = {
           .update({ clicked_record_id: recordId })
           .eq('id', recentLog.id);
       }
-    } catch (error) {
-      console.error('Failed to log click:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to log click', error, 'enhanced-search-service');
     }
   }
 };
@@ -143,15 +146,21 @@ export const enhancedSearch = {
    */
   async searchCustomers(filters?: SearchFilters): Promise<Account[]> {
     // TEMPORARILY RE-ENABLED - Backend API not fully implemented yet
-    console.log('🔍 Enhanced search service temporarily re-enabled for customer loading');
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Enhanced search service temporarily re-enabled for customer loading', {}, 'enhanced-search-service');
+    }
     
     const startTime = performance.now();
     
-    console.log('🔍 Enhanced search service called with filters:', filters);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Enhanced search service called with filters', { filters }, 'enhanced-search-service');
+    }
     
     try {
       const tenantId = await getTenantId();
-      console.log('🔍 Using tenant ID:', tenantId);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Using tenant ID', { tenantId }, 'enhanced-search-service');
+      }
       
       // If no search term, return all customers
       if (!filters?.search?.trim()) {
@@ -227,13 +236,15 @@ export const enhancedSearch = {
         ? results.reduce((sum, r) => sum + (r._relevance_score || 0), 0) / results.length 
         : 0;
 
-      console.log('🔍 Enhanced search completed:', {
-        resultsCount: filteredResults.length,
-        timeTakenMs,
-        avgRelevanceScore: avgRelevanceScore.toFixed(3),
-        firstResult: filteredResults[0]?.name,
-        matchTypes: [...new Set(results.map(r => r._match_type))]
-      });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Enhanced search completed', {
+          resultsCount: filteredResults.length,
+          timeTakenMs,
+          avgRelevanceScore: avgRelevanceScore.toFixed(3),
+          firstResult: filteredResults[0]?.name,
+          matchTypes: [...new Set(results.map(r => r._match_type))]
+        }, 'enhanced-search-service');
+      }
 
       // Log the search with enhanced metrics
       await searchLogger.logSearch({
@@ -246,8 +257,8 @@ export const enhancedSearch = {
       });
 
       return filteredResults;
-    } catch (error) {
-      console.error('Error in enhanced search:', error);
+    } catch (error: unknown) {
+      logger.error('Error in enhanced search', error, 'enhanced-search-service');
       throw error;
     }
   },
@@ -262,7 +273,9 @@ export const enhancedSearch = {
   ): Promise<Account[]> {
     const startTime = performance.now();
     
-    console.log('🔍 Vector search called with embedding length:', embedding.length);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Vector search called', { embeddingLength: embedding.length }, 'enhanced-search-service');
+    }
     
     try {
       const tenantId = await getTenantId();
@@ -278,8 +291,10 @@ export const enhancedSearch = {
       );
 
       if (error) {
-        console.log('🔍 Vector search error:', error.message);
-        console.log('🔍 Returning empty results - check if pgvector is properly configured');
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Vector search error', { error: error.message }, 'enhanced-search-service');
+          logger.debug('Returning empty results - check if pgvector is properly configured', {}, 'enhanced-search-service');
+        }
         return [];
       }
 
@@ -303,17 +318,19 @@ export const enhancedSearch = {
       const endTime = performance.now();
       const timeTakenMs = Math.round(endTime - startTime);
 
-      console.log('🔍 Vector search completed:', {
-        resultsCount: results.length,
-        timeTakenMs,
-        avgSimilarityScore: results.length > 0 
-          ? (results.reduce((sum, r) => sum + (r._similarity_score || 0), 0) / results.length).toFixed(3)
-          : '0.000'
-      });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Vector search completed', {
+          resultsCount: results.length,
+          timeTakenMs,
+          avgSimilarityScore: results.length > 0 
+            ? (results.reduce((sum, r) => sum + (r._similarity_score || 0), 0) / results.length).toFixed(3)
+            : '0.000'
+        }, 'enhanced-search-service');
+      }
 
       return results;
-    } catch (error) {
-      console.error('Error in vector search:', error);
+    } catch (error: unknown) {
+      logger.error('Error in vector search', error, 'enhanced-search-service');
       return [];
     }
   },
@@ -338,8 +355,8 @@ export const enhancedSearch = {
 
       if (error) throw error;
       return data;
-    } catch (error) {
-      console.error('Error getting search analytics:', error);
+    } catch (error: unknown) {
+      logger.error('Error getting search analytics', error, 'enhanced-search-service');
       throw error;
     }
   },
@@ -378,8 +395,8 @@ export const enhancedSearch = {
       };
 
       return metrics;
-    } catch (error) {
-      console.error('Error getting search performance:', error);
+    } catch (error: unknown) {
+      logger.error('Error getting search performance', error, 'enhanced-search-service');
       throw error;
     }
   }
@@ -406,8 +423,8 @@ export const searchCorrections = {
 
       if (error) throw error;
       return data?.map(c => c.corrected_query) || [];
-    } catch (error) {
-      console.error('Error getting corrections:', error);
+    } catch (error: unknown) {
+      logger.error('Error getting corrections', error, 'enhanced-search-service');
       return [];
     }
   },
@@ -439,8 +456,8 @@ export const searchCorrections = {
           .eq('original_query', originalQuery.toLowerCase())
           .eq('corrected_query', correctedQuery);
       }
-    } catch (error) {
-      console.error('Error updating correction:', error);
+    } catch (error: unknown) {
+      logger.error('Error updating correction', error, 'enhanced-search-service');
     }
   }
 };

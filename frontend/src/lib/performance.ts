@@ -1,4 +1,5 @@
 import { SentryPerformance, SentryUtils } from './sentry';
+import { logger } from '@/utils/logger';
 
 // Performance monitoring service
 export class PerformanceMonitor {
@@ -31,13 +32,13 @@ export class PerformanceMonitor {
 
     // Log slow API calls
     if (duration > 2000) {
-      console.warn(`Slow API call detected: ${endpoint} took ${duration}ms`);
+      logger.warn('Slow API call detected', { endpoint, duration }, 'performance');
       SentryUtils.captureMessage(`Slow API call: ${endpoint}`, 'warning');
     }
 
     // Log failed API calls
     if (status >= 400) {
-      console.error(`API call failed: ${endpoint} - ${status}`);
+      logger.error('API call failed', { endpoint, status, error }, 'performance');
       if (error) {
         SentryUtils.captureException(error, { extra: { endpoint, status, duration } });
       }
@@ -63,7 +64,7 @@ export class PerformanceMonitor {
 
     // Log slow page loads
     if (loadTime > 3000) {
-      console.warn(`Slow page load detected: ${route} took ${loadTime}ms`);
+      logger.warn('Slow page load detected', { route, loadTime }, 'performance');
       SentryUtils.captureMessage(`Slow page load: ${route}`, 'warning');
     }
 

@@ -18,8 +18,10 @@ import {
   AlertCircle,
   ArrowRight
 } from 'lucide-react';
-import { Card, Button } from '@/components/ui/EnhancedUI';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import type { SearchFilters } from '@/types/enhanced-types';
+import { logger } from '@/utils/logger';
 
 interface AdvancedSearchBarProps {
   onResultsChange?: (results: any[]) => void;
@@ -69,20 +71,22 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
 
   // Notify parent when results change (but only after search)
   // Use a stable callback reference to prevent infinite loops
-  const stableOnResultsChange = useCallback((newResults: any[]) => {
+  const stableOnResultsChange = useCallback((newResults: Array<Record<string, unknown>>) => {
     if (onResultsChange) {
-      console.log('🔄 AdvancedSearchBar calling onResultsChange with:', newResults.length, 'results');
+      logger.debug('AdvancedSearchBar calling onResultsChange', { resultsCount: newResults.length }, 'AdvancedSearchBar');
       onResultsChange(newResults);
     }
   }, [onResultsChange]);
-  
+
   useEffect(() => {
     if (hasSearched && !isLoading) {
-      console.log('🔄 AdvancedSearchBar effect triggered:', {
-        hasSearched,
-        isLoading,
-        resultsLength: results.length
-      });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('AdvancedSearchBar effect triggered', {
+          hasSearched,
+          isLoading,
+          resultsLength: results.length
+        });
+      }
       stableOnResultsChange(results);
     }
   }, [results, hasSearched, isLoading, stableOnResultsChange]);

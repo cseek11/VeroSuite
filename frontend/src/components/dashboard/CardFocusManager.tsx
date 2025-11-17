@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import { cn } from '@/lib/utils';
 
 interface CardFocusManagerProps {
@@ -10,11 +10,11 @@ interface CardFocusManagerProps {
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
-  onFocus?: () => void;
-  onBlur?: () => void;
+  onFocus?: (e?: React.FocusEvent) => void;
+  onBlur?: (e?: React.FocusEvent) => void;
 }
 
-export const CardFocusManager: React.FC<CardFocusManagerProps> = ({
+const CardFocusManagerComponent: React.FC<CardFocusManagerProps> = ({
   cardId,
   isFocused,
   isSelected,
@@ -51,12 +51,12 @@ export const CardFocusManager: React.FC<CardFocusManagerProps> = ({
   }, [isFocused, isSelected]);
 
   // Handle focus events
-  const handleFocus = () => {
-    onFocus?.();
+  const handleFocus = (e: React.FocusEvent) => {
+    onFocus?.(e);
   };
 
-  const handleBlur = () => {
-    onBlur?.();
+  const handleBlur = (e: React.FocusEvent) => {
+    onBlur?.(e);
   };
 
   // Handle keyboard events for the card
@@ -127,6 +127,23 @@ export const CardFocusManager: React.FC<CardFocusManagerProps> = ({
     </div>
   );
 };
+
+// Memoized CardFocusManager to prevent unnecessary re-renders
+export const CardFocusManager = memo(CardFocusManagerComponent, (prevProps, nextProps) => {
+  // Only re-render if these props change
+  return (
+    prevProps.cardId === nextProps.cardId &&
+    prevProps.isFocused === nextProps.isFocused &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.navigationMode === nextProps.navigationMode &&
+    prevProps.isNavigating === nextProps.isNavigating &&
+    prevProps.className === nextProps.className &&
+    // Deep compare style object
+    JSON.stringify(prevProps.style) === JSON.stringify(nextProps.style)
+  );
+});
+
+CardFocusManager.displayName = 'CardFocusManager';
 
 // Keyboard navigation instructions component
 export const KeyboardNavigationInstructions: React.FC = () => {

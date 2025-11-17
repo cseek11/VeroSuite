@@ -15,11 +15,28 @@ vi.mock('../../lib/supabase-client', () => ({
   },
 }));
 
-// Mock React Query
-vi.mock('@tanstack/react-query', () => ({
-  useQuery: vi.fn(),
-  useMutation: vi.fn(),
+// Mock config
+vi.mock('../../lib/config', () => ({
+  config: {
+    app: {
+      environment: 'test',
+    },
+    supabaseUrl: 'https://test.supabase.co',
+    supabaseAnonKey: 'test-anon-key',
+  },
 }));
+
+// Mock React Query
+vi.mock('@tanstack/react-query', async () => {
+  const actual = await vi.importActual('@tanstack/react-query');
+  return {
+    ...actual,
+    QueryClient: actual.QueryClient,
+    QueryClientProvider: actual.QueryClientProvider,
+    useQuery: vi.fn(),
+    useMutation: vi.fn(),
+  };
+});
 
 describe('useAuth', () => {
   const mockSupabaseAuth = vi.mocked(supabase.auth);

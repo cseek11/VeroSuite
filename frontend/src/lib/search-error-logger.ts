@@ -4,6 +4,7 @@
 // Comprehensive error logging for search operations with detailed context
 
 import { supabase } from './supabase-client';
+import { logger } from '@/utils/logger';
 
 export interface SearchErrorContext {
   operation: string;
@@ -62,8 +63,8 @@ class SearchErrorLogger {
       this.errors = this.errors.slice(0, this.maxErrors);
     }
 
-    // Log to console with detailed context
-    console.error('🔴 Search Error:', {
+    // Log error with detailed context
+    logger.error('Search Error', {
       id: errorId,
       type: searchError.type,
       severity,
@@ -72,13 +73,13 @@ class SearchErrorLogger {
       query: fullContext.query,
       stack: error.stack,
       context: fullContext
-    });
+    }, 'search-error-logger');
 
     // Try to persist to database (non-blocking)
     try {
       await this.persistError(searchError);
-    } catch (persistError) {
-      console.error('Failed to persist search error:', persistError);
+    } catch (persistError: unknown) {
+      logger.error('Failed to persist search error', persistError, 'search-error-logger');
     }
 
     // Send to external error tracking if configured
@@ -95,13 +96,15 @@ class SearchErrorLogger {
     executionTimeMs: number,
     context?: Partial<SearchErrorContext>
   ): Promise<void> {
-    console.log('✅ Search Success:', {
-      operation,
-      query,
-      resultsCount,
-      executionTimeMs,
-      context
-    });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Search Success', {
+        operation,
+        query,
+        resultsCount,
+        executionTimeMs,
+        context
+      }, 'search-error-logger');
+    }
 
     // Log to search analytics if available
     try {
@@ -112,8 +115,8 @@ class SearchErrorLogger {
         p_execution_time_ms: executionTimeMs,
         p_context: context || {}
       });
-    } catch (error) {
-      console.warn('Failed to log search success:', error);
+    } catch (error: unknown) {
+      logger.warn('Failed to log search success', { error }, 'search-error-logger');
     }
   }
 
@@ -152,8 +155,8 @@ class SearchErrorLogger {
           .from('search_errors')
           .update({ is_resolved: true, resolved_at: new Date().toISOString() })
           .eq('id', errorId);
-      } catch (dbError) {
-        console.error('Failed to update error resolution:', dbError);
+      } catch (dbError: unknown) {
+        logger.error('Failed to update error resolution', dbError, 'search-error-logger');
       }
     }
   }
@@ -235,8 +238,8 @@ class SearchErrorLogger {
         user_agent: error.context.userAgent,
         created_at: error.createdAt.toISOString()
       });
-    } catch (dbError) {
-      console.error('Failed to persist search error to database:', dbError);
+    } catch (dbError: unknown) {
+      logger.error('Failed to persist search error to database', dbError, 'search-error-logger');
     }
   }
 
@@ -245,9 +248,9 @@ class SearchErrorLogger {
    */
   private async sendToErrorTracking(error: SearchError): Promise<void> {
     // This would integrate with services like Sentry, LogRocket, etc.
-    // For now, just log to console
+    // For now, just log to logger
     if (error.severity === 'critical') {
-      console.error('🚨 CRITICAL SEARCH ERROR - Consider external alerting:', error);
+      logger.error('CRITICAL SEARCH ERROR - Consider external alerting', error, 'search-error-logger');
     }
   }
 }

@@ -9,8 +9,6 @@ interface KpiDisplayCardProps {
 const KpiDisplayCard: React.FC<KpiDisplayCardProps> = ({ cardId, kpiData }) => {
   const kpi = cardId ? kpiData[cardId] : null;
   
-  console.log('🎯 KPIDisplayCard rendered:', { cardId, kpiData, kpi });
-  
   if (!kpi) {
     return (
       <div className="p-4 text-gray-600 text-center">

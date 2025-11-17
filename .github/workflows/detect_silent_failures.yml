@@ -1,0 +1,65 @@
+name: Detect Silent Failures
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Get PR number
+        id: pr
+        run: |
+          echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Detect silent failures
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+        run: |
+          python .cursor/scripts/detect_silent_failures.py \
+            --pr "$PR_NUM" \
+            --out detection.json
+
+      - name: Upload detection artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: silent-failure-detection
+          path: detection.json
+          retention-days: 7
+
+      - name: Post detection comment
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ ! -f detection.json ]; then
+            echo "No detection.json found"
+            exit 0
+          fi
+          
+          REPORT=$(jq -r '.report' detection.json)
+          COMPLIANCE=$(jq -r '.compliance' detection.json)
+          
+          gh pr comment "$PR_NUM" --body "$REPORT" || true
+          
+          # Block if critical violations
+          if [ "$COMPLIANCE" = "false" ]; then
+            CRITICAL=$(jq '[.violations[] | select(.severity == "high")] | length' detection.json)
+            if [ "$CRITICAL" -gt 0 ]; then
+              echo "::error::Found $CRITICAL critical silent failure(s)"
+              exit 1
+            fi
+          fi
+

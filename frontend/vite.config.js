@@ -7,6 +7,11 @@ export default defineConfig({
         alias: {
             '@': path.resolve(__dirname, './src'),
         },
+        // Ensure TypeScript files in shared folder are resolved correctly
+        extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+    },
+    optimizeDeps: {
+        include: ['react-window', 'react-window-infinite-loader'],
     },
     server: {
         port: 5173,

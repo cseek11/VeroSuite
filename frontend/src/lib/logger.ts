@@ -10,12 +10,20 @@ export enum LogLevel {
   FATAL = 4,
 }
 
-// Log entry interface
+// Log entry interface - aligned with backend StructuredLogEntry
 interface LogEntry {
   level: LogLevel;
   message: string;
   timestamp: string;
-  context?: Record<string, any>;
+  context?: string; // Context identifier (service, module, component name)
+  operation?: string; // Operation name (function, endpoint, action)
+  severity: 'info' | 'warn' | 'error' | 'debug' | 'verbose';
+  errorCode?: string; // Error classification code
+  rootCause?: string; // Root cause description
+  traceId?: string; // Distributed trace identifier
+  spanId?: string; // Span identifier within trace
+  requestId?: string; // Request identifier
+  additionalData?: Record<string, any>; // Additional structured data
   error?: Error;
   userId?: string;
   tenantId?: string;
@@ -59,21 +67,44 @@ export class Logger {
     }
   }
 
-  // Create log entry
+  // Create log entry with structured format
+  // MANDATORY: All logs must include message, context, traceId, operation, severity, errorCode/rootCause
   private createLogEntry(
     level: LogLevel,
     message: string,
-    context?: Record<string, any>,
-    error?: Error
+    context?: string | Record<string, any>,
+    error?: Error,
+    operation?: string,
+    errorCode?: string,
+    rootCause?: string,
+    traceId?: string,
+    spanId?: string,
+    requestId?: string
   ): LogEntry {
     const userContext = this.getUserContext();
+    
+    // Handle context as string (context identifier) or object (legacy support)
+    const contextString = typeof context === 'string' ? context : 'Application';
+    const additionalData = typeof context === 'object' ? context : {};
+    
+    // Get or generate trace ID
+    const finalTraceId = traceId || this.getOrGenerateTraceId();
+    const finalRequestId = requestId || this.getOrGenerateRequestId();
     
     return {
       level,
       message,
       timestamp: new Date().toISOString(),
-      context: {
-        ...context,
+      context: contextString,
+      operation,
+      severity: this.getSeverityFromLevel(level),
+      ...(errorCode && { errorCode }),
+      ...(rootCause && { rootCause }),
+      ...(finalTraceId && { traceId: finalTraceId }),
+      ...(spanId && { spanId }),
+      ...(finalRequestId && { requestId: finalRequestId }),
+      additionalData: {
+        ...additionalData,
         ...userContext,
         sessionId: this.sessionId,
         environment: config.app.environment,
@@ -84,6 +115,39 @@ export class Logger {
       tenantId: userContext.tenantId,
       sessionId: this.sessionId,
     };
+  }
+
+  // Get severity string from log level
+  private getSeverityFromLevel(level: LogLevel): 'info' | 'warn' | 'error' | 'debug' | 'verbose' {
+    switch (level) {
+      case LogLevel.DEBUG:
+        return 'debug';
+      case LogLevel.INFO:
+        return 'info';
+      case LogLevel.WARN:
+        return 'warn';
+      case LogLevel.ERROR:
+      case LogLevel.FATAL:
+        return 'error';
+      default:
+        return 'info';
+    }
+  }
+
+  // Get or generate trace ID (stored in session storage for consistency)
+  private getOrGenerateTraceId(): string {
+    const key = 'verofield_trace_id';
+    let traceId = sessionStorage.getItem(key);
+    if (!traceId) {
+      traceId = `trace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      sessionStorage.setItem(key, traceId);
+    }
+    return traceId;
+  }
+
+  // Get or generate request ID
+  private getOrGenerateRequestId(): string {
+    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   // Add log entry
@@ -139,29 +203,93 @@ export class Logger {
     }
   }
 
-  // Log methods
-  debug(message: string, context?: Record<string, any>) {
-    const entry = this.createLogEntry(LogLevel.DEBUG, message, context);
+  // Log methods with structured format support
+  /**
+   * Log debug message with structured format
+   * @param message - Human-readable log message
+   * @param context - Context identifier (string) or additional data (object for backward compatibility)
+   * @param operation - Operation name (function, endpoint, action)
+   * @param traceId - Distributed trace identifier
+   * @param spanId - Span identifier within trace
+   * @param requestId - Request identifier
+   */
+  debug(
+    message: string,
+    context?: string | Record<string, any>,
+    operation?: string,
+    traceId?: string,
+    spanId?: string,
+    requestId?: string
+  ) {
+    const entry = this.createLogEntry(LogLevel.DEBUG, message, context, undefined, operation, undefined, undefined, traceId, spanId, requestId);
     this.addLog(entry);
   }
 
-  info(message: string, context?: Record<string, any>) {
-    const entry = this.createLogEntry(LogLevel.INFO, message, context);
+  /**
+   * Log info message with structured format
+   */
+  info(
+    message: string,
+    context?: string | Record<string, any>,
+    operation?: string,
+    traceId?: string,
+    spanId?: string,
+    requestId?: string
+  ) {
+    const entry = this.createLogEntry(LogLevel.INFO, message, context, undefined, operation, undefined, undefined, traceId, spanId, requestId);
     this.addLog(entry);
   }
 
-  warn(message: string, context?: Record<string, any>, error?: Error) {
-    const entry = this.createLogEntry(LogLevel.WARN, message, context, error);
+  /**
+   * Log warning message with structured format
+   */
+  warn(
+    message: string,
+    context?: string | Record<string, any>,
+    error?: Error,
+    operation?: string,
+    errorCode?: string,
+    traceId?: string,
+    spanId?: string,
+    requestId?: string
+  ) {
+    const entry = this.createLogEntry(LogLevel.WARN, message, context, error, operation, errorCode, undefined, traceId, spanId, requestId);
     this.addLog(entry);
   }
 
-  error(message: string, context?: Record<string, any>, error?: Error) {
-    const entry = this.createLogEntry(LogLevel.ERROR, message, context, error);
+  /**
+   * Log error message with structured format
+   */
+  error(
+    message: string,
+    context?: string | Record<string, any>,
+    error?: Error,
+    operation?: string,
+    errorCode?: string,
+    rootCause?: string,
+    traceId?: string,
+    spanId?: string,
+    requestId?: string
+  ) {
+    const entry = this.createLogEntry(LogLevel.ERROR, message, context, error, operation, errorCode, rootCause, traceId, spanId, requestId);
     this.addLog(entry);
   }
 
-  fatal(message: string, context?: Record<string, any>, error?: Error) {
-    const entry = this.createLogEntry(LogLevel.FATAL, message, context, error);
+  /**
+   * Log fatal error message with structured format
+   */
+  fatal(
+    message: string,
+    context?: string | Record<string, any>,
+    error?: Error,
+    operation?: string,
+    errorCode?: string,
+    rootCause?: string,
+    traceId?: string,
+    spanId?: string,
+    requestId?: string
+  ) {
+    const entry = this.createLogEntry(LogLevel.FATAL, message, context, error, operation, errorCode, rootCause, traceId, spanId, requestId);
     this.addLog(entry);
   }
 
@@ -207,9 +335,20 @@ export class Logger {
     this.info(message, context);
   }
 
-  // Generic log method
-  log(level: LogLevel, message: string, context?: Record<string, any>, error?: Error) {
-    const entry = this.createLogEntry(level, message, context, error);
+  // Generic log method with structured format support
+  log(
+    level: LogLevel,
+    message: string,
+    context?: string | Record<string, any>,
+    error?: Error,
+    operation?: string,
+    errorCode?: string,
+    rootCause?: string,
+    traceId?: string,
+    spanId?: string,
+    requestId?: string
+  ) {
+    const entry = this.createLogEntry(level, message, context, error, operation, errorCode, rootCause, traceId, spanId, requestId);
     this.addLog(entry);
   }
 

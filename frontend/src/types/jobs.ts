@@ -44,10 +44,13 @@ export enum JobStatus {
 
 export interface CreateJobRequest {
   work_order_id: string;
+  account_id: string;
+  location_id: string;
   technician_id?: string;
   scheduled_date: string;
-  scheduled_start_time: string;
-  scheduled_end_time: string;
+  scheduled_start_time?: string;
+  scheduled_end_time?: string;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
   status?: JobStatus;
   notes?: string;
 }

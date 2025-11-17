@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, User, Mail, Phone } from 'lucide-react';
+import { Search, User } from 'lucide-react';
 
 interface Customer {
   id: string;
@@ -32,9 +32,6 @@ export const CustomerSearch: React.FC<CustomerSearchProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Debug logging
-  console.log('CustomerSearch - customers:', customers);
-  console.log('CustomerSearch - customers length:', customers?.length);
 
 
   // Get selected customer for display

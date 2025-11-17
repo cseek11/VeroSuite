@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { DollarSign, CreditCard, FileText, Download, Eye, AlertCircle, CheckCircle, Clock, Calendar, Plus, Edit, Trash2 } from 'lucide-react';
+import { CreditCard, Download, Eye, AlertCircle, CheckCircle, Clock, Plus, Edit, Trash2 } from 'lucide-react';
 import {
   Typography,
   Button,
@@ -21,7 +21,8 @@ import {
   DialogTitle
 } from '@/components/ui';
 import { enhancedApi } from '@/lib/enhanced-api';
-import type { Invoice, Payment, PaymentMethod, CreatePaymentMethodDto } from '@/types/enhanced-types';
+import type { Invoice, Payment, PaymentMethod } from '@/types/enhanced-types';
+import { logger } from '@/utils/logger';
 
 interface Customer {
   id: string;
@@ -116,7 +117,7 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
         ));
         setPaymentMethods(paymentMethodsData);
       } catch (err) {
-        console.error('Error loading customer billing data:', err);
+        logger.error('Error loading customer billing data', err, 'CustomerBilling');
         setError(err instanceof Error ? err.message : 'Failed to load billing data');
       } finally {
         setLoading(false);
@@ -410,7 +411,7 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
                           const updatedMethods = await enhancedApi.billing.getPaymentMethods(customer.id);
                           setPaymentMethods(updatedMethods);
                         } catch (err) {
-                          console.error('Error deleting payment method:', err);
+                          logger.error('Error deleting payment method', err, 'CustomerBilling');
                         }
                       }}
                     >

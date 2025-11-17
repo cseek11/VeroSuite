@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+// Legacy JS utility - to be refactored to TS in future cleanup
+
 export class DataAdapter {
   constructor({ source = [], map = {}, transport } = {}) { this.source = source; this.map = map; this.transport = transport; }
   _applyMap(item, inverse=false) { return item; }

@@ -1,8 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { technicianApi } from '../lib/technician-api';
 import { 
-  TechnicianProfile, 
-  TechnicianListResponse, 
   CreateTechnicianProfileDto, 
   UpdateTechnicianProfileDto,
   TechnicianQueryParams 

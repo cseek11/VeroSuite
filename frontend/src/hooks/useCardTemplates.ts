@@ -43,7 +43,7 @@ export function useCardTemplates({
   userId = 'user'
 }: UseCardTemplatesProps) {
   const [templates, setTemplates] = useState<CardTemplate[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, _setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);

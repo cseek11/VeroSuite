@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { secureApiClient } from '@/lib/secure-api-client';
 import { authService } from '@/lib/auth-service';
 import { useAuthStore } from '@/stores/auth';
 import { loginSchema, type LoginFormData } from '@/lib/validation';
-import { Eye, EyeOff, Mail, Lock, Building, Loader2 } from 'lucide-react';
-import { Button, Input, Card, Typography } from '@/components/ui/EnhancedUI';
+import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
+import Card from '@/components/ui/Card';
+import { Text } from '@/components/ui';
 import { BackgroundBeams } from '@/components/ui/background-beams';
-import { BugIcon } from '@/components/icons/BugIcon';
+import { logger } from '@/utils/logger';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -39,7 +39,9 @@ export default function Login() {
     setError(null);
     try {
       const res = await authService.login(data.email, data.password);
-      console.log('Login successful:', res);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Login successful', { res }, 'Login');
+      }
       
       // Extract the correct fields from backend response
       const token = res.token;
@@ -51,11 +53,13 @@ export default function Login() {
       
       // Don't set tenantId from user input - it will be validated and set by the auth store
       await setAuth({ token, user });
-      console.log('Auth set, navigating to dashboard');
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Auth set, navigating to dashboard', {}, 'Login');
+      }
       navigate('/dashboard');
-    } catch (err: any) {
-      console.error('Login error:', err);
-      setError(err.message || 'Login failed');
+    } catch (err: unknown) {
+      logger.error('Login error', err, 'Login');
+      setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -180,9 +184,9 @@ export default function Login() {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <Typography variant="body2" className="text-gray-200 drop-shadow-md">
+          <Text variant="small" className="text-gray-200 drop-shadow-md">
             © 2025 VeroPest Suite. All rights reserved.
-          </Typography>
+          </Text>
         </div>
       </div>
     </div>

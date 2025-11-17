@@ -1,0 +1,350 @@
+#!/usr/bin/env python3
+"""
+Collect and aggregate REWARD_SCORE metrics from PRs.
+
+Reads reward.json artifacts and aggregates metrics for dashboard visualization.
+"""
+
+import argparse
+import json
+import subprocess
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Dict, List, Optional
+
+# Import structured logger
+try:
+    from logger_util import get_logger
+    logger = get_logger(context="collect_metrics")
+except ImportError:
+    # Fallback if logger_util not available (should not happen)
+    import logging
+    logger = logging.getLogger("collect_metrics")
+
+
+METRICS_FILE = Path(__file__).resolve().parents[0].parents[0] / "docs" / "metrics" / "reward_scores.json"
+
+
+def load_metrics() -> Dict:
+    """Load existing metrics from JSON file."""
+    if METRICS_FILE.exists():
+        try:
+            with open(METRICS_FILE, "r", encoding="utf-8") as handle:
+                return json.load(handle)
+        except (json.JSONDecodeError, FileNotFoundError) as e:
+            logger.warn(
+                f"Could not load metrics file: {METRICS_FILE}",
+                operation="load_metrics",
+                error=e,
+                metrics_file=str(METRICS_FILE)
+            )
+            pass
+    return {
+        "version": "1.0",
+        "last_updated": datetime.utcnow().isoformat() + "Z",
+        "scores": [],
+        "aggregates": {
+            "total_prs": 0,
+            "average_score": 0.0,
+            "score_distribution": {},
+            "trends": [],
+            "category_performance": {},
+            "anti_patterns": []
+        }
+    }
+
+
+def save_metrics(metrics: Dict) -> None:
+    """Save metrics to JSON file."""
+    METRICS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    metrics["last_updated"] = datetime.utcnow().isoformat() + "Z"
+    with open(METRICS_FILE, "w", encoding="utf-8") as handle:
+        json.dump(metrics, handle, indent=2)
+
+
+def get_reward_artifacts(repo_path: Path, days: int = 30) -> List[Dict]:
+    """Get reward artifacts from recent PRs."""
+    artifacts = []
+    
+    try:
+        # Get recent PRs using GitHub CLI
+        result = subprocess.run(
+            ["gh", "pr", "list", "--state", "all", "--limit", "100", "--json", "number,mergedAt,closedAt"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        if result.returncode == 0:
+            prs = json.loads(result.stdout)
+            for pr in prs:
+                pr_num = str(pr.get("number", ""))
+                # Try to get reward artifact (would need artifact API, simplified here)
+                # In real implementation, would fetch from GitHub Actions artifacts
+                artifacts.append({
+                    "pr": pr_num,
+                    "merged_at": pr.get("mergedAt"),
+                    "closed_at": pr.get("closedAt")
+                })
+    except (subprocess.TimeoutExpired, FileNotFoundError, json.JSONDecodeError) as e:
+        logger.warn(
+            "Could not get PR artifacts",
+            operation="get_pr_artifacts",
+            error=e,
+            pr_num=pr_num
+        )
+        pass
+    
+    return artifacts
+
+
+def get_pr_info(pr_num: str, repo_path: Path) -> Dict:
+    """Get PR information including author and files changed."""
+    info = {
+        "author": None,
+        "files_changed": 0,
+        "coverage_delta": None
+    }
+    
+    try:
+        # Get PR info using GitHub CLI
+        result = subprocess.run(
+            ["gh", "pr", "view", pr_num, "--json", "author,changedFiles"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode == 0:
+            pr_data = json.loads(result.stdout)
+            info["author"] = pr_data.get("author", {}).get("login")
+            info["files_changed"] = pr_data.get("changedFiles", 0)
+    except (subprocess.TimeoutExpired, FileNotFoundError, json.JSONDecodeError) as e:
+        logger.warn(
+            "Could not get PR info",
+            operation="get_pr_info",
+            error=e,
+            pr_num=pr_num
+        )
+        pass
+    
+    return info
+
+
+def add_score_entry(metrics: Dict, pr_num: str, score: int, breakdown: Dict, metadata: Dict, repo_path: Optional[Path] = None) -> None:
+    """Add a new score entry to metrics with enhanced data."""
+    # Get PR info if repo path provided
+    pr_info = {}
+    if repo_path:
+        pr_info = get_pr_info(pr_num, repo_path)
+    
+    entry = {
+        "pr": pr_num,
+        "score": score,
+        "breakdown": breakdown,
+        "timestamp": metadata.get("computed_at", datetime.utcnow().isoformat() + "Z"),
+        "rubric_version": metadata.get("rubric_version", "unknown"),
+        "author": pr_info.get("author"),
+        "files_changed": pr_info.get("files_changed", 0),
+        "coverage_delta": pr_info.get("coverage_delta")
+    }
+    
+    # Add to scores list
+    if "scores" not in metrics:
+        metrics["scores"] = []
+    
+    # Check if PR already exists, update if so
+    existing_index = None
+    for i, existing in enumerate(metrics["scores"]):
+        if existing.get("pr") == pr_num:
+            existing_index = i
+            break
+    
+    if existing_index is not None:
+        metrics["scores"][existing_index] = entry
+    else:
+        metrics["scores"].append(entry)
+    
+    # Keep only last 1000 entries
+    metrics["scores"] = metrics["scores"][-1000:]
+
+
+def calculate_aggregates(metrics: Dict) -> Dict:
+    """Calculate aggregate metrics including category performance and anti-patterns."""
+    scores = metrics.get("scores", [])
+
+    if not scores:
+        return {
+            "total_prs": 0,
+            "average_score": 0.0,
+            "score_distribution": {},
+            "trends": [],
+            "category_performance": {},
+            "anti_patterns": []
+        }
+
+    # Calculate total and average
+    total_prs = len(scores)
+    total_score = sum(entry.get("score", 0) for entry in scores)
+    average_score = total_score / total_prs if total_prs > 0 else 0.0
+    
+    # Calculate category performance
+    category_totals = {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": 0,
+        "penalties": 0
+    }
+    category_counts = {key: 0 for key in category_totals}
+    
+    for entry in scores:
+        breakdown = entry.get("breakdown", {})
+        for category in category_totals:
+            if category in breakdown:
+                category_totals[category] += breakdown[category]
+                if breakdown[category] != 0:
+                    category_counts[category] += 1
+    
+    category_performance = {}
+    for category in category_totals:
+        avg = category_totals[category] / total_prs if total_prs > 0 else 0.0
+        category_performance[category] = {
+            "average": round(avg, 2),
+            "total": category_totals[category],
+            "count": category_counts[category]
+        }
+    
+    # Track anti-patterns (low scores <= 0)
+    anti_patterns = []
+    for entry in scores:
+        if entry.get("score", 0) <= 0:
+            anti_patterns.append({
+                "pr": entry.get("pr"),
+                "score": entry.get("score"),
+                "timestamp": entry.get("timestamp"),
+                "breakdown": entry.get("breakdown", {}),
+                "penalties": entry.get("breakdown", {}).get("penalties", 0)
+            })
+    
+    # Keep only last 50 anti-patterns
+    anti_patterns = sorted(anti_patterns, key=lambda x: x.get("timestamp", ""), reverse=True)[:50]
+    
+    # Calculate score distribution
+    distribution = {}
+    for entry in scores:
+        score = entry.get("score", 0)
+        score_range = get_score_range(score)
+        distribution[score_range] = distribution.get(score_range, 0) + 1
+    
+    # Calculate trends (last 30 days)
+    now = datetime.utcnow()
+    thirty_days_ago = now - timedelta(days=30)
+    
+    recent_scores = []
+    for entry in scores:
+        try:
+            timestamp = datetime.fromisoformat(entry.get("timestamp", "").replace("Z", "+00:00"))
+            if timestamp.replace(tzinfo=None) >= thirty_days_ago:
+                recent_scores.append(entry)
+        except (ValueError, TypeError) as e:
+            logger.debug(
+                f"Could not parse timestamp: {entry.get('timestamp')}",
+                operation="calculate_aggregates",
+                error=e,
+                entry_pr=entry.get('pr', 'unknown')
+            )
+            pass
+    
+    # Group by week
+    trends = []
+    if recent_scores:
+        # Group by week
+        weekly_scores = {}
+        for entry in recent_scores:
+            try:
+                timestamp = datetime.fromisoformat(entry.get("timestamp", "").replace("Z", "+00:00"))
+                week_key = timestamp.strftime("%Y-W%W")
+                if week_key not in weekly_scores:
+                    weekly_scores[week_key] = []
+                weekly_scores[week_key].append(entry.get("score", 0))
+            except (ValueError, TypeError):
+                pass
+        
+        for week, week_scores in sorted(weekly_scores.items()):
+            trends.append({
+                "period": week,
+                "average": sum(week_scores) / len(week_scores) if week_scores else 0.0,
+                "count": len(week_scores)
+            })
+    
+    return {
+        "total_prs": total_prs,
+        "average_score": round(average_score, 2),
+        "score_distribution": distribution,
+        "trends": trends,
+        "category_performance": category_performance,
+        "anti_patterns": anti_patterns
+    }
+
+
+def get_score_range(score: int) -> str:
+    """Get score range category."""
+    if score >= 6:
+        return "high (6+)"
+    elif score >= 3:
+        return "medium (3-5)"
+    elif score >= 0:
+        return "low (0-2)"
+    else:
+        return "negative (<0)"
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--pr", help="PR number (optional, for single PR update)")
+    parser.add_argument("--score", type=int, help="Score value (optional)")
+    parser.add_argument("--breakdown", help="Path to breakdown JSON (optional)")
+    parser.add_argument("--metadata", help="Path to metadata JSON (optional)")
+    parser.add_argument("--aggregate-only", action="store_true", help="Only recalculate aggregates")
+    args = parser.parse_args()
+    
+    # Load existing metrics
+    metrics = load_metrics()
+    
+    # Add new score entry if provided
+    if args.pr and args.score is not None:
+        breakdown = {}
+        if args.breakdown:
+            with open(args.breakdown, "r", encoding="utf-8") as handle:
+                breakdown = json.load(handle)
+        
+        metadata = {}
+        if args.metadata:
+            with open(args.metadata, "r", encoding="utf-8") as handle:
+                metadata = json.load(handle)
+        
+        # Get repo path for PR info
+        repo_path = Path(__file__).resolve().parents[0].parents[0]
+        add_score_entry(metrics, args.pr, args.score, breakdown, metadata, repo_path)
+    
+    # Recalculate aggregates
+    metrics["aggregates"] = calculate_aggregates(metrics)
+    
+    # Save metrics
+    save_metrics(metrics)
+    
+    logger.info(
+        f"Metrics updated: {metrics['aggregates']['total_prs']} PRs, avg score: {metrics['aggregates']['average_score']}",
+        operation="main",
+        total_prs=metrics['aggregates']['total_prs'],
+        average_score=metrics['aggregates']['average_score']
+    )
+
+
+if __name__ == "__main__":
+    main()
+

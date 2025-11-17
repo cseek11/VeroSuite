@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Phone, Mail, MapPin, User, Edit2, Plus, Trash2 } from 'lucide-react';
+import { Phone, Mail, User, Edit2, Plus, Trash2 } from 'lucide-react';
 import { Button, Input, Typography } from '@/components/ui';
 
 interface CustomerContactProps {

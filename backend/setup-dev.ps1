@@ -7,7 +7,7 @@ if (-not (Test-Path $envFile)) {
     Write-Host "Creating .env file..." -ForegroundColor Yellow
     @"
 # Database Configuration
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/verosuite"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/verofield"
 
 # JWT Configuration
 JWT_SECRET="dev-jwt-secret-key-change-in-production"

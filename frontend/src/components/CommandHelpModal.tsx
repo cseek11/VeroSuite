@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Search, Command, Users, Calendar, DollarSign, Settings, BarChart3, Wrench, MessageSquare, FileText, Shield, Database, ChevronDown, ChevronRight } from 'lucide-react';
+import { X, Search, Command, Users, Calendar, DollarSign, BarChart3, Wrench, MessageSquare, Shield, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface CommandHelpModalProps {
   isOpen: boolean;

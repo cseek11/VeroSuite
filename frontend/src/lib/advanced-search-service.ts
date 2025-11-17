@@ -8,6 +8,7 @@ import { config } from '@/lib/config';
 import type { SearchFilters, Account } from '@/types/enhanced-types';
 import { intentClassificationService, type IntentResult } from './intent-classification-service';
 import { actionExecutorService, type ActionResult } from './action-handlers';
+import { logger } from '@/utils/logger';
 
 // ============================================================================
 // TYPES
@@ -57,7 +58,7 @@ class AdvancedSearchService {
 
   private getTenantId = async (): Promise<string> => {
     // Get auth data from localStorage
-    const authData = localStorage.getItem('verosuite_auth');
+    const authData = localStorage.getItem('verofield_auth');
     if (!authData) {
       throw new Error('User not authenticated');
     }
@@ -70,10 +71,10 @@ class AdvancedSearchService {
         throw new Error('Tenant ID not found in auth data');
       }
 
-      console.log('🔍 Getting tenant ID for user:', parsed.user?.email);
+      logger.debug('Getting tenant ID for user', { userEmail: parsed.user?.email }, 'advanced-search-service');
       return tenantId;
-    } catch (error) {
-      console.error('Error parsing auth data:', error);
+    } catch (error: unknown) {
+      logger.error('Error parsing auth data', error, 'advanced-search-service');
       throw new Error('Invalid authentication data');
     }
   };
@@ -88,15 +89,21 @@ class AdvancedSearchService {
     options: AdvancedSearchOptions = {}
   ): Promise<GlobalSearchResult> => {
     try {
-      console.log('🌍 Starting global search for query:', query);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Starting global search for query', { query }, 'advanced-search-service');
+      }
       
       // First, classify the intent of the query
       const intentResult = intentClassificationService.classifyIntent(query);
-      console.log('🎯 Intent classified:', intentResult);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Intent classified', { intent: intentResult.intent, confidence: intentResult.confidence }, 'advanced-search-service');
+      }
       
       // If it's a search intent or low confidence, fall back to regular search
       if (intentResult.intent === 'search' || intentResult.confidence < 0.6) {
-        console.log('🔍 Falling back to regular search');
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Falling back to regular search', {}, 'advanced-search-service');
+        }
         const searchResults = await this.searchCustomersAdvanced(query, filters, options);
         return {
           type: 'search',
@@ -107,12 +114,14 @@ class AdvancedSearchService {
       
       // For action intents with high confidence, execute the action
       if (intentResult.confidence >= 0.6) {
-        console.log('🚀 Executing action for intent:', intentResult.intent);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Executing action for intent', { intent: intentResult.intent }, 'advanced-search-service');
+        }
         
         // Validate the action before execution
         const validation = actionExecutorService.validateAction(intentResult);
         if (!validation.isValid) {
-          console.log('❌ Action validation failed:', validation.errors);
+          logger.warn('Action validation failed', { errors: validation.errors }, 'advanced-search-service');
           // Fall back to search if validation fails
           const searchResults = await this.searchCustomersAdvanced(query, filters, options);
           return {
@@ -127,7 +136,9 @@ class AdvancedSearchService {
         
         // If confidence is high enough, execute immediately
         if (intentResult.confidence >= 0.9) {
-          console.log('⚡ High confidence, executing action immediately');
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('High confidence, executing action immediately', {}, 'advanced-search-service');
+          }
           const actionResult = await actionExecutorService.executeAction(intentResult);
           
           return {
@@ -139,7 +150,9 @@ class AdvancedSearchService {
         }
         
         // Otherwise, return confirmation data for user approval
-        console.log('⏳ Medium confidence, requiring confirmation');
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Medium confidence, requiring confirmation', {}, 'advanced-search-service');
+        }
         return {
           type: 'action',
           intent: intentResult,
@@ -149,7 +162,9 @@ class AdvancedSearchService {
       }
       
       // Fallback to search
-      console.log('🔍 Fallback to search');
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Fallback to search', {}, 'advanced-search-service');
+      }
       const searchResults = await this.searchCustomersAdvanced(query, filters, options);
       return {
         type: 'search',
@@ -157,8 +172,8 @@ class AdvancedSearchService {
         intent: intentResult
       };
       
-    } catch (error) {
-      console.error('❌ Error in global search:', error);
+    } catch (error: unknown) {
+      logger.error('Error in global search', error, 'advanced-search-service');
       
       // On error, fall back to regular search
       try {
@@ -174,8 +189,8 @@ class AdvancedSearchService {
             processedQuery: query
           }
         };
-      } catch (searchError) {
-        console.error('❌ Fallback search also failed:', searchError);
+      } catch (searchError: unknown) {
+        logger.error('Fallback search also failed', searchError, 'advanced-search-service');
         throw error; // Re-throw original error
       }
     }
@@ -186,10 +201,12 @@ class AdvancedSearchService {
    */
   executeConfirmedAction = async (intentResult: IntentResult): Promise<ActionResult> => {
     try {
-      console.log('✅ Executing confirmed action:', intentResult.intent);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Executing confirmed action', { intent: intentResult.intent }, 'advanced-search-service');
+      }
       return await actionExecutorService.executeAction(intentResult);
-    } catch (error) {
-      console.error('❌ Error executing confirmed action:', error);
+    } catch (error: unknown) {
+      logger.error('Error executing confirmed action', error, 'advanced-search-service');
       throw error;
     }
   };
@@ -240,7 +257,9 @@ class AdvancedSearchService {
     options: AdvancedSearchOptions = {}
   ): Promise<AdvancedSearchResult[]> => {
     try {
-      console.log('🚀 Starting advanced search:', { query, filters, options });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Starting advanced search', { query, filters, options }, 'advanced-search-service');
+      }
       
       const tenantId = await this.getTenantId();
       
@@ -257,14 +276,16 @@ class AdvancedSearchService {
       // Generate search variations for typo tolerance
       const searchVariations = this.generateSearchVariations(normalizedQuery, typoTolerance);
       
-      console.log('🔍 Advanced search setup:', {
-        originalQuery: query,
-        normalizedQuery,
-        searchVariations,
-        searchMode,
-        fuzzyThreshold,
-        tenantId
-      });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Advanced search setup', {
+          originalQuery: query,
+          normalizedQuery,
+          searchVariations,
+          searchMode,
+          fuzzyThreshold,
+          tenantId
+        }, 'advanced-search-service');
+      }
 
       // Execute search based on mode
       let results: AdvancedSearchResult[] = [];
@@ -288,16 +309,20 @@ class AdvancedSearchService {
           break;
       }
 
-      console.log('📊 Raw search results:', { count: results.length, results: results.slice(0, 2) });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Raw search results', { count: results.length, results: results.slice(0, 2) }, 'advanced-search-service');
+      }
 
       // Post-process results
       const processedResults = this.postProcessResults(results, query, normalizedQuery);
       
-      console.log(`✅ Advanced search completed: ${processedResults.length} results`);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Advanced search completed', { resultCount: processedResults.length }, 'advanced-search-service');
+      }
       return processedResults;
 
-    } catch (error) {
-      console.error('❌ Advanced search failed:', error);
+    } catch (error: unknown) {
+      logger.error('Advanced search failed', error, 'advanced-search-service');
       throw error;
     }
   };
@@ -323,8 +348,8 @@ class AdvancedSearchService {
         .slice(0, limit);
 
       return suggestions;
-    } catch (error) {
-      console.error('❌ Failed to get search suggestions:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to get search suggestions', error, 'advanced-search-service');
       return [];
     }
   };
@@ -351,7 +376,9 @@ class AdvancedSearchService {
         const bestCorrection = suggestions.find(s => s.type === 'correction' && s.confidence > 0.7);
         
         if (bestCorrection) {
-          console.log(`🔧 Auto-correcting "${query}" to "${bestCorrection.text}"`);
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('Auto-correcting query', { original: query, corrected: bestCorrection.text }, 'advanced-search-service');
+          }
           results = await this.searchCustomersAdvanced(bestCorrection.text, filters, options);
           
           return {
@@ -369,8 +396,8 @@ class AdvancedSearchService {
         results,
         suggestions
       };
-    } catch (error) {
-      console.error('❌ Search with auto-correction failed:', error);
+    } catch (error: unknown) {
+      logger.error('Search with auto-correction failed', error, 'advanced-search-service');
       throw error;
     }
   };
@@ -451,7 +478,9 @@ class AdvancedSearchService {
     filters?: SearchFilters,
     maxResults: number = 50
   ): Promise<AdvancedSearchResult[]> {
-    console.log('🔍 Executing standard search:', { query, tenantId, filters, maxResults });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Executing standard search', { query, tenantId, filters, maxResults }, 'advanced-search-service');
+    }
     
     // Use the new multi-word search function for better multi-word query handling
     const { data, error } = await supabase
@@ -463,11 +492,13 @@ class AdvancedSearchService {
       });
 
     if (error) {
-      console.error('❌ Standard search failed:', error);
+      logger.error('Standard search failed', error, 'advanced-search-service');
       return [];
     }
 
-    console.log('✅ Standard search results:', { count: data?.length || 0, data: data?.slice(0, 2) });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Standard search results', { count: data?.length || 0, data: data?.slice(0, 2) }, 'advanced-search-service');
+    }
     return this.mapToAdvancedResults(data || [], 'exact');
   }
 
@@ -490,8 +521,8 @@ class AdvancedSearchService {
         if (!error && data) {
           return this.mapToAdvancedResults(data, 'fuzzy');
         }
-      } catch (e) {
-        console.warn('Fuzzy RPC unavailable, falling back to client fuzzy search');
+      } catch (e: unknown) {
+        logger.warn('Fuzzy RPC unavailable, falling back to client fuzzy search', { error: e }, 'advanced-search-service');
       }
     }
 
@@ -538,7 +569,9 @@ class AdvancedSearchService {
     fuzzyThreshold: number = 0.3,
     maxResults: number = 50
   ): Promise<AdvancedSearchResult[]> {
-    console.log('🔍 Executing hybrid search:', { query, searchVariations, fuzzyThreshold });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Executing hybrid search', { query, searchVariations, fuzzyThreshold }, 'advanced-search-service');
+    }
     
     // Combine standard and fuzzy search results
     const [standardResults, fuzzyResults] = await Promise.all([
@@ -546,16 +579,20 @@ class AdvancedSearchService {
       this.executeFuzzySearch(tenantId, searchVariations, filters, fuzzyThreshold, maxResults)
     ]);
 
-    console.log('📊 Hybrid search results:', { 
-      standard: standardResults.length, 
-      fuzzy: fuzzyResults.length 
-    });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Hybrid search results', { 
+        standard: standardResults.length, 
+        fuzzy: fuzzyResults.length 
+      }, 'advanced-search-service');
+    }
 
     // Merge and deduplicate results
     const allResults = [...standardResults, ...fuzzyResults];
     const uniqueResults = this.removeDuplicateResults(allResults);
     
-    console.log('✅ Final hybrid results:', { total: uniqueResults.length });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Final hybrid results', { total: uniqueResults.length }, 'advanced-search-service');
+    }
     return uniqueResults.slice(0, maxResults);
   }
 
@@ -576,47 +613,57 @@ class AdvancedSearchService {
         });
 
       if (error) {
-        console.log('Vector search not available, falling back to hybrid search');
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Vector search not available, falling back to hybrid search', {}, 'advanced-search-service');
+        }
         return this.executeHybridSearch(tenantId, query, [query], filters, 0.3, maxResults);
       }
 
       return this.mapToAdvancedResults(data || [], 'vector');
-    } catch (error) {
-      console.log('Vector search failed, falling back to hybrid search');
+    } catch (error: unknown) {
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Vector search failed, falling back to hybrid search', { error }, 'advanced-search-service');
+      }
       return this.executeHybridSearch(tenantId, query, [query], filters, 0.3, maxResults);
     }
   }
 
-  private async getTypoCorrections(tenantId: string, query: string, limit: number): Promise<SearchSuggestion[]> {
+  private async getTypoCorrections(_tenantId: string, _query: string, _limit: number): Promise<SearchSuggestion[]> {
     // This would typically use a spell-checker or ML model
     // For now, return empty array - can be enhanced later
     return [];
   }
 
-  private async getQueryCompletions(tenantId: string, query: string, limit: number): Promise<SearchSuggestion[]> {
+  private async getQueryCompletions(_tenantId: string, query: string, limit: number): Promise<SearchSuggestion[]> {
     try {
       if (config.features.enableSuggestions) {
         try {
-          console.log('🔍 Calling get_search_suggestions RPC with:', { query, limit });
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('Calling get_search_suggestions RPC', { query, limit }, 'advanced-search-service');
+          }
           const { data, error } = await supabase.rpc('get_search_suggestions', {
             p_query: query,
             p_limit: limit
           });
-          console.log('🔍 RPC response:', { data, error });
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('RPC response', { data, error }, 'advanced-search-service');
+          }
           if (!error && Array.isArray(data)) {
             const suggestions = (data as any[]).map((row) => ({
               text: row.suggestion || '',
               type: this.mapSourceToType(row.source),
               confidence: Number(row.score) / 100 // Convert score (0-100) to confidence (0-1)
             }));
-            console.log('🔍 Mapped suggestions:', suggestions);
+            if (process.env.NODE_ENV === 'development') {
+              logger.debug('Mapped suggestions', { suggestions }, 'advanced-search-service');
+            }
             return suggestions;
           }
           if (error) {
-            console.error('❌ RPC error:', error);
+            logger.error('RPC error', error, 'advanced-search-service');
           }
-        } catch (rpcError) {
-          console.warn('⚠️ RPC get_search_suggestions failed, falling back to direct queries:', rpcError);
+        } catch (rpcError: unknown) {
+          logger.warn('RPC get_search_suggestions failed, falling back to direct queries', { error: rpcError }, 'advanced-search-service');
         }
       }
       
@@ -626,14 +673,14 @@ class AdvancedSearchService {
         supabase
           .from('customers')
           .select('first_name, last_name')
-          .eq('tenant_id', tenantId)
+          .eq('tenant_id', _tenantId)
           .or(`first_name.ilike.${query}%,last_name.ilike.${query}%`)
           .limit(limit),
         // Search logs
         supabase
           .from('search_logs')
           .select('query')
-          .eq('tenant_id', tenantId)
+          .eq('tenant_id', _tenantId)
           .ilike('query', `${query}%`)
           .order('created_at', { ascending: false })
           .limit(limit)
@@ -670,8 +717,8 @@ class AdvancedSearchService {
         .sort((a, b) => b.confidence - a.confidence)
         .slice(0, limit);
         
-    } catch (error) {
-      console.error('Failed to get query completions:', error);
+    } catch (_error) {
+      logger.error('Failed to get query completions', _error, 'advanced-search-service');
       return [];
     }
   }
@@ -781,7 +828,7 @@ class AdvancedSearchService {
   private postProcessResults(
     results: AdvancedSearchResult[],
     originalQuery: string,
-    normalizedQuery: string
+    _normalizedQuery: string
   ): AdvancedSearchResult[] {
     return results.map(result => ({
       ...result,

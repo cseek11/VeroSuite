@@ -14,15 +14,13 @@ import {
   Filter,
   Search,
   MoreVertical,
-  Eye,
-  Edit,
-  Trash2,
   CheckCircle,
   Clock,
   AlertCircle
 } from 'lucide-react';
 import { enhancedApi } from '@/lib/enhanced-api';
 import type { Invoice, Payment, BillingAnalytics, RevenueAnalytics } from '@/types/enhanced-types';
+import { logger } from '@/utils/logger';
 
 // Real financial data will be fetched from the API
 
@@ -72,8 +70,8 @@ const FinancePage: React.FC = () => {
         setPayments(payments);
         setBillingAnalytics(analytics);
         setRevenueAnalytics(revenue);
-      } catch (err) {
-        console.error('Error loading finance data:', err);
+      } catch (err: unknown) {
+        logger.error('Error loading finance data', err, 'Finance');
         setError(err instanceof Error ? err.message : 'Failed to load finance data');
       } finally {
         setLoading(false);
@@ -100,8 +98,8 @@ const FinancePage: React.FC = () => {
       setPayments(paymentsData);
       setBillingAnalytics(analyticsData);
       setRevenueAnalytics(revenueData);
-    } catch (err) {
-      console.error('Error refreshing finance data:', err);
+    } catch (err: unknown) {
+      logger.error('Error refreshing finance data', err, 'Finance');
       setError(err instanceof Error ? err.message : 'Failed to refresh finance data');
     } finally {
       setLoading(false);
@@ -259,7 +257,7 @@ const FinancePage: React.FC = () => {
           <p className="text-slate-600 mb-4">{error}</p>
           <button 
             onClick={refreshData}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-sm"
           >
             Try Again
           </button>

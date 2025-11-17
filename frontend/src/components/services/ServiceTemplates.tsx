@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { supabase } from '@/lib/supabase-client';
-import { PlusIcon, PencilIcon, TrashIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { Plus, Pencil, Trash2, Copy, ArrowUp, ArrowDown, X } from 'lucide-react';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
+import Select from '@/components/ui/Select';
+import Checkbox from '@/components/ui/Checkbox';
+import Button from '@/components/ui/Button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/Dialog';
 
 interface ServiceTemplate {
   id: string;
@@ -19,6 +28,11 @@ interface ServiceTemplate {
   compliance_notes: string;
   created_at: string;
   updated_at: string;
+  customer_segments?: {
+    segment_name: string;
+    segment_code: string;
+    pricing_tier: string;
+  };
 }
 
 interface CustomerSegment {
@@ -187,18 +201,18 @@ export default function ServiceTemplates() {
       'premium': 'bg-purple-100 text-purple-800',
       'enterprise': 'bg-indigo-100 text-indigo-800',
     };
-    return colors[pricingTier.toLowerCase()] || 'bg-gray-100 text-gray-800';
+    return colors[pricingTier.toLowerCase()] || 'bg-slate-100 text-slate-800';
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white shadow-sm border border-gray-200 rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <div className="bg-white shadow-sm border border-slate-200 rounded-lg">
+        <div className="px-6 py-4 border-b border-slate-200">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Service Templates</h2>
-              <p className="text-sm text-gray-600">
+              <h2 className="text-xl font-semibold text-slate-900">Service Templates</h2>
+              <p className="text-sm text-slate-600">
                 Create and manage service templates by customer segment for consistent service delivery
               </p>
             </div>
@@ -206,7 +220,7 @@ export default function ServiceTemplates() {
               onClick={() => setIsAddingTemplate(true)}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
-              <PlusIcon className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-2" />
               Add Template
             </button>
           </div>
@@ -218,16 +232,16 @@ export default function ServiceTemplates() {
         {serviceTemplates?.map((template) => (
           <div
             key={template.id}
-            className="bg-white shadow-sm border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+            className="bg-white shadow-sm border border-slate-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
             onClick={() => setSelectedTemplate(template)}
           >
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="text-lg font-medium text-gray-900 mb-1">
+                  <h3 className="text-lg font-medium text-slate-900 mb-1">
                     {template.template_name}
                   </h3>
-                  <p className="text-sm text-gray-500 mb-2">
+                  <p className="text-sm text-slate-500 mb-2">
                     {template.template_code}
                   </p>
                   <div className="flex items-center space-x-2 mb-3">
@@ -250,7 +264,7 @@ export default function ServiceTemplates() {
                     className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
                     title="Duplicate Template"
                   >
-                    <DocumentDuplicateIcon className="h-4 w-4" />
+                    <Copy className="h-4 w-4" />
                   </button>
                   <button
                     onClick={(e) => {
@@ -260,7 +274,7 @@ export default function ServiceTemplates() {
                     className="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50"
                     title="Edit Template"
                   >
-                    <PencilIcon className="h-4 w-4" />
+                    <Pencil className="h-4 w-4" />
                   </button>
                   <button
                     onClick={(e) => {
@@ -270,31 +284,31 @@ export default function ServiceTemplates() {
                     className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                     title="Delete Template"
                   >
-                    <TrashIcon className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
               
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-slate-600 mb-4">
                 {template.description || 'No description provided'}
               </p>
               
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Services:</span>
-                  <span className="text-gray-900 font-medium">
+                  <span className="text-slate-500">Services:</span>
+                  <span className="text-slate-900 font-medium">
                     {template.service_sequence?.length || 0} services
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Duration:</span>
-                  <span className="text-gray-900 font-medium">
+                  <span className="text-slate-500">Duration:</span>
+                  <span className="text-slate-900 font-medium">
                     {template.estimated_total_duration || 0} min
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Price Multiplier:</span>
-                  <span className="text-gray-900 font-medium">
+                  <span className="text-slate-500">Price Multiplier:</span>
+                  <span className="text-slate-900 font-medium">
                     {template.base_price_multiplier || 1.0}x
                   </span>
                 </div>
@@ -340,6 +354,23 @@ export default function ServiceTemplates() {
   );
 }
 
+// Template Form Schema
+const templateSchema = z.object({
+  template_name: z.string().min(1, 'Template name is required'),
+  template_code: z.string().min(1, 'Template code is required'),
+  segment_id: z.string().min(1, 'Customer segment is required'),
+  description: z.string().optional(),
+  is_active: z.boolean().default(true),
+  base_price_multiplier: z.number().min(0.1, 'Price multiplier must be at least 0.1'),
+  service_sequence: z.array(z.string()).default([]),
+  estimated_total_duration: z.number().min(0).default(0),
+  required_equipment: z.array(z.string()).default([]),
+  safety_requirements: z.array(z.string()).default([]),
+  compliance_notes: z.string().optional(),
+});
+
+type TemplateFormData = z.infer<typeof templateSchema>;
+
 // Template Form Component
 interface TemplateFormProps {
   template?: ServiceTemplate | null;
@@ -350,226 +381,281 @@ interface TemplateFormProps {
 }
 
 function TemplateForm({ template, segments, serviceTypes, onSubmit, onCancel }: TemplateFormProps) {
-  const [formData, setFormData] = useState({
-    template_name: template?.template_name || '',
-    template_code: template?.template_code || '',
-    segment_id: template?.segment_id || '',
-    description: template?.description || '',
-    is_active: template?.is_active ?? true,
-    base_price_multiplier: template?.base_price_multiplier || 1.0,
-    service_sequence: template?.service_sequence || [],
-    estimated_total_duration: template?.estimated_total_duration || 0,
-    required_equipment: template?.required_equipment || [],
-    safety_requirements: template?.safety_requirements || [],
-    compliance_notes: template?.compliance_notes || '',
+  const [isOpen, setIsOpen] = useState(true);
+  const [selectedServiceToAdd, setSelectedServiceToAdd] = useState('');
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    setValue,
+    reset,
+  } = useForm<TemplateFormData>({
+    resolver: zodResolver(templateSchema),
+    defaultValues: {
+      template_name: template?.template_name || '',
+      template_code: template?.template_code || '',
+      segment_id: template?.segment_id || '',
+      description: template?.description || '',
+      is_active: template?.is_active ?? true,
+      base_price_multiplier: template?.base_price_multiplier || 1.0,
+      service_sequence: template?.service_sequence || [],
+      estimated_total_duration: template?.estimated_total_duration || 0,
+      required_equipment: template?.required_equipment || [],
+      safety_requirements: template?.safety_requirements || [],
+      compliance_notes: template?.compliance_notes || '',
+    },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
+  const serviceSequence = watch('service_sequence');
+
+  const handleFormSubmit = (data: TemplateFormData) => {
+    onSubmit(data as Omit<ServiceTemplate, 'id' | 'created_at' | 'updated_at'>);
+    setIsOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsOpen(false);
+    reset();
+    onCancel();
   };
 
   const addServiceToSequence = (serviceId: string) => {
-    if (!formData.service_sequence.includes(serviceId)) {
-      setFormData({
-        ...formData,
-        service_sequence: [...formData.service_sequence, serviceId],
-      });
+    if (serviceId && !serviceSequence.includes(serviceId)) {
+      const newSequence = [...serviceSequence, serviceId];
+      setValue('service_sequence', newSequence);
+      setSelectedServiceToAdd('');
+      
+      // Calculate total duration
+      const service = serviceTypes.find(s => s.id === serviceId);
+      if (service) {
+        const currentDuration = watch('estimated_total_duration');
+        setValue('estimated_total_duration', currentDuration + service.estimated_duration);
+      }
     }
   };
 
   const removeServiceFromSequence = (serviceId: string) => {
-    setFormData({
-      ...formData,
-      service_sequence: formData.service_sequence.filter(id => id !== serviceId),
-    });
+    const service = serviceTypes.find(s => s.id === serviceId);
+    if (service) {
+      const currentDuration = watch('estimated_total_duration');
+      setValue('estimated_total_duration', Math.max(0, currentDuration - service.estimated_duration));
+    }
+    setValue('service_sequence', serviceSequence.filter(id => id !== serviceId));
   };
 
   const moveServiceInSequence = (fromIndex: number, toIndex: number) => {
-    const newSequence = [...formData.service_sequence];
+    const newSequence = [...serviceSequence];
     const [removed] = newSequence.splice(fromIndex, 1);
-    newSequence.splice(toIndex, 0, removed);
-    setFormData({
-      ...formData,
-      service_sequence: newSequence,
-    });
+    if (removed) {
+      newSequence.splice(toIndex, 0, removed);
+      setValue('service_sequence', newSequence);
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-10 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
-        <div className="mt-3">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
+    <Dialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
             {template ? 'Edit Service Template' : 'Create New Service Template'}
-          </h3>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Template Name</label>
-                <input
-                  type="text"
-                  value={formData.template_name}
-                  onChange={(e) => setFormData({ ...formData, template_name: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                  required
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Controller
+              name="template_name"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  label="Template Name *"
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  {...(errors.template_name?.message ? { error: errors.template_name.message } : {})}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Template Code</label>
-                <input
-                  type="text"
-                  value={formData.template_code}
-                  onChange={(e) => setFormData({ ...formData, template_code: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                  required
+              )}
+            />
+            <Controller
+              name="template_code"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  label="Template Code *"
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  {...(errors.template_code?.message ? { error: errors.template_code.message } : {})}
                 />
-              </div>
-            </div>
+              )}
+            />
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Customer Segment</label>
-                <select
-                  value={formData.segment_id}
-                  onChange={(e) => setFormData({ ...formData, segment_id: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                  required
-                >
-                  <option value="">Select Segment</option>
-                  {segments.map((segment) => (
-                    <option key={segment.id} value={segment.id}>
-                      {segment.segment_name} ({segment.pricing_tier})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Price Multiplier</label>
-                <input
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Controller
+              name="segment_id"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  label="Customer Segment *"
+                  value={field.value}
+                  onChange={(value) => field.onChange(value)}
+                  options={[
+                    { value: '', label: 'Select Segment' },
+                    ...segments.map((segment) => ({
+                      value: segment.id,
+                      label: `${segment.segment_name} (${segment.pricing_tier})`,
+                    })),
+                  ]}
+                  {...(errors.segment_id?.message ? { error: errors.segment_id.message } : {})}
+                />
+              )}
+            />
+            <Controller
+              name="base_price_multiplier"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  label="Price Multiplier *"
                   type="number"
                   step="0.1"
                   min="0.1"
-                  value={formData.base_price_multiplier}
-                  onChange={(e) => setFormData({ ...formData, base_price_multiplier: parseFloat(e.target.value) || 1.0 })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                  required
+                  value={field.value.toString()}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 1.0)}
+                  {...(errors.base_price_multiplier?.message ? { error: errors.base_price_multiplier.message } : {})}
+                />
+              )}
+            />
+          </div>
+
+          <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+              <Textarea
+                label="Description"
+                value={field.value || ''}
+                onChange={(e) => field.onChange(e.target.value)}
+                rows={3}
+                {...(errors.description?.message ? { error: errors.description.message } : {})}
+              />
+            )}
+          />
+
+          {/* Service Sequence Management */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Service Sequence</label>
+            <div className="border border-slate-300 rounded-md p-4">
+              <div className="mb-4">
+                <Select
+                  label="Add Service"
+                  value={selectedServiceToAdd}
+                  onChange={(value) => {
+                    setSelectedServiceToAdd(value);
+                    if (value) {
+                      addServiceToSequence(value);
+                    }
+                  }}
+                  options={[
+                    { value: '', label: 'Select a service to add' },
+                    ...serviceTypes
+                      .filter(service => !serviceSequence.includes(service.id))
+                      .map((service) => ({
+                        value: service.id,
+                        label: `${service.type_name} ($${service.base_price})`,
+                      })),
+                  ]}
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Description</label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={3}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-              />
-            </div>
-
-            {/* Service Sequence Management */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Service Sequence</label>
-              <div className="border border-gray-300 rounded-md p-4">
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Add Service</label>
-                  <select
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        addServiceToSequence(e.target.value);
-                        e.target.value = '';
-                      }
-                    }}
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                  >
-                    <option value="">Select a service to add</option>
-                    {serviceTypes
-                      .filter(service => !formData.service_sequence.includes(service.id))
-                      .map((service) => (
-                        <option key={service.id} value={service.id}>
-                          {service.type_name} (${service.base_price})
-                        </option>
-                      ))}
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  {formData.service_sequence.map((serviceId, index) => {
-                    const service = serviceTypes.find(s => s.id === serviceId);
-                    return service ? (
-                      <div key={serviceId} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                        <div className="flex items-center space-x-3">
-                          <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{service.type_name}</div>
-                            <div className="text-xs text-gray-500">
-                              ${service.base_price} • {service.estimated_duration} min
-                            </div>
+              <div className="space-y-2">
+                {serviceSequence.map((serviceId, index) => {
+                  const service = serviceTypes.find(s => s.id === serviceId);
+                  return service ? (
+                    <div key={serviceId} className="flex items-center justify-between p-3 bg-slate-50 rounded-md">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm font-medium text-slate-500">#{index + 1}</span>
+                        <div>
+                          <div className="text-sm font-medium text-slate-900">{service.type_name}</div>
+                          <div className="text-xs text-slate-500">
+                            ${service.base_price} • {service.estimated_duration} min
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          {index > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => moveServiceInSequence(index, index - 1)}
-                              className="text-gray-400 hover:text-gray-600"
-                            >
-                              ↑
-                            </button>
-                          )}
-                          {index < formData.service_sequence.length - 1 && (
-                            <button
-                              type="button"
-                              onClick={() => moveServiceInSequence(index, index + 1)}
-                              className="text-gray-400 hover:text-gray-600"
-                            >
-                              ↓
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => removeServiceFromSequence(serviceId)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            ×
-                          </button>
-                        </div>
                       </div>
-                    ) : null;
-                  })}
-                </div>
+                      <div className="flex items-center space-x-2">
+                        {index > 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => moveServiceInSequence(index, index - 1)}
+                            className="p-1"
+                          >
+                            <ArrowUp className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {index < serviceSequence.length - 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => moveServiceInSequence(index, index + 1)}
+                            className="p-1"
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeServiceFromSequence(serviceId)}
+                          className="p-1 text-red-600 hover:text-red-900"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : null;
+                })}
+                {serviceSequence.length === 0 && (
+                  <p className="text-sm text-slate-500 text-center py-4">No services added yet</p>
+                )}
               </div>
             </div>
+          </div>
 
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.is_active}
-                onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-              />
-              <span className="ml-2 text-sm text-gray-700">Active Template</span>
-            </div>
+          <Controller
+            name="is_active"
+            control={control}
+            render={({ field }) => (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  checked={field.value}
+                  onChange={(checked) => field.onChange(checked)}
+                />
+                <label className="text-sm font-medium text-slate-700">Active Template</label>
+              </div>
+            )}
+          />
 
-            <div className="flex justify-end space-x-3 pt-4">
-              <button
-                type="button"
-                onClick={onCancel}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700"
-              >
-                {template ? 'Update Template' : 'Create Template'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+            >
+              {template ? 'Update Template' : 'Create Template'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -588,22 +674,22 @@ function TemplateDetail({ template, serviceTypes, onClose, onEdit }: TemplateDet
   ).filter(Boolean);
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div className="fixed inset-0 bg-slate-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
       <div className="relative top-10 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
         <div className="mt-3">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-medium text-gray-900">Template Details</h3>
+            <h3 className="text-lg font-medium text-slate-900">Template Details</h3>
             <div className="flex space-x-3">
               <button
                 onClick={onEdit}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                className="inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50"
               >
-                <PencilIcon className="h-4 w-4 mr-2" />
+                <Pencil className="h-4 w-4 mr-2" />
                 Edit
               </button>
               <button
                 onClick={onClose}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-white hover:bg-slate-50"
               >
                 Close
               </button>

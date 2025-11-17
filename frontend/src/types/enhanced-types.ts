@@ -22,6 +22,33 @@ export interface User {
   phone?: string;
   roles: string[];
   status: 'active' | 'inactive' | 'suspended';
+  manager_id?: string;
+  avatar_url?: string;
+  tags?: string[];
+  department?: string;
+  position?: string;
+  employee_id?: string;
+  technician_number?: string;
+  pesticide_license_number?: string;
+  license_expiration_date?: string;
+  hire_date?: string;
+  employment_type?: 'full_time' | 'part_time' | 'contractor' | 'temporary';
+  custom_permissions?: string[];
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  emergency_contact_relationship?: string;
+  address_line1?: string;
+  address_line2?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+  country?: string;
+  date_of_birth?: string;
+  social_security_number?: string; // Encrypted at rest
+  driver_license_number?: string; // Encrypted at rest
+  driver_license_state?: string;
+  driver_license_expiry?: string;
+  qualifications?: string[];
   created_at: string;
   updated_at: string;
 }
@@ -315,7 +342,7 @@ export interface PaymentMethod {
   id: string;
   tenant_id: string;
   account_id: string;
-  payment_type: 'credit_card' | 'ach' | 'check' | 'cash' | 'cod';
+  payment_type: 'credit_card' | 'debit_card' | 'ach' | 'check' | 'cash' | 'cod';
   payment_name?: string;
   account_number?: string;
   routing_number?: string;
@@ -816,26 +843,7 @@ export interface Payment {
   };
 }
 
-export interface PaymentMethod {
-  id: string;
-  tenant_id: string;
-  account_id: string;
-  payment_type: 'credit_card' | 'debit_card' | 'ach' | 'check' | 'cash' | 'cod';
-  payment_name?: string;
-  account_number?: string;
-  routing_number?: string;
-  card_type?: string;
-  card_last4?: string;
-  card_expiry?: string;
-  is_default: boolean;
-  is_active: boolean;
-  created_at: string;
-  account?: {
-    id: string;
-    name: string;
-    email?: string;
-  };
-}
+// Duplicate PaymentMethod interface removed - already defined earlier with all properties
 
 // Billing DTOs for API requests
 export interface CreateInvoiceDto {
@@ -905,7 +913,37 @@ export interface RevenueAnalytics {
   growthRate: number;
 }
 
-// ============================================================================
+export interface ARInvoice {
+  id: string;
+  invoice_number: string;
+  daysPastDue: number;
+  total_amount: number;
+  status: string;
+  due_date: string;
+}
+
+export interface CustomerAR {
+  customerId: string;
+  customerName: string;
+  totalAR: number;
+  invoices: ARInvoice[];
+}
+
+export interface AgingBucket {
+  bucket: string;
+  amount: number;
+  invoiceCount: number;
+}
+
+export interface ARSummary {
+  totalAR: number;
+  agingBuckets: AgingBucket[];
+  customerAR: CustomerAR[];
+  totalCustomers: number;
+  totalInvoices: number;
+}
+
+// ============================================================================ 
 // KPI TEMPLATES TYPES (Re-exported from kpi-templates.ts)
 // ============================================================================
 

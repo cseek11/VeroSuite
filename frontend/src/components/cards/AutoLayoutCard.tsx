@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AutoLayoutManager from '@/components/dashboard/AutoLayoutManager';
+import { logger } from '@/utils/logger';
 
 const AutoLayoutCard: React.FC = () => {
   const [showAutoLayout, setShowAutoLayout] = useState(false);
@@ -33,7 +34,7 @@ const AutoLayoutCard: React.FC = () => {
             { id: 'recent-activity', type: 'recent-activity', x: 420, y: 300, width: 300, height: 300 }
           ]}
           onLayoutChange={(changes) => {
-            console.log('Layout changes:', changes);
+            logger.debug('Layout changes', { changes }, 'AutoLayoutCard');
             // Here you would apply the layout changes to the actual cards
           }}
         />
@@ -43,6 +44,12 @@ const AutoLayoutCard: React.FC = () => {
 };
 
 export default AutoLayoutCard;
+
+
+
+
+
+
 
 
 

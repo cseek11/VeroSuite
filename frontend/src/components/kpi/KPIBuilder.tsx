@@ -23,6 +23,7 @@ import { useKPIBuilder, KPIField, CustomKPI } from '@/hooks/useKPIBuilder';
 import { useKpiTemplates, useCreateKpiTemplate } from '@/hooks/useKpiTemplates';
 import KpiTemplateLibrary from './KpiTemplateLibrary';
 import { cn } from '@/lib/utils';
+import { logger } from '@/utils/logger';
 
 interface KPIBuilderProps {
   isOpen: boolean;
@@ -157,11 +158,11 @@ const KPIBuilder: React.FC<KPIBuilderProps> = ({
 
       try {
         const savedTemplate = await createTemplateMutation.mutateAsync(templateData);
-        console.log('✅ Saved template:', savedTemplate);
+        logger.debug('Saved template', { templateId: savedTemplate?.id }, 'KPIBuilder');
         onSaveTemplate?.(savedTemplate);
         onClose();
       } catch (error) {
-        console.error('❌ Failed to save template:', error);
+        logger.error('Failed to save template', error, 'KPIBuilder');
       }
     } else {
       // Save as regular KPI
@@ -175,7 +176,7 @@ const KPIBuilder: React.FC<KPIBuilderProps> = ({
     try {
       await kpiBuilder.testKPI();
     } catch (error) {
-      console.error('Test failed:', error);
+      logger.error('KPI test failed', error, 'KPIBuilder');
     }
   };
 

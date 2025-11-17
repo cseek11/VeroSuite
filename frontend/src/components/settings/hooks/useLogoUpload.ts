@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { company } from '@/lib/enhanced-api';
+import { logger } from '@/utils/logger';
+import { toast } from '@/utils/toast';
 
 export const useLogoUpload = () => {
   const queryClient = useQueryClient();
@@ -15,14 +17,14 @@ export const useLogoUpload = () => {
   const uploadHeaderLogoMutation = useMutation({
     mutationFn: (file: File) => company.uploadLogo(file, 'header'),
     onSuccess: (data) => {
-      console.log('✅ Header logo uploaded successfully:', data.logo_url);
+      logger.debug('Header logo uploaded successfully', { logo_url: data.logo_url }, 'useLogoUpload');
       setHeaderLogoPreview(data.logo_url);
       setHeaderLogoFile(null);
       queryClient.invalidateQueries({ queryKey: ['company', 'settings'] });
     },
     onError: (error) => {
-      console.error('❌ Failed to upload header logo:', error);
-      alert('Failed to upload header logo. Please try again.');
+      logger.error('Failed to upload header logo', error, 'useLogoUpload');
+      toast.error('Failed to upload header logo. Please try again.');
     }
   });
 
@@ -30,14 +32,14 @@ export const useLogoUpload = () => {
   const uploadInvoiceLogoMutation = useMutation({
     mutationFn: (file: File) => company.uploadLogo(file, 'invoice'),
     onSuccess: (data) => {
-      console.log('✅ Invoice logo uploaded successfully:', data.logo_url);
+      logger.debug('Invoice logo uploaded successfully', { logo_url: data.logo_url }, 'useLogoUpload');
       setInvoiceLogoPreview(data.logo_url);
       setInvoiceLogoFile(null);
       queryClient.invalidateQueries({ queryKey: ['company', 'settings'] });
     },
     onError: (error) => {
-      console.error('❌ Failed to upload invoice logo:', error);
-      alert('Failed to upload invoice logo. Please try again.');
+      logger.error('Failed to upload invoice logo', error, 'useLogoUpload');
+      toast.error('Failed to upload invoice logo. Please try again.');
     }
   });
 
@@ -45,7 +47,7 @@ export const useLogoUpload = () => {
   const deleteLogoMutation = useMutation({
     mutationFn: (logoType: 'header' | 'invoice') => company.deleteLogo(logoType),
     onSuccess: (data, logoType) => {
-      console.log(`✅ ${logoType} logo deleted successfully`);
+      logger.debug(`${logoType} logo deleted successfully`, {}, 'useLogoUpload');
       if (logoType === 'header') {
         setHeaderLogoPreview('');
       } else {
@@ -54,8 +56,8 @@ export const useLogoUpload = () => {
       queryClient.invalidateQueries({ queryKey: ['company', 'settings'] });
     },
     onError: (error) => {
-      console.error('❌ Failed to delete logo:', error);
-      alert('Failed to delete logo. Please try again.');
+      logger.error('Failed to delete logo', error, 'useLogoUpload');
+      toast.error('Failed to delete logo. Please try again.');
     }
   });
 
@@ -65,12 +67,12 @@ export const useLogoUpload = () => {
     const maxSize = 2 * 1024 * 1024; // 2MB
 
     if (!validTypes.includes(file.type)) {
-      alert('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+      toast.error('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
       return false;
     }
 
     if (file.size > maxSize) {
-      alert('File size must be less than 2MB');
+      toast.error('File size must be less than 2MB');
       return false;
     }
 
@@ -84,7 +86,7 @@ export const useLogoUpload = () => {
       try {
         // If replacing an existing logo, delete the old one first
         if (headerLogoPreview) {
-          console.log('🔄 Replacing existing header logo - deleting old one first');
+          logger.debug('Replacing existing header logo - deleting old one first', {}, 'useLogoUpload');
           await deleteLogoMutation.mutateAsync('header');
         }
         
@@ -92,7 +94,7 @@ export const useLogoUpload = () => {
         await uploadHeaderLogoMutation.mutateAsync(file);
       } catch (error) {
         setHeaderLogoPreview(''); // Clear preview on error
-        console.error('❌ Failed to upload/replace header logo:', error);
+        logger.error('Failed to upload/replace header logo', error, 'useLogoUpload');
       }
     }
     // Reset input
@@ -106,7 +108,7 @@ export const useLogoUpload = () => {
       try {
         // If replacing an existing logo, delete the old one first
         if (invoiceLogoPreview) {
-          console.log('🔄 Replacing existing invoice logo - deleting old one first');
+          logger.debug('Replacing existing invoice logo - deleting old one first', {}, 'useLogoUpload');
           await deleteLogoMutation.mutateAsync('invoice');
         }
         
@@ -114,7 +116,7 @@ export const useLogoUpload = () => {
         await uploadInvoiceLogoMutation.mutateAsync(file);
       } catch (error) {
         setInvoiceLogoPreview(''); // Clear preview on error
-        console.error('❌ Failed to upload/replace invoice logo:', error);
+        logger.error('Failed to upload/replace invoice logo', error, 'useLogoUpload');
       }
     }
     // Reset input
@@ -122,18 +124,14 @@ export const useLogoUpload = () => {
   };
 
   // Set logo previews from company settings
-  const setLogoPreviews = (companySettings: any) => {
-    const headerUrl = companySettings.header_logo_url || '';
-    const invoiceUrl = companySettings.invoice_logo_url || '';
-    
-    console.log('🔄 setLogoPreviews called with:');
-    console.log('  - headerUrl:', headerUrl);
-    console.log('  - invoiceUrl:', invoiceUrl);
+  const setLogoPreviews = (companySettings: Record<string, unknown>) => {
+    const headerUrl = (companySettings.header_logo_url as string) || '';
+    const invoiceUrl = (companySettings.invoice_logo_url as string) || '';
     
     setHeaderLogoPreview(headerUrl);
     setInvoiceLogoPreview(invoiceUrl);
     
-    console.log('✅ Logo previews updated');
+    logger.debug('Logo previews updated', { headerUrl, invoiceUrl }, 'useLogoUpload');
   };
 
   return {

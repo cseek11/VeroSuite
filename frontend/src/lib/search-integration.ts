@@ -8,6 +8,7 @@ import { unifiedSearchService } from './unified-search-service';
 import { searchErrorLogger } from './search-error-logger';
 import { supabase } from './supabase-client';
 import type { SearchResult, SearchOptions } from './unified-search-service';
+import { logger } from '@/utils/logger';
 
 // ============================================================================
 // TYPES AND INTERFACES
@@ -183,7 +184,7 @@ class SearchIntegration {
 
       return this.getSearchResult();
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       const searchTime = Date.now() - startTime;
       
       // Log search error
@@ -336,7 +337,9 @@ class SearchIntegration {
    */
   async refreshCurrentSearch(): Promise<void> {
     if (this.state.currentSearch.trim()) {
-      console.log('🔄 Refreshing current search:', this.state.currentSearch);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Refreshing current search', { searchTerm: this.state.currentSearch }, 'search-integration');
+      }
       await this.performSearch(this.state.currentSearch);
     }
   }

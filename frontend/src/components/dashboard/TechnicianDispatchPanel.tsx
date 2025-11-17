@@ -1,5 +1,11 @@
 import React from 'react';
-import { Card, Typography, Chip, ProgressBar, Avatar } from '@/components/ui/EnhancedUI';
+import Card from '@/components/ui/Card';
+import {
+  Badge,
+  Avatar,
+  Heading,
+  Text,
+} from '@/components/ui';
 import { Users, MapPin, Clock, Phone, Mail, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { enhancedApi } from '@/lib/enhanced-api';
@@ -23,13 +29,13 @@ const TechnicianDispatchPanel: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'available':
-        return 'success';
+        return 'bg-green-100 text-green-800';
       case 'busy':
-        return 'warning';
+        return 'bg-yellow-100 text-yellow-800';
       case 'offline':
-        return 'default';
+        return 'bg-gray-100 text-gray-800';
       default:
-        return 'default';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -53,53 +59,53 @@ const TechnicianDispatchPanel: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div className="text-center">
             <Users className="mx-auto h-8 w-8 text-blue-500 mb-2" />
-            <Typography variant="h3" className="font-bold text-blue-600">
+            <Heading level={3} className="font-bold text-blue-600">
               {dispatchStats.totalTechnicians}
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-gray-600">
               Total Technicians
-            </Typography>
+            </Text>
           </div>
 
           <div className="text-center">
             <CheckCircle className="mx-auto h-8 w-8 text-green-500 mb-2" />
-            <Typography variant="h3" className="font-bold text-green-600">
+            <Heading level={3} className="font-bold text-green-600">
               {dispatchStats.available}
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-gray-600">
               Available
-            </Typography>
+            </Text>
           </div>
 
           <div className="text-center">
             <AlertTriangle className="mx-auto h-8 w-8 text-yellow-500 mb-2" />
-            <Typography variant="h3" className="font-bold text-yellow-600">
+            <Heading level={3} className="font-bold text-yellow-600">
               {dispatchStats.busy}
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-gray-600">
               On Job
-            </Typography>
+            </Text>
           </div>
 
           <div className="text-center">
             <Clock className="mx-auto h-8 w-8 text-gray-500 mb-2" />
-            <Typography variant="h3" className="font-bold text-gray-600">
+            <Heading level={3} className="font-bold text-gray-600">
               {dispatchStats.jobsInQueue}
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-gray-600">
               In Queue
-            </Typography>
+            </Text>
           </div>
         </div>
 
         <div className="mt-6 pt-4 border-t">
           <div className="flex justify-between items-center">
-            <Typography variant="body1" className="font-medium">
+            <Text variant="body" className="font-medium">
               Average Response Time
-            </Typography>
-            <Typography variant="body1" className="font-bold text-blue-600">
+            </Text>
+            <Text variant="body" className="font-bold text-blue-600">
               {dispatchStats.averageResponseTime}
-            </Typography>
+            </Text>
           </div>
         </div>
       </Card>
@@ -118,75 +124,75 @@ const TechnicianDispatchPanel: React.FC = () => {
                     fallback={technician.name.split(' ').map(n => n[0]).join('')}
                   />
                   <div>
-                    <Typography variant="body1" className="font-medium">
+                    <Text variant="body" className="font-medium">
                       {technician.name}
-                    </Typography>
+                    </Text>
                     <div className="flex items-center space-x-2 mt-1">
                       {getStatusIcon(technician.status)}
-                      <Chip variant={getStatusColor(technician.status) as any}>
+                      <Badge variant="default" className={getStatusColor(technician.status)}>
                         {technician.status.charAt(0).toUpperCase() + technician.status.slice(1)}
-                      </Chip>
+                      </Badge>
                     </div>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <Typography variant="body2" className="font-medium">
+                  <Text variant="small" className="font-medium">
                     ⭐ {technician.rating}
-                  </Typography>
-                  <Typography variant="caption" className="text-gray-500">
+                  </Text>
+                  <Text variant="small" className="text-gray-500">
                     {technician.jobsCompleted} jobs
-                  </Typography>
+                  </Text>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                 <div className="flex items-center space-x-2">
                   <MapPin className="h-4 w-4 text-gray-400" />
-                  <Typography variant="body2" className="text-gray-600">
+                  <Text variant="small" className="text-gray-600">
                     {technician.location}
-                  </Typography>
+                  </Text>
                 </div>
 
                 <div className="flex items-center space-x-2">
                   <Clock className="h-4 w-4 text-gray-400" />
-                  <Typography variant="body2" className="text-gray-600">
+                  <Text variant="small" className="text-gray-600">
                     Response: {technician.responseTime}
-                  </Typography>
+                  </Text>
                 </div>
               </div>
 
               {technician.currentJob && (
                 <div className="mb-3 p-3 bg-blue-50 rounded-lg">
-                  <Typography variant="body2" className="font-medium text-blue-800">
+                  <Text variant="small" className="font-medium text-blue-800">
                     Current Job:
-                  </Typography>
-                  <Typography variant="body2" className="text-blue-700">
+                  </Text>
+                  <Text variant="small" className="text-blue-700">
                     {technician.currentJob}
-                  </Typography>
+                  </Text>
                 </div>
               )}
 
               <div className="flex flex-wrap gap-2 mb-3">
                 {technician.specialties.map((specialty, index) => (
-                  <Chip key={index} variant="default" className="text-xs">
+                  <Badge key={index} variant="default" className="text-xs">
                     {specialty}
-                  </Chip>
+                  </Badge>
                 ))}
               </div>
 
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <Phone className="h-4 w-4 text-gray-400" />
-                  <Typography variant="body2" className="text-gray-600">
+                  <Text variant="small" className="text-gray-600">
                     {technician.phone}
-                  </Typography>
+                  </Text>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Mail className="h-4 w-4 text-gray-400" />
-                  <Typography variant="body2" className="text-gray-600">
+                  <Text variant="small" className="text-gray-600">
                     {technician.email}
-                  </Typography>
+                  </Text>
                 </div>
               </div>
             </div>

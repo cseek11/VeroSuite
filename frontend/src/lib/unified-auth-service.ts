@@ -5,6 +5,7 @@
 
 import { supabase } from './supabase-client';
 import { searchErrorLogger } from './search-error-logger';
+import { logger } from '@/utils/logger';
 
 export interface AuthUser {
   id: string;
@@ -33,7 +34,7 @@ class UnifiedAuthService {
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
-        console.warn('Auth initialization error:', error);
+        logger.warn('Auth initialization error', { error }, 'unified-auth-service');
         return;
       }
 
@@ -80,8 +81,10 @@ class UnifiedAuthService {
         refresh_token: user.refresh_token || ''
       };
 
-      console.log('✅ User authenticated:', this.currentUser.email, 'Tenant:', this.currentUser.tenant_id);
-    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('User authenticated', { email: this.currentUser.email, tenantId: this.currentUser.tenant_id }, 'unified-auth-service');
+      }
+    } catch (error: unknown) {
       searchErrorLogger.logError({
         operation: 'set_current_user',
         error: error as Error,
@@ -228,12 +231,12 @@ class UnifiedAuthService {
         try {
           await this.signUp(testEmail, testPassword, testTenantId);
           return true;
-        } catch (signUpError) {
-          console.warn('Test auth failed:', signUpError);
+        } catch (signUpError: unknown) {
+          logger.warn('Test auth failed', { error: signUpError }, 'unified-auth-service');
           return false;
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       searchErrorLogger.logError({
         operation: 'test_auth',
         error: error as Error,

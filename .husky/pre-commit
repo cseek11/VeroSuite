@@ -1,0 +1,24 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Observability and error resilience checks
+echo "Running observability checks..."
+
+# Check for silent failures
+if command -v ts-node >/dev/null 2>&1; then
+  echo "Checking for silent failures..."
+  ts-node scripts/detect-silent-failures.ts || exit 1
+else
+  echo "Warning: ts-node not found, skipping silent failure detection"
+fi
+
+# Run observability audit
+if command -v ts-node >/dev/null 2>&1; then
+  echo "Running observability audit..."
+  ts-node scripts/audit-observability.ts || exit 1
+else
+  echo "Warning: ts-node not found, skipping observability audit"
+fi
+
+echo "✅ Observability checks passed"
+

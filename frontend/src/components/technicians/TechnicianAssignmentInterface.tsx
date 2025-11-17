@@ -1,30 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTechnicians } from '@/hooks/useTechnicians';
-import { useJobs, useJobsByTechnician } from '@/hooks/useJobs';
-import { useWorkOrders } from '@/hooks/useWorkOrders';
 import { TechnicianProfile, TechnicianStatus } from '@/types/technician';
-import { Job, JobStatus } from '@/types/jobs';
+import { Job } from '@/types/jobs';
 import { WorkOrder } from '@/types/work-orders';
 import { 
-  User, 
-  Clock, 
-  MapPin, 
   Phone, 
-  Mail, 
-  Calendar, 
-  CheckCircle, 
-  AlertCircle, 
-  XCircle,
-  Filter,
+  Mail,
   Search,
-  Star,
   Award,
-  Shield,
-  Car,
   Navigation,
-  Timer,
-  Users,
-  TrendingUp,
   Activity
 } from 'lucide-react';
 import Button from '@/components/ui/Button';

@@ -43,7 +43,7 @@ let authToken = '';
 export function setup() {
   // Login and get authentication token
   const loginPayload = JSON.stringify({
-    email: 'stresstest@verosuite.com',
+    email: 'stresstest@verofield.com',
     password: 'StressTest123!'
   });
 

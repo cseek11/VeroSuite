@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import {
   TrendingUp, TrendingDown, DollarSign, Users, Clock, Target,
-  Download, Calendar, Filter, ChevronDown, Plus, AlertTriangle,
-  CheckCircle, XCircle, BarChart3, PieChart as PieChartIcon,
-  Activity, UserCheck, Mail, Phone, Globe, Search
+  Download, Calendar, Plus, AlertTriangle, XCircle, BarChart3,
+  Activity, UserCheck, Search
 } from 'lucide-react';
 
 // Real data will be fetched from API
-import { enhancedApi } from '@/lib/enhanced-api';
 
 const COLORS = {
   primary: '#6366F1',

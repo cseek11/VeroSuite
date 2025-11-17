@@ -25,7 +25,7 @@ const Card: React.FC<CardProps> = ({
           )}
         </div>
       )}
-      <div className="p-6">{children}</div>
+      <div style={{ padding: `calc(var(--space-4, 16px) * var(--density-scale, 1))` }}>{children}</div>
     </div>
   );
 };

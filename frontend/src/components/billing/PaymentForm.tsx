@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { loadStripe, StripeCardElement, StripePaymentIntent } from '@stripe/stripe-js';
 import {
-  Card,
-  Typography,
-  Button,
-  Input,
-  Alert
-} from '@/components/ui/EnhancedUI';
+  Elements,
+  CardElement,
+  useStripe,
+  useElements,
+  CardElementChangeEvent
+} from '@stripe/react-stripe-js';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import { Heading, Text } from '@/components/ui';
 import {
   CreditCard,
   Shield,
@@ -15,13 +19,17 @@ import {
   AlertCircle,
   ArrowLeft,
   Loader2,
-  Calendar,
-  DollarSign,
-  User,
-  Mail
+  Download,
+  RefreshCw,
+  XCircle,
+  Info,
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
 import { Invoice, PaymentMethod } from '@/types/enhanced-types';
+import { logger } from '@/utils/logger';
+import { toast } from '@/utils/toast';
+import PaymentMethodSelector from './PaymentMethodSelector';
+import PaymentConfirmation from './PaymentConfirmation';
 
 interface PaymentFormProps {
   invoice: Invoice;
@@ -30,116 +38,121 @@ interface PaymentFormProps {
   onCancel: () => void;
 }
 
-interface StripeElements {
-  card: any;
-  elements: any;
-  stripe: any;
-}
+// Initialize Stripe
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
-export default function PaymentForm({ invoice, paymentMethods, onSuccess, onCancel }: PaymentFormProps) {
+// Inner component that uses Stripe hooks
+function PaymentFormInner({ 
+  invoice, 
+  paymentMethods, 
+  onSuccess, 
+  onCancel,
+  clientSecret 
+}: PaymentFormProps & { clientSecret: string | null }) {
+  const stripe = useStripe();
+  const elements = useElements();
   const [paymentStep, setPaymentStep] = useState<'method' | 'details' | 'processing' | 'success'>('method');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const [useNewCard, setUseNewCard] = useState(false);
-  const [stripeElements, setStripeElements] = useState<StripeElements | null>(null);
   const [cardError, setCardError] = useState<string>('');
   const [paymentError, setPaymentError] = useState<string>('');
-  const [isLoadingStripe, setIsLoadingStripe] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentIntent, setPaymentIntent] = useState<StripePaymentIntent | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [lastError, setLastError] = useState<Error | null>(null);
+  const [showRetry, setShowRetry] = useState(false);
+  const cardElementRef = useRef<StripeCardElement | null>(null);
 
   const queryClient = useQueryClient();
 
-  // Create Stripe Payment Intent
-  const createPaymentIntentMutation = useMutation({
-    mutationFn: (invoiceId: string) => billing.createStripePaymentIntent(invoiceId),
-    onSuccess: (data) => {
-      console.log('Payment intent created:', data);
-      initializeStripe(data.clientSecret);
-    },
-    onError: (error) => {
-      console.error('Failed to create payment intent:', error);
-      setPaymentError('Failed to initialize payment. Please try again.');
-    }
-  });
-
   // Process Payment
   const processPaymentMutation = useMutation({
-    mutationFn: async (paymentData: any) => {
-      if (useNewCard && stripeElements) {
-        // Process with Stripe
-        const { error, paymentIntent } = await stripeElements.stripe.confirmCardPayment(
-          paymentData.clientSecret,
-          {
-            payment_method: {
-              card: stripeElements.card,
-              billing_details: {
-                name: invoice.accounts?.name || '',
-                email: invoice.accounts?.email || '',
-              },
-            }
-          }
-        );
+    mutationFn: async () => {
+      if (useNewCard && stripe && elements && clientSecret) {
+        const cardElement = elements.getElement(CardElement);
+        if (!cardElement) {
+          throw new Error('Card element not found');
+        }
+
+        // Confirm payment with Stripe
+        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: cardElement,
+            billing_details: {
+              name: invoice.accounts?.name || '',
+              email: invoice.accounts?.email || '',
+            },
+          },
+        });
 
         if (error) {
           throw new Error(error.message);
         }
 
+        // Store payment intent for confirmation screen
+        setPaymentIntent(paymentIntent);
         return paymentIntent;
-      } else {
+      } else if (selectedPaymentMethod) {
         // Process with existing payment method
         return billing.processPayment(invoice.id, {
           invoice_id: invoice.id,
-          payment_method_id: selectedPaymentMethod?.id || '',
+          payment_method_id: selectedPaymentMethod.id,
           amount: Number(invoice.total_amount),
           payment_date: new Date().toISOString(),
           notes: 'Online payment'
         });
+      } else {
+        throw new Error('No payment method selected');
       }
     },
-    onSuccess: () => {
-      setPaymentStep('success');
-      queryClient.invalidateQueries({ queryKey: ['billing'] });
-      setTimeout(() => {
-        onSuccess();
-      }, 2000);
+    onSuccess: async (result) => {
+      // If Stripe payment, verify status and show success
+      if (useNewCard && result && typeof result === 'object' && 'id' in result) {
+        const intent = result as StripePaymentIntent;
+        setPaymentIntent(intent);
+        
+        // Verify payment status from Stripe
+        try {
+          const status = await billing.getStripePaymentStatus(intent.id);
+          logger.debug('Payment status verified', { status: status.status, id: intent.id }, 'PaymentForm');
+        } catch (error) {
+          logger.warn('Could not verify payment status', error, 'PaymentForm');
+          // Continue anyway - payment was confirmed by Stripe
+        }
+        
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ['billing'] });
+        setPaymentStep('success');
+      } else {
+        // Non-Stripe payment - show success immediately
+        setPaymentStep('success');
+        queryClient.invalidateQueries({ queryKey: ['billing'] });
+      }
+      
+      // Auto-close after showing success for a bit (user can close manually)
+      // Removed auto-close to let user review confirmation
     },
-    onError: (error: any) => {
-      console.error('Payment failed:', error);
-      setPaymentError(error.message || 'Payment failed. Please try again.');
-      setPaymentStep('details');
-    }
+      onError: (error: unknown) => {
+        logger.error('Payment failed', error, 'PaymentForm');
+        const errorMessage = error instanceof Error ? error.message : 'Payment failed. Please try again.';
+        setPaymentError(errorMessage);
+        setLastError(error instanceof Error ? error : new Error(errorMessage));
+        const newRetryCount = retryCount + 1;
+        setRetryCount(newRetryCount);
+        setShowRetry(newRetryCount < 3); // Allow up to 3 retries
+        setPaymentStep('details');
+        setIsProcessing(false);
+        
+        // Show toast notification
+        toast.error(errorMessage);
+      }
   });
-
-  const initializeStripe = async (clientSecret: string) => {
-    setIsLoadingStripe(true);
-    try {
-      // Note: In a real implementation, you would load Stripe.js here
-      // For now, we'll simulate the Stripe initialization
-      console.log('Initializing Stripe with client secret:', clientSecret);
-      
-      // Simulated Stripe elements - in real implementation:
-      // const stripe = await loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
-      // const elements = stripe.elements();
-      // const card = elements.create('card');
-      
-      setStripeElements({
-        stripe: { confirmCardPayment: () => Promise.resolve({ paymentIntent: { status: 'succeeded' } }) },
-        elements: {},
-        card: {}
-      });
-      
-      setPaymentStep('details');
-    } catch (error) {
-      console.error('Failed to initialize Stripe:', error);
-      setPaymentError('Failed to load payment form. Please try again.');
-    } finally {
-      setIsLoadingStripe(false);
-    }
-  };
 
   const handlePaymentMethodSelect = (method: PaymentMethod | 'new') => {
     if (method === 'new') {
       setUseNewCard(true);
       setSelectedPaymentMethod(null);
-      createPaymentIntentMutation.mutate(invoice.id);
+      setPaymentStep('details');
     } else {
       setUseNewCard(false);
       setSelectedPaymentMethod(method);
@@ -147,78 +160,140 @@ export default function PaymentForm({ invoice, paymentMethods, onSuccess, onCanc
     }
   };
 
-  const handleSubmitPayment = async () => {
-    setPaymentError('');
-    setPaymentStep('processing');
-    
-    try {
-      if (useNewCard) {
-        // Process new card payment
-        await processPaymentMutation.mutateAsync({
-          clientSecret: 'simulated-client-secret' // In real implementation, this comes from payment intent
-        });
+    const handleCardElementChange = (event: CardElementChangeEvent) => {
+      if (event.error) {
+        setCardError(event.error.message);
+        setPaymentError(''); // Clear payment error when user fixes card
       } else {
-        // Process with existing payment method
-        await processPaymentMutation.mutateAsync({});
+        setCardError('');
+        setPaymentError(''); // Clear payment error when card is valid
       }
-    } catch (error) {
-      // Error handled in mutation
+    };
+
+    const handleRetryPayment = async () => {
+      setPaymentError('');
+      setLastError(null);
+      setShowRetry(false);
+      setPaymentStep('processing');
+      setIsProcessing(true);
+
+      try {
+        // Reset card element if using new card
+        if (useNewCard && elements) {
+          const cardElement = elements.getElement(CardElement);
+          if (cardElement) {
+            cardElement.clear();
+          }
+        }
+
+        // Wait a moment before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Retry the payment
+        await processPaymentMutation.mutateAsync();
+      } catch (error) {
+        // Error is handled by mutation's onError
+        logger.error('Retry payment failed', error, 'PaymentForm');
+      }
+    };
+
+  const handleSubmitPayment = async () => {
+    if (useNewCard && !clientSecret) {
+      setPaymentError('Payment form is not ready. Please wait.');
+      return;
     }
+
+    // Validate card if using new card
+    if (useNewCard && cardError) {
+      setPaymentError('Please fix card errors before submitting.');
+      return;
+    }
+
+    // Reset error states
+    setPaymentError('');
+    setCardError('');
+    setLastError(null);
+    setShowRetry(false);
+    setRetryCount(0);
+    setPaymentStep('processing');
+    setIsProcessing(true);
+
+    try {
+      await processPaymentMutation.mutateAsync();
+    } catch (error) {
+      // Error is handled by mutation's onError
+      logger.error('Payment submission failed', error, 'PaymentForm');
+    }
+  };
+
+  const cardElementOptions = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#424770',
+        '::placeholder': {
+          color: '#aab7c4',
+        },
+      },
+      invalid: {
+        color: '#9e2146',
+      },
+    },
   };
 
   const renderPaymentMethodSelection = () => (
     <Card>
       <div className="p-6">
-        <Typography variant="h3" className="font-semibold mb-6">
-          Select Payment Method
-        </Typography>
+        <div className="flex items-center justify-between mb-6">
+          <Heading level={3} className="font-semibold">
+            Select Payment Method
+          </Heading>
+          <div className="flex items-center text-green-600 text-sm">
+            <Shield className="w-4 h-4 mr-1" />
+            Secure
+          </div>
+        </div>
 
-        <div className="space-y-4">
-          {/* Existing Payment Methods */}
-          {paymentMethods.map((method) => (
-            <div
-              key={method.id}
-              className="border border-gray-200 rounded-lg p-4 hover:border-purple-300 cursor-pointer transition-colors"
-              onClick={() => handlePaymentMethodSelect(method)}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <CreditCard className="w-5 h-5 text-gray-600" />
-                  <div>
-                    <div className="font-medium">
-                      {method.payment_name || `${method.card_type} ending in ${method.card_last4}`}
-                    </div>
-                    {method.card_expiry && (
-                      <div className="text-sm text-gray-600">
-                        Expires {method.card_expiry}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {method.is_default && (
-                  <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
-                    Default
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
+        {/* Use PaymentMethodSelector component */}
+        <PaymentMethodSelector
+          accountId={invoice.account_id}
+          value={selectedPaymentMethod?.id}
+          onChange={(method) => {
+            if (method === 'new') {
+              handlePaymentMethodSelect('new');
+            } else if (method) {
+              handlePaymentMethodSelect(method);
+            }
+          }}
+          onAddNew={() => handlePaymentMethodSelect('new')}
+          showAddNew={true}
+        />
 
-          {/* Add New Card Option */}
-          <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-purple-400 cursor-pointer transition-colors"
-            onClick={() => handlePaymentMethodSelect('new')}
-          >
-            <div className="flex items-center justify-center space-x-3 text-gray-600">
-              <CreditCard className="w-5 h-5" />
-              <span className="font-medium">Pay with new card</span>
-            </div>
+        {/* Invoice Summary */}
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200"> 
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">Total Amount:</span>        
+            <span className="text-lg font-bold text-gray-900">
+              ${Number(invoice.total_amount).toFixed(2)}
+            </span>
           </div>
         </div>
 
         <div className="mt-6 flex justify-between">
-          <Button variant="outline" onClick={onCancel} icon={ArrowLeft}>
+          <Button variant="outline" onClick={onCancel} icon={ArrowLeft}>        
             Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              if (selectedPaymentMethod || useNewCard) {
+                setPaymentStep('details');
+              }
+            }}
+            disabled={!selectedPaymentMethod && !useNewCard}
+            icon={CreditCard}
+          >
+            Continue
           </Button>
         </div>
       </div>
@@ -230,9 +305,9 @@ export default function PaymentForm({ invoice, paymentMethods, onSuccess, onCanc
       {/* Invoice Summary */}
       <Card className="bg-purple-50 border-purple-200">
         <div className="p-6">
-          <Typography variant="h4" className="font-semibold mb-4 text-purple-800">
+          <Heading level={4} className="font-semibold mb-4 text-purple-800">
             Payment Summary
-          </Typography>
+          </Heading>
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className="text-gray-700">Invoice:</span>
@@ -254,9 +329,9 @@ export default function PaymentForm({ invoice, paymentMethods, onSuccess, onCanc
       <Card>
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <Typography variant="h3" className="font-semibold">
+            <Heading level={3} className="font-semibold">
               Payment Details
-            </Typography>
+            </Heading>
             <div className="flex items-center text-green-600 text-sm">
               <Shield className="w-4 h-4 mr-1" />
               Secure Payment
@@ -264,29 +339,77 @@ export default function PaymentForm({ invoice, paymentMethods, onSuccess, onCanc
           </div>
 
           {paymentError && (
-            <Alert type="error" className="mb-6">
-              {paymentError}
-            </Alert>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start">
+                <AlertCircle className="w-5 h-5 text-red-600 mr-2 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-red-800 mb-1">{paymentError}</p>
+                  {lastError && (
+                    <p className="text-xs text-red-600 mb-3">
+                      {lastError.message.includes('card') 
+                        ? 'Please check your card details and try again.'
+                        : lastError.message.includes('network')
+                        ? 'Network error. Please check your connection and try again.'
+                        : 'An error occurred while processing your payment.'}
+                    </p>
+                  )}
+                  {showRetry && retryCount < 3 && (
+                    <div className="flex items-center gap-2 mt-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRetryPayment}
+                        icon={RefreshCw}
+                        className="text-red-700 border-red-300 hover:bg-red-100"
+                      >
+                        Retry Payment
+                      </Button>
+                      <Text variant="small" className="text-red-600">
+                        Attempt {retryCount} of 3
+                      </Text>
+                    </div>
+                  )}
+                  {retryCount >= 3 && (
+                    <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                      <div className="flex items-start">
+                        <Info className="w-4 h-4 text-yellow-600 mr-2 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-xs font-medium text-yellow-800 mb-1">
+                            Maximum retry attempts reached
+                          </p>
+                          <p className="text-xs text-yellow-700">
+                            Please contact support or try again later. Your card has not been charged.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           )}
 
           {useNewCard ? (
             <div className="space-y-4">
-              {isLoadingStripe ? (
+              {!clientSecret ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="w-6 h-6 animate-spin text-purple-600 mr-2" />
                   <span>Loading secure payment form...</span>
                 </div>
               ) : (
                 <>
-                  {/* Simulated Stripe Card Element */}
+                  {/* Real Stripe Card Element */}
                   <div className="border border-gray-300 rounded-lg p-4 bg-white">
                     <div className="text-sm text-gray-600 mb-2">Card Information</div>
-                    <div className="bg-gray-50 p-3 rounded border text-center text-gray-500">
-                      [Stripe Card Element would be mounted here]
-                      <div className="text-xs mt-1">
-                        Secure card input powered by Stripe
-                      </div>
+                    <div className="py-2">
+                      <CardElement
+                        options={cardElementOptions}
+                        onChange={handleCardElementChange}
+                      />
                     </div>
+                    {cardError && (
+                      <div className="mt-2 text-sm text-red-600">{cardError}</div>
+                    )}
                   </div>
                   
                   <div className="flex items-center text-sm text-gray-600">
@@ -326,11 +449,11 @@ export default function PaymentForm({ invoice, paymentMethods, onSuccess, onCanc
             <Button
               variant="primary"
               onClick={handleSubmitPayment}
-              disabled={isLoadingStripe || (useNewCard && !stripeElements)}
+              disabled={isProcessing || (useNewCard && (!stripe || !elements || !clientSecret || !!cardError))}
               icon={CreditCard}
               className="px-8"
             >
-              Pay ${Number(invoice.total_amount).toFixed(2)}
+              {isProcessing ? 'Processing...' : `Pay $${Number(invoice.total_amount).toFixed(2)}`}
             </Button>
           </div>
         </div>
@@ -341,56 +464,169 @@ export default function PaymentForm({ invoice, paymentMethods, onSuccess, onCanc
   const renderProcessing = () => (
     <Card>
       <div className="p-12 text-center">
-        <Loader2 className="w-12 h-12 animate-spin text-purple-600 mx-auto mb-4" />
-        <Typography variant="h3" className="font-semibold mb-2">
+        <div className="relative inline-block mb-6">
+          <Loader2 className="w-16 h-16 animate-spin text-purple-600 mx-auto" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Shield className="w-6 h-6 text-purple-400" />
+          </div>
+        </div>
+        <Heading level={3} className="font-semibold mb-2 text-gray-900">
           Processing Payment
-        </Typography>
-        <Typography variant="body2" className="text-gray-600">
-          Please wait while we process your payment. Do not close this window.
-        </Typography>
+        </Heading>
+        <Text variant="body" className="text-gray-600 mb-4">
+          Please wait while we securely process your payment.
+        </Text>
+        <Text variant="small" className="text-gray-500 mb-6">
+          Do not close this window or refresh the page.
+        </Text>
+        <div className="flex items-center justify-center gap-2 text-sm text-purple-600 mt-4">
+          <Lock className="w-4 h-4" />
+          <span>Your payment is being secured...</span>
+        </div>
+        {retryCount > 0 && (
+          <div className="mt-4 text-xs text-gray-500">
+            Retry attempt {retryCount}
+          </div>
+        )}
       </div>
     </Card>
   );
 
-  const renderSuccess = () => (
-    <Card>
-      <div className="p-12 text-center">
-        <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-6" />
-        <Typography variant="h2" className="font-bold text-green-800 mb-2">
-          Payment Successful!
-        </Typography>
-        <Typography variant="h4" className="text-gray-700 mb-4">
-          Your payment of ${Number(invoice.total_amount).toFixed(2)} has been processed
-        </Typography>
-        <Typography variant="body2" className="text-gray-600 mb-6">
-          You will receive a confirmation email shortly. Thank you for your payment!
-        </Typography>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-left max-w-md mx-auto">
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Invoice:</span>
-              <span className="font-medium">{invoice.invoice_number}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Amount:</span>
-              <span className="font-medium">${Number(invoice.total_amount).toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Date:</span>
-              <span className="font-medium">{new Date().toLocaleDateString()}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
+  const handleDownloadReceipt = () => {
+    // Generate receipt data
+    const receiptData = {
+      invoiceNumber: invoice.invoice_number,
+      transactionId: paymentIntent?.id || 'N/A',
+      amount: Number(invoice.total_amount).toFixed(2),
+      date: new Date().toLocaleDateString(),
+      customer: invoice.accounts?.name || 'N/A',
+    };
+    
+    // Create receipt text
+    const receiptText = `
+PAYMENT RECEIPT
+================
+
+Invoice Number: ${receiptData.invoiceNumber}
+Transaction ID: ${receiptData.transactionId}
+Amount Paid: $${receiptData.amount}
+Payment Date: ${receiptData.date}
+Customer: ${receiptData.customer}
+
+Thank you for your payment!
+    `.trim();
+    
+    // Create and download file
+    const blob = new Blob([receiptText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Receipt-${invoice.invoice_number}-${Date.now()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    logger.debug('Receipt downloaded', { invoiceNumber: invoice.invoice_number }, 'PaymentForm');
+    toast.success('Receipt downloaded');
+  };
+
+  // renderSuccess removed - now using PaymentConfirmation component
 
   return (
     <div className="max-w-2xl mx-auto">
       {paymentStep === 'method' && renderPaymentMethodSelection()}
       {paymentStep === 'details' && renderPaymentDetails()}
       {paymentStep === 'processing' && renderProcessing()}
-      {paymentStep === 'success' && renderSuccess()}
+      {paymentStep === 'success' && (
+        <PaymentConfirmation
+          invoice={invoice}
+          paymentIntent={paymentIntent}
+          paymentMethod={selectedPaymentMethod}
+          onDownloadReceipt={handleDownloadReceipt}
+          onClose={onSuccess}
+        />
+      )}
     </div>
+  );
+}
+
+// Main component with Stripe Elements provider
+export default function PaymentForm({ invoice, paymentMethods, onSuccess, onCancel }: PaymentFormProps) {
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [isLoadingIntent, setIsLoadingIntent] = useState(false);
+  const [error, setError] = useState<string>('');
+
+  // Create payment intent when component mounts or when needed
+  useEffect(() => {
+    const createIntent = async () => {
+      setIsLoadingIntent(true);
+      setError('');
+      try {
+        const data = await billing.createStripePaymentIntent(invoice.id);
+        setClientSecret(data.clientSecret);
+        logger.debug('Payment intent created', { invoiceId: invoice.id }, 'PaymentForm');
+      } catch (err) {
+        logger.error('Failed to create payment intent', err, 'PaymentForm');
+        setError('Failed to initialize payment. Please try again.');
+      } finally {
+        setIsLoadingIntent(false);
+      }
+    };
+
+    // Only create intent if Stripe key is configured
+    if (import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY !== 'pk_test_your_stripe_publishable_key_here') {
+      createIntent();
+    } else {
+      setError('Stripe is not configured. Please set VITE_STRIPE_PUBLISHABLE_KEY in your environment variables.');
+    }
+  }, [invoice.id]);
+
+  if (error && !clientSecret) {
+    return (
+      <Card>
+        <div className="p-6">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          </div>
+          <div className="mt-4">
+            <Button variant="outline" onClick={onCancel} icon={ArrowLeft}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (!clientSecret && isLoadingIntent) {
+    return (
+      <Card>
+        <div className="p-12 text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-purple-600 mx-auto mb-4" />
+          <Heading level={3} className="font-semibold mb-2">
+            Initializing Payment
+          </Heading>
+          <Text variant="small" className="text-gray-600">
+            Please wait while we set up secure payment processing...
+          </Text>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Elements stripe={stripePromise} options={{ clientSecret }}>
+      <PaymentFormInner
+        invoice={invoice}
+        paymentMethods={paymentMethods}
+        onSuccess={onSuccess}
+        onCancel={onCancel}
+        clientSecret={clientSecret}
+      />
+    </Elements>
   );
 }

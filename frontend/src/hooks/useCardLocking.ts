@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { logger } from '@/utils/logger';
 
 const LOCKED_CARDS_STORAGE_KEY = 'verocards-v2-locked-cards';
 
@@ -8,8 +9,8 @@ export function useCardLocking() {
     if (saved) {
       try {
         return new Set(JSON.parse(saved));
-      } catch (error) {
-        console.warn('Failed to parse saved locked cards');
+      } catch (error: unknown) {
+        logger.warn('Failed to parse saved locked cards', { error }, 'useCardLocking');
       }
     }
     return new Set();
@@ -19,8 +20,8 @@ export function useCardLocking() {
   useEffect(() => {
     try {
       localStorage.setItem(LOCKED_CARDS_STORAGE_KEY, JSON.stringify(Array.from(lockedCards)));
-    } catch (error) {
-      console.error('Failed to save locked cards:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to save locked cards', error, 'useCardLocking');
     }
   }, [lockedCards]);
 
@@ -57,6 +58,7 @@ export function useCardLocking() {
 
   // Check if card is locked
   const isCardLocked = useCallback((cardId: string) => {
+    // Page cards can be locked/unlocked like regular cards
     return lockedCards.has(cardId);
   }, [lockedCards]);
 

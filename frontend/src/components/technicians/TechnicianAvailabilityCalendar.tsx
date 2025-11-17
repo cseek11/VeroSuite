@@ -1,25 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { useTechnicians } from '@/hooks/useTechnicians';
-import { useJobsByTechnician } from '@/hooks/useJobs';
 import { TechnicianProfile, TechnicianStatus } from '@/types/technician';
 import { Job, JobStatus } from '@/types/jobs';
 import { 
-  Calendar, 
   Clock, 
-  User, 
   ChevronLeft, 
-  ChevronRight, 
-  Filter,
+  ChevronRight,
   Search,
   MapPin,
-  Phone,
-  Mail,
   CheckCircle,
   AlertCircle,
-  XCircle,
-  Activity,
-  TrendingUp,
-  Users
+  XCircle
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';

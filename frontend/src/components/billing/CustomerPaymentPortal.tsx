@@ -1,65 +1,75 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import {
-  Card,
+  Tabs,
   Typography,
-  Button,
-  Alert,
-  Tabs
-} from '@/components/ui/EnhancedUI';
+  Heading,
+  Text,
+} from '@/components/ui';
 import {
   CreditCard,
   FileText,
   History,
-  DollarSign,
-  Calendar,
-  CheckCircle,
-  AlertCircle,
-  Clock,
-  Download,
-  Eye,
   ArrowLeft,
-  Loader2,
-  Shield
+  X,
+  Settings
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
-import { Invoice, Payment, PaymentMethod } from '@/types/enhanced-types';
+import { Invoice } from '@/types/enhanced-types';
+import { trackPaymentInitiated } from '@/lib/billing-analytics';
+import { logger } from '@/utils/logger';
+import { toast } from '@/utils/toast';
 import InvoiceViewer from './InvoiceViewer';
 import PaymentForm from './PaymentForm';
-import PaymentHistory from './PaymentHistory';
+import InvoiceList from './InvoiceList';
+import InvoiceDetail from './InvoiceDetail';
+import PaymentMethodManager from './PaymentMethodManager';
+import CustomerPaymentHistory from './CustomerPaymentHistory';
+import { BillingErrorBoundary } from './BillingErrorBoundary';
 
 interface CustomerPaymentPortalProps {
   customerId: string;
   onClose?: () => void;
 }
 
-type TabType = 'invoices' | 'payment' | 'history';
+type TabType = 'invoices' | 'payment' | 'history' | 'payment-methods';
 
 export default function CustomerPaymentPortal({ customerId, onClose }: CustomerPaymentPortalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('invoices');
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [showInvoiceDetail, setShowInvoiceDetail] = useState(false);
+  const [showInvoiceViewer, setShowInvoiceViewer] = useState(false);
   const queryClient = useQueryClient();
 
-  // Fetch customer invoices
-  const { data: invoices = [], isLoading: invoicesLoading, error: invoicesError } = useQuery({
+  // Fetch customer invoices (for finding invoice by ID in handlers)
+  const { data: invoices = [], error: invoicesError, isLoading: invoicesLoading } = useQuery({
     queryKey: ['billing', 'invoices', customerId],
     queryFn: () => billing.getInvoices(customerId),
     enabled: !!customerId,
-  });
-
-  // Fetch customer payments
-  const { data: payments = [], isLoading: paymentsLoading } = useQuery({
-    queryKey: ['billing', 'payments', customerId],
-    queryFn: () => billing.getPayments(),
-    enabled: !!customerId,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load invoices';
+      logger.error('Failed to fetch customer invoices', error, 'CustomerPaymentPortal');
+      toast.error(`Unable to load invoices. ${errorMessage}. Please try again or contact support.`);
+    },
   });
 
   // Fetch payment methods
-  const { data: paymentMethods = [], isLoading: paymentMethodsLoading } = useQuery({
+  const { data: paymentMethods = [], error: paymentMethodsError, isLoading: paymentMethodsLoading } = useQuery({
     queryKey: ['billing', 'payment-methods', customerId],
     queryFn: () => billing.getPaymentMethods(customerId),
     enabled: !!customerId,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load payment methods';
+      logger.error('Failed to fetch payment methods', error, 'CustomerPaymentPortal');
+      toast.error(`Unable to load payment methods. ${errorMessage}. Please try again or contact support.`);
+    },
   });
 
   // Calculate outstanding balance
@@ -76,6 +86,7 @@ export default function CustomerPaymentPortal({ customerId, onClose }: CustomerP
     return new Date(invoice.due_date) < new Date();
   });
 
+
   const handlePayInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setShowPaymentForm(true);
@@ -87,6 +98,35 @@ export default function CustomerPaymentPortal({ customerId, onClose }: CustomerP
     setSelectedInvoice(null);
     queryClient.invalidateQueries({ queryKey: ['billing'] });
     setActiveTab('history');
+  };
+
+  const handleInvoiceSelect = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setShowInvoiceDetail(true);
+  };
+
+  const handleInvoicePay = (invoice: Invoice) => {
+    trackPaymentInitiated(
+      invoice.id,
+      Number(invoice.total_amount),
+      undefined,
+      customerId
+    );
+    setSelectedInvoice(invoice);
+    setShowPaymentForm(true);
+    setActiveTab('payment');
+  };
+
+  const handleInvoiceView = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setShowInvoiceViewer(true);
+  };
+
+  const handleDownloadPDF = async () => {
+    if (selectedInvoice) {
+      // Trigger PDF download from InvoiceViewer
+      setShowInvoiceViewer(true);
+    }
   };
 
   const tabs = [
@@ -132,117 +172,39 @@ export default function CustomerPaymentPortal({ customerId, onClose }: CustomerP
               </div>
             </Card>
           )}
-
-          {/* Invoices List */}
-          <Card>
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <Typography variant="h3" className="font-semibold">
-                  Your Invoices
-                </Typography>
-                <div className="flex space-x-2">
-                  <Button variant="outline" size="sm" icon={Download}>
-                    Export
-                  </Button>
+          
+          {invoicesError ? (
+            <Card className="bg-red-50 border-red-200">
+              <div className="p-6">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <X className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <Heading level={4} className="text-red-800 mb-2">
+                      Failed to Load Invoices
+                    </Heading>
+                    <Text className="text-red-700 mb-4">
+                      {invoicesError instanceof Error ? invoicesError.message : 'Unable to load invoices. Please try refreshing the page or contact support.'}
+                    </Text>
+                    <Button
+                      variant="outline"
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ['billing', 'invoices', customerId] })}
+                    >
+                      Retry
+                    </Button>
+                  </div>
                 </div>
               </div>
-
-              {invoicesLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
-                  <span className="ml-3 text-gray-600">Loading invoices...</span>
-                </div>
-              ) : invoicesError ? (
-                <Alert type="error" title="Error Loading Invoices">
-                  Unable to load your invoices. Please try again later.
-                </Alert>
-              ) : invoices.length === 0 ? (
-                <div className="text-center py-12">
-                  <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <Typography variant="h4" className="text-gray-500 mb-2">
-                    No invoices found
-                  </Typography>
-                  <Typography variant="body2" className="text-gray-400">
-                    You don't have any invoices at the moment.
-                  </Typography>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {invoices.map((invoice) => (
-                    <div
-                      key={invoice.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3">
-                            <Typography variant="h4" className="font-semibold">
-                              {invoice.invoice_number}
-                            </Typography>
-                            <div className="flex items-center space-x-2">
-                              {invoice.status === 'paid' && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                  <CheckCircle className="w-3 h-3 mr-1" />
-                                  Paid
-                                </span>
-                              )}
-                              {invoice.status === 'sent' && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                  <Clock className="w-3 h-3 mr-1" />
-                                  Pending
-                                </span>
-                              )}
-                              {invoice.status === 'overdue' && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                  <AlertCircle className="w-3 h-3 mr-1" />
-                                  Overdue
-                                </span>
-                              )}
-                              {invoice.status === 'draft' && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                  Draft
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="mt-2 flex items-center space-x-4 text-sm text-gray-600">
-                            <span className="flex items-center">
-                              <Calendar className="w-4 h-4 mr-1" />
-                              Due: {new Date(invoice.due_date).toLocaleDateString()}
-                            </span>
-                            <span className="flex items-center">
-                              <DollarSign className="w-4 h-4 mr-1" />
-                              ${Number(invoice.total_amount).toFixed(2)}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            icon={Eye}
-                            onClick={() => setSelectedInvoice(invoice)}
-                          >
-                            View
-                          </Button>
-                          {(invoice.status === 'sent' || invoice.status === 'overdue') && (
-                            <Button
-                              variant="primary"
-                              size="sm"
-                              icon={CreditCard}
-                              onClick={() => handlePayInvoice(invoice)}
-                            >
-                              Pay Now
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </Card>
+            </Card>
+          ) : (
+            <InvoiceList
+              customerId={customerId}
+              onInvoiceSelect={handleInvoiceSelect}
+              onInvoicePay={handleInvoicePay}
+              showActions={true}
+            />
+          )}
         </div>
       )
     },
@@ -266,21 +228,18 @@ export default function CustomerPaymentPortal({ customerId, onClose }: CustomerP
           ) : (
             <Card>
               <div className="p-6">
-                <Typography variant="h3" className="font-semibold mb-4">
-                  Make a Payment
-                </Typography>
                 <div className="text-center py-12">
                   <CreditCard className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <Typography variant="h4" className="text-gray-500 mb-2">
                     Select an invoice to pay
                   </Typography>
-                  <Typography variant="body2" className="text-gray-400 mb-6">
-                    Choose an invoice from the Invoices tab to make a payment.
+                  <Typography variant="body2" className="text-gray-400 mb-4">
+                    Go to the Invoices tab to select an invoice for payment.
                   </Typography>
                   <Button
-                    variant="outline"
+                    variant="primary"
+                    size="sm"
                     onClick={() => setActiveTab('invoices')}
-                    icon={ArrowLeft}
                   >
                     View Invoices
                   </Button>
@@ -296,69 +255,169 @@ export default function CustomerPaymentPortal({ customerId, onClose }: CustomerP
       label: 'Payment History',
       icon: History,
       component: (
-        <PaymentHistory
-          payments={payments}
-          isLoading={paymentsLoading}
+        <CustomerPaymentHistory
           customerId={customerId}
+          onInvoiceClick={(invoiceId) => {
+            const invoice = invoices.find(inv => inv.id === invoiceId);
+            if (invoice) {
+              handleInvoiceView(invoice);
+            }
+          }}
         />
+      )
+    },
+    {
+      id: 'payment-methods' as TabType,
+      label: 'Payment Methods',
+      icon: Settings,
+      component: (
+        <div>
+          {paymentMethodsError ? (
+            <Card className="bg-red-50 border-red-200">
+              <div className="p-6">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <X className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <Heading level={4} className="text-red-800 mb-2">
+                      Failed to Load Payment Methods
+                    </Heading>
+                    <Text className="text-red-700 mb-4">
+                      {paymentMethodsError instanceof Error ? paymentMethodsError.message : 'Unable to load payment methods. Please try refreshing the page or contact support.'}
+                    </Text>
+                    <Button
+                      variant="outline"
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ['billing', 'payment-methods', customerId] })}
+                    >
+                      Retry
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ) : (
+            <PaymentMethodManager
+              customerId={customerId}
+              onPaymentMethodSelected={(method) => {
+                // When a payment method is selected, switch to payment tab
+                setActiveTab('payment');
+              }}
+            />
+          )}
+        </div>
       )
     }
   ];
 
+  // Show loading state while initial data is being fetched
+  if (invoicesLoading || paymentMethodsLoading) {
+    return (
+      <BillingErrorBoundary
+        context="CustomerPaymentPortal"
+        onBack={onClose}
+      >
+        <div className="w-full">
+          {onClose && (
+            <div className="flex items-center justify-between mb-6">                                    
+              <Button
+                variant="outline"
+                size="sm"
+                icon={ArrowLeft}
+                onClick={onClose}
+              >
+                Back
+              </Button>
+            </div>
+          )}
+          <Card>
+            <div className="p-12 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+              <Text className="text-gray-600">Loading customer billing information...</Text>
+            </div>
+          </Card>
+        </div>
+      </BillingErrorBoundary>
+    );
+  }
+
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <Typography variant="h1" className="font-bold text-gray-900">
-            Payment Portal
-          </Typography>
-          <Typography variant="body1" className="text-gray-600 mt-2">
-            Manage your invoices and payments securely
-          </Typography>
-        </div>
+    <BillingErrorBoundary
+      context="CustomerPaymentPortal"
+      onBack={onClose}
+    >
+      <div className="w-full">
         {onClose && (
-          <Button variant="outline" onClick={onClose} icon={ArrowLeft}>
-            Back
-          </Button>
+          <div className="flex items-center justify-between mb-6">                                    
+            <Button
+              variant="outline"
+              size="sm"
+              icon={ArrowLeft}
+              onClick={onClose}
+            >
+              Back
+            </Button>
+          </div>
         )}
-      </div>
 
-      {/* Security Notice */}
-      <Alert type="info" className="mb-6">
-        <div className="flex items-center">
-          <Shield className="w-5 h-5 mr-2" />
-          <span className="font-medium">Secure Payment Processing</span>
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as TabType)}                                        
+          tabs={tabs}
+        />
+
+        {/* Render active tab content */}
+        <div className="mt-6">
+          {tabs.find(tab => tab.id === activeTab)?.component}
         </div>
-        <div className="mt-1 text-sm">
-          Your payment information is protected with bank-level security and encryption.
+
+      {/* Invoice Detail Modal */}
+      {showInvoiceDetail && selectedInvoice && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+              <Heading level={3}>Invoice Details</Heading>
+              <button
+                onClick={() => {
+                  setShowInvoiceDetail(false);
+                  setSelectedInvoice(null);
+                }}
+                className="p-2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <InvoiceDetail
+                invoice={selectedInvoice}
+                onPayNow={() => {
+                  setShowInvoiceDetail(false);
+                  handleInvoicePay(selectedInvoice);
+                }}
+                onDownloadPDF={handleDownloadPDF}
+                showActions={true}
+              />
+            </div>
+          </div>
         </div>
-      </Alert>
-
-      {/* Tabs */}
-      <Tabs
-        tabs={tabs}
-        active={activeTab}
-        onTabChange={(tabId) => setActiveTab(tabId as TabType)}
-        variant="pills"
-        size="lg"
-        className="mb-8"
-      />
-
-      {/* Tab Content */}
-      <div className="tab-content">
-        {tabs.find(tab => tab.id === activeTab)?.component}
-      </div>
+      )}
 
       {/* Invoice Viewer Modal */}
-      {selectedInvoice && !showPaymentForm && (
+      {showInvoiceViewer && selectedInvoice && (
         <InvoiceViewer
           invoice={selectedInvoice}
-          isOpen={true}
-          onClose={() => setSelectedInvoice(null)}
-          onPayNow={() => handlePayInvoice(selectedInvoice)}
+          isOpen={showInvoiceViewer}
+          onClose={() => {
+            setShowInvoiceViewer(false);
+            setSelectedInvoice(null);
+          }}
+          onPayNow={() => {
+            setShowInvoiceViewer(false);
+            handleInvoicePay(selectedInvoice);
+          }}
         />
       )}
-    </div>
+      </div>
+    </BillingErrorBoundary>
   );
 }

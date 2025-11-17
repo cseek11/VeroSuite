@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import {
-  Card,
-  Button,
-  Typography,
-  Chip,
-  Modal
-} from '@/components/ui/EnhancedUI';
+  Badge,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Heading,
+  Text,
+} from '@/components/ui';
 import {
   Camera,
   MapPin,
@@ -52,22 +56,22 @@ export default function PhotoGallery({ photos, customerId, isLoading }: PhotoGal
 
   const getPhotoTypeColor = (type: string) => {
     switch (type.toLowerCase()) {
-      case 'property': return 'blue';
-      case 'before_service': return 'red';
-      case 'after_service': return 'green';
-      case 'damage': return 'orange';
-      case 'pest_evidence': return 'purple';
-      default: return 'gray';
+      case 'property': return 'bg-blue-100 text-blue-800';
+      case 'before_service': return 'bg-red-100 text-red-800';
+      case 'after_service': return 'bg-green-100 text-green-800';
+      case 'damage': return 'bg-orange-100 text-orange-800';
+      case 'pest_evidence': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getPhotoCategoryColor = (category: string) => {
     switch (category.toLowerCase()) {
-      case 'profile': return 'blue';
-      case 'work_order': return 'green';
-      case 'inspection': return 'yellow';
-      case 'maintenance': return 'purple';
-      default: return 'gray';
+      case 'profile': return 'bg-blue-100 text-blue-800';
+      case 'work_order': return 'bg-green-100 text-green-800';
+      case 'inspection': return 'bg-yellow-100 text-yellow-800';
+      case 'maintenance': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -101,9 +105,9 @@ export default function PhotoGallery({ photos, customerId, isLoading }: PhotoGal
     return (
       <Card className="p-6">
         <div className="text-center py-8">
-          <Typography variant="body1" className="text-gray-600">
+          <Text variant="body" className="text-slate-600">
             Loading photos...
-          </Typography>
+          </Text>
         </div>
       </Card>
     );
@@ -113,9 +117,9 @@ export default function PhotoGallery({ photos, customerId, isLoading }: PhotoGal
     <>
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <Typography variant="h3" className="text-gray-900">
+          <Heading level={3} className="text-slate-900">
             Photo Gallery
-          </Typography>
+          </Heading>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -137,12 +141,12 @@ export default function PhotoGallery({ photos, customerId, isLoading }: PhotoGal
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-6">
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-gray-500" />
-            <Typography variant="body2" className="text-gray-600">Category:</Typography>
+            <Filter className="h-4 w-4 text-slate-500" />
+            <Text variant="small" className="text-slate-600">Category:</Text>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="p-1 border border-gray-300 rounded text-sm"
+              className="p-1 border border-slate-300 rounded text-sm"
             >
               {categories.map(category => (
                 <option key={category} value={category}>
@@ -153,11 +157,11 @@ export default function PhotoGallery({ photos, customerId, isLoading }: PhotoGal
           </div>
           
           <div className="flex items-center gap-2">
-            <Typography variant="body2" className="text-gray-600">Type:</Typography>
+            <Text variant="small" className="text-slate-600">Type:</Text>
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="p-1 border border-gray-300 rounded text-sm"
+              className="p-1 border border-slate-300 rounded text-sm"
             >
               {types.map(type => (
                 <option key={type} value={type}>
@@ -171,13 +175,13 @@ export default function PhotoGallery({ photos, customerId, isLoading }: PhotoGal
         {/* Photo Grid/List */}
         {filteredPhotos.length === 0 ? (
           <div className="text-center py-8">
-            <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <Typography variant="h4" className="text-gray-900 mb-2">
+            <Camera className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+            <Heading level={4} className="text-slate-900 mb-2">
               No Photos Found
-            </Typography>
-            <Typography variant="body1" className="text-gray-600">
+            </Heading>
+            <Text variant="body" className="text-slate-600">
               No photos match the selected filters.
-            </Typography>
+            </Text>
           </div>
         ) : (
           <div className={viewMode === 'grid' 
@@ -187,7 +191,7 @@ export default function PhotoGallery({ photos, customerId, isLoading }: PhotoGal
             {filteredPhotos.map((photo) => (
               <div
                 key={photo.id}
-                className={`border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${
+                className={`border border-slate-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${
                   viewMode === 'list' ? 'flex gap-4 p-4' : ''
                 }`}
                 onClick={() => {
@@ -205,13 +209,12 @@ export default function PhotoGallery({ photos, customerId, isLoading }: PhotoGal
                   
                   {/* Photo Type Badge */}
                   <div className="absolute top-2 left-2">
-                    <Chip
-                      color={getPhotoTypeColor(photo.photo_type)}
+                    <Badge
                       variant="default"
-                      size="sm"
+                      className={getPhotoTypeColor(photo.photo_type)}
                     >
                       {photo.photo_type.replace('_', ' ')}
-                    </Chip>
+                    </Badge>
                   </div>
                   
                   {/* Before/After Indicator */}
@@ -226,47 +229,46 @@ export default function PhotoGallery({ photos, customerId, isLoading }: PhotoGal
                 <div className={`${viewMode === 'list' ? 'flex-1' : 'p-3'}`}>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <Chip
-                        color={getPhotoCategoryColor(photo.photo_category)}
+                      <Badge
                         variant="default"
-                        size="sm"
+                        className={getPhotoCategoryColor(photo.photo_category)}
                       >
                         {photo.photo_category}
-                      </Chip>
+                      </Badge>
                       {photo.pest_type && (
-                        <Chip color="purple" variant="default" size="sm">
+                        <Badge variant="default" className="bg-purple-100 text-purple-800">
                           {photo.pest_type}
-                        </Chip>
+                        </Badge>
                       )}
                     </div>
                     
                     {photo.description && (
-                      <Typography variant="body2" className="text-gray-700 line-clamp-2">
+                      <Text variant="small" className="text-slate-700 line-clamp-2">
                         {photo.description}
-                      </Typography>
+                      </Text>
                     )}
                     
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <div className="flex items-center gap-2 text-sm text-slate-500">
                       <Calendar className="h-3 w-3" />
                       <span>{formatDate(photo.taken_at)}</span>
                     </div>
                     
                     {photo.taken_by && (
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className="flex items-center gap-2 text-sm text-slate-500">
                         <User className="h-3 w-3" />
                         <span>{photo.taken_by}</span>
                       </div>
                     )}
                     
                     {photo.location_coords && (
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className="flex items-center gap-2 text-sm text-slate-500">
                         <MapPin className="h-3 w-3" />
                         <span>GPS</span>
                       </div>
                     )}
                     
                     {photo.file_size && (
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-slate-500">
                         {formatFileSize(photo.file_size)}
                       </div>
                     )}
@@ -280,152 +282,152 @@ export default function PhotoGallery({ photos, customerId, isLoading }: PhotoGal
         {/* Photo Statistics */}
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-blue-50 p-4 rounded-lg text-center">
-            <Typography variant="h4" className="text-blue-900 font-semibold">
+            <Heading level={4} className="text-blue-900 font-semibold">
               {photos.length}
-            </Typography>
-            <Typography variant="body2" className="text-blue-600">
+            </Heading>
+            <Text variant="small" className="text-blue-600">
               Total Photos
-            </Typography>
+            </Text>
           </div>
           
           <div className="bg-green-50 p-4 rounded-lg text-center">
-            <Typography variant="h4" className="text-green-900 font-semibold">
+            <Heading level={4} className="text-green-900 font-semibold">
               {photos.filter(p => p.photo_type === 'before_service').length}
-            </Typography>
-            <Typography variant="body2" className="text-green-600">
+            </Heading>
+            <Text variant="small" className="text-green-600">
               Before Photos
-            </Typography>
+            </Text>
           </div>
           
           <div className="bg-purple-50 p-4 rounded-lg text-center">
-            <Typography variant="h4" className="text-purple-900 font-semibold">
+            <Heading level={4} className="text-purple-900 font-semibold">
               {photos.filter(p => p.photo_type === 'pest_evidence').length}
-            </Typography>
-            <Typography variant="body2" className="text-purple-600">
+            </Heading>
+            <Text variant="small" className="text-purple-600">
               Pest Evidence
-            </Typography>
+            </Text>
           </div>
           
           <div className="bg-orange-50 p-4 rounded-lg text-center">
-            <Typography variant="h4" className="text-orange-900 font-semibold">
+            <Heading level={4} className="text-orange-900 font-semibold">
               {photos.filter(p => p.location_coords).length}
-            </Typography>
-            <Typography variant="body2" className="text-orange-600">
+            </Heading>
+            <Text variant="small" className="text-orange-600">
               GPS Tagged
-            </Typography>
+            </Text>
           </div>
         </div>
       </Card>
 
       {/* Photo Detail Modal */}
-      <Modal
-        isOpen={showPhotoModal}
-        onClose={() => setShowPhotoModal(false)}
-        title="Photo Details"
-        size="xl"
-      >
-        {selectedPhoto && (
-          <div className="space-y-6">
-            {/* Photo Display */}
-            <div className="relative">
-              <img
-                src={selectedPhoto.file_url}
-                alt={selectedPhoto.description || 'Customer photo'}
-                className="w-full h-96 object-cover rounded-lg"
-              />
-              
-              {/* Photo Badges */}
-              <div className="absolute top-4 left-4 flex gap-2">
-                <Chip
-                  color={getPhotoTypeColor(selectedPhoto.photo_type)}
-                  variant="default"
-                >
-                  {selectedPhoto.photo_type.replace('_', ' ')}
-                </Chip>
-                <Chip
-                  color={getPhotoCategoryColor(selectedPhoto.photo_category)}
-                  variant="default"
-                >
-                  {selectedPhoto.photo_category}
-                </Chip>
-                {selectedPhoto.is_before_photo && (
-                  <Chip color="red" variant="default">
-                    Before
-                  </Chip>
+      <Dialog open={showPhotoModal} onOpenChange={(open) => !open && setShowPhotoModal(false)}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Photo Details</DialogTitle>
+          </DialogHeader>
+          {selectedPhoto && (
+            <div className="space-y-6">
+              {/* Photo Display */}
+              <div className="relative">
+                <img
+                  src={selectedPhoto.file_url}
+                  alt={selectedPhoto.description || 'Customer photo'}
+                  className="w-full h-96 object-cover rounded-lg"
+                />
+                
+                {/* Photo Badges */}
+                <div className="absolute top-4 left-4 flex gap-2">
+                  <Badge
+                    variant="default"
+                    className={getPhotoTypeColor(selectedPhoto.photo_type)}
+                  >
+                    {selectedPhoto.photo_type.replace('_', ' ')}
+                  </Badge>
+                  <Badge
+                    variant="default"
+                    className={getPhotoCategoryColor(selectedPhoto.photo_category)}
+                  >
+                    {selectedPhoto.photo_category}
+                  </Badge>
+                  {selectedPhoto.is_before_photo && (
+                    <Badge variant="default" className="bg-red-100 text-red-800">
+                      Before
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              {/* Photo Details */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Text variant="small" className="text-slate-600">Taken At</Text>
+                  <Text variant="body">{formatDate(selectedPhoto.taken_at)}</Text>
+                </div>
+                
+                {selectedPhoto.taken_by && (
+                  <div>
+                    <Text variant="small" className="text-slate-600">Taken By</Text>
+                    <Text variant="body">{selectedPhoto.taken_by}</Text>
+                  </div>
+                )}
+                
+                {selectedPhoto.location_coords && (
+                  <div>
+                    <Text variant="small" className="text-slate-600">GPS Coordinates</Text>
+                    <Text variant="body">{selectedPhoto.location_coords}</Text>
+                  </div>
+                )}
+                
+                {selectedPhoto.treatment_area && (
+                  <div>
+                    <Text variant="small" className="text-slate-600">Treatment Area</Text>
+                    <Text variant="body">{selectedPhoto.treatment_area}</Text>
+                  </div>
+                )}
+                
+                {selectedPhoto.pest_type && (
+                  <div>
+                    <Text variant="small" className="text-slate-600">Pest Type</Text>
+                    <Text variant="body">{selectedPhoto.pest_type}</Text>
+                  </div>
+                )}
+                
+                {selectedPhoto.file_size && (
+                  <div>
+                    <Text variant="small" className="text-slate-600">File Size</Text>
+                    <Text variant="body">{formatFileSize(selectedPhoto.file_size)}</Text>
+                  </div>
                 )}
               </div>
-            </div>
 
-            {/* Photo Details */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Typography variant="body2" className="text-gray-600">Taken At</Typography>
-                <Typography variant="body1">{formatDate(selectedPhoto.taken_at)}</Typography>
+              {selectedPhoto.description && (
+                <div>
+                  <Text variant="small" className="text-slate-600 mb-2">Description</Text>
+                  <Text variant="body">{selectedPhoto.description}</Text>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline">
+                  <Download className="h-4 w-4 mr-1" />
+                  Download
+                </Button>
+                <Button variant="outline">
+                  <Share2 className="h-4 w-4 mr-1" />
+                  Share
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowPhotoModal(false)}
+                >
+                  Close
+                </Button>
               </div>
-              
-              {selectedPhoto.taken_by && (
-                <div>
-                  <Typography variant="body2" className="text-gray-600">Taken By</Typography>
-                  <Typography variant="body1">{selectedPhoto.taken_by}</Typography>
-                </div>
-              )}
-              
-              {selectedPhoto.location_coords && (
-                <div>
-                  <Typography variant="body2" className="text-gray-600">GPS Coordinates</Typography>
-                  <Typography variant="body1">{selectedPhoto.location_coords}</Typography>
-                </div>
-              )}
-              
-              {selectedPhoto.treatment_area && (
-                <div>
-                  <Typography variant="body2" className="text-gray-600">Treatment Area</Typography>
-                  <Typography variant="body1">{selectedPhoto.treatment_area}</Typography>
-                </div>
-              )}
-              
-              {selectedPhoto.pest_type && (
-                <div>
-                  <Typography variant="body2" className="text-gray-600">Pest Type</Typography>
-                  <Typography variant="body1">{selectedPhoto.pest_type}</Typography>
-                </div>
-              )}
-              
-              {selectedPhoto.file_size && (
-                <div>
-                  <Typography variant="body2" className="text-gray-600">File Size</Typography>
-                  <Typography variant="body1">{formatFileSize(selectedPhoto.file_size)}</Typography>
-                </div>
-              )}
             </div>
-
-            {selectedPhoto.description && (
-              <div>
-                <Typography variant="body2" className="text-gray-600 mb-2">Description</Typography>
-                <Typography variant="body1">{selectedPhoto.description}</Typography>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline">
-                <Download className="h-4 w-4 mr-1" />
-                Download
-              </Button>
-              <Button variant="outline">
-                <Share2 className="h-4 w-4 mr-1" />
-                Share
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowPhotoModal(false)}
-              >
-                Close
-              </Button>
-            </div>
-          </div>
-        )}
-      </Modal>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useUndoRedo } from './useUndoRedo';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { logger } from '@/utils/logger';
+import { CARD_CONSTANTS } from '../routes/dashboard/utils/cardConstants';
 
 export interface CardLayout {
   id: string;
@@ -55,6 +56,8 @@ const defaultCardSizes: Record<string, { width: number; height: number }> = {
   'recent-activity': { width: 260, height: 200 },
   'customer-search': { width: 260, height: 160 },
   'reports': { width: 280, height: 180 },
+  'technician-dispatch': { width: 400, height: 500 },
+  'invoices': { width: 400, height: 500 },
   'quick-actions': { width: 260, height: 160 },
   'kpi-builder': { width: 320, height: 240 },
   'predictive-analytics': { width: 300, height: 200 },
@@ -64,22 +67,25 @@ const defaultCardSizes: Record<string, { width: number; height: number }> = {
   'financial-summary': { width: 280, height: 180 },
   'notifications': { width: 260, height: 160 },
   'kpi-display': { width: 320, height: 240 },
-  'kpi-template': { width: 400, height: 300 }
+  'kpi-template': { width: 400, height: 300 },
+  'customers-page': { width: 1200, height: 800 },
+  'customers-page-minimized': { width: CARD_CONSTANTS.MINIMIZED.WIDTH, height: CARD_CONSTANTS.MINIMIZED.HEIGHT }
 };
 
 // Layout configuration optimized for FAB system integration
+// Uses constants from CARD_CONSTANTS where applicable
 const layoutConfig = {
   canvas: {
-    minHeight: 600,
-    padding: 8,
+    minHeight: CARD_CONSTANTS.CANVAS.MIN_HEIGHT,
+    padding: CARD_CONSTANTS.CANVAS.PADDING,
     autoExpandAmount: 150
   },
   cards: {
-    minGap: 12,
-    snapDistance: 20,
+    minGap: CARD_CONSTANTS.DRAG.MIN_GAP,
+    snapDistance: CARD_CONSTANTS.DRAG.SNAP_DISTANCE,
     headerOffset: 60, // Reduced for secondary nav bar
     sidebarOffset: 20, // Minimal since FAB system
-    bottomOffset: 100 // Space for FAB systems
+    bottomOffset: CARD_CONSTANTS.CANVAS.BOTTOM_OFFSET // Space for FAB systems
   }
 };
 
@@ -90,15 +96,15 @@ export function useDashboardLayout(): UseDashboardLayoutReturn {
     if (saved) {
       try {
         return JSON.parse(saved);
-      } catch (error) {
-        console.warn('Failed to load saved layout, using default');
+      } catch (_error) {
+        logger.warn('Failed to load saved layout, using default', undefined, 'DashboardLayout');
       }
     }
     
     // Default layout - empty canvas with grid layout
     return {
       cards: {},
-      canvasHeight: 600,
+      canvasHeight: CARD_CONSTANTS.CANVAS.MIN_HEIGHT,
       theme: 'light',
       currentLayout: 'grid'
     };
@@ -109,17 +115,55 @@ export function useDashboardLayout(): UseDashboardLayoutReturn {
     localStorage.setItem('verocards-v2-layout', JSON.stringify(layout));
   }, [layout]);
 
-  // Undo/Redo system
-  const {
-    pushState: pushLayoutToHistory,
-    undo: undoLayout,
-    redo: redoLayout,
-    canUndo,
-    canRedo
-  } = useUndoRedo<DashboardLayout>({
-    initialState: layout,
-    maxHistorySize: 50
-  });
+  // Undo/Redo system - simple implementation for DashboardLayout
+  const [history, setHistory] = useState<DashboardLayout[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const maxHistorySize = CARD_CONSTANTS.UNDO_REDO?.MAX_HISTORY_SIZE || 50;
+
+  // Simplified version using refs to avoid closure issues
+  const historyRef = useRef<DashboardLayout[]>([]);
+  const historyIndexRef = useRef(-1);
+  
+  const pushLayoutToHistoryRef = useCallback((layoutState: DashboardLayout) => {
+    const clonedState = JSON.parse(JSON.stringify(layoutState));
+    const newHistory = historyRef.current.slice(0, historyIndexRef.current + 1);
+    newHistory.push(clonedState);
+    if (newHistory.length > maxHistorySize) {
+      newHistory.shift();
+    }
+    historyIndexRef.current = newHistory.length - 1;
+    historyRef.current = newHistory;
+    setHistory(newHistory);
+    setHistoryIndex(historyIndexRef.current);
+  }, [maxHistorySize]);
+
+  // Use the ref-based version
+  const pushLayoutToHistoryFinal = pushLayoutToHistoryRef;
+
+  const undoLayout = useCallback((): DashboardLayout | null => {
+    if (historyIndexRef.current <= 0) return null;
+    historyIndexRef.current = historyIndexRef.current - 1;
+    const result = historyRef.current[historyIndexRef.current] || null;
+    setHistoryIndex(historyIndexRef.current);
+    return result;
+  }, []);
+
+  const redoLayout = useCallback((): DashboardLayout | null => {
+    if (historyIndexRef.current >= historyRef.current.length - 1) return null;
+    historyIndexRef.current = historyIndexRef.current + 1;
+    const result = historyRef.current[historyIndexRef.current] || null;
+    setHistoryIndex(historyIndexRef.current);
+    return result;
+  }, []);
+
+  // Sync refs with state
+  useEffect(() => {
+    historyRef.current = history;
+    historyIndexRef.current = historyIndex;
+  }, [history, historyIndex]);
+
+  const canUndo = historyIndex > 0;
+  const canRedo = historyIndex < history.length - 1;
 
   // Undo operation
   const handleUndo = useCallback(() => {
@@ -160,8 +204,8 @@ export function useDashboardLayout(): UseDashboardLayoutReturn {
         ...prev.cards,
         [cardId]: {
           ...card,
-          x: Math.max(8, x), // Allow cards near left edge, just prevent going off-screen
-          y: Math.max(8, y)  // Allow cards near top, just prevent going off-screen
+          x: Math.max(layoutConfig.cards.minGap / 2, x), // Allow cards near edges
+          y: Math.max(layoutConfig.cards.minGap / 2, y)  // Allow cards near edges
         }
       };
 
@@ -185,8 +229,8 @@ export function useDashboardLayout(): UseDashboardLayoutReturn {
 
   // Save layout state to history (for meaningful actions)
   const saveToHistory = useCallback(() => {
-    pushLayoutToHistory(layout);
-  }, [layout, pushLayoutToHistory]);
+    pushLayoutToHistoryFinal(layout);
+  }, [layout, pushLayoutToHistoryFinal]);
 
   // Update multiple card positions (for multi-drag)
   const updateMultipleCardPositions = useCallback((updates: Array<{ cardId: string; x: number; y: number }>) => {
@@ -198,8 +242,8 @@ export function useDashboardLayout(): UseDashboardLayoutReturn {
         if (card) {
           updatedCards[cardId] = {
             ...card,
-            x: Math.max(8, x), // Allow cards near left edge, just prevent going off-screen
-            y: Math.max(8, y)  // Allow cards near top, just prevent going off-screen
+            x: Math.max(layoutConfig.cards.minGap / 2, x), // Allow cards near edges
+            y: Math.max(layoutConfig.cards.minGap / 2, y)  // Allow cards near edges
           };
         }
       });
@@ -227,14 +271,19 @@ export function useDashboardLayout(): UseDashboardLayoutReturn {
       const card = prev.cards[cardId];
       if (!card) return prev;
 
+      // Allow minimized size (200x140 or smaller) but enforce minimums for normal cards
+      const isMinimizedSize = width <= 200 && height <= 140;
+      const finalWidth = isMinimizedSize ? width : Math.max(200, width);
+      const finalHeight = isMinimizedSize ? height : Math.max(120, height);
+
       return {
         ...prev,
         cards: {
           ...prev.cards,
           [cardId]: {
             ...card,
-            width: Math.max(200, width), // Minimum width
-            height: Math.max(120, height) // Minimum height
+            width: finalWidth,
+            height: finalHeight
           }
         }
       };
@@ -244,8 +293,7 @@ export function useDashboardLayout(): UseDashboardLayoutReturn {
   // Add new card
   const addCard = useCallback((type: string, position?: { x: number; y: number }) => {
     const cardId = `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const defaultSize = defaultCardSizes[type];
-    if (!defaultSize) return cardId;
+    const defaultSize = defaultCardSizes[type] || { width: 280, height: 180 }; // Fallback size if not found
     
     setLayout(prev => {
       // Smart positioning - find empty space using current state
@@ -291,10 +339,26 @@ export function useDashboardLayout(): UseDashboardLayoutReturn {
 
   // Reset to default layout (empty canvas)
   const resetLayout = useCallback(() => {
-    setLayout(prev => ({
-      ...prev,
-      cards: {}
-    }));
+    const resetLayout = {
+      cards: {},
+      canvasHeight: 600,
+      theme: 'light' as const,
+      zoom: 1,
+      pan: { x: 0, y: 0 },
+      currentLayout: 'custom' as const
+    };
+    
+    setLayout(resetLayout);
+    
+    // Save the reset layout to localStorage
+    try {
+      localStorage.setItem('verocards-v2-layout', JSON.stringify(resetLayout));
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Layout reset and saved to localStorage', {}, 'useDashboardLayout');
+      }
+    } catch (error: unknown) {
+      logger.error('Failed to save reset layout', error, 'useDashboardLayout');
+    }
   }, []);
 
   // Auto-arrange cards
@@ -355,8 +419,8 @@ export function useDashboardLayout(): UseDashboardLayoutReturn {
     if (saved) {
       try {
         setLayout(JSON.parse(saved));
-      } catch (error) {
-        console.warn('Failed to load layout');
+      } catch (error: unknown) {
+        logger.warn('Failed to load layout', { error }, 'useDashboardLayout');
       }
     }
   }, []);
@@ -543,6 +607,9 @@ function findEmptySpace(existingCards: Record<string, CardLayout>, cardSize: { w
   
   // Find the last card's grid position
   const lastCard = sortedCards[sortedCards.length - 1];
+  if (!lastCard) {
+    return { x: margin, y: margin };
+  }
   const lastRow = Math.floor(lastCard.y / rowHeight);
   const lastCol = Math.floor(lastCard.x / colWidth);
   

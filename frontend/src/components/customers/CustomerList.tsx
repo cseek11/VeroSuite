@@ -1,8 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { secureApiClient } from '@/lib/secure-api-client';
-import { Customer, CustomerSegment } from '@/types/customer';
-import { MagnifyingGlassIcon, FunnelIcon, EyeIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { supabase } from '@/lib/supabase-client';
+import { Customer } from '@/types/customer';
+import { Search, Eye, Pencil, Plus } from 'lucide-react';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { logger } from '@/utils/logger';
 
 interface CustomerListProps {
   onViewCustomer: (customer: Customer) => void;
@@ -29,13 +32,13 @@ export default function CustomerList({ onViewCustomer, onEditCustomer, onCreateC
         
         // Ensure we have an array
         if (!Array.isArray(customers)) {
-          console.warn('Backend API returned non-array data:', customers);
+          logger.warn('Backend API returned non-array data', { customers }, 'CustomerList');
           return [];
         }
         
         return customers;
       } catch (error) {
-        console.error('Error fetching customers from secure API:', error);
+        logger.error('Error fetching customers from secure API', error, 'CustomerList');
         return [];
       }
     },
@@ -160,7 +163,7 @@ export default function CustomerList({ onViewCustomer, onEditCustomer, onCreateC
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <LoadingSpinner text="Loading customers..." />
       </div>
     );
   }
@@ -192,7 +195,7 @@ export default function CustomerList({ onViewCustomer, onEditCustomer, onCreateC
             onClick={onCreateCustomer}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
           >
-            <PlusIcon className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-2" />
             Add Customer
           </button>
         </div>
@@ -204,7 +207,7 @@ export default function CustomerList({ onViewCustomer, onEditCustomer, onCreateC
           {/* Search */}
           <div className="flex-1">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 id="customer-list-search"
                 name="customer-list-search"
@@ -212,10 +215,10 @@ export default function CustomerList({ onViewCustomer, onEditCustomer, onCreateC
                 placeholder="Search customers by name, email, or phone..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                onFocus={() => console.log('🎯 CustomerList search FOCUSED')}
-                onBlur={() => console.log('🚫 CustomerList search BLURRED')}
+                onFocus={() => logger.debug('CustomerList search focused', {}, 'CustomerList')}
+                onBlur={() => logger.debug('CustomerList search blurred', {}, 'CustomerList')}
                 onKeyDown={(e) => {
-                  console.log('⌨️ CustomerList search keyDown:', e.key, 'target:', e.target);
+                  logger.debug('CustomerList search keyDown', { key: e.key }, 'CustomerList');
                 }}
                 data-search-input="true"
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
@@ -362,14 +365,14 @@ export default function CustomerList({ onViewCustomer, onEditCustomer, onCreateC
                       className="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50"
                       title="View Customer"
                     >
-                      <EyeIcon className="h-4 w-4" />
+                      <Eye className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => onEditCustomer(customer)}
                       className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
                       title="Edit Customer"
                     >
-                      <PencilIcon className="h-4 w-4" />
+                      <Pencil className="h-4 w-4" />
                     </button>
                   </div>
                 </td>

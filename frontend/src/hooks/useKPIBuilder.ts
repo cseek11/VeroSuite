@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { logger } from '@/utils/logger';
 
 export interface KPIField {
   id: string;
@@ -173,7 +174,7 @@ export function useKPIBuilder({
       
       // Try to evaluate the expression
       new Function('return ' + testExpression)();
-    } catch (error) {
+    } catch (_error) {
       errors.push('Invalid formula syntax');
     }
 
@@ -342,8 +343,8 @@ export function useKPIBuilder({
     try {
       const result = await onTest(testKPI);
       return result;
-    } catch (error) {
-      console.error('KPI test failed:', error);
+    } catch (error: unknown) {
+      logger.error('KPI test failed', error, 'useKPIBuilder');
       throw error;
     }
   }, [currentKPI, onTest]);

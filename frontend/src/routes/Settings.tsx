@@ -9,8 +9,6 @@ import {
   Save, 
   Settings as SettingsIcon,
   Building2,
-  Eye,
-  EyeOff,
   CheckCircle
 } from 'lucide-react';
 import { 
@@ -23,6 +21,7 @@ import {
   DataSettings 
 } from '@/components/settings/sections';
 import { SuccessMessage } from '@/components/settings/shared/SuccessMessage';
+import { logger } from '@/utils/logger';
 
 export default function Settings() {
   const [isLoading, setIsLoading] = useState(false);
@@ -52,19 +51,23 @@ export default function Settings() {
     try {
       if (activeTab === 'company') {
         // Company settings are handled by the CompanySettings component itself
-        console.log('ℹ️ Company settings are managed by the CompanySettings component');
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Company settings are managed by the CompanySettings component', {}, 'Settings');
+        }
         return;
       } else {
         // Save other settings (profile, etc.)
         await new Promise(resolve => setTimeout(resolve, 1000));
-        console.log('✅ Settings saved successfully');
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Settings saved successfully', {}, 'Settings');
+        }
       }
       
       // Show success message for non-company tabs
       setShowSuccessMessage(true);
       setTimeout(() => setShowSuccessMessage(false), 3000); // Hide after 3 seconds
-    } catch (error) {
-      console.error('❌ Failed to save settings:', error);
+    } catch (error: unknown) {
+      logger.error('Failed to save settings', error, 'Settings');
     }
     setIsLoading(false);
   };
@@ -218,10 +221,10 @@ export default function Settings() {
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className={`px-6 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
+                className={`px-3 py-1.5 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
                   isLoading
                     ? 'bg-gray-400 cursor-not-allowed text-white'
-                    : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl'
+                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl'
                 }`}
               >
                 {isLoading ? (

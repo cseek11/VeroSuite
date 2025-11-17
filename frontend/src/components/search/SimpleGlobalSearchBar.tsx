@@ -10,16 +10,16 @@ import { useAdvancedSearch } from '@/hooks/useAdvancedSearch';
 import { 
   Search, 
   X, 
-  Zap, 
-  Command
+  Zap
 } from 'lucide-react';
 import type { SearchFilters } from '@/types/enhanced-types';
-import type { IntentResult, IntentType } from '@/lib/intent-classification-service';
+import type { IntentResult } from '@/lib/intent-classification-service';
 import type { ActionResult } from '@/lib/action-handlers';
 import { intentClassificationService } from '@/lib/intent-classification-service';
 import { actionExecutorService } from '@/lib/action-handlers';
 import ConfirmationDialog from '@/components/ui/ConfirmationDialog';
 import CommandHelpModal from '@/components/CommandHelpModal';
+import { logger } from '@/utils/logger';
 
 interface SimpleGlobalSearchBarProps {
   onResultsChange?: (results: any[]) => void;
@@ -153,7 +153,7 @@ export const SimpleGlobalSearchBar: React.FC<SimpleGlobalSearchBarProps> = ({
           );
           
           if (exactMatch) {
-            console.log('🎯 Exact match found, navigating to customer page:', exactMatch.name);
+            logger.debug('Exact match found, navigating to customer page', { customerName: exactMatch.name, customerId: exactMatch.id }, 'SimpleGlobalSearchBar');
             navigate(`/customers/${exactMatch.id}`);
             setQuery('');
             clearSearchResults();
@@ -161,13 +161,13 @@ export const SimpleGlobalSearchBar: React.FC<SimpleGlobalSearchBarProps> = ({
           }
           
           // If there are multiple results, navigate to customers page with search
-          console.log('🔍 Multiple results found, navigating to customers page');
+          logger.debug('Multiple results found, navigating to customers page', { resultsCount: results.length }, 'SimpleGlobalSearchBar');
           navigate(`/customers?search=${encodeURIComponent(searchQuery)}`);
           setQuery('');
           clearSearchResults();
         } else {
           // No results found, navigate to customers page with search anyway
-          console.log('🔍 No results found, navigating to customers page');
+          logger.debug('No results found, navigating to customers page', { searchQuery }, 'SimpleGlobalSearchBar');
           navigate(`/customers?search=${encodeURIComponent(searchQuery)}`);
           setQuery('');
           clearSearchResults();
@@ -175,7 +175,7 @@ export const SimpleGlobalSearchBar: React.FC<SimpleGlobalSearchBarProps> = ({
       }, 500); // Wait 500ms for search results to load
       
     } catch (error) {
-      console.error('Search navigation error:', error);
+      logger.error('Search navigation error', error, 'SimpleGlobalSearchBar');
     }
   };
 
@@ -200,32 +200,31 @@ export const SimpleGlobalSearchBar: React.FC<SimpleGlobalSearchBarProps> = ({
           
           // Handle navigation if present
           if (result.navigation) {
-            console.log('🧭 Navigating to:', result.navigation.path);
+            logger.debug('Navigating to', { path: result.navigation.path }, 'SimpleGlobalSearchBar');
             navigate(result.navigation.path);
           }
           
           // Notify parent component
           onActionExecuted?.(result);
           
-          // Show success feedback (you could add a toast here)
-          console.log('✅ Command executed successfully:', result.message);
+          logger.debug('Command executed successfully', { message: result.message }, 'SimpleGlobalSearchBar');
         } else if (result.requiresConfirmation) {
           // Show confirmation dialog
-          console.log('🔔 Command requires confirmation:', result.message);
+          logger.debug('Command requires confirmation', { message: result.message }, 'SimpleGlobalSearchBar');
           setConfirmationDialog({
             isOpen: true,
             data: result.data,
             result: result
           });
         } else {
-          console.error('❌ Command failed:', result.message);
+          logger.error('Command failed', new Error(result.message), 'SimpleGlobalSearchBar');
         }
       } else {
         // Fallback to regular search
         search(commandQuery);
       }
     } catch (error) {
-      console.error('❌ Error executing command:', error);
+      logger.error('Error executing command', error, 'SimpleGlobalSearchBar');
       // Fallback to regular search
       search(commandQuery);
     } finally {
@@ -280,19 +279,19 @@ export const SimpleGlobalSearchBar: React.FC<SimpleGlobalSearchBarProps> = ({
         
         // Handle navigation if present
         if (result.navigation) {
-          console.log('🧭 Navigating to:', result.navigation.path);
+          logger.debug('Navigating to', { path: result.navigation.path }, 'SimpleGlobalSearchBar');
           navigate(result.navigation.path);
         }
         
         // Notify parent component
         onActionExecuted?.(result);
         
-        console.log('✅ Confirmed action executed successfully:', result.message);
+        logger.debug('Confirmed action executed successfully', { message: result.message }, 'SimpleGlobalSearchBar');
       } else {
-        console.error('❌ Confirmed action failed:', result.message);
+        logger.error('Confirmed action failed', new Error(result.message), 'SimpleGlobalSearchBar');
       }
     } catch (error) {
-      console.error('❌ Confirmation execution error:', error);
+      logger.error('Confirmation execution error', error, 'SimpleGlobalSearchBar');
     } finally {
       setIsExecuting(false);
       setConfirmationDialog({ isOpen: false, data: null, result: {} as ActionResult });

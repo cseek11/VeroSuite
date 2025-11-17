@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Customer, CustomerSegment } from '@/types/customer';
-import { MagnifyingGlassIcon, FunnelIcon, EyeIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { Search, Eye, Pencil, Plus } from 'lucide-react';
 import { useSecureAccounts, useSearchAccounts } from '@/hooks/useSecureAccounts';
 
 interface CustomerListProps {
@@ -29,7 +29,7 @@ export default function SecureCustomerList({ onViewCustomer, onEditCustomer, onC
   const filteredAndSortedCustomers = useMemo(() => {
     if (!customers) return [];
 
-    let filtered = customers.filter((customer: Customer) => {
+    const filtered = customers.filter((customer: Customer) => {
       // Filter by segment
       if (selectedSegment !== 'all') {
         const segment = getCustomerSegment(customer);
@@ -150,7 +150,7 @@ export default function SecureCustomerList({ onViewCustomer, onEditCustomer, onC
             onClick={onCreateCustomer}
             className="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors"
           >
-            <PlusIcon className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-2" />
             Add Customer
           </button>
         </div>
@@ -162,7 +162,7 @@ export default function SecureCustomerList({ onViewCustomer, onEditCustomer, onC
           {/* Search */}
           <div className="flex-1">
             <div className="relative">
-              <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search customers..."
@@ -302,14 +302,14 @@ export default function SecureCustomerList({ onViewCustomer, onEditCustomer, onC
                         className="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50"
                         title="View customer"
                       >
-                        <EyeIcon className="h-4 w-4" />
+                        <Eye className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => onEditCustomer(customer)}
                         className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
                         title="Edit customer"
                       >
-                        <PencilIcon className="h-4 w-4" />
+                        <Pencil className="h-4 w-4" />
                       </button>
                     </div>
                   </td>
@@ -362,7 +362,7 @@ export default function SecureCustomerList({ onViewCustomer, onEditCustomer, onC
               onClick={onCreateCustomer}
               className="mt-4 inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors"
             >
-              <PlusIcon className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-2" />
               Add Your First Customer
             </button>
           )}

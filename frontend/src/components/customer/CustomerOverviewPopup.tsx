@@ -1,17 +1,16 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { MapPin, Building, Phone, Mail, Calendar, DollarSign, Tag, Clock, TrendingUp, AlertCircle, Loader2, Edit, Check, X } from 'lucide-react';
+import { Calendar, TrendingUp, AlertCircle, Loader2, Edit, Check, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { enhancedApi } from '@/lib/enhanced-api';
 import {
   Typography,
-  Button,
   Card,
   Input,
   Chip,
-  Badge,
-  Separator
+  Badge
 } from '@/components/ui';
+import { logger } from '@/utils/logger';
 
 
 interface Customer {
@@ -128,7 +127,7 @@ const CustomerOverviewPopup: React.FC<CustomerOverviewPopupProps> = ({
       if (error) throw error;
       setIsEditing(false);
     } catch (error) {
-      console.error('Error updating customer:', error);
+      logger.error('Error updating customer', error, 'CustomerOverviewPopup');
     }
   };
 

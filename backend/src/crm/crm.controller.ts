@@ -24,7 +24,7 @@ import { CreateNoteDto, UpdateNoteDto } from './dto';
 @ApiTags('CRM')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('v1/crm')
+@Controller({ path: 'crm', version: '1' })
 export class CrmController {
   constructor(private readonly crmService: CrmService) {}
 

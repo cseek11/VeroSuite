@@ -6,6 +6,7 @@ import {
   JobFilters, 
   JobListResponse 
 } from '@/types/jobs';
+import { logger } from '@/utils/logger';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
@@ -14,13 +15,13 @@ class JobsApiService {
     // Get token from auth store (stored as JSON)
     let token = null;
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (authData) {
         const parsed = JSON.parse(authData);
         token = parsed.token;
       }
-    } catch (error) {
-      console.error('Error parsing auth data:', error);
+    } catch (error: unknown) {
+      logger.error('Error parsing auth data', error, 'useJobs');
     }
     
     // Fallback to direct jwt key

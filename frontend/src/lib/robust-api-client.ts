@@ -5,6 +5,7 @@
 
 import { supabase } from '@/lib/supabase-client';
 import { authService } from '@/lib/auth-service';
+import { logger } from '@/utils/logger';
 
 export interface ApiResponse<T> {
   data?: T;
@@ -66,8 +67,10 @@ class RobustApiClient {
       if (authService.isAuthenticated()) {
         return await authService.getAuthHeaders();
       }
-    } catch (error) {
-      console.log('🔄 Backend auth failed, attempting token exchange:', error);
+    } catch (error: unknown) {
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Backend auth failed, attempting token exchange', { error }, 'robust-api-client');
+      }
     }
 
     // Fallback: Exchange Supabase token
@@ -90,7 +93,7 @@ class RobustApiClient {
         return this.getAuthHeaders(retryCount + 1);
       }
       
-      console.error('❌ Token exchange failed after retries:', error);
+      logger.error('Token exchange failed after retries', { error }, 'robust-api-client');
       throw new Error('Failed to authenticate with backend. Please login again.');
     }
   }
@@ -108,7 +111,9 @@ class RobustApiClient {
 
     for (let attempt = 0; attempt <= retryConfig.maxRetries; attempt++) {
       try {
-        console.log(`🔄 API request attempt ${attempt + 1}/${retryConfig.maxRetries + 1}`);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('API request attempt', { attempt: attempt + 1, maxRetries: retryConfig.maxRetries + 1 }, 'robust-api-client');
+        }
         
         const response = await requestFn();
         const duration = Date.now() - startTime;
@@ -137,7 +142,9 @@ class RobustApiClient {
               retryConfig.maxDelay
             );
             
-            console.log(`⏳ Retrying after ${delay}ms due to error:`, error.message);
+            if (process.env.NODE_ENV === 'development') {
+              logger.debug('Retrying after delay', { delay, error: error.message }, 'robust-api-client');
+            }
             await new Promise(resolve => setTimeout(resolve, delay));
             continue;
           }
@@ -145,17 +152,19 @@ class RobustApiClient {
           lastError = error;
           break;
         }
-      } catch (error) {
+      } catch (error: unknown) {
         lastError = error;
         
         // Check if we should retry
-        if (attempt < retryConfig.maxRetries && retryConfig.retryCondition!(error)) {
+        if (attempt < retryConfig.maxRetries && retryConfig.retryCondition!(error as any)) {
           const delay = Math.min(
             retryConfig.baseDelay * Math.pow(retryConfig.backoffFactor, attempt),
             retryConfig.maxDelay
           );
           
-          console.log(`⏳ Retrying after ${delay}ms due to error:`, (error as Error).message);
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('Retrying after delay', { delay, error: (error as Error).message }, 'robust-api-client');
+          }
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
@@ -204,7 +213,9 @@ class RobustApiClient {
     if (config.enabled) {
       const cached = this.cache.get(cacheKey);
       if (cached && Date.now() - cached.timestamp < cached.ttl) {
-        console.log('📦 Cache hit for:', cacheKey);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Cache hit', { cacheKey }, 'robust-api-client');
+        }
         return {
           data: cached.data,
           success: true,
@@ -284,8 +295,9 @@ class RobustApiClient {
   async post<T>(endpoint: string, data: any, config?: {
     retry?: Partial<RetryConfig>;
   }): Promise<ApiResponse<T>> {
-    console.log('🔍 RobustApiClient.post - endpoint:', endpoint);
-    console.log('🔍 RobustApiClient.post - data:', data);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('RobustApiClient.post', { endpoint, data }, 'robust-api-client');
+    }
     
     return this.executeWithRetry<T>(async () => {
       const headers = await this.getAuthHeaders();
@@ -303,8 +315,9 @@ class RobustApiClient {
   async put<T>(endpoint: string, data: any, config?: {
     retry?: Partial<RetryConfig>;
   }): Promise<ApiResponse<T>> {
-    console.log('🔧 RobustApiClient.put - endpoint:', endpoint);
-    console.log('🔧 RobustApiClient.put - data:', data);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('RobustApiClient.put', { endpoint, data }, 'robust-api-client');
+    }
     
     // Clear relevant cache entries
     this.invalidateCache(endpoint);
@@ -383,7 +396,7 @@ class RobustApiClient {
   async getAllAccounts(): Promise<any[]> {
     const response = await this.get<any[]>('/accounts');
     if (!response.success) {
-      console.error('❌ Failed to get accounts:', response.error);
+      logger.error('Failed to get accounts', { error: response.error }, 'robust-api-client');
       return [];
     }
     return response.data || [];

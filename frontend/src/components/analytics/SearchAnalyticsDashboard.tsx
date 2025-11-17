@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchAnalytics } from '../../lib/search-analytics-service';
+import { logger } from '@/utils/logger';
 
 export const SearchAnalyticsDashboard: React.FC = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState(30);
@@ -24,7 +25,7 @@ export const SearchAnalyticsDashboard: React.FC = () => {
       setPerformanceData(perf);
       setTrendingSearches(trending);
     } catch (error) {
-      console.error('Failed to load analytics data:', error);
+      logger.error('Failed to load analytics data', error, 'SearchAnalyticsDashboard');
     } finally {
       setIsLoading(false);
     }

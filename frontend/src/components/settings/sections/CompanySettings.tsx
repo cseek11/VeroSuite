@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Building2, Phone, Mail, Globe, MapPin, Image, Upload, X, AlertTriangle, Save } from 'lucide-react';
+import { Building2, MapPin, Image, Upload, X, AlertTriangle, Save } from 'lucide-react';
 import { SettingsCard } from '../shared/SettingsCard';
 import { SuccessMessage } from '../shared/SuccessMessage';
 import { useCompanySettings } from '../hooks/useCompanySettings';
 import { useLogoUpload } from '../hooks/useLogoUpload';
+import { logger } from '@/utils/logger';
+import { toast } from '@/utils/toast';
 
 interface CompanySettingsProps {
   isLoading: boolean;
@@ -26,13 +28,12 @@ export const CompanySettings: React.FC<CompanySettingsProps> = ({ isLoading: par
 
   // Set logo previews when company settings load
   React.useEffect(() => {
-    console.log('🔄 CompanySettings: companySettings loaded:', companySettings);
-    console.log('🔄 CompanySettings: companyData state:', companyData);
     if (companySettings) {
-      console.log('🖼️ Setting logo previews:');
-      console.log('  - header_logo_url:', companySettings.header_logo_url);
-      console.log('  - invoice_logo_url:', companySettings.invoice_logo_url);
-      console.log('  - logo_url (fallback):', companySettings.logo_url);
+      logger.debug('Setting logo previews', {
+        header_logo_url: companySettings.header_logo_url,
+        invoice_logo_url: companySettings.invoice_logo_url,
+        logo_url: companySettings.logo_url
+      }, 'CompanySettings');
       setLogoPreviews(companySettings);
     }
   }, [companySettings, companyData, setLogoPreviews]);
@@ -44,8 +45,6 @@ export const CompanySettings: React.FC<CompanySettingsProps> = ({ isLoading: par
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      console.log('🎯 CompanySettings: Starting save process...');
-      
       // Add timeout to prevent infinite loading
       const savePromise = saveCompanySettings();
       const timeoutPromise = new Promise((_, reject) => 
@@ -54,12 +53,12 @@ export const CompanySettings: React.FC<CompanySettingsProps> = ({ isLoading: par
       
       await Promise.race([savePromise, timeoutPromise]);
       
-      console.log('✅ CompanySettings: Save completed successfully');
+      logger.debug('Company settings saved successfully', {}, 'CompanySettings');
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
-      console.error('❌ CompanySettings: Save failed:', error);
-      alert(`Failed to save company settings: ${error.message || 'Unknown error'}`);
+      logger.error('Company settings save failed', error, 'CompanySettings');
+      toast.error(`Failed to save company settings: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSaving(false);
     }
@@ -210,14 +209,14 @@ export const CompanySettings: React.FC<CompanySettingsProps> = ({ isLoading: par
                 alt="Header Logo" 
                 className="w-20 h-20 object-contain rounded"
                 onError={(e) => {
-                  console.error('❌ Header logo preview failed to load:', headerLogoPreview);
+                  logger.error('Header logo preview failed to load', new Error(`URL: ${headerLogoPreview}`), 'CompanySettings');
                   // Try adding cache-busting parameter
                   const img = e.currentTarget;
                   if (!img.src.includes('?t=')) {
                     img.src = headerLogoPreview + '?t=' + Date.now();
                   }
                 }}
-                onLoad={() => console.log('✅ Header logo preview loaded:', headerLogoPreview)}
+                onLoad={() => logger.debug('Header logo preview loaded', { url: headerLogoPreview }, 'CompanySettings')}
               />
             ) : (
               <div className="text-center">
@@ -323,14 +322,14 @@ export const CompanySettings: React.FC<CompanySettingsProps> = ({ isLoading: par
                 alt="Invoice Logo" 
                 className="w-20 h-20 object-contain rounded"
                 onError={(e) => {
-                  console.error('❌ Invoice logo preview failed to load:', invoiceLogoPreview);
+                  logger.error('Invoice logo preview failed to load', new Error(`URL: ${invoiceLogoPreview}`), 'CompanySettings');
                   // Try adding cache-busting parameter
                   const img = e.currentTarget;
                   if (!img.src.includes('?t=')) {
                     img.src = invoiceLogoPreview + '?t=' + Date.now();
                   }
                 }}
-                onLoad={() => console.log('✅ Invoice logo preview loaded:', invoiceLogoPreview)}
+                onLoad={() => logger.debug('Invoice logo preview loaded', { url: invoiceLogoPreview }, 'CompanySettings')}
               />
             ) : (
               <div className="text-center">

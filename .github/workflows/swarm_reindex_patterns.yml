@@ -1,0 +1,24 @@
+name: Swarm - Reindex Patterns
+
+on:
+  push:
+    paths:
+      - '.cursor/patterns/**'
+
+jobs:
+  reindex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Reindex embeddings
+        run: |
+          python .cursor/scripts/reindex_embeddings.py --path .cursor/patterns/ --out .cursor/patterns.index
+
+      - name: Upload index artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: patterns-index
+          path: .cursor/patterns.index
+

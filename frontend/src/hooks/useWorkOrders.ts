@@ -4,8 +4,7 @@ import {
   WorkOrder, 
   CreateWorkOrderRequest, 
   UpdateWorkOrderRequest, 
-  WorkOrderFilters,
-  WorkOrderListResponse
+  WorkOrderFilters
 } from '@/types/work-orders';
 
 // Query keys
@@ -30,30 +29,51 @@ export const useWorkOrders = (filters: WorkOrderFilters = {}) => {
 };
 
 export const useWorkOrder = (id: string) => {
+  // Validate UUID format before enabling query
+  const isValidUUID = (str: string | undefined | null): boolean => {
+    if (!str || typeof str !== 'string') return false;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  };
+
   return useQuery({
     queryKey: workOrderKeys.detail(id),
     queryFn: () => workOrdersApi.getWorkOrderById(id),
-    enabled: !!id,
+    enabled: !!id && isValidUUID(id), // Only enable if ID is valid UUID
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
   });
 };
 
 export const useWorkOrdersByCustomer = (customerId: string) => {
+  // Validate UUID format before enabling query
+  const isValidUUID = (str: string | undefined | null): boolean => {
+    if (!str || typeof str !== 'string') return false;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  };
+
   return useQuery({
     queryKey: workOrderKeys.byCustomer(customerId),
     queryFn: () => workOrdersApi.getWorkOrdersByCustomer(customerId),
-    enabled: !!customerId,
+    enabled: !!customerId && isValidUUID(customerId), // Only enable if ID is valid UUID
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
   });
 };
 
 export const useWorkOrdersByTechnician = (technicianId: string) => {
+  // Validate UUID format before enabling query
+  const isValidUUID = (str: string | undefined | null): boolean => {
+    if (!str || typeof str !== 'string') return false;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  };
+
   return useQuery({
     queryKey: workOrderKeys.byTechnician(technicianId),
     queryFn: () => workOrdersApi.getWorkOrdersByTechnician(technicianId),
-    enabled: !!technicianId,
+    enabled: !!technicianId && isValidUUID(technicianId), // Only enable if ID is valid UUID
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
   });
@@ -91,8 +111,13 @@ export const useUpdateWorkOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateWorkOrderRequest }) => 
-      workOrdersApi.updateWorkOrder(id, data),
+    mutationFn: ({ id, data }: { id: string; data: UpdateWorkOrderRequest }) => {
+      // Validate UUID before making API call
+      if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+        throw new Error(`Invalid work order ID: "${id}". ID must be a valid UUID.`);
+      }
+      return workOrdersApi.updateWorkOrder(id, data);
+    },
     onSuccess: (updatedWorkOrder) => {
       // Update the work order in cache
       queryClient.setQueryData(workOrderKeys.detail(updatedWorkOrder.id), updatedWorkOrder);
@@ -118,7 +143,13 @@ export const useDeleteWorkOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => workOrdersApi.deleteWorkOrder(id),
+    mutationFn: (id: string) => {
+      // Validate UUID before making API call
+      if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+        throw new Error(`Invalid work order ID: "${id}". ID must be a valid UUID.`);
+      }
+      return workOrdersApi.deleteWorkOrder(id);
+    },
     onSuccess: (_, deletedId) => {
       // Remove from cache
       queryClient.removeQueries({ queryKey: workOrderKeys.detail(deletedId) });
@@ -137,7 +168,13 @@ export const useChangeWorkOrderStatus = () => {
       workOrderId: string; 
       newStatus: string; 
       notes?: string; 
-    }) => workOrdersApi.changeWorkOrderStatus(workOrderId, newStatus, notes),
+    }) => {
+      // Validate UUID before making API call
+      if (!workOrderId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workOrderId)) {
+        throw new Error(`Invalid work order ID: "${workOrderId}". ID must be a valid UUID.`);
+      }
+      return workOrdersApi.changeWorkOrderStatus(workOrderId, newStatus, notes);
+    },
     onSuccess: (updatedWorkOrder) => {
       // Update the work order in cache
       queryClient.setQueryData(workOrderKeys.detail(updatedWorkOrder.id), updatedWorkOrder);
@@ -167,7 +204,16 @@ export const useAssignWorkOrder = () => {
       workOrderId: string; 
       technicianId: string; 
       scheduledDate?: string; 
-    }) => workOrdersApi.assignWorkOrder(workOrderId, technicianId, scheduledDate),
+    }) => {
+      // Validate UUIDs before making API call
+      if (!workOrderId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workOrderId)) {
+        throw new Error(`Invalid work order ID: "${workOrderId}". ID must be a valid UUID.`);
+      }
+      if (!technicianId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(technicianId)) {
+        throw new Error(`Invalid technician ID: "${technicianId}". ID must be a valid UUID.`);
+      }
+      return workOrdersApi.assignWorkOrder(workOrderId, technicianId, scheduledDate);
+    },
     onSuccess: (updatedWorkOrder) => {
       // Update the work order in cache
       queryClient.setQueryData(workOrderKeys.detail(updatedWorkOrder.id), updatedWorkOrder);

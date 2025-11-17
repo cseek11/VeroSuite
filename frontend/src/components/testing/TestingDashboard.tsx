@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, CheckCircle, XCircle, Clock, AlertTriangle, RefreshCw, Download, Eye } from 'lucide-react';
+import { Play, CheckCircle, XCircle, Clock, AlertTriangle, RefreshCw, Download } from 'lucide-react';
 import { testExecutionService, TestResult, TestCategory } from '../../services/TestExecutionService';
 
 // Remove duplicate interfaces since they're imported from the service
@@ -324,7 +324,7 @@ const TestingDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">VeroSuite Testing Dashboard</h1>
+              <h1 className="text-3xl font-bold text-gray-900">VeroField Testing Dashboard</h1>
               <p className="text-gray-600 mt-2">Comprehensive testing suite for enterprise-grade CRM application</p>
             </div>
             <div className="flex space-x-3">

@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Plus, 
-  Search, 
-  Filter, 
   Calendar, 
   User, 
   Clock, 
@@ -20,6 +18,7 @@ import { ReusablePopup } from '@/components/ui';
 
 // Real API using enhanced-api
 import { enhancedApi } from '@/lib/enhanced-api';
+import { useDialog } from '@/hooks/useDialog';
 
 const workOrdersApi = {
   list: async (filters: any) => {
@@ -44,14 +43,15 @@ const customerSearchApi = {
   }
 };
 
-// Real technicians API
+// Real technicians API - use enhancedApi.technicians.list() for proper technician data
 const techniciansApi = {
   list: async () => {
-    return await enhancedApi.users.list({ roles: ['technician'], status: 'active' });
+    return await enhancedApi.technicians.list();
   }
 };
 
 export default function WorkOrders() {
+  const { showConfirm, DialogComponents: _DialogComponents } = useDialog();
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({
     status: '',
@@ -405,8 +405,15 @@ export default function WorkOrders() {
                         <Eye className="h-4 w-4 text-slate-600" />
                       </button>
                       <button
-                        onClick={() => {
-                          if (confirm('Are you sure you want to delete this work order?')) {
+                        onClick={async () => {
+                          const confirmed = await showConfirm({
+                            title: 'Delete Work Order',
+                            message: 'Are you sure you want to delete this work order?',
+                            type: 'danger',
+                            confirmText: 'Delete',
+                            cancelText: 'Cancel',
+                          });
+                          if (confirmed) {
                             deleteMutation.mutate(workOrder.id);
                           }
                         }}
@@ -800,7 +807,7 @@ export default function WorkOrders() {
                    </div>
                  </div>
                 
-                                 <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                                 <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
                    <button
                      type="button"
                      onClick={() => {
@@ -808,14 +815,14 @@ export default function WorkOrders() {
                        setShowEditModal(false);
                        setSelectedWorkOrder(null);
                      }}
-                     className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium text-gray-700 hover:border-gray-400"
+                     className="px-3 py-1.5 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm text-slate-700 hover:bg-white hover:shadow-lg transition-all duration-200 font-medium text-sm"
                    >
                      Cancel
                    </button>
                    <button
                      type="submit"
                      disabled={createMutation.isPending || updateMutation.isPending}
-                     className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl"
+                     className="px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm"
                    >
                      {createMutation.isPending || updateMutation.isPending ? (
                        <div className="flex items-center gap-2">

@@ -1,0 +1,44 @@
+name: Observability Compliance Check
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  observability-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install ts-node
+        run: npm install -g ts-node typescript
+
+      - name: Check for silent failures
+        run: ts-node scripts/detect-silent-failures.ts
+
+      - name: Run observability audit
+        run: ts-node scripts/audit-observability.ts
+
+      - name: Check observability test coverage
+        run: |
+          echo "Checking observability test coverage..."
+          # Add test coverage checks here if needed
+          # npm run test:observability || exit 1
+

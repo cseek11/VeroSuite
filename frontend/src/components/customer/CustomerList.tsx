@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useUserPreferences } from '@/stores/userPreferences';
 import { useDensityMode } from '@/hooks/useDensityMode';
@@ -17,6 +17,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import type { Account } from '@/types/enhanced-types';
+import { logger } from '@/utils/logger';
 
 interface CustomerListProps {
   onCustomerClick: (customer: Account) => void;
@@ -81,15 +82,17 @@ export const CustomerList: React.FC<CustomerListProps> = ({
 
 
 
-  // Debug logging
-  console.log('CustomerList Debug:', {
-    isLoading,
-    error: error?.message,
-    customersCount: customers?.length,
-    searchTerm,
-    statusFilter,
-    typeFilter
-  });
+  // Debug logging (development only)
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('CustomerList Debug', {
+      isLoading,
+      error: error?.message,
+      customersCount: customers?.length,
+      searchTerm,
+      statusFilter,
+      typeFilter
+    }, 'CustomerList');
+  }
 
   // Sort customers (API handles filtering)
   const sortedCustomers = useMemo(() => {
@@ -249,7 +252,7 @@ export const CustomerList: React.FC<CustomerListProps> = ({
             <AdvancedSearchBar
               onResultsChange={(results) => {
                 // Handle advanced search results
-                console.log('Advanced search results:', results);
+                logger.debug('Advanced search results', { resultsCount: results.length }, 'CustomerList');
               }}
               placeholder="Search with fuzzy matching and suggestions..."
               showModeSelector={true}

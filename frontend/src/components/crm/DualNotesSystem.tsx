@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Textarea from '@/components/ui/Textarea';
 import {
-  Card,
-  Button,
-  Typography,
-  Chip,
-  Modal,
-  Textarea,
-  Tabs
-} from '@/components/ui/EnhancedUI';
+  Badge,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  Heading,
+  Text,
+} from '@/components/ui';
 import {
   FileText,
   User,
@@ -21,6 +27,7 @@ import {
   Plus,
   Edit
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface CustomerNote {
   id: string;
@@ -58,13 +65,13 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
 
   const getNoteTypeColor = (type: string) => {
     switch (type.toLowerCase()) {
-      case 'internal': return 'gray';
+      case 'internal': return 'slate';
       case 'technician': return 'blue';
       case 'safety': return 'red';
       case 'preference': return 'green';
       case 'property': return 'purple';
-      case 'general': return 'gray';
-      default: return 'gray';
+      case 'general': return 'slate';
+      default: return 'slate';
     }
   };
 
@@ -82,7 +89,7 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
       case 'high': return 'red';
       case 'medium': return 'yellow';
       case 'low': return 'green';
-      default: return 'gray';
+      default: return 'slate';
     }
   };
 
@@ -98,7 +105,7 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
 
   const handleCreateNote = () => {
     // Mock create note functionality
-    console.log('Creating note:', newNote);
+    logger.debug('Creating note', { noteType: newNote.note_type, priority: newNote.priority }, 'DualNotesSystem');
     setShowNewNoteModal(false);
     setNewNote({
       note_type: 'general',
@@ -117,9 +124,9 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
     return (
       <Card className="p-6">
         <div className="text-center py-8">
-          <Typography variant="body1" className="text-gray-600">
+          <Text variant="body" className="text-slate-600">
             Loading notes...
-          </Typography>
+          </Text>
         </div>
       </Card>
     );
@@ -129,9 +136,9 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
     <>
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <Typography variant="h3" className="text-gray-900">
+          <Heading level={3} className="text-slate-900">
             Notes & Communication
-          </Typography>
+          </Heading>
           <Button
             variant="primary"
             onClick={() => setShowNewNoteModal(true)}
@@ -142,40 +149,31 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <div className="flex gap-2 mb-6 border-b border-gray-200">
-            <Button
-              variant={activeTab === 'internal' ? "primary" : "outline"}
-              onClick={() => setActiveTab('internal')}
-              className="flex items-center gap-2"
-            >
+          <TabsList className="flex gap-2 mb-6 border-b border-slate-200">
+            <TabsTrigger value="internal" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               Internal Notes ({internalNotes.length})
-            </Button>
-            <Button
-              variant={activeTab === 'technician' ? "primary" : "outline"}
-              onClick={() => setActiveTab('technician')}
-              className="flex items-center gap-2"
-            >
+            </TabsTrigger>
+            <TabsTrigger value="technician" className="flex items-center gap-2">
               <Smartphone className="h-4 w-4" />
               Technician Notes ({technicianNotes.length})
-            </Button>
-          </div>
-        </Tabs>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Notes List */}
-        <div className="space-y-4">
+          {/* Notes List */}
+          <div className="space-y-4">
           {(activeTab === 'internal' ? internalNotes : technicianNotes).length === 0 ? (
             <div className="text-center py-8">
-              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <Typography variant="h4" className="text-gray-900 mb-2">
+              <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+              <Heading level={4} className="text-slate-900 mb-2">
                 No {activeTab === 'internal' ? 'Internal' : 'Technician'} Notes
-              </Typography>
-              <Typography variant="body1" className="text-gray-600">
+              </Heading>
+              <Text variant="body" className="text-slate-600">
                 {activeTab === 'internal' 
                   ? 'No internal notes have been added yet.' 
                   : 'No technician notes have been added yet.'
                 }
-              </Typography>
+              </Text>
             </div>
           ) : (
             (activeTab === 'internal' ? internalNotes : technicianNotes).map((note) => {
@@ -185,49 +183,43 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
                 <div
                   key={note.id}
                   className={`border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer ${
-                    note.is_alert ? 'border-red-200 bg-red-50' : 'border-gray-200'
+                    note.is_alert ? 'border-red-200 bg-red-50' : 'border-slate-200'
                   }`}
                   onClick={() => setSelectedNote(note)}
                 >
                   {/* Note Header */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <SourceIcon className="h-4 w-4 text-gray-500" />
-                      <Chip
-                        color={getNoteTypeColor(note.note_type)}
-                        variant="default"
-                      >
+                      <SourceIcon className="h-4 w-4 text-slate-500" />
+                      <Badge variant="default">
                         {note.note_type}
-                      </Chip>
-                      <Chip
-                        color={getPriorityColor(note.priority)}
-                        variant="default"
-                      >
+                      </Badge>
+                      <Badge variant={note.priority === 'high' ? 'destructive' : 'secondary'}>
                         {note.priority}
-                      </Chip>
+                      </Badge>
                       {note.is_alert && (
                         <AlertTriangle className="h-4 w-4 text-red-500" />
                       )}
                     </div>
-                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                    <div className="flex items-center gap-1 text-sm text-slate-500">
                       <Clock className="h-4 w-4" />
                       <span>{formatDate(note.created_at)}</span>
                     </div>
                   </div>
 
                   {/* Note Content */}
-                  <Typography variant="body1" className="text-gray-800 mb-3">
+                  <Text variant="body" className="text-slate-800 mb-3">
                     {note.note_content}
-                  </Typography>
+                  </Text>
 
                   {/* Note Footer */}
                   <div className="flex items-center justify-between">
-                    <Typography variant="body2" className="text-gray-600">
+                    <Text variant="small" className="text-slate-600">
                       By: {note.created_by}
-                    </Typography>
+                    </Text>
                     
                     {note.location_coords && (
-                      <div className="flex items-center gap-1 text-sm text-gray-500">
+                      <div className="flex items-center gap-1 text-sm text-slate-500">
                         <MapPin className="h-4 w-4" />
                         <span>GPS: {note.location_coords}</span>
                       </div>
@@ -237,7 +229,8 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
               );
             })
           )}
-        </div>
+          </div>
+        </Tabs>
 
         {/* Quick Actions */}
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -249,8 +242,8 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
               setShowNewNoteModal(true);
             }}
           >
-            <FileText className="h-6 w-6 mb-2 text-gray-600" />
-            <Typography variant="body2">General Note</Typography>
+            <FileText className="h-6 w-6 mb-2 text-slate-600" />
+            <Text variant="small">General Note</Text>
           </Button>
           
           <Button
@@ -262,7 +255,7 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
             }}
           >
             <AlertTriangle className="h-6 w-6 mb-2 text-red-600" />
-            <Typography variant="body2">Safety Alert</Typography>
+            <Text variant="small">Safety Alert</Text>
           </Button>
           
           <Button
@@ -274,7 +267,7 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
             }}
           >
             <CheckCircle className="h-6 w-6 mb-2 text-green-600" />
-            <Typography variant="body2">Customer Preference</Typography>
+            <Text variant="small">Customer Preference</Text>
           </Button>
           
           <Button
@@ -286,24 +279,23 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
             }}
           >
             <Smartphone className="h-6 w-6 mb-2 text-blue-600" />
-            <Typography variant="body2">Field Note</Typography>
+            <Text variant="small">Field Note</Text>
           </Button>
         </div>
       </Card>
 
-      {/* New Note Modal */}
-      <Modal
-        isOpen={showNewNoteModal}
-        onClose={() => setShowNewNoteModal(false)}
-        title="Add New Note"
-        size="lg"
-      >
+      {/* New Note Dialog */}
+      <Dialog open={showNewNoteModal} onOpenChange={(open) => !open && setShowNewNoteModal(false)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add New Note</DialogTitle>
+          </DialogHeader>
         <div className="space-y-6">
           {/* Note Type Selection */}
           <div>
-            <Typography variant="body2" className="text-gray-600 mb-2">
+            <Text variant="small" className="text-slate-600 mb-2">
               Note Type
-            </Typography>
+            </Text>
             <div className="grid grid-cols-2 gap-2">
               {['general', 'safety', 'preference', 'property', 'technician'].map((type) => (
                 <Button
@@ -320,9 +312,9 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
 
           {/* Note Source */}
           <div>
-            <Typography variant="body2" className="text-gray-600 mb-2">
+            <Text variant="small" className="text-slate-600 mb-2">
               Note Source
-            </Typography>
+            </Text>
             <div className="grid grid-cols-3 gap-2">
               {['office', 'field', 'mobile_app'].map((source) => (
                 <Button
@@ -339,9 +331,9 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
 
           {/* Priority */}
           <div>
-            <Typography variant="body2" className="text-gray-600 mb-2">
+            <Text variant="small" className="text-slate-600 mb-2">
               Priority
-            </Typography>
+            </Text>
             <div className="grid grid-cols-3 gap-2">
               {['low', 'medium', 'high'].map((priority) => (
                 <Button
@@ -358,9 +350,9 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
 
           {/* Note Content */}
           <div>
-            <Typography variant="body2" className="text-gray-600 mb-2">
+            <Text variant="small" className="text-slate-600 mb-2">
               Note Content
-            </Typography>
+            </Text>
             <Textarea
               value={newNote.note_content}
               onChange={(e) => setNewNote({ ...newNote, note_content: e })}
@@ -378,7 +370,7 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
                 onChange={(e) => setNewNote({ ...newNote, is_alert: e.target.checked })}
                 className="rounded"
               />
-              <Typography variant="body2">Mark as alert/warning</Typography>
+              <Text variant="small">Mark as alert/warning</Text>
             </label>
             
             <label className="flex items-center gap-2">
@@ -388,7 +380,7 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
                 onChange={(e) => setNewNote({ ...newNote, is_internal: e.target.checked })}
                 className="rounded"
               />
-              <Typography variant="body2">Internal note (not customer-facing)</Typography>
+              <Text variant="small">Internal note (not customer-facing)</Text>
             </label>
           </div>
 
@@ -421,51 +413,51 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
             </Button>
           </div>
         </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
-      {/* Note Detail Modal */}
-      <Modal
-        isOpen={!!selectedNote}
-        onClose={() => setSelectedNote(null)}
-        title="Note Details"
-        size="lg"
-      >
+      {/* Note Detail Dialog */}
+      <Dialog open={!!selectedNote} onOpenChange={(open) => !open && setSelectedNote(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Note Details</DialogTitle>
+          </DialogHeader>
         {selectedNote && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Typography variant="body2" className="text-gray-600">Note Type</Typography>
-                <Chip color={getNoteTypeColor(selectedNote.note_type)}>
+                <Text variant="small" className="text-slate-600">Note Type</Text>
+                <Badge variant="default">
                   {selectedNote.note_type}
-                </Chip>
+                </Badge>
               </div>
               <div>
-                <Typography variant="body2" className="text-gray-600">Priority</Typography>
-                <Chip color={getPriorityColor(selectedNote.priority)}>
+                <Text variant="small" className="text-slate-600">Priority</Text>
+                <Badge variant={selectedNote.priority === 'high' ? 'destructive' : 'secondary'}>
                   {selectedNote.priority}
-                </Chip>
+                </Badge>
               </div>
               <div>
-                <Typography variant="body2" className="text-gray-600">Source</Typography>
-                <Typography variant="body1">{selectedNote.note_source}</Typography>
+                <Text variant="small" className="text-slate-600">Source</Text>
+                <Text variant="body">{selectedNote.note_source}</Text>
               </div>
               <div>
-                <Typography variant="body2" className="text-gray-600">Created By</Typography>
-                <Typography variant="body1">{selectedNote.created_by}</Typography>
+                <Text variant="small" className="text-slate-600">Created By</Text>
+                <Text variant="body">{selectedNote.created_by}</Text>
               </div>
             </div>
 
             <div>
-              <Typography variant="body2" className="text-gray-600 mb-2">Content</Typography>
-              <Typography variant="body1">{selectedNote.note_content}</Typography>
+              <Text variant="small" className="text-slate-600 mb-2">Content</Text>
+              <Text variant="body">{selectedNote.note_content}</Text>
             </div>
 
             {selectedNote.location_coords && (
               <div>
-                <Typography variant="body2" className="text-gray-600 mb-2">Location</Typography>
+                <Text variant="small" className="text-slate-600 mb-2">Location</Text>
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-gray-500" />
-                  <Typography variant="body1">{selectedNote.location_coords}</Typography>
+                  <MapPin className="h-4 w-4 text-slate-500" />
+                  <Text variant="body">{selectedNote.location_coords}</Text>
                 </div>
               </div>
             )}
@@ -484,7 +476,8 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
             </div>
           </div>
         )}
-      </Modal>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

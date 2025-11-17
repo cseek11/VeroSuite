@@ -1,10 +1,12 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["public", "auth"]
 }
 
 model Tenant {
@@ -49,6 +51,7 @@ model Tenant {
   kpiTemplateUsage        KpiTemplateUsage[]
 
   @@map("tenants")
+  @@schema("public")
 }
 
 model User {
@@ -59,6 +62,7 @@ model User {
   first_name                                          String             @db.VarChar(100)
   last_name                                           String             @db.VarChar(100)
   phone                                               String?            @db.VarChar(20)
+  employee_id                                         String?            @unique @db.VarChar(20)
   roles                                               String[]           @default([])
   status                                              String             @default("active") @db.VarChar(20)
   technician_number                                   String?            @db.VarChar(20)
@@ -70,6 +74,23 @@ model User {
   employment_type                                     String?            @default("full_time") @db.VarChar(20)
   emergency_contact_name                              String?            @db.VarChar(100)
   emergency_contact_phone                             String?            @db.VarChar(20)
+  emergency_contact_relationship                      String?            @db.VarChar(50)
+  address_line1                                       String?            @db.VarChar(255)
+  address_line2                                       String?            @db.VarChar(255)
+  city                                                String?            @db.VarChar(100)
+  state                                               String?            @db.VarChar(2)
+  postal_code                                         String?            @db.VarChar(20)
+  country                                             String?            @default("US") @db.VarChar(100)
+  date_of_birth                                       DateTime?          @db.Date
+  social_security_number                              String?            @db.VarChar(255)
+  driver_license_number                               String?            @db.VarChar(255)
+  driver_license_state                                String?            @db.VarChar(2)
+  driver_license_expiry                               DateTime?          @db.Date
+  qualifications                                      String[]           @default([])
+  custom_permissions                                  String[]           @default([])
+  manager_id                                          String?            @db.Uuid
+  avatar_url                                          String?            @db.VarChar(500)
+  tags                                                String[]           @default([])
   created_at                                          DateTime           @default(now()) @db.Timestamptz(6)
   updated_at                                          DateTime           @default(now()) @updatedAt @db.Timestamptz(6)
   Invoice_Invoice_created_byTousers                   Invoice[]          @relation("Invoice_created_byTousers")
@@ -92,8 +113,12 @@ model User {
   approvedKpiTemplates                                KpiTemplate[]      @relation("KpiTemplateApprover")
   userKpis                                            UserKpi[]
   kpiTemplateUsage                                    KpiTemplateUsage[]
+  manager                                             User?              @relation("UserHierarchy", fields: [manager_id], references: [id], onDelete: SetNull)
+  directReports                                       User[]             @relation("UserHierarchy")
 
+  @@index([manager_id])
   @@map("users")
+  @@schema("public")
 }
 
 model CustomerSegment {
@@ -113,6 +138,7 @@ model CustomerSegment {
   @@unique([tenant_id, segment_code])
   @@unique([tenant_id, segment_code], map: "customer_segments_tenant_code_unique")
   @@map("customer_segments")
+  @@schema("public")
 }
 
 model ServiceCategory {
@@ -132,6 +158,7 @@ model ServiceCategory {
   @@unique([tenant_id, category_code])
   @@unique([tenant_id, category_code], map: "service_categories_tenant_code_unique")
   @@map("service_categories")
+  @@schema("public")
 }
 
 model ServiceType {
@@ -160,6 +187,7 @@ model ServiceType {
   @@unique([tenant_id, service_code])
   @@unique([tenant_id, service_code], map: "service_types_tenant_code_unique")
   @@map("service_types")
+  @@schema("public")
 }
 
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
@@ -179,6 +207,7 @@ model Account {
   property_size            String?
   ar_balance               Decimal                  @default(0.00) @db.Decimal(10, 2)
   billing_address          Json?
+  stripe_customer_id       String?                  @db.VarChar(255)
   created_at               DateTime                 @default(now()) @db.Timestamptz(6)
   updated_at               DateTime                 @default(now()) @updatedAt @db.Timestamptz(6)
   created_by               String?                  @db.Uuid
@@ -208,6 +237,7 @@ model Account {
 
   @@unique([tenant_id, id])
   @@map("accounts")
+  @@schema("public")
 }
 
 model CustomerProfile {
@@ -249,6 +279,7 @@ model CustomerProfile {
 
   @@unique([tenant_id, account_id])
   @@map("customer_profiles")
+  @@schema("public")
 }
 
 model CustomerContact {
@@ -273,6 +304,7 @@ model CustomerContact {
 
   @@unique([tenant_id, account_id, contact_type])
   @@map("customer_contacts")
+  @@schema("public")
 }
 
 model Location {
@@ -297,6 +329,7 @@ model Location {
 
   @@unique([tenant_id, id])
   @@map("locations")
+  @@schema("public")
 }
 
 model WorkOrder {
@@ -329,6 +362,7 @@ model WorkOrder {
   @@unique([tenant_id, id])
   @@index([tenant_id, status], map: "idx_work_orders_tenant_status")
   @@map("work_orders")
+  @@schema("public")
 }
 
 model Job {
@@ -361,6 +395,7 @@ model Job {
   @@index([tenant_id, technician_id, scheduled_date])
   @@index([tenant_id, status, scheduled_date])
   @@map("jobs")
+  @@schema("public")
 }
 
 model ServiceArea {
@@ -382,6 +417,7 @@ model ServiceArea {
   @@unique([tenant_id, area_code])
   @@unique([tenant_id, area_code], map: "service_areas_tenant_code_unique")
   @@map("service_areas")
+  @@schema("public")
 }
 
 model TechnicianSkill {
@@ -401,6 +437,7 @@ model TechnicianSkill {
 
   @@unique([tenant_id, technician_id, service_type_id])
   @@map("technician_skills")
+  @@schema("public")
 }
 
 model PricingTier {
@@ -422,6 +459,7 @@ model PricingTier {
   @@unique([tenant_id, tier_code])
   @@unique([tenant_id, tier_code], map: "pricing_tiers_tenant_code_unique")
   @@map("pricing_tiers")
+  @@schema("public")
 }
 
 model ServicePricing {
@@ -443,6 +481,7 @@ model ServicePricing {
 
   @@unique([tenant_id, service_type_id, pricing_tier_id, effective_date])
   @@map("service_pricing")
+  @@schema("public")
 }
 
 model PaymentMethod {
@@ -465,6 +504,7 @@ model PaymentMethod {
 
   @@unique([tenant_id, account_id, payment_type])
   @@map("payment_methods")
+  @@schema("public")
 }
 
 model CustomerAnalytics {
@@ -481,6 +521,7 @@ model CustomerAnalytics {
 
   @@unique([tenant_id, account_id, metric_date, metric_type])
   @@map("customer_analytics")
+  @@schema("public")
 }
 
 model ServiceAnalytics {
@@ -500,6 +541,7 @@ model ServiceAnalytics {
   tenant          Tenant       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@map("service_analytics")
+  @@schema("public")
 }
 
 model CommunicationTemplate {
@@ -517,6 +559,7 @@ model CommunicationTemplate {
   tenant                  Tenant                   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@map("communication_templates")
+  @@schema("public")
 }
 
 model AutomatedCommunication {
@@ -537,6 +580,7 @@ model AutomatedCommunication {
   tenant               Tenant                 @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@map("automated_communications")
+  @@schema("public")
 }
 
 model ComplianceRequirement {
@@ -556,6 +600,7 @@ model ComplianceRequirement {
   tenant                   Tenant             @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@map("compliance_requirements")
+  @@schema("public")
 }
 
 model ComplianceRecord {
@@ -577,6 +622,7 @@ model ComplianceRecord {
   tenant            Tenant                @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@map("compliance_records")
+  @@schema("public")
 }
 
 model ServiceHistory {
@@ -597,6 +643,7 @@ model ServiceHistory {
 
   @@unique([tenant_id, id])
   @@map("service_history")
+  @@schema("public")
 }
 
 model ContractsSubscription {
@@ -618,6 +665,7 @@ model ContractsSubscription {
 
   @@unique([tenant_id, id])
   @@map("contracts_subscriptions")
+  @@schema("public")
 }
 
 model CommunicationLog {
@@ -636,6 +684,7 @@ model CommunicationLog {
 
   @@unique([tenant_id, id])
   @@map("communication_logs")
+  @@schema("public")
 }
 
 model CustomerNote {
@@ -657,6 +706,7 @@ model CustomerNote {
 
   @@unique([tenant_id, id])
   @@map("customer_notes")
+  @@schema("public")
 }
 
 model PestActivityTracking {
@@ -680,6 +730,7 @@ model PestActivityTracking {
 
   @@unique([tenant_id, id])
   @@map("pest_activity_tracking")
+  @@schema("public")
 }
 
 model ComplianceTracking {
@@ -698,6 +749,7 @@ model ComplianceTracking {
 
   @@unique([tenant_id, id])
   @@map("compliance_tracking")
+  @@schema("public")
 }
 
 model TechnicianCertification {
@@ -714,6 +766,7 @@ model TechnicianCertification {
 
   @@unique([tenant_id, id])
   @@map("technician_certifications")
+  @@schema("public")
 }
 
 model ChemicalUsageLog {
@@ -735,6 +788,7 @@ model ChemicalUsageLog {
 
   @@unique([tenant_id, id])
   @@map("chemical_usage_log")
+  @@schema("public")
 }
 
 model CustomerPhoto {
@@ -759,6 +813,7 @@ model CustomerPhoto {
 
   @@unique([tenant_id, id])
   @@map("customer_photos")
+  @@schema("public")
 }
 
 model BusinessAnalytics {
@@ -775,6 +830,7 @@ model BusinessAnalytics {
 
   @@unique([tenant_id, id])
   @@map("business_analytics")
+  @@schema("public")
 }
 
 model CustomerDocument {
@@ -793,6 +849,7 @@ model CustomerDocument {
 
   @@unique([tenant_id, id])
   @@map("customer_documents")
+  @@schema("public")
 }
 
 model TenantBranding {
@@ -818,6 +875,7 @@ model TenantBranding {
   tenant       Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@map("tenant_branding")
+  @@schema("public")
 }
 
 model AuditLog {
@@ -838,6 +896,7 @@ model AuditLog {
   @@index([tenant_id, timestamp(sort: Desc)])
   @@index([tenant_id, timestamp(sort: Desc)], map: "idx_audit_logs_tenant_timestamp")
   @@map("audit_logs")
+  @@schema("public")
 }
 
 model Invoice {
@@ -875,6 +934,7 @@ model Invoice {
   @@index([status])
   @@index([tenant_id])
   @@map("Invoice")
+  @@schema("public")
 }
 
 model InvoiceItem {
@@ -891,6 +951,7 @@ model InvoiceItem {
 
   @@index([invoice_id])
   @@map("InvoiceItem")
+  @@schema("public")
 }
 
 model Payment {
@@ -913,6 +974,7 @@ model Payment {
   @@index([payment_date])
   @@index([tenant_id])
   @@map("Payment")
+  @@schema("public")
 }
 
 model ServiceAgreement {
@@ -945,6 +1007,7 @@ model ServiceAgreement {
   @@index([status])
   @@index([tenant_id])
   @@map("ServiceAgreement")
+  @@schema("public")
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
@@ -952,6 +1015,7 @@ model ext_exists {
   exists Boolean?
 
   @@ignore
+  @@schema("public")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -970,6 +1034,7 @@ model knowledge_articles {
   content      String
   featured     Boolean?  @default(false)
   created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  @@schema("public")
 }
 
 model knowledge_categories {
@@ -979,6 +1044,7 @@ model knowledge_categories {
   description String?
   icon        String?
   created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  @@schema("public")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -1009,6 +1075,7 @@ model popular_searches {
   @@index([tenant_id], map: "idx_popular_searches_tenant")
   @@index([tenant_id, is_trending, trend_score], map: "idx_popular_searches_trending")
   @@index([tenant_id, search_count(sort: Desc)], map: "idx_popular_searches_usage")
+  @@schema("public")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -1026,6 +1093,7 @@ model search_corrections {
   @@index([confidence_score(sort: Desc)], map: "idx_search_corrections_confidence")
   @@index([original_query], map: "idx_search_corrections_original_query")
   @@index([tenant_id], map: "idx_search_corrections_tenant_id")
+  @@schema("public")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -1059,6 +1127,7 @@ model search_performance_metrics {
   @@unique([tenant_id, metric_date, metric_hour])
   @@index([created_at], map: "idx_search_performance_created")
   @@index([tenant_id, metric_date], map: "idx_search_performance_tenant_date")
+  @@schema("public")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -1083,6 +1152,7 @@ model search_suggestions_analytics {
   @@index([tenant_id, confidence_score(sort: Desc)], map: "idx_search_suggestions_confidence")
   @@index([tenant_id], map: "idx_search_suggestions_tenant")
   @@index([tenant_id, suggestion_type], map: "idx_search_suggestions_type")
+  @@schema("public")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -1105,6 +1175,7 @@ model search_trends {
   @@unique([tenant_id, trend_period, trend_date])
   @@index([tenant_id, trend_period, trend_date], map: "idx_search_trends_period_date")
   @@index([tenant_id], map: "idx_search_trends_tenant")
+  @@schema("public")
 }
 
 model search_typo_corrections {
@@ -1119,6 +1190,7 @@ model search_typo_corrections {
 
   @@unique([tenant_id, original_query, corrected_query])
   @@index([tenant_id, original_query], map: "idx_typo_corrections_tenant_query")
+  @@schema("public")
 }
 
 enum BillingFrequency {
@@ -1126,6 +1198,7 @@ enum BillingFrequency {
   quarterly
   annually
   one_time
+  @@schema("public")
 }
 
 enum InvoiceStatus {
@@ -1134,6 +1207,7 @@ enum InvoiceStatus {
   paid
   overdue
   cancelled
+  @@schema("public")
 }
 
 enum ServiceAgreementStatus {
@@ -1141,6 +1215,7 @@ enum ServiceAgreementStatus {
   inactive
   expired
   cancelled
+  @@schema("public")
 }
 
 // ===== TECHNICIAN MANAGEMENT MODELS =====
@@ -1177,6 +1252,7 @@ model TechnicianProfile {
 
   @@unique([tenant_id, user_id])
   @@map("technician_profiles")
+  @@schema("public")
 }
 
 model TechnicianPayroll {
@@ -1200,6 +1276,7 @@ model TechnicianPayroll {
 
   @@unique([tenant_id, technician_id])
   @@map("technician_payroll")
+  @@schema("public")
 }
 
 model TechnicianDocument {
@@ -1225,6 +1302,7 @@ model TechnicianDocument {
   verifier        User?     @relation("DocumentVerifier", fields: [verified_by], references: [id], onDelete: SetNull)
 
   @@map("technician_documents")
+  @@schema("public")
 }
 
 model TechnicianPerformance {
@@ -1247,6 +1325,7 @@ model TechnicianPerformance {
 
   @@unique([tenant_id, technician_id, period_start, period_end])
   @@map("technician_performance")
+  @@schema("public")
 }
 
 // KPI Templates System
@@ -1287,6 +1366,7 @@ model KpiTemplate {
   @@index([is_public])
   @@index([usage_count(sort: Desc)])
   @@map("kpi_templates")
+  @@schema("public")
 }
 
 model KpiTemplateField {
@@ -1306,6 +1386,7 @@ model KpiTemplateField {
   template          KpiTemplate @relation(fields: [template_id], references: [id], onDelete: Cascade)
 
   @@map("kpi_template_fields")
+  @@schema("public")
 }
 
 model UserKpi {
@@ -1333,6 +1414,7 @@ model UserKpi {
 
   @@index([tenant_id, user_id])
   @@map("user_kpis")
+  @@schema("public")
 }
 
 model KpiTemplateUsage {
@@ -1354,4 +1436,192 @@ model KpiTemplateUsage {
   // Prevent duplicate favorites per user/tenant/template
   @@unique([tenant_id, user_id, template_id, action], map: "kpi_template_usage_unique_action_per_user")
   @@map("kpi_template_usage")
+  @@schema("public")
+}
+
+// ============================================================================
+// Dashboard Models
+// ============================================================================
+
+model DashboardLayout {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id               String                    @db.Uuid
+  user_id                 String                    @db.Uuid
+  name                    String                    @db.VarChar(255)
+  is_default              Boolean                   @default(false)
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                  @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  regions                 DashboardRegion[]
+  versions                DashboardLayoutVersion[]
+  migrationLogs           DashboardMigrationLog[]
+  auditLogs               DashboardLayoutAudit[]
+
+  @@index([tenant_id])
+  @@index([user_id])
+  @@index([tenant_id, user_id])
+  @@map("dashboard_layouts")
+  @@schema("public")
+}
+
+model DashboardRegion {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  layout_id               String                    @db.Uuid
+  tenant_id               String                    @db.Uuid
+  user_id                 String                    @db.Uuid
+  region_type             String                    @db.VarChar(50)
+  grid_row                Int                       @default(0)
+  grid_col                Int                       @default(0)
+  row_span                Int                       @default(1)
+  col_span                Int                       @default(1)
+  min_width               Int?                      @default(200)
+  min_height              Int?                      @default(150)
+  is_collapsed            Boolean                   @default(false)
+  is_locked               Boolean                   @default(false)
+  is_hidden_mobile        Boolean                   @default(false)
+  config                  Json                      @default("{}")
+  widget_type             String?                   @db.VarChar(100)
+  widget_config           Json                      @default("{}")
+  display_order           Int                       @default(0)
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                  @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at              DateTime?                 @db.Timestamptz(6)
+  
+  layout                  DashboardLayout           @relation(fields: [layout_id], references: [id], onDelete: Cascade)
+  acls                    DashboardRegionAcl[]
+  presences               DashboardRegionPresence[]
+
+  @@index([layout_id])
+  @@index([tenant_id])
+  @@index([user_id])
+  @@index([layout_id, tenant_id, user_id])
+  @@index([display_order])
+  @@index([grid_row, grid_col])
+  @@index([deleted_at])
+  @@map("dashboard_regions")
+  @@schema("public")
+}
+
+model DashboardLayoutVersion {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  layout_id               String                    @db.Uuid
+  version_number          Int
+  status                  String                    @db.VarChar(20)
+  created_by              String                    @db.Uuid
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  payload                 Json
+  diff                    Json?
+  notes                   String?
+  tenant_id               String                    @db.Uuid
+  
+  layout                  DashboardLayout           @relation(fields: [layout_id], references: [id], onDelete: Cascade)
+
+  @@unique([layout_id, version_number])
+  @@index([layout_id])
+  @@index([tenant_id])
+  @@index([status])
+  @@index([created_at(sort: Desc)])
+  @@map("dashboard_layout_versions")
+  @@schema("public")
+}
+
+model DashboardRegionAcl {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  region_id               String                    @db.Uuid
+  principal_type          String                    @db.VarChar(20)
+  principal_id            String                    @db.Uuid
+  permission_set          Json                      @default("{\"read\": true, \"edit\": false, \"share\": false}")
+  tenant_id               String                    @db.Uuid
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  
+  region                  DashboardRegion           @relation(fields: [region_id], references: [id], onDelete: Cascade)
+
+  @@unique([region_id, principal_type, principal_id])
+  @@index([region_id])
+  @@index([tenant_id])
+  @@index([principal_type, principal_id])
+  @@map("dashboard_region_acls")
+  @@schema("public")
+}
+
+model DashboardWidgetRegistry {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  widget_id               String                    @unique @db.VarChar(100)
+  manifest                Json
+  signature               String?
+  allowed_tenants         String[]                  @db.Uuid
+  is_public               Boolean                   @default(false)
+  is_approved             Boolean                   @default(false)
+  created_by              String?                   @db.Uuid
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  @@index([widget_id])
+  @@index([is_approved])
+  @@index([is_public])
+  @@map("dashboard_widget_registry")
+  @@schema("public")
+}
+
+model DashboardMigrationLog {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                 String                    @db.Uuid
+  layout_id               String                    @db.Uuid
+  migration_payload       Json
+  status                  String                    @db.VarChar(20)
+  errors                  Json?
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  tenant_id               String                    @db.Uuid
+  
+  layout                  DashboardLayout           @relation(fields: [layout_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([layout_id])
+  @@index([tenant_id])
+  @@index([status])
+  @@index([created_at(sort: Desc)])
+  @@map("dashboard_migration_logs")
+  @@schema("public")
+}
+
+model DashboardRegionPresence {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  region_id               String                    @db.Uuid
+  user_id                 String                    @db.Uuid
+  session_id              String                    @db.VarChar(255)
+  is_editing              Boolean                   @default(false)
+  last_seen               DateTime                  @default(now()) @db.Timestamptz(6)
+  tenant_id               String                    @db.Uuid
+  
+  region                  DashboardRegion           @relation(fields: [region_id], references: [id], onDelete: Cascade)
+
+  @@unique([region_id, user_id, session_id])
+  @@index([region_id])
+  @@index([tenant_id])
+  @@index([user_id])
+  @@index([last_seen])
+  @@index([is_editing])
+  @@map("dashboard_region_presence")
+  @@schema("public")
+}
+
+model DashboardLayoutAudit {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  layout_id               String                    @db.Uuid
+  user_id                 String                    @db.Uuid
+  action                  String                    @db.VarChar(50)
+  changes                 Json?
+  metadata                Json?
+  tenant_id               String                    @db.Uuid
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  
+  layout                  DashboardLayout           @relation(fields: [layout_id], references: [id], onDelete: Cascade)
+
+  @@index([layout_id])
+  @@index([user_id])
+  @@index([tenant_id])
+  @@index([action])
+  @@index([created_at(sort: Desc)])
+  @@map("dashboard_layout_audit")
+  @@schema("public")
 }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 // TODO: Update to use enhanced API for file uploads
 // import { enhancedApi } from '@/lib/enhanced-api';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { logger } from '@/utils/logger';
 import {
   Upload,
   Image,
@@ -23,9 +24,9 @@ export default function Uploads() {
       const presign = await presignUpload(file.name, file.type);
       await fetch(presign.uploadUrl, { method: presign.method, headers: presign.headers, body: file });
       setFiles((prev) => [presign.fileUrl, ...prev]);
-    } catch (error) {
+    } catch (error: unknown) {
       setUploadError('Upload failed. Please try again.');
-      console.error('Upload error:', error);
+      logger.error('Upload error', error, 'Uploads');
     } finally {
       setUploading(false);
     }

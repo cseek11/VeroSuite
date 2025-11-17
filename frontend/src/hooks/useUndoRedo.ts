@@ -1,115 +1,100 @@
 import { useState, useCallback, useRef } from 'react';
+import { DashboardRegion } from '@/routes/dashboard/types/region.types';
 
-interface UseUndoRedoProps<T> {
-  initialState: T;
+interface HistoryState {
+  regions: DashboardRegion[];
+  timestamp: number;
+}
+
+interface UseUndoRedoOptions {
   maxHistorySize?: number;
+  debounceMs?: number;
 }
 
-interface UndoRedoState<T> {
-  history: T[];
-  currentIndex: number;
+interface UseUndoRedoReturn {
+  canUndo: boolean;
+  canRedo: boolean;
+  undo: () => DashboardRegion[] | null;
+  redo: () => DashboardRegion[] | null;
+  saveState: (regions: DashboardRegion[]) => void;
+  clearHistory: () => void;
+  historySize: number;
 }
 
-export function useUndoRedo<T>({ initialState, maxHistorySize = 50 }: UseUndoRedoProps<T>) {
-  const [state, setState] = useState<UndoRedoState<T>>({
-    history: [initialState],
-    currentIndex: 0
-  });
+export function useUndoRedo({
+  maxHistorySize = 50,
+  debounceMs = 300
+}: UseUndoRedoOptions = {}): UseUndoRedoReturn {
+  const [history, setHistory] = useState<HistoryState[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const isUpdatingRef = useRef(false);
+  const saveState = useCallback((regions: DashboardRegion[]) => {
+    // Debounce to avoid saving on every keystroke
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
 
-  // Get current value
-  const currentValue = state.history[state.currentIndex];
-
-  // Check if undo is possible
-  const canUndo = state.currentIndex > 0;
-
-  // Check if redo is possible
-  const canRedo = state.currentIndex < state.history.length - 1;
-
-  // Push new state to history
-  const pushState = useCallback((newState: T) => {
-    if (isUpdatingRef.current) return; // Prevent recursive updates
-
-    setState(prevState => {
-      // If we're not at the end of history, remove everything after current index
-      const newHistory = prevState.history.slice(0, prevState.currentIndex + 1);
-      
-      // Add new state
-      newHistory.push(newState);
-      
-      // Limit history size
-      if (newHistory.length > maxHistorySize) {
-        newHistory.shift();
-        return {
-          history: newHistory,
-          currentIndex: newHistory.length - 1
+    debounceTimerRef.current = setTimeout(() => {
+      setHistory(prev => {
+        // Remove any states after current index (when user undid and then made new changes)
+        const newHistory = prev.slice(0, currentIndex + 1);
+        
+        // Add new state
+        const newState: HistoryState = {
+          regions: JSON.parse(JSON.stringify(regions)), // Deep clone
+          timestamp: Date.now()
         };
-      }
-      
-      return {
-        history: newHistory,
-        currentIndex: newHistory.length - 1
-      };
-    });
-  }, [maxHistorySize]);
 
-  // Undo operation
-  const undo = useCallback(() => {
-    if (!canUndo) return null;
+        const updated = [...newHistory, newState];
 
-    setState(prevState => ({
-      ...prevState,
-      currentIndex: prevState.currentIndex - 1
-    }));
+        // Limit history size
+        if (updated.length > maxHistorySize) {
+          return updated.slice(-maxHistorySize);
+        }
 
-    return state.history[state.currentIndex - 1];
-  }, [canUndo, state.history, state.currentIndex]);
+        return updated;
+      });
 
-  // Redo operation
-  const redo = useCallback(() => {
-    if (!canRedo) return null;
+      setCurrentIndex(prev => {
+        const newIndex = prev + 1;
+        // Ensure index doesn't exceed history length
+        return Math.min(newIndex, maxHistorySize - 1);
+      });
+    }, debounceMs);
+  }, [currentIndex, maxHistorySize, debounceMs]);
 
-    setState(prevState => ({
-      ...prevState,
-      currentIndex: prevState.currentIndex + 1
-    }));
+  const undo = useCallback((): DashboardRegion[] | null => {
+    if (currentIndex <= 0) return null;
 
-    return state.history[state.currentIndex + 1];
-  }, [canRedo, state.history, state.currentIndex]);
+    const newIndex = currentIndex - 1;
+    setCurrentIndex(newIndex);
+    return history[newIndex]?.regions || null;
+  }, [currentIndex, history]);
 
-  // Clear history
+  const redo = useCallback((): DashboardRegion[] | null => {
+    if (currentIndex >= history.length - 1) return null;
+
+    const newIndex = currentIndex + 1;
+    setCurrentIndex(newIndex);
+    return history[newIndex]?.regions || null;
+  }, [currentIndex, history]);
+
   const clearHistory = useCallback(() => {
-    setState({
-      history: [currentValue],
-      currentIndex: 0
-    });
-  }, [currentValue]);
-
-  // Get history info
-  const getHistoryInfo = useCallback(() => {
-    return {
-      historyLength: state.history.length,
-      currentIndex: state.currentIndex,
-      canUndo,
-      canRedo
-    };
-  }, [state.history.length, state.currentIndex, canUndo, canRedo]);
-
-  // Set updating flag to prevent recursive updates
-  const setUpdating = useCallback((updating: boolean) => {
-    isUpdatingRef.current = updating;
+    setHistory([]);
+    setCurrentIndex(-1);
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
   }, []);
 
   return {
-    currentValue,
-    pushState,
+    canUndo: currentIndex > 0,
+    canRedo: currentIndex < history.length - 1,
     undo,
     redo,
-    canUndo,
-    canRedo,
+    saveState,
     clearHistory,
-    getHistoryInfo,
-    setUpdating
+    historySize: history.length
   };
 }

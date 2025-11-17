@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { DashboardLayout } from './useDashboardLayout';
+import { logger } from '@/utils/logger';
 
 export interface CollaborationUser {
   id: string;
@@ -26,7 +27,7 @@ const USER_COLORS = [
 
 // Simulated WebSocket for demo purposes
 class MockWebSocket {
-  private listeners: { [key: string]: Function[] } = {};
+  private listeners: { [key: string]: Array<(data: unknown) => void> } = {};
   private isConnected = false;
 
   connect() {
@@ -51,20 +52,20 @@ class MockWebSocket {
     }, 50 + Math.random() * 100);
   }
 
-  on(event: string, callback: Function) {
+  on(event: string, callback: (data: unknown) => void) {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
     this.listeners[event].push(callback);
   }
 
-  off(event: string, callback: Function) {
+  off(event: string, callback: (data: unknown) => void) {
     if (this.listeners[event]) {
       this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
     }
   }
 
-  private emit(event: string, data: any) {
+  private emit(event: string, data: unknown) {
     if (this.listeners[event]) {
       this.listeners[event].forEach(callback => callback(data));
     }
@@ -111,12 +112,12 @@ export function useRealtimeCollaboration(dashboardId: string, currentUser: any) 
       setCollaborators({});
     });
 
-    wsRef.current.on('message', (event: any) => {
+    wsRef.current.on('message', (event: { data: string }) => {
       try {
         const collaborationEvent: CollaborationEvent = JSON.parse(event.data);
         handleCollaborationEvent(collaborationEvent);
-      } catch (error) {
-        console.error('Failed to parse collaboration event:', error);
+      } catch (error: unknown) {
+        logger.error('Failed to parse collaboration event', error, 'useRealtimeCollaboration');
       }
     });
 
@@ -136,8 +137,8 @@ export function useRealtimeCollaboration(dashboardId: string, currentUser: any) 
         };
         
         wsRef.current.send(JSON.stringify(leaveEvent));
-      } catch (error) {
-        console.warn('Failed to send leave event:', error);
+      } catch (error: unknown) {
+        logger.warn('Failed to send leave event', { error }, 'useRealtimeCollaboration');
       }
       
       // Clean up the connection
@@ -194,12 +195,16 @@ export function useRealtimeCollaboration(dashboardId: string, currentUser: any) 
       case 'layout_update':
         // Handle layout updates from other users
         // This would trigger a layout merge/conflict resolution
-        console.log('Layout update from user:', event.userId, event.data);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Layout update from user', { userId: event.userId, data: event.data }, 'useRealtimeCollaboration');
+        }
         break;
 
       case 'card_select':
         // Handle card selection from other users
-        console.log('Card selection from user:', event.userId, event.data);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Card selection from user', { userId: event.userId, data: event.data }, 'useRealtimeCollaboration');
+        }
         break;
     }
   }, [currentUser]);

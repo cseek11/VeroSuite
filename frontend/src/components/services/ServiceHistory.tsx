@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
-import { CalendarIcon, ClockIcon, UserIcon, CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { Calendar, Clock, User, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 
 interface ServiceHistory {
   id: string;
@@ -134,13 +134,13 @@ export default function ServiceHistory() {
 
   const getStatusIcon = (status: string) => {
     const icons: Record<string, React.ReactNode> = {
-      'scheduled': <CalendarIcon className="h-4 w-4" />,
-      'in_progress': <ClockIcon className="h-4 w-4" />,
-      'completed': <CheckCircleIcon className="h-4 w-4" />,
-      'cancelled': <XCircleIcon className="h-4 w-4" />,
-                'no_show': <ExclamationTriangleIcon className="h-4 w-4" />,
+      'scheduled': <Calendar className="h-4 w-4" />,
+      'in_progress': <Clock className="h-4 w-4" />,
+      'completed': <CheckCircle className="h-4 w-4" />,
+      'cancelled': <XCircle className="h-4 w-4" />,
+                'no_show': <AlertTriangle className="h-4 w-4" />,
     };
-    return icons[status] || <CalendarIcon className="h-4 w-4" />;
+    return icons[status] || <Calendar className="h-4 w-4" />;
   };
 
   const formatDate = (dateString: string) => {
@@ -260,7 +260,7 @@ export default function ServiceHistory() {
         <div className="bg-white shadow-sm border border-gray-200 rounded-lg p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <CheckCircleIcon className="h-8 w-8 text-green-600" />
+              <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
             <div className="ml-4">
               <div className="text-2xl font-bold text-gray-900">
@@ -273,7 +273,7 @@ export default function ServiceHistory() {
         <div className="bg-white shadow-sm border border-gray-200 rounded-lg p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <ClockIcon className="h-8 w-8 text-yellow-600" />
+              <Clock className="h-8 w-8 text-yellow-600" />
             </div>
             <div className="ml-4">
               <div className="text-2xl font-bold text-gray-900">
@@ -286,7 +286,7 @@ export default function ServiceHistory() {
         <div className="bg-white shadow-sm border border-gray-200 rounded-lg p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <XCircleIcon className="h-8 w-8 text-red-600" />
+              <XCircle className="h-8 w-8 text-red-600" />
             </div>
             <div className="ml-4">
               <div className="text-2xl font-bold text-gray-900">
@@ -299,7 +299,7 @@ export default function ServiceHistory() {
         <div className="bg-white shadow-sm border border-gray-200 rounded-lg p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-                                   <ExclamationTriangleIcon className="h-8 w-8 text-gray-600" />
+                                   <AlertTriangle className="h-8 w-8 text-gray-600" />
             </div>
             <div className="ml-4">
               <div className="text-2xl font-bold text-gray-900">
@@ -371,7 +371,7 @@ export default function ServiceHistory() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <UserIcon className="h-4 w-4 text-gray-400 mr-2" />
+                      <User className="h-4 w-4 text-gray-400 mr-2" />
                       <div className="text-sm text-gray-900">
                         {service.technicians?.name || 'N/A'}
                       </div>
@@ -431,7 +431,7 @@ export default function ServiceHistory() {
       {/* No Results */}
       {(!serviceHistory || serviceHistory.length === 0) && (
         <div className="bg-white shadow-sm border border-gray-200 rounded-lg p-12 text-center">
-          <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
+          <Calendar className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No service history found</h3>
           <p className="mt-1 text-sm text-gray-500">
             Try adjusting your filters or search criteria.

@@ -8,19 +8,16 @@ import {
   Phone,
   User,
   FileText,
-  Calendar,
   Clock,
   TrendingUp,
   AlertCircle,
   CheckCircle,
-  Eye,
   Filter,
   Archive,
-  Trash2,
   Settings,
-  RefreshCw,
-  Plus
+  RefreshCw
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface ActivityAction {
   id: string;
@@ -50,7 +47,7 @@ export default function ExpandableActivityFABSystem({ className = '' }: Expandab
   const fabRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // Activity Categories with VeroSuite-specific features
+  // Activity Categories with VeroField-specific features
   const activityCategories: ActivityCategory[] = [
     {
       id: 'notifications',
@@ -64,7 +61,7 @@ export default function ExpandableActivityFABSystem({ className = '' }: Expandab
           icon: Bell, 
           badge: 12,
           description: 'See all recent notifications',
-          action: () => console.log('View all notifications')
+          action: () => logger.debug('View all notifications', {}, 'ExpandableActivityFABSystem')
         },
         { 
           id: 'emergency-alerts', 
@@ -73,7 +70,7 @@ export default function ExpandableActivityFABSystem({ className = '' }: Expandab
           badge: 2,
           color: 'text-red-600',
           description: 'Urgent system alerts',
-          action: () => console.log('Emergency alerts')
+          action: () => logger.debug('Emergency alerts', {}, 'ExpandableActivityFABSystem')
         },
         { 
           id: 'job-updates', 
@@ -81,7 +78,7 @@ export default function ExpandableActivityFABSystem({ className = '' }: Expandab
           icon: CheckCircle, 
           badge: 8,
           description: 'Work order status changes',
-          action: () => console.log('Job updates')
+          action: () => logger.debug('Job updates', {}, 'ExpandableActivityFABSystem')
         },
         { 
           id: 'system-notifications', 
@@ -89,7 +86,7 @@ export default function ExpandableActivityFABSystem({ className = '' }: Expandab
           icon: Settings,
           badge: 2,
           description: 'System and app updates',
-          action: () => console.log('System notifications')
+          action: () => logger.debug('System notifications', {}, 'ExpandableActivityFABSystem')
         }
       ]
     },
@@ -114,7 +111,7 @@ export default function ExpandableActivityFABSystem({ className = '' }: Expandab
           badge: 3,
           color: 'text-orange-600',
           description: 'Unanswered phone calls',
-          action: () => console.log('Missed calls')
+          action: () => logger.debug('Missed calls', {}, 'ExpandableActivityFABSystem')
         },
         { 
           id: 'new-emails', 
@@ -122,7 +119,7 @@ export default function ExpandableActivityFABSystem({ className = '' }: Expandab
           icon: Mail, 
           badge: 7,
           description: 'Unread email messages',
-          action: () => console.log('New emails')
+          action: () => logger.debug('New emails', {}, 'ExpandableActivityFABSystem')
         },
         { 
           id: 'customer-inquiries', 
@@ -130,7 +127,7 @@ export default function ExpandableActivityFABSystem({ className = '' }: Expandab
           icon: User,
           badge: 4,
           description: 'Customer support requests',
-          action: () => console.log('Customer inquiries')
+          action: () => logger.debug('Customer inquiries', {}, 'ExpandableActivityFABSystem')
         }
       ]
     },
@@ -145,28 +142,28 @@ export default function ExpandableActivityFABSystem({ className = '' }: Expandab
           label: 'Recent Activity', 
           icon: Clock,
           description: 'Latest system activity',
-          action: () => console.log('Recent activity')
+          action: () => logger.debug('Recent activity', {}, 'ExpandableActivityFABSystem')
         },
         { 
           id: 'user-actions', 
           label: 'User Actions', 
           icon: User,
           description: 'Team member activities',
-          action: () => console.log('User actions')
+          action: () => logger.debug('User actions', {}, 'ExpandableActivityFABSystem')
         },
         { 
           id: 'system-events', 
           label: 'System Events', 
           icon: Settings,
           description: 'Automated system events',
-          action: () => console.log('System events')
+          action: () => logger.debug('System events', {}, 'ExpandableActivityFABSystem')
         },
         { 
           id: 'data-changes', 
           label: 'Data Changes', 
           icon: FileText,
           description: 'Record modifications',
-          action: () => console.log('Data changes')
+          action: () => logger.debug('Data changes', {}, 'ExpandableActivityFABSystem')
         }
       ]
     },
@@ -181,28 +178,28 @@ export default function ExpandableActivityFABSystem({ className = '' }: Expandab
           label: 'Mark All Read', 
           icon: CheckCircle,
           description: 'Clear all notifications',
-          action: () => console.log('Mark all read')
+          action: () => logger.debug('Mark all read', {}, 'ExpandableActivityFABSystem')
         },
         { 
           id: 'filter-activity', 
           label: 'Filter Activity', 
           icon: Filter,
           description: 'Filter activity feed',
-          action: () => console.log('Filter activity')
+          action: () => logger.debug('Filter activity', {}, 'ExpandableActivityFABSystem')
         },
         { 
           id: 'archive-old', 
           label: 'Archive Old Items', 
           icon: Archive,
           description: 'Archive old notifications',
-          action: () => console.log('Archive old')
+          action: () => logger.debug('Archive old', {}, 'ExpandableActivityFABSystem')
         },
         { 
           id: 'refresh-feed', 
           label: 'Refresh Feed', 
           icon: RefreshCw,
           description: 'Refresh activity feed',
-          action: () => console.log('Refresh feed')
+          action: () => logger.debug('Refresh feed', {}, 'ExpandableActivityFABSystem')
         },
         { 
           id: 'activity-settings', 

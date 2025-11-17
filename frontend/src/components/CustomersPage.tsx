@@ -1,40 +1,27 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import CustomerListView from './CustomerListView';
 import SearchBar from './SearchBar';
 import CustomerSearchResults from './CustomerSearchResults';
 import {
   Users,
-  Search,
-  Plus,
   MapPin,
-  Building,
   RefreshCw,
   UserPlus,
-  Eye,
-  Edit,
-  Phone,
-  DollarSign,
   Calendar,
-  Filter,
-  Mail,
-  Clock,
-  CheckCircle,
-  AlertTriangle,
   X,
   Grid3X3,
   List
 } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { secureApiClient } from '@/lib/secure-api-client';
-import { Account, CustomerProfile } from '@/types/enhanced-types';
+import { Account } from '@/types/enhanced-types';
 import { useSearchIntegration } from '@/lib/search-integration';
 import type { SearchResult } from '@/lib/unified-search-service';
+import { logger } from '@/utils/logger';
+import { toast } from '@/utils/toast';
 
 export default function CustomersPage() {
-  console.log('🔄 CustomersPage component rendering');
-  
   const [selectedCustomer, setSelectedCustomer] = useState<Account | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -68,7 +55,7 @@ export default function CustomersPage() {
   useEffect(() => {
     const handleCustomerUpdate = (event: CustomEvent) => {
       const { customerId } = event.detail;
-      console.log('🔄 Real-time customer update received in CustomersPage:', customerId);
+      logger.debug('Real-time customer update received', { customerId }, 'CustomersPage');
       
       // Invalidate and refetch customer data
       queryClient.invalidateQueries({ queryKey: ['secure-customers'] });
@@ -82,14 +69,14 @@ export default function CustomersPage() {
     };
     
     const handleCustomerCreate = (event: CustomEvent) => {
-      console.log('🔄 Real-time customer creation received in CustomersPage');
+      logger.debug('Real-time customer creation received', {}, 'CustomersPage');
       queryClient.invalidateQueries({ queryKey: ['secure-customers'] });
       queryClient.invalidateQueries({ queryKey: ['search'] });
       queryClient.invalidateQueries({ queryKey: ['unified-search'] });
     };
     
     const handleCustomerDelete = (event: CustomEvent) => {
-      console.log('🔄 Real-time customer deletion received in CustomersPage');
+      logger.debug('Real-time customer deletion received', {}, 'CustomersPage');
       queryClient.invalidateQueries({ queryKey: ['secure-customers'] });
       queryClient.invalidateQueries({ queryKey: ['search'] });
       queryClient.invalidateQueries({ queryKey: ['unified-search'] });
@@ -107,10 +94,6 @@ export default function CustomersPage() {
       window.removeEventListener('customerDeleted', handleCustomerDelete as EventListener);
     };
   }, [queryClient, search, searchTerm]);
-
-  // Debug logging
-  console.log('CustomersPage - Customers data:', customers);
-  console.log('CustomersPage - Loading:', isLoading);
 
   // ============================================================================
   // SEARCH HANDLERS
@@ -176,10 +159,10 @@ export default function CustomersPage() {
         }));
         
         // Show success message
-        console.log(`✅ Customer "${result.name}" deleted successfully`);
+        logger.debug('Customer deleted successfully', { customerName: result.name }, 'CustomersPage');
       } catch (error) {
-        console.error('Failed to delete customer:', error);
-        alert('Failed to delete customer. Please try again.');
+        logger.error('Failed to delete customer', error, 'CustomersPage');
+        toast.error('Failed to delete customer. Please try again.');
       }
     }
   };
@@ -195,7 +178,6 @@ export default function CustomersPage() {
       window.open(`mailto:${result.email}`, '_self');
     }
   };
-  console.log('CustomersPage - Error:', error);
 
   // Fetch service history for selected customer
   const { data: serviceHistory = [] } = useQuery({
@@ -214,7 +196,6 @@ export default function CustomersPage() {
   };
 
   const filteredCustomers = useMemo(() => {
-    console.log('🔄 Filtering customers - searchTerm:', searchTerm, 'filterType:', filterType);
     if (!Array.isArray(customers)) {
       return [];
     }
@@ -232,34 +213,33 @@ export default function CustomersPage() {
       // Check if the search input was previously focused
       const wasSearchFocused = document.activeElement?.hasAttribute('data-search-input');
       if (wasSearchFocused) {
-        console.log('🔄 Restoring focus to search input');
         searchInputRef.current.focus();
       }
     }
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
+    <div className="h-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3 flex flex-col">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6 mb-6">
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
-              <Users className="h-8 w-8 text-indigo-600" />
+            <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+              <Users className="h-6 w-6 text-indigo-600" />
               Customers
             </h1>
-            <p className="text-slate-600 mt-2">
+            <p className="text-slate-600 mt-1 text-sm">
               Manage your customer relationships and service history
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+          <div className="flex items-center gap-2">
+            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors text-sm">
               <UserPlus className="h-4 w-4" />
               Add Customer
             </button>
             <button 
               onClick={() => refetch()}
-              className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-2"
+              className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1.5 rounded-lg hover:bg-white hover:shadow-lg transition-all duration-200 flex items-center gap-1 text-sm"
             >
               <RefreshCw className="h-4 w-4" />
               Refresh
@@ -269,7 +249,7 @@ export default function CustomersPage() {
       </div>
 
       {/* Search and Filter Bar */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4">
+      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-3 mb-3 flex-shrink-0">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <SearchBar
@@ -346,8 +326,8 @@ export default function CustomersPage() {
 
       {/* Search Results */}
       {showSearchResults && (
-        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-6 mb-4">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/20 p-4 mb-4 h-64 overflow-hidden flex flex-col flex-shrink-0">
+          <div className="flex items-center justify-between mb-3 flex-shrink-0">
             <h3 className="text-lg font-semibold text-gray-900">
               Search Results
               {searchResults.length > 0 && (
@@ -368,31 +348,41 @@ export default function CustomersPage() {
             </button>
           </div>
           
-          <CustomerSearchResults
-            results={searchResults}
-            loading={searchLoading}
-            error={searchError}
-            onView={handleViewCustomer}
-            onEdit={handleEditCustomer}
-            onDelete={handleDeleteCustomer}
-            onCall={handleCallCustomer}
-            onEmail={handleEmailCustomer}
-            showActions={true}
-            compact={viewMode === 'grid'}
-          />
+          <div className="flex-1 overflow-y-auto min-h-0">
+            <CustomerSearchResults
+              results={searchResults}
+              loading={searchLoading}
+              error={searchError}
+              onView={handleViewCustomer}
+              onEdit={handleEditCustomer}
+              onDelete={handleDeleteCustomer}
+              onCall={handleCallCustomer}
+              onEmail={handleEmailCustomer}
+              showActions={true}
+              compact={viewMode === 'grid'}
+            />
+          </div>
         </div>
       )}
 
-      {/* Customer List */}
-      <CustomerListView
-        customers={filteredCustomers}
-        onViewHistory={handleViewHistory}
-        onEdit={(customer) => console.log('Edit customer:', customer)}
-        onViewDetails={(customer) => console.log('View details:', customer)}
-        onSelectionChange={setSelectedCustomers}
-        isLoading={isLoading}
-        error={error}
-      />
+      {/* Customer List - Content container */}
+      <div className="flex-1 min-h-0">
+        <CustomerListView
+          customers={filteredCustomers}
+          onViewHistory={handleViewHistory}
+          onEdit={(customer) => {
+            logger.debug('Edit customer requested', { customerId: customer.id }, 'CustomersPage');
+            // TODO: Implement edit functionality
+          }}
+          onViewDetails={(customer) => {
+            logger.debug('View customer details requested', { customerId: customer.id }, 'CustomersPage');
+            // TODO: Implement view details functionality
+          }}
+          onSelectionChange={setSelectedCustomers}
+          isLoading={isLoading}
+          error={error}
+        />
+      </div>
 
       {/* Service History Modal */}
       {showHistory && selectedCustomer && (

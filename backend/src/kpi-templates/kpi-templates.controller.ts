@@ -11,7 +11,8 @@ import {
   Request,
   ParseUUIDPipe,
   HttpCode,
-  HttpStatus
+  HttpStatus,
+  UseInterceptors
 } from '@nestjs/common';
 import { 
   ApiTags, 
@@ -30,11 +31,13 @@ import {
   TrackTemplateUsageDto,
   KpiTemplateFiltersDto
 } from './dto';
+import { DeprecationInterceptor } from '../common/interceptors/deprecation.interceptor';
 
-@ApiTags('KPI Templates')
+@ApiTags('KPI Templates V1 (Deprecated)')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('v1/kpi-templates')
+@Controller({ path: 'kpi-templates', version: '1' })
+@UseInterceptors(DeprecationInterceptor)
 export class KpiTemplatesController {
   constructor(private readonly kpiTemplatesService: KpiTemplatesService) {}
 

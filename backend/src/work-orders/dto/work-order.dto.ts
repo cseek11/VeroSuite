@@ -1,4 +1,4 @@
-import { IsString, IsUUID, IsDateString, IsOptional, IsEnum, IsNumber, Min, MaxLength } from 'class-validator';
+import { IsString, IsUUID, IsDateString, IsOptional, IsEnum, IsNumber, Min, MaxLength, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { TenantAware, TenantAwareDto } from '../../common/dto/tenant-aware.dto';
@@ -87,12 +87,12 @@ export class CreateWorkOrderDto extends TenantAwareDto {
 export class UpdateWorkOrderDto {
   @ApiProperty({ description: 'Customer/Account ID', required: false })
   @IsOptional()
-  @IsUUID()
+  @IsUUID('all')
   customer_id?: string;
 
   @ApiProperty({ description: 'Assigned technician ID', required: false })
   @IsOptional()
-  @IsUUID()
+  @Matches(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, { message: 'assigned_to must be a valid UUID' })
   assigned_to?: string;
 
   @ApiProperty({ enum: WorkOrderStatus, required: false })

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useCreateTechnician, useUpdateTechnician, useTechnician } from '../../hooks/useTechnicians';
 import { CreateTechnicianProfileDto, UpdateTechnicianProfileDto, EmploymentType, TechnicianStatus } from '../../types/technician';
 import { User } from '../../types/user';
@@ -8,31 +10,89 @@ import { userApi } from '../../lib/user-api';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import Input from '../ui/Input';
+import Select from '../ui/Select';
 import CreateUserModal from './CreateUserModal';
+import { logger } from '@/utils/logger';
+import { toast } from '@/utils/toast';
 
 interface TechnicianFormProps {
   technicianId?: string;
   isEdit?: boolean;
 }
 
+// Form validation schema
+const technicianFormSchema = z.object({
+  user_id: z.string().uuid('User is required').optional(),
+  employee_id: z.string().min(1, 'Employee ID is required'),
+  hire_date: z.string().min(1, 'Hire date is required'),
+  position: z.string().min(1, 'Position is required'),
+  department: z.string().min(1, 'Department is required'),
+  employment_type: z.nativeEnum(EmploymentType, { required_error: 'Employment type is required' }),
+  status: z.nativeEnum(TechnicianStatus, { required_error: 'Status is required' }),
+  emergency_contact_name: z.string().min(1, 'Emergency contact name is required'),
+  emergency_contact_phone: z.string().min(1, 'Emergency contact phone is required'),
+  emergency_contact_relationship: z.string().min(1, 'Emergency contact relationship is required'),
+  address_line1: z.string().min(1, 'Address line 1 is required'),
+  address_line2: z.string().optional(),
+  city: z.string().min(1, 'City is required'),
+  state: z.string().min(1, 'State is required').length(2, 'State must be 2 characters'),
+  postal_code: z.string().min(1, 'Postal code is required'),
+  country: z.string().min(1, 'Country is required'),
+  date_of_birth: z.string().min(1, 'Date of birth is required'),
+  social_security_number: z.string().regex(/^\d{3}-\d{2}-\d{4}$/, 'SSN must be in format XXX-XX-XXXX'),
+  driver_license_number: z.string().optional(),
+  driver_license_state: z.string().optional(),
+  driver_license_expiry: z.string().optional(),
+  qualifications: z.array(z.string()).optional(),
+});
+
+type TechnicianFormData = z.infer<typeof technicianFormSchema>;
 
 const TechnicianForm: React.FC<TechnicianFormProps> = ({ technicianId, isEdit = false }) => {
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [qualifications, setQualifications] = useState<string[]>([]);
+  const [newQualification, setNewQualification] = useState('');
 
   const { data: technician, isLoading: loadingTechnician } = useTechnician(technicianId || '');
   const createMutation = useCreateTechnician();
   const updateMutation = useUpdateTechnician();
 
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors },
     reset,
     setValue,
-  } = useForm<CreateTechnicianProfileDto | UpdateTechnicianProfileDto>();
+    watch,
+  } = useForm<TechnicianFormData>({
+    resolver: zodResolver(technicianFormSchema),
+    defaultValues: {
+      employee_id: '',
+      hire_date: '',
+      position: '',
+      department: '',
+      employment_type: EmploymentType.FULL_TIME,
+      status: TechnicianStatus.ACTIVE,
+      emergency_contact_name: '',
+      emergency_contact_phone: '',
+      emergency_contact_relationship: '',
+      address_line1: '',
+      address_line2: '',
+      city: '',
+      state: '',
+      postal_code: '',
+      country: 'US',
+      date_of_birth: '',
+      social_security_number: '',
+      driver_license_number: '',
+      driver_license_state: '',
+      driver_license_expiry: '',
+      qualifications: [],
+    },
+  });
 
   // Load users for the dropdown
   useEffect(() => {
@@ -44,20 +104,20 @@ const TechnicianForm: React.FC<TechnicianFormProps> = ({ technicianId, isEdit = 
         
         // If no users found, try to sync from authentication system
         if (usersList.length === 0) {
-          console.log('No users found, attempting to sync from authentication system...');
+          logger.debug('No users found, attempting to sync from authentication system', {}, 'TechnicianForm');
           try {
             const syncResult = await userApi.syncUsers();
-            console.log('Sync result:', syncResult);
+            logger.debug('User sync completed', { usersCount: syncResult.users?.length || 0 }, 'TechnicianForm');
             setUsers(syncResult.users || []);
           } catch (syncError) {
-            console.error('Error syncing users:', syncError);
+            logger.error('Error syncing users', syncError, 'TechnicianForm');
             setUsers(usersList);
           }
         } else {
           setUsers(usersList);
         }
       } catch (error) {
-        console.error('Error loading users:', error);
+        logger.error('Error loading users', error, 'TechnicianForm');
       } finally {
         setLoadingUsers(false);
       }
@@ -94,7 +154,7 @@ const TechnicianForm: React.FC<TechnicianFormProps> = ({ technicianId, isEdit = 
     }
   }, [isEdit, technician, setValue]);
 
-  const onSubmit = async (data: CreateTechnicianProfileDto | UpdateTechnicianProfileDto) => {
+  const onSubmit = async (data: TechnicianFormData) => {
     try {
       if (isEdit && technicianId) {
         await updateMutation.mutateAsync({ id: technicianId, data: data as UpdateTechnicianProfileDto });
@@ -103,15 +163,81 @@ const TechnicianForm: React.FC<TechnicianFormProps> = ({ technicianId, isEdit = 
       }
       navigate('/technicians');
     } catch (error) {
-      console.error('Failed to save technician:', error);
-      alert('Failed to save technician. Please try again.');
+      logger.error('Failed to save technician', error, 'TechnicianForm');
+      toast.error('Failed to save technician. Please try again.');
     }
   };
 
   const handleUserCreated = (newUser: User) => {
     setUsers(prev => [...prev, newUser]);
     setValue('user_id', newUser.id);
+    // Auto-populate employee_id if user has one
+    if (newUser.employee_id) {
+      setValue('employee_id', newUser.employee_id);
+    }
     setShowCreateUserModal(false);
+  };
+
+  // Auto-populate employee_id when user is selected
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name === 'user_id' && value.user_id && !isEdit) {
+        const selectedUser = users.find(u => u.id === value.user_id);
+        if (selectedUser?.employee_id) {
+          setValue('employee_id', selectedUser.employee_id);
+        } else if (selectedUser && !selectedUser.employee_id) {
+          // User doesn't have employee_id, try to generate one
+          // This is optional - user can still manually enter one
+          userApi.getNextEmployeeId('technician').then((employeeId) => {
+            setValue('employee_id', employeeId);
+          }).catch((error) => {
+            logger.error('Failed to generate employee ID', error, 'TechnicianForm');
+            // Continue without auto-populating - user can enter manually
+          });
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, setValue, users, isEdit]);
+
+  // SSN formatting handler
+  const formatSSN = (value: string): string => {
+    // Remove all non-digits
+    const digits = value.replace(/\D/g, '');
+    // Limit to 9 digits
+    const limited = digits.slice(0, 9);
+    // Format as XXX-XX-XXXX
+    if (limited.length <= 3) return limited;
+    if (limited.length <= 5) return `${limited.slice(0, 3)}-${limited.slice(3)}`;
+    return `${limited.slice(0, 3)}-${limited.slice(3, 5)}-${limited.slice(5)}`;
+  };
+
+  const handleSSNChange = (value: string, onChange: (value: string) => void) => {
+    const formatted = formatSSN(value);
+    onChange(formatted);
+  };
+
+  // Qualifications handlers
+  const addQualification = () => {
+    if (newQualification.trim() && !qualifications.includes(newQualification.trim())) {
+      const updated = [...qualifications, newQualification.trim()];
+      setQualifications(updated);
+      setValue('qualifications', updated);
+      setNewQualification('');
+    }
+  };
+
+  const removeQualification = (qual: string) => {
+    const updated = qualifications.filter(q => q !== qual);
+    setQualifications(updated);
+    setValue('qualifications', updated);
+  };
+
+  const handleQualificationKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addQualification();
+    }
   };
 
   if (loadingTechnician) {
@@ -148,28 +274,35 @@ const TechnicianForm: React.FC<TechnicianFormProps> = ({ technicianId, isEdit = 
           <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {!isEdit && (
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  User *
+                  User <span className="text-red-500">*</span>
                 </label>
                 <div className="flex gap-2">
-                  <select
-                    {...register('user_id', { required: 'User is required' })}
-                    className="crm-input flex-1"
-                    disabled={loadingUsers}
-                  >
-                    <option value="">Select a user...</option>
-                    {users.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.first_name} {user.last_name} ({user.email})
-                      </option>
-                    ))}
-                  </select>
+                  <Controller
+                    name="user_id"
+                    control={control}
+                    rules={{ required: 'User is required' }}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value || ''}
+                        onChange={field.onChange}
+                        disabled={loadingUsers}
+                        placeholder="Select a user..."
+                        options={users.map((user) => ({
+                          value: user.id,
+                          label: `${user.first_name} ${user.last_name} (${user.email})`,
+                        }))}
+                        className="flex-1"
+                        error={errors.user_id?.message}
+                      />
+                    )}
+                  />
                   <Button
                     type="button"
                     variant="secondary"
                     onClick={() => setShowCreateUserModal(true)}
-                    className="px-4 py-2 whitespace-nowrap"
+                    className="px-4 py-2 whitespace-nowrap flex-shrink-0"
                   >
                     + New User
                   </Button>
@@ -180,79 +313,98 @@ const TechnicianForm: React.FC<TechnicianFormProps> = ({ technicianId, isEdit = 
               </div>
             )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Employee ID
-              </label>
-              <Input
-                type="text"
-                {...register('employee_id')}
-                className="crm-input"
-                placeholder="Enter employee ID"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Hire Date *
-              </label>
-              <Input
-                type="date"
-                {...register('hire_date', { required: 'Hire date is required' })}
-                className="crm-input"
-              />
-              {errors.hire_date && (
-                <p className="text-red-500 text-sm mt-1">{errors.hire_date.message}</p>
+            <Controller
+              name="employee_id"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  {...field}
+                  label="Employee ID *"
+                  placeholder="Enter employee ID"
+                  error={errors.employee_id?.message}
+                />
               )}
-            </div>
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Position
-              </label>
-              <Input
-                type="text"
-                {...register('position')}
-                className="crm-input"
-                placeholder="Enter position"
-              />
-            </div>
+            <Controller
+              name="hire_date"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="date"
+                  {...field}
+                  label="Hire Date *"
+                  error={errors.hire_date?.message}
+                />
+              )}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Department
-              </label>
-              <Input
-                type="text"
-                {...register('department')}
-                className="crm-input"
-                placeholder="Enter department"
-              />
-            </div>
+            <Controller
+              name="position"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  {...field}
+                  label="Position *"
+                  placeholder="Enter position"
+                  error={errors.position?.message}
+                />
+              )}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Employment Type
-              </label>
-              <select {...register('employment_type')} className="crm-input">
-                <option value={EmploymentType.FULL_TIME}>Full Time</option>
-                <option value={EmploymentType.PART_TIME}>Part Time</option>
-                <option value={EmploymentType.CONTRACTOR}>Contractor</option>
-                <option value={EmploymentType.TEMPORARY}>Temporary</option>
-              </select>
-            </div>
+            <Controller
+              name="department"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  {...field}
+                  label="Department *"
+                  placeholder="Enter department"
+                  error={errors.department?.message}
+                />
+              )}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <select {...register('status')} className="crm-input">
-                <option value={TechnicianStatus.ACTIVE}>Active</option>
-                <option value={TechnicianStatus.INACTIVE}>Inactive</option>
-                <option value={TechnicianStatus.TERMINATED}>Terminated</option>
-                <option value={TechnicianStatus.ON_LEAVE}>On Leave</option>
-              </select>
-            </div>
+            <Controller
+              name="employment_type"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value || EmploymentType.FULL_TIME}
+                  onChange={field.onChange}
+                  label="Employment Type *"
+                  options={[
+                    { value: EmploymentType.FULL_TIME, label: 'Full Time' },
+                    { value: EmploymentType.PART_TIME, label: 'Part Time' },
+                    { value: EmploymentType.CONTRACTOR, label: 'Contractor' },
+                    { value: EmploymentType.TEMPORARY, label: 'Temporary' },
+                  ]}
+                  error={errors.employment_type?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value || TechnicianStatus.ACTIVE}
+                  onChange={field.onChange}
+                  label="Status *"
+                  options={[
+                    { value: TechnicianStatus.ACTIVE, label: 'Active' },
+                    { value: TechnicianStatus.INACTIVE, label: 'Inactive' },
+                    { value: TechnicianStatus.TERMINATED, label: 'Terminated' },
+                    { value: TechnicianStatus.ON_LEAVE, label: 'On Leave' },
+                  ]}
+                  error={errors.status?.message}
+                />
+              )}
+            />
           </div>
         </Card>
 
@@ -260,41 +412,47 @@ const TechnicianForm: React.FC<TechnicianFormProps> = ({ technicianId, isEdit = 
         <Card>
           <h2 className="text-lg font-semibold mb-4">Emergency Contact</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Contact Name
-              </label>
-              <Input
-                type="text"
-                {...register('emergency_contact_name')}
-                className="crm-input"
-                placeholder="Enter contact name"
-              />
-            </div>
+            <Controller
+              name="emergency_contact_name"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  {...field}
+                  label="Contact Name *"
+                  placeholder="Enter contact name"
+                  error={errors.emergency_contact_name?.message}
+                />
+              )}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Contact Phone
-              </label>
-              <Input
-                type="tel"
-                {...register('emergency_contact_phone')}
-                className="crm-input"
-                placeholder="Enter phone number"
-              />
-            </div>
+            <Controller
+              name="emergency_contact_phone"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="tel"
+                  {...field}
+                  label="Contact Phone *"
+                  placeholder="Enter phone number"
+                  error={errors.emergency_contact_phone?.message}
+                />
+              )}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Relationship
-              </label>
-              <Input
-                type="text"
-                {...register('emergency_contact_relationship')}
-                className="crm-input"
-                placeholder="e.g., Spouse, Parent"
-              />
-            </div>
+            <Controller
+              name="emergency_contact_relationship"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  {...field}
+                  label="Relationship *"
+                  placeholder="e.g., Spouse, Parent"
+                  error={errors.emergency_contact_relationship?.message}
+                />
+              )}
+            />
           </div>
         </Card>
 
@@ -302,78 +460,92 @@ const TechnicianForm: React.FC<TechnicianFormProps> = ({ technicianId, isEdit = 
         <Card>
           <h2 className="text-lg font-semibold mb-4">Address Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Address Line 1
-              </label>
-              <Input
-                type="text"
-                {...register('address_line1')}
-                className="crm-input"
-                placeholder="Enter address"
-              />
-            </div>
+            <Controller
+              name="address_line1"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  {...field}
+                  label="Address Line 1 *"
+                  placeholder="Enter address"
+                  error={errors.address_line1?.message}
+                  className="md:col-span-2"
+                />
+              )}
+            />
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Address Line 2
-              </label>
-              <Input
-                type="text"
-                {...register('address_line2')}
-                className="crm-input"
-                placeholder="Enter apartment, suite, etc."
-              />
-            </div>
+            <Controller
+              name="address_line2"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  {...field}
+                  label="Address Line 2"
+                  placeholder="Enter apartment, suite, etc."
+                  error={errors.address_line2?.message}
+                  className="md:col-span-2"
+                />
+              )}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                City
-              </label>
-              <Input
-                type="text"
-                {...register('city')}
-                className="crm-input"
-                placeholder="Enter city"
-              />
-            </div>
+            <Controller
+              name="city"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  {...field}
+                  label="City *"
+                  placeholder="Enter city"
+                  error={errors.city?.message}
+                />
+              )}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                State
-              </label>
-              <Input
-                type="text"
-                {...register('state')}
-                className="crm-input"
-                placeholder="Enter state"
-              />
-            </div>
+            <Controller
+              name="state"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  {...field}
+                  label="State *"
+                  placeholder="Enter state (e.g., PA)"
+                  maxLength={2}
+                  error={errors.state?.message}
+                />
+              )}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Postal Code
-              </label>
-              <Input
-                type="text"
-                {...register('postal_code')}
-                className="crm-input"
-                placeholder="Enter postal code"
-              />
-            </div>
+            <Controller
+              name="postal_code"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  {...field}
+                  label="Postal Code *"
+                  placeholder="Enter postal code"
+                  error={errors.postal_code?.message}
+                />
+              )}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Country
-              </label>
-              <Input
-                type="text"
-                {...register('country')}
-                className="crm-input"
-                placeholder="Enter country"
-                defaultValue="US"
-              />
-            </div>
+            <Controller
+              name="country"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  {...field}
+                  label="Country *"
+                  placeholder="Enter country"
+                  error={errors.country?.message}
+                />
+              )}
+            />
           </div>
         </Card>
 
@@ -381,63 +553,124 @@ const TechnicianForm: React.FC<TechnicianFormProps> = ({ technicianId, isEdit = 
         <Card>
           <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Date of Birth
-              </label>
-              <Input
-                type="date"
-                {...register('date_of_birth')}
-                className="crm-input"
-              />
-            </div>
+            <Controller
+              name="date_of_birth"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="date"
+                  {...field}
+                  label="Date of Birth *"
+                  error={errors.date_of_birth?.message}
+                />
+              )}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Social Security Number
-              </label>
+            <Controller
+              name="social_security_number"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  {...field}
+                  value={field.value || ''}
+                  onChange={(e) => handleSSNChange(e.target.value, field.onChange)}
+                  label="Social Security Number *"
+                  placeholder="XXX-XX-XXXX"
+                  maxLength={11}
+                  error={errors.social_security_number?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="driver_license_number"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  {...field}
+                  label="Driver License Number"
+                  placeholder="Enter license number"
+                  error={errors.driver_license_number?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="driver_license_state"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  {...field}
+                  label="Driver License State"
+                  placeholder="Enter state"
+                  error={errors.driver_license_state?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="driver_license_expiry"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="date"
+                  {...field}
+                  label="Driver License Expiry"
+                  error={errors.driver_license_expiry?.message}
+                />
+              )}
+            />
+          </div>
+        </Card>
+
+        {/* Qualifications & Certifications */}
+        <Card>
+          <h2 className="text-lg font-semibold mb-4">Qualifications & Certifications</h2>
+          <div className="space-y-4">
+            <div className="flex gap-2">
               <Input
                 type="text"
-                {...register('social_security_number')}
-                className="crm-input"
-                placeholder="XXX-XX-XXXX"
+                value={newQualification}
+                onChange={(e) => setNewQualification(e.target.value)}
+                onKeyPress={handleQualificationKeyPress}
+                placeholder="Enter qualification or certification"
+                className="flex-1"
               />
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={addQualification}
+                disabled={!newQualification.trim()}
+              >
+                Add
+              </Button>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Driver License Number
-              </label>
-              <Input
-                type="text"
-                {...register('driver_license_number')}
-                className="crm-input"
-                placeholder="Enter license number"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Driver License State
-              </label>
-              <Input
-                type="text"
-                {...register('driver_license_state')}
-                className="crm-input"
-                placeholder="Enter state"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Driver License Expiry
-              </label>
-              <Input
-                type="date"
-                {...register('driver_license_expiry')}
-                className="crm-input"
-              />
-            </div>
+            {qualifications.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {qualifications.map((qual) => (
+                  <span
+                    key={qual}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm"
+                  >
+                    {qual}
+                    <button
+                      type="button"
+                      onClick={() => removeQualification(qual)}
+                      className="text-purple-600 hover:text-purple-800"
+                      aria-label={`Remove ${qual}`}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className="text-sm text-gray-500">
+              Add qualifications, certifications, or specializations that can be used for filtering technicians.
+            </p>
           </div>
         </Card>
 

@@ -13,14 +13,14 @@ export interface RequiredEnvVars {
 }
 
 export interface OptionalEnvVars {
-  SUPABASE_PUBLISHABLE_KEY?: string;
-  JWT_EXPIRES_IN?: string;
-  REFRESH_TOKEN_EXPIRES_IN?: string;
-  CORS_ORIGIN?: string;
-  STRIPE_SECRET_KEY?: string;
-  STRIPE_PUBLISHABLE_KEY?: string;
-  STRIPE_WEBHOOK_SECRET?: string;
-  REDIS_URL?: string;
+  SUPABASE_PUBLISHABLE_KEY?: string | undefined;
+  JWT_EXPIRES_IN?: string | undefined;
+  REFRESH_TOKEN_EXPIRES_IN?: string | undefined;
+  CORS_ORIGIN?: string | undefined;
+  STRIPE_SECRET_KEY?: string | undefined;
+  STRIPE_PUBLISHABLE_KEY?: string | undefined;
+  STRIPE_WEBHOOK_SECRET?: string | undefined;
+  REDIS_URL?: string | undefined;
 }
 
 /**

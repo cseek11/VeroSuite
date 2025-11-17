@@ -45,7 +45,7 @@ async function clearAuthCache() {
     // Step 3: Clear local storage (browser only)
     console.log('\n3️⃣ Clearing local storage...');
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-      localStorage.removeItem('verosuite_auth');
+      localStorage.removeItem('verofield_auth');
       localStorage.removeItem('user');
       localStorage.removeItem('jwt');
       localStorage.clear();

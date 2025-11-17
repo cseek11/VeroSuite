@@ -2,7 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
 import { Customer } from '@/types/customer';
-import { ArrowLeftIcon, PencilIcon, PhoneIcon, EnvelopeIcon, MapPinIcon, CalendarIcon, CurrencyDollarIcon, TagIcon } from '@heroicons/react/24/outline';
+import { ArrowLeft, Pencil, Phone, Mail, MapPin, Calendar, Tag as TagIcon } from 'lucide-react';
 
 interface CustomerDetailProps {
   customerId: string;
@@ -36,7 +36,7 @@ export default function CustomerDetail({ customerId, onBack, onEdit }: CustomerD
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <LoadingSpinner text="Loading customer..." />
       </div>
     );
   }
@@ -92,7 +92,7 @@ export default function CustomerDetail({ customerId, onBack, onEdit }: CustomerD
                 onClick={onBack}
                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md"
               >
-                <ArrowLeftIcon className="h-5 w-5" />
+                <ArrowLeft className="h-5 w-5" />
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{customer.name}</h1>
@@ -105,7 +105,7 @@ export default function CustomerDetail({ customerId, onBack, onEdit }: CustomerD
               onClick={() => onEdit(customer)}
               className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
-              <PencilIcon className="h-4 w-4 mr-2" />
+              <Pencil className="h-4 w-4 mr-2" />
               Edit Customer
             </button>
           </div>
@@ -135,7 +135,7 @@ export default function CustomerDetail({ customerId, onBack, onEdit }: CustomerD
               </span>
             </div>
             <div className="flex items-center space-x-2">
-              <CalendarIcon className="h-4 w-4 text-gray-400" />
+              <Calendar className="h-4 w-4 text-gray-400" />
               <span className="text-sm text-gray-600">
                 Since {new Date(customer.created_at).toLocaleDateString()}
               </span>
@@ -190,21 +190,21 @@ export default function CustomerDetail({ customerId, onBack, onEdit }: CustomerD
             <div className="px-6 py-4">
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
-                  <EnvelopeIcon className="h-5 w-5 text-gray-400" />
+                  <Mail className="h-5 w-5 text-gray-400" />
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Email</dt>
                     <dd className="text-sm text-gray-900">{customer.email}</dd>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <PhoneIcon className="h-5 w-5 text-gray-400" />
+                  <Phone className="h-5 w-5 text-gray-400" />
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Phone</dt>
                     <dd className="text-sm text-gray-900">{customer.phone}</dd>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <MapPinIcon className="h-5 w-5 text-gray-400" />
+                  <MapPin className="h-5 w-5 text-gray-400" />
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Address</dt>
                     <dd className="text-sm text-gray-900">

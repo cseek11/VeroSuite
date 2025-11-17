@@ -1,25 +1,30 @@
-import React, { useState, useEffect, useMemo } from 'react';
+/**
+ * @deprecated This component is deprecated. Use ScheduleCalendar from @/components/scheduling/ScheduleCalendar instead.
+ * 
+ * Migration Guide:
+ * - Replace JobScheduler with ScheduleCalendar
+ * - ScheduleCalendar provides all features of JobScheduler plus additional enterprise features
+ * - See docs/guides/development/SCHEDULER_MIGRATION_GUIDE.md for detailed migration instructions
+ * 
+ * This component will be removed in a future version.
+ * Last Updated: 2025-01-27
+ */
+
+import React, { useState, useMemo } from 'react';
 import { useJobs, useCreateJob, useUpdateJob, useDeleteJob } from '@/hooks/useJobs';
 import { useWorkOrders } from '@/hooks/useWorkOrders';
 import { useTechnicians } from '@/hooks/useTechnicians';
-import { Job, CreateJobRequest, UpdateJobRequest } from '@/types/jobs';
+import { Job, CreateJobRequest } from '@/types/jobs';
 import { WorkOrder } from '@/types/work-orders';
 import { 
-  Calendar, 
-  Clock, 
-  User, 
   Plus, 
   Edit, 
-  Trash2, 
-  MapPin,
+  Trash2,
   Phone,
   Mail,
   ChevronLeft,
   ChevronRight,
-  Filter,
   Search,
-  Grid,
-  List,
   Eye
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
@@ -34,6 +39,8 @@ import {
   DialogHeader, 
   DialogTitle 
 } from '@/components/ui/Dialog';
+import { logger } from '@/utils/logger';
+import { useDialog } from '@/hooks/useDialog';
 
 interface JobSchedulerProps {
   onJobSelect?: (job: Job) => void;
@@ -48,6 +55,7 @@ export default function JobScheduler({
   onJobEdit,
   onJobCreate
 }: JobSchedulerProps) {
+  const { showAlert, DialogComponents } = useDialog();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -146,12 +154,33 @@ export default function JobScheduler({
   // Handle job creation from work order
   const handleCreateJobFromWorkOrder = async (workOrder: WorkOrder) => {
     try {
+      // Ensure we have required fields
+      const accountId = workOrder.account?.id || workOrder.customer_id;
+      const locationId = workOrder.location_id;
+      
+      if (!accountId || !locationId) {
+        logger.error('Work order missing account_id or location_id', { accountId, locationId }, 'JobScheduler');
+        await showAlert({
+          title: 'Cannot Create Job',
+          message: 'Work order must have a customer and location assigned.',
+          type: 'error',
+        });
+        return;
+      }
+
+      const scheduledDate = workOrder.scheduled_date 
+        ? new Date(workOrder.scheduled_date).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0];
+
       const jobData: CreateJobRequest = {
         work_order_id: workOrder.id,
-        technician_id: workOrder.assigned_to || '',
-        scheduled_date: workOrder.scheduled_date || new Date().toISOString(),
+        account_id: accountId,
+        location_id: locationId,
+        technician_id: workOrder.assigned_to,
+        scheduled_date: scheduledDate,
         scheduled_start_time: '09:00',
         scheduled_end_time: '17:00',
+        priority: workOrder.priority || 'medium',
         status: 'scheduled',
         notes: `Job created from work order: ${workOrder.description}`
       };
@@ -161,7 +190,7 @@ export default function JobScheduler({
       setSelectedWorkOrder(null);
       refetchJobs();
     } catch (error) {
-      console.error('Failed to create job:', error);
+      logger.error('Failed to create job', error, 'JobScheduler');
     }
   };
 
@@ -173,7 +202,7 @@ export default function JobScheduler({
       setSelectedJob(null);
       refetchJobs();
     } catch (error) {
-      console.error('Failed to delete job:', error);
+      logger.error('Failed to delete job', error, 'JobScheduler');
     }
   };
 

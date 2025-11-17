@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Bell, Shield, User, Mail, Phone, Save } from 'lucide-react';
+import { Bell, Shield, User, Mail, Save } from 'lucide-react';
 import { Button, Typography, Switch } from '@/components/ui';
 
 interface CustomerSettingsProps {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Account } from '@/types/enhanced-types';
-import { CheckCircle, XCircle, Clock, AlertTriangle, Home, Building, Heart, DollarSign, Calendar } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Home, Building, Heart, DollarSign } from 'lucide-react';
 
 interface CustomerStatusBarProps {
   customer: Account;

@@ -1,38 +1,17 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import Button from '@/components/ui/Button';
 import {
-  Typography,
-  Button,
-  Card,
-  Input,
-  Chip,
-  Textarea,
   Badge,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Alert,
-  AlertDescription,
-  Skeleton,
-  Separator
 } from '@/components/ui';
+import { logger } from '@/utils/logger';
 import {
-  Eye,
-  Edit,
   Phone,
   Mail,
   MapPin,
@@ -40,51 +19,12 @@ import {
   DollarSign,
   FileText,
   MessageSquare,
-  Download,
-  Send,
   Plus,
-  Search,
-  Filter,
-  Clock,
-  CheckCircle,
   AlertCircle,
-  Star,
-  Tag,
-  CreditCard,
-  FileImage,
-  Users,
-  Building,
-  PhoneCall,
-  MessageCircle,
-  History,
   Settings,
-  Shield,
-  FileCheck,
-  FileX,
-  ChevronDown,
-  ChevronUp,
-  ExternalLink,
-  Copy,
-  Share2,
-  Archive,
-  RefreshCw,
-  MoreHorizontal,
-  Camera,
-  Upload,
   Trash2,
   User,
-  Home,
-  Briefcase,
-  Clock as ClockIcon,
-  TrendingUp,
   BarChart3,
-  PieChart,
-  Activity,
-  Zap,
-  Bell,
-  Check,
-  X,
-  Save,
   Loader2,
   ArrowLeft
 } from 'lucide-react';
@@ -150,7 +90,7 @@ const CustomerPage: React.FC<CustomerPageProps> = ({ customerId: propCustomerId 
     setActiveTab('notes');
     // You can add additional logic here to scroll to the specific note
     // For example, you could pass the noteId to the CustomerNotesHistory component
-    console.log(`Navigating to note: ${noteId}`);
+    logger.debug('Navigating to note', { noteId }, 'CustomerPage');
   };
 
   // Fetch customer data
@@ -164,7 +104,7 @@ const CustomerPage: React.FC<CustomerPageProps> = ({ customerId: propCustomerId 
   const updateCustomerMutation = useMutation({
     mutationFn: (updates: Partial<Customer>) => enhancedApi.customers.update(customerId!, updates),
     onSuccess: (data) => {
-      console.log('✅ Customer updated successfully:', data.name);
+      logger.debug('Customer updated successfully', { customerName: data.name, customerId }, 'CustomerPage');
       
       // Invalidate all customer-related queries
       queryClient.invalidateQueries({ queryKey: ['customer', customerId] });
@@ -183,7 +123,7 @@ const CustomerPage: React.FC<CustomerPageProps> = ({ customerId: propCustomerId 
       }));
     },
     onError: (error) => {
-      console.error('❌ Customer update failed:', error);
+      logger.error('Customer update failed', error, 'CustomerPage');
     }
   });
 
@@ -191,7 +131,7 @@ const CustomerPage: React.FC<CustomerPageProps> = ({ customerId: propCustomerId 
   const deleteCustomerMutation = useMutation({
     mutationFn: () => enhancedApi.customers.delete(customerId!),
     onSuccess: () => {
-      console.log('✅ Customer deleted successfully');
+      logger.debug('Customer deleted successfully', { customerId }, 'CustomerPage');
       
       // Invalidate all customer-related queries
       queryClient.invalidateQueries({ queryKey: ['customer', customerId] });
@@ -211,7 +151,7 @@ const CustomerPage: React.FC<CustomerPageProps> = ({ customerId: propCustomerId 
       navigate('/customers');
     },
     onError: (error) => {
-      console.error('❌ Customer deletion failed:', error);
+      logger.error('Customer deletion failed', error, 'CustomerPage');
     }
   });
 
@@ -220,7 +160,7 @@ const CustomerPage: React.FC<CustomerPageProps> = ({ customerId: propCustomerId 
     const handleCustomerUpdate = (event: CustomEvent) => {
       const { customerId: updatedCustomerId } = event.detail;
       if (updatedCustomerId === customerId) {
-        console.log('🔄 Customer updated via action handler, invalidating cache');
+        logger.debug('Customer updated via action handler, invalidating cache', { customerId }, 'CustomerPage');
         queryClient.invalidateQueries({ queryKey: ['customer', customerId] });
       }
     };
@@ -322,12 +262,15 @@ const CustomerPage: React.FC<CustomerPageProps> = ({ customerId: propCustomerId 
           </Button>
         </div>
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-          <Alert type="error">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Failed to load customer data. Please try again.
-            </AlertDescription>
-          </Alert>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-red-800">Error</p>
+              <p className="text-sm text-red-700 mt-1">
+                Failed to load customer data. Please try again.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );

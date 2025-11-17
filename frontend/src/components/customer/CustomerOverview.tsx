@@ -1,16 +1,13 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { MapPin, Building, Phone, Mail, Calendar, DollarSign, Tag, Clock, TrendingUp, AlertCircle, Loader2, Edit, Check, X, User, MessageSquare, FileText, ChevronLeft } from 'lucide-react';
+import { MapPin, Building, Phone, Mail, Calendar, DollarSign, Tag, Clock, AlertCircle, Loader2, Edit, Check, X, User, MessageSquare, FileText, ChevronLeft } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { enhancedApi } from '@/lib/enhanced-api';
 import {
   Typography,
   Button,
-  Card,
-  Input,
   Chip,
   Badge,
-  Separator,
   Textarea
 } from '@/components/ui';
 
@@ -122,7 +119,7 @@ const CustomerOverview: React.FC<CustomerOverviewProps> = ({
       } as any);
       setIsEditing(false);
     } catch (e) {
-      console.error('Failed to save customer', e);
+      logger.error('Failed to save customer', e, 'CustomerOverview');
     } finally {
       setIsSaving(false);
     }

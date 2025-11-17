@@ -1,8 +1,8 @@
-# VeroSuite Testing Dashboard
+# VeroField Testing Dashboard
 
 ## Overview
 
-The VeroSuite Testing Dashboard provides a comprehensive UI for running and monitoring tests across your CRM application. It offers a user-friendly interface to execute tests, view real-time results, and export test reports.
+The VeroField Testing Dashboard provides a comprehensive UI for running and monitoring tests across your CRM application. It offers a user-friendly interface to execute tests, view real-time results, and export test reports.
 
 ## Features
 
@@ -116,7 +116,7 @@ For issues or questions about the testing dashboard:
 
 ---
 
-**The VeroSuite Testing Dashboard provides a professional, enterprise-grade interface for comprehensive test management and monitoring.**
+**The VeroField Testing Dashboard provides a professional, enterprise-grade interface for comprehensive test management and monitoring.**
 
 
 

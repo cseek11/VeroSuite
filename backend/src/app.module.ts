@@ -2,11 +2,11 @@ import { Module, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
-import { DatabaseService } from './common/services/database.service';
-import { SupabaseService } from './common/services/supabase.service';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
+import { RateLimitMiddleware } from './common/middleware/rate-limit.middleware';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TenantContextInterceptor } from './common/interceptors/tenant-context.interceptor';
+import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
 import { JobsModule } from './jobs/jobs.module';
 import { CrmModule } from './crm/crm.module';
@@ -26,12 +26,14 @@ import { KPIsModule } from './kpis/kpis.module';
 import { KpiTemplatesModule } from './kpi-templates/kpi-templates.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { WebSocketModule } from './websocket/websocket.module';
+import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env.local', '.env'] }),
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
+    CommonModule,
     AuthModule,
     JobsModule,
     CrmModule,
@@ -53,13 +55,20 @@ import { WebSocketModule } from './websocket/websocket.module';
     WebSocketModule,
   ],
   providers: [
-    DatabaseService,
-    SupabaseService,
     { provide: APP_INTERCEPTOR, useClass: TenantContextInterceptor },
   ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
+    // Apply security headers to all routes (first, so they're always present)
+    consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
+    
+    // Apply rate limiting globally to all routes for abuse prevention
+    // Configured per-route with different limits (dashboard: 100/min, auth: 10/min, etc.)
+    consumer
+      .apply(RateLimitMiddleware)
+      .forRoutes('*');
+    
     // Apply tenant middleware to all routes for multi-tenant isolation
     consumer.apply(TenantMiddleware).forRoutes('*');
   }

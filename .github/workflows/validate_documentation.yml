@@ -1,0 +1,56 @@
+name: Validate Documentation Dates
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Get PR number
+        id: pr
+        run: |
+          echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate documentation dates
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+        run: |
+          python .cursor/scripts/validate_documentation_dates.py \
+            --pr "$PR_NUM" \
+            --out validation.json
+
+      - name: Upload validation artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: documentation-date-validation
+          path: validation.json
+          retention-days: 7
+
+      - name: Post validation comment
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ ! -f validation.json ]; then
+            echo "No validation.json found"
+            exit 0
+          fi
+          
+          REPORT=$(jq -r '.report' validation.json)
+          
+          # Warn but don't block (allow manual override)
+          gh pr comment "$PR_NUM" --body "$REPORT" || true
+

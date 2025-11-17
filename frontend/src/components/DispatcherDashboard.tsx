@@ -3,27 +3,27 @@ import { UserManagementForm } from './UserManagementForm';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { enhancedApi } from '@/lib/enhanced-api';
+import { logger } from '@/utils/logger';
 
 // TODO: Implement these APIs in enhanced API
 // For now, using placeholder functions
 const jobsApi = {
   today: async () => {
-    console.log('TODO: Implement jobs API in enhanced API');
+    logger.warn('TODO: Implement jobs API in enhanced API', {}, 'DispatcherDashboard');
     return [];
   }
 };
 
 const crmApi = {
   accounts: async () => {
-    console.log('TODO: Implement accounts API in enhanced API');
+    logger.warn('TODO: Implement accounts API in enhanced API', {}, 'DispatcherDashboard');
     return [];
   }
 };
 
 const routingApi = {
   optimize: async (date: string) => {
-    console.log('TODO: Implement routing API in enhanced API');
+    logger.warn('TODO: Implement routing API in enhanced API', { date }, 'DispatcherDashboard');
     return [];
   }
 };

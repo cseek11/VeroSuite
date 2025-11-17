@@ -1,6 +1,10 @@
 import React from 'react';
 import { Job } from '@/types';
-import { Card, Typography, Chip, ProgressBar } from '@/components/ui/EnhancedUI';
+import Card from '@/components/ui/Card';
+import {
+  Badge,
+  Text,
+} from '@/components/ui';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Calendar, Clock, MapPin, User, CheckCircle, AlertTriangle, Play, Pause } from 'lucide-react';
 
@@ -25,12 +29,12 @@ const TodaysOperations: React.FC<TodaysOperationsProps> = ({ jobs, isLoading }) 
       <Card title="Today's Operations">
         <div className="text-center py-8">
           <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <Typography variant="body1" className="text-gray-500 mb-2">
+          <Text variant="body" className="text-gray-500 mb-2">
             No operations scheduled for today
-          </Typography>
-          <Typography variant="body2" className="text-gray-400">
+          </Text>
+          <Text variant="small" className="text-gray-400">
             All caught up! Check back later for new assignments.
-          </Typography>
+          </Text>
         </div>
       </Card>
     );
@@ -52,13 +56,13 @@ const TodaysOperations: React.FC<TodaysOperationsProps> = ({ jobs, isLoading }) 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'success';
+        return 'bg-green-100 text-green-800';
       case 'in-progress':
-        return 'primary';
+        return 'bg-blue-100 text-blue-800';
       case 'urgent':
-        return 'destructive';
+        return 'bg-red-100 text-red-800';
       default:
-        return 'default';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -89,56 +93,64 @@ const TodaysOperations: React.FC<TodaysOperationsProps> = ({ jobs, isLoading }) 
               <div className="flex items-center space-x-3">
                 {getStatusIcon(job.status)}
                 <div>
-                  <Typography variant="body1" className="font-medium">
+                  <Text variant="body" className="font-medium">
                     {job.title}
-                  </Typography>
+                  </Text>
                   {job.description && (
-                    <Typography variant="body2" className="text-gray-600 mt-1">
+                    <Text variant="small" className="text-gray-600 mt-1">
                       {job.description}
-                    </Typography>
+                    </Text>
                   )}
                 </div>
               </div>
-              <Chip variant={getStatusColor(job.status) as any}>
+              <Badge variant="default" className={getStatusColor(job.status)}>
                 {job.status.replace('-', ' ')}
-              </Chip>
+              </Badge>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
               <div className="flex items-center space-x-2">
                 <Clock className="h-4 w-4 text-gray-400" />
-                <Typography variant="body2" className="text-gray-600">
+                <Text variant="small" className="text-gray-600">
                   {formatTime(job.start)}
                   {job.end && ` - ${formatTime(job.end)}`}
-                </Typography>
+                </Text>
               </div>
 
               {job.technician && (
                 <div className="flex items-center space-x-2">
                   <User className="h-4 w-4 text-gray-400" />
-                  <Typography variant="body2" className="text-gray-600">
+                  <Text variant="small" className="text-gray-600">
                     {job.technician}
-                  </Typography>
+                  </Text>
                 </div>
               )}
 
               {job.location && (
                 <div className="flex items-center space-x-2">
                   <MapPin className="h-4 w-4 text-gray-400" />
-                  <Typography variant="body2" className="text-gray-600">
+                  <Text variant="small" className="text-gray-600">
                     {job.location}
-                  </Typography>
+                  </Text>
                 </div>
               )}
             </div>
 
             <div className="flex items-center space-x-3">
               <div className="flex-1">
-                <ProgressBar
-                  value={getProgressValue(job.status)}
-                  color={getStatusColor(job.status) as any}
-                  showLabel
-                />
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full ${
+                      job.status === 'completed' ? 'bg-green-500' :
+                      job.status === 'in-progress' ? 'bg-blue-500' :
+                      job.status === 'urgent' ? 'bg-red-500' : 'bg-gray-500'
+                    }`}
+                    style={{ width: `${getProgressValue(job.status)}%` }}
+                  />
+                </div>
+                <div className="text-sm text-gray-600 text-center mt-1">
+                  {getProgressValue(job.status)}%
+                </div>
               </div>
             </div>
           </div>
@@ -147,21 +159,21 @@ const TodaysOperations: React.FC<TodaysOperationsProps> = ({ jobs, isLoading }) 
 
       <div className="mt-6 pt-4 border-t">
         <div className="flex justify-between items-center">
-          <Typography variant="body2" className="text-gray-600">
+          <Text variant="small" className="text-gray-600">
             Total Operations: {jobs.length}
-          </Typography>
+          </Text>
           <div className="flex space-x-4">
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-green-500" />
-              <Typography variant="body2" className="text-gray-600">
+              <Text variant="small" className="text-gray-600">
                 {jobs.filter(job => job.status === 'completed').length} Completed
-              </Typography>
+              </Text>
             </div>
             <div className="flex items-center space-x-2">
               <Play className="h-4 w-4 text-blue-500" />
-              <Typography variant="body2" className="text-gray-600">
+              <Text variant="small" className="text-gray-600">
                 {jobs.filter(job => job.status === 'in-progress').length} In Progress
-              </Typography>
+              </Text>
             </div>
           </div>
         </div>

@@ -9,6 +9,7 @@
 
 import { supabase } from './supabase-client';
 import { useAuthStore } from '@/stores/auth';
+import { logger } from '@/utils/logger';
 
 export interface OptimizedSearchResult {
   id: string;
@@ -150,8 +151,8 @@ class OptimizedSearchService {
         suggestion: results.find(r => r.suggested_correction)?.suggested_correction
       };
 
-    } catch (error) {
-      console.error('Search failed:', error);
+    } catch (error: unknown) {
+      logger.error('Search failed', error, 'optimized-search-service');
       return {
         results: [],
         metrics: {
@@ -184,7 +185,7 @@ class OptimizedSearchService {
       });
 
     if (error) {
-      console.error('Smart search failed:', error);
+      logger.error('Smart search failed', error, 'optimized-search-service');
       return [];
     }
 
@@ -209,7 +210,7 @@ class OptimizedSearchService {
       });
 
     if (error) {
-      console.error('Fuzzy search failed:', error);
+      logger.error('Fuzzy search failed', error, 'optimized-search-service');
       return [];
     }
 
@@ -234,7 +235,7 @@ class OptimizedSearchService {
       });
 
     if (error) {
-      console.error('Typo-tolerant search failed:', error);
+      logger.error('Typo-tolerant search failed', error, 'optimized-search-service');
       return [];
     }
 
@@ -255,9 +256,11 @@ class OptimizedSearchService {
         p_accepted: accepted
       });
 
-      console.log('Learned correction:', { original, corrected, accepted });
-    } catch (error) {
-      console.error('Failed to learn correction:', error);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Learned correction', { original, corrected, accepted }, 'optimized-search-service');
+      }
+    } catch (error: unknown) {
+      logger.error('Failed to learn correction', error, 'optimized-search-service');
     }
   }
 
@@ -281,13 +284,13 @@ class OptimizedSearchService {
         .limit(limit);
 
       if (error) {
-        console.error('Failed to get suggestions:', error);
+        logger.error('Failed to get suggestions', error, 'optimized-search-service');
         return [];
       }
 
       return data?.map(item => item.corrected_query) || [];
-    } catch (error) {
-      console.error('Error getting suggestions:', error);
+    } catch (error: unknown) {
+      logger.error('Error getting suggestions', error, 'optimized-search-service');
       return [];
     }
   }
@@ -327,7 +330,7 @@ class OptimizedSearchService {
     options: SearchOptions,
     results: OptimizedSearchResult[],
     metrics: SearchPerformanceMetrics,
-    timeout: number
+    _timeout: number
   ): void {
     const cacheKey = this.generateCacheKey(query, options);
     
@@ -372,9 +375,11 @@ class OptimizedSearchService {
   async refreshSearchCache(): Promise<void> {
     try {
       await supabase.rpc('refresh_search_cache');
-      console.log('Search cache refreshed successfully');
-    } catch (error) {
-      console.error('Failed to refresh search cache:', error);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Search cache refreshed successfully', {}, 'optimized-search-service');
+      }
+    } catch (error: unknown) {
+      logger.error('Failed to refresh search cache', error, 'optimized-search-service');
     }
   }
 
@@ -395,6 +400,12 @@ export const optimizedSearch = new OptimizedSearchService();
 
 // Export types
 export type { SearchOptions, SearchPerformanceMetrics };
+
+
+
+
+
+
 
 
 

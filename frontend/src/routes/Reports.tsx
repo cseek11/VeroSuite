@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { useNavigate } from 'react-router-dom';
 import { PageLoader } from '@/components/LoadingSpinner';
+import { logger } from '@/utils/logger';
 
 import {
   BarChart3,
@@ -13,9 +14,6 @@ import {
   Search,
   Filter,
   Star,
-  StarOff,
-  Eye,
-  Share2,
   Settings,
   DollarSign,
   Wrench,
@@ -24,16 +22,13 @@ import {
   Target,
   Route,
   PieChart,
-  LineChart,
   Activity,
   Clock,
   CheckCircle,
   AlertTriangle,
-  ChevronDown,
   Plus,
   Grid,
   List,
-  RefreshCw,
   Bookmark,
   BookmarkPlus,
   Heart,
@@ -210,7 +205,9 @@ const Reports: React.FC = () => {
 
   const handleExportReport = (reportId: string, format: 'csv' | 'pdf' | 'excel') => {
     // Handle report export
-    console.log(`Exporting ${reportId} as ${format}`);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Exporting report', { reportId, format }, 'Reports');
+    }
   };
 
   return (

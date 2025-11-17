@@ -1,3 +1,5 @@
+import { logger } from '@/utils/logger';
+
 interface Config {
   supabase: {
     url: string;
@@ -35,7 +37,7 @@ function validateConfig(): Config {
   // Validate URL format
   try {
     new URL(supabaseUrl);
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Invalid Supabase URL format');
   }
 
@@ -71,6 +73,7 @@ export const config = validateConfig();
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   (window as unknown as { appConfig?: Config }).appConfig = config;
   // One-time log to confirm flags at startup
-  // eslint-disable-next-line no-console
-  console.log('App feature flags:', config.features);
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('App feature flags', { features: config.features }, 'config');
+  }
 }

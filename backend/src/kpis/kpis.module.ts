@@ -2,10 +2,11 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { KPIsController } from './kpis.controller';
+import { KPIsV2Controller } from './kpis-v2.controller';
 import { KPIsService } from './kpis.service';
 import { SupabaseService } from '../common/services/supabase.service';
 import { RedisService } from '../common/services/redis.service';
-import { CacheService } from '../common/services/cache.service';
+// CacheService is now provided by CommonModule (global)
 import { WebSocketGateway } from '../websocket/websocket.gateway';
 
 @Module({
@@ -27,8 +28,8 @@ import { WebSocketGateway } from '../websocket/websocket.gateway';
       inject: [ConfigService],
     }),
   ],
-  controllers: [KPIsController],
-  providers: [KPIsService, SupabaseService, RedisService, CacheService, WebSocketGateway],
+  controllers: [KPIsController, KPIsV2Controller],
+  providers: [KPIsService, SupabaseService, RedisService, /* CacheService provided by CommonModule */ WebSocketGateway],
   exports: [KPIsService],
 })
 export class KPIsModule {}

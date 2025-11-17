@@ -3,3 +3,5 @@ export * from './assign-job.dto';
 export * from './photo.dto';
 export * from './update-photos.dto';
 export * from './job-response.dto';
+export * from './check-conflicts.dto';
+export * from './recurring-jobs.dto';

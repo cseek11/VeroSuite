@@ -6,6 +6,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { searchLoggingService, type SearchAnalytics, type SearchCorrection } from '@/lib/search-logging-service';
+import { logger } from '@/utils/logger';
 
 export interface UseSearchLoggingOptions {
   enableLogging?: boolean;
@@ -73,7 +74,9 @@ export const useSearchLogging = (options: UseSearchLoggingOptions = {}) => {
     setIsLogging(true);
     setCurrentLogId(null);
 
-    console.log('🔍 Starting search log:', { query, filters: searchFilters });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Starting search log', { query, filters: searchFilters }, 'useSearchLogging');
+    }
   }, [enableLogging]);
 
   // Complete logging a search
@@ -91,9 +94,11 @@ export const useSearchLogging = (options: UseSearchLoggingOptions = {}) => {
       });
 
       setCurrentLogId(logId);
-      console.log('✅ Search log completed:', { query, resultsCount, timeTakenMs, logId });
-    } catch (error) {
-      console.error('❌ Failed to log search:', error);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Search log completed', { query, resultsCount, timeTakenMs, logId }, 'useSearchLogging');
+      }
+    } catch (error: unknown) {
+      logger.error('Failed to log search', error, 'useSearchLogging');
     } finally {
       setIsLogging(false);
       searchStartTime.current = 0;
@@ -106,9 +111,11 @@ export const useSearchLogging = (options: UseSearchLoggingOptions = {}) => {
 
     try {
       await searchLoggingService.logClick(currentLogId, recordId);
-      console.log('✅ Search click logged:', { logId: currentLogId, recordId });
-    } catch (error) {
-      console.error('❌ Failed to log search click:', error);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Search click logged', { logId: currentLogId, recordId }, 'useSearchLogging');
+      }
+    } catch (error: unknown) {
+      logger.error('Failed to log search click', error, 'useSearchLogging');
     }
   }, [enableLogging, currentLogId]);
 
@@ -122,9 +129,11 @@ export const useSearchLogging = (options: UseSearchLoggingOptions = {}) => {
         correctedQuery,
         wasSuccessful
       });
-      console.log('✅ Search correction added:', { originalQuery, correctedQuery, wasSuccessful });
-    } catch (error) {
-      console.error('❌ Failed to add search correction:', error);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Search correction added', { originalQuery, correctedQuery, wasSuccessful }, 'useSearchLogging');
+      }
+    } catch (error: unknown) {
+      logger.error('Failed to add search correction', error, 'useSearchLogging');
     }
   }, [enableLogging]);
 
@@ -196,6 +205,12 @@ export const useSearchLogging = (options: UseSearchLoggingOptions = {}) => {
 };
 
 export default useSearchLogging;
+
+
+
+
+
+
 
 
 

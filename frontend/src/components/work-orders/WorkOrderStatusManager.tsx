@@ -3,18 +3,14 @@ import { useUpdateWorkOrder, useBulkUpdateStatus } from '@/hooks/useWorkOrders';
 import { WorkOrder, WorkOrderStatus } from '@/types/work-orders';
 import { 
   getStatusColor, 
-  getStatusLabel, 
-  getNextStatuses,
-  canChangeStatus
+  getStatusLabel
 } from '@/types/work-orders';
 import { 
-  Clock, 
   Play, 
   CheckCircle, 
   XCircle, 
   RotateCcw,
   AlertCircle,
-  MessageSquare,
   History
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
@@ -27,6 +23,7 @@ import {
   DialogHeader, 
   DialogTitle 
 } from '@/components/ui/Dialog';
+import { logger } from '@/utils/logger';
 
 interface WorkOrderStatusManagerProps {
   workOrder?: WorkOrder;
@@ -176,7 +173,7 @@ export default function WorkOrderStatusManager({
       setSelectedTransition(null);
       setStatusNotes('');
     } catch (error) {
-      console.error('Failed to update work order status:', error);
+      logger.error('Failed to update work order status', error, 'WorkOrderStatusManager');
     } finally {
       setIsSubmitting(false);
     }

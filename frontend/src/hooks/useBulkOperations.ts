@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { logger } from '@/utils/logger';
 
 export interface BulkOperation {
   id: string;
@@ -55,7 +56,7 @@ export function useBulkOperations({
     isActive: false
   });
 
-  const selectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const _selectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Add operation to history
   const addToHistory = useCallback((operation: BulkOperation) => {
@@ -253,7 +254,7 @@ export function useBulkOperations({
     let selectedCardIds: string[] = [];
 
     switch (selectionType) {
-      case 'similar':
+      case 'similar': {
         // Select cards with similar size and type
         selectedCardIds = Object.entries(cards || {})
           .filter(([id, c]) => {
@@ -262,8 +263,9 @@ export function useBulkOperations({
           })
           .map(([id]) => id);
         break;
+      }
 
-      case 'nearby':
+      case 'nearby': {
         // Select cards within a certain radius
         const radius = 200;
         selectedCardIds = Object.entries(cards || {})
@@ -275,19 +277,22 @@ export function useBulkOperations({
           })
           .map(([id]) => id);
         break;
+      }
 
-      case 'same-type':
+      case 'same-type': {
         // Select all cards of the same type
         selectedCardIds = Object.entries(cards || {})
           .filter(([id, c]) => id !== cardId && c.type === card.type)
           .map(([id]) => id);
         break;
+      }
 
-      case 'same-group':
+      case 'same-group': {
         // Select cards in the same group (if grouping is implemented)
         // This would need to be implemented based on your grouping system
         selectedCardIds = [];
         break;
+      }
     }
 
     return selectedCardIds;
@@ -300,18 +305,22 @@ export function useBulkOperations({
     const lastOperation = operationHistory[0];
     
     switch (lastOperation.type) {
-      case 'delete':
+      case 'delete': {
         // This would require storing the deleted card data to restore
-        console.log('Cannot undo delete operation without card data');
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Cannot undo delete operation without card data', {}, 'useBulkOperations');
+        }
         break;
-      case 'group':
+      }
+      case 'group': {
         if (lastOperation.data?.action === 'ungroup') {
           onGroupCards(lastOperation.cardIds, lastOperation.data.groupName);
         } else {
           onUngroupCards(lastOperation.cardIds);
         }
         break;
-      case 'move':
+      }
+      case 'move': {
         const { deltaX, deltaY } = lastOperation.data;
         lastOperation.cardIds.forEach(cardId => {
           const card = cards[cardId];
@@ -320,7 +329,8 @@ export function useBulkOperations({
           }
         });
         break;
-      case 'resize':
+      }
+      case 'resize': {
         const { deltaWidth, deltaHeight } = lastOperation.data;
         lastOperation.cardIds.forEach(cardId => {
           const card = cards[cardId];
@@ -329,16 +339,22 @@ export function useBulkOperations({
           }
         });
         break;
-      case 'lock':
+      }
+      case 'lock': {
         onUnlockCards(lastOperation.cardIds);
         break;
-      case 'unlock':
+      }
+      case 'unlock': {
         onLockCards(lastOperation.cardIds);
         break;
-      case 'duplicate':
+      }
+      case 'duplicate': {
         // This would require tracking which cards were duplicated
-        console.log('Cannot undo duplicate operation');
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Cannot undo duplicate operation', {}, 'useBulkOperations');
+        }
         break;
+      }
     }
 
     setOperationHistory(prev => prev.slice(1));

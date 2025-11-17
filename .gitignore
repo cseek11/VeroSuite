@@ -25,6 +25,14 @@ coverage
 # nyc test coverage
 .nyc_output
 
+# Test output directories and files
+Test_Results/
+test-results/
+test-output/
+*.test.log
+*.test-output.*
+*.test-results.*
+
 # Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
 

@@ -1,11 +1,8 @@
 import { useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Card,
-  Typography,
-  Button,
-  Alert
-} from '@/components/ui/EnhancedUI';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import { Heading, Text } from '@/components/ui';
 import {
   X,
   Download,
@@ -19,12 +16,16 @@ import {
   MapPin,
   CheckCircle,
   AlertCircle,
-  Clock
+  Clock,
+  History,
+  ArrowRight
 } from 'lucide-react';
 import { Invoice } from '@/types/enhanced-types';
-import { company } from '@/lib/enhanced-api';
+import { company, billing } from '@/lib/enhanced-api';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { logger } from '@/utils/logger';
+import { toast } from '@/utils/toast';
 
 interface InvoiceViewerProps {
   invoice: Invoice;
@@ -40,6 +41,13 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
   const { data: companySettings } = useQuery({
     queryKey: ['company', 'settings'],
     queryFn: company.getSettings,
+  });
+
+  // Fetch payment history for this invoice
+  const { data: payments = [], isLoading: paymentsLoading } = useQuery({
+    queryKey: ['billing', 'payments', invoice.id],
+    queryFn: () => billing.getPayments(invoice.id),
+    enabled: isOpen && !!invoice.id,
   });
 
   const handleDownloadPDF = async (invoice: Invoice) => {
@@ -95,10 +103,10 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
       // Download the PDF
       pdf.save(`Invoice-${invoice.invoice_number}.pdf`);
       
-      console.log('📄 PDF generated successfully for invoice:', invoice.invoice_number);
+      logger.debug('PDF generated successfully', { invoiceNumber: invoice.invoice_number }, 'InvoiceViewer');
     } catch (error) {
-      console.error('Failed to generate PDF:', error);
-      alert('Failed to generate PDF. Please try again.');
+      logger.error('Failed to generate PDF', error, 'InvoiceViewer');
+      toast.error('Failed to generate PDF. Please try again.');
     } finally {
       // Reset button state
       const button = document.querySelector('[data-pdf-button]') as HTMLButtonElement;
@@ -167,9 +175,9 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
               </div>
             )}
             <div className="flex-1">
-              <Typography variant="h3" className="font-bold text-slate-800">
+              <Heading level={3} className="font-bold text-slate-800">
                 {!companySettings?.invoice_logo_url && `Invoice ${invoice.invoice_number}`}
-              </Typography>
+              </Heading>
               <div className="flex flex-col space-y-2 mt-2">
                 <div className="flex items-center space-x-3">
                   <span className="font-semibold text-slate-700 text-lg">{invoice.accounts?.name}</span>
@@ -267,7 +275,7 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
 
             {/* Overdue Warning */}
             {isOverdue && (
-              <Alert type="warning" className="mb-6">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <strong>Payment Overdue</strong>
@@ -282,7 +290,7 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
                     </Button>
                   )}
                 </div>
-              </Alert>
+              </div>
             )}
 
             {/* Invoice Details */}
@@ -290,9 +298,9 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
               {/* Company Info */}
               <Card>
                 <div className="p-6">
-                  <Typography variant="h4" className="font-semibold mb-4 text-purple-800">
+                  <Heading level={4} className="font-semibold mb-4 text-purple-800">
                     {companySettings?.company_name || 'VeroField Pest Control'}
-                  </Typography>
+                  </Heading>
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex items-center">
                       <Building className="w-4 h-4 mr-2" />
@@ -323,9 +331,9 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
               {/* Customer Info */}
               <Card>
                 <div className="p-6">
-                  <Typography variant="h4" className="font-semibold mb-4">
+                  <Heading level={4} className="font-semibold mb-4">
                     Bill To
-                  </Typography>
+                  </Heading>
                   <div className="space-y-2 text-sm">
                     <div className="font-medium">{invoice.accounts?.name}</div>
                     {(invoice.accounts as any)?.address && (
@@ -394,9 +402,9 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
             {/* Line Items */}
             <Card>
               <div className="p-6">
-                <Typography variant="h4" className="font-semibold mb-4">
+                <Heading level={4} className="font-semibold mb-4">
                   Services
-                </Typography>
+                </Heading>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
@@ -452,15 +460,119 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
             {invoice.notes && (
               <Card className="mt-6">
                 <div className="p-6">
-                  <Typography variant="h4" className="font-semibold mb-3">
+                  <Heading level={4} className="font-semibold mb-3">
                     Notes
-                  </Typography>
-                  <Typography variant="body2" className="text-gray-700">
+                  </Heading>
+                  <Text variant="small" className="text-gray-700">
                     {invoice.notes}
-                  </Typography>
+                  </Text>
                 </div>
               </Card>
             )}
+
+            {/* Payment History */}
+            <Card className="mt-6">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <Heading level={4} className="font-semibold flex items-center">
+                    <History className="w-5 h-5 mr-2 text-purple-600" />
+                    Payment History
+                  </Heading>
+                  {payments.length > 0 && (
+                    <Text variant="small" className="text-gray-600">
+                      {payments.length} payment{payments.length !== 1 ? 's' : ''}
+                    </Text>
+                  )}
+                </div>
+
+                {paymentsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Clock className="w-5 h-5 text-gray-400 animate-spin mr-2" />
+                    <Text variant="small" className="text-gray-500">
+                      Loading payment history...
+                    </Text>
+                  </div>
+                ) : payments.length === 0 ? (
+                  <div className="text-center py-8">
+                    <History className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <Text variant="small" className="text-gray-500">
+                      No payments recorded for this invoice
+                    </Text>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {payments.map((payment) => (
+                      <div
+                        key={payment.id}
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="flex items-center space-x-4 flex-1">
+                          <div className="p-2 rounded-lg bg-green-100 text-green-700">
+                            <CheckCircle className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <Text variant="body" className="font-semibold">
+                                ${Number(payment.amount).toFixed(2)}
+                              </Text>
+                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                Completed
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-4 mt-1">
+                              <Text variant="small" className="text-gray-600 flex items-center">
+                                <Calendar className="w-3 h-3 mr-1" />
+                                {new Date(payment.payment_date).toLocaleDateString()}
+                              </Text>
+                              {payment.payment_methods && (
+                                <Text variant="small" className="text-gray-600 flex items-center">
+                                  <CreditCard className="w-3 h-3 mr-1" />
+                                  {payment.payment_methods.payment_type?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Payment'}
+                                </Text>
+                              )}
+                              {payment.reference_number && (
+                                <Text variant="small" className="text-gray-500 font-mono">
+                                  {payment.reference_number.substring(0, 8)}...
+                                </Text>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-gray-400" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Payment Summary */}
+                {payments.length > 0 && (
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Text variant="small" className="text-gray-600 mb-1">
+                          Total Paid
+                        </Text>
+                        <Text variant="body" className="font-bold text-green-700">
+                          ${payments
+                            .reduce((sum, p) => sum + Number(p.amount), 0)
+                            .toFixed(2)}
+                        </Text>
+                      </div>
+                      <div>
+                        <Text variant="small" className="text-gray-600 mb-1">
+                          Balance Due
+                        </Text>
+                        <Text variant="body" className="font-bold text-orange-700">
+                          ${(Number(invoice.total_amount) - payments
+                            .reduce((sum, p) => sum + Number(p.amount), 0))
+                            .toFixed(2)}
+                        </Text>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
           </div>
         </div>
 
@@ -469,12 +581,12 @@ export default function InvoiceViewer({ invoice, isOpen, onClose, onPayNow }: In
           <div className="border-t border-gray-200 p-6 bg-gray-50">
             <div className="flex items-center justify-between">
               <div>
-                <Typography variant="h4" className="font-semibold">
+                <Heading level={4} className="font-semibold">
                   Amount Due: ${Number(invoice.total_amount).toFixed(2)}
-                </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                </Heading>
+                <Text variant="small" className="text-gray-600">
                   Due {new Date(invoice.due_date).toLocaleDateString()}
-                </Typography>
+                </Text>
               </div>
               {onPayNow && (
                 <Button

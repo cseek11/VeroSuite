@@ -1,12 +1,18 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { createClient } from '@supabase/supabase-js';
+import { DatabaseService } from '../common/services/database.service';
+import { PermissionsService } from '../common/services/permissions.service';
 
 @Injectable()
 export class AuthService {
   private supabase;
 
-  constructor(private jwtService: JwtService) {
+  constructor(
+    private jwtService: JwtService,
+    private db: DatabaseService,
+    private permissionsService: PermissionsService,
+  ) {
     // Initialize Supabase client for auth operations
     const supabaseUrl = process.env.SUPABASE_URL;
     // Use the new Supabase secret key (server-side only)
@@ -36,31 +42,77 @@ export class AuthService {
 
       const user = authData.user;
 
-      // Debug logging to understand the user data structure
-      console.log('=== AUTH DEBUG ===');
-      console.log('User ID:', user.id);
-      console.log('User Email:', user.email);
-      console.log('User Metadata:', JSON.stringify(user.user_metadata, null, 2));
-      console.log('App Metadata:', JSON.stringify(user.app_metadata, null, 2));
-      console.log('==================');
+      // Fetch user from database to get actual roles and permissions
+      const dbUser = await this.db.user.findUnique({
+        where: { id: user.id },
+        select: {
+          id: true,
+          email: true,
+          first_name: true,
+          last_name: true,
+          tenant_id: true,
+          roles: true,
+          custom_permissions: true,
+        },
+      });
 
-      // Extract tenant_id from user_metadata or app_metadata
-      const tenant_id = user.user_metadata?.tenant_id || user.app_metadata?.tenant_id;
+      if (!dbUser) {
+        throw new UnauthorizedException('User not found in database');
+      }
+
+      // Extract tenant_id from database user
+      const tenant_id = dbUser.tenant_id;
       
       if (!tenant_id) {
-        console.error('No tenant_id found in user metadata or app metadata');
-        console.error('Available user_metadata keys:', Object.keys(user.user_metadata || {}));
-        console.error('Available app_metadata keys:', Object.keys(user.app_metadata || {}));
         throw new UnauthorizedException('User does not have a tenant_id assigned');
       }
 
+      // Get roles from database (fallback to metadata if not in DB)
+      const roles = dbUser.roles && dbUser.roles.length > 0 
+        ? dbUser.roles 
+        : (user.user_metadata?.roles || user.app_metadata?.roles || ['user']);
+
+      // Get custom permissions from database - ensure it's always an array
+      let customPermissions = dbUser.custom_permissions || [];
+      if (!Array.isArray(customPermissions)) {
+        // Handle case where it might be stored as JSON string
+        try {
+          customPermissions = typeof customPermissions === 'string' 
+            ? JSON.parse(customPermissions) 
+            : [];
+        } catch (e) {
+          console.warn('Failed to parse custom_permissions, using empty array:', e);
+          customPermissions = [];
+        }
+      }
+      
+      console.log('Login - Custom permissions from DB:', {
+        userId: dbUser.id,
+        email: dbUser.email,
+        customPermissions,
+        customPermissionsType: Array.isArray(customPermissions) ? 'array' : typeof customPermissions,
+        customPermissionsLength: Array.isArray(customPermissions) ? customPermissions.length : 'N/A'
+      });
+
+      // Combine role-based permissions with custom permissions
+      const permissions = this.permissionsService.getCombinedPermissions(roles, customPermissions);
+      
+      console.log('Login - Combined permissions:', {
+        userId: dbUser.id,
+        email: dbUser.email,
+        roles,
+        customPermissionsCount: customPermissions.length,
+        combinedPermissionsCount: permissions.length,
+        combinedPermissions: permissions
+      });
+
       // Create JWT payload for our backend
       const payload = {
-        sub: user.id,
-        email: user.email,
+        sub: dbUser.id,
+        email: dbUser.email,
         tenant_id: tenant_id,
-        roles: user.user_metadata?.roles || user.app_metadata?.roles || ['user'],
-        permissions: [],
+        roles: roles,
+        permissions: permissions,
       };
 
       console.log('JWT Payload:', JSON.stringify(payload, null, 2));
@@ -71,12 +123,13 @@ export class AuthService {
       return {
         access_token,
         user: {
-          id: user.id,
-          email: user.email,
-          first_name: user.user_metadata?.first_name || '',
-          last_name: user.user_metadata?.last_name || '',
+          id: dbUser.id,
+          email: dbUser.email,
+          first_name: dbUser.first_name,
+          last_name: dbUser.last_name,
           tenant_id: tenant_id,
-          roles: user.user_metadata?.roles || user.app_metadata?.roles || ['user'],
+          roles: roles,
+          permissions: permissions,
         },
       };
     } catch (error) {
@@ -94,31 +147,49 @@ export class AuthService {
         throw new UnauthorizedException('Invalid Supabase token');
       }
 
-      // Debug logging to understand the user data structure
-      console.log('=== TOKEN EXCHANGE DEBUG ===');
-      console.log('User ID:', user.id);
-      console.log('User Email:', user.email);
-      console.log('User Metadata:', JSON.stringify(user.user_metadata, null, 2));
-      console.log('App Metadata:', JSON.stringify(user.app_metadata, null, 2));
-      console.log('============================');
+      // Fetch user from database to get actual roles and permissions
+      const dbUser = await this.db.user.findUnique({
+        where: { id: user.id },
+        select: {
+          id: true,
+          email: true,
+          first_name: true,
+          last_name: true,
+          tenant_id: true,
+          roles: true,
+          custom_permissions: true,
+        },
+      });
 
-      // Extract tenant_id from user_metadata or app_metadata
-      const tenant_id = user.user_metadata?.tenant_id || user.app_metadata?.tenant_id;
+      if (!dbUser) {
+        throw new UnauthorizedException('User not found in database');
+      }
+
+      // Extract tenant_id from database user
+      const tenant_id = dbUser.tenant_id;
       
       if (!tenant_id) {
-        console.error('No tenant_id found in user metadata or app metadata');
-        console.error('Available user_metadata keys:', Object.keys(user.user_metadata || {}));
-        console.error('Available app_metadata keys:', Object.keys(user.app_metadata || {}));
         throw new UnauthorizedException('User does not have a tenant_id assigned');
       }
 
+      // Get roles from database (fallback to metadata if not in DB)
+      const roles = dbUser.roles && dbUser.roles.length > 0 
+        ? dbUser.roles 
+        : (user.user_metadata?.roles || user.app_metadata?.roles || ['user']);
+
+      // Get custom permissions from database
+      const customPermissions = dbUser.custom_permissions || [];
+
+      // Combine role-based permissions with custom permissions
+      const permissions = this.permissionsService.getCombinedPermissions(roles, customPermissions);
+
       // Create JWT payload for our backend
       const payload = {
-        sub: user.id,
-        email: user.email,
+        sub: dbUser.id,
+        email: dbUser.email,
         tenant_id: tenant_id,
-        roles: user.user_metadata?.roles || user.app_metadata?.roles || ['user'],
-        permissions: [],
+        roles: roles,
+        permissions: permissions,
       };
 
       console.log('JWT Payload:', JSON.stringify(payload, null, 2));
@@ -129,17 +200,89 @@ export class AuthService {
       return {
         access_token,
         user: {
-          id: user.id,
-          email: user.email,
-          first_name: user.user_metadata?.first_name || '',
-          last_name: user.user_metadata?.last_name || '',
+          id: dbUser.id,
+          email: dbUser.email,
+          first_name: dbUser.first_name,
+          last_name: dbUser.last_name,
           tenant_id: tenant_id,
-          roles: user.user_metadata?.roles || user.app_metadata?.roles || ['user'],
+          roles: roles,
+          permissions: permissions,
         },
       };
     } catch (error) {
       console.error('Token exchange error:', error);
       throw new UnauthorizedException('Token exchange failed');
+    }
+  }
+
+  async getCurrentUser(userId: string) {
+    try {
+      // Fetch user from database to get latest roles and permissions
+      const dbUser = await this.db.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          first_name: true,
+          last_name: true,
+          tenant_id: true,
+          roles: true,
+          custom_permissions: true,
+          status: true,
+        },
+      });
+
+      if (!dbUser) {
+        throw new UnauthorizedException('User not found in database');
+      }
+
+      // Combine role-based permissions with custom permissions
+      const roles = dbUser.roles || [];
+      let customPermissions = dbUser.custom_permissions || [];
+      if (!Array.isArray(customPermissions)) {
+        // Handle case where it might be stored as JSON string
+        try {
+          customPermissions = typeof customPermissions === 'string' 
+            ? JSON.parse(customPermissions) 
+            : [];
+        } catch (e) {
+          console.warn('Failed to parse custom_permissions, using empty array:', e);
+          customPermissions = [];
+        }
+      }
+      
+      console.log('getCurrentUser - Custom permissions from DB:', {
+        userId: dbUser.id,
+        customPermissions,
+        customPermissionsType: Array.isArray(customPermissions) ? 'array' : typeof customPermissions,
+        customPermissionsLength: Array.isArray(customPermissions) ? customPermissions.length : 'N/A'
+      });
+      
+      const combinedPermissions = this.permissionsService.getCombinedPermissions(roles, customPermissions);
+      
+      console.log('getCurrentUser - Combined permissions:', {
+        userId: dbUser.id,
+        roles,
+        customPermissionsCount: customPermissions.length,
+        combinedPermissionsCount: combinedPermissions.length,
+        combinedPermissions: combinedPermissions
+      });
+
+      return {
+        user: {
+          id: dbUser.id,
+          email: dbUser.email,
+          first_name: dbUser.first_name,
+          last_name: dbUser.last_name,
+          tenant_id: dbUser.tenant_id,
+          roles: roles,
+          permissions: combinedPermissions,
+          status: dbUser.status,
+        },
+      };
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      throw new UnauthorizedException('Failed to get user profile');
     }
   }
 }

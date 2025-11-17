@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Edit2, Trash2, Lock, Unlock, Ungroup } from 'lucide-react';
+import { Trash2, Lock, Unlock, Ungroup } from 'lucide-react';
 import { CardGroup as CardGroupType } from '@/hooks/useCardGrouping';
 
 interface CardGroupProps {

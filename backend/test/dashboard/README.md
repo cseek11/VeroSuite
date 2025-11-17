@@ -1,8 +1,8 @@
-# VeroSuite Enterprise Testing Dashboard
+# VeroField Enterprise Testing Dashboard
 
 ## Overview
 
-The VeroSuite Enterprise Testing Dashboard is a comprehensive real-time testing command center designed for mission-critical CRM applications. It provides executives, developers, and QA teams with instant visibility into system health, test coverage, security posture, and performance metrics.
+The VeroField Enterprise Testing Dashboard is a comprehensive real-time testing command center designed for mission-critical CRM applications. It provides executives, developers, and QA teams with instant visibility into system health, test coverage, security posture, and performance metrics.
 
 ## Features
 
@@ -245,7 +245,7 @@ For issues or questions:
 
 ## License
 
-This dashboard is part of the VeroSuite Enterprise Testing Framework and is subject to the same licensing terms.
+This dashboard is part of the VeroField Enterprise Testing Framework and is subject to the same licensing terms.
 
 
 

@@ -3,25 +3,24 @@ import {
   CreateWorkOrderRequest, 
   UpdateWorkOrderRequest, 
   WorkOrderFilters, 
-  WorkOrderListResponse,
-  WorkOrderStatusChange,
-  WorkOrderAssignment
+  WorkOrderListResponse
 } from '@/types/work-orders';
+import { logger } from '@/utils/logger';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'}/v1`;
 
 class WorkOrdersApiService {
   private async getAuthHeaders(): Promise<HeadersInit> {
     // Get token from auth store (stored as JSON)
     let token = null;
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (authData) {
         const parsed = JSON.parse(authData);
         token = parsed.token;
       }
-    } catch (error) {
-      console.error('Error parsing auth data:', error);
+    } catch (error: unknown) {
+      logger.error('Error parsing auth data', error, 'work-orders-api');
     }
     
     // Fallback to direct jwt key
@@ -67,12 +66,23 @@ class WorkOrdersApiService {
   }
 
   async getWorkOrderById(id: string): Promise<WorkOrder> {
+    // Validate UUID before making API call
+    if (!id || !this.isValidUUID(id)) {
+      throw new Error(`Invalid work order ID: "${id}". ID must be a valid UUID.`);
+    }
+
     const response = await fetch(`${API_BASE_URL}/work-orders/${id}`, {
       method: 'GET',
       headers: await this.getAuthHeaders(),
     });
 
     return this.handleResponse<WorkOrder>(response);
+  }
+
+  private isValidUUID(str: string | undefined | null): boolean {
+    if (!str || typeof str !== 'string') return false;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
   }
 
   async createWorkOrder(data: CreateWorkOrderRequest): Promise<WorkOrder> {
@@ -86,6 +96,11 @@ class WorkOrdersApiService {
   }
 
   async updateWorkOrder(id: string, data: UpdateWorkOrderRequest): Promise<WorkOrder> {
+    // Validate UUID before making API call
+    if (!id || !this.isValidUUID(id)) {
+      throw new Error(`Invalid work order ID: "${id}". ID must be a valid UUID.`);
+    }
+
     const response = await fetch(`${API_BASE_URL}/work-orders/${id}`, {
       method: 'PUT',
       headers: await this.getAuthHeaders(),
@@ -96,6 +111,11 @@ class WorkOrdersApiService {
   }
 
   async deleteWorkOrder(id: string): Promise<{ message: string }> {
+    // Validate UUID before making API call
+    if (!id || !this.isValidUUID(id)) {
+      throw new Error(`Invalid work order ID: "${id}". ID must be a valid UUID.`);
+    }
+
     const response = await fetch(`${API_BASE_URL}/work-orders/${id}`, {
       method: 'DELETE',
       headers: await this.getAuthHeaders(),
@@ -105,6 +125,11 @@ class WorkOrdersApiService {
   }
 
   async getWorkOrdersByCustomer(customerId: string): Promise<WorkOrder[]> {
+    // Validate UUID before making API call
+    if (!customerId || !this.isValidUUID(customerId)) {
+      throw new Error(`Invalid customer ID: "${customerId}". ID must be a valid UUID.`);
+    }
+
     const response = await fetch(`${API_BASE_URL}/work-orders/customer/${customerId}`, {
       method: 'GET',
       headers: await this.getAuthHeaders(),
@@ -114,6 +139,11 @@ class WorkOrdersApiService {
   }
 
   async getWorkOrdersByTechnician(technicianId: string): Promise<WorkOrder[]> {
+    // Validate UUID before making API call
+    if (!technicianId || !this.isValidUUID(technicianId)) {
+      throw new Error(`Invalid technician ID: "${technicianId}". ID must be a valid UUID.`);
+    }
+
     const response = await fetch(`${API_BASE_URL}/work-orders/technician/${technicianId}`, {
       method: 'GET',
       headers: await this.getAuthHeaders(),

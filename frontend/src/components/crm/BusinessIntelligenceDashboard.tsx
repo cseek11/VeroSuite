@@ -1,10 +1,10 @@
 import React from 'react';
+import Card from '@/components/ui/Card';
 import {
-  Card,
-  Typography,
-  Chip,
-  ProgressBar
-} from '@/components/ui/EnhancedUI';
+  Badge,
+  Heading,
+  Text,
+} from '@/components/ui';
 import {
   TrendingUp,
   TrendingDown,
@@ -71,19 +71,19 @@ export default function BusinessIntelligenceDashboard({ customerId }: BusinessIn
       case 'increasing': return <TrendingUp className="h-4 w-4 text-green-500" />;
       case 'decreasing': return <TrendingDown className="h-4 w-4 text-red-500" />;
       case 'stable': return <Activity className="h-4 w-4 text-blue-500" />;
-      default: return <Activity className="h-4 w-4 text-gray-500" />;
+      default: return <Activity className="h-4 w-4 text-slate-500" />;
     }
   };
 
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <Typography variant="h3" className="text-gray-900">
+        <Heading level={3} className="text-slate-900">
           Business Intelligence
-        </Typography>
-        <Chip color="blue" variant="default">
+        </Heading>
+        <Badge variant="default" className="bg-blue-100 text-blue-800">
           AI-Powered Insights
-        </Chip>
+        </Badge>
       </div>
 
       {/* Key Metrics Grid */}
@@ -93,31 +93,36 @@ export default function BusinessIntelligenceDashboard({ customerId }: BusinessIn
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-6 w-6 text-red-600" />
-              <Typography variant="h4" className="text-gray-900">
+              <Heading level={4} className="text-slate-900">
                 Churn Risk
-              </Typography>
+              </Heading>
             </div>
             {getTrendIcon(biData.churnRisk.trend)}
           </div>
           
           <div className="mb-4">
-            <Typography variant="h2" className="text-red-900 font-bold">
+            <Heading level={2} className="text-red-900 font-bold">
               {Math.round(biData.churnRisk.score * 100)}%
-            </Typography>
-            <Chip
-              color={getRiskColor(biData.churnRisk.risk)}
+            </Heading>
+            <Badge
               variant="default"
+              className={
+                getRiskColor(biData.churnRisk.risk) === 'green' ? 'bg-green-100 text-green-800' :
+                getRiskColor(biData.churnRisk.risk) === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                getRiskColor(biData.churnRisk.risk) === 'red' ? 'bg-red-100 text-red-800' :
+                'bg-gray-100 text-gray-800'
+              }
             >
               {biData.churnRisk.risk} Risk
-            </Chip>
+            </Badge>
           </div>
           
           <div className="space-y-2">
-            <Typography variant="body2" className="text-gray-700 font-medium">
+            <Text variant="small" className="text-slate-700 font-medium">
               Contributing Factors:
-            </Typography>
+            </Text>
             {biData.churnRisk.factors.map((factor, index) => (
-              <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+              <div key={index} className="flex items-center gap-2 text-sm text-slate-600">
                 <CheckCircle className="h-3 w-3 text-green-500" />
                 <span>{factor}</span>
               </div>
@@ -130,31 +135,32 @@ export default function BusinessIntelligenceDashboard({ customerId }: BusinessIn
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <DollarSign className="h-6 w-6 text-green-600" />
-              <Typography variant="h4" className="text-gray-900">
+              <Heading level={4} className="text-slate-900">
                 Customer LTV
-              </Typography>
+              </Heading>
             </div>
             {getTrendIcon(biData.customerLifetimeValue.trend)}
           </div>
           
           <div className="mb-4">
-            <Typography variant="h2" className="text-green-900 font-bold">
+            <Heading level={2} className="text-green-900 font-bold">
               ${biData.customerLifetimeValue.current.toLocaleString()}
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
+            </Heading>
+            <Text variant="small" className="text-slate-600">
               Projected: ${biData.customerLifetimeValue.projected.toLocaleString()}
-            </Typography>
+            </Text>
           </div>
           
           <div className="bg-white p-3 rounded-lg">
-            <Typography variant="body2" className="text-gray-700 font-medium mb-2">
+            <Text variant="small" className="text-slate-700 font-medium mb-2">
               Growth Trend
-            </Typography>
-            <ProgressBar
-              value={((biData.customerLifetimeValue.current / biData.customerLifetimeValue.projected) * 100)}
-              color="green"
-              className="h-2"
-            />
+            </Text>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-green-500 h-2 rounded-full"
+                style={{ width: `${(biData.customerLifetimeValue.current / biData.customerLifetimeValue.projected) * 100}%` }}
+              />
+            </div>
           </div>
         </div>
 
@@ -163,17 +169,17 @@ export default function BusinessIntelligenceDashboard({ customerId }: BusinessIn
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Users className="h-6 w-6 text-blue-600" />
-              <Typography variant="h4" className="text-gray-900">
+              <Heading level={4} className="text-slate-900">
                 Satisfaction
-              </Typography>
+              </Heading>
             </div>
             {getTrendIcon(biData.satisfactionScore.trend)}
           </div>
           
           <div className="mb-4">
-            <Typography variant="h2" className="text-blue-900 font-bold">
+            <Heading level={2} className="text-blue-900 font-bold">
               {biData.satisfactionScore.current}/5.0
-            </Typography>
+            </Heading>
             <div className="flex items-center gap-1 mt-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <div
@@ -181,7 +187,7 @@ export default function BusinessIntelligenceDashboard({ customerId }: BusinessIn
                   className={`w-4 h-4 rounded-full ${
                     star <= biData.satisfactionScore.current
                       ? 'bg-yellow-400'
-                      : 'bg-gray-300'
+                      : 'bg-slate-300'
                   }`}
                 />
               ))}
@@ -189,14 +195,14 @@ export default function BusinessIntelligenceDashboard({ customerId }: BusinessIn
           </div>
           
           <div className="bg-white p-3 rounded-lg">
-            <Typography variant="body2" className="text-gray-700 font-medium mb-2">
+            <Text variant="small" className="text-slate-700 font-medium mb-2">
               Historical Trend
-            </Typography>
+            </Text>
             <div className="flex items-center gap-1">
               {biData.satisfactionScore.history.map((score, index) => (
                 <div
                   key={index}
-                  className="flex-1 bg-gray-200 rounded"
+                  className="flex-1 bg-slate-200 rounded"
                   style={{ height: `${score * 8}px` }}
                 />
               ))}
@@ -207,9 +213,9 @@ export default function BusinessIntelligenceDashboard({ customerId }: BusinessIn
 
       {/* Predictive Analytics */}
       <div className="mb-8">
-        <Typography variant="h4" className="text-gray-900 mb-4">
+        <Heading level={4} className="text-slate-900 mb-4">
           Predictive Analytics
-        </Typography>
+        </Heading>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Pest Pressure Prediction */}
@@ -217,31 +223,36 @@ export default function BusinessIntelligenceDashboard({ customerId }: BusinessIn
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Target className="h-5 w-5 text-purple-600" />
-                <Typography variant="h5" className="text-gray-900">
+                <Heading level={5} className="text-slate-900">
                   Pest Pressure Prediction
-                </Typography>
+                </Heading>
               </div>
               {getTrendIcon(biData.pestPressure.trend)}
             </div>
             
             <div className="mb-4">
-              <Typography variant="h3" className="text-purple-900 font-bold">
+              <Heading level={3} className="text-purple-900 font-bold">
                 {Math.round(biData.pestPressure.score * 100)}%
-              </Typography>
-              <Chip
-                color={getRiskColor(biData.pestPressure.risk)}
+              </Heading>
+              <Badge
                 variant="default"
+                className={
+                  getRiskColor(biData.pestPressure.risk) === 'green' ? 'bg-green-100 text-green-800' :
+                  getRiskColor(biData.pestPressure.risk) === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                  getRiskColor(biData.pestPressure.risk) === 'red' ? 'bg-red-100 text-red-800' :
+                  'bg-gray-100 text-gray-800'
+                }
               >
                 {biData.pestPressure.risk} Risk
-              </Chip>
+              </Badge>
             </div>
             
             <div className="space-y-2">
-              <Typography variant="body2" className="text-gray-700 font-medium">
+              <Text variant="small" className="text-slate-700 font-medium">
                 Risk Factors:
-              </Typography>
+              </Text>
               {biData.pestPressure.factors.map((factor, index) => (
-                <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                <div key={index} className="flex items-center gap-2 text-sm text-slate-600">
                   <AlertTriangle className="h-3 w-3 text-orange-500" />
                   <span>{factor}</span>
                 </div>
@@ -254,30 +265,30 @@ export default function BusinessIntelligenceDashboard({ customerId }: BusinessIn
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-emerald-600" />
-                <Typography variant="h5" className="text-gray-900">
+                <Heading level={5} className="text-slate-900">
                   Revenue Forecast
-                </Typography>
+                </Heading>
               </div>
               {getTrendIcon(biData.revenueForecast.trend)}
             </div>
             
             <div className="space-y-4">
               <div>
-                <Typography variant="body2" className="text-gray-600">
+                <Text variant="small" className="text-slate-600">
                   Next Month
-                </Typography>
-                <Typography variant="h4" className="text-emerald-900 font-bold">
+                </Text>
+                <Heading level={4} className="text-emerald-900 font-bold">
                   ${biData.revenueForecast.nextMonth.toLocaleString()}
-                </Typography>
+                </Heading>
               </div>
               
               <div>
-                <Typography variant="body2" className="text-gray-600">
+                <Text variant="small" className="text-slate-600">
                   Next Quarter
-                </Typography>
-                <Typography variant="h4" className="text-emerald-900 font-bold">
+                </Text>
+                <Heading level={4} className="text-emerald-900 font-bold">
                   ${biData.revenueForecast.nextQuarter.toLocaleString()}
-                </Typography>
+                </Heading>
               </div>
             </div>
           </div>
@@ -289,87 +300,88 @@ export default function BusinessIntelligenceDashboard({ customerId }: BusinessIn
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-amber-600" />
-            <Typography variant="h5" className="text-gray-900">
+            <Heading level={5} className="text-slate-900">
               Service Effectiveness
-            </Typography>
+            </Heading>
           </div>
           {getTrendIcon(biData.serviceEffectiveness.trend)}
         </div>
         
         <div className="mb-4">
-          <Typography variant="h3" className="text-amber-900 font-bold">
+          <Heading level={3} className="text-amber-900 font-bold">
             {Math.round(biData.serviceEffectiveness.score * 100)}%
-          </Typography>
-          <Typography variant="body2" className="text-gray-600">
+          </Heading>
+          <Text variant="small" className="text-slate-600">
             Treatment success rate
-          </Typography>
+          </Text>
         </div>
         
         <div className="bg-white p-3 rounded-lg">
-          <Typography variant="body2" className="text-gray-700 font-medium mb-2">
+          <Text variant="small" className="text-slate-700 font-medium mb-2">
             Effectiveness Trend
-          </Typography>
-          <ProgressBar
-            value={biData.serviceEffectiveness.score * 100}
-            color="amber"
-            className="h-3"
-          />
+          </Text>
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <div
+              className="bg-amber-500 h-3 rounded-full"
+              style={{ width: `${biData.serviceEffectiveness.score * 100}%` }}
+            />
+          </div>
         </div>
       </div>
 
       {/* AI Recommendations */}
       <div className="mt-8 p-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border border-indigo-200">
-        <Typography variant="h4" className="text-gray-900 mb-4">
+        <Heading level={4} className="text-slate-900 mb-4">
           AI Recommendations
-        </Typography>
+        </Heading>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white p-4 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle className="h-4 w-4 text-green-500" />
-              <Typography variant="body1" className="font-medium">
+              <Text variant="body" className="font-medium">
                 Proactive Service
-              </Typography>
+              </Text>
             </div>
-            <Typography variant="body2" className="text-gray-600">
+            <Text variant="small" className="text-slate-600">
               Schedule preventive treatment within 30 days to maintain low pest pressure.
-            </Typography>
+            </Text>
           </div>
           
           <div className="bg-white p-4 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <DollarSign className="h-4 w-4 text-blue-500" />
-              <Typography variant="body1" className="font-medium">
+              <Text variant="body" className="font-medium">
                 Upsell Opportunity
-              </Typography>
+              </Text>
             </div>
-            <Typography variant="body2" className="text-gray-600">
+            <Text variant="small" className="text-slate-600">
               Customer shows high satisfaction - consider premium service upgrade.
-            </Typography>
+            </Text>
           </div>
           
           <div className="bg-white p-4 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <Users className="h-4 w-4 text-purple-500" />
-              <Typography variant="body1" className="font-medium">
+              <Text variant="body" className="font-medium">
                 Retention Strategy
-              </Typography>
+              </Text>
             </div>
-            <Typography variant="body2" className="text-gray-600">
+            <Text variant="small" className="text-slate-600">
               Send personalized thank you note and satisfaction survey.
-            </Typography>
+            </Text>
           </div>
           
           <div className="bg-white p-4 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <Target className="h-4 w-4 text-orange-500" />
-              <Typography variant="body1" className="font-medium">
+              <Text variant="body" className="font-medium">
                 Seasonal Alert
-              </Typography>
+              </Text>
             </div>
-            <Typography variant="body2" className="text-gray-600">
+            <Text variant="small" className="text-slate-600">
               Anticipate increased pest activity in spring - prepare treatment plan.
-            </Typography>
+            </Text>
           </div>
         </div>
       </div>

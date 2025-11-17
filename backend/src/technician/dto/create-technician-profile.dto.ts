@@ -23,16 +23,15 @@ export class CreateTechnicianProfileDto {
   @IsUUID(4, { message: 'Invalid user ID format' })
   user_id!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     description: 'Employee ID',
     example: 'EMP001',
     maxLength: 50
   })
-  @IsOptional()
   @IsString()
   @Length(1, 50, { message: 'Employee ID must be between 1 and 50 characters' })
   @Matches(/^[A-Z0-9\-_]+$/, { message: 'Employee ID must contain only uppercase letters, numbers, hyphens, and underscores' })
-  employee_id?: string;
+  employee_id!: string;
 
   @ApiProperty({ 
     description: 'Hire date',
@@ -41,81 +40,73 @@ export class CreateTechnicianProfileDto {
   @IsDateString({}, { message: 'Invalid hire date format' })
   hire_date!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     description: 'Job position',
     example: 'Senior Technician',
     maxLength: 100
   })
-  @IsOptional()
   @IsString()
   @Length(1, 100, { message: 'Position must be between 1 and 100 characters' })
-  position?: string;
+  position!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     description: 'Department',
     example: 'Field Operations',
     maxLength: 100
   })
-  @IsOptional()
   @IsString()
   @Length(1, 100, { message: 'Department must be between 1 and 100 characters' })
-  department?: string;
+  department!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     enum: EmploymentType,
     description: 'Employment type',
     default: EmploymentType.FULL_TIME
   })
-  @IsOptional()
   @IsEnum(EmploymentType, { message: 'Invalid employment type' })
-  employment_type?: EmploymentType;
+  employment_type!: EmploymentType;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     enum: TechnicianStatus,
     description: 'Technician status',
     default: TechnicianStatus.ACTIVE
   })
-  @IsOptional()
   @IsEnum(TechnicianStatus, { message: 'Invalid technician status' })
-  status?: TechnicianStatus;
+  status!: TechnicianStatus;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     description: 'Emergency contact name',
     example: 'John Doe',
     maxLength: 100
   })
-  @IsOptional()
   @IsString()
   @Length(1, 100, { message: 'Emergency contact name must be between 1 and 100 characters' })
-  emergency_contact_name?: string;
+  emergency_contact_name!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     description: 'Emergency contact phone',
     example: '+1-412-555-0123'
   })
-  @IsOptional()
   @IsPhoneNumber('US', { message: 'Please provide a valid US phone number' })
-  emergency_contact_phone?: string;
+  emergency_contact_phone!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     description: 'Emergency contact relationship',
     example: 'Spouse',
     maxLength: 50
   })
-  @IsOptional()
   @IsString()
   @Length(1, 50, { message: 'Emergency contact relationship must be between 1 and 50 characters' })
-  emergency_contact_relationship?: string;
+  emergency_contact_relationship!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     description: 'Address line 1',
     example: '123 Main Street',
     maxLength: 255
   })
-  @IsOptional()
   @IsString()
   @Length(1, 255, { message: 'Address line 1 must be between 1 and 255 characters' })
-  address_line1?: string;
+  address_line1!: string;
 
   @ApiPropertyOptional({ 
     description: 'Address line 2',
@@ -127,67 +118,61 @@ export class CreateTechnicianProfileDto {
   @Length(1, 255, { message: 'Address line 2 must be between 1 and 255 characters' })
   address_line2?: string;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     description: 'City',
     example: 'Pittsburgh',
     maxLength: 100
   })
-  @IsOptional()
   @IsString()
   @Length(1, 100, { message: 'City must be between 1 and 100 characters' })
-  city?: string;
+  city!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     description: 'State code',
     example: 'PA',
     pattern: '^[A-Z]{2}$'
   })
-  @IsOptional()
   @IsString()
   @Length(2, 2, { message: 'State must be exactly 2 characters' })
   @Matches(/^[A-Z]{2}$/, { message: 'State must be a 2-letter uppercase code' })
-  state?: string;
+  state!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     description: 'Postal code',
     example: '15213',
     pattern: '^\\d{5}(-\\d{4})?$'
   })
-  @IsOptional()
   @IsString()
   @Length(5, 10, { message: 'Postal code must be between 5 and 10 characters' })
   @Matches(/^\d{5}(-\d{4})?$/, { message: 'Invalid postal code format' })
-  postal_code?: string;
+  postal_code!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     description: 'Country',
     example: 'USA',
     maxLength: 100,
     default: 'USA'
   })
-  @IsOptional()
   @IsString()
   @Length(1, 100, { message: 'Country must be between 1 and 100 characters' })
-  country?: string;
+  country!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiProperty({ 
     description: 'Date of birth',
     example: '1990-01-15'
   })
-  @IsOptional()
   @IsDateString({}, { message: 'Invalid date of birth format' })
-  date_of_birth?: string;
+  date_of_birth!: string;
 
-  @ApiPropertyOptional({ 
-    description: 'Social Security Number (last 4 digits only)',
-    example: '1234',
-    pattern: '^\\d{4}$'
+  @ApiProperty({ 
+    description: 'Social Security Number (full format)',
+    example: '123-45-6789',
+    pattern: '^\\d{3}-\\d{2}-\\d{4}$'
   })
-  @IsOptional()
   @IsString()
-  @Length(4, 4, { message: 'SSN must be exactly 4 digits' })
-  @Matches(/^\d{4}$/, { message: 'SSN must contain only numbers' })
-  social_security_number?: string;
+  @Length(11, 11, { message: 'SSN must be in format XXX-XX-XXXX' })
+  @Matches(/^\d{3}-\d{2}-\d{4}$/, { message: 'SSN must be in format XXX-XX-XXXX' })
+  social_security_number!: string;
 
   @ApiPropertyOptional({ 
     description: 'Driver license number',

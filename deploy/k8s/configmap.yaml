@@ -1,0 +1,17 @@
+# VeroField Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: verofield-config
+  namespace: verofield
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  JWT_EXPIRES_IN: "7d"
+  REFRESH_TOKEN_EXPIRES_IN: "30d"
+  ENABLE_EVENT_SOURCING: "true"
+  LOG_LEVEL: "info"
+  REDIS_URL: "redis://verofield-redis:6379"
+  CORS_ORIGIN: "https://verofield.example.com"
+
+

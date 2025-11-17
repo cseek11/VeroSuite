@@ -8,14 +8,13 @@ import {
   User,
   LogOut,
   Settings,
-  Layout,
-  Grid,
   Plus,
   Users,
   X,
   Command
 } from 'lucide-react';
 import { SimpleGlobalSearchBar } from '@/components/search/SimpleGlobalSearchBar';
+import { logger } from '@/utils/logger';
 
 interface V4TopBarProps {
   onMobileMenuToggle: () => void;
@@ -44,7 +43,6 @@ export default function V4TopBar({
 
   // Check if we're on a dashboard route
   const isOnDashboard = location.pathname === '/dashboard';
-  const isOnResizableDashboard = location.pathname === '/resizable-dashboard';
 
   // Keyboard shortcuts data
   const keyboardShortcuts = [
@@ -55,8 +53,7 @@ export default function V4TopBar({
     { key: '⌘ + J', description: 'Jobs', action: 'View all jobs' },
     { key: '⌘ + S', description: 'Settings', action: 'Open settings' },
     { key: '⌘ + /', description: 'Shortcuts', action: 'Show this help' },
-    { key: '⌘ + 1', description: 'VeroDash', action: 'Switch to VeroDash' },
-    { key: '⌘ + 2', description: 'VeroCards', action: 'Switch to VeroCards' },
+    { key: '⌘ + 1', description: 'Dashboard', action: 'Go to main dashboard' },
     { key: 'Esc', description: 'Close Modal', action: 'Close any open modal' },
   ];
 
@@ -74,17 +71,7 @@ export default function V4TopBar({
                           target.closest('[data-search-input]') ||
                           target.hasAttribute('data-search-input');
       
-      // Debug logging for V4TopBar
-      console.log('🔝 V4TopBar keyDown:', {
-        key: event.key,
-        target: target.tagName,
-        isInputField,
-        hasDataSearchInput: target.hasAttribute('data-search-input'),
-        id: target.id
-      });
-      
       if (isInputField) {
-        console.log('🚫 V4TopBar BLOCKED for input field');
         return; // Don't trigger shortcuts when typing in input fields
       }
 
@@ -128,10 +115,6 @@ export default function V4TopBar({
           case '1':
             event.preventDefault();
             navigate('/dashboard');
-            break;
-          case '2':
-            event.preventDefault();
-            navigate('/resizable-dashboard');
             break;
         }
       } else if (event.key === 'Escape') {
@@ -191,7 +174,7 @@ export default function V4TopBar({
                 className="w-full"
                 enableCommands={true}
                 onActionExecuted={(result) => {
-                  console.log('Action executed from header:', result);
+                  logger.debug('Action executed from header', { result }, 'V4TopBar');
                   // You can add additional handling here if needed
                 }}
               />
@@ -210,7 +193,11 @@ export default function V4TopBar({
          <div className="flex items-center gap-2 flex-shrink-0">
            <div className="text-center hidden sm:block">
              <div className="font-semibold text-sm">{user?.name || user?.first_name || user?.email || 'User'}</div>
-             <div className="text-xs opacity-80">{user?.role || 'Admin'}</div>
+             <div className="text-xs opacity-80">
+               {user?.roles && user.roles.length > 0 
+                 ? user.roles.map(r => r.charAt(0).toUpperCase() + r.slice(1)).join(', ')
+                 : 'Admin'}
+             </div>
            </div>
            <div className="relative user-menu-dropdown">
             <button 
@@ -250,31 +237,6 @@ export default function V4TopBar({
         
         {/* Quick Actions - Compact */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          {/* Dashboard Toggle - Always Visible */}
-          <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-lg p-0.5 h-6">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className={`px-1 h-4 text-xs font-medium rounded-md transition-colors flex items-center gap-1 ${
-                isOnDashboard
-                  ? 'bg-white text-purple-600 shadow-sm'
-                  : 'text-white hover:bg-white/20'
-              }`}
-            >
-              <Layout className="w-2 h-2" />
-              <span className="hidden sm:inline text-xs">VeroDash</span>
-            </button>
-            <button
-              onClick={() => navigate('/resizable-dashboard')}
-              className={`px-1 h-4 text-xs font-medium rounded-md transition-colors flex items-center gap-1 ${
-                isOnResizableDashboard
-                  ? 'bg-white text-purple-600 shadow-sm'
-                  : 'text-white hover:bg-white/20'
-              }`}
-            >
-              <Grid className="w-2 h-2" />
-              <span className="hidden sm:inline text-xs">VeroCards</span>
-            </button>
-          </div>
 
           {/* Quick Actions - Icons Only */}
           <div className="relative quick-actions-dropdown">

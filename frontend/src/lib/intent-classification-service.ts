@@ -6,6 +6,8 @@
 // This service classifies user input into actionable intents and extracts entities
 // for the pest control CRM domain
 
+import { logger } from '@/utils/logger';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -847,14 +849,16 @@ class IntentClassificationService {
     };
 
     // Debug logging
-    console.log('🔍 Intent Classification Result:', {
-      query: query,
-      normalizedQuery: normalizedQuery,
-      intent: result.intent,
-      confidence: result.confidence,
-      entities: result.entities,
-      actionData: result.actionData
-    });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Intent Classification Result', {
+        query: query,
+        normalizedQuery: normalizedQuery,
+        intent: result.intent,
+        confidence: result.confidence,
+        entities: result.entities,
+        actionData: result.actionData
+      });
+    }
 
     return result;
   }
@@ -893,8 +897,10 @@ class IntentClassificationService {
     const entities: ExtractedEntities = {};
     
     // Extract customer name
-    console.log('🔍 Extracting entities from query:', query);
-    console.log('🔍 Starting entity extraction...');
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Extracting entities from query', { query }, 'intent-classification');
+      logger.debug('Starting entity extraction', {}, 'intent-classification');
+    }
     
     // First try to extract customer name from update patterns
     const updatePatterns = [
@@ -909,10 +915,14 @@ class IntentClassificationService {
     
     for (const pattern of updatePatterns) {
       const match = query.match(pattern);
-      console.log('🔍 Testing update pattern:', pattern, 'Match:', match);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Testing update pattern', { pattern: pattern.toString(), match }, 'intent-classification');
+      }
       if (match && match[1]) {
         entities.customerName = this.formatText(match[1].trim());
-        console.log('✅ Found customer name from update pattern:', match[1], '-> formatted:', entities.customerName);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Found customer name from update pattern', { original: match[1], formatted: entities.customerName }, 'intent-classification');
+        }
         break;
       }
     }
@@ -921,31 +931,41 @@ class IntentClassificationService {
     if (!entities.customerName) {
       for (const pattern of this.entityPatterns.customerName) {
         const match = query.match(pattern);
-        console.log('🔍 Testing regular pattern:', pattern, 'Match:', match);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Testing regular pattern', { pattern: pattern.toString(), match }, 'intent-classification');
+        }
         if (match && match[1]) {
           entities.customerName = this.formatText(match[1]);
-          console.log('✅ Found customer name:', match[1], '-> formatted:', entities.customerName);
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('Found customer name', { original: match[1], formatted: entities.customerName }, 'intent-classification');
+          }
           break;
         }
       }
     }
 
     // Try to parse space-separated address format first: "134 Thompson Ave Donora PA 15033"
-    console.log('🔍 Testing space-separated address pattern...');
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Testing space-separated address pattern', {}, 'intent-classification');
+    }
     const spaceAddressMatch = query.match(/(\d+\s+[a-z\s]+(?:st|ave|rd|blvd|dr|ln|way|pl|street|avenue|road|boulevard|drive|lane|place|court|circle|terrace|trail|parkway|highway|apt|apartment|unit|suite|#))\s+([a-z]+)\s+([a-z]{2})\s+(\d{5}(?:-\d{4})?)/i);
-    console.log('🔍 Space address match result:', spaceAddressMatch);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Space address match result', { match: spaceAddressMatch }, 'intent-classification');
+    }
     
     if (spaceAddressMatch && spaceAddressMatch[1] && spaceAddressMatch[2] && spaceAddressMatch[3] && spaceAddressMatch[4]) {
       entities.address = this.formatText(spaceAddressMatch[1].trim());
       entities.city = this.formatText(spaceAddressMatch[2].trim());
       entities.state = spaceAddressMatch[3].trim().toUpperCase();
       entities.zipCode = spaceAddressMatch[4].trim();
-      console.log('✅ Found space-separated address:', {
-        address: entities.address,
-        city: entities.city,
-        state: entities.state,
-        zipCode: entities.zipCode
-      });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Found space-separated address', {
+          address: entities.address,
+          city: entities.city,
+          state: entities.state,
+          zipCode: entities.zipCode
+        }, 'intent-classification');
+      }
     } else {
       // Fall back to individual pattern matching
       // Extract address
@@ -953,19 +973,27 @@ class IntentClassificationService {
         const match = query.match(pattern);
         if (match && match[1]) {
           entities.address = this.formatText(match[1]);
-          console.log('✅ Found address:', match[1], '-> formatted:', entities.address);
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('Found address', { original: match[1], formatted: entities.address }, 'intent-classification');
+          }
           break;
         }
       }
 
       // Extract city
-      console.log('🔍 Testing city patterns on query:', query);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Testing city patterns on query', { query }, 'intent-classification');
+      }
       for (const pattern of this.entityPatterns.city) {
         const match = query.match(pattern);
-        console.log('🔍 Testing city pattern:', pattern, 'Match:', match);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Testing city pattern', { pattern: pattern.toString(), match }, 'intent-classification');
+        }
         if (match && match[1]) {
           entities.city = this.formatText(match[1].trim());
-          console.log('✅ Found city:', match[1], '-> formatted:', entities.city);
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('Found city', { original: match[1], formatted: entities.city }, 'intent-classification');
+          }
           break;
         }
       }
@@ -976,7 +1004,9 @@ class IntentClassificationService {
           const match = query.match(pattern);
           if (match && match[1]) {
             entities.state = match[1].trim().toUpperCase();
-            console.log('✅ Found state:', match[1]);
+            if (process.env.NODE_ENV === 'development') {
+              logger.debug('Found state', { state: match[1] }, 'intent-classification');
+            }
             break;
           }
         }
@@ -988,7 +1018,9 @@ class IntentClassificationService {
           const match = query.match(pattern);
           if (match && match[1]) {
             entities.zipCode = match[1].trim();
-            console.log('✅ Found zip code:', match[1]);
+            if (process.env.NODE_ENV === 'development') {
+              logger.debug('Found zip code', { zipCode: match[1] }, 'intent-classification');
+            }
             break;
           }
         }
@@ -1000,19 +1032,27 @@ class IntentClassificationService {
       const match = query.match(pattern);
       if (match && match[1]) {
         entities.phone = match[1];
-        console.log('✅ Found phone:', match[1]);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Found phone', { phone: match[1] }, 'intent-classification');
+        }
         break;
       }
     }
 
     // Extract email
-    console.log('🔍 Testing email patterns on query:', query);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Testing email patterns on query', { query }, 'intent-classification');
+    }
     for (const pattern of this.entityPatterns.email) {
       const match = query.match(pattern);
-      console.log('🔍 Testing email pattern:', pattern, 'Match:', match);
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Testing email pattern', { pattern: pattern.toString(), match }, 'intent-classification');
+      }
       if (match && match[1]) {
         entities.email = match[1];
-        console.log('✅ Found email:', match[1]);
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Found email', { email: match[1] }, 'intent-classification');
+        }
         break;
       }
     }
@@ -1089,8 +1129,10 @@ class IntentClassificationService {
       }
     }
 
-    console.log('🔍 Final extracted entities:', entities);
-    console.log('🔍 Final city value:', entities.city);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Final extracted entities', { entities }, 'intent-classification');
+      logger.debug('Final city value', { city: entities.city }, 'intent-classification');
+    }
     return entities;
   }
 

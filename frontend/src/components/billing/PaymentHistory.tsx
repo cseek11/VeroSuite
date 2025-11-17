@@ -1,26 +1,27 @@
 import React, { useState } from 'react';
-import {
-  Card,
-  Typography,
-  Button,
-  Input,
-  Alert
-} from '@/components/ui/EnhancedUI';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import { Typography, Badge } from '@/components/ui';
 import {
   History,
   Download,
   Search,
-  Filter,
   Calendar,
   DollarSign,
   CheckCircle,
   CreditCard,
-  FileText,
   Eye,
   Loader2,
-  Receipt
+  Receipt,
+  AlertCircle,
+  Clock,
+  XCircle,
+  Filter
 } from 'lucide-react';
 import { Payment } from '@/types/enhanced-types';
+import { logger } from '@/utils/logger';
+import { toast } from '@/utils/toast';
 
 interface PaymentHistoryProps {
   payments: Payment[];
@@ -28,16 +29,42 @@ interface PaymentHistoryProps {
   customerId: string;
 }
 
+type PaymentStatus = 'completed' | 'pending' | 'failed' | 'refunded' | 'all';
+type DateFilter = 'all' | '30days' | '90days' | '1year';
+
 export default function PaymentHistory({ payments, isLoading, customerId }: PaymentHistoryProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [dateFilter, setDateFilter] = useState<'all' | '30days' | '90days' | '1year'>('all');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<PaymentStatus>('all');
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
 
-  // Filter payments based on search and date filters
+  // Determine payment status based on invoice status and payment data
+  const getPaymentStatus = (payment: Payment): PaymentStatus => {
+    // If invoice is paid, payment is completed
+    if (payment.Invoice?.status === 'paid') {
+      return 'completed';
+    }
+    // If payment has reference number (Stripe transaction ID), it's likely completed
+    if (payment.reference_number && payment.reference_number.startsWith('pi_')) {
+      return 'completed';
+    }
+    // If payment date is in the future, it's pending
+    const paymentDate = new Date(payment.payment_date);
+    if (paymentDate > new Date()) {
+      return 'pending';
+    }
+    // Default to completed if payment exists
+    return 'completed';
+  };
+
+  // Filter payments based on search, date, and status filters
   const filteredPayments = payments.filter((payment) => {
+    // Search filter
     const matchesSearch = payment.reference_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         payment.Invoice?.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase());
+                         payment.Invoice?.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         payment.notes?.toLowerCase().includes(searchTerm.toLowerCase());
     
+    // Date filter
     let matchesDate = true;
     if (dateFilter !== 'all') {
       const paymentDate = new Date(payment.payment_date);
@@ -47,7 +74,10 @@ export default function PaymentHistory({ payments, isLoading, customerId }: Paym
       matchesDate = paymentDate >= filterDate;
     }
     
-    return matchesSearch && matchesDate;
+    // Status filter
+    const matchesStatus = statusFilter === 'all' || getPaymentStatus(payment) === statusFilter;
+    
+    return matchesSearch && matchesDate && matchesStatus;
   });
 
   // Calculate totals
@@ -67,9 +97,99 @@ export default function PaymentHistory({ payments, isLoading, customerId }: Paym
     return 'Payment Method';
   };
 
+  const getStatusBadge = (payment: Payment) => {
+    const status = getPaymentStatus(payment);
+    const statusConfig = {
+      completed: {
+        variant: 'success' as const,
+        icon: CheckCircle,
+        label: 'Completed',
+        className: 'bg-green-100 text-green-800'
+      },
+      pending: {
+        variant: 'warning' as const,
+        icon: Clock,
+        label: 'Pending',
+        className: 'bg-yellow-100 text-yellow-800'
+      },
+      failed: {
+        variant: 'error' as const,
+        icon: XCircle,
+        label: 'Failed',
+        className: 'bg-red-100 text-red-800'
+      },
+      refunded: {
+        variant: 'info' as const,
+        icon: AlertCircle,
+        label: 'Refunded',
+        className: 'bg-blue-100 text-blue-800'
+      }
+    };
+
+    const config = statusConfig[status] || statusConfig.completed;
+    const Icon = config.icon;
+
+    return (
+      <Badge variant={config.variant} className="flex items-center gap-1">
+        <Icon className="w-3 h-3" />
+        {config.label}
+      </Badge>
+    );
+  };
+
   const handleDownloadReceipt = (payment: Payment) => {
-    // In a real implementation, this would generate and download a PDF receipt
-    console.log('Downloading receipt for payment:', payment.id);
+    try {
+      // Generate receipt data
+      const receiptData = {
+        paymentId: payment.id,
+        referenceNumber: payment.reference_number || payment.id.slice(-8),
+        invoiceNumber: payment.Invoice?.invoice_number || 'N/A',
+        amount: Number(payment.amount).toFixed(2),
+        date: new Date(payment.payment_date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }),
+        paymentMethod: getPaymentMethodDisplay(payment),
+        customer: customerId,
+        notes: payment.notes || 'N/A'
+      };
+      
+      // Create receipt text
+      const receiptText = `
+PAYMENT RECEIPT
+================
+
+Payment ID: ${receiptData.paymentId}
+Reference Number: ${receiptData.referenceNumber}
+Invoice Number: ${receiptData.invoiceNumber}
+Amount Paid: $${receiptData.amount}
+Payment Date: ${receiptData.date}
+Payment Method: ${receiptData.paymentMethod}
+Status: ${getPaymentStatus(payment).toUpperCase()}
+
+${receiptData.notes !== 'N/A' ? `Notes: ${receiptData.notes}` : ''}
+
+Thank you for your payment!
+      `.trim();
+      
+      // Create and download file
+      const blob = new Blob([receiptText], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Receipt-${receiptData.referenceNumber}-${Date.now()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      logger.debug('Receipt downloaded', { paymentId: payment.id }, 'PaymentHistory');
+      toast.success('Receipt downloaded successfully');
+    } catch (error) {
+      logger.error('Failed to download receipt', error, 'PaymentHistory');
+      toast.error('Failed to download receipt. Please try again.');
+    }
   };
 
   const renderPaymentCard = (payment: Payment) => (
@@ -79,21 +199,38 @@ export default function PaymentHistory({ payments, isLoading, customerId }: Paym
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <Typography variant="h4" className="font-semibold">
-                Payment #{payment.reference_number || payment.id.slice(-8)}
-              </Typography>
-              <Typography variant="body2" className="text-gray-600">
-                {new Date(payment.payment_date).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </Typography>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-3">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                getPaymentStatus(payment) === 'completed' 
+                  ? 'bg-green-100' 
+                  : getPaymentStatus(payment) === 'pending'
+                  ? 'bg-yellow-100'
+                  : 'bg-red-100'
+              }`}>
+                {getPaymentStatus(payment) === 'completed' ? (
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                ) : getPaymentStatus(payment) === 'pending' ? (
+                  <Clock className="w-5 h-5 text-yellow-600" />
+                ) : (
+                  <XCircle className="w-5 h-5 text-red-600" />
+                )}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <Typography variant="h4" className="font-semibold">
+                    Payment #{payment.reference_number || payment.id.slice(-8)}
+                  </Typography>
+                  {getStatusBadge(payment)}
+                </div>
+                <Typography variant="body2" className="text-gray-600">
+                  {new Date(payment.payment_date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </Typography>
+              </div>
             </div>
           </div>
 
@@ -228,10 +365,25 @@ export default function PaymentHistory({ payments, isLoading, customerId }: Paym
                 />
               </div>
               
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-gray-400" />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as PaymentStatus)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                >
+                  <option value="all">All Status</option>
+                  <option value="completed">Completed</option>
+                  <option value="pending">Pending</option>
+                  <option value="failed">Failed</option>
+                  <option value="refunded">Refunded</option>
+                </select>
+              </div>
+              
               <select
                 value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value as any)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                onChange={(e) => setDateFilter(e.target.value as DateFilter)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
               >
                 <option value="all">All Time</option>
                 <option value="30days">Last 30 Days</option>
@@ -326,11 +478,17 @@ export default function PaymentHistory({ payments, isLoading, customerId }: Paym
                 </div>
                 <div>
                   <div className="text-sm text-gray-600 mb-1">Payment Method</div>
-                      <div className="font-medium">
-                        {selectedPayment.payment_methods?.payment_name || 
-                         `${selectedPayment.payment_methods?.card_type} ****${selectedPayment.payment_methods?.card_last4}` ||
-                         'Payment Method'}
-                      </div>
+                  <div className="font-medium">
+                    {selectedPayment.payment_methods?.payment_name || 
+                     `${selectedPayment.payment_methods?.card_type} ****${selectedPayment.payment_methods?.card_last4}` ||
+                     'Payment Method'}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">Status</div>
+                  <div className="font-medium">
+                    {getStatusBadge(selectedPayment)}
+                  </div>
                 </div>
               </div>
 
@@ -346,10 +504,7 @@ export default function PaymentHistory({ payments, isLoading, customerId }: Paym
               <div className="flex justify-end space-x-3">
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    // In a real implementation, this would generate and download a PDF receipt
-                    console.log('Downloading receipt for payment:', selectedPayment.id);
-                  }}
+                  onClick={() => handleDownloadReceipt(selectedPayment)}
                   icon={Download}
                 >
                   Download Receipt

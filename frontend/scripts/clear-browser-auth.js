@@ -19,7 +19,7 @@ try {
   // Step 3: Clear specific auth keys
   console.log('\n3️⃣ Clearing specific auth keys...');
   const authKeys = [
-    'verosuite_auth',
+    'verofield_auth',
     'user',
     'jwt',
     'supabase.auth.token',
@@ -61,6 +61,17 @@ try {
   console.log('3. Clear all storage under Storage section');
   console.log('4. Refresh the page');
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,17 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { enhancedApi } from '@/lib/enhanced-api';
 import { queryKeys, invalidateQueries } from '@/lib/queryClient';
 import { Account } from '@/types';
+import { logger } from '@/utils/logger';
 
 // TODO: Implement accounts API in enhanced API
 // For now, using placeholder functions
 const crmApi = {
-  accounts: async (search?: string) => {
-    console.log('TODO: Implement accounts API in enhanced API');
+  accounts: async (_search?: string) => {
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('TODO: Implement accounts API in enhanced API', {}, 'useAccounts');
+    }
     return [];
   },
-  createAccount: async (accountData: Partial<Account>) => {
-    console.log('TODO: Implement accounts API in enhanced API');
+  createAccount: async (_accountData: Partial<Account>) => {
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('TODO: Implement accounts API in enhanced API', {}, 'useAccounts');
+    }
     return null;
   }
 };
@@ -38,7 +42,7 @@ export const useAccount = (id: string) => {
 
 // Hook to create a new account
 export const useCreateAccount = () => {
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   
   return useMutation({
     mutationFn: (accountData: Partial<Account>) => crmApi.createAccount(accountData),
@@ -50,7 +54,7 @@ export const useCreateAccount = () => {
 
 // Hook to update an account
 export const useUpdateAccount = () => {
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   
   return useMutation({
     mutationFn: (data: { id: string; accountData: Partial<Account> }) => 

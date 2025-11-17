@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 export interface ServiceType {
   id: string;
@@ -21,13 +21,13 @@ class ServiceTypesApi {
     // Get token from auth store (stored as JSON)
     let token = null;
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (authData) {
         const parsed = JSON.parse(authData);
         token = parsed.token;
       }
-    } catch (error) {
-      console.error('Error parsing auth data:', error);
+    } catch (error: unknown) {
+      logger.error('Error parsing auth data', error, 'service-types-api');
     }
     
     // Fallback to direct jwt key

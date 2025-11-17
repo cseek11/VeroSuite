@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { supabase } from '@/lib/supabase-client';
-import { PlusIcon, PencilIcon, TrashIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { Plus, Pencil, Trash2, Settings } from 'lucide-react';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
+import Select from '@/components/ui/Select';
+import Checkbox from '@/components/ui/Checkbox';
+import Button from '@/components/ui/Button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/Dialog';
 
 interface ServiceType {
   id: string;
@@ -13,9 +22,9 @@ interface ServiceType {
   base_price: number;
   estimated_duration: number;
   is_active: boolean;
-  required_equipment: any;
-  safety_requirements: any;
-  compliance_requirements: any;
+  required_equipment: Record<string, unknown> | null;
+  safety_requirements: Record<string, unknown> | null;
+  compliance_requirements: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }
@@ -172,8 +181,8 @@ export default function ServiceTypeManagement() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white shadow-sm border border-gray-200 rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <div className="bg-white shadow-sm border border-slate-200 rounded-lg">
+        <div className="px-6 py-4 border-b border-slate-200">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">Service Type Management</h2>
@@ -186,14 +195,14 @@ export default function ServiceTypeManagement() {
                 onClick={() => setIsAddingCategory(true)}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
               >
-                                        <Cog6ToothIcon className="h-4 w-4 mr-2" />
+                                        <Settings className="h-4 w-4 mr-2" />
                 Add Category
               </button>
               <button
                 onClick={() => setIsAddingService(true)}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
               >
-                <PlusIcon className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-2" />
                 Add Service Type
               </button>
             </div>
@@ -202,8 +211,8 @@ export default function ServiceTypeManagement() {
       </div>
 
       {/* Service Categories */}
-      <div className="bg-white shadow-sm border border-gray-200 rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <div className="bg-white shadow-sm border border-slate-200 rounded-lg">
+        <div className="px-6 py-4 border-b border-slate-200">
           <h3 className="text-lg font-medium text-gray-900">Service Categories</h3>
         </div>
         <div className="overflow-x-auto">
@@ -251,7 +260,7 @@ export default function ServiceTypeManagement() {
                       onClick={() => setEditingCategory(category)}
                       className="text-purple-600 hover:text-purple-900 mr-3"
                     >
-                      <PencilIcon className="h-4 w-4" />
+                      <Pencil className="h-4 w-4" />
                     </button>
                   </td>
                 </tr>
@@ -262,8 +271,8 @@ export default function ServiceTypeManagement() {
       </div>
 
       {/* Service Types */}
-      <div className="bg-white shadow-sm border border-gray-200 rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <div className="bg-white shadow-sm border border-slate-200 rounded-lg">
+        <div className="px-6 py-4 border-b border-slate-200">
           <h3 className="text-lg font-medium text-gray-900">Service Types</h3>
         </div>
         <div className="overflow-x-auto">
@@ -321,13 +330,13 @@ export default function ServiceTypeManagement() {
                         onClick={() => setEditingService(serviceType)}
                         className="text-purple-600 hover:text-purple-900"
                       >
-                        <PencilIcon className="h-4 w-4" />
+                        <Pencil className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => deleteServiceTypeMutation.mutate(serviceType.id)}
                         className="text-red-600 hover:text-red-900"
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </td>
@@ -378,6 +387,22 @@ export default function ServiceTypeManagement() {
   );
 }
 
+// Service Type Form Schema
+const serviceTypeSchema = z.object({
+  service_name: z.string().min(1, 'Service name is required'),
+  service_code: z.string().min(1, 'Service code is required'),
+  description: z.string().optional(),
+  category_id: z.string().min(1, 'Category is required'),
+  base_price: z.number().min(0, 'Base price must be 0 or greater'),
+  estimated_duration: z.number().min(1, 'Duration must be at least 1 minute'),
+  is_active: z.boolean().default(true),
+  required_equipment: z.record(z.unknown()).nullable().optional(),
+  safety_requirements: z.record(z.unknown()).nullable().optional(),
+  compliance_requirements: z.record(z.unknown()).nullable().optional(),
+});
+
+type ServiceTypeFormData = z.infer<typeof serviceTypeSchema>;
+
 // Service Type Form Component
 interface ServiceTypeFormProps {
   serviceType?: ServiceType | null;
@@ -387,132 +412,185 @@ interface ServiceTypeFormProps {
 }
 
 function ServiceTypeForm({ serviceType, categories, onSubmit, onCancel }: ServiceTypeFormProps) {
-  const [formData, setFormData] = useState({
-    service_name: serviceType?.service_name || '',
-    service_code: serviceType?.service_code || '',
-    description: serviceType?.description || '',
-    category_id: serviceType?.category_id || '',
-    base_price: serviceType?.base_price || 0,
-    estimated_duration: serviceType?.estimated_duration || 60,
-    is_active: serviceType?.is_active ?? true,
-    required_equipment: serviceType?.required_equipment || null,
-    safety_requirements: serviceType?.safety_requirements || null,
-    compliance_requirements: serviceType?.compliance_requirements || null,
+  const [isOpen, setIsOpen] = useState(true);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<ServiceTypeFormData>({
+    resolver: zodResolver(serviceTypeSchema),
+    defaultValues: {
+      service_name: serviceType?.service_name || '',
+      service_code: serviceType?.service_code || '',
+      description: serviceType?.description || '',
+      category_id: serviceType?.category_id || '',
+      base_price: serviceType?.base_price || 0,
+      estimated_duration: serviceType?.estimated_duration || 60,
+      is_active: serviceType?.is_active ?? true,
+      required_equipment: serviceType?.required_equipment || null,
+      safety_requirements: serviceType?.safety_requirements || null,
+      compliance_requirements: serviceType?.compliance_requirements || null,
+    },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
+  const handleFormSubmit = (data: ServiceTypeFormData) => {
+    onSubmit(data as Omit<ServiceType, 'id' | 'created_at' | 'updated_at'>);
+    setIsOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsOpen(false);
+    reset();
+    onCancel();
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div className="mt-3">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>
             {serviceType ? 'Edit Service Type' : 'Add New Service Type'}
-          </h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Service Name</label>
-              <input
-                type="text"
-                value={formData.service_name}
-                onChange={(e) => setFormData({ ...formData, service_name: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                required
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+          <Controller
+            name="service_name"
+            control={control}
+            render={({ field }) => (
+              <Input
+                label="Service Name *"
+                value={field.value}
+                onChange={(e) => field.onChange(e.target.value)}
+                {...(errors.service_name?.message ? { error: errors.service_name.message } : {})}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Service Code</label>
-              <input
-                type="text"
-                value={formData.service_code}
-                onChange={(e) => setFormData({ ...formData, service_code: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                required
+            )}
+          />
+
+          <Controller
+            name="service_code"
+            control={control}
+            render={({ field }) => (
+              <Input
+                label="Service Code *"
+                value={field.value}
+                onChange={(e) => field.onChange(e.target.value)}
+                {...(errors.service_code?.message ? { error: errors.service_code.message } : {})}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Category</label>
-              <select
-                value={formData.category_id}
-                onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                required
-              >
-                <option value="">Select Category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.category_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Base Price ($)</label>
-                <input
+            )}
+          />
+
+          <Controller
+            name="category_id"
+            control={control}
+            render={({ field }) => (
+              <Select
+                label="Category *"
+                value={field.value}
+                onChange={(value) => field.onChange(value)}
+                options={[
+                  { value: '', label: 'Select Category' },
+                  ...categories.map((category) => ({
+                    value: category.id,
+                    label: category.category_name,
+                  })),
+                ]}
+                {...(errors.category_id?.message ? { error: errors.category_id.message } : {})}
+              />
+            )}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <Controller
+              name="base_price"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  label="Base Price ($) *"
                   type="number"
                   step="0.01"
-                  value={formData.base_price}
-                  onChange={(e) => setFormData({ ...formData, base_price: parseFloat(e.target.value) || 0 })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                  required
+                  min="0"
+                  value={field.value.toString()}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  {...(errors.base_price?.message ? { error: errors.base_price.message } : {})}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Duration (min)</label>
-                <input
+              )}
+            />
+            <Controller
+              name="estimated_duration"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  label="Duration (min) *"
                   type="number"
-                  value={formData.estimated_duration}
-                  onChange={(e) => setFormData({ ...formData, estimated_duration: parseInt(e.target.value) || 60 })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                  required
+                  min="1"
+                  value={field.value.toString()}
+                  onChange={(e) => field.onChange(parseInt(e.target.value) || 60)}
+                  {...(errors.estimated_duration?.message ? { error: errors.estimated_duration.message } : {})}
                 />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Description</label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              )}
+            />
+          </div>
+
+          <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+              <Textarea
+                label="Description"
+                value={field.value || ''}
+                onChange={(e) => field.onChange(e.target.value)}
                 rows={3}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                {...(errors.description?.message ? { error: errors.description.message } : {})}
               />
-            </div>
-            <div className="flex items-center">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+            )}
+          />
+
+          <Controller
+            name="is_active"
+            control={control}
+            render={({ field }) => (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  checked={field.value}
+                  onChange={(checked) => field.onChange(checked)}
                 />
-                <span className="ml-2 text-sm text-gray-700">Active</span>
-              </label>
-            </div>
-            <div className="flex justify-end space-x-3 pt-4">
-              <button
-                type="button"
-                onClick={onCancel}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700"
-              >
-                {serviceType ? 'Update' : 'Create'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+                <label className="text-sm font-medium text-slate-700">Active</label>
+              </div>
+            )}
+          />
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+            >
+              {serviceType ? 'Update' : 'Create'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
+
+// Category Form Schema
+const categorySchema = z.object({
+  category_name: z.string().min(1, 'Category name is required'),
+  category_code: z.string().min(1, 'Category code is required'),
+  description: z.string().optional(),
+  is_active: z.boolean().default(true),
+});
+
+type CategoryFormData = z.infer<typeof categorySchema>;
 
 // Category Form Component
 interface CategoryFormProps {
@@ -522,82 +600,117 @@ interface CategoryFormProps {
 }
 
 function CategoryForm({ category, onSubmit, onCancel }: CategoryFormProps) {
-  const [formData, setFormData] = useState({
-    category_name: category?.category_name || '',
-    category_code: category?.category_code || '',
-    description: category?.description || '',
-    is_active: category?.is_active ?? true,
+  const [isOpen, setIsOpen] = useState(true);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<CategoryFormData>({
+    resolver: zodResolver(categorySchema),
+    defaultValues: {
+      category_name: category?.category_name || '',
+      category_code: category?.category_code || '',
+      description: category?.description || '',
+      is_active: category?.is_active ?? true,
+    },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
+  const handleFormSubmit = (data: CategoryFormData) => {
+    onSubmit({
+      ...data,
+      tenant_id: category?.tenant_id || '7193113e-ece2-4f7b-ae8c-176df4367e28',
+    } as Omit<ServiceCategory, 'id' | 'created_at'>);
+    setIsOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsOpen(false);
+    reset();
+    onCancel();
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div className="mt-3">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>
             {category ? 'Edit Category' : 'Add New Category'}
-          </h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Category Name</label>
-              <input
-                type="text"
-                value={formData.category_name}
-                onChange={(e) => setFormData({ ...formData, category_name: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                required
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+          <Controller
+            name="category_name"
+            control={control}
+            render={({ field }) => (
+              <Input
+                label="Category Name *"
+                value={field.value}
+                onChange={(e) => field.onChange(e.target.value)}
+                {...(errors.category_name?.message ? { error: errors.category_name.message } : {})}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Category Code</label>
-              <input
-                type="text"
-                value={formData.category_code}
-                onChange={(e) => setFormData({ ...formData, category_code: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                required
+            )}
+          />
+
+          <Controller
+            name="category_code"
+            control={control}
+            render={({ field }) => (
+              <Input
+                label="Category Code *"
+                value={field.value}
+                onChange={(e) => field.onChange(e.target.value)}
+                {...(errors.category_code?.message ? { error: errors.category_code.message } : {})}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Description</label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            )}
+          />
+
+          <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+              <Textarea
+                label="Description"
+                value={field.value || ''}
+                onChange={(e) => field.onChange(e.target.value)}
                 rows={3}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                {...(errors.description?.message ? { error: errors.description.message } : {})}
               />
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.is_active}
-                onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-              />
-              <span className="ml-2 text-sm text-gray-700">Active</span>
-            </div>
-            <div className="flex justify-end space-x-3 pt-4">
-              <button
-                type="button"
-                onClick={onCancel}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700"
-              >
-                {category ? 'Update' : 'Create'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+            )}
+          />
+
+          <Controller
+            name="is_active"
+            control={control}
+            render={({ field }) => (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  checked={field.value}
+                  onChange={(checked) => field.onChange(checked)}
+                />
+                <label className="text-sm font-medium text-slate-700">Active</label>
+              </div>
+            )}
+          />
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+            >
+              {category ? 'Update' : 'Create'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

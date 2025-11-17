@@ -3,6 +3,8 @@
 // ============================================================================
 // Robust intent detection with context awareness, validation, and reliability
 
+import { logger } from '@/utils/logger';
+
 export interface EnhancedIntentResult {
   intent: IntentType;
   confidence: number;
@@ -196,8 +198,8 @@ class EnhancedIntentClassificationService {
         context: { ...this.context }
       };
       
-    } catch (error) {
-      console.error('🔴 Intent classification failed:', error);
+    } catch (error: unknown) {
+      logger.error('Intent classification failed', error, 'enhanced-intent-service');
       
       return {
         intent: 'search',
@@ -295,11 +297,13 @@ class EnhancedIntentClassificationService {
     }
     
     // Extract field-specific values
+    // eslint-disable-next-line no-useless-escape
     const phoneMatch = query.match(/(?:phone|call|contact).*?(?:to|is|=)\s*([+\d\s\-\(\)\.x]+)/i);
     if (phoneMatch && phoneMatch[1]) {
       entities.phone = this.entityValidators.phone.format(phoneMatch[1].trim());
     }
     
+    // eslint-disable-next-line no-useless-escape
     const emailMatch = query.match(/email.*?(?:to|is|=)\s*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i);
     if (emailMatch && emailMatch[1]) {
       entities.email = emailMatch[1].trim();

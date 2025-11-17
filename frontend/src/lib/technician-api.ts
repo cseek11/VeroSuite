@@ -5,6 +5,7 @@ import {
   UpdateTechnicianProfileDto,
   TechnicianQueryParams 
 } from '../types/technician';
+import { logger } from '@/utils/logger';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
@@ -12,13 +13,13 @@ class TechnicianApiService {
   private async getAuthHeaders(): Promise<HeadersInit> {
     let token = null;
     try {
-      const authData = localStorage.getItem('verosuite_auth');
+      const authData = localStorage.getItem('verofield_auth');
       if (authData) {
         const parsed = JSON.parse(authData);
         token = parsed.token;
       }
-    } catch (error) {
-      console.error('Error parsing auth data:', error);
+    } catch (error: unknown) {
+      logger.error('Error parsing auth data', error, 'technician-api');
     }
     if (!token) {
       token = localStorage.getItem('jwt'); // Fallback
@@ -44,10 +45,12 @@ class TechnicianApiService {
     if (params.sort_by) searchParams.append('sort_by', params.sort_by);
     if (params.sort_order) searchParams.append('sort_order', params.sort_order);
 
-    const url = `${API_BASE_URL}/technicians${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const url = `${API_BASE_URL}/v1/technicians${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
     const headers = await this.getAuthHeaders();
     
-    console.log('🔍 Technician API Request:', { url, headers });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Technician API Request', { url, headers }, 'technician-api');
+    }
     
     const response = await fetch(url, {
       method: 'GET',
@@ -56,19 +59,40 @@ class TechnicianApiService {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ Technician API Error:', { 
+      logger.error('Technician API Error', { 
         status: response.status, 
         statusText: response.statusText, 
         error: errorText 
-      });
+      }, 'technician-api');
       throw new Error(`Failed to fetch technicians: ${response.statusText}`);
     }
 
-    return response.json();
+    const responseData = await response.json();
+    // Handle paginated response structure - TechnicianListResponseDto has 'data' property
+    if (responseData && Array.isArray(responseData.data)) {
+      return {
+        technicians: responseData.data,
+        total: responseData.pagination?.total || responseData.data.length,
+        page: responseData.pagination?.page || 1,
+        limit: responseData.pagination?.limit || responseData.data.length,
+        total_pages: responseData.pagination?.totalPages || 1
+      };
+    } else if (responseData && Array.isArray(responseData.technicians)) {
+      return responseData;
+    } else if (Array.isArray(responseData)) {
+      return {
+        technicians: responseData,
+        total: responseData.length,
+        page: 1,
+        limit: responseData.length,
+        total_pages: 1
+      };
+    }
+    return responseData;
   }
 
   async getDashboardStats(): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/technicians/dashboard/stats`, {
+    const response = await fetch(`${API_BASE_URL}/v1/technicians/dashboard/stats`, {
       method: 'GET',
       headers: await this.getAuthHeaders(),
     });
@@ -81,7 +105,7 @@ class TechnicianApiService {
   }
 
   async getPerformanceMetrics(): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/technicians/dashboard/performance`, {
+    const response = await fetch(`${API_BASE_URL}/v1/technicians/dashboard/performance`, {
       method: 'GET',
       headers: await this.getAuthHeaders(),
     });
@@ -94,7 +118,7 @@ class TechnicianApiService {
   }
 
   async getAvailabilityData(): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/technicians/dashboard/availability`, {
+    const response = await fetch(`${API_BASE_URL}/v1/technicians/dashboard/availability`, {
       method: 'GET',
       headers: await this.getAuthHeaders(),
     });
@@ -107,7 +131,7 @@ class TechnicianApiService {
   }
 
   async getTechnician(id: string): Promise<TechnicianProfile> {
-    const response = await fetch(`${API_BASE_URL}/technicians/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/v1/technicians/${id}`, {
       method: 'GET',
       headers: await this.getAuthHeaders(),
     });
@@ -116,11 +140,16 @@ class TechnicianApiService {
       throw new Error(`Failed to fetch technician: ${response.statusText}`);
     }
 
-    return response.json();
+    const responseData = await response.json();
+    // Handle response structure - may have 'data' property
+    if (responseData && responseData.data) {
+      return responseData.data;
+    }
+    return responseData;
   }
 
   async createTechnician(data: CreateTechnicianProfileDto): Promise<TechnicianProfile> {
-    const response = await fetch(`${API_BASE_URL}/technicians`, {
+    const response = await fetch(`${API_BASE_URL}/v1/technicians`, {
       method: 'POST',
       headers: await this.getAuthHeaders(),
       body: JSON.stringify(data),
@@ -131,11 +160,16 @@ class TechnicianApiService {
       throw new Error(errorData.message || `Failed to create technician: ${response.statusText}`);
     }
 
-    return response.json();
+    const responseData = await response.json();
+    // Handle response structure - may have 'data' property
+    if (responseData && responseData.data) {
+      return responseData.data;
+    }
+    return responseData;
   }
 
   async updateTechnician(id: string, data: UpdateTechnicianProfileDto): Promise<TechnicianProfile> {
-    const response = await fetch(`${API_BASE_URL}/technicians/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/v1/technicians/${id}`, {
       method: 'PUT',
       headers: await this.getAuthHeaders(),
       body: JSON.stringify(data),
@@ -146,11 +180,16 @@ class TechnicianApiService {
       throw new Error(errorData.message || `Failed to update technician: ${response.statusText}`);
     }
 
-    return response.json();
+    const responseData = await response.json();
+    // Handle response structure - may have 'data' property
+    if (responseData && responseData.data) {
+      return responseData.data;
+    }
+    return responseData;
   }
 
   async deleteTechnician(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/technicians/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/v1/technicians/${id}`, {
       method: 'DELETE',
       headers: await this.getAuthHeaders(),
     });

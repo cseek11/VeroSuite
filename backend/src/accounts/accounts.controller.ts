@@ -10,7 +10,7 @@ import {
 } from './dto';
 
 @ApiTags('Accounts')
-@Controller('accounts')
+@Controller({ path: 'accounts', version: '1' })
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class AccountsController {

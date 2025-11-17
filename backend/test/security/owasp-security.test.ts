@@ -7,11 +7,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../../src/app.module';
-import { SecurityTestSuite, SecurityTestUtils } from '../setup/security-setup';
+import { SecurityTestSuite } from '../setup/security-setup';
 
 describe('OWASP Security Tests', () => {
   let app: INestApplication;
-  let securityTestSuite: SecurityTestSuite;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -20,8 +19,6 @@ describe('OWASP Security Tests', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
-
-    securityTestSuite = new SecurityTestSuite(app);
   });
 
   afterAll(async () => {
@@ -30,7 +27,7 @@ describe('OWASP Security Tests', () => {
 
   describe('A01: Injection Attacks', () => {
     it('should prevent SQL injection in authentication', async () => {
-      const sqlPayloads = SecurityTestUtils.generateMaliciousPayloads().sqlInjection;
+      const sqlPayloads = ['OR 1=1--', "'; DROP TABLE users--", '1\' OR \'1\'=\'1'];
       
       for (const payload of sqlPayloads) {
         const response = await request(app.getHttpServer())
@@ -45,7 +42,7 @@ describe('OWASP Security Tests', () => {
     });
 
     it('should prevent SQL injection in customer search', async () => {
-      const sqlPayloads = SecurityTestUtils.generateMaliciousPayloads().sqlInjection;
+      const sqlPayloads = ['OR 1=1--', "'; DROP TABLE users--", '1\' OR \'1\'=\'1'];
       
       for (const payload of sqlPayloads) {
         const response = await request(app.getHttpServer())
@@ -379,7 +376,7 @@ describe('OWASP Security Tests', () => {
 
   describe('A07: Cross-Site Scripting (XSS)', () => {
     it('should prevent stored XSS attacks', async () => {
-      const xssPayloads = SecurityTestUtils.generateMaliciousPayloads().xssPayloads;
+      const xssPayloads = ['<script>alert("XSS")</script>', '<img src=x onerror=alert(1)>', '<svg onload=alert(1)>'];
       
       for (const payload of xssPayloads) {
         const response = await request(app.getHttpServer())
@@ -397,7 +394,7 @@ describe('OWASP Security Tests', () => {
     });
 
     it('should prevent reflected XSS attacks', async () => {
-      const xssPayloads = SecurityTestUtils.generateMaliciousPayloads().xssPayloads;
+      const xssPayloads = ['<script>alert("XSS")</script>', '<img src=x onerror=alert(1)>', '<svg onload=alert(1)>'];
       
       for (const payload of xssPayloads) {
         const response = await request(app.getHttpServer())
@@ -410,7 +407,7 @@ describe('OWASP Security Tests', () => {
     });
 
     it('should prevent DOM-based XSS attacks', async () => {
-      const xssPayloads = SecurityTestUtils.generateMaliciousPayloads().xssPayloads;
+      const xssPayloads = ['<script>alert("XSS")</script>', '<img src=x onerror=alert(1)>', '<svg onload=alert(1)>'];
       
       for (const payload of xssPayloads) {
         const response = await request(app.getHttpServer())

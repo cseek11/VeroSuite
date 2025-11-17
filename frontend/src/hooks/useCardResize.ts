@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { CARD_CONSTANTS } from '../routes/dashboard/utils/cardConstants';
 
 interface ResizeState {
   isResizing: boolean;
@@ -6,6 +7,7 @@ interface ResizeState {
   resizeHandle: string | null;
   startPosition: { x: number; y: number };
   startSize: { width: number; height: number };
+  startCardPosition: { x: number; y: number };
 }
 
 interface UseCardResizeProps {
@@ -15,15 +17,17 @@ interface UseCardResizeProps {
   getCardGroup?: (cardId: string) => any;
   updateGroupBounds?: (groupId: string, cards: Record<string, any>) => void;
   getCardType?: (cardId: string) => string;
+  onUpdatePosition?: (cardId: string, x: number, y: number) => void;
 }
 
-export function useCardResize({ onUpdateSize, cards, onResizeEnd, getCardGroup, updateGroupBounds, getCardType }: UseCardResizeProps) {
+export function useCardResize({ onUpdateSize, cards, onResizeEnd, getCardGroup, updateGroupBounds, getCardType, onUpdatePosition }: UseCardResizeProps) {
   const [resizeState, setResizeState] = useState<ResizeState>({
     isResizing: false,
     resizingCardId: null,
     resizeHandle: null,
     startPosition: { x: 0, y: 0 },
-    startSize: { width: 0, height: 0 }
+    startSize: { width: 0, height: 0 },
+    startCardPosition: { x: 0, y: 0 }
   });
 
   // Start resizing
@@ -39,7 +43,8 @@ export function useCardResize({ onUpdateSize, cards, onResizeEnd, getCardGroup, 
       resizingCardId: cardId,
       resizeHandle: handle,
       startPosition: { x: e.clientX, y: e.clientY },
-      startSize: { width: card.width, height: card.height }
+      startSize: { width: card.width, height: card.height },
+      startCardPosition: { x: card.x, y: card.y }
     });
 
     // Set global styles
@@ -47,57 +52,111 @@ export function useCardResize({ onUpdateSize, cards, onResizeEnd, getCardGroup, 
     document.body.style.userSelect = 'none';
   }, [cards]);
 
+  // Use ref to store current resize state to avoid stale closures
+  const resizeStateRef = useRef(resizeState);
+  useEffect(() => {
+    resizeStateRef.current = resizeState;
+  }, [resizeState]);
+
   // Handle resize move with immediate DOM updates for smooth performance
   const handleResizeMove = useCallback((e: MouseEvent) => {
-    if (!resizeState.isResizing || !resizeState.resizingCardId) return;
+    const currentState = resizeStateRef.current;
+    if (!currentState.isResizing || !currentState.resizingCardId) return;
 
     // Use requestAnimationFrame for smooth 60fps updates
     requestAnimationFrame(() => {
-      const deltaX = e.clientX - resizeState.startPosition.x;
-      const deltaY = e.clientY - resizeState.startPosition.y;
+      const state = resizeStateRef.current;
+      if (!state.isResizing || !state.resizingCardId) return;
 
-      let newWidth = resizeState.startSize.width;
-      let newHeight = resizeState.startSize.height;
+      const deltaX = e.clientX - state.startPosition.x;
+      const deltaY = e.clientY - state.startPosition.y;
+
+      let newWidth = state.startSize.width;
+      let newHeight = state.startSize.height;
 
       // Calculate new dimensions based on resize handle
-      switch (resizeState.resizeHandle) {
+      switch (state.resizeHandle) {
         case 'se': // Southeast (bottom-right)
-          newWidth = resizeState.startSize.width + deltaX;
-          newHeight = resizeState.startSize.height + deltaY;
+          newWidth = state.startSize.width + deltaX;
+          newHeight = state.startSize.height + deltaY;
+          break;
+        case 'sw': // Southwest (bottom-left)
+          newWidth = state.startSize.width - deltaX;
+          newHeight = state.startSize.height + deltaY;
+          break;
+        case 'ne': // Northeast (top-right)
+          newWidth = state.startSize.width + deltaX;
+          newHeight = state.startSize.height - deltaY;
+          break;
+        case 'nw': // Northwest (top-left)
+          newWidth = state.startSize.width - deltaX;
+          newHeight = state.startSize.height - deltaY;
           break;
         case 'e': // East (right edge)
-          newWidth = resizeState.startSize.width + deltaX;
+          newWidth = state.startSize.width + deltaX;
+          break;
+        case 'w': // West (left edge)
+          newWidth = state.startSize.width - deltaX;
           break;
         case 's': // South (bottom edge)
-          newHeight = resizeState.startSize.height + deltaY;
+          newHeight = state.startSize.height + deltaY;
+          break;
+        case 'n': // North (top edge)
+          newHeight = state.startSize.height - deltaY;
           break;
         default:
           return;
       }
 
       // Apply constraints - larger limits for Smart KPIs cards
-      const minWidth = 200;
-      const minHeight = 120;
+      const minWidth = CARD_CONSTANTS.RESIZE.MIN_WIDTH;
+      const minHeight = CARD_CONSTANTS.RESIZE.MIN_HEIGHT;
       
-      // Check if this is a Smart KPIs card for larger max dimensions
-      const cardType = getCardType?.(resizeState.resizingCardId);
+      // Check card type for appropriate max dimensions
+      const cardType = getCardType?.(state.resizingCardId);
       const isSmartKPIsCard = cardType === 'smart-kpis' || cardType === 'smart-kpis-test' || cardType === 'smart-kpis-debug';
+      const isPageCard = cardType?.includes('-page') || cardType === 'customers-page';
       
-      const maxWidth = isSmartKPIsCard ? 800 : 500;
-      const maxHeight = isSmartKPIsCard ? 600 : 350;
+      let maxWidth, maxHeight;
+      if (isPageCard) {
+        maxWidth = CARD_CONSTANTS.RESIZE.MAX_WIDTH;  // Allow larger size for page cards
+        maxHeight = CARD_CONSTANTS.RESIZE.MAX_HEIGHT;
+      } else if (isSmartKPIsCard) {
+        maxWidth = CARD_CONSTANTS.RESIZE.MAX_WIDTH_SMART_KPI;
+        maxHeight = CARD_CONSTANTS.RESIZE.MAX_HEIGHT_SMART_KPI;
+      } else {
+        maxWidth = CARD_CONSTANTS.RESIZE.MAX_WIDTH_STANDARD;
+        maxHeight = CARD_CONSTANTS.RESIZE.MAX_HEIGHT_STANDARD;
+      }
 
       newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
       newHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
 
+      // Calculate new position for left/top edge resizing
+      let newX = state.startCardPosition.x;
+      let newY = state.startCardPosition.y;
+
+      if (state.resizeHandle === 'w' || state.resizeHandle === 'nw' || state.resizeHandle === 'sw') {
+        // Resizing from left edge - adjust X position
+        newX = state.startCardPosition.x + (state.startSize.width - newWidth);
+      }
+
+      if (state.resizeHandle === 'n' || state.resizeHandle === 'nw' || state.resizeHandle === 'ne') {
+        // Resizing from top edge - adjust Y position
+        newY = state.startCardPosition.y + (state.startSize.height - newHeight);
+      }
+
       // Immediate DOM update for visual feedback
-      const cardElement = document.querySelector(`[data-card-id="${resizeState.resizingCardId}"]`) as HTMLElement;
+      const cardElement = document.querySelector(`[data-card-id="${state.resizingCardId}"]`) as HTMLElement;
       if (cardElement) {
         cardElement.style.width = `${newWidth}px`;
         cardElement.style.height = `${newHeight}px`;
+        cardElement.style.left = `${newX}px`;
+        cardElement.style.top = `${newY}px`;
         cardElement.style.transition = 'none'; // Disable transitions during resize
       }
     });
-  }, [resizeState]);
+  }, [getCardType]);
 
   // End resizing
   const handleResizeEnd = useCallback(() => {
@@ -107,12 +166,19 @@ export function useCardResize({ onUpdateSize, cards, onResizeEnd, getCardGroup, 
       if (cardElement) {
         const finalWidth = parseInt(cardElement.style.width) || resizeState.startSize.width;
         const finalHeight = parseInt(cardElement.style.height) || resizeState.startSize.height;
+        const finalX = parseInt(cardElement.style.left) || resizeState.startCardPosition.x;
+        const finalY = parseInt(cardElement.style.top) || resizeState.startCardPosition.y;
         
         // Re-enable transitions
         cardElement.style.transition = '';
         
         // Final state update
         onUpdateSize(resizeState.resizingCardId!, finalWidth, finalHeight);
+        
+        // Update position if it changed (for left/top edge resizing)
+        if (onUpdatePosition && (finalX !== resizeState.startCardPosition.x || finalY !== resizeState.startCardPosition.y)) {
+          onUpdatePosition(resizeState.resizingCardId!, finalX, finalY);
+        }
         
         // Update group bounds if card is in a group
         if (getCardGroup && updateGroupBounds) {
@@ -124,7 +190,9 @@ export function useCardResize({ onUpdateSize, cards, onResizeEnd, getCardGroup, 
               [resizeState.resizingCardId!]: {
                 ...cards[resizeState.resizingCardId!],
                 width: finalWidth,
-                height: finalHeight
+                height: finalHeight,
+                x: finalX,
+                y: finalY
               }
             };
             updateGroupBounds(cardGroup.id, updatedCards);
@@ -146,10 +214,11 @@ export function useCardResize({ onUpdateSize, cards, onResizeEnd, getCardGroup, 
         resizingCardId: null,
         resizeHandle: null,
         startPosition: { x: 0, y: 0 },
-        startSize: { width: 0, height: 0 }
+        startSize: { width: 0, height: 0 },
+        startCardPosition: { x: 0, y: 0 }
       });
     }
-  }, [resizeState, onUpdateSize, onResizeEnd]);
+  }, [resizeState, onUpdateSize, onResizeEnd, onUpdatePosition, getCardGroup, updateGroupBounds, cards]);
 
   // Add global resize event listeners
   useEffect(() => {

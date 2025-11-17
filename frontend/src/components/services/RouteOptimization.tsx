@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
-import { MapIcon, ClockIcon, UserIcon, TruckIcon, CalculatorIcon } from '@heroicons/react/24/outline';
+import { Map, Clock, User, Truck, Calculator } from 'lucide-react';
 
 interface ServiceSchedule {
   id: string;
@@ -316,7 +316,7 @@ export default function RouteOptimization() {
         <div className="bg-white shadow-sm border border-gray-200 rounded-lg p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <TruckIcon className="h-8 w-8 text-blue-600" />
+              <Truck className="h-8 w-8 text-blue-600" />
             </div>
             <div className="ml-4">
               <div className="text-2xl font-bold text-gray-900">
@@ -329,7 +329,7 @@ export default function RouteOptimization() {
         <div className="bg-white shadow-sm border border-gray-200 rounded-lg p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <ClockIcon className="h-8 w-8 text-green-600" />
+              <Clock className="h-8 w-8 text-green-600" />
             </div>
             <div className="ml-4">
               <div className="text-2xl font-bold text-gray-900">
@@ -342,7 +342,7 @@ export default function RouteOptimization() {
         <div className="bg-white shadow-sm border border-gray-200 rounded-lg p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <CalculatorIcon className="h-8 w-8 text-purple-600" />
+              <Calculator className="h-8 w-8 text-purple-600" />
             </div>
             <div className="ml-4">
               <div className="text-2xl font-bold text-gray-900">
@@ -360,7 +360,7 @@ export default function RouteOptimization() {
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
+                <User className="h-5 w-5 text-gray-400 mr-2" />
                 <h3 className="text-lg font-medium text-gray-900">{route.technician_name}</h3>
               </div>
               <div className="flex items-center space-x-4 text-sm text-gray-500">
@@ -435,7 +435,7 @@ export default function RouteOptimization() {
       {/* No Routes */}
       {optimizedRoutes.length === 0 && (
         <div className="bg-white shadow-sm border border-gray-200 rounded-lg p-12 text-center">
-          <MapIcon className="mx-auto h-12 w-12 text-gray-400" />
+          <Map className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No routes to optimize</h3>
           <p className="mt-1 text-sm text-gray-500">
             No scheduled services found for the selected date and technician.

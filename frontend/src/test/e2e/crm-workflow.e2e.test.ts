@@ -4,7 +4,7 @@
  */
 
 import { test, expect, Page } from '@playwright/test';
-import { TestUtils } from '../setup/enterprise-testing-setup';
+// TestUtils import removed - not used in this file
 
 test.describe('CRM Workflow E2E Tests', () => {
   let page: Page;
@@ -17,7 +17,7 @@ test.describe('CRM Workflow E2E Tests', () => {
     
     // Mock authentication
     await page.goto('/login');
-    await page.fill('[data-testid="email-input"]', 'test@verosuite.com');
+    await page.fill('[data-testid="email-input"]', 'test@verofield.com');
     await page.fill('[data-testid="password-input"]', 'TestPassword123!');
     await page.click('[data-testid="login-button"]');
     
@@ -73,7 +73,8 @@ test.describe('CRM Workflow E2E Tests', () => {
       
       // Step 4: Assign technician to work order
       await page.click('[data-testid="work-orders-nav"]');
-      await page.click('[data-testid="work-order-item"]').first();
+      const workOrderItem = page.locator('[data-testid="work-order-item"]').first();
+      await workOrderItem.click();
       
       await page.click('[data-testid="assign-technician-button"]');
       await page.selectOption('[data-testid="technician-select"]', 'tech1@example.com');

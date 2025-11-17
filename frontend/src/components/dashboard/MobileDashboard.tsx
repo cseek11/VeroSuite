@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useTouchGestures } from '@/hooks/useTouchGestures';
 import { useDensityMode } from '@/hooks/useDensityMode';
+import { logger } from '@/utils/logger';
 
 interface MobileDashboardProps {
   children: React.ReactNode;
@@ -58,7 +59,7 @@ export function MobileDashboard({
 
   const handleTap = useCallback((point: { x: number; y: number }) => {
     // Handle tap actions
-    console.log('Tap at:', point);
+    logger.debug('Tap gesture detected', { point }, 'MobileDashboard');
   }, []);
 
   const handleDoubleTap = useCallback((point: { x: number; y: number }) => {
@@ -72,7 +73,7 @@ export function MobileDashboard({
 
   const handleSwipe = useCallback((direction: 'up' | 'down' | 'left' | 'right', velocity: { x: number; y: number }) => {
     // Handle swipe gestures for navigation
-    console.log('Swipe:', direction, velocity);
+    logger.debug('Swipe gesture detected', { direction, velocity }, 'MobileDashboard');
   }, []);
 
   const { gestureState, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel } = useTouchGestures({

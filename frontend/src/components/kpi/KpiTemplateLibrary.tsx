@@ -3,31 +3,23 @@ import { useKpiTemplates, useFeaturedKpiTemplates, usePopularKpiTemplates, useTr
 import KpiTemplateEditor from './KpiTemplateEditor';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import { Card } from '@/components/ui/EnhancedUI';
-import { Badge } from '@/components/ui/CRMComponents';
-import { Chip } from '@/components/ui/EnhancedUI';
+import { Badge } from '@/components/ui';
 import { 
   Search, 
   Filter, 
-  Star, 
   TrendingUp, 
   Plus, 
-  Eye, 
-  Copy,
-  Tag,
+  Eye,
   Calendar,
   User,
   BarChart3,
-  PieChart,
-  Activity,
   DollarSign,
   Users,
   Settings,
-  Heart,
-  Share2,
-  Download
+  Heart
 } from 'lucide-react';
-import type { KpiTemplate, KpiTemplateFilters } from '@/types/kpi-templates';
+import type { KpiTemplate } from '@/types/kpi-templates';
+import { logger } from '@/utils/logger';
 
 interface KpiTemplateLibraryProps {
   onTemplateSelect?: (template: KpiTemplate) => void;
@@ -67,14 +59,6 @@ export default function KpiTemplateLibrary({
   });
   const { data: userKpis = [] } = useUserKpis();
 
-  // Debug logging (reduced for performance)
-  console.log('🔍 KpiTemplateLibrary Debug:');
-  console.log('  - templates count:', Array.isArray(templates) ? templates.length : 'not array');
-  console.log('  - templatesLoading:', templatesLoading);
-  console.log('  - userKpis count:', Array.isArray(userKpis) ? userKpis.length : 'not array');
-  console.log('  - userKpis data:', userKpis);
-  console.log('  - templates data:', templates);
-  
   const { data: featuredTemplates = [] } = useFeaturedKpiTemplates();
   const { data: popularTemplates = [] } = usePopularKpiTemplates(6);
   const trackUsageMutation = useTrackTemplateUsage();
@@ -82,11 +66,6 @@ export default function KpiTemplateLibrary({
   // Get favorited templates to sort them first
   const { data: favoritedTemplatesData = [], isLoading: favoritesLoading, error: favoritesError } = useFavoritedTemplates();
   const favoritedTemplateIds = new Set(favoritedTemplatesData.map(t => t.id));
-  
-  // Debug favorites data (reduced for performance)
-  console.log('🔍 Favorites Debug:');
-  console.log('  - favoritedTemplatesData count:', favoritedTemplatesData.length);
-  console.log('  - favoritesLoading:', favoritesLoading);
 
   // Local optimistic overrides so clicking heart immediately reorders list
   const [favoriteOverrides, setFavoriteOverrides] = useState<Record<string, boolean>>({});
@@ -94,7 +73,6 @@ export default function KpiTemplateLibrary({
   // Clear optimistic overrides when favorites data is successfully loaded
   React.useEffect(() => {
     if (favoritedTemplatesData.length > 0 && !favoritesLoading && !favoritesError) {
-      console.log('🔄 Clearing optimistic overrides - favorites data loaded successfully');
       setFavoriteOverrides({});
     }
   }, [favoritedTemplatesData.length, favoritesLoading, favoritesError]);
@@ -111,20 +89,11 @@ export default function KpiTemplateLibrary({
 
   // Map user KPIs to template-like objects
   const userTemplates = useMemo(() => {
-    console.log('🔄 Processing user KPIs to templates:', userKpis);
     if (!Array.isArray(userKpis)) {
-      console.log('⚠️ userKpis is not an array:', userKpis);
-      return [] as any[];
+      logger.warn('userKpis is not an array', { userKpis }, 'KpiTemplateLibrary');
+      return [] as Array<Record<string, unknown>>;
     }
-    const mapped = userKpis.map((k: any) => {
-      console.log('🔍 User KPI details:', {
-        id: k.id,
-        template_id: k.template_id,
-        name: k.name,
-        has_template_id: !!k.template_id,
-        is_from_template: !!k.template_id
-      });
-      
+    const mapped = userKpis.map((k: Record<string, unknown>) => {
       return {
         id: k.template_id || k.id, // Use template_id for favorites, fallback to k.id
         userKpiId: k.id, // Keep original UserKpi ID for reference
@@ -148,8 +117,6 @@ export default function KpiTemplateLibrary({
         creator: k.creator || undefined,
       };
     });
-    console.log('✅ Mapped user templates:', mapped);
-    console.log('🔍 User template IDs for favorites:', mapped.map(t => ({ name: t.name, id: t.id, userKpiId: t.userKpiId, is_from_template: t.is_from_template })));
     return mapped;
   }, [userKpis]);
 
@@ -157,30 +124,15 @@ export default function KpiTemplateLibrary({
   const combinedTemplates = useMemo(() => {
     const sys = Array.isArray(templates) ? templates : [];
     const combined = [...userTemplates, ...sys];
-    console.log('🔄 Combined templates details:', {
-      userTemplatesCount: userTemplates.length,
-      systemTemplatesCount: sys.length,
-      combinedCount: combined.length,
-      userTemplates: userTemplates,
-      systemTemplates: sys.slice(0, 2), // Show first 2 for debugging
-      combinedArray: combined
-    });
-    console.log('🔄 Combined templates array length:', combined.length);
-    console.log('🔄 Combined templates first item:', combined[0]);
     return combined;
   }, [templates, userTemplates]);
 
   // Derive user templates (user-created templates)
   const derivedUserTemplates = useMemo(() => {
     const source = Array.isArray(combinedTemplates) ? combinedTemplates : [];
-    const list = source.filter((t: any) => t.template_type === 'user');
+    const list = source.filter((t: Record<string, unknown>) => t.template_type === 'user');
     // keep a stable order: name asc
-    const sorted = [...list].sort((a, b) => a.name.localeCompare(b.name));
-    console.log('🔍 Derived User Templates Debug:');
-    console.log('  - source length:', source.length);
-    console.log('  - filtered list length:', list.length);
-    console.log('  - sorted list length:', sorted.length);
-    console.log('  - sorted templates:', sorted);
+    const sorted = [...list].sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
     return sorted;
   }, [combinedTemplates]);
 
@@ -213,29 +165,15 @@ export default function KpiTemplateLibrary({
     });
     
     // Keep a stable order: name asc
-    const sorted = [...favoritedList].sort((a, b) => a.name.localeCompare(b.name));
-    
-    console.log('🔍 Derived Favorites Debug:');
-    console.log('  - source length:', source.length);
-    console.log('  - effectiveFavoritedIds:', Array.from(effectiveFavoritedIds));
-    console.log('  - favorited list length:', favoritedList.length);
-    console.log('  - sorted favorites:', sorted);
-    console.log('  - user templates in source:', source.filter(t => t.template_type === 'user').map(t => ({ name: t.name, id: t.id, userKpiId: t.userKpiId })));
-    console.log('  - system templates in source:', source.filter(t => t.template_type !== 'user').map(t => ({ name: t.name, id: t.id })));
+    const sorted = [...favoritedList].sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
     
     return sorted;
   }, [combinedTemplates, effectiveFavoritedIds]);
 
   // Filter and sort templates based on search, category, and favorites
   const filteredTemplates = useMemo(() => {
-    console.log('🔍 Filtering templates - combinedTemplates:', combinedTemplates);
-    console.log('🔍 Filtering templates - combinedTemplates type:', typeof combinedTemplates);
-    console.log('🔍 Filtering templates - combinedTemplates isArray:', Array.isArray(combinedTemplates));
-    
     if (!Array.isArray(combinedTemplates)) {
-      console.error('Templates is not an array:', combinedTemplates);
-      console.error('Templates type:', typeof templates);
-      console.error('Templates keys:', templates ? Object.keys(templates) : 'null/undefined');
+      logger.error('Templates is not an array', new Error(`Type: ${typeof combinedTemplates}`), 'KpiTemplateLibrary');
       return [];
     }
     
@@ -268,16 +206,16 @@ export default function KpiTemplateLibrary({
   // Get unique categories and types for filters
   const categories = useMemo(() => {
     if (!Array.isArray(combinedTemplates)) {
-      console.error('Templates is not an array:', combinedTemplates);
+      logger.error('Templates is not an array for categories', new Error(`Type: ${typeof combinedTemplates}`), 'KpiTemplateLibrary');
       return ['all'];
     }
-    const cats = ['all', ...Array.from(new Set(combinedTemplates.map((t: any) => t.category)))];
+    const cats = ['all', ...Array.from(new Set(combinedTemplates.map((t: Record<string, unknown>) => t.category)))];
     return cats;
   }, [combinedTemplates]);
 
   const types = useMemo(() => {
     if (!Array.isArray(templates)) {
-      console.error('Templates is not an array:', templates);
+      logger.error('Templates is not an array for types', new Error(`Type: ${typeof templates}`), 'KpiTemplateLibrary');
       return ['all'];
     }
     const types = ['all', ...Array.from(new Set(templates.map(t => t.template_type)))];
@@ -296,29 +234,16 @@ export default function KpiTemplateLibrary({
   };
 
   const handleUseTemplate = async (template: KpiTemplate) => {
-    console.log('🔍 TICKET-4: Starting template usage with comprehensive logging');
-    console.log('📋 Template details:', {
-      id: template.id,
-      name: template.name,
-      type: template.type,
-      source: (template as any).source,
-      template_type: (template as any).template_type,
-      user_id: (template as any).user_id,
-      is_active: (template as any).is_active
-    });
-
     // Fire-and-forget tracking so failures don't block using the template
     trackUsageMutation
       .mutateAsync({ templateId: template.id, action: 'viewed' })
-      .catch((err) => console.warn('Failed to track template usage:', err));
+      .catch((err) => logger.warn('Failed to track template usage', err, 'KpiTemplateLibrary'));
 
     // Always proceed to use the template
     try {
-      console.log('✅ TICKET-4: Calling onUseTemplate callback');
       onUseTemplate?.(template);
-      console.log('✅ TICKET-4: Template usage completed successfully');
     } catch (error) {
-      console.error('❌ TICKET-4: Failed to use template:', error);
+      logger.error('Failed to use template', error, 'KpiTemplateLibrary');
     }
   };
 
@@ -335,10 +260,9 @@ export default function KpiTemplateLibrary({
       const templateUrl = `${window.location.origin}/templates/${template.id}`;
       await navigator.clipboard.writeText(templateUrl);
       
-      // Show success message (you could add a toast notification here)
-      console.log('Template URL copied to clipboard:', templateUrl);
+      logger.debug('Template URL copied to clipboard', { templateUrl }, 'KpiTemplateLibrary');
     } catch (error) {
-      console.error('Failed to share template:', error);
+      logger.error('Failed to share template', error, 'KpiTemplateLibrary');
     }
   };
 
@@ -400,15 +324,15 @@ export default function KpiTemplateLibrary({
                     {template.name}
                   </h3>
                   <div className="flex gap-1 flex-shrink-0">
-                    <Chip className={`text-xs ${getCategoryColor(template.category)}`}>
+                    <Badge className={`text-xs ${getCategoryColor(template.category)}`}>
                       {template.category}
-                    </Chip>
-                    <Chip className={`text-xs ${getTypeColor(template.template_type)}`}>
+                    </Badge>
+                    <Badge className={`text-xs ${getTypeColor(template.template_type)}`}>
                       {template.template_type}
-                    </Chip>
-                    <Chip className="text-xs bg-green-100 text-green-700 border-green-200">
+                    </Badge>
+                    <Badge className="text-xs bg-green-100 text-green-700 border-green-200">
                       Live View
-                    </Chip>
+                    </Badge>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-xs text-gray-500 flex-shrink-0">

@@ -6,6 +6,7 @@
 import { EnhancedIntentClassificationService, type EnhancedIntentResult } from './enhanced-intent-service';
 import { EnhancedActionHandler, type EnhancedActionResult } from './enhanced-action-handler';
 import { robustApiClient } from './robust-api-client';
+import { logger } from '@/utils/logger';
 
 export interface GlobalSearchResult {
   success: boolean;
@@ -61,10 +62,13 @@ class GlobalSearchIntegrationService {
     const startTime = Date.now();
     const processingId = ++this.processingCount;
     
-    console.log(`🔍 Global Search Processing #${processingId} started:`, { 
-      query, 
-      config: processingConfig 
-    });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Global Search Processing started', { 
+        processingId,
+        query, 
+        config: processingConfig 
+      }, 'global-search-integration');
+    }
 
     try {
       // Set timeout for processing
@@ -79,18 +83,21 @@ class GlobalSearchIntegrationService {
       
       const result = await Promise.race([processingPromise, timeoutPromise]);
       
-      console.log(`✅ Global Search Processing #${processingId} completed:`, {
-        success: result.success,
-        processingTime: result.processingTime,
-        confidence: result.confidence
-      });
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Global Search Processing completed', {
+          processingId,
+          success: result.success,
+          processingTime: result.processingTime,
+          confidence: result.confidence
+        }, 'global-search-integration');
+      }
 
       return result;
 
-    } catch (error) {
+    } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
       
-      console.error(`🔴 Global Search Processing #${processingId} failed:`, error);
+      logger.error('Global Search Processing failed', { processingId, error }, 'global-search-integration');
       
       return {
         success: false,
@@ -124,19 +131,24 @@ class GlobalSearchIntegrationService {
     if (config.debug) {
       apiHealth = await robustApiClient.healthCheck();
       if (!apiHealth.healthy) {
-        console.warn(`⚠️ API health check failed for processing #${processingId}`);
+        logger.warn('API health check failed', { processingId }, 'global-search-integration');
       }
     }
 
     // Step 2: Intent classification and entity extraction
-    console.log(`🧠 Processing #${processingId}: Classifying intent...`);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Classifying intent', { processingId }, 'global-search-integration');
+    }
     const intentResult = await this.intentService.classifyIntent(query);
     
-    console.log(`🧠 Processing #${processingId}: Intent classified:`, {
-      intent: intentResult.intent,
-      confidence: intentResult.confidence,
-      entities: Object.keys(intentResult.entities).filter(k => k !== 'validation')
-    });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Intent classified', {
+        processingId,
+        intent: intentResult.intent,
+        confidence: intentResult.confidence,
+        entities: Object.keys(intentResult.entities).filter(k => k !== 'validation')
+      }, 'global-search-integration');
+    }
 
     // Step 3: Confidence check
     if (intentResult.confidence < config.confidenceThreshold) {
@@ -158,14 +170,19 @@ class GlobalSearchIntegrationService {
     }
 
     // Step 4: Execute action
-    console.log(`⚡ Processing #${processingId}: Executing action...`);
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Executing action', { processingId }, 'global-search-integration');
+    }
     const actionResult = await this.actionHandler.executeAction(intentResult);
     
-    console.log(`⚡ Processing #${processingId}: Action executed:`, {
-      success: actionResult.success,
-      errors: actionResult.errors.length,
-      warnings: actionResult.warnings.length
-    });
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Action executed', {
+        processingId,
+        success: actionResult.success,
+        errors: actionResult.errors.length,
+        warnings: actionResult.warnings.length
+      }, 'global-search-integration');
+    }
 
     // Step 5: Compile final result
     const processingTime = Date.now() - startTime;
@@ -217,7 +234,9 @@ class GlobalSearchIntegrationService {
    * Reset conversation context
    */
   resetContext(): void {
-    console.log('🔄 Resetting global search context');
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Resetting global search context', {}, 'global-search-integration');
+    }
     // The intent service maintains its own context
     // This could be expanded to reset that context if needed
   }

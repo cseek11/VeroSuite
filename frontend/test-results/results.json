@@ -1,7 +1,7 @@
 {
   "config": {
-    "configFile": "C:\\Users\\ashse\\Documents\\VeroPest Suite\\Training\\VeroSuite\\frontend\\playwright.config.ts",
-    "rootDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/src/test/e2e",
+    "configFile": "C:\\Users\\ashse\\Documents\\VeroField\\Training\\VeroField\\frontend\\playwright.config.ts",
+    "rootDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/src/test/e2e",
     "forbidOnly": false,
     "fullyParallel": true,
     "globalSetup": null,
@@ -28,6 +28,10 @@
         {
           "outputFile": "test-results/results.xml"
         }
+      ],
+      [
+        "list",
+        null
       ]
     ],
     "reportSlowTests": {
@@ -37,13 +41,13 @@
     "quiet": false,
     "projects": [
       {
-        "outputDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/test-results",
+        "outputDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "chromium",
         "name": "chromium",
-        "testDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/src/test/e2e",
+        "testDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/src/test/e2e",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -51,13 +55,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/test-results",
+        "outputDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "firefox",
         "name": "firefox",
-        "testDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/src/test/e2e",
+        "testDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/src/test/e2e",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -65,13 +69,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/test-results",
+        "outputDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "webkit",
         "name": "webkit",
-        "testDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/src/test/e2e",
+        "testDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/src/test/e2e",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -79,13 +83,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/test-results",
+        "outputDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "Mobile Chrome",
         "name": "Mobile Chrome",
-        "testDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/src/test/e2e",
+        "testDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/src/test/e2e",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -93,13 +97,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/test-results",
+        "outputDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "Mobile Safari",
         "name": "Mobile Safari",
-        "testDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/src/test/e2e",
+        "testDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/src/test/e2e",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -107,13 +111,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/test-results",
+        "outputDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "Microsoft Edge",
         "name": "Microsoft Edge",
-        "testDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/src/test/e2e",
+        "testDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/src/test/e2e",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -121,13 +125,13 @@
         "timeout": 30000
       },
       {
-        "outputDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/test-results",
+        "outputDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
         "id": "Google Chrome",
         "name": "Google Chrome",
-        "testDir": "C:/Users/ashse/Documents/VeroPest Suite/Training/VeroSuite/frontend/src/test/e2e",
+        "testDir": "C:/Users/ashse/Documents/VeroField/Training/VeroField/frontend/src/test/e2e",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -150,12 +154,16 @@
   "errors": [
     {
       "message": "TypeError: Cannot redefine property: Symbol($$jest-matchers-object)",
-      "stack": "TypeError: Cannot redefine property: Symbol($$jest-matchers-object)\n    at C:\\Users\\ashse\\Documents\\VeroPest Suite\\Training\\VeroSuite\\frontend\\node_modules\\@vitest\\expect\\dist\\index.js:667:9"
+      "stack": "TypeError: Cannot redefine property: Symbol($$jest-matchers-object)\n    at C:\\Users\\ashse\\Documents\\VeroField\\Training\\VeroField\\frontend\\node_modules\\@vitest\\expect\\dist\\index.js:667:9"
+    },
+    {
+      "message": "Error: No tests found",
+      "stack": "Error: No tests found"
     }
   ],
   "stats": {
-    "startTime": "2025-09-11T06:15:33.110Z",
-    "duration": 4747.064,
+    "startTime": "2025-11-16T23:00:24.184Z",
+    "duration": 5077.328000000001,
     "expected": 0,
     "skipped": 0,
     "unexpected": 0,

@@ -9,7 +9,8 @@ import {
   UseGuards, 
   Request,
   Query,
-  ParseUUIDPipe
+  ParseUUIDPipe,
+  UseInterceptors
 } from '@nestjs/common';
 import { 
   ApiTags, 
@@ -21,11 +22,13 @@ import {
 import { KPIsService } from './kpis.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateKPIDto, UpdateKPIDto, KPIResponseDto, KPIDataResponseDto, KPITrendResponseDto } from './dto';
+import { DeprecationInterceptor } from '../common/interceptors/deprecation.interceptor';
 
-@ApiTags('KPIs')
+@ApiTags('KPIs V1 (Deprecated)')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('kpis')
+@Controller({ path: 'kpis', version: '1' })
+@UseInterceptors(DeprecationInterceptor)
 export class KPIsController {
   constructor(private readonly kpisService: KPIsService) {}
 

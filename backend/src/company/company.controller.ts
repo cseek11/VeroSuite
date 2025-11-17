@@ -5,7 +5,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CompanyService } from './company.service';
 import { UpdateCompanySettingsDto, CompanySettingsResponseDto } from './dto/company-settings.dto';
 
-@Controller('v1/company')
+@Controller({ path: 'company', version: '1' })
 export class CompanyController {
   private readonly logger = new Logger(CompanyController.name);
 
