@@ -1,9 +1,9 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-17T23:10:50.629088Z",
+  "last_updated": "2025-11-17T23:11:42.969406Z",
   "scores": [
     {
-      "pr": "12",
+      "pr": "13",
       "score": -7,
       "breakdown": {
         "tests": 0,
@@ -13,7 +13,7 @@
         "security": -3,
         "penalties": -6
       },
-      "timestamp": "2025-11-17T23:10:29.271129Z",
+      "timestamp": "2025-11-17T23:11:21.870691Z",
       "rubric_version": "unknown",
       "author": null,
       "files_changed": 0,
@@ -320,6 +320,66 @@
           "notes": "File: docs/planning/INVESTIGATION_SUMMARY.md\nDocs: Documentation updated"
         },
         "docs/planning/LARGE_PR_BEST_PRACTICES.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 1,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/LARGE_PR_BEST_PRACTICES.md\nDocs: Documentation updated\nPerformance: Performance improvements detected (4 mentions)"
+        },
+        "docs/planning/MONITOR_CHANGES_POST_IMPLEMENTATION_AUDIT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/MONITOR_CHANGES_POST_IMPLEMENTATION_AUDIT.md\nDocs: Documentation updated with engineering decisions"
+        },
+        "docs/planning/PR_MERGE_SUCCESS.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/PR_MERGE_SUCCESS.md\nDocs: Documentation updated"
+        },
+        "docs/planning/REWARD_SCORE_AUTOMATION_TRIGGER.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/REWARD_SCORE_AUTOMATION_TRIGGER.md\nDocs: Documentation updated"
+        },
+        "docs/planning/REWARD_SCORE_GRANULARITY_ANALYSIS.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/REWARD_SCORE_GRANULARITY_ANALYSIS.md\nDocs: Documentation updated"
+        },
+        "docs/planning/REWARD_SCORE_SYSTEM_STATUS.md": {
           "score": 0,
           "breakdown": {
             "tests": 0,
@@ -329,7 +389,7 @@
             "security": 0,
             "penalties": 0
           },
-          "notes": "File: docs/planning/LARGE_PR_BEST_PRACTICES.md (no contributions)"
+          "notes": "File: docs/planning/REWARD_SCORE_SYSTEM_STATUS.md (no contributions)"
         },
         "frontend/src/components/billing/InvoiceTemplates.tsx": {
           "score": 0,
@@ -405,9 +465,9 @@
     },
     "anti_patterns": [
       {
-        "pr": "12",
+        "pr": "13",
         "score": -7,
-        "timestamp": "2025-11-17T23:10:29.271129Z",
+        "timestamp": "2025-11-17T23:11:21.870691Z",
         "breakdown": {
           "tests": 0,
           "bug_fix": 0,
