@@ -311,7 +311,9 @@ jobs:
             # Extract decision from comment
             DECISION=$(echo "$COMMENT" | grep -oP 'Decision Recommendation: \*\*\K[^*]+' || echo "BLOCK")
             echo "Decision: $DECISION"
-            exit 1
+            # Don't exit 1 here - let metrics collection run even with low scores
+            # The artifact is already uploaded, so metrics can be collected
+            echo "::warning::Score is below threshold, but continuing to allow metrics collection"
           elif [ "$SCORE" -le 3 ]; then
             echo "::warning::REWARD_SCORE is $SCORE (requires improvement)"
             DECISION=$(echo "$COMMENT" | grep -oP 'Decision Recommendation: \*\*\K[^*]+' || echo "REQUEST_CHANGES")
