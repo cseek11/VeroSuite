@@ -74,6 +74,8 @@ The system has been fully implemented with:
 - Audit logging of sensitive actions
 - Input validation and DTOs across endpoints
 
+<!-- Test PR: Verifying REWARD_SCORE CI automation system -->
+
 ## Contributing
 
 See [Documentation Contributing Guide](docs/CONTRIBUTING.md) for how to contribute to documentation.
