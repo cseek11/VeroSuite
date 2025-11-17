@@ -44,11 +44,14 @@ model Tenant {
   technicianDocuments     TechnicianDocument[]
   technicianPerformance   TechnicianPerformance[]
   tenantBranding          TenantBranding?
-  users                   User[]
-  workOrders              WorkOrder[]
-  kpiTemplates            KpiTemplate[]
-  userKpis                UserKpi[]
-  kpiTemplateUsage        KpiTemplateUsage[]
+    users                   User[]
+    workOrders              WorkOrder[]
+    kpiTemplates            KpiTemplate[]
+    userKpis                UserKpi[]
+    kpiTemplateUsage        KpiTemplateUsage[]
+    invoiceTemplates        InvoiceTemplate[]
+    invoiceSchedules        InvoiceSchedule[]
+    invoiceReminderHistory  InvoiceReminderHistory[]
 
   @@map("tenants")
   @@schema("public")
@@ -110,11 +113,16 @@ model User {
   tenant                                              Tenant             @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
   assignedWorkOrders                                  WorkOrder[]        @relation("WorkOrderAssignedTo")
   createdKpiTemplates                                 KpiTemplate[]      @relation("KpiTemplateCreator")
-  approvedKpiTemplates                                KpiTemplate[]      @relation("KpiTemplateApprover")
-  userKpis                                            UserKpi[]
-  kpiTemplateUsage                                    KpiTemplateUsage[]
-  manager                                             User?              @relation("UserHierarchy", fields: [manager_id], references: [id], onDelete: SetNull)
-  directReports                                       User[]             @relation("UserHierarchy")
+    approvedKpiTemplates                                KpiTemplate[]      @relation("KpiTemplateApprover")
+    userKpis                                            UserKpi[]
+    kpiTemplateUsage                                    KpiTemplateUsage[]
+    InvoiceTemplate_InvoiceTemplate_created_byTousers   InvoiceTemplate[] @relation("InvoiceTemplate_created_byTousers")
+    InvoiceTemplate_InvoiceTemplate_updated_byTousers   InvoiceTemplate[] @relation("InvoiceTemplate_updated_byTousers")
+    InvoiceSchedule_InvoiceSchedule_created_byTousers   InvoiceSchedule[] @relation("InvoiceSchedule_created_byTousers")
+    InvoiceSchedule_InvoiceSchedule_updated_byTousers   InvoiceSchedule[] @relation("InvoiceSchedule_updated_byTousers")
+    InvoiceReminderHistory                             InvoiceReminderHistory[]
+    manager                                             User?              @relation("UserHierarchy", fields: [manager_id], references: [id], onDelete: SetNull)
+    directReports                                       User[]             @relation("UserHierarchy")
 
   @@index([manager_id])
   @@map("users")
@@ -229,11 +237,12 @@ model Account {
   customerPhotos           CustomerPhoto[]
   customerProfile          CustomerProfile?
   locations                Location[]
-  paymentMethods           PaymentMethod[]
-  pestActivity             PestActivityTracking[]
-  serviceHistory           ServiceHistory[]
-  workOrders               WorkOrder[]
-  jobs                     Job[]
+    paymentMethods           PaymentMethod[]
+    pestActivity             PestActivityTracking[]
+    serviceHistory           ServiceHistory[]
+    workOrders               WorkOrder[]
+    jobs                     Job[]
+    invoiceSchedules         InvoiceSchedule[]
 
   @@unique([tenant_id, id])
   @@map("accounts")
@@ -924,9 +933,10 @@ model Invoice {
   ServiceAgreement                ServiceAgreement? @relation(fields: [service_agreement_id], references: [id])
   tenants                         Tenant            @relation(fields: [tenant_id], references: [id])
   users_Invoice_updated_byTousers User              @relation("Invoice_updated_byTousers", fields: [updated_by], references: [id])
-  work_orders                     WorkOrder?        @relation(fields: [work_order_id], references: [id])
-  InvoiceItem                     InvoiceItem[]
-  Payment                         Payment[]
+    work_orders                     WorkOrder?        @relation(fields: [work_order_id], references: [id])
+    InvoiceItem                     InvoiceItem[]
+    Payment                         Payment[]
+    invoiceReminderHistory          InvoiceReminderHistory[]
 
   @@unique([invoice_number, tenant_id])
   @@index([account_id])
@@ -974,6 +984,78 @@ model Payment {
   @@index([payment_date])
   @@index([tenant_id])
   @@map("Payment")
+  @@schema("public")
+}
+
+model InvoiceTemplate {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id   String   @db.Uuid
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  items       Json     @default("[]")
+  tags        String[] @default([])
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @updatedAt @db.Timestamptz(6)
+  created_by  String   @db.Uuid
+  updated_by  String   @db.Uuid
+  tenant      Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  users_InvoiceTemplate_created_byTousers User @relation("InvoiceTemplate_created_byTousers", fields: [created_by], references: [id])
+  users_InvoiceTemplate_updated_byTousers User @relation("InvoiceTemplate_updated_byTousers", fields: [updated_by], references: [id])
+
+  @@index([tenant_id])
+  @@index([name])
+  @@map("invoice_templates")
+  @@schema("public")
+}
+
+model InvoiceSchedule {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id     String   @db.Uuid
+  account_id    String   @db.Uuid
+  template_id   String?  @db.Uuid
+  schedule_type String   @db.VarChar(20) // 'recurring' | 'one-time'
+  frequency     String?  @db.VarChar(20) // 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'
+  start_date    DateTime @db.Date
+  end_date      DateTime? @db.Date
+  next_run_date DateTime @db.Timestamptz(6)
+  is_active     Boolean  @default(true)
+  amount        Decimal? @db.Decimal(10, 2)
+  description   String?  @db.Text
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+  created_by    String   @db.Uuid
+  updated_by    String   @db.Uuid
+  tenant        Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  account       Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
+  users_InvoiceSchedule_created_byTousers User @relation("InvoiceSchedule_created_byTousers", fields: [created_by], references: [id])
+  users_InvoiceSchedule_updated_byTousers User @relation("InvoiceSchedule_updated_byTousers", fields: [updated_by], references: [id])
+
+  @@index([tenant_id])
+  @@index([account_id])
+  @@index([is_active])
+  @@index([next_run_date])
+  @@map("invoice_schedules")
+  @@schema("public")
+}
+
+model InvoiceReminderHistory {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id     String   @db.Uuid
+  invoice_id    String   @db.Uuid
+  reminder_type String   @db.VarChar(20) // 'email' | 'sms' | 'letter'
+  status        String   @db.VarChar(20) @default("sent") // 'sent' | 'failed' | 'pending'
+  message       String?  @db.Text
+  sent_at       DateTime @default(now()) @db.Timestamptz(6)
+  created_by    String   @db.Uuid
+  tenant        Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  invoice       Invoice  @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+  users         User     @relation(fields: [created_by], references: [id])
+
+  @@index([tenant_id])
+  @@index([invoice_id])
+  @@index([sent_at(sort: Desc)])
+  @@index([reminder_type])
+  @@map("invoice_reminder_history")
   @@schema("public")
 }
 
