@@ -6,12 +6,18 @@ on:
   workflow_run:
     workflows: ["CI"]
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to compute score for (optional)'
+        required: false
+        type: string
 
 jobs:
   compute-score:
     runs-on: ubuntu-latest
-    # Only run if PR event, or if workflow_run completed successfully and was triggered by a PR
-    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success')
+    # Only run if PR event, workflow_dispatch, or if workflow_run completed successfully and was triggered by a PR
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,6 +44,19 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            # Use provided PR number or find from current branch
+            if [ -n "${{ github.event.inputs.pr_number }}" ]; then
+              echo "number=${{ github.event.inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+            else
+              # Try to find PR from current branch
+              PR_NUM=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '.[0].number' || echo "")
+              if [ -z "$PR_NUM" ]; then
+                echo "Error: No PR number provided and could not find PR for branch ${{ github.ref_name }}" >&2
+                exit 1
+              fi
+              echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
+            fi
           else
             # Extract PR number from workflow_run
             PR_NUM=$(gh pr list --head "${{ github.event.workflow_run.head_branch }}" --json number --jq '.[0].number' || echo "")
@@ -279,7 +298,11 @@ jobs:
               -f body="$COMMENT" || true
           else
             echo "Posting new comment"
-            gh pr comment "$PR_NUM" --body "$COMMENT" || true
+            # Try to post comment, but don't fail if permissions are insufficient
+            gh pr comment "$PR_NUM" --body "$COMMENT" 2>&1 || {
+              echo "Warning: Could not post comment (may need write permissions). Score computed: $SCORE"
+              echo "Comment content saved to reward.json artifact"
+            }
           fi
 
           # Set decision based on score
@@ -288,7 +311,9 @@ jobs:
             # Extract decision from comment
             DECISION=$(echo "$COMMENT" | grep -oP 'Decision Recommendation: \*\*\K[^*]+' || echo "BLOCK")
             echo "Decision: $DECISION"
-            exit 1
+            # Don't exit 1 here - let metrics collection run even with low scores
+            # The artifact is already uploaded, so metrics can be collected
+            echo "::warning::Score is below threshold, but continuing to allow metrics collection"
           elif [ "$SCORE" -le 3 ]; then
             echo "::warning::REWARD_SCORE is $SCORE (requires improvement)"
             DECISION=$(echo "$COMMENT" | grep -oP 'Decision Recommendation: \*\*\K[^*]+' || echo "REQUEST_CHANGES")

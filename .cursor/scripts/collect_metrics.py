@@ -133,8 +133,8 @@ def get_pr_info(pr_num: str, repo_path: Path) -> Dict:
     return info
 
 
-def add_score_entry(metrics: Dict, pr_num: str, score: int, breakdown: Dict, metadata: Dict, repo_path: Optional[Path] = None) -> None:
-    """Add a new score entry to metrics with enhanced data."""
+def add_score_entry(metrics: Dict, pr_num: str, score: int, breakdown: Dict, metadata: Dict, repo_path: Optional[Path] = None, file_scores: Optional[Dict] = None) -> None:
+    """Add a new score entry to metrics with enhanced data including file-level scores."""
     # Get PR info if repo path provided
     pr_info = {}
     if repo_path:
@@ -148,7 +148,8 @@ def add_score_entry(metrics: Dict, pr_num: str, score: int, breakdown: Dict, met
         "rubric_version": metadata.get("rubric_version", "unknown"),
         "author": pr_info.get("author"),
         "files_changed": pr_info.get("files_changed", 0),
-        "coverage_delta": pr_info.get("coverage_delta")
+        "coverage_delta": pr_info.get("coverage_delta"),
+        "file_scores": file_scores if file_scores else {}  # File-level scoring breakdown
     }
     
     # Add to scores list
@@ -309,6 +310,7 @@ def main() -> None:
     parser.add_argument("--score", type=int, help="Score value (optional)")
     parser.add_argument("--breakdown", help="Path to breakdown JSON (optional)")
     parser.add_argument("--metadata", help="Path to metadata JSON (optional)")
+    parser.add_argument("--reward-json", help="Path to reward.json artifact (contains score, breakdown, metadata, file_scores)")
     parser.add_argument("--aggregate-only", action="store_true", help="Only recalculate aggregates")
     args = parser.parse_args()
     
@@ -316,20 +318,36 @@ def main() -> None:
     metrics = load_metrics()
     
     # Add new score entry if provided
-    if args.pr and args.score is not None:
-        breakdown = {}
-        if args.breakdown:
-            with open(args.breakdown, "r", encoding="utf-8") as handle:
-                breakdown = json.load(handle)
-        
-        metadata = {}
-        if args.metadata:
-            with open(args.metadata, "r", encoding="utf-8") as handle:
-                metadata = json.load(handle)
+    if args.reward_json or (args.pr and args.score is not None):
+        # If reward.json provided, read all data from it
+        if args.reward_json:
+            with open(args.reward_json, "r", encoding="utf-8") as handle:
+                reward_data = json.load(handle)
+            score = reward_data.get("score", 0)
+            breakdown = reward_data.get("breakdown", {})
+            metadata = reward_data.get("metadata", {})
+            file_scores = reward_data.get("file_scores", {})
+            pr_num = metadata.get("pr") or args.pr
+            if not pr_num:
+                logger.error("PR number not found in reward.json metadata or --pr argument", operation="main")
+                sys.exit(1)
+        else:
+            # Use individual arguments
+            score = args.score
+            breakdown = {}
+            if args.breakdown:
+                with open(args.breakdown, "r", encoding="utf-8") as handle:
+                    breakdown = json.load(handle)
+            metadata = {}
+            if args.metadata:
+                with open(args.metadata, "r", encoding="utf-8") as handle:
+                    metadata = json.load(handle)
+            file_scores = {}
+            pr_num = args.pr
         
         # Get repo path for PR info
         repo_path = Path(__file__).resolve().parents[0].parents[0]
-        add_score_entry(metrics, args.pr, args.score, breakdown, metadata, repo_path)
+        add_score_entry(metrics, pr_num, score, breakdown, metadata, repo_path, file_scores)
     
     # Recalculate aggregates
     metrics["aggregates"] = calculate_aggregates(metrics)
