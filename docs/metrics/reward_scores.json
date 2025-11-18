@@ -1,19 +1,19 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-18T14:55:52.865042Z",
+  "last_updated": "2025-11-18T14:56:53.863971Z",
   "scores": [
     {
-      "pr": "18",
-      "score": -7,
+      "pr": "49",
+      "score": -6,
       "breakdown": {
-        "tests": 0,
+        "tests": 1,
         "bug_fix": 0,
         "docs": 1,
         "performance": 1,
         "security": -3,
         "penalties": -6
       },
-      "timestamp": "2025-11-18T14:50:36.278599Z",
+      "timestamp": "2025-11-18T14:55:53.656840Z",
       "rubric_version": "unknown",
       "author": null,
       "files_changed": 0,
@@ -175,6 +175,18 @@
           },
           "notes": "File: .cursor/rules/verification.md (no contributions)"
         },
+        ".cursor/scripts/aggregate_reward_errors.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/aggregate_reward_errors.py (no contributions)"
+        },
         ".cursor/scripts/analyze_metrics.py": {
           "score": 0,
           "breakdown": {
@@ -198,6 +210,18 @@
             "penalties": 0
           },
           "notes": "File: .cursor/scripts/auto_pr_daemon.py (no contributions)"
+        },
+        ".cursor/scripts/check_workflow_permissions.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/check_workflow_permissions.py (no contributions)"
         },
         ".cursor/scripts/collect_metrics.py": {
           "score": 0,
@@ -259,6 +283,126 @@
           },
           "notes": "File: .cursor/scripts/monitor_changes.py (no contributions)"
         },
+        ".cursor/scripts/reindex_embeddings.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/reindex_embeddings.py (no contributions)"
+        },
+        ".cursor/scripts/retry_artifact_download.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/retry_artifact_download.py (no contributions)"
+        },
+        ".cursor/scripts/retry_reward_workflows.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/retry_reward_workflows.py (no contributions)"
+        },
+        ".cursor/scripts/reward_system_health_check.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/reward_system_health_check.py (no contributions)"
+        },
+        ".cursor/scripts/suggest_patterns.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/suggest_patterns.py (no contributions)"
+        },
+        ".cursor/scripts/tests/test_compute_reward_score.py": {
+          "score": 1,
+          "breakdown": {
+            "tests": 1,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/tests/test_compute_reward_score.py\nTests: New test files added: 1; No test coverage detected"
+        },
+        ".cursor/scripts/tests/test_monitor_changes.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/tests/test_monitor_changes.py (no contributions)"
+        },
+        ".cursor/scripts/validate_documentation_dates.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/validate_documentation_dates.py (no contributions)"
+        },
+        ".cursor/scripts/validate_file_organization.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/validate_file_organization.py (no contributions)"
+        },
+        ".cursor/scripts/validate_trace_propagation.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/validate_trace_propagation.py (no contributions)"
+        },
         ".cursor/scripts/validate_workflow_triggers.py": {
           "score": 0,
           "breakdown": {
@@ -270,6 +414,174 @@
             "penalties": 0
           },
           "notes": "File: .cursor/scripts/validate_workflow_triggers.py (no contributions)"
+        },
+        ".github/workflows/ci.yml": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/ci.yml (no contributions)"
+        },
+        ".github/workflows/detect_silent_failures.yml": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/detect_silent_failures.yml (no contributions)"
+        },
+        ".github/workflows/retry_failed_reward_runs.yml": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/retry_failed_reward_runs.yml (no contributions)"
+        },
+        ".github/workflows/reward_error_aggregation.yml": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/reward_error_aggregation.yml\nDocs: Documentation updated"
+        },
+        ".github/workflows/reward_system_health_check.yml": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/reward_system_health_check.yml (no contributions)"
+        },
+        ".github/workflows/swarm_compute_reward_score.yml": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/swarm_compute_reward_score.yml (no contributions)"
+        },
+        ".github/workflows/swarm_log_anti_patterns.yml": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/swarm_log_anti_patterns.yml (no contributions)"
+        },
+        ".github/workflows/swarm_reindex_patterns.yml": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/swarm_reindex_patterns.yml (no contributions)"
+        },
+        ".github/workflows/swarm_suggest_patterns.yml": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/swarm_suggest_patterns.yml (no contributions)"
+        },
+        ".github/workflows/update_metrics_dashboard.yml": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/update_metrics_dashboard.yml (no contributions)"
+        },
+        ".github/workflows/validate_documentation.yml": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/validate_documentation.yml (no contributions)"
+        },
+        ".github/workflows/validate_file_organization.yml": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/validate_file_organization.yml (no contributions)"
+        },
+        ".github/workflows/validate_pattern_learning.yml": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/validate_pattern_learning.yml (no contributions)"
+        },
+        ".github/workflows/validate_trace_propagation.yml": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/validate_trace_propagation.yml (no contributions)"
         },
         "README_AUTO_PR.md": {
           "score": 0,
@@ -283,6 +595,42 @@
           },
           "notes": "File: README_AUTO_PR.md (no contributions)"
         },
+        "backend/prisma/migrations/20250823161445_enhanced_crm_schema/migration.sql": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/prisma/migrations/20250823161445_enhanced_crm_schema/migration.sql (no contributions)"
+        },
+        "backend/prisma/migrations/add_invoice_templates_schedules_reminders/migration.sql": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/prisma/migrations/add_invoice_templates_schedules_reminders/migration.sql (no contributions)"
+        },
+        "backend/prisma/migrations/add_user_employee_fields/migration.sql": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/prisma/migrations/add_user_employee_fields/migration.sql (no contributions)"
+        },
         "backend/prisma/schema.prisma": {
           "score": 0,
           "breakdown": {
@@ -295,6 +643,18 @@
           },
           "notes": "File: backend/prisma/schema.prisma (no contributions)"
         },
+        "backend/src/billing/__tests__/billing.service.templates-schedules-reminders.test.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/billing/__tests__/billing.service.templates-schedules-reminders.test.ts (no contributions)"
+        },
         "backend/src/billing/billing.controller.ts": {
           "score": 0,
           "breakdown": {
@@ -306,6 +666,18 @@
             "penalties": 0
           },
           "notes": "File: backend/src/billing/billing.controller.ts (no contributions)"
+        },
+        "backend/src/billing/billing.module.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/billing/billing.module.ts (no contributions)"
         },
         "backend/src/billing/billing.service.ts": {
           "score": 0,
@@ -404,6 +776,18 @@
           "notes": "File: backend/src/billing/dto/update-invoice-schedule.dto.ts (no contributions)"
         },
         "backend/src/billing/dto/update-invoice-template.dto.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/billing/dto/update-invoice-template.dto.ts (no contributions)"
+        },
+        "backend/test/setup.js": {
           "score": 1,
           "breakdown": {
             "tests": 0,
@@ -413,7 +797,259 @@
             "security": 0,
             "penalties": 0
           },
-          "notes": "File: backend/src/billing/dto/update-invoice-template.dto.ts\nDocs: Documentation updated"
+          "notes": "File: backend/test/setup.js\nDocs: Documentation updated"
+        },
+        "docs/ENSURING_AI_COMPLIANCE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/ENSURING_AI_COMPLIANCE.md\nDocs: Documentation updated"
+        },
+        "docs/architecture/cursor_rules_upgrade.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/architecture/cursor_rules_upgrade.md\nDocs: Documentation updated"
+        },
+        "docs/archive/CLEANUP_REPORT_2025-11-16.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/archive/CLEANUP_REPORT_2025-11-16.md\nDocs: Documentation updated"
+        },
+        "docs/archive/DOCUMENTATION_ORGANIZATION_SUMMARY.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/archive/DOCUMENTATION_ORGANIZATION_SUMMARY.md\nDocs: Documentation updated"
+        },
+        "docs/archive/ROOT_FILES_AUDIT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/archive/ROOT_FILES_AUDIT.md\nDocs: Documentation updated"
+        },
+        "docs/database/BASELINE_MIGRATION_ALTERNATIVE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/database/BASELINE_MIGRATION_ALTERNATIVE.md\nDocs: Documentation updated"
+        },
+        "docs/database/INVOICE_TEMPLATES_MIGRATION_COMPLETE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/database/INVOICE_TEMPLATES_MIGRATION_COMPLETE.md\nDocs: Documentation updated"
+        },
+        "docs/database/INVOICE_TEMPLATES_SCHEDULES_REMINDERS_MIGRATION.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/database/INVOICE_TEMPLATES_SCHEDULES_REMINDERS_MIGRATION.md\nDocs: Documentation updated with engineering decisions"
+        },
+        "docs/database/MIGRATION_DRIFT_RESOLUTION.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/database/MIGRATION_DRIFT_RESOLUTION.md\nDocs: Documentation updated"
+        },
+        "docs/database/MIGRATION_FIX_INSTRUCTIONS.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/database/MIGRATION_FIX_INSTRUCTIONS.md\nDocs: Documentation updated"
+        },
+        "docs/database/NEXT_STEPS_AFTER_INTROSPECTION.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/database/NEXT_STEPS_AFTER_INTROSPECTION.md\nDocs: Documentation updated"
+        },
+        "docs/database/SCHEMA_INTROSPECTION_COMPLETE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/database/SCHEMA_INTROSPECTION_COMPLETE.md\nDocs: Documentation updated"
+        },
+        "docs/database/SHADOW_DATABASE_BYPASS.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/database/SHADOW_DATABASE_BYPASS.md\nDocs: Documentation updated"
+        },
+        "docs/database/TENANT_TABLE_NAME_FIX.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/database/TENANT_TABLE_NAME_FIX.md\nDocs: Documentation updated with engineering decisions"
+        },
+        "docs/engineering-decisions.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/engineering-decisions.md\nDocs: Documentation updated"
+        },
+        "docs/error-patterns.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/error-patterns.md\nDocs: Documentation updated"
+        },
+        "docs/metrics/AUTOMATION_TRIGGERS.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/metrics/AUTOMATION_TRIGGERS.md\nDocs: Documentation updated"
+        },
+        "docs/metrics/WORKFLOW_GUIDE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/metrics/WORKFLOW_GUIDE.md\nDocs: Documentation updated"
+        },
+        "docs/metrics/lib/.gitkeep": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/metrics/lib/.gitkeep\nDocs: Documentation updated"
+        },
+        "docs/metrics/reward_error_log.json": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/metrics/reward_error_log.json\nDocs: Documentation updated"
+        },
+        "docs/metrics/serve.ps1": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/metrics/serve.ps1\nDocs: Documentation updated"
         },
         "docs/planning/AUTOMATED_PR_CREATION_STRATEGY.md": {
           "score": 1,
@@ -475,6 +1111,42 @@
           },
           "notes": "File: docs/planning/AUTO_PR_POST_IMPLEMENTATION_AUDIT_FINAL.md\nDocs: Documentation updated with engineering decisions"
         },
+        "docs/planning/AUTO_PR_REWARD_SYSTEM_AUDIT_REPORT.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 1,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/AUTO_PR_REWARD_SYSTEM_AUDIT_REPORT.md\nDocs: Documentation updated\nPerformance: Performance improvements detected (4 mentions)"
+        },
+        "docs/planning/AUTO_PR_REWARD_SYSTEM_FIXES_IMPLEMENTED.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 1,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/AUTO_PR_REWARD_SYSTEM_FIXES_IMPLEMENTED.md\nDocs: Documentation updated\nPerformance: Performance improvements detected (5 mentions)"
+        },
+        "docs/planning/AUTO_PR_REWARD_SYSTEM_POST_IMPLEMENTATION_AUDIT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/AUTO_PR_REWARD_SYSTEM_POST_IMPLEMENTATION_AUDIT.md\nDocs: Documentation updated with engineering decisions"
+        },
         "docs/planning/AUTO_PR_USAGE_GUIDE.md": {
           "score": 1,
           "breakdown": {
@@ -486,6 +1158,42 @@
             "penalties": 0
           },
           "notes": "File: docs/planning/AUTO_PR_USAGE_GUIDE.md\nDocs: Documentation updated"
+        },
+        "docs/planning/BILLING_API_AUDIT_REPORT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/BILLING_API_AUDIT_REPORT.md\nDocs: Documentation updated with engineering decisions"
+        },
+        "docs/planning/BILLING_API_RECOMMENDATIONS_COMPLETION.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/BILLING_API_RECOMMENDATIONS_COMPLETION.md\nDocs: Documentation updated"
+        },
+        "docs/planning/CI_AUTOMATION_POST_IMPLEMENTATION_AUDIT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/CI_AUTOMATION_POST_IMPLEMENTATION_AUDIT.md\nDocs: Documentation updated"
         },
         "docs/planning/DASHBOARD_UPDATE_RESOLUTION.md": {
           "score": 1,
@@ -523,6 +1231,30 @@
           },
           "notes": "File: docs/planning/INVESTIGATION_SUMMARY.md\nDocs: Documentation updated"
         },
+        "docs/planning/JOB_SCHEDULING_PHASE_2_RESOURCE_TIMELINE_TEST_FIXES.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/JOB_SCHEDULING_PHASE_2_RESOURCE_TIMELINE_TEST_FIXES.md\nDocs: Documentation updated"
+        },
+        "docs/planning/JOB_SCHEDULING_PHASE_2_RESOURCE_TIMELINE_TEST_SUITE_SUMMARY.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/JOB_SCHEDULING_PHASE_2_RESOURCE_TIMELINE_TEST_SUITE_SUMMARY.md\nDocs: Documentation updated"
+        },
         "docs/planning/LARGE_PR_BEST_PRACTICES.md": {
           "score": 2,
           "breakdown": {
@@ -534,6 +1266,30 @@
             "penalties": 0
           },
           "notes": "File: docs/planning/LARGE_PR_BEST_PRACTICES.md\nDocs: Documentation updated\nPerformance: Performance improvements detected (4 mentions)"
+        },
+        "docs/planning/MONITOR_CHANGES_BUG_FIX.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/MONITOR_CHANGES_BUG_FIX.md\nDocs: Documentation updated"
+        },
+        "docs/planning/MONITOR_CHANGES_BUG_FIX_AUDIT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/MONITOR_CHANGES_BUG_FIX_AUDIT.md\nDocs: Documentation updated with engineering decisions"
         },
         "docs/planning/MONITOR_CHANGES_POST_IMPLEMENTATION_AUDIT.md": {
           "score": 1,
@@ -547,6 +1303,66 @@
           },
           "notes": "File: docs/planning/MONITOR_CHANGES_POST_IMPLEMENTATION_AUDIT.md\nDocs: Documentation updated with engineering decisions"
         },
+        "docs/planning/MONITOR_CHANGES_RECOMMENDATIONS_COMPLETE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/MONITOR_CHANGES_RECOMMENDATIONS_COMPLETE.md\nDocs: Documentation updated"
+        },
+        "docs/planning/NEXT_DEVELOPMENT_PHASE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/NEXT_DEVELOPMENT_PHASE.md\nDocs: Documentation updated"
+        },
+        "docs/planning/PAYMENT_TRACKING_FINAL_AUDIT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/PAYMENT_TRACKING_FINAL_AUDIT.md\nDocs: Documentation updated"
+        },
+        "docs/planning/PAYMENT_TRACKING_HOOKS_FIX.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/PAYMENT_TRACKING_HOOKS_FIX.md\nDocs: Documentation updated"
+        },
+        "docs/planning/PAYMENT_TRACKING_POST_IMPLEMENTATION_AUDIT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/PAYMENT_TRACKING_POST_IMPLEMENTATION_AUDIT.md\nDocs: Documentation updated"
+        },
         "docs/planning/PR_MERGE_SUCCESS.md": {
           "score": 1,
           "breakdown": {
@@ -559,6 +1375,18 @@
           },
           "notes": "File: docs/planning/PR_MERGE_SUCCESS.md\nDocs: Documentation updated"
         },
+        "docs/planning/RECOMMENDATIONS_AUDIT_FINAL.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/RECOMMENDATIONS_AUDIT_FINAL.md\nDocs: Documentation updated with engineering decisions"
+        },
         "docs/planning/REWARD_SCORE_AUTOMATION_TRIGGER.md": {
           "score": 1,
           "breakdown": {
@@ -570,6 +1398,30 @@
             "penalties": 0
           },
           "notes": "File: docs/planning/REWARD_SCORE_AUTOMATION_TRIGGER.md\nDocs: Documentation updated"
+        },
+        "docs/planning/REWARD_SCORE_CI_AUTOMATION_PLAN.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/REWARD_SCORE_CI_AUTOMATION_PLAN.md\nDocs: Documentation updated"
+        },
+        "docs/planning/REWARD_SCORE_DASHBOARD_TROUBLESHOOTING.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/REWARD_SCORE_DASHBOARD_TROUBLESHOOTING.md\nDocs: Documentation updated"
         },
         "docs/planning/REWARD_SCORE_GRANULARITY_ANALYSIS.md": {
           "score": 1,
@@ -584,6 +1436,318 @@
           "notes": "File: docs/planning/REWARD_SCORE_GRANULARITY_ANALYSIS.md\nDocs: Documentation updated"
         },
         "docs/planning/REWARD_SCORE_SYSTEM_STATUS.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/REWARD_SCORE_SYSTEM_STATUS.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_1_2_IMPLEMENTATION_COMPLETE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_1_2_IMPLEMENTATION_COMPLETE.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_1_2_POST_IMPLEMENTATION_AUDIT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_1_2_POST_IMPLEMENTATION_AUDIT.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_API_ERRORS_STATUS.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_API_ERRORS_STATUS.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_AUDIT_SUMMARY.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_AUDIT_SUMMARY.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_BACKEND_API_FIXES.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_BACKEND_API_FIXES.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_BACKEND_API_INVESTIGATION.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_BACKEND_API_INVESTIGATION.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_COMPLETE_1_4_SUMMARY.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_COMPLETE_1_4_SUMMARY.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_DEBUG_API_ERRORS.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_DEBUG_API_ERRORS.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_ERROR_EVALUATION.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_ERROR_EVALUATION.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_ERROR_EVALUATION_FINAL.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_ERROR_EVALUATION_FINAL.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_ERROR_FIX_SUMMARY.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_ERROR_FIX_SUMMARY.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_ERROR_PATTERNS_VERIFICATION.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_ERROR_PATTERNS_VERIFICATION.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_FINAL_SUMMARY.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_FINAL_SUMMARY.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_PAYMENT_PROCESSING_AUDIT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_PAYMENT_PROCESSING_AUDIT.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_PAYMENT_PROCESSING_COMPLETE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_PAYMENT_PROCESSING_COMPLETE.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_ROUTES_REFERENCE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_ROUTES_REFERENCE.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_TEST_RESULTS.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_TEST_RESULTS.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_3_4_FINANCIAL_MANAGEMENT_COMPLETE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_3_4_FINANCIAL_MANAGEMENT_COMPLETE.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_4_5_INVOICE_GENERATION_COMPLETE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_4_5_INVOICE_GENERATION_COMPLETE.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_4_5_INVOICE_GENERATION_PROGRESS.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_4_5_INVOICE_GENERATION_PROGRESS.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_4_5_POST_IMPLEMENTATION_AUDIT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_4_5_POST_IMPLEMENTATION_AUDIT.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_4_5_RECOMMENDATIONS_COMPLETE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_4_5_RECOMMENDATIONS_COMPLETE.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_4_5_TEST_FIXES_POST_IMPLEMENTATION_AUDIT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_4_5_TEST_FIXES_POST_IMPLEMENTATION_AUDIT.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WORKFLOW_RUN_TRIGGER_ISSUE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WORKFLOW_RUN_TRIGGER_ISSUE.md\nDocs: Documentation updated"
+        },
+        "docs/planning/WORKFLOW_TRIGGER_RULES_AUDIT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WORKFLOW_TRIGGER_RULES_AUDIT.md\nDocs: Documentation updated"
+        },
+        "docs/reference/FILE_ORGANIZATION.md": {
           "score": 0,
           "breakdown": {
             "tests": 0,
@@ -593,7 +1757,67 @@
             "security": 0,
             "penalties": 0
           },
-          "notes": "File: docs/planning/REWARD_SCORE_SYSTEM_STATUS.md (no contributions)"
+          "notes": "File: docs/reference/FILE_ORGANIZATION.md (no contributions)"
+        },
+        "frontend/src/components/billing/BillingErrorBoundary.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/BillingErrorBoundary.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/BillingSkeletons.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/BillingSkeletons.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/FinancialDashboard.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/FinancialDashboard.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/InvoiceReminders.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/InvoiceReminders.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/InvoiceScheduler.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/InvoiceScheduler.tsx (no contributions)"
         },
         "frontend/src/components/billing/InvoiceTemplates.tsx": {
           "score": 0,
@@ -606,6 +1830,186 @@
             "penalties": 0
           },
           "notes": "File: frontend/src/components/billing/InvoiceTemplates.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/PaymentConfirmation.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/PaymentConfirmation.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/__tests__/ARManagement.test.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/__tests__/ARManagement.test.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/__tests__/CustomerPaymentHistory.test.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/__tests__/CustomerPaymentHistory.test.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/__tests__/FinancialDashboard.test.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/__tests__/FinancialDashboard.test.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/__tests__/FinancialReports.test.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/__tests__/FinancialReports.test.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/__tests__/InvoiceDetail.test.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/__tests__/InvoiceDetail.test.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/__tests__/InvoiceList.test.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/__tests__/InvoiceList.test.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/__tests__/PaymentConfirmation.test.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/__tests__/PaymentConfirmation.test.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/__tests__/PaymentForm.test.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/__tests__/PaymentForm.test.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/__tests__/PaymentMethodManager.test.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/__tests__/PaymentMethodManager.test.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/__tests__/PaymentMethodSelector.test.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/__tests__/PaymentMethodSelector.test.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/__tests__/RevenueAnalytics.test.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/__tests__/RevenueAnalytics.test.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/__tests__/SavedPaymentMethods.test.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/__tests__/SavedPaymentMethods.test.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/__tests__/billing.e2e.test.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/__tests__/billing.e2e.test.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/__tests__/billing.integration.test.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/__tests__/billing.integration.test.tsx (no contributions)"
         },
         "frontend/src/lib/enhanced-api.ts": {
           "score": 0,
@@ -624,22 +2028,22 @@
   ],
   "aggregates": {
     "total_prs": 1,
-    "average_score": -7.0,
+    "average_score": -6.0,
     "score_distribution": {
       "negative (<0)": 1
     },
     "trends": [
       {
         "period": "2025-W46",
-        "average": -7.0,
+        "average": -6.0,
         "count": 1
       }
     ],
     "category_performance": {
       "tests": {
-        "average": 0.0,
-        "total": 0,
-        "count": 0
+        "average": 1.0,
+        "total": 1,
+        "count": 1
       },
       "bug_fix": {
         "average": 0.0,
@@ -669,11 +2073,11 @@
     },
     "anti_patterns": [
       {
-        "pr": "18",
-        "score": -7,
-        "timestamp": "2025-11-18T14:50:36.278599Z",
+        "pr": "49",
+        "score": -6,
+        "timestamp": "2025-11-18T14:55:53.656840Z",
         "breakdown": {
-          "tests": 0,
+          "tests": 1,
           "bug_fix": 0,
           "docs": 1,
           "performance": 1,
