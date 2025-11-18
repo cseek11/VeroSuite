@@ -26,7 +26,9 @@ async function loadMetrics() {
         let usingGitHub = false;
         
         try {
-            response = await fetch(GITHUB_METRICS_URL);
+            // Add cache-busting parameter to ensure fresh data
+            const cacheBuster = `?t=${Date.now()}`;
+            response = await fetch(GITHUB_METRICS_URL + cacheBuster);
             if (response.ok) {
                 usingGitHub = true;
             } else {
@@ -485,11 +487,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // Wait for Chart.js to load before initializing
     if (typeof Chart !== 'undefined') {
         loadMetrics();
-        // Auto-refresh every 5 minutes
-        setInterval(loadMetrics, 5 * 60 * 1000);
+        // Auto-refresh every 5 minutes with cache-busting
+        setInterval(() => {
+            console.log('Auto-refreshing metrics...');
+            loadMetrics();
+        }, 5 * 60 * 1000);
     } else {
         // Chart.js will call initDashboard when loaded
         console.log('Waiting for Chart.js to load...');
     }
 });
+
+// Add manual refresh button handler if it exists
+if (typeof document !== 'undefined') {
+    document.addEventListener('click', (e) => {
+        if (e.target && e.target.id === 'refreshMetrics') {
+            console.log('Manual refresh triggered');
+            loadMetrics();
+        }
+    });
+}
 

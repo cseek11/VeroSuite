@@ -57,7 +57,10 @@
         <header>
             <h1>VeroField REWARD_SCORE Dashboard</h1>
             <p class="subtitle">Code Quality Metrics & Trends</p>
-            <p class="last-updated">Last Updated: <span id="lastUpdated">Loading...</span></p>
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                <p class="last-updated" style="margin: 0;">Last Updated: <span id="lastUpdated">Loading...</span></p>
+                <button id="refreshMetrics" class="btn-primary" style="padding: 5px 15px; font-size: 0.9em;">🔄 Refresh</button>
+            </div>
         </header>
 
         <div class="filters-section">
