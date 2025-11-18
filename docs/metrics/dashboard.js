@@ -26,24 +26,25 @@ async function loadMetrics() {
         let usingGitHub = false;
         
         try {
-            // Add cache-busting parameter to ensure fresh data
+            // Try GitHub raw URL (may fail due to CORS, that's OK - we'll use local file)
+            // Note: GitHub raw URLs don't support CORS preflight, so this will often fail
             const cacheBuster = `?t=${Date.now()}`;
             const githubUrl = GITHUB_METRICS_URL + cacheBuster;
-            console.log('Fetching from GitHub:', githubUrl);
+            console.log('Attempting to fetch from GitHub:', githubUrl);
             response = await fetch(githubUrl, {
-                cache: 'no-store',  // Force no cache
-                headers: {
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
-                }
+                method: 'GET',  // Simple GET request (no preflight)
+                mode: 'cors',
+                cache: 'no-store'
             });
             if (response.ok) {
                 usingGitHub = true;
+                console.log('✅ Successfully fetched from GitHub');
             } else {
                 throw new Error(`GitHub fetch failed: ${response.status} ${response.statusText}`);
             }
         } catch (githubError) {
+            // CORS errors are expected - GitHub raw doesn't support CORS preflight
+            // This is fine, we'll use the local file which should be kept up to date by the workflow
             // Fallback to local file if GitHub fetch fails
             console.warn('Failed to fetch from GitHub, trying local file:', githubError);
             
