@@ -25,18 +25,19 @@ except ImportError:
 METRICS_FILE = Path(__file__).resolve().parents[0].parents[0] / "docs" / "metrics" / "reward_scores.json"
 
 
-def load_metrics() -> Dict:
+def load_metrics(metrics_file: Optional[Path] = None) -> Dict:
     """Load existing metrics from JSON file."""
-    if METRICS_FILE.exists():
+    target_file = Path(metrics_file) if metrics_file else METRICS_FILE
+    if target_file.exists():
         try:
-            with open(METRICS_FILE, "r", encoding="utf-8") as handle:
+            with open(target_file, "r", encoding="utf-8") as handle:
                 return json.load(handle)
         except (json.JSONDecodeError, FileNotFoundError) as e:
             logger.warn(
-                f"Could not load metrics file: {METRICS_FILE}",
+                f"Could not load metrics file: {target_file}",
                 operation="load_metrics",
                 error=e,
-                metrics_file=str(METRICS_FILE)
+                metrics_file=str(target_file)
             )
             pass
     return {
@@ -54,11 +55,12 @@ def load_metrics() -> Dict:
     }
 
 
-def save_metrics(metrics: Dict) -> None:
+def save_metrics(metrics: Dict, metrics_file: Optional[Path] = None) -> None:
     """Save metrics to JSON file."""
-    METRICS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    target_file = Path(metrics_file) if metrics_file else METRICS_FILE
+    target_file.parent.mkdir(parents=True, exist_ok=True)
     metrics["last_updated"] = datetime.utcnow().isoformat() + "Z"
-    with open(METRICS_FILE, "w", encoding="utf-8") as handle:
+    with open(target_file, "w", encoding="utf-8") as handle:
         json.dump(metrics, handle, indent=2)
 
 
@@ -311,25 +313,57 @@ def main() -> None:
     parser.add_argument("--breakdown", help="Path to breakdown JSON (optional)")
     parser.add_argument("--metadata", help="Path to metadata JSON (optional)")
     parser.add_argument("--reward-json", help="Path to reward.json artifact (contains score, breakdown, metadata, file_scores)")
+    parser.add_argument("--reward-file", help="Path to reward.json artifact (alias for --reward-json)")
+    parser.add_argument("--output", required=True, help="Path to output metrics file")
     parser.add_argument("--aggregate-only", action="store_true", help="Only recalculate aggregates")
     args = parser.parse_args()
     
-    # Load existing metrics
-    metrics = load_metrics()
+    # Determine reward file to use (prefer --reward-file over --reward-json for backward compatibility)
+    reward_file = args.reward_file or args.reward_json
+    
+    # Load existing metrics from output path if it exists
+    output_path = Path(args.output)
+    metrics = load_metrics(output_path) if output_path.exists() else load_metrics()
     
     # Add new score entry if provided
-    if args.reward_json or (args.pr and args.score is not None):
+    if reward_file or (args.pr and args.score is not None):
         # If reward.json provided, read all data from it
-        if args.reward_json:
-            with open(args.reward_json, "r", encoding="utf-8") as handle:
-                reward_data = json.load(handle)
-            score = reward_data.get("score", 0)
+        if reward_file:
+            # Validate reward file exists
+            if not os.path.exists(reward_file):
+                logger.error(f"Reward file not found: {reward_file}", operation="main")
+                sys.exit(1)
+            
+            try:
+                with open(reward_file, "r", encoding="utf-8") as handle:
+                    reward_data = json.load(handle)
+            except json.JSONDecodeError as e:
+                logger.error(f"Invalid JSON in reward file: {reward_file}", operation="main", error=str(e))
+                sys.exit(1)
+            except Exception as e:
+                logger.error(f"Error reading reward file: {reward_file}", operation="main", error=str(e))
+                sys.exit(1)
+            
+            # Validate reward payload structure
+            try:
+                validate_reward_payload(reward_data)
+            except ValueError as e:
+                logger.error(f"Invalid reward payload: {e}", operation="main")
+                sys.exit(1)
+            
+            # Check for required fields (pr_number, total_score, timestamp)
+            required_fields = ["pr_number", "total_score", "timestamp"]
+            missing_fields = [f for f in required_fields if f not in reward_data]
+            if missing_fields:
+                logger.error(f"Missing required fields in reward.json: {missing_fields}", operation="main")
+                sys.exit(1)
+            score = reward_data.get("total_score", reward_data.get("score", 0))
             breakdown = reward_data.get("breakdown", {})
             metadata = reward_data.get("metadata", {})
             file_scores = reward_data.get("file_scores", {})
-            pr_num = metadata.get("pr") or args.pr
+            pr_num = reward_data.get("pr_number") or metadata.get("pr") or args.pr
             if not pr_num:
-                logger.error("PR number not found in reward.json metadata or --pr argument", operation="main")
+                logger.error("PR number not found in reward.json (pr_number, metadata.pr, or --pr argument)", operation="main")
                 sys.exit(1)
         else:
             # Use individual arguments
@@ -352,8 +386,8 @@ def main() -> None:
     # Recalculate aggregates
     metrics["aggregates"] = calculate_aggregates(metrics)
     
-    # Save metrics
-    save_metrics(metrics)
+    # Save metrics to output path
+    save_metrics(metrics, args.output)
     
     logger.info(
         f"Metrics updated: {metrics['aggregates']['total_prs']} PRs, avg score: {metrics['aggregates']['average_score']}",
@@ -364,5 +398,10 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+        sys.exit(0)
+    except Exception as e:
+        logger.error(f"Unhandled exception in collect_metrics: {e}", operation="main", error=str(e), exc_info=True)
+        sys.exit(1)
 
