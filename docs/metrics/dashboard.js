@@ -1,6 +1,10 @@
 // VeroField REWARD_SCORE Dashboard JavaScript
 
-const METRICS_FILE = 'reward_scores.json';
+// Fetch metrics from GitHub raw URL (always latest) or fallback to local file
+const GITHUB_REPO = 'cseek11/VeroSuite';
+const GITHUB_BRANCH = 'main';
+const GITHUB_METRICS_URL = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/docs/metrics/reward_scores.json`;
+const LOCAL_METRICS_FILE = 'reward_scores.json';
 
 let distributionChart = null;
 let trendsChart = null;
@@ -17,17 +21,43 @@ let currentFilters = {
 // Load and render metrics
 async function loadMetrics() {
     try {
-        // Check if we're running from file:// protocol
-        if (window.location.protocol === 'file:') {
-            showError('Dashboard must be served via HTTP server due to CORS restrictions. See README.md for setup instructions.');
-            return;
+        // Try GitHub raw URL first (always latest data)
+        let response;
+        let usingGitHub = false;
+        
+        try {
+            response = await fetch(GITHUB_METRICS_URL);
+            if (response.ok) {
+                usingGitHub = true;
+            } else {
+                throw new Error('GitHub fetch failed');
+            }
+        } catch (githubError) {
+            // Fallback to local file if GitHub fetch fails
+            console.warn('Failed to fetch from GitHub, trying local file:', githubError);
+            
+            // Check if we're running from file:// protocol
+            if (window.location.protocol === 'file:') {
+                showError('Dashboard must be served via HTTP server due to CORS restrictions. See README.md for setup instructions.');
+                return;
+            }
+            
+            response = await fetch(LOCAL_METRICS_FILE);
         }
         
-        const response = await fetch(METRICS_FILE);
         if (!response.ok) {
             throw new Error(`Failed to load metrics: ${response.statusText}`);
         }
+        
         const data = await response.json();
+        
+        // Show data source indicator
+        if (usingGitHub) {
+            console.log('✅ Loaded metrics from GitHub (latest data)');
+        } else {
+            console.log('⚠️ Loaded metrics from local file (may be outdated)');
+        }
+        
         renderMetrics(data);
     } catch (error) {
         console.error('Error loading metrics:', error);
