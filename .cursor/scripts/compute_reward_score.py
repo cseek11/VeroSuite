@@ -653,9 +653,13 @@ def get_decision_recommendation(score: int, breakdown: dict, static_analysis: di
     tests_failing = (frontend_cov == 0 and backend_cov == 0) or breakdown.get("penalties", 0) < -3
     
     # Decision logic
-    if score < -3 and (critical_security or tests_failing):
+    # Critical security issues always block, regardless of score
+    if critical_security:
         decision = "BLOCK"
-        reason = "Score below -3 with critical issues (security or failing tests)"
+        reason = "Critical security issues detected (blocking threshold)"
+    elif score < -3 and tests_failing:
+        decision = "BLOCK"
+        reason = "Score below -3 with failing tests (blocking threshold)"
     elif score < -3:
         decision = "BLOCK"
         reason = "Score below -3 (blocking threshold)"

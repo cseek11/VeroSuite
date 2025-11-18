@@ -4,6 +4,236 @@ This document catalogs error patterns, their root causes, fixes, and prevention 
 
 ---
 
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
+
+---
+
 ## TYPESCRIPT_ANY_TYPES - 2025-11-16
 
 ### Summary
@@ -95,6 +325,236 @@ const getPaymentTypeColor = (type: string): 'default' | 'secondary' | 'outline' 
 
 ---
 
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
+
+---
+
 ## TENANT_CONTEXT_NOT_FOUND - 2025-11-16
 
 ### Summary
@@ -178,6 +638,236 @@ async getInvoices(@Request() req: any, @Query('accountId') accountId?: string) {
 
 ---
 
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
+
+---
+
 ## INVALID_UUID_FORMAT - 2025-11-16
 
 ### Summary
@@ -254,6 +944,236 @@ async getInvoices(accountId?: string, status?: InvoiceStatus, tenantId?: string)
 - ARRAY_GUARD_PATTERN - Similar validation pattern
 - Input validation failures
 - Type conversion errors
+
+---
+
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
 
 ---
 
@@ -340,6 +1260,236 @@ export default function CustomerPaymentPortal({ customerId, onClose }: CustomerP
 
 ---
 
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
+
+---
+
 ## TEST_SELECTOR_MISMATCH - 2025-11-16
 
 ### Summary
@@ -421,6 +1571,236 @@ if (invoicesTab) {
 - **TABS_COMPONENT_MISSING_CONTENT** - Related component rendering issue
 - Test selector ambiguity with multiple elements
 - Component API mismatches between expected and actual implementation
+
+---
+
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
 
 ---
 
@@ -522,6 +1902,236 @@ Automated PR creation daemon (`monitor_changes.py`) crashed when parsing timesta
 
 ---
 
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
+
+---
+
 ## Contributing
 
 When adding a new pattern:
@@ -531,6 +2141,236 @@ When adding a new pattern:
 3. Include code examples when helpful
 4. Link to related patterns
 5. Update the pattern categories if needed
+
+---
+
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
 
 ---
 
@@ -651,6 +2491,236 @@ All regression tests are in place:
 - ✅ Network error handling with async operations
 - ✅ Conditional element rendering (bulk button appears after selection)
 - ✅ Multiple button scenarios (list button + dialog button)
+
+---
+
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
 
 ---
 
@@ -792,6 +2862,236 @@ it('should handle job update errors gracefully', async () => {
 
 ---
 
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
+
+---
+
 ## FRONTEND_TEST_EXPANSION_PATTERN - 2025-11-18
 
 ### Summary
@@ -874,7 +3174,467 @@ describe('Accessibility', () => {
 
 ---
 
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
+
+---
+
 **Last Updated:** 2025-11-18
+
+---
+
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
 
 ---
 
@@ -921,6 +3681,236 @@ Invoice template creation fails due to database constraints, validation errors, 
 
 ---
 
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
+
+---
+
 ## BILLING_API_SCHEDULE_CREATE_FAILED - 2025-11-18
 
 ### Summary
@@ -964,6 +3954,236 @@ Invoice schedule creation fails due to invalid dates, missing account references
 
 ---
 
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
+
+---
+
 ## BILLING_API_REMINDER_FETCH_FAILED - 2025-11-18
 
 ### Summary
@@ -1001,6 +4221,236 @@ Reminder history retrieval fails due to database query errors or tenant isolatio
 - Add query timeout handling
 - Monitor query performance via metrics
 - Add caching for frequently accessed data
+
+---
+
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
 
 ---
 
@@ -1079,6 +4529,236 @@ interface V4LayoutContentProps {
 - TYPESCRIPT_ANY_TYPES - Similar pattern in component event handlers
 - Missing type validation in API calls
 - Type assertion bypassing type safety
+
+---
+
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
 
 ---
 
@@ -1168,6 +4848,236 @@ error(
 
 ---
 
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
+
+---
+
 ## AUTO_PR_CONSOLIDATION_NOT_RUNNING - 2025-11-18
 
 ### Summary
@@ -1233,6 +5143,236 @@ if: github.event_name == 'pull_request' ||
 
 ---
 
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
+
+---
+
 ## WORKFLOW_TRIGGER_SKIPPED - 2025-11-18
 
 ### Summary
@@ -1275,6 +5415,236 @@ if: ... && github.event.workflow_run.event == 'pull_request'
 ### Similar Historical Issues
 - Workflow dependency issues causing cascading failures
 - Missing workflow triggers preventing automation
+
+---
+
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
 
 ---
 
@@ -1337,6 +5707,236 @@ def get_workflow_triggers(workflow: Dict) -> Optional[Dict]:
 
 ---
 
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
+
+---
+
 ## DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - 2025-11-18
 
 ### Summary
@@ -1389,6 +5989,236 @@ jobs:
 ### Similar Historical Issues
 - WORKFLOW_TRIGGER_SKIPPED - Related workflow trigger issues
 - Missing workflow conditions causing unnecessary runs
+
+---
+
+## SILENT_FAILURE_CASCADE - 2025-01-27
+
+### Summary
+PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation or exit with proper codes, verification steps didn't validate JSON structure, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.
+
+### Root Cause
+- Scripts didn't verify file creation after write operations
+- Verification steps didn't validate JSON structure with required fields
+- Artifact downloads used `continue-on-error: true` masking failures
+- No error propagation from scripts to workflows (silent failures)
+- Missing file existence checks before processing
+- No JSON validation before using data
+
+### Triggering Conditions
+- `compute_reward_score.py` fails silently (no file verification after write)
+- `reward.json` missing or invalid (no validation step)
+- Artifact download fails (continue-on-error: true prevents workflow failure)
+- Dashboard workflow doesn't fail when artifact missing
+- Script exits with code 0 even when file creation fails
+- JSON structure missing required fields (pr_number, total_score, timestamp)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - Added file verification after writing reward.json
+- `.cursor/scripts/collect_metrics.py` - Added file existence checks before processing
+- `.cursor/scripts/retry_artifact_download.py` - Added sys.exit(1) on failure
+- `.github/workflows/swarm_compute_reward_score.yml` - Added JSON validation step
+- `.github/workflows/update_metrics_dashboard.yml` - Removed continue-on-error, added verification
+
+### How It Was Fixed
+1. **Added file verification:** Check file exists and size > 0 after write operations
+2. **Added JSON validation:** Validate JSON structure with required fields (pr_number, total_score, timestamp)
+3. **Added proper exit codes:** All failures exit with sys.exit(1), success with sys.exit(0)
+4. **Removed continue-on-error:** Removed from critical artifact download steps
+5. **Added verification steps:** Verify artifact contents after download
+6. **Wrapped main() in try/except:** Catch all exceptions and exit with proper codes
+7. **Added file existence checks:** Verify input files exist before processing
+
+**Example Fixes:**
+```python
+# ❌ WRONG: No file verification
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+# File might not exist, but script continues
+
+# ✅ CORRECT: Verify file creation
+with open(args.out, "w", encoding="utf-8") as handle:
+    json.dump(output, handle, indent=2)
+
+if not os.path.exists(args.out):
+    logger.error("FATAL: reward.json was not created", operation="main", output_path=args.out)
+    sys.exit(1)
+
+file_size = os.path.getsize(args.out)
+if file_size == 0:
+    logger.error("FATAL: reward.json is empty", operation="main", output_path=args.out)
+    sys.exit(1)
+```
+
+```python
+# ❌ WRONG: No JSON validation
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+# Missing fields cause errors later
+
+# ✅ CORRECT: Validate JSON structure
+with open(reward_file, "r") as f:
+    reward_data = json.load(f)
+
+required_fields = ["pr_number", "total_score", "timestamp"]
+missing = [f for f in required_fields if f not in reward_data]
+if missing:
+    logger.error("FATAL: Missing required fields", operation="main", missing_fields=missing)
+    sys.exit(1)
+```
+
+```yaml
+# ❌ WRONG: Silent failure
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Fail fast
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify file creation after write operations (check exists and size > 0)
+- **ALWAYS** validate JSON structure with required fields before using data
+- **NEVER** use `continue-on-error: true` for critical steps
+- **ALWAYS** exit with proper error codes (0=success, 1=failure)
+- **ALWAYS** add verification steps after artifact operations
+- **ALWAYS** check file existence before processing
+- **ALWAYS** wrap main() in try/except with proper error handling
+- **ALWAYS** validate input data structure before use
+- **ALWAYS** propagate errors from scripts to workflows
+
+### Similar Historical Issues
+- DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - Similar artifact download issue
+- Missing error propagation in workflows
+- Silent failures in scripts
+- Missing validation steps
+
+---
+
+## ARTIFACT_DOWNLOAD_TIMING - 2025-01-27
+
+### Summary
+Dashboard workflow triggered on `workflow_run` completion fired before artifacts were finalized by GitHub Actions, causing artifact download failures even when artifacts were successfully uploaded.
+
+### Root Cause
+- `workflow_run` event fires when workflow completes, not when artifacts are finalized
+- GitHub Actions takes time to finalize artifacts after upload
+- No delay between workflow completion and artifact download attempt
+- Race condition between artifact upload and download
+
+### Triggering Conditions
+- Dashboard workflow triggers on `workflow_run` completion
+- Artifact download attempted immediately after workflow completion
+- Artifacts not yet finalized by GitHub Actions
+- Cross-workflow artifact download (different workflow run)
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Added 10-second delay before artifact download
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact upload timing
+
+### How It Was Fixed
+1. **Added delay step:** 10-second sleep before artifact download to allow GitHub to finalize artifacts
+2. **Used proper artifact action:** `dawidd6/action-download-artifact@v6` handles timing better
+3. **Added artifact verification:** Verify artifact exists after download before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: No delay, immediate download
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  # Artifacts may not be finalized yet
+
+# ✅ CORRECT: Delay before download
+- name: Wait for artifacts to finalize
+  run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  # Artifacts are now finalized
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add delay (10 seconds) before downloading artifacts from workflow_run events
+- **USE** proper artifact download actions that handle timing
+- **VERIFY** artifact exists after download before using
+- **CONSIDER** retry logic for artifact downloads
+- **MONITOR** artifact download success rates
+- **DOCUMENT** timing requirements for artifact operations
+
+### Similar Historical Issues
+- CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - Related artifact download issue
+- Race conditions in workflow dependencies
+- Timing issues with GitHub Actions events
+
+---
+
+## CROSS_WORKFLOW_ARTIFACT_DOWNLOAD - 2025-01-27
+
+### Summary
+Dashboard workflow couldn't download artifacts from reward score workflow because `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads by default, causing dashboard updates to fail silently.
+
+### Root Cause
+- `actions/download-artifact@v4` doesn't support cross-workflow artifact downloads
+- Default artifact download action only works within same workflow run
+- No error when artifact not found (continue-on-error: true)
+- Missing proper error handling for cross-workflow scenarios
+
+### Triggering Conditions
+- Dashboard workflow tries to download artifacts from different workflow
+- Using `actions/download-artifact@v4` for cross-workflow downloads
+- Artifact name pattern matching needed (reward-pr-*)
+- Workflow run ID from different workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Replaced with dawidd6/action-download-artifact@v6
+- `.github/workflows/swarm_compute_reward_score.yml` - Artifact naming pattern
+
+### How It Was Fixed
+1. **Replaced artifact action:** Changed from `actions/download-artifact@v4` to `dawidd6/action-download-artifact@v6`
+2. **Added workflow specification:** Specify source workflow name
+3. **Added pattern matching:** Use `name_is_regexp: true` for pattern matching
+4. **Added error handling:** Set `if_no_artifact_found: fail` to fail workflow if missing
+5. **Added artifact verification:** Verify artifact downloaded before using
+
+**Example Fixes:**
+```yaml
+# ❌ WRONG: Doesn't support cross-workflow downloads
+- name: Download reward artifact
+  uses: actions/download-artifact@v4
+  with:
+    name: reward
+    run-id: ${{ github.event.workflow_run.id }}
+  continue-on-error: true  # Masks failures
+
+# ✅ CORRECT: Supports cross-workflow downloads
+- name: Download reward artifact
+  uses: dawidd6/action-download-artifact@v6
+  with:
+    workflow: swarm_compute_reward_score.yml
+    run_id: ${{ github.event.workflow_run.id }}
+    name: reward-pr-*
+    name_is_regexp: true
+    path: ./artifacts
+    if_no_artifact_found: fail  # Fails workflow if missing
+```
+
+### How to Prevent It in the Future
+- **USE** `dawidd6/action-download-artifact@v6` for cross-workflow artifact downloads
+- **SPECIFY** workflow name when downloading from different workflow
+- **USE** pattern matching (`name_is_regexp: true`) for dynamic artifact names
+- **SET** `if_no_artifact_found: fail` to ensure proper error propagation
+- **VERIFY** artifact exists after download before using
+- **DOCUMENT** cross-workflow artifact download requirements
+- **TEST** artifact download in cross-workflow scenarios
+
+### Similar Historical Issues
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- Missing error handling for artifact operations
 
 ---
 

@@ -48,31 +48,35 @@ class TestAutoPRConsolidation(unittest.TestCase):
         }
         
         with patch('monitor_changes.subprocess.run') as mock_run:
-            # Mock gh pr view calls
-            def mock_gh_pr_view(*args, **kwargs):
-                pr_num = int(args[0][3])  # Extract PR number from command
-                files = pr_files_data.get(pr_num, [])
+            # Mock gh pr view and close calls
+            def mock_subprocess(*args, **kwargs):
+                cmd = args[0] if args else []
                 result = Mock()
                 result.returncode = 0
-                result.stdout = json.dumps({"files": files})
+                
+                # Handle gh pr view calls
+                if len(cmd) > 2 and cmd[0] == "gh" and cmd[1] == "pr" and cmd[2] == "view":
+                    pr_num = int(cmd[3])
+                    files = pr_files_data.get(pr_num, [])
+                    result.stdout = json.dumps({"files": files})
+                # Handle gh pr close calls
+                elif len(cmd) > 2 and cmd[0] == "gh" and cmd[1] == "pr" and cmd[2] == "close":
+                    result.stdout = ""
+                else:
+                    result.stdout = ""
+                
                 return result
             
-            mock_run.side_effect = mock_gh_pr_view
+            mock_run.side_effect = mock_subprocess
             
-            # Mock gh pr close calls
-            with patch('monitor_changes.subprocess.run') as mock_close:
-                close_result = Mock()
-                close_result.returncode = 0
-                mock_close.return_value = close_result
-                
-                # Set max_open_prs to 1 (should close 2 smallest)
-                self.config["pr_settings"]["max_open_prs"] = 1
-                
-                closed_count = consolidate_small_prs(open_prs, self.config, self.repo_path)
-                
-                # Should close 2 PRs (PR #1 with 1 file, PR #2 with 2 files)
-                # Keep PR #3 with 3 files (largest)
-                self.assertEqual(closed_count, 2)
+            # Set max_open_prs to 1 (should close 2 smallest)
+            self.config["pr_settings"]["max_open_prs"] = 1
+            
+            closed_count = consolidate_small_prs(open_prs, self.config, self.repo_path)
+            
+            # Should close 2 PRs (PR #1 with 1 file, PR #2 with 2 files)
+            # Keep PR #3 with 3 files (largest)
+            self.assertEqual(closed_count, 2)
     
     def test_consolidation_handles_large_prs(self):
         """Verify consolidation handles PRs with 100+ files using additions/deletions."""
@@ -91,27 +95,32 @@ class TestAutoPRConsolidation(unittest.TestCase):
         }
         
         with patch('monitor_changes.subprocess.run') as mock_run:
-            def mock_gh_pr_view(*args, **kwargs):
-                pr_num = int(args[0][3])
-                files = pr_files_data.get(pr_num, [])
+            def mock_subprocess(*args, **kwargs):
+                cmd = args[0] if args else []
                 result = Mock()
                 result.returncode = 0
-                result.stdout = json.dumps({"files": files})
+                
+                # Handle gh pr view calls
+                if len(cmd) > 2 and cmd[0] == "gh" and cmd[1] == "pr" and cmd[2] == "view":
+                    pr_num = int(cmd[3])
+                    files = pr_files_data.get(pr_num, [])
+                    result.stdout = json.dumps({"files": files})
+                # Handle gh pr close calls
+                elif len(cmd) > 2 and cmd[0] == "gh" and cmd[1] == "pr" and cmd[2] == "close":
+                    result.stdout = ""
+                else:
+                    result.stdout = ""
+                
                 return result
             
-            mock_run.side_effect = mock_gh_pr_view
+            mock_run.side_effect = mock_subprocess
             
-            with patch('monitor_changes.subprocess.run') as mock_close:
-                close_result = Mock()
-                close_result.returncode = 0
-                mock_close.return_value = close_result
-                
-                self.config["pr_settings"]["max_open_prs"] = 1
-                
-                closed_count = consolidate_small_prs(open_prs, self.config, self.repo_path)
-                
-                # Should close PR #1 (smaller), keep PR #2 (larger)
-                self.assertEqual(closed_count, 1)
+            self.config["pr_settings"]["max_open_prs"] = 1
+            
+            closed_count = consolidate_small_prs(open_prs, self.config, self.repo_path)
+            
+            # Should close PR #1 (smaller), keep PR #2 (larger)
+            self.assertEqual(closed_count, 1)
     
     def test_file_filtering_excludes_duplicates(self):
         """Verify file filtering excludes files already in open PRs."""
@@ -134,15 +143,22 @@ class TestAutoPRConsolidation(unittest.TestCase):
         }
         
         with patch('monitor_changes.subprocess.run') as mock_run:
-            def mock_gh_pr_view(*args, **kwargs):
-                pr_num = int(args[0][3])
-                files = pr_files_data.get(pr_num, [])
+            def mock_subprocess(*args, **kwargs):
+                cmd = args[0] if args else []
                 result = Mock()
                 result.returncode = 0
-                result.stdout = json.dumps({"files": files})
+                
+                # Handle gh pr view calls
+                if len(cmd) > 2 and cmd[0] == "gh" and cmd[1] == "pr" and cmd[2] == "view":
+                    pr_num = int(cmd[3])
+                    files = pr_files_data.get(pr_num, [])
+                    result.stdout = json.dumps({"files": files})
+                else:
+                    result.stdout = ""
+                
                 return result
             
-            mock_run.side_effect = mock_gh_pr_view
+            mock_run.side_effect = mock_subprocess
             
             files_in_prs = get_files_in_open_prs(open_prs, self.repo_path)
             
@@ -170,29 +186,34 @@ class TestAutoPRConsolidation(unittest.TestCase):
         }
         
         with patch('monitor_changes.subprocess.run') as mock_run:
-            def mock_gh_pr_view(*args, **kwargs):
-                pr_num = int(args[0][3])
-                files = pr_files_data.get(pr_num, [])
+            def mock_subprocess(*args, **kwargs):
+                cmd = args[0] if args else []
                 result = Mock()
                 result.returncode = 0
-                result.stdout = json.dumps({"files": files})
+                
+                # Handle gh pr view calls
+                if len(cmd) > 2 and cmd[0] == "gh" and cmd[1] == "pr" and cmd[2] == "view":
+                    pr_num = int(cmd[3])
+                    files = pr_files_data.get(pr_num, [])
+                    result.stdout = json.dumps({"files": files})
+                # Handle gh pr close calls
+                elif len(cmd) > 2 and cmd[0] == "gh" and cmd[1] == "pr" and cmd[2] == "close":
+                    result.stdout = ""
+                else:
+                    result.stdout = ""
+                
                 return result
             
-            mock_run.side_effect = mock_gh_pr_view
+            mock_run.side_effect = mock_subprocess
             
-            with patch('monitor_changes.subprocess.run') as mock_close:
-                close_result = Mock()
-                close_result.returncode = 0
-                mock_close.return_value = close_result
-                
-                self.config["change_threshold"]["min_files"] = 10
-                self.config["pr_settings"]["max_open_prs"] = 2
-                
-                closed_count = consolidate_small_prs(open_prs, self.config, self.repo_path)
-                
-                # Should only close PR #1 (5 files < 10 threshold)
-                # PR #2 and #3 are at or above threshold
-                self.assertEqual(closed_count, 1)
+            self.config["change_threshold"]["min_files"] = 10
+            self.config["pr_settings"]["max_open_prs"] = 2
+            
+            closed_count = consolidate_small_prs(open_prs, self.config, self.repo_path)
+            
+            # Should only close PR #1 (5 files < 10 threshold)
+            # PR #2 and #3 are at or above threshold
+            self.assertEqual(closed_count, 1)
 
 
 if __name__ == "__main__":

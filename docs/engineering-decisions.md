@@ -2472,4 +2472,117 @@ Handle YAML 1.1 boolean quirk by converting `True` key back to `"on"` immediatel
 
 ---
 
-**Last Updated:** 2025-11-18
+## Artifact Download Action Selection - 2025-01-27
+
+### Decision
+Use `dawidd6/action-download-artifact@v6` instead of `actions/download-artifact@v4` for cross-workflow artifact downloads in dashboard workflow, with a 10-second delay before download to allow GitHub to finalize artifacts.
+
+### Context
+**Problem:** Dashboard workflow needs to download artifacts from reward score workflow, but:
+- `actions/download-artifact@v4` doesn't support cross-workflow downloads by default
+- Workflow run event fires before artifacts are finalized (timing issue)
+- Need reliable artifact download with proper error handling
+- Need pattern matching for dynamic artifact names (reward-pr-*)
+
+**Constraints:**
+- Must work with GitHub Actions workflow_run events
+- Must support cross-workflow artifact downloads
+- Must handle timing issues with artifact finalization
+- Must provide proper error handling (fail workflow if artifact missing)
+- Must support pattern matching for artifact names
+
+**Requirements:**
+- Reliable cross-workflow artifact downloads
+- Proper error propagation (fail workflow if artifact missing)
+- Pattern matching support for dynamic artifact names
+- Active maintenance and community support
+- Works with GitHub Actions workflow_run events
+
+### Trade-offs
+**Pros:**
+- Supports cross-workflow artifact downloads (primary requirement)
+- Better error handling (`if_no_artifact_found: fail`)
+- Pattern matching support (`name_is_regexp: true`)
+- More reliable than GitHub CLI workarounds
+- Active maintenance (1M+ downloads, regular updates)
+- Well-documented and widely used
+- Handles timing issues better than default action
+
+**Cons:**
+- Third-party action (not official GitHub action)
+- Additional dependency to maintain
+- Requires workflow name specification
+- Requires 10-second delay for artifact finalization
+- Slightly more complex configuration
+
+### Alternatives Considered
+**Alternative 1: GitHub CLI (gh run download)**
+- Description: Use GitHub CLI to download artifacts with retry logic
+- Why it was rejected: More complex, requires retry logic, less reliable, harder to maintain
+
+**Alternative 2: Wait and retry with actions/download-artifact@v4**
+- Description: Add delay and retry logic with default action
+- Why it was rejected: Doesn't support cross-workflow downloads, less reliable, more complex retry logic needed
+
+**Alternative 3: Workflow artifact API**
+- Description: Use GitHub Actions API directly to download artifacts
+- Why it was rejected: Too complex for workflow YAML, requires authentication handling, more code to maintain
+
+**Alternative 4: Keep using actions/download-artifact@v4 with workarounds**
+- Description: Continue using default action with continue-on-error and retry scripts
+- Why it was rejected: Doesn't support cross-workflow downloads, masks failures, unreliable
+
+### Rationale
+- `dawidd6/action-download-artifact@v6` is the de-facto standard for cross-workflow artifact downloads in GitHub Actions
+- 1M+ downloads and active maintenance provide confidence in reliability
+- Built-in support for pattern matching simplifies dynamic artifact names
+- Proper error handling (`if_no_artifact_found: fail`) ensures failures propagate correctly
+- 10-second delay addresses timing issue with artifact finalization
+- Well-documented and widely used in GitHub Actions community
+
+### Impact
+**Short-term:**
+- Dashboard workflow can now download artifacts from reward score workflow
+- Proper error propagation when artifacts are missing
+- More reliable artifact downloads
+- Better debugging with proper error messages
+
+**Long-term:**
+- Reduced maintenance burden (no custom retry logic)
+- More reliable dashboard updates
+- Better observability with proper error handling
+- Standard pattern for cross-workflow artifact downloads
+
+**Affected Areas:**
+- `.github/workflows/update_metrics_dashboard.yml` - Uses new action
+- Dashboard update reliability
+- Metrics collection pipeline
+- Error handling in workflows
+
+### Lessons Learned
+**What Worked Well:**
+- Using community-maintained action with proven track record
+- Adding delay for artifact finalization
+- Pattern matching for dynamic artifact names
+- Proper error handling with if_no_artifact_found: fail
+
+**What Didn't Work:**
+- Using default action for cross-workflow downloads
+- No delay before artifact download
+- continue-on-error masking failures
+- No verification after artifact download
+
+**What Would Be Done Differently:**
+- Research cross-workflow artifact download options earlier
+- Test artifact download timing in different scenarios
+- Add artifact verification step from the start
+- Document timing requirements for artifact operations
+
+### Related Decisions
+- SILENT_FAILURE_CASCADE - Related error propagation issue
+- ARTIFACT_DOWNLOAD_TIMING - Related timing issue
+- Error handling patterns in workflows
+
+---
+
+**Last Updated:** 2025-01-27
