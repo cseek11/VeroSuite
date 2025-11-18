@@ -885,7 +885,7 @@ The CI automation suite provides:
 
 ---
 
-**Last Updated:** 2025-11-17
+**Last Updated:** 2025-11-18
 
 ---
 
@@ -927,6 +927,65 @@ The billing system frontend components (InvoiceTemplates, InvoiceScheduler, Invo
 **Alternative 3: Database-Driven Scheduling (Current Approach)**
 - Description: Store schedules in database, use background worker to process them
 - Why accepted: Scalable, persistent, can be processed by any worker instance, easy to query and manage
+
+---
+
+## Financial Management Components - 2025-11-18
+
+### Decision
+Implemented PaymentDashboard, OverdueAlertsService, and ReconciliationTools to complete Week 4-5 Financial Management features. These components provide comprehensive payment tracking, automated overdue alerts, and payment reconciliation capabilities.
+
+### Context
+The billing system needed completion of financial management features to provide:
+- Comprehensive payment metrics dashboard
+- Automated overdue invoice alerts with configurable thresholds
+- Payment reconciliation tools for matching transactions
+- Integration with existing payment tracking and AR management
+
+### Trade-offs
+**Pros:**
+- PaymentDashboard provides unified view of payment metrics, analytics, and AR summary
+- OverdueAlertsService enables automated alert processing with configurable escalation rules
+- ReconciliationTools allows bulk payment matching and filtering
+- All components follow existing patterns and integrate seamlessly
+- Structured logging with trace propagation ensures observability
+- Tenant isolation maintained throughout
+
+**Cons:**
+- PaymentDashboard duplicates some functionality from PaymentTracking (intentional - different use cases)
+- OverdueAlertsService requires StructuredLoggerService for full trace propagation (added)
+- ReconciliationTools uses simplified matching logic (actual reconciliation logic to be implemented)
+- Alert history tracking not yet implemented (prevents duplicate alerts)
+- Phone/SMS alerts not yet implemented (marked as TODO)
+
+### Alternatives Considered
+**Alternative 1: Integrate PaymentDashboard into PaymentTracking**
+- Description: Add dashboard features directly to PaymentTracking component
+- Why rejected: PaymentDashboard serves different purpose (overview vs. detailed tracking), would make PaymentTracking too complex
+
+**Alternative 2: Add Overdue Alerts to BillingService**
+- Description: Include overdue alert processing methods in existing BillingService
+- Why rejected: Overdue alerts have distinct configuration and processing logic, separate service improves maintainability and testability
+
+**Alternative 3: External Reconciliation Service**
+- Description: Use external service for payment reconciliation matching
+- Why rejected: Want full control over matching logic, avoid external dependencies, keep costs low
+
+**Alternative 4: Simple Alert System (No Configuration)**
+- Description: Hardcode alert thresholds and frequencies
+- Why rejected: Different tenants need different alert configurations, flexibility is essential for production use
+
+### Implementation Details
+- **PaymentDashboard**: Aggregates data from PaymentTracking, PaymentAnalytics, and ARSummary APIs
+- **OverdueAlertsService**: Uses StructuredLoggerService with trace propagation (traceId/spanId/requestId)
+- **ReconciliationTools**: Converts payment tracking data to reconciliation records with filtering
+- All components include comprehensive error handling and user feedback
+- All components use current system dates (no hardcoded dates)
+- All components follow React Hooks Rules (hooks before early returns)
+
+### Related Decisions
+- Billing Automation API Integration (2025-11-18) - Invoice templates and scheduling
+- Structured logging pattern - All services use StructuredLoggerService with trace IDs
 
 ### Rationale
 The database-driven approach provides:
@@ -2319,6 +2378,97 @@ Expand existing test files systematically to improve test coverage from ~10% to 
 - Testing standards and requirements
 - Error handling and resilience patterns
 - Accessibility compliance requirements
+
+---
+
+## YAML 1.1 Boolean Quirk Handling in Workflow Validation - 2025-11-18
+
+### Decision
+Handle YAML 1.1 boolean quirk by converting `True` key back to `"on"` immediately after parsing, and update all validation functions to check for both `"on"` and `True` keys.
+
+### Context
+**Problem Statement:**
+- Validation script reported false positives for missing `on:` sections
+- All workflows actually had proper `on:` sections defined
+- YAML 1.1 parses `on:` as boolean `True` instead of string `"on"`
+- PyYAML's `safe_load()` uses YAML 1.1 by default
+- Script checked for `"on" in workflow`, which failed because key was `True`
+
+**Constraints:**
+- Must work with existing PyYAML library
+- Must not break existing validation logic
+- Must handle both YAML 1.1 and 1.2 formats
+- Must be backward compatible
+
+**Requirements:**
+- Correctly detect `on:` sections in workflow files
+- Handle both `"on"` and `True` keys
+- Maintain validation accuracy
+- No false positives
+
+### Trade-offs
+**Pros:**
+- Fixes false positive detection
+- Maintains backward compatibility
+- Works with existing PyYAML library
+- Simple, localized fix
+
+**Cons:**
+- Requires checking for both keys in multiple places
+- Adds slight complexity to validation logic
+- Doesn't address root cause (YAML 1.1 quirk)
+
+### Alternatives Considered
+**Alternative 1: Use YAML 1.2 Loader**
+- Description: Use YAML 1.2 loader that doesn't have this quirk
+- Why it was rejected: PyYAML doesn't have built-in YAML 1.2 support, would require different library
+
+**Alternative 2: Quote `on:` in Workflow Files**
+- Description: Quote `on:` in all workflow files to prevent boolean parsing
+- Why it was rejected: Would require modifying all workflow files, not a script fix
+
+**Alternative 3: Custom YAML Parser**
+- Description: Write custom YAML parser that handles this correctly
+- Why it was rejected: Too complex, overkill for this issue
+
+### Rationale
+- Converting `True` to `"on"` immediately after parsing normalizes the data structure
+- Checking for both keys provides defense in depth
+- Simple fix that addresses the immediate problem
+- Maintains compatibility with existing code
+
+### Impact
+**Short-term:**
+- Fixes false positive detection
+- Validation script now works correctly
+- No more incorrect workflow violations
+
+**Long-term:**
+- Validation script is more robust
+- Better handling of YAML quirks
+- Improved developer experience
+
+**Affected Areas:**
+- `.cursor/scripts/validate_workflow_triggers.py` - YAML parsing and validation functions
+
+### Lessons Learned
+**What Worked Well:**
+- Converting `True` to `"on"` immediately after parsing
+- Checking for both keys provides defense in depth
+- Simple, localized fix
+
+**What Didn't Work:**
+- Initial approach only checked for `"on"` key
+- Didn't account for YAML 1.1 boolean quirk
+
+**What Would Be Done Differently:**
+- Could add tests for YAML parsing edge cases
+- Could document YAML quirks in validation script
+- Could add validation for YAML parsing results
+
+### Related Decisions
+- Automated Workflow Validation in CI
+- Error handling and resilience patterns
 
 ---
 

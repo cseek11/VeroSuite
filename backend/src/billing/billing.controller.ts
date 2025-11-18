@@ -11,11 +11,18 @@ import {
   Request,
   HttpCode,
   HttpStatus,
-  BadRequestException
+  BadRequestException,
+  NotFoundException,
+  Res,
+  Header
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { Response } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BillingService } from './billing.service';
+import { InvoicePdfService } from './invoice-pdf.service';
+import { OverdueAlertsService } from './overdue-alerts.service';
+import { StructuredLoggerService } from '../common/services/logger.service';
 import { 
   CreateInvoiceDto, 
   UpdateInvoiceDto, 
@@ -33,7 +40,12 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller({ path: 'billing', version: '1' })
 export class BillingController {
-  constructor(private readonly billingService: BillingService) {}
+  constructor(
+    private readonly billingService: BillingService,
+    private readonly invoicePdfService: InvoicePdfService,
+    private readonly overdueAlertsService: OverdueAlertsService,
+    private readonly structuredLogger: StructuredLoggerService,
+  ) {}
 
   // ============================================================================
   // INVOICE ENDPOINTS
@@ -268,6 +280,43 @@ export class BillingController {
   }
 
   // ============================================================================
+  // PDF GENERATION ENDPOINTS
+  // ============================================================================
+
+  @Get('invoices/:id/pdf')
+  @ApiOperation({ summary: 'Download invoice as PDF' })
+  @ApiResponse({ status: 200, description: 'PDF generated successfully', content: { 'application/pdf': {} } })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Invoice not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Header('Content-Type', 'application/pdf')
+  async downloadInvoicePdf(
+    @Param('id') invoiceId: string,
+    @Request() req: any,
+    @Res() res: Response
+  ) {
+    try {
+      const pdfBuffer = await this.invoicePdfService.generateInvoicePdf(
+        invoiceId,
+        req.user?.tenantId
+      );
+
+      // Get invoice for filename
+      const invoice = await this.billingService.getInvoiceById(invoiceId);
+      const filename = `Invoice-${invoice.invoice_number}.pdf`;
+
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', pdfBuffer.length.toString());
+      res.send(pdfBuffer);
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(`Failed to generate PDF: ${(error as Error).message}`);
+    }
+  }
+
+  // ============================================================================
   // RECURRING PAYMENT ENDPOINTS
   // ============================================================================
 
@@ -373,6 +422,76 @@ export class BillingController {
       invoiceIds,
       req.user.userId,
       sendReminderDto.message
+    );
+  }
+
+  // ============================================================================
+  // OVERDUE ALERTS ENDPOINTS
+  // ============================================================================
+
+  @Post('overdue-alerts/process')
+  @ApiOperation({ summary: 'Process overdue alerts for all overdue invoices' })
+  @ApiResponse({ status: 200, description: 'Overdue alerts processed successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async processOverdueAlerts(@Request() req: any) {
+    // Extract trace context from request headers if available
+    const requestId = req.headers['x-request-id'] || req.id || undefined;
+    const traceId = req.headers['x-trace-id'] || undefined;
+    const spanId = req.headers['x-span-id'] || undefined;
+
+    // Set request context for structured logging
+    if (requestId) {
+      this.structuredLogger.setRequestContext(requestId, {
+        traceId,
+        spanId,
+        requestId,
+        userId: req.user?.userId,
+        tenantId: req.user?.tenantId,
+        operation: 'processOverdueAlerts',
+      });
+    }
+
+    return this.overdueAlertsService.processOverdueAlerts(
+      req.user.tenantId,
+      undefined,
+      req.user.userId,
+      requestId
+    );
+  }
+
+  @Get('overdue-alerts/statistics')
+  @ApiOperation({ summary: 'Get overdue alert statistics' })
+  @ApiQuery({ name: 'startDate', required: false, description: 'Start date for statistics' })
+  @ApiQuery({ name: 'endDate', required: false, description: 'End date for statistics' })
+  @ApiResponse({ status: 200, description: 'Alert statistics retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getAlertStatistics(
+    @Request() req: any,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string
+  ) {
+    // Extract trace context from request headers if available
+    const requestId = req.headers['x-request-id'] || req.id || undefined;
+    const traceId = req.headers['x-trace-id'] || undefined;
+    const spanId = req.headers['x-span-id'] || undefined;
+
+    // Set request context for structured logging
+    if (requestId) {
+      this.structuredLogger.setRequestContext(requestId, {
+        traceId,
+        spanId,
+        requestId,
+        userId: req.user?.userId,
+        tenantId: req.user?.tenantId,
+        operation: 'getAlertStatistics',
+      });
+    }
+
+    return this.overdueAlertsService.getAlertStatistics(
+      req.user.tenantId,
+      startDate ? new Date(startDate) : undefined,
+      endDate ? new Date(endDate) : undefined,
+      requestId
     );
   }
 

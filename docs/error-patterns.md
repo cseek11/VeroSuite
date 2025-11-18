@@ -1278,4 +1278,118 @@ if: ... && github.event.workflow_run.event == 'pull_request'
 
 ---
 
+## YAML_ON_PARSED_AS_BOOLEAN - 2025-11-18
+
+### Summary
+Validation script (`validate_workflow_triggers.py`) reported false positives for missing `on:` sections because YAML 1.1 parses `on:` as boolean `True` instead of string `"on"`. This caused all workflows to be incorrectly flagged as missing `on:` sections, even though they all had proper `on:` sections defined.
+
+### Root Cause
+- YAML 1.1 specification treats `on` as a boolean value (`True`)
+- PyYAML's `safe_load()` parses `on:` as the boolean key `True` instead of the string `"on"`
+- Validation script checked for `"on" in workflow`, which failed because the key was actually `True`
+- This is a known YAML 1.1 quirk (YAML 1.2 changed this behavior, but PyYAML defaults to 1.1)
+
+### Triggering Conditions
+- Using PyYAML's `safe_load()` to parse GitHub Actions workflow files
+- Workflow files contain `on:` section (standard GitHub Actions syntax)
+- Validation script checks for `"on" in workflow` dictionary
+- YAML parser converts `on:` to boolean `True` key
+
+### Relevant Code/Modules
+- `.cursor/scripts/validate_workflow_triggers.py` - YAML parsing and validation logic
+- All `.github/workflows/*.yml` files - Contain `on:` sections
+
+### How It Was Fixed
+1. **Fixed YAML parsing:** Convert `True` key back to `"on"` in `load_workflow_file()`
+2. **Updated trigger extraction:** `get_workflow_triggers()` now handles both `"on"` and `True` keys
+3. **Updated validation:** `check_has_on_section()` checks for both keys
+
+**Example Fix:**
+```python
+# ✅ GOOD: Handle YAML 1.1 boolean quirk
+data = yaml.safe_load(f)
+# Fix YAML 1.1 quirk: 'on' is parsed as boolean True
+if data and True in data and "on" not in data:
+    data["on"] = data.pop(True)
+```
+
+```python
+# ✅ GOOD: Check for both keys
+def get_workflow_triggers(workflow: Dict) -> Optional[Dict]:
+    if "on" in workflow:
+        return workflow.get("on")
+    elif True in workflow:
+        return workflow.get(True)
+    return None
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** check for both `"on"` and `True` keys when parsing YAML with `on:` sections
+- **CONVERT** `True` key to `"on"` immediately after YAML parsing
+- **USE** YAML 1.2 loader if available (but PyYAML defaults to 1.1)
+- **TEST** YAML parsing with actual workflow files
+- **DOCUMENT** YAML quirks in code comments
+- **VERIFY** validation scripts handle YAML 1.1 boolean quirks
+
+### Similar Historical Issues
+- YAML parsing issues with boolean values
+- Type conversion issues in validation scripts
+
+---
+
+## DASHBOARD_DOWNLOAD_FROM_SKIPPED_WORKFLOW - 2025-11-18
+
+### Summary
+Dashboard update workflow was downloading artifacts from skipped reward score workflows instead of successful ones. This caused dashboard updates to fail because reward.json artifacts don't exist for skipped workflows, resulting in stale metrics and no dashboard updates.
+
+### Root Cause
+- Dashboard workflow triggered on all `workflow_run` events with `types: [completed]`
+- No job-level condition to filter by workflow conclusion
+- Dashboard attempted to download artifacts from skipped workflows (which don't create reward.json)
+- No reward.json available → Dashboard couldn't update metrics
+
+### Triggering Conditions
+- Reward score workflow is skipped (non-PR events like push to main, schedule)
+- Dashboard workflow triggered by `workflow_run` event
+- Dashboard workflow has no condition to check if source workflow succeeded
+- Dashboard attempts to download artifact from skipped workflow
+
+### Relevant Code/Modules
+- `.github/workflows/update_metrics_dashboard.yml` - Missing job-level condition to filter by conclusion
+- `.github/workflows/swarm_compute_reward_score.yml` - Workflow condition causes skips for non-PR events
+
+### How It Was Fixed
+1. **Added job-level condition:** Dashboard workflow now only runs when reward score workflow succeeded
+2. **Filter by conclusion:** Added `github.event.workflow_run.conclusion == 'success'` condition
+3. **Skip when source skipped:** Dashboard now correctly skips when reward score workflow was skipped/failed/cancelled
+
+**Example Fix:**
+```yaml
+# ❌ WRONG: No condition, runs for all workflow_run events
+jobs:
+  update-metrics:
+    runs-on: ubuntu-latest
+
+# ✅ CORRECT: Only runs when source workflow succeeded
+jobs:
+  update-metrics:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || 
+        github.event_name == 'workflow_dispatch' || 
+        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** add job-level conditions for workflow_run triggers
+- **ALWAYS** check `github.event.workflow_run.conclusion == 'success'` before downloading artifacts
+- **NEVER** assume artifacts exist without checking workflow conclusion
+- **VERIFY** dashboard only runs when source workflow succeeded
+- **TEST** dashboard behavior with both successful and skipped source workflows
+
+### Similar Historical Issues
+- WORKFLOW_TRIGGER_SKIPPED - Related workflow trigger issues
+- Missing workflow conditions causing unnecessary runs
+
+---
+
 **Last Updated:** 2025-11-18

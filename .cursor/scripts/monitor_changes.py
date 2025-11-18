@@ -688,7 +688,34 @@ def create_auto_pr(files: Dict[str, Dict], config: Dict, repo_path: pathlib.Path
         )
         
         # Add all changed files
-        file_list = list(files.keys())
+        # Ensure file paths are relative to repo root and exist
+        # Handle paths that might be missing leading dot (e.g., "cursor/" instead of ".cursor/")
+        file_list = []
+        for file_path in files.keys():
+            # Normalize path: ensure it's relative to repo root
+            normalized_path = file_path
+            
+            # Check if path exists as-is
+            test_path = repo_path / file_path
+            if not test_path.exists():
+                # Try with leading dot if path starts with common directory names
+                if file_path.startswith("cursor/") and not file_path.startswith(".cursor/"):
+                    normalized_path = ".cursor/" + file_path[7:]  # Replace "cursor/" with ".cursor/"
+                    test_path = repo_path / normalized_path
+                elif file_path.startswith("github/") and not file_path.startswith(".github/"):
+                    normalized_path = ".github/" + file_path[7:]  # Replace "github/" with ".github/"
+                    test_path = repo_path / normalized_path
+                # docs/ is correct, no leading dot needed
+            
+            # Verify file exists before adding
+            if test_path.exists():
+                file_list.append(normalized_path)
+            else:
+                logger.warn(
+                    f"File does not exist, skipping: {file_path} (tried: {normalized_path})",
+                    operation="create_auto_pr"
+                )
+        
         if file_list:
             subprocess.run(
                 ["git", "add"] + file_list,
