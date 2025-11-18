@@ -99,15 +99,16 @@ def main() -> None:
             )
             time.sleep(delay)
 
-    print(
-        f"::warning::Unable to download artifact '{artifact_name}' after {max_attempts} attempts"
-    )
     logger.error(
-        "Failed to download artifact after retries",
+        f"FATAL: Failed to download artifact '{artifact_name}' after {max_attempts} attempts",
         operation="main",
         run_id=run_id,
         artifact=artifact_name,
     )
+    print(
+        f"::error::Unable to download artifact '{artifact_name}' after {max_attempts} attempts"
+    )
+    sys.exit(1)  # CRITICAL: Must exit with error
 
 
 if __name__ == "__main__":

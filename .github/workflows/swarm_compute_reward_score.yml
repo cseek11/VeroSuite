@@ -264,23 +264,40 @@ jobs:
             fi
           }
 
-      - name: Verify reward.json exists
+      - name: Verify reward.json exists and is valid
+        id: verify-reward
         run: |
-          if [ ! -f reward.json ]; then
-            echo "ERROR: reward.json was not created!"
+          if [ ! -f "reward.json" ]; then
+            echo "❌ ERROR: reward.json was not created"
+            ls -la  # Show what files exist for debugging
             exit 1
           fi
-          echo "reward.json exists, size: $(stat -f%z reward.json 2>/dev/null || stat -c%s reward.json 2>/dev/null || echo 'unknown') bytes"
-          echo "reward.json content preview:"
-          head -20 reward.json || echo "Could not read reward.json"
+          
+          # Validate JSON structure
+          python3 << 'EOF'
+          import json, sys
+          try:
+              with open('reward.json', 'r') as f:
+                  data = json.load(f)
+              required = ['pr_number', 'total_score', 'timestamp']
+              missing = [f for f in required if f not in data]
+              if missing:
+                  print(f"❌ ERROR: Missing fields: {missing}")
+                  sys.exit(1)
+              print(f"✓ reward.json valid (PR #{data['pr_number']}, score: {data['total_score']})")
+          except Exception as e:
+              print(f"❌ ERROR: Invalid JSON: {e}")
+              sys.exit(1)
+          EOF
 
       - name: Upload reward artifact
+        if: success()  # Only if verification passed
         uses: actions/upload-artifact@v4
         with:
-          name: reward
+          name: reward-pr-${{ steps.pr.outputs.number }}
           path: reward.json
-          retention-days: 30
-        continue-on-error: false
+          retention-days: 90
+          if-no-files-found: error
 
       - name: Upload static analysis artifact
         uses: actions/upload-artifact@v4
