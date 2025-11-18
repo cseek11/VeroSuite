@@ -45,13 +45,30 @@ import type {
   CreateInvoiceScheduleData,
   UpdateInvoiceScheduleData,
   InvoiceReminderHistory,
-  RecurringPaymentData
+  RecurringPaymentData,
+  StripePaymentIntent,
+  StripePaymentStatus,
+  PaymentRetryHistory,
+  OverdueInvoice,
+  RevenueBreakdown,
+  RecentTransaction,
+  Route,
+  DashboardRegion,
+  CreateDashboardRegionData,
+  UpdateDashboardRegionData,
+  DashboardLayoutHistory,
+  RoleDefaultLayout,
+  Feedback,
+  ExperienceMetrics
 } from '@/types/enhanced-types';
 import type {
   KpiTemplate,
   KpiTemplateFilters,
   UserKpi
 } from '@/types/kpi-templates';
+import type {
+  TechnicianProfile
+} from '@/types/technician';
 
 
 
@@ -603,7 +620,7 @@ export const customerProfiles = {
   },
 
   // Dashboard Customer Experience APIs
-  getExperienceMetrics: async (): Promise<any> => {
+  getExperienceMetrics: async (): Promise<ExperienceMetrics> => {
     try {
       const tenantId = await getTenantId();
       
@@ -644,7 +661,7 @@ export const customerProfiles = {
     }
   },
 
-  getRecentFeedback: async (): Promise<any[]> => {
+  getRecentFeedback: async (): Promise<Feedback[]> => {
     try {
       const tenantId = await getTenantId();
       
@@ -816,7 +833,7 @@ export const workOrders = {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return (data as any) || [];
+      return (data as WorkOrder[]) || [];
     } catch (error) {
       handleApiError(error, 'fetch work orders by customer');
     }
@@ -1001,7 +1018,7 @@ export const jobs = {
         .order('scheduled_date', { ascending: false });
 
       if (error) throw error;
-      return (data as any) || [];
+      return (data as Job[]) || [];
     } catch (error) {
       handleApiError(error, 'fetch jobs by customer');
     }
@@ -2484,7 +2501,7 @@ export const billing = {
   },
 
   // Stripe Payment Integration
-  createStripePaymentIntent: async (invoiceId: string): Promise<any> => {
+  createStripePaymentIntent: async (invoiceId: string): Promise<StripePaymentIntent> => {
     try {
       const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
@@ -2518,7 +2535,7 @@ export const billing = {
     }
   },
 
-  getStripePaymentStatus: async (paymentIntentId: string): Promise<any> => {
+  getStripePaymentStatus: async (paymentIntentId: string): Promise<StripePaymentStatus> => {
     try {
       const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
@@ -2585,7 +2602,7 @@ export const billing = {
     }
   },
 
-  retryFailedPayment: async (invoiceId: string): Promise<any> => {
+  retryFailedPayment: async (invoiceId: string): Promise<Payment> => {
     try {
       const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
@@ -2620,7 +2637,7 @@ export const billing = {
     }
   },
 
-  getPaymentAnalytics: async (startDate?: string, endDate?: string): Promise<any> => {
+  getPaymentAnalytics: async (startDate?: string, endDate?: string): Promise<BillingAnalytics> => {
     try {
       const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
@@ -2694,7 +2711,7 @@ export const billing = {
     }
   },
 
-  getRecurringPayment: async (subscriptionId: string): Promise<any> => {
+  getRecurringPayment: async (subscriptionId: string): Promise<RecurringPaymentData> => {
     try {
       const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
@@ -2727,7 +2744,7 @@ export const billing = {
     }
   },
 
-  cancelRecurringPayment: async (subscriptionId: string, immediately: boolean = false): Promise<any> => {
+  cancelRecurringPayment: async (subscriptionId: string, immediately: boolean = false): Promise<{ success: boolean; message: string }> => {
     try {
       const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
@@ -2763,7 +2780,7 @@ export const billing = {
     }
   },
 
-  getPaymentRetryHistory: async (invoiceId: string): Promise<any> => {
+  getPaymentRetryHistory: async (invoiceId: string): Promise<PaymentRetryHistory[]> => {
     try {
       const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
@@ -2796,7 +2813,7 @@ export const billing = {
     }
   },
 
-  getOverdueInvoices: async (): Promise<any> => {
+  getOverdueInvoices: async (): Promise<OverdueInvoice[]> => {
     try {
       const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
@@ -2829,7 +2846,7 @@ export const billing = {
     }
   },
 
-  getPaymentTracking: async (startDate?: string, endDate?: string): Promise<any> => {
+  getPaymentTracking: async (startDate?: string, endDate?: string): Promise<RecentTransaction[]> => {
     try {
       const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
@@ -2866,7 +2883,7 @@ export const billing = {
     }
   },
 
-  sendInvoiceReminder: async (invoiceIds: string[], message?: string): Promise<any> => {
+  sendInvoiceReminder: async (invoiceIds: string[], message?: string): Promise<{ success: boolean; sent_count: number }> => {
     try {
       const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
@@ -2881,7 +2898,13 @@ export const billing = {
 
       if (!token) throw new Error('No access token found');
 
-      const payload: any = {};
+      interface ReminderPayload {
+        invoice_id?: string;
+        invoice_ids?: string[];
+        message?: string;
+      }
+      
+      const payload: ReminderPayload = {};
       if (invoiceIds.length === 1) {
         payload.invoice_id = invoiceIds[0];
       } else {
@@ -2913,7 +2936,7 @@ export const billing = {
   },
 
     // Invoice Templates
-    getInvoiceTemplates: async (): Promise<any[]> => {
+    getInvoiceTemplates: async (): Promise<InvoiceTemplate[]> => {
       try {
         const authData = localStorage.getItem('verofield_auth');
         if (!authData) throw new Error('User not authenticated');
@@ -3049,7 +3072,7 @@ export const billing = {
     },
 
     // Invoice Schedules
-    getInvoiceSchedules: async (): Promise<any[]> => {
+    getInvoiceSchedules: async (): Promise<InvoiceSchedule[]> => {
       try {
         const authData = localStorage.getItem('verofield_auth');
         if (!authData) throw new Error('User not authenticated');
@@ -3184,7 +3207,7 @@ export const billing = {
       }
     },
 
-    toggleInvoiceSchedule: async (id: string): Promise<any> => {
+    toggleInvoiceSchedule: async (id: string): Promise<InvoiceSchedule> => {
       try {
         const authData = localStorage.getItem('verofield_auth');
         if (!authData) throw new Error('User not authenticated');
@@ -3219,7 +3242,7 @@ export const billing = {
     },
 
     // Reminder History
-    getReminderHistory: async (): Promise<any[]> => {
+    getReminderHistory: async (): Promise<InvoiceReminderHistory[]> => {
       try {
         const authData = localStorage.getItem('verofield_auth');
         if (!authData) throw new Error('User not authenticated');
@@ -3388,7 +3411,7 @@ export const financial = {
     }
   },
 
-  getRevenueBreakdown: async (): Promise<any[]> => {
+  getRevenueBreakdown: async (): Promise<RevenueBreakdown[]> => {
     try {
       // TODO: Replace with actual revenue breakdown when implemented
       return [];
@@ -3398,7 +3421,7 @@ export const financial = {
     }
   },
 
-  getRecentTransactions: async (): Promise<any[]> => {
+  getRecentTransactions: async (): Promise<RecentTransaction[]> => {
     try {
       // TODO: Replace with actual transaction data when implemented
       return [];
@@ -3597,7 +3620,7 @@ export const kpiTemplates = {
     },
 
     // Get user's favorited templates
-    getFavorites: async (): Promise<any[]> => {
+    getFavorites: async (): Promise<KpiTemplate[]> => {
       try {
         const token = await getAuthToken();
         const response = await fetch(`http://localhost:3001/api/v2/kpi-templates/favorites`, {
@@ -3658,7 +3681,7 @@ export const kpiTemplates = {
     },
 
     // Get popular templates
-    getPopular: async (limit: number = 10): Promise<any[]> => {
+    getPopular: async (limit: number = 10): Promise<KpiTemplate[]> => {
       try {
         const token = await getAuthToken();
         const response = await fetch(`http://localhost:3001/api/v2/kpi-templates/popular?limit=${limit}`, {
@@ -3683,7 +3706,7 @@ export const kpiTemplates = {
     },
 
     // Get featured templates
-    getFeatured: async (): Promise<any[]> => {
+    getFeatured: async (): Promise<KpiTemplate[]> => {
       try {
         const token = await getAuthToken();
         const response = await fetch(`http://localhost:3001/api/v2/kpi-templates?is_featured=true`, {
@@ -3751,7 +3774,7 @@ export const userKpis = {
     },
 
     // Get a specific user KPI
-    get: async (id: string): Promise<any | null> => {
+    get: async (id: string): Promise<UserKpi | null> => {
       try {
         const { data, error } = await supabase
           .from('user_kpis')
@@ -3848,7 +3871,7 @@ export const userKpis = {
 
 const technicians = {
   // Get all technicians
-  list: async (): Promise<any[]> => {
+  list: async (): Promise<TechnicianProfile[]> => {
     try {
       const token = await getAuthToken();
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
@@ -3970,12 +3993,12 @@ const technicians = {
   },
 
   // Get available technicians for a time slot
-  getAvailable: async (date: string, startTime: string, endTime: string): Promise<any[]> => {
+  getAvailable: async (date: string, startTime: string, endTime: string): Promise<TechnicianProfile[]> => {
     try {
       const token = await getAuthToken();
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
       const url = `${baseUrl}/v2/technicians/available?date=${date}&start_time=${startTime}&end_time=${endTime}`;
-      const response = await enhancedApiCall<{ data: any[]; meta: any }>(url,
+      const response = await enhancedApiCall<{ data: TechnicianProfile[]; meta: { total: number; page: number; limit: number } }>(url,
         {
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         }
@@ -3996,14 +4019,14 @@ const technicians = {
 
 const routing = {
   // Get routes for a specific date or all routes
-  getRoutes: async (date?: string): Promise<any[]> => {
+  getRoutes: async (date?: string): Promise<Route[]> => {
     try {
       const token = await getAuthToken();
       const url = date 
         ? `http://localhost:3001/api/v1/routing/routes?date=${date}`
         : 'http://localhost:3001/api/v1/routing/routes';
       
-      const data = await enhancedApiCall<any[]>(url, {
+      const data = await enhancedApiCall<Route[]>(url, {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       return data || [];
@@ -4100,10 +4123,10 @@ export const enhancedApi = {
       }
     },
     // Region methods
-    listRegions: async (layoutId: string): Promise<any[]> => {
+    listRegions: async (layoutId: string): Promise<DashboardRegion[]> => {
       try {
         const token = await getAuthToken();
-        const data = await enhancedApiCall<any[]>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/regions`, {
+        const data = await enhancedApiCall<DashboardRegion[]>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/regions`, {
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
         return data || [];
@@ -4112,7 +4135,7 @@ export const enhancedApi = {
         return [];
       }
     },
-    createRegion: async (layoutId: string, regionData: any): Promise<any> => {
+    createRegion: async (layoutId: string, regionData: CreateDashboardRegionData): Promise<DashboardRegion> => {
       try {
         const token = await getAuthToken();
         // Ensure numbers are numbers, not strings, and clamp to valid ranges
@@ -4136,7 +4159,7 @@ export const enhancedApi = {
           logger.debug('Creating region', { layoutId, sanitizedData }, 'enhanced-api');
         }
         
-        const data = await enhancedApiCall<any>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/regions`, {
+        const data = await enhancedApiCall<DashboardRegion>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/regions`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
           body: JSON.stringify(sanitizedData)
@@ -4147,7 +4170,7 @@ export const enhancedApi = {
         throw error;
       }
     },
-    updateRegion: async (layoutId: string, regionId: string, updates: any): Promise<any> => {
+    updateRegion: async (layoutId: string, regionId: string, updates: UpdateDashboardRegionData): Promise<DashboardRegion> => {
       try {
         const token = await getAuthToken();
         if (process.env.NODE_ENV === 'development') {
@@ -4191,10 +4214,10 @@ export const enhancedApi = {
         throw error;
       }
     },
-    getRoleDefaults: async (role: string): Promise<any[]> => {
+    getRoleDefaults: async (role: string): Promise<RoleDefaultLayout[]> => {
       try {
         const token = await getAuthToken();
-        const data = await enhancedApiCall<any[]>(`http://localhost:3001/api/v1/dashboard/regions/defaults/${role}`, {
+        const data = await enhancedApiCall<RoleDefaultLayout[]>(`http://localhost:3001/api/v1/dashboard/regions/defaults/${role}`, {
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
         return data || [];
@@ -4204,10 +4227,10 @@ export const enhancedApi = {
       }
     },
     // Versioning methods
-    getVersions: async (layoutId: string): Promise<any[]> => {
+    getVersions: async (layoutId: string): Promise<{ version: number; created_at: string }[]> => {
       try {
         const token = await getAuthToken();
-        const data = await enhancedApiCall<any[]>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/versions`, {
+        const data = await enhancedApiCall<{ version: number; created_at: string }[]>(`http://localhost:3001/api/v1/dashboard/layouts/${layoutId}/versions`, {
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
         return data || [];
@@ -4258,10 +4281,10 @@ export const enhancedApi = {
       }
     },
     // Undo/Redo methods
-    undoLayout: async (layoutId: string): Promise<{ regions: any[], version: number }> => {
+    undoLayout: async (layoutId: string): Promise<{ regions: DashboardRegion[]; version: number }> => {
       try {
         const token = await getAuthToken();
-        const data = await enhancedApiCall<{ regions: any[], version: number }>(`http://localhost:3001/api/v2/dashboard/layouts/${layoutId}/undo`, {
+        const data = await enhancedApiCall<{ regions: DashboardRegion[]; version: number }>(`http://localhost:3001/api/v2/dashboard/layouts/${layoutId}/undo`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
@@ -4271,10 +4294,10 @@ export const enhancedApi = {
         throw error;
       }
     },
-    redoLayout: async (layoutId: string): Promise<{ regions: any[], version: number }> => {
+    redoLayout: async (layoutId: string): Promise<{ regions: DashboardRegion[]; version: number }> => {
       try {
         const token = await getAuthToken();
-        const data = await enhancedApiCall<{ regions: any[], version: number }>(`http://localhost:3001/api/v2/dashboard/layouts/${layoutId}/redo`, {
+        const data = await enhancedApiCall<{ regions: DashboardRegion[]; version: number }>(`http://localhost:3001/api/v2/dashboard/layouts/${layoutId}/redo`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
@@ -4284,10 +4307,10 @@ export const enhancedApi = {
         throw error;
       }
     },
-    getLayoutHistory: async (layoutId: string, limit: number = 50): Promise<{ canUndo: boolean, canRedo: boolean, recentEvents: any[] }> => {
+    getLayoutHistory: async (layoutId: string, limit: number = 50): Promise<DashboardLayoutHistory> => {
       try {
         const token = await getAuthToken();
-        const data = await enhancedApiCall<{ canUndo: boolean, canRedo: boolean, recentEvents: any[] }>(`http://localhost:3001/api/v2/dashboard/layouts/${layoutId}/history?limit=${limit}`, {
+        const data = await enhancedApiCall<DashboardLayoutHistory>(`http://localhost:3001/api/v2/dashboard/layouts/${layoutId}/history?limit=${limit}`, {
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
         return data;
