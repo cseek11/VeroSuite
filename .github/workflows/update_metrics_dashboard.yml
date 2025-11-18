@@ -53,14 +53,26 @@ jobs:
         if: github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch'
         run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
 
-      - name: Download reward artifact
+      - name: Download reward artifact (new format)
         if: github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch'
+        id: download-new
         uses: dawidd6/action-download-artifact@v6
         with:
           workflow: swarm_compute_reward_score.yml
           run_id: ${{ github.event.workflow_run.id || steps.get-run-id.outputs.run_id }}
           name: reward-pr-*
           name_is_regexp: true
+          path: ./artifacts
+          if_no_artifact_found: ignore
+          continue-on-error: true
+
+      - name: Download reward artifact (old format fallback)
+        if: (github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch') && steps.download-new.outcome == 'failure'
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: swarm_compute_reward_score.yml
+          run_id: ${{ github.event.workflow_run.id || steps.get-run-id.outputs.run_id }}
+          name: reward
           path: ./artifacts
           if_no_artifact_found: fail
 
