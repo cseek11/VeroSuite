@@ -127,38 +127,38 @@ export default function InvoiceDetail({
   return (
     <div className={className}>
       {/* Header Section */}
-      <Card className="mb-6">
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex-1">
+      <Card className="mb-4 sm:mb-6">
+        <div className="p-3 sm:p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4 sm:gap-0 mb-4 sm:mb-6">
+            <div className="flex-1 min-w-0">
               {companySettings?.invoice_logo_url && (
                 <img 
                   src={companySettings.invoice_logo_url} 
                   alt="Company Logo" 
-                  className="w-auto h-16 max-w-[180px] object-contain mb-4"
+                  className="w-auto h-12 sm:h-16 max-w-[140px] sm:max-w-[180px] object-contain mb-3 sm:mb-4"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
                   }}
                 />
               )}
-              <div className="flex items-center space-x-3 mb-2">
-                <Heading level={2} className="font-bold">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                <Heading level={2} className="font-bold text-xl sm:text-2xl">
                   Invoice {invoice.invoice_number}
                 </Heading>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-shrink-0">
                   {getStatusIcon(invoice.status)}
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(invoice.status)}`}>
+                  <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border ${getStatusColor(invoice.status)}`}>
                     {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                   </span>
                 </div>
               </div>
-              <Text variant="body" className="text-gray-600">
+              <Text variant="body" className="text-gray-600 text-sm sm:text-base">
                 Issued on {formatDate(invoice.issue_date)}
               </Text>
             </div>
             {showActions && (
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 w-full sm:w-auto">
                 {onDownloadPDF && (
                   <Button
                     variant="outline"
@@ -187,7 +187,7 @@ export default function InvoiceDetail({
           </div>
 
           {/* Customer Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <Heading level={4} className="mb-3 flex items-center">
                 <Building className="w-5 h-5 mr-2 text-gray-600" />
@@ -272,9 +272,9 @@ export default function InvoiceDetail({
       </Card>
 
       {/* Invoice Items */}
-      <Card className="mb-6">
-        <div className="p-6">
-          <Heading level={3} className="mb-4">Invoice Items</Heading>
+      <Card className="mb-4 sm:mb-6">
+        <div className="p-3 sm:p-4 md:p-6">
+          <Heading level={3} className="mb-3 sm:mb-4 text-lg sm:text-xl">Invoice Items</Heading>
           {!invoice.InvoiceItem || invoice.InvoiceItem.length === 0 ? (
             <div className="text-center py-8">
               <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -351,10 +351,10 @@ export default function InvoiceDetail({
 
       {/* Payment History */}
       {payments.length > 0 && (
-        <Card className="mb-6">
-          <div className="p-6">
-            <Heading level={3} className="mb-4 flex items-center">
-              <History className="w-5 h-5 mr-2" />
+        <Card className="mb-4 sm:mb-6">
+          <div className="p-3 sm:p-4 md:p-6">
+            <Heading level={3} className="mb-3 sm:mb-4 flex items-center text-lg sm:text-xl">
+              <History className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Payment History
             </Heading>
             {paymentsLoading ? (
