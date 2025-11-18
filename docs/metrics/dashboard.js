@@ -28,11 +28,20 @@ async function loadMetrics() {
         try {
             // Add cache-busting parameter to ensure fresh data
             const cacheBuster = `?t=${Date.now()}`;
-            response = await fetch(GITHUB_METRICS_URL + cacheBuster);
+            const githubUrl = GITHUB_METRICS_URL + cacheBuster;
+            console.log('Fetching from GitHub:', githubUrl);
+            response = await fetch(githubUrl, {
+                cache: 'no-store',  // Force no cache
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            });
             if (response.ok) {
                 usingGitHub = true;
             } else {
-                throw new Error('GitHub fetch failed');
+                throw new Error(`GitHub fetch failed: ${response.status} ${response.statusText}`);
             }
         } catch (githubError) {
             // Fallback to local file if GitHub fetch fails
@@ -44,7 +53,9 @@ async function loadMetrics() {
                 return;
             }
             
-            response = await fetch(LOCAL_METRICS_FILE);
+            response = await fetch(LOCAL_METRICS_FILE, {
+                cache: 'no-store'
+            });
         }
         
         if (!response.ok) {
@@ -54,9 +65,15 @@ async function loadMetrics() {
         // Get response text first to check for issues
         const text = await response.text();
         
+        // Log what we received for debugging
+        console.log('Response received, length:', text.length);
+        console.log('First 500 chars:', text.substring(0, 500));
+        
         // Check for merge conflict markers
         if (text.includes('<<<<<<<') || text.includes('=======') || text.includes('>>>>>>>')) {
-            throw new Error('JSON file contains merge conflict markers. Please resolve conflicts in the repository.');
+            console.error('⚠️ Conflict markers detected in response!');
+            console.error('Full response preview:', text.substring(0, 1000));
+            throw new Error('JSON file contains merge conflict markers. Please resolve conflicts in the repository. Check console for details.');
         }
         
         // Parse JSON
