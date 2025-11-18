@@ -99,29 +99,34 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # Copy from .cursor/docs/metrics to docs/metrics if it exists
-          if [ -f .cursor/docs/metrics/reward_scores.json ]; then
-            mkdir -p docs/metrics
-            cp .cursor/docs/metrics/reward_scores.json docs/metrics/reward_scores.json
-            echo "Copied metrics file to docs/metrics/reward_scores.json"
+          # collect_metrics.py writes directly to docs/metrics/reward_scores.json
+          METRICS_FILE="docs/metrics/reward_scores.json"
+          
+          if [ ! -f "$METRICS_FILE" ]; then
+            echo "Metrics file not found at $METRICS_FILE"
+            exit 1
           fi
           
-          # Use docs/metrics/reward_scores.json (dashboard reads from here)
-          if [ -f docs/metrics/reward_scores.json ]; then
-            METRICS_FILE="docs/metrics/reward_scores.json"
-          else
-            echo "Metrics file not found"
-            exit 0
-          fi
+          echo "Checking metrics file: $METRICS_FILE"
+          FILE_SIZE=$(stat -f%z "$METRICS_FILE" 2>/dev/null || stat -c%s "$METRICS_FILE" 2>/dev/null || echo "0")
+          echo "File size: $FILE_SIZE bytes"
           
-          git status
-          git add "$METRICS_FILE"
-          git status
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
+          if [ -s "$METRICS_FILE" ] && [ "$FILE_SIZE" -gt 0 ]; then
+            echo "Metrics file has content, checking for changes..."
+            git status
+            git add "$METRICS_FILE"
+            git status
+            if git diff --cached --quiet; then
+              echo "No changes to commit (file unchanged)"
+            else
+              echo "Changes detected, committing..."
+              git commit -m "chore: update REWARD_SCORE metrics [skip ci]"
+              echo "Pushing to main..."
+              git push origin main || echo "Push failed (may need permissions)"
+            fi
           else
-            git commit -m "chore: update REWARD_SCORE metrics [skip ci]"
-            git push origin main || echo "Push failed"
+            echo "Metrics file is empty or invalid, skipping commit"
+            exit 1
           fi
 
       - name: Upload metrics artifact
