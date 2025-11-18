@@ -1001,6 +1001,181 @@ export interface BillingAnalytics {
   averagePaymentTime: number;
 }
 
+// ============================================================================
+// PAYMENT & STRIPE TYPES
+// ============================================================================
+
+export interface StripePaymentIntent {
+  id: string;
+  client_secret: string;
+  amount: number;
+  currency: string;
+  status: 'requires_payment_method' | 'requires_confirmation' | 'requires_action' | 'processing' | 'requires_capture' | 'canceled' | 'succeeded';
+  invoice_id: string;
+}
+
+export interface StripePaymentStatus {
+  id: string;
+  status: string;
+  amount: number;
+  currency: string;
+  invoice_id?: string;
+}
+
+export interface PaymentRetryHistory {
+  id: string;
+  invoice_id: string;
+  attempt_number: number;
+  attempted_at: string;
+  status: 'success' | 'failed';
+  error_message?: string;
+  payment_method_id?: string;
+}
+
+export interface OverdueInvoice {
+  id: string;
+  invoice_number: string;
+  account_id: string;
+  customer_name: string;
+  due_date: string;
+  total_amount: number;
+  days_overdue: number;
+  status: 'overdue';
+}
+
+export interface RevenueBreakdown {
+  period: string;
+  revenue: number;
+  expenses: number;
+  profit: number;
+  invoices_count: number;
+}
+
+export interface RecentTransaction {
+  id: string;
+  invoice_id: string;
+  invoice_number: string;
+  customer_name: string;
+  amount: number;
+  payment_method: string;
+  status: 'completed' | 'pending' | 'failed';
+  transaction_date: string;
+}
+
+// ============================================================================
+// ROUTING TYPES
+// ============================================================================
+
+export interface Route {
+  id: string;
+  technician_id: string;
+  technician_name: string;
+  date: string;
+  jobs: RouteJob[];
+  total_distance: number;
+  estimated_duration: number;
+  optimized: boolean;
+}
+
+export interface RouteJob {
+  id: string;
+  work_order_id: string;
+  customer_name: string;
+  address: string;
+  scheduled_time: string;
+  estimated_duration: number;
+  sequence: number;
+  latitude?: number;
+  longitude?: number;
+}
+
+// ============================================================================
+// DASHBOARD TYPES
+// ============================================================================
+
+export interface DashboardRegion {
+  id: string;
+  layout_id: string;
+  name: string;
+  grid_row: number;
+  grid_col: number;
+  row_span: number;
+  col_span: number;
+  min_width: number;
+  min_height: number;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateDashboardRegionData {
+  name: string;
+  grid_row: number;
+  grid_col: number;
+  row_span: number;
+  col_span: number;
+  min_width?: number;
+  min_height?: number;
+  display_order?: number;
+}
+
+export interface UpdateDashboardRegionData {
+  name?: string;
+  grid_row?: number;
+  grid_col?: number;
+  row_span?: number;
+  col_span?: number;
+  min_width?: number;
+  min_height?: number;
+  display_order?: number;
+}
+
+export interface DashboardLayoutHistory {
+  canUndo: boolean;
+  canRedo: boolean;
+  recentEvents: DashboardLayoutEvent[];
+}
+
+export interface DashboardLayoutEvent {
+  id: string;
+  event_type: string;
+  timestamp: string;
+  user_id: string;
+  changes: unknown;
+}
+
+export interface RoleDefaultLayout {
+  role: string;
+  regions: DashboardRegion[];
+  cards: unknown[];
+}
+
+// ============================================================================
+// FEEDBACK TYPES
+// ============================================================================
+
+export interface Feedback {
+  id: string;
+  tenant_id: string;
+  user_id: string;
+  rating: number;
+  comment?: string;
+  category: string;
+  created_at: string;
+}
+
+// ============================================================================
+// EXPERIENCE METRICS TYPES
+// ============================================================================
+
+export interface ExperienceMetrics {
+  average_rating: number;
+  total_feedback: number;
+  positive_feedback: number;
+  negative_feedback: number;
+  categories: Record<string, number>;
+}
+
 export interface RevenueAnalytics {
   monthlyRevenue: Array<{
     month: string;
