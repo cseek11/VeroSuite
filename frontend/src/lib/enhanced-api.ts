@@ -37,8 +37,21 @@ import type {
   CreatePaymentMethodDto,
   BillingAnalytics,
   RevenueAnalytics,
-  ARSummary
+  ARSummary,
+  InvoiceTemplate,
+  CreateInvoiceTemplateData,
+  UpdateInvoiceTemplateData,
+  InvoiceSchedule,
+  CreateInvoiceScheduleData,
+  UpdateInvoiceScheduleData,
+  InvoiceReminderHistory,
+  RecurringPaymentData
 } from '@/types/enhanced-types';
+import type {
+  KpiTemplate,
+  KpiTemplateFilters,
+  UserKpi
+} from '@/types/kpi-templates';
 
 
 
@@ -2645,7 +2658,7 @@ export const billing = {
     }
   },
 
-  createRecurringPayment: async (invoiceId: string, data: any): Promise<any> => {
+  createRecurringPayment: async (invoiceId: string, data: RecurringPaymentData): Promise<RecurringPaymentData> => {
     try {
       const authData = localStorage.getItem('verofield_auth');
       if (!authData) throw new Error('User not authenticated');
@@ -2933,7 +2946,7 @@ export const billing = {
       }
     },
 
-    createInvoiceTemplate: async (templateData: any): Promise<any> => {
+    createInvoiceTemplate: async (templateData: CreateInvoiceTemplateData): Promise<InvoiceTemplate> => {
       try {
         const authData = localStorage.getItem('verofield_auth');
         if (!authData) throw new Error('User not authenticated');
@@ -2968,7 +2981,7 @@ export const billing = {
       }
     },
 
-    updateInvoiceTemplate: async (id: string, templateData: any): Promise<any> => {
+    updateInvoiceTemplate: async (id: string, templateData: UpdateInvoiceTemplateData): Promise<InvoiceTemplate> => {
       try {
         const authData = localStorage.getItem('verofield_auth');
         if (!authData) throw new Error('User not authenticated');
@@ -3069,7 +3082,7 @@ export const billing = {
       }
     },
 
-    createInvoiceSchedule: async (scheduleData: any): Promise<any> => {
+    createInvoiceSchedule: async (scheduleData: CreateInvoiceScheduleData): Promise<InvoiceSchedule> => {
       try {
         const authData = localStorage.getItem('verofield_auth');
         if (!authData) throw new Error('User not authenticated');
@@ -3104,7 +3117,7 @@ export const billing = {
       }
     },
 
-    updateInvoiceSchedule: async (id: string, scheduleData: any): Promise<any> => {
+    updateInvoiceSchedule: async (id: string, scheduleData: UpdateInvoiceScheduleData): Promise<InvoiceSchedule> => {
       try {
         const authData = localStorage.getItem('verofield_auth');
         if (!authData) throw new Error('User not authenticated');
@@ -3412,7 +3425,7 @@ export const kpiTemplates = {
           Object.entries(filters).filter(([_, value]) => value !== undefined && value !== null && value !== '')
         );
         
-        const response = await enhancedApiCall<{ data: any; meta: any }>(`http://localhost:3001/api/v2/kpi-templates?${new URLSearchParams(cleanFilters)}`, {
+        const response = await enhancedApiCall<{ data: KpiTemplate[]; meta: { total: number; page: number; limit: number } }>(`http://localhost:3001/api/v2/kpi-templates?${new URLSearchParams(cleanFilters)}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -3719,10 +3732,10 @@ export const kpiTemplates = {
 
 export const userKpis = {
     // Get user's KPIs
-    list: async (): Promise<any[]> => {
+    list: async (): Promise<UserKpi[]> => {
       try {
         const token = await getAuthToken();
-        const response = await enhancedApiCall<{ data: any[]; meta: any }>(`http://localhost:3001/api/v2/kpis/user`, {
+        const response = await enhancedApiCall<{ data: UserKpi[]; meta: { total: number; page: number; limit: number } }>(`http://localhost:3001/api/v2/kpis/user`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
