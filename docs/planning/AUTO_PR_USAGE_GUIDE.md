@@ -30,11 +30,25 @@ python .cursor/scripts/monitor_changes.py --check --force
 
 ### 3. Continuous Monitoring (Daemon)
 
-Run in background to continuously monitor:
+**Windows (PowerShell):**
+```powershell
+# Start daemon
+cd .cursor\scripts
+.\start_auto_pr_daemon.ps1
 
+# Check status
+.\check_auto_pr_status.ps1
+
+# Stop daemon
+.\stop_auto_pr_daemon.ps1
+```
+
+**Linux/Mac:**
 ```bash
 python .cursor/scripts/auto_pr_daemon.py --interval 300
 ```
+
+**Note:** The daemon must be running for automatic PR creation. It checks every 5 minutes (300 seconds) by default.
 
 ---
 
