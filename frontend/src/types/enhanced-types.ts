@@ -784,6 +784,103 @@ export type SkillLevelType = 'basic' | 'intermediate' | 'expert';
 // BILLING & PAYMENT TYPES
 // ============================================================================
 
+export interface InvoiceTemplateItem {
+  service_type_id: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+}
+
+export interface InvoiceTemplate {
+  id: string;
+  tenant_id?: string;
+  name: string;
+  description?: string;
+  items: InvoiceTemplateItem[];
+  tags?: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateInvoiceTemplateData {
+  name: string;
+  description?: string;
+  items: InvoiceTemplateItem[];
+  tags?: string[];
+}
+
+export interface UpdateInvoiceTemplateData {
+  name?: string;
+  description?: string;
+  items?: InvoiceTemplateItem[];
+  tags?: string[];
+}
+
+export interface InvoiceSchedule {
+  id: string;
+  tenant_id?: string;
+  account_id: string;
+  customer_id: string;
+  customer_name?: string;
+  schedule_type: 'recurring' | 'one-time';
+  frequency?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  start_date: string;
+  end_date?: string;
+  next_run_date: string;
+  is_active: boolean;
+  template_id?: string;
+  amount: number;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateInvoiceScheduleData {
+  account_id: string;
+  schedule_type: 'recurring' | 'one-time';
+  frequency?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  start_date: string;
+  end_date?: string;
+  is_active?: boolean;
+  template_id?: string;
+  amount: number;
+  description?: string;
+}
+
+export interface UpdateInvoiceScheduleData {
+  schedule_type?: 'recurring' | 'one-time';
+  frequency?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  start_date?: string;
+  end_date?: string;
+  next_run_date?: string;
+  is_active?: boolean;
+  template_id?: string;
+  amount?: number;
+  description?: string;
+}
+
+export interface InvoiceReminderHistory {
+  id: string;
+  tenant_id?: string;
+  invoice_id: string;
+  invoice_number: string;
+  customer_name: string;
+  sent_at: string;
+  reminder_type: 'email' | 'sms' | 'letter';
+  status: 'sent' | 'failed' | 'pending';
+  message?: string;
+}
+
+export interface RecurringPaymentData {
+  invoice_id: string;
+  payment_method_id: string;
+  amount: number;
+  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  start_date: string;
+  end_date?: string;
+  is_active?: boolean;
+}
+
 export interface Invoice {
   id: string;
   tenant_id: string;
