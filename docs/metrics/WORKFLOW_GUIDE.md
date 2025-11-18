@@ -1,6 +1,6 @@
 # REWARD_SCORE CI Workflow Guide
 
-**Last Updated:** 2025-11-17
+**Last Updated:** 2025-11-18
 
 ## Overview
 
@@ -42,6 +42,24 @@ The REWARD_SCORE system uses a cascading workflow architecture:
    - Condition: Score ≤ 0
    - Downloads: `reward` artifact
    - Generates: Anti-pattern detection report
+
+6. **Retry Failed Reward Workflows** (`.github/workflows/retry_failed_reward_runs.yml`)
+   - Triggers on: schedule (every 30 minutes) or manual dispatch
+   - Uses: `.cursor/scripts/retry_reward_workflows.py`
+   - Action: Re-runs failed reward computation jobs (max 3 attempts)
+   - Goal: Recover automatically from transient workflow failures
+
+7. **Reward System Health Check** (`.github/workflows/reward_system_health_check.yml`)
+   - Triggers on: schedule (every 20 minutes) or manual dispatch
+   - Uses: `.cursor/scripts/reward_system_health_check.py`
+   - Action: Validates recent successful runs and freshness of `reward_scores.json`
+   - Goal: Detect dashboard staleness before it impacts users
+
+8. **Reward Error Aggregation** (`.github/workflows/reward_error_aggregation.yml`)
+   - Triggers on: `workflow_run` (reward + metrics workflows), hourly schedule, or manual dispatch
+   - Uses: `.cursor/scripts/aggregate_reward_errors.py`
+   - Output: `docs/metrics/reward_error_log.json` for surfacing repeated failures
+   - Goal: Provide visibility into systemic automation issues
 
 ## Workflow Triggers
 
