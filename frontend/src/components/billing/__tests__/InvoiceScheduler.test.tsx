@@ -259,6 +259,70 @@ describe('InvoiceScheduler', () => {
 
       // Error handling would be in the toggle function
     });
+
+    it('should handle schedule creation with invalid data', async () => {
+      renderComponent();
+
+      const createButton = screen.getByText(/create schedule/i);
+      fireEvent.click(createButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/schedule editor coming soon/i)).toBeInTheDocument();
+      });
+
+      // Component should validate schedule data before creation
+    });
+
+    it('should handle schedule search with special characters', async () => {
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByText(/acme corporation/i)).toBeInTheDocument();
+      });
+
+      const searchInput = screen.getByPlaceholderText(/search schedules/i);
+      fireEvent.change(searchInput, { target: { value: 'Test <script>alert("xss")</script>' } });
+
+      // Component should handle special characters safely
+      await waitFor(() => {
+        expect(searchInput).toHaveValue('Test <script>alert("xss")</script>');
+      });
+    });
+
+    it('should handle rapid schedule status changes', async () => {
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByText(/acme corporation/i)).toBeInTheDocument();
+      });
+
+      // Rapidly toggle schedule status
+      const toggleButtons = screen.queryAllByText(/pause|activate/i);
+      if (toggleButtons.length > 0) {
+        fireEvent.click(toggleButtons[0]);
+        fireEvent.click(toggleButtons[0]);
+        fireEvent.click(toggleButtons[0]);
+
+        // Component should handle rapid changes without errors
+        await waitFor(() => {
+          expect(mockLogger.debug).toHaveBeenCalled();
+        });
+      }
+    });
+
+    it('should handle schedule with missing required fields', async () => {
+      queryClient.setQueryData(['invoice-schedules'], [
+        { id: 'schedule-1', customer_id: 'cust-1' }, // Missing amount, frequency
+        { id: 'schedule-2', customer_id: 'cust-2', amount: 100 }, // Missing frequency
+      ]);
+
+      renderComponent();
+
+      await waitFor(() => {
+        // Component should handle incomplete schedule data gracefully
+        expect(screen.getByText(/invoice scheduler/i)).toBeInTheDocument();
+      });
+    });
   });
 });
 

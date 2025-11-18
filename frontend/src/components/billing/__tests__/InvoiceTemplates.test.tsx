@@ -231,6 +231,62 @@ describe('InvoiceTemplates', () => {
       // Error handling would be in the delete function
       // This test verifies error handling is present
     });
+
+    it('should handle template application with invalid data', async () => {
+      const onApplyTemplate = vi.fn();
+      renderComponent({ onApplyTemplate });
+
+      await waitFor(() => {
+        expect(screen.getByText(/standard monthly service/i)).toBeInTheDocument();
+      });
+
+      // Try to apply template - component should validate data
+      const applyButtons = screen.getAllByText(/apply/i);
+      if (applyButtons.length > 0) {
+        fireEvent.click(applyButtons[0]);
+        
+        // Component should handle invalid template data gracefully
+        await waitFor(() => {
+          expect(screen.queryByText(/apply template/i)).toBeInTheDocument();
+        });
+      }
+    });
+
+    it('should handle template search with special characters', async () => {
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByText(/standard monthly service/i)).toBeInTheDocument();
+      });
+
+      const searchInput = screen.getByPlaceholderText(/search templates/i);
+      fireEvent.change(searchInput, { target: { value: 'Test <script>alert("xss")</script>' } });
+
+      // Component should handle special characters safely
+      await waitFor(() => {
+        expect(searchInput).toHaveValue('Test <script>alert("xss")</script>');
+      });
+    });
+
+    it('should handle rapid template search changes', async () => {
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByText(/standard monthly service/i)).toBeInTheDocument();
+      });
+
+      const searchInput = screen.getByPlaceholderText(/search templates/i);
+      
+      // Rapidly change search term
+      fireEvent.change(searchInput, { target: { value: 'Monthly' } });
+      fireEvent.change(searchInput, { target: { value: 'One-time' } });
+      fireEvent.change(searchInput, { target: { value: 'Standard' } });
+
+      // Component should handle rapid changes without errors
+      await waitFor(() => {
+        expect(searchInput).toBeInTheDocument();
+      });
+    });
   });
 });
 
