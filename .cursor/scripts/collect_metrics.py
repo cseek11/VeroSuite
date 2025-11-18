@@ -353,13 +353,6 @@ def main() -> None:
                 logger.error(f"Error reading reward file: {reward_file}", operation="main", error=str(e))
                 sys.exit(1)
             
-            # Validate reward payload structure
-            try:
-                validate_reward_payload(reward_data)
-            except ValueError as e:
-                logger.error(f"Invalid reward payload: {e}", operation="main")
-                sys.exit(1)
-            
             # Check for required fields (pr_number, total_score, timestamp)
             required_fields = ["pr_number", "total_score", "timestamp"]
             missing_fields = [f for f in required_fields if f not in reward_data]
