@@ -1,0 +1,148 @@
+﻿name: Update Metrics Dashboard
+
+on:
+  workflow_run:
+    workflows: ["Swarm - Compute Reward Score"]
+    types: [completed]
+  schedule:
+    # Run daily at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-metrics:
+    runs-on: ubuntu-latest
+    # Only run if reward score workflow completed successfully (has reward.json artifact)
+    # Skip if workflow was skipped, failed, or cancelled (no reward.json available)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Get latest REWARD_SCORE run ID
+        id: get-run-id
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Get the most recent successful run that actually completed (not skipped)
+          # Filter by conclusion == "success" and status == "completed", then take the first one
+          echo "Fetching successful REWARD_SCORE runs..."
+          RUN_ID=$(gh run list --workflow="swarm_compute_reward_score.yml" --limit 50 --json databaseId,conclusion,status --jq '[.[] | select(.conclusion == "success" and .status == "completed")] | first | .databaseId')
+          echo "Query result: $RUN_ID"
+          if [ -z "$RUN_ID" ] || [ "$RUN_ID" == "null" ]; then
+            echo "No successful REWARD_SCORE run found"
+            exit 1
+          fi
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "Found successful run ID: $RUN_ID"
+
+      - name: Download reward artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: reward
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id || steps.get-run-id.outputs.run_id }}
+        continue-on-error: true
+        if: github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch'
+
+      - name: Retry reward artifact download
+        if: github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch'
+        env:
+          RUN_ID: ${{ github.event.workflow_run.id || steps.get-run-id.outputs.run_id }}
+          ARTIFACT_NAME: reward
+          DEST_PATH: .
+          REQUIRED_FILE: reward.json
+          MAX_ATTEMPTS: 3
+        run: python .cursor/scripts/retry_artifact_download.py
+
+      - name: Extract score data
+        id: extract-score
+        if: github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch'
+        run: |
+          if [ -f reward.json ]; then
+            PR_NUM=$(jq -r '.metadata.pr' reward.json)
+            SCORE=$(jq -r '.score' reward.json)
+            echo "pr=$PR_NUM" >> "$GITHUB_OUTPUT"
+            echo "score=$SCORE" >> "$GITHUB_OUTPUT"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            
+            # Save breakdown and metadata
+            jq '.breakdown' reward.json > breakdown.json
+            jq '.metadata' reward.json > metadata.json
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update metrics
+        env:
+          PR_NUM: ${{ steps.extract-score.outputs.pr }}
+          SCORE: ${{ steps.extract-score.outputs.score }}
+        run: |
+          if [ "${{ steps.extract-score.outputs.found }}" = "true" ]; then
+            echo "Updating metrics for PR $PR_NUM with score $SCORE"
+            python .cursor/scripts/collect_metrics.py \
+              --pr "$PR_NUM" \
+              --reward-json reward.json
+          else
+            echo "No reward.json found, recalculating aggregates only"
+            # Just recalculate aggregates
+            python .cursor/scripts/collect_metrics.py --aggregate-only
+          fi
+
+      - name: Commit and push metrics
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # collect_metrics.py writes to docs/metrics/reward_scores.json
+          # Check if file exists and has content
+          METRICS_FILE="docs/metrics/reward_scores.json"
+          
+          echo "Checking for metrics file: $METRICS_FILE"
+          if [ -f "$METRICS_FILE" ]; then
+            echo "Found metrics file: $METRICS_FILE"
+            FILE_SIZE=$(stat -f%z "$METRICS_FILE" 2>/dev/null || stat -c%s "$METRICS_FILE" 2>/dev/null || echo "0")
+            echo "File size: $FILE_SIZE bytes"
+            
+            # Check if file has content (not empty)
+            if [ -s "$METRICS_FILE" ] && [ "$FILE_SIZE" -gt 0 ]; then
+              echo "Metrics file has content, checking for changes..."
+              git status
+              git add "$METRICS_FILE"
+              git status
+              if git diff --cached --quiet; then
+                echo "No changes to commit (file unchanged)"
+              else
+                echo "Changes detected, committing..."
+                git commit -m "chore: update REWARD_SCORE metrics [skip ci]"
+                echo "Pushing to main..."
+                git push origin main || echo "Push failed (may need permissions)"
+              fi
+            else
+              echo "Metrics file is empty or invalid, skipping commit"
+            fi
+          else
+            echo "Metrics file not found at $METRICS_FILE"
+            echo "Checking if collect_metrics.py created it elsewhere..."
+            find . -name "reward_scores.json" -type f 2>/dev/null | head -5 || echo "No reward_scores.json found"
+            echo "This is OK if no reward.json was available - aggregates will be recalculated on next run"
+          fi
+
+      - name: Upload metrics artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: metrics-data
+          path: docs/metrics/reward_scores.json
+          retention-days: 30
+        continue-on-error: true
+
