@@ -8,6 +8,7 @@ Reads reward.json artifacts and aggregates metrics for dashboard visualization.
 import argparse
 import json
 import subprocess
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -304,6 +305,27 @@ def get_score_range(score: int) -> str:
         return "negative (<0)"
 
 
+def validate_reward_payload(reward_data: Dict) -> None:
+    """Validate the structure of reward.json."""
+    required_keys = {"score", "breakdown", "metadata"}
+    missing = [key for key in required_keys if key not in reward_data]
+    if missing:
+        raise ValueError(f"reward.json missing keys: {', '.join(missing)}")
+
+    if not isinstance(reward_data["breakdown"], dict):
+        raise ValueError("reward.json 'breakdown' must be an object")
+
+    metadata = reward_data["metadata"]
+    if not isinstance(metadata, dict):
+        raise ValueError("reward.json 'metadata' must be an object")
+
+    if not metadata.get("pr"):
+        raise ValueError("reward.json metadata.pr is required")
+
+    if not isinstance(reward_data.get("score"), (int, float)):
+        raise ValueError("reward.json score must be numeric")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pr", help="PR number (optional, for single PR update)")
@@ -323,6 +345,16 @@ def main() -> None:
         if args.reward_json:
             with open(args.reward_json, "r", encoding="utf-8") as handle:
                 reward_data = json.load(handle)
+            try:
+                validate_reward_payload(reward_data)
+            except ValueError as error:
+                logger.error(
+                    "Invalid reward.json payload",
+                    operation="main",
+                    error=str(error),
+                    reward_path=args.reward_json,
+                )
+                sys.exit(1)
             score = reward_data.get("score", 0)
             breakdown = reward_data.get("breakdown", {})
             metadata = reward_data.get("metadata", {})
