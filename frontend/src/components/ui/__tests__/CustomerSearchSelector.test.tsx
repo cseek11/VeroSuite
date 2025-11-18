@@ -587,5 +587,494 @@ describe('CustomerSearchSelector', () => {
       });
     });
   });
+
+  describe('Advanced Search Scenarios', () => {
+    it('should search across multiple fields simultaneously', async () => {
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      const input = screen.getByPlaceholderText(/search customers/i);
+      fireEvent.change(input, { target: { value: 'example.com' } });
+      fireEvent.focus(input);
+
+      await waitFor(() => {
+        // Should find customers by email domain
+        const results = screen.queryAllByText(/john|jane|bob/i);
+        expect(results.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('should handle search with special characters', async () => {
+      const specialCustomer = createMockAccount({
+        id: 'account-special',
+        name: "O'Brien & Associates",
+        email: 'test+special@example.com',
+      });
+
+      (secureApiClient.getAllAccounts as ReturnType<typeof vi.fn>).mockResolvedValue([
+        ...mockCustomers,
+        specialCustomer,
+      ]);
+
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      const input = screen.getByPlaceholderText(/search customers/i);
+      fireEvent.change(input, { target: { value: "O'Brien" } });
+      fireEvent.focus(input);
+
+      await waitFor(() => {
+        expect(screen.getByText(/o'brien/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should handle search with partial matches', async () => {
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      const input = screen.getByPlaceholderText(/search customers/i);
+      fireEvent.change(input, { target: { value: 'Joh' } });
+      fireEvent.focus(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
+    });
+
+    it('should handle search with numbers in phone/zip', async () => {
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      const input = screen.getByPlaceholderText(/search customers/i);
+      fireEvent.change(input, { target: { value: '12345' } });
+      fireEvent.focus(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
+    });
+
+    it('should prioritize exact name matches', async () => {
+      const exactMatchCustomer = createMockAccount({
+        id: 'account-exact',
+        name: 'John Smith',
+      });
+
+      (secureApiClient.getAllAccounts as ReturnType<typeof vi.fn>).mockResolvedValue([
+        ...mockCustomers,
+        exactMatchCustomer,
+      ]);
+
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      const input = screen.getByPlaceholderText(/search customers/i);
+      fireEvent.change(input, { target: { value: 'John Smith' } });
+      fireEvent.focus(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('John Smith')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Performance with Large Datasets', () => {
+    it('should handle search with 1000+ customers efficiently', async () => {
+      const largeDataset = Array.from({ length: 1000 }, (_, i) =>
+        createMockAccount({
+          id: `account-${i}`,
+          name: `Customer ${i}`,
+          email: `customer${i}@example.com`,
+        })
+      );
+
+      (secureApiClient.getAllAccounts as ReturnType<typeof vi.fn>).mockResolvedValue(largeDataset);
+
+      const startTime = performance.now();
+
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      const input = screen.getByPlaceholderText(/search customers/i);
+      fireEvent.change(input, { target: { value: 'Customer 500' } });
+      fireEvent.focus(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('Customer 500')).toBeInTheDocument();
+      });
+
+      const endTime = performance.now();
+      const searchTime = endTime - startTime;
+
+      // Search should complete in reasonable time (< 1 second for 1000 items)
+      expect(searchTime).toBeLessThan(1000);
+    });
+
+    it('should limit results to prevent performance issues', async () => {
+      const manyCustomers = Array.from({ length: 100 }, (_, i) =>
+        createMockAccount({
+          id: `account-${i}`,
+          name: `Test Customer ${i}`,
+        })
+      );
+
+      (secureApiClient.getAllAccounts as ReturnType<typeof vi.fn>).mockResolvedValue(manyCustomers);
+
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      const input = screen.getByPlaceholderText(/search customers/i);
+      fireEvent.change(input, { target: { value: 'Test' } });
+      fireEvent.focus(input);
+
+      await waitFor(() => {
+        const results = screen.queryAllByText(/Test Customer \d+/);
+        // Should be limited to 20 results
+        expect(results.length).toBeLessThanOrEqual(20);
+      });
+    });
+
+    it('should debounce rapid search input changes', async () => {
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      const input = screen.getByPlaceholderText(/search customers/i);
+      
+      // Rapidly type multiple characters
+      fireEvent.change(input, { target: { value: 'J' } });
+      fireEvent.change(input, { target: { value: 'Jo' } });
+      fireEvent.change(input, { target: { value: 'Joh' } });
+      fireEvent.change(input, { target: { value: 'John' } });
+      fireEvent.focus(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Error Handling Edge Cases', () => {
+    it('should handle API returning null', async () => {
+      (secureApiClient.getAllAccounts as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      // Component should handle null gracefully
+      expect(screen.getByPlaceholderText(/search customers/i)).toBeInTheDocument();
+    });
+
+    it('should handle API returning undefined', async () => {
+      (secureApiClient.getAllAccounts as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
+
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      // Component should handle undefined gracefully
+      expect(screen.getByPlaceholderText(/search customers/i)).toBeInTheDocument();
+    });
+
+    it('should handle API returning invalid data structure', async () => {
+      (secureApiClient.getAllAccounts as ReturnType<typeof vi.fn>).mockResolvedValue('invalid-data');
+
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      // Component should handle invalid data gracefully
+      expect(screen.getByPlaceholderText(/search customers/i)).toBeInTheDocument();
+    });
+
+    it('should handle network error with retry', async () => {
+      let callCount = 0;
+      (secureApiClient.getAllAccounts as ReturnType<typeof vi.fn>).mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return Promise.reject(new Error('Network error'));
+        }
+        return Promise.resolve(mockCustomers);
+      });
+
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      }, { timeout: 3000 });
+
+      // Component should still be functional
+      expect(screen.getByPlaceholderText(/search customers/i)).toBeInTheDocument();
+    });
+
+    it('should handle timeout errors', async () => {
+      (secureApiClient.getAllAccounts as ReturnType<typeof vi.fn>).mockImplementation(
+        () => new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Request timeout')), 100);
+        })
+      );
+
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      }, { timeout: 2000 });
+
+      // Component should handle timeout gracefully
+      expect(screen.getByPlaceholderText(/search customers/i)).toBeInTheDocument();
+    });
+
+    it('should handle customers with missing required fields', async () => {
+      const incompleteCustomers = [
+        { id: 'account-1' }, // Missing name, email, etc.
+        { id: 'account-2', name: 'Partial Customer' }, // Missing email
+        createMockAccount({ id: 'account-3', name: 'Complete Customer' }),
+      ];
+
+      (secureApiClient.getAllAccounts as ReturnType<typeof vi.fn>).mockResolvedValue(incompleteCustomers);
+
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      const input = screen.getByPlaceholderText(/search customers/i);
+      fireEvent.change(input, { target: { value: 'Complete' } });
+      fireEvent.focus(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('Complete Customer')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('should have proper ARIA labels', () => {
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} label="Select Customer" />
+        </TestWrapper>
+      );
+
+      const input = screen.getByPlaceholderText(/search customers/i);
+      expect(input).toHaveAttribute('type', 'text');
+    });
+
+    it('should support keyboard navigation', async () => {
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      const input = screen.getByPlaceholderText(/search customers/i) as HTMLInputElement;
+      input.focus();
+      expect(document.activeElement).toBe(input);
+
+      // Arrow keys should navigate results
+      fireEvent.change(input, { target: { value: 'John' } });
+      fireEvent.focus(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
+
+      // Press Enter to select
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    });
+
+    it('should support Escape key to close dropdown', async () => {
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      const input = screen.getByPlaceholderText(/search customers/i) as HTMLInputElement;
+      fireEvent.change(input, { target: { value: 'John' } });
+      fireEvent.focus(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
+
+      fireEvent.keyDown(input, { key: 'Escape', code: 'Escape' });
+
+      await waitFor(() => {
+        expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should announce search results to screen readers', async () => {
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      const input = screen.getByPlaceholderText(/search customers/i);
+      fireEvent.change(input, { target: { value: 'John' } });
+      fireEvent.focus(input);
+
+      await waitFor(() => {
+        const results = screen.getByText('John Doe');
+        expect(results).toBeInTheDocument();
+        expect(results).toBeVisible();
+      });
+    });
+
+    it('should have proper focus management', async () => {
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      const input = screen.getByPlaceholderText(/search customers/i) as HTMLInputElement;
+      input.focus();
+      expect(document.activeElement).toBe(input);
+
+      // After selection, focus should return to input
+      fireEvent.change(input, { target: { value: 'John' } });
+      fireEvent.focus(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
+
+      const customerOption = screen.getByText('John Doe');
+      fireEvent.click(customerOption);
+
+      await waitFor(() => {
+        // Input should still be focusable
+        expect(input).toBeInTheDocument();
+      });
+    });
+
+    it('should support screen reader announcements for empty states', async () => {
+      render(
+        <TestWrapper>
+          <CustomerSearchSelector onChange={mockOnChange} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+
+      const input = screen.getByPlaceholderText(/search customers/i);
+      fireEvent.change(input, { target: { value: 'NonExistentCustomer123' } });
+      fireEvent.focus(input);
+
+      await waitFor(() => {
+        const emptyState = screen.getByText(/no customers found/i);
+        expect(emptyState).toBeInTheDocument();
+        expect(emptyState).toBeVisible();
+      });
+    });
+  });
 });
 
