@@ -424,6 +424,41 @@ if (invoicesTab) {
 
 ---
 
+## MONITOR_CHANGES_DATETIME_PARSE_FAILURE - 2025-11-17
+
+### Summary
+Automated PR creation daemon (`monitor_changes.py`) crashed when parsing timestamps stored in the state file. Timestamps included duplicate timezone suffixes (`+00:00+00:00`) or trailing `Z`, causing `ValueError: Invalid isoformat string` and preventing PR creation for large batches (800+ files).
+
+### Root Cause
+- `datetime.fromisoformat()` received malformed strings due to appending extra timezone suffixes.
+- State serialization appended `"Z"` to `datetime.now(UTC).isoformat()` even though the string already contained `+00:00`.
+- Time-based trigger logic mixed timezone-aware and naive datetimes when computing inactivity/max work thresholds, leading to `TypeError`.
+
+### Triggering Conditions
+- Monitoring daemon not running, so first manual `--check` encountered malformed timestamps left in `.cursor/cache/auto_pr_state.json`.
+- Large change batches producing lots of state writes, increasing chance of encountering legacy malformed entries.
+
+### Relevant Code/Modules
+- `.cursor/scripts/monitor_changes.py`: `check_time_based_trigger`, state serialization block.
+- `.cursor/cache/auto_pr_state.json`: persisted malformed timestamps.
+
+### How It Was Fixed
+1. **Sanitized parsing**: Strip duplicate timezone suffixes and convert trailing `Z` to `+00:00` before calling `datetime.fromisoformat()`.
+2. **Correct serialization**: Store `datetime.now(UTC).isoformat()` as-is (no extra `"Z"`).
+3. **Consistent comparisons**: Compare timezone-aware datetimes directly without `.replace(tzinfo=None)`.
+4. **Regression tests**: Added `.cursor/scripts/tests/test_monitor_changes.py` covering double timezone strings, `Z` suffixes, and timezone-aware comparisons.
+
+### How to Prevent It in the Future
+- **Avoid** mutating ISO strings returned by `datetime.now(UTC).isoformat()`.
+- **Normalize** persisted timestamps before parsing to tolerate legacy data.
+- **Ensure** both operands in datetime arithmetic share the same timezone awareness.
+- **Add** regression tests whenever datetime parsing/serialization changes.
+- **Monitor** daemon health; remove corrupted state files when detected.
+
+### Similar Historical Issues
+- DATE_COMPLIANCE_DEPRECATION – prior shift from `datetime.utcnow()` to `datetime.now(UTC)`.
+- TIMEZONE_MISMATCH_TYPEERROR – subtracting aware vs naive datetimes.
+
 ## Pattern Categories
 
 ### API & Network Errors
@@ -758,3 +793,133 @@ it('should handle job update errors gracefully', async () => {
 ---
 
 **Last Updated:** 2025-11-17
+
+---
+
+## BILLING_API_TEMPLATE_CREATE_FAILED - 2025-11-18
+
+### Summary
+Invoice template creation fails due to database constraints, validation errors, or tenant isolation violations. Error occurs in BillingService.createInvoiceTemplate() method.
+
+### Root Cause
+- Database constraint violations (duplicate names, invalid tenant_id)
+- Missing required fields (name, items)
+- Invalid JSON structure for items array
+- Tenant context not found or invalid
+- Database connection failures
+
+### Triggering Conditions
+- Creating template with duplicate name for same tenant
+- Missing or empty items array
+- Invalid tenant_id or tenant context not set
+- Database connection timeout or failure
+- Invalid JSON in items field
+
+### Relevant Code/Modules
+- ackend/src/billing/billing.service.ts - createInvoiceTemplate() method
+- ackend/src/billing/billing.controller.ts - POST /invoice-templates endpoint
+- ackend/src/billing/dto/create-invoice-template.dto.ts - DTO validation
+
+### How It Was Fixed
+1. **Added structured error logging:** All errors include errorCode 'TEMPLATE_CREATE_FAILED', rootCause, and context
+2. **Added performance monitoring:** Duration tracking and metrics collection
+3. **Added tenant isolation:** Automatic tenant ID resolution from context
+4. **Added validation:** DTO validation ensures required fields are present
+5. **Added error metrics:** Failed operations tracked via MetricsService
+
+**Error Code:** TEMPLATE_CREATE_FAILED  
+**Root Cause:** Database operation failed or validation error
+
+### Prevention Strategies
+- Validate all required fields before database operation
+- Ensure tenant context is properly set
+- Use database transactions for atomic operations
+- Add retry logic for transient database failures
+- Monitor error rates via metrics
+
+---
+
+## BILLING_API_SCHEDULE_CREATE_FAILED - 2025-11-18
+
+### Summary
+Invoice schedule creation fails due to invalid dates, missing account references, or database constraints. Error occurs in BillingService.createInvoiceSchedule() method.
+
+### Root Cause
+- Invalid date formats or date range violations
+- Missing or invalid account_id reference
+- Invalid schedule_type or frequency combination
+- Database constraint violations
+- Tenant isolation violations
+
+### Triggering Conditions
+- Creating schedule with start_date in the past
+- Invalid frequency for recurring schedules
+- Missing account_id or invalid UUID format
+- Database foreign key constraint violations
+- Tenant context not found
+
+### Relevant Code/Modules
+- ackend/src/billing/billing.service.ts - createInvoiceSchedule() method
+- ackend/src/billing/billing.controller.ts - POST /invoice-schedules endpoint
+- ackend/src/billing/dto/create-invoice-schedule.dto.ts - DTO validation
+
+### How It Was Fixed
+1. **Added structured error logging:** All errors include errorCode 'SCHEDULE_CREATE_FAILED', rootCause, and context
+2. **Added performance monitoring:** Duration tracking and metrics collection
+3. **Added date validation:** Start date and next_run_date calculation
+4. **Added tenant isolation:** Automatic tenant ID resolution from context
+5. **Added error metrics:** Failed operations tracked via MetricsService
+
+**Error Code:** SCHEDULE_CREATE_FAILED  
+**Root Cause:** Database operation failed or validation error
+
+### Prevention Strategies
+- Validate date ranges before database operation
+- Ensure account_id exists and belongs to tenant
+- Validate schedule_type and frequency combinations
+- Use database transactions for atomic operations
+- Monitor error rates via metrics
+
+---
+
+## BILLING_API_REMINDER_FETCH_FAILED - 2025-11-18
+
+### Summary
+Reminder history retrieval fails due to database query errors or tenant isolation violations. Error occurs in BillingService.getReminderHistory() method.
+
+### Root Cause
+- Database query timeout or connection failure
+- Invalid tenant_id or tenant context not set
+- Database index issues causing slow queries
+- Missing or corrupted reminder history records
+
+### Triggering Conditions
+- Large number of reminder records causing query timeout
+- Invalid tenant_id or tenant context not set
+- Database connection failure
+- Missing database indexes on tenant_id or sent_at
+
+### Relevant Code/Modules
+- ackend/src/billing/billing.service.ts - getReminderHistory() method
+- ackend/src/billing/billing.controller.ts - GET /reminder-history endpoint
+
+### How It Was Fixed
+1. **Added structured error logging:** All errors include errorCode 'REMINDER_HISTORY_FETCH_FAILED', rootCause, and context
+2. **Added performance monitoring:** Duration tracking and metrics collection
+3. **Added tenant isolation:** Automatic tenant ID resolution from context
+4. **Added query optimization:** Proper ordering and indexing
+5. **Added error metrics:** Failed operations tracked via MetricsService
+
+**Error Code:** REMINDER_HISTORY_FETCH_FAILED  
+**Root Cause:** Database query failed
+
+### Prevention Strategies
+- Add pagination for large result sets
+- Ensure database indexes on tenant_id and sent_at
+- Add query timeout handling
+- Monitor query performance via metrics
+- Add caching for frequently accessed data
+
+---
+
+**Last Updated:** 2025-11-18

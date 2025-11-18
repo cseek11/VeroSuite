@@ -1,8 +1,8 @@
 # Engineering Decisions Knowledge Base
 
-**Purpose:** This file serves as a living knowledge base of engineering decisions, trade-offs, alternatives considered, and lessons learned. Every significant architectural or design decision should be documented here.
+**Purpose:** This file serves as a living knowledge base of engineering decisions, trade-offs, alternatives considered, and lessons learned. Every significant architectural or design decision should be documented here.                      
 
-**Last Updated:** 2025-11-17
+**Last Updated:** 2025-11-18
 
 ---
 
@@ -882,6 +882,695 @@ The CI automation suite provides:
 - File organization standards
 - Documentation date compliance
 - Pattern learning and anti-pattern detection
+
+---
+
+**Last Updated:** 2025-11-17
+
+---
+
+## Billing Automation API Integration - 2025-11-18
+
+### Decision
+Implemented backend API integration for Invoice Templates, Schedules, and Reminder History to complete the billing automation system. Added Prisma models, DTOs, service methods, controller endpoints, and frontend API client methods.
+
+### Context
+The billing system frontend components (InvoiceTemplates, InvoiceScheduler, InvoiceReminders) were completed but lacked backend integration. This feature completes the remaining 60% of the billing & invoicing system by providing:
+- Invoice template management (CRUD operations)
+- Automated invoice scheduling (recurring and one-time)
+- Reminder history tracking and retrieval
+
+### Trade-offs
+**Pros:**
+- Complete end-to-end billing automation functionality
+- Reusable invoice templates for faster invoice creation
+- Automated scheduling reduces manual work
+- Reminder history provides audit trail
+- Structured logging ensures observability compliance
+- Tenant isolation maintained through RLS policies
+
+**Cons:**
+- Additional database tables increase schema complexity
+- More API endpoints to maintain
+- Frontend components require API integration testing
+- Schedule execution logic (cron jobs) not yet implemented (future work)
+
+### Alternatives Considered
+**Alternative 1: External Scheduling Service (Cron-as-a-Service)**
+- Description: Use external service like AWS EventBridge, Google Cloud Scheduler
+- Why rejected: Want full control over scheduling logic, avoid external dependencies, keep costs low
+
+**Alternative 2: In-Memory Scheduling (Node-cron)**
+- Description: Use node-cron library to run schedules in the application process
+- Why rejected: Not scalable across multiple instances, requires coordination, risk of lost schedules on restart
+
+**Alternative 3: Database-Driven Scheduling (Current Approach)**
+- Description: Store schedules in database, use background worker to process them
+- Why accepted: Scalable, persistent, can be processed by any worker instance, easy to query and manage
+
+### Rationale
+The database-driven approach provides:
+- Persistence: Schedules survive application restarts
+- Scalability: Multiple worker instances can process schedules
+- Queryability: Easy to view, filter, and manage schedules via API
+- Auditability: Full history of schedule executions and reminders
+- Tenant isolation: RLS policies ensure data security
+
+### Implementation Pattern
+1. **Database Schema:**
+   - InvoiceTemplate - Stores reusable invoice templates with items and tags
+   - InvoiceSchedule - Stores scheduled invoices (recurring/one-time) with frequency and next run date
+   - InvoiceReminderHistory - Tracks all reminder communications sent
+
+2. **Backend Architecture:**
+   - DTOs for all operations (create, update, response)
+   - Service methods with structured logging and error handling
+   - REST endpoints following existing billing API patterns
+   - Tenant isolation enforced at service layer
+
+3. **Frontend Integration:**
+   - React Query for data fetching and mutations
+   - API client methods in enhanced-api.ts
+   - Form handling with validation
+   - User feedback via toast notifications
+
+4. **Logging Compliance:**
+   - All new methods use StructuredLoggerService
+   - Includes context, operation, errorCode, rootCause
+   - Trace propagation ready (traceId/spanId/requestId via request context)
+
+### Affected Areas
+- ackend/prisma/schema.prisma - 3 new models with relations
+- ackend/src/billing/dto/ - 7 new DTO files
+- ackend/src/billing/billing.service.ts - 10 new service methods
+- ackend/src/billing/billing.controller.ts - 9 new endpoints
+- ackend/src/billing/billing.module.ts - Added StructuredLoggerService
+- rontend/src/lib/enhanced-api.ts - 9 new API client methods
+- rontend/src/components/billing/ - 3 components updated to use API
+
+### Lessons Learned
+**What Worked Well:**
+- Prisma schema changes integrate seamlessly with existing models
+- DTO pattern provides type safety and validation
+- Structured logging ensures compliance with observability rules
+- React Query mutations simplify frontend state management
+- Tenant isolation pattern consistent across all new methods
+
+**What Would Be Done Differently:**
+- Could add integration tests for schedule execution logic
+- Could add unit tests for service methods
+- Could add validation for schedule frequency/date combinations
+- Could add rate limiting for reminder sending
+- Could add webhook notifications for schedule executions
+
+### Related Decisions
+- Structured logging and trace propagation pattern
+- Error handling and resilience patterns
+- Tenant isolation and RLS policies
+- Frontend API client patterns
+- React Query for state management
+
+### Future Work
+- Implement background worker for schedule execution
+- Add schedule execution history tracking
+- Add schedule conflict detection
+- Add bulk schedule operations
+- Add schedule template system
+- Add reminder automation rules
+
+---
+
+## Automated Workflow Validation in CI - 2025-11-17
+
+### Decision
+Implemented automated workflow validation in CI pipeline that runs on every PR to prevent workflow format mismatches, broken triggers, and artifact naming inconsistencies before merge.
+
+### Context
+**Problem Statement:**
+- Workflow format mismatches occurred when PR branches had new formats but main branch had old formats
+- Broken workflow_run dependencies caused cascading workflow failures
+- Artifact naming inconsistencies prevented artifact downloads
+- No validation before merge led to production issues
+
+**Constraints:**
+- Must not slow down CI pipeline significantly
+- Must provide clear error messages
+- Must block merge on critical violations
+- Must validate all workflow files
+
+**Requirements:**
+- Validate workflow trigger configuration
+- Validate workflow_run dependencies exist
+- Validate artifact naming consistency
+- Validate PR trigger types
+- Block merge on critical violations
+
+### Trade-offs
+**Pros:**
+- Prevents workflow format mismatches before merge
+- Catches broken dependencies early
+- Ensures artifact naming consistency
+- Reduces production failures
+- Provides clear error messages
+- Fast validation (< 5 seconds)
+
+**Cons:**
+- Adds ~5 seconds to CI pipeline
+- Requires maintaining validation script
+- May block merges temporarily (but prevents worse issues)
+
+### Alternatives Considered
+**Alternative 1: Manual Validation**
+- Description: Rely on developers to manually run validation script
+- Why rejected: Human error, easy to forget, inconsistent enforcement
+
+**Alternative 2: Pre-commit Hook Only**
+- Description: Run validation only in pre-commit hook
+- Why rejected: Can be bypassed, not all developers use pre-commit hooks
+
+**Alternative 3: CI Validation (Current Approach)**
+- Description: Run validation in CI pipeline on every PR
+- Why accepted: Cannot be bypassed, consistent enforcement, blocks merge on violations
+
+### Rationale
+CI validation provides:
+- **Enforcement:** Cannot be bypassed, ensures all PRs are validated
+- **Early Detection:** Catches issues before merge, prevents production failures
+- **Consistency:** All PRs validated the same way
+- **Clear Feedback:** Provides actionable error messages in PR comments
+
+### Implementation Pattern
+1. **Validation Script:** `.cursor/scripts/validate_workflow_triggers.py`
+   - Validates all workflow files in `.github/workflows/`
+   - Checks for `on:` sections, trigger types, dependencies, artifacts
+   - Returns structured violation reports
+
+2. **CI Integration:** `.github/workflows/ci.yml`
+   - Added `workflow-validation` job
+   - Runs on all PRs
+   - Blocks merge on critical violations
+   - Provides clear error messages
+
+3. **Validation Checks:**
+   - Missing `on:` sections
+   - Incorrect PR trigger types
+   - Missing workflow_run dependencies
+   - Artifact naming inconsistencies
+   - Reward.json format usage
+
+### Impact
+**Short-term:**
+- All PRs now validated before merge
+- Workflow format mismatches prevented
+- Broken dependencies caught early
+- Clear error messages in PR comments
+
+**Long-term:**
+- Reduced production failures
+- Better workflow quality
+- Easier maintenance
+- Consistent workflow patterns
+
+**Affected Areas:**
+- `.github/workflows/ci.yml` - Added validation job
+- `.cursor/scripts/validate_workflow_triggers.py` - Enhanced validation
+- All workflow files - Now validated automatically
+
+### Lessons Learned
+**What Worked Well:**
+- Fast validation (< 5 seconds)
+- Clear error messages help developers fix issues quickly
+- Blocking merge on critical violations prevents production issues
+- Structured violation reports easy to parse
+
+**What Would Be Done Differently:**
+- Could add auto-fix suggestions for common violations
+- Could add validation for workflow syntax errors
+- Could add validation for workflow permissions
+
+### Related Decisions
+- CI automation and workflow requirements (`.cursor/rules/ci-automation.md`)
+- Error handling and resilience patterns
+- Structured logging and observability
+
+---
+
+## Automated Retry Mechanism for Artifact Downloads - 2025-11-17
+
+### Decision
+Implemented automated retry mechanism with exponential backoff for artifact downloads to recover from transient failures and improve reliability of metrics collection.
+
+### Context
+**Problem Statement:**
+- Artifact downloads sometimes fail due to transient network issues
+- Single failures caused permanent failures in metrics collection
+- No retry mechanism led to lost metrics data
+- Manual intervention required to recover from failures
+
+**Constraints:**
+- Must not cause infinite retries
+- Must have reasonable timeout
+- Must log all retry attempts
+- Must work in GitHub Actions environment
+
+**Requirements:**
+- Retry failed artifact downloads
+- Exponential backoff between retries
+- Max retry limit (3 attempts)
+- Clear logging of retry attempts
+- Graceful failure after max retries
+
+### Trade-offs
+**Pros:**
+- Recovers from transient failures automatically
+- Improves reliability of metrics collection
+- Reduces manual intervention
+- Better error messages for debugging
+- Configurable retry parameters
+
+**Cons:**
+- Adds delay to workflow execution (up to ~20 seconds)
+- May mask underlying issues if retries always succeed
+- Requires maintaining retry logic
+
+### Alternatives Considered
+**Alternative 1: No Retry (Previous Approach)**
+- Description: Fail immediately on artifact download failure
+- Why rejected: Too many transient failures, lost metrics data
+
+**Alternative 2: Fixed Delay Retry**
+- Description: Retry with fixed delay (e.g., 5 seconds)
+- Why rejected: Less efficient than exponential backoff, may retry too quickly
+
+**Alternative 3: Exponential Backoff Retry (Current Approach)**
+- Description: Retry with exponential backoff (1s, 2s, 4s, 8s)
+- Why accepted: Efficient, gives system time to recover, standard practice
+
+### Rationale
+Exponential backoff retry provides:
+- **Efficiency:** Gives system time to recover between retries
+- **Reliability:** Recovers from transient failures automatically
+- **Standard Practice:** Common pattern for handling transient failures
+- **Configurable:** Can adjust retry parameters as needed
+
+### Implementation Pattern
+1. **Retry Script:** `.cursor/scripts/retry_artifact_download.py`
+   - Implements exponential backoff (1s, 2s, 4s, 8s)
+   - Max 3 retry attempts
+   - Logs all retry attempts
+   - Graceful failure after max retries
+
+2. **Workflow Integration:** `.github/workflows/update_metrics_dashboard.yml`
+   - Uses retry script for artifact downloads
+   - Continues workflow even if artifact download fails (with warning)
+   - Better error messages for debugging
+
+3. **Schema Validation:** `.cursor/schemas/reward_schema.json`
+   - JSON schema for reward.json validation
+   - Ensures data format consistency
+   - Prevents format mismatches
+
+### Impact
+**Short-term:**
+- Automatic recovery from transient failures
+- Improved reliability of metrics collection
+- Better error messages for debugging
+- Reduced manual intervention
+
+**Long-term:**
+- More reliable metrics collection
+- Better data quality
+- Reduced operational overhead
+- Improved system resilience
+
+**Affected Areas:**
+- `.cursor/scripts/retry_artifact_download.py` - New retry script
+- `.github/workflows/update_metrics_dashboard.yml` - Added retry logic
+- `.cursor/schemas/reward_schema.json` - New schema file
+- `.cursor/scripts/collect_metrics.py` - Added schema validation
+
+### Lessons Learned
+**What Worked Well:**
+- Exponential backoff recovers from most transient failures
+- Clear logging helps debug issues
+- Schema validation prevents format mismatches
+- Configurable parameters allow tuning
+
+**What Would Be Done Differently:**
+- Could add retry for other operations (not just artifact downloads)
+- Could add metrics for retry success rates
+- Could add alerting for persistent failures
+
+### Related Decisions
+- Error handling and resilience patterns
+- Structured logging and observability
+- Automated state recovery for failed PRs
+
+---
+
+## Automated Health Monitoring for Reward System - 2025-11-17
+
+### Decision
+Implemented automated health monitoring workflow that runs every 20 minutes to proactively detect system failures, stale metrics, and configuration issues in the reward system.
+
+### Context
+**Problem Statement:**
+- System failures discovered only after impact (dashboard not updating)
+- No proactive monitoring led to delayed issue detection
+- Stale metrics data not detected automatically
+- Configuration issues discovered only at runtime
+
+**Constraints:**
+- Must not overload system with checks
+- Must provide actionable alerts
+- Must run frequently enough to catch issues early
+- Must work in GitHub Actions environment
+
+**Requirements:**
+- Monitor workflow success rates
+- Check metrics file freshness
+- Validate workflow dependencies
+- Detect configuration issues
+- Provide clear health status
+
+### Trade-offs
+**Pros:**
+- Proactive failure detection
+- Early warning for issues
+- System health visibility
+- Automated monitoring
+- Clear health status
+
+**Cons:**
+- Adds scheduled workflow (runs every 20 minutes)
+- Requires maintaining health check logic
+- May generate false positives if thresholds too strict
+
+### Alternatives Considered
+**Alternative 1: Manual Monitoring**
+- Description: Rely on developers to manually check system health
+- Why rejected: Human error, easy to miss issues, inconsistent monitoring
+
+**Alternative 2: External Monitoring Service**
+- Description: Use external service like Datadog, New Relic
+- Why rejected: Additional cost, external dependency, want self-contained solution
+
+**Alternative 3: Scheduled Health Check Workflow (Current Approach)**
+- Description: Scheduled GitHub Actions workflow that checks system health
+- Why accepted: Self-contained, no external dependencies, integrated with existing workflows
+
+### Rationale
+Scheduled health check provides:
+- **Proactive Detection:** Catches issues before they impact users
+- **Self-Contained:** No external dependencies, uses existing infrastructure
+- **Integrated:** Works with existing GitHub Actions workflows
+- **Actionable:** Provides clear health status and failure reasons
+
+### Implementation Pattern
+1. **Health Check Script:** `.cursor/scripts/reward_system_health_check.py`
+   - Verifies workflow success rates
+   - Checks metrics file freshness
+   - Validates workflow dependencies
+   - Detects configuration issues
+
+2. **Scheduled Workflow:** `.github/workflows/reward_system_health_check.yml`
+   - Runs every 20 minutes
+   - Can be triggered manually via workflow_dispatch
+   - Logs health status
+   - Alerts on critical issues
+
+3. **Health Checks:**
+   - Latest workflow run success
+   - Workflow run freshness (within threshold)
+   - Metrics file existence and freshness
+   - Configuration validation
+
+### Impact
+**Short-term:**
+- Proactive failure detection
+- Early warning for issues
+- System health visibility
+- Reduced time to detect issues
+
+**Long-term:**
+- Better system reliability
+- Reduced operational overhead
+- Improved monitoring capabilities
+- Better data quality
+
+**Affected Areas:**
+- `.cursor/scripts/reward_system_health_check.py` - New health check script
+- `.github/workflows/reward_system_health_check.yml` - New scheduled workflow
+- All reward system workflows - Now monitored automatically
+
+### Lessons Learned
+**What Worked Well:**
+- Proactive detection catches issues early
+- Clear health status helps debugging
+- Scheduled checks provide consistent monitoring
+- Manual trigger allows on-demand health checks
+
+**What Would Be Done Differently:**
+- Could add alerting (Slack, email) for critical failures
+- Could add health dashboard UI
+- Could add metrics for health check trends
+- Could add more granular health checks
+
+### Related Decisions
+- Automated error aggregation
+- Structured logging and observability
+- Error handling and resilience patterns
+
+---
+
+## Automated Error Aggregation for Reward System - 2025-11-17
+
+### Decision
+Implemented automated error aggregation workflow that collects errors from all reward system workflows, categorizes them, and publishes them for dashboard use and trend analysis.
+
+### Context
+**Problem Statement:**
+- Errors logged but not aggregated or surfaced
+- No visibility into error patterns and trends
+- Difficult to identify recurring issues
+- No centralized error tracking
+
+**Constraints:**
+- Must not overload system with aggregation
+- Must provide actionable insights
+- Must work with existing workflows
+- Must be maintainable
+
+**Requirements:**
+- Aggregate errors from all reward workflows
+- Categorize errors by type
+- Track error frequency and trends
+- Publish error log for dashboard use
+- Provide error visibility
+
+### Trade-offs
+**Pros:**
+- Centralized error visibility
+- Error trend analysis
+- Proactive issue detection
+- Better debugging information
+- Historical error tracking
+
+**Cons:**
+- Adds scheduled workflow (runs hourly)
+- Requires maintaining aggregation logic
+- Error log file grows over time (limited to 25 entries)
+
+### Alternatives Considered
+**Alternative 1: Manual Error Review**
+- Description: Rely on developers to manually review workflow logs
+- Why rejected: Time-consuming, easy to miss patterns, inconsistent review
+
+**Alternative 2: External Error Tracking Service**
+- Description: Use external service like Sentry, Rollbar
+- Why rejected: Additional cost, external dependency, want self-contained solution
+
+**Alternative 3: Automated Error Aggregation (Current Approach)**
+- Description: Scheduled workflow that aggregates errors and publishes log file
+- Why accepted: Self-contained, no external dependencies, integrated with existing workflows
+
+### Rationale
+Automated error aggregation provides:
+- **Visibility:** Centralized view of all errors
+- **Trends:** Track error frequency and patterns over time
+- **Proactive:** Identify recurring issues early
+- **Self-Contained:** No external dependencies
+- **Integrated:** Works with existing GitHub Actions workflows
+
+### Implementation Pattern
+1. **Error Aggregation Script:** `.cursor/scripts/aggregate_reward_errors.py`
+   - Collects errors from all reward workflows
+   - Categorizes errors by type
+   - Tracks error frequency
+   - Generates error log
+
+2. **Scheduled Workflow:** `.github/workflows/reward_error_aggregation.yml`
+   - Runs hourly and on workflow_run completion
+   - Can be triggered manually via workflow_dispatch
+   - Updates error log file
+   - Commits error log to repository
+
+3. **Error Log:** `docs/metrics/reward_error_log.json`
+   - Centralized error tracking
+   - Error categorization
+   - Frequency tracking
+   - Trend analysis
+
+### Impact
+**Short-term:**
+- Centralized error visibility
+- Error trend analysis
+- Proactive issue detection
+- Better debugging information
+
+**Long-term:**
+- Better system reliability
+- Reduced operational overhead
+- Improved monitoring capabilities
+- Better error prevention
+
+**Affected Areas:**
+- `.cursor/scripts/aggregate_reward_errors.py` - New aggregation script
+- `.github/workflows/reward_error_aggregation.yml` - New scheduled workflow
+- `docs/metrics/reward_error_log.json` - New error log file
+- All reward system workflows - Errors now aggregated
+
+### Lessons Learned
+**What Worked Well:**
+- Centralized error visibility helps identify patterns
+- Error categorization makes analysis easier
+- Trend tracking helps predict issues
+- Self-contained solution avoids external dependencies
+
+**What Would Be Done Differently:**
+- Could add error dashboard UI
+- Could add alerting (Slack, email) for critical errors
+- Could add error correlation analysis
+- Could add error resolution tracking
+
+### Related Decisions
+- Automated health monitoring
+- Structured logging and observability
+- Error handling and resilience patterns
+
+---
+
+## Automated State Recovery for Failed Reward Workflows - 2025-11-17
+
+### Decision
+Implemented automated state recovery system that tracks failed reward workflow runs and automatically retries them with exponential backoff to ensure all PRs eventually get scored.
+
+### Context
+**Problem Statement:**
+- Failed reward computations not automatically retried
+- Manual intervention required to retry failed PRs
+- Lost metrics data for failed PRs
+- No tracking of retry attempts
+
+**Constraints:**
+- Must not cause infinite retries
+- Must have reasonable retry limit
+- Must track retry attempts
+- Must work in GitHub Actions environment
+
+**Requirements:**
+- Track failed workflow runs
+- Automatically retry failed runs
+- Exponential backoff for retries
+- Max retry limit (3 attempts)
+- Track retry success rates
+
+### Trade-offs
+**Pros:**
+- Automatic retry of failed PRs
+- No manual intervention needed
+- Ensures all PRs eventually get scored
+- Tracks retry attempts
+- Improves metrics collection rate
+
+**Cons:**
+- Adds scheduled workflow (runs every 30 minutes)
+- May retry PRs that will always fail
+- Requires maintaining retry logic
+
+### Alternatives Considered
+**Alternative 1: Manual Retry (Previous Approach)**
+- Description: Rely on developers to manually retry failed workflows
+- Why rejected: Time-consuming, easy to forget, inconsistent retry
+
+**Alternative 2: Immediate Retry on Failure**
+- Description: Retry immediately when workflow fails
+- Why rejected: May retry too quickly, doesn't give system time to recover
+
+**Alternative 3: Scheduled Retry with Exponential Backoff (Current Approach)**
+- Description: Scheduled workflow that retries failed runs with exponential backoff
+- Why accepted: Gives system time to recover, prevents infinite retries, standard practice
+
+### Rationale
+Scheduled retry with exponential backoff provides:
+- **Reliability:** Ensures all PRs eventually get scored
+- **Efficiency:** Gives system time to recover between retries
+- **Safety:** Max retry limit prevents infinite retries
+- **Standard Practice:** Common pattern for handling transient failures
+
+### Implementation Pattern
+1. **Retry Script:** `.cursor/scripts/retry_reward_workflows.py`
+   - Lists failed workflow runs
+   - Filters by retry attempt count
+   - Retries failed runs
+   - Tracks retry attempts
+
+2. **Scheduled Workflow:** `.github/workflows/retry_failed_reward_runs.yml`
+   - Runs every 30 minutes
+   - Can be triggered manually via workflow_dispatch
+   - Retries failed reward computations
+   - Updates state after each retry
+
+3. **State Tracking:** `.cursor/cache/failed_prs.json` (gitignored)
+   - Tracks failed PRs
+   - Stores retry attempt counts
+   - Removes successful retries
+
+### Impact
+**Short-term:**
+- Automatic retry of failed PRs
+- No manual intervention needed
+- Improved metrics collection rate
+- Better data completeness
+
+**Long-term:**
+- More reliable metrics collection
+- Better data quality
+- Reduced operational overhead
+- Improved system resilience
+
+**Affected Areas:**
+- `.cursor/scripts/retry_reward_workflows.py` - New retry script
+- `.github/workflows/retry_failed_reward_runs.yml` - New scheduled workflow
+- `.cursor/cache/failed_prs.json` - New state tracking file (gitignored)
+
+### Lessons Learned
+**What Worked Well:**
+- Scheduled retry ensures all PRs eventually get scored
+- Exponential backoff gives system time to recover
+- Max retry limit prevents infinite retries
+- State tracking helps monitor retry success rates
+
+**What Would Be Done Differently:**
+- Could add retry success rate metrics
+- Could add alerting for persistent failures
+- Could add retry reason tracking
+- Could add retry delay configuration
+
+### Related Decisions
+- Automated retry mechanism for artifact downloads
+- Error handling and resilience patterns
+- Structured logging and observability
 
 ---
 
