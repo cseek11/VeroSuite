@@ -78,6 +78,7 @@ jobs:
           python3 << 'EOF'
           import json
           import pathlib
+          from textwrap import dedent
           
           patterns_path = pathlib.Path("suggestions/patterns.json")
           if not patterns_path.exists():
@@ -92,48 +93,48 @@ jobs:
               exit(0)
           
           # Generate markdown summary
-          summary = f"""# Pattern Extraction Suggestions (PR #{pathlib.Path().cwd().name})
-          
-**REWARD_SCORE:** {pathlib.Path().cwd().name} (triggered pattern extraction)
-          
-## Candidate Patterns ({len(candidates)})
-          
-"""
+          summary = dedent(f"""
+              # Pattern Extraction Suggestions (PR #{pathlib.Path().cwd().name})
+
+              **REWARD_SCORE:** {pathlib.Path().cwd().name} (triggered pattern extraction)
+
+              ## Candidate Patterns ({len(candidates)})
+          """)
           
           for i, pattern in enumerate(candidates, 1):
-              summary += f"""### {i}. {pattern.get('pattern', 'Unknown Pattern')}
-          
-**When:** {pattern.get('when', 'N/A')}
-          
-**Do:**
-"""
+              summary += dedent(f"""
+                  ### {i}. {pattern.get('pattern', 'Unknown Pattern')}
+
+                  **When:** {pattern.get('when', 'N/A')}
+
+                  **Do:**
+              """)
               for step in pattern.get('do', []):
-                  summary += f"- {step}\n"
+                  summary += f"                  - {step}\n"
           
-              summary += f"""
-**Why:** {pattern.get('why', 'N/A')}
-          
-**Example:** `{pattern.get('example', 'N/A')}`
-          
-**Metadata:**
-- Domain: {pattern.get('metadata', {}).get('domain', 'unknown')}
-- Complexity: {pattern.get('metadata', {}).get('complexity', 'unknown')}
-- Source PR: #{pattern.get('metadata', {}).get('source_pr', 'unknown')}
-          
----
-          
-"""
-          
-          summary += """
-## Next Steps
+              summary += dedent(f"""
+                  **Why:** {pattern.get('why', 'N/A')}
 
-1. Review each candidate pattern above
-2. If approved, create pattern file in `.cursor/patterns/` with naming: `NNN_domain_short-name.md`
-3. Update pattern metadata with human reviewer approval
-4. Merge pattern file to make it available for future use
+                  **Example:** `{pattern.get('example', 'N/A')}`
 
-**Note:** Patterns require human review before being added to the pattern library.
-"""
+                  **Metadata:**
+                  - Domain: {pattern.get('metadata', {}).get('domain', 'unknown')}
+                  - Complexity: {pattern.get('metadata', {}).get('complexity', 'unknown')}
+                  - Source PR: #{pattern.get('metadata', {}).get('source_pr', 'unknown')}
+
+                  ---
+              """)
+          
+          summary += dedent("""
+              ## Next Steps
+
+              1. Review each candidate pattern above
+              2. If approved, create pattern file in `.cursor/patterns/` with naming: `NNN_domain_short-name.md`
+              3. Update pattern metadata with human reviewer approval
+              4. Merge pattern file to make it available for future use
+
+              **Note:** Patterns require human review before being added to the pattern library.
+          """)
           
           pathlib.Path("suggestions/README.md").write_text(summary)
           print(f"Generated summary with {len(candidates)} patterns")

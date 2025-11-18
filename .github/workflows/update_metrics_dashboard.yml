@@ -51,6 +51,16 @@ jobs:
         continue-on-error: true
         if: github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch'
 
+      - name: Retry reward artifact download
+        if: github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch'
+        env:
+          RUN_ID: ${{ github.event.workflow_run.id || steps.get-run-id.outputs.run_id }}
+          ARTIFACT_NAME: reward
+          DEST_PATH: .
+          REQUIRED_FILE: reward.json
+          MAX_ATTEMPTS: 3
+        run: python .cursor/scripts/retry_artifact_download.py
+
       - name: Extract score data
         id: extract-score
         if: github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch'

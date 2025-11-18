@@ -33,6 +33,12 @@ jobs:
         run: |
           pip install pyyaml
 
+      - name: Verify workflow permissions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python .cursor/scripts/check_workflow_permissions.py
+
       - name: Setup GitHub CLI
         uses: actions/setup-python@v5
         with:
