@@ -119,7 +119,19 @@ export default function WorkOrderForm({
         logger.debug('Technician API response received', { techniciansCount: techniciansData?.length || 0 }, 'WorkOrderForm');
         
         // Transform technician data to match our interface
-        const transformedTechnicians: Technician[] = techniciansData?.map((tech: any) => {
+        // TechnicianProfile from API may have nested user data
+        type TechnicianApiResponse = TechnicianProfile & {
+          user?: {
+            id?: string;
+            email?: string;
+            first_name?: string;
+            firstName?: string;
+            last_name?: string;
+            lastName?: string;
+          };
+        };
+        
+        const transformedTechnicians: Technician[] = techniciansData?.map((tech: TechnicianApiResponse) => {
           logger.debug('Processing technician', { techId: tech.id || tech.user_id }, 'WorkOrderForm');
           const id = tech.id || tech.user_id || '';
           const email = tech.email || tech.user?.email || '';
@@ -147,7 +159,12 @@ export default function WorkOrderForm({
         setTechnicians(transformedTechnicians);
         // Auto-select if only one technician is available and none selected
         if (transformedTechnicians.length === 1) {
-          try { setValue('assigned_to', transformedTechnicians[0].id); } catch {}
+          try { 
+            setValue('assigned_to', transformedTechnicians[0].id); 
+          } catch (error) {
+            // Silently ignore setValue errors (form may not be ready)
+            logger.debug('Could not auto-select technician', { error }, 'WorkOrderForm');
+          }
         }
       } catch (error) {
         logger.error('Error loading technicians', { 
