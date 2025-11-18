@@ -1,13 +1,687 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-18T14:49:41.319047Z",
-  "scores": [],
+  "last_updated": "2025-11-18T14:55:52.865042Z",
+  "scores": [
+    {
+      "pr": "18",
+      "score": -7,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 1,
+        "performance": 1,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-18T14:50:36.278599Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {
+        ".cursor/config/auto_pr_config.yaml": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/config/auto_pr_config.yaml (no contributions)"
+        },
+        ".cursor/patterns/001_backend_circuit_breaker.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/patterns/001_backend_circuit_breaker.md (no contributions)"
+        },
+        ".cursor/prompts/coach.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/coach.md (no contributions)"
+        },
+        ".cursor/prompts/distill_backend.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/distill_backend.md (no contributions)"
+        },
+        ".cursor/prompts/distill_data.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/distill_data.md (no contributions)"
+        },
+        ".cursor/prompts/distill_frontend.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/distill_frontend.md (no contributions)"
+        },
+        ".cursor/prompts/distill_infra.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/distill_infra.md (no contributions)"
+        },
+        ".cursor/prompts/lead_review.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/lead_review.md (no contributions)"
+        },
+        ".cursor/prompts/security_review.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/security_review.md (no contributions)"
+        },
+        ".cursor/prompts/tester.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/tester.md (no contributions)"
+        },
+        ".cursor/rules/ci-automation.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/rules/ci-automation.md (no contributions)"
+        },
+        ".cursor/rules/file-organization.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/rules/file-organization.md (no contributions)"
+        },
+        ".cursor/rules/verification.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/rules/verification.md (no contributions)"
+        },
+        ".cursor/scripts/analyze_metrics.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/analyze_metrics.py (no contributions)"
+        },
+        ".cursor/scripts/auto_pr_daemon.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/auto_pr_daemon.py (no contributions)"
+        },
+        ".cursor/scripts/collect_metrics.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/collect_metrics.py (no contributions)"
+        },
+        ".cursor/scripts/detect_anti_patterns.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/detect_anti_patterns.py (no contributions)"
+        },
+        ".cursor/scripts/detect_silent_failures.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/detect_silent_failures.py (no contributions)"
+        },
+        ".cursor/scripts/logger_util.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/logger_util.py (no contributions)"
+        },
+        ".cursor/scripts/monitor_changes.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/monitor_changes.py (no contributions)"
+        },
+        ".cursor/scripts/validate_workflow_triggers.py": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/validate_workflow_triggers.py (no contributions)"
+        },
+        "README_AUTO_PR.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: README_AUTO_PR.md (no contributions)"
+        },
+        "backend/prisma/schema.prisma": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/prisma/schema.prisma (no contributions)"
+        },
+        "backend/src/billing/billing.controller.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/billing/billing.controller.ts (no contributions)"
+        },
+        "backend/src/billing/billing.service.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/billing/billing.service.ts (no contributions)"
+        },
+        "backend/src/billing/dto/create-invoice-schedule.dto.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/billing/dto/create-invoice-schedule.dto.ts (no contributions)"
+        },
+        "backend/src/billing/dto/create-invoice-template.dto.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/billing/dto/create-invoice-template.dto.ts (no contributions)"
+        },
+        "backend/src/billing/dto/index.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/billing/dto/index.ts (no contributions)"
+        },
+        "backend/src/billing/dto/invoice-schedule-response.dto.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/billing/dto/invoice-schedule-response.dto.ts (no contributions)"
+        },
+        "backend/src/billing/dto/invoice-template-response.dto.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/billing/dto/invoice-template-response.dto.ts (no contributions)"
+        },
+        "backend/src/billing/dto/reminder-history-response.dto.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/billing/dto/reminder-history-response.dto.ts (no contributions)"
+        },
+        "backend/src/billing/dto/update-invoice-schedule.dto.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/billing/dto/update-invoice-schedule.dto.ts (no contributions)"
+        },
+        "backend/src/billing/dto/update-invoice-template.dto.ts": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/billing/dto/update-invoice-template.dto.ts\nDocs: Documentation updated"
+        },
+        "docs/planning/AUTOMATED_PR_CREATION_STRATEGY.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/AUTOMATED_PR_CREATION_STRATEGY.md\nDocs: Documentation updated"
+        },
+        "docs/planning/AUTO_PR_IMPLEMENTATION_AUDIT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/AUTO_PR_IMPLEMENTATION_AUDIT.md\nDocs: Documentation updated with engineering decisions"
+        },
+        "docs/planning/AUTO_PR_IMPLEMENTATION_COMPLETE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/AUTO_PR_IMPLEMENTATION_COMPLETE.md\nDocs: Documentation updated"
+        },
+        "docs/planning/AUTO_PR_IMPLEMENTATION_SUMMARY.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/AUTO_PR_IMPLEMENTATION_SUMMARY.md\nDocs: Documentation updated"
+        },
+        "docs/planning/AUTO_PR_POST_IMPLEMENTATION_AUDIT_FINAL.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/AUTO_PR_POST_IMPLEMENTATION_AUDIT_FINAL.md\nDocs: Documentation updated with engineering decisions"
+        },
+        "docs/planning/AUTO_PR_USAGE_GUIDE.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/AUTO_PR_USAGE_GUIDE.md\nDocs: Documentation updated"
+        },
+        "docs/planning/DASHBOARD_UPDATE_RESOLUTION.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/DASHBOARD_UPDATE_RESOLUTION.md\nDocs: Documentation updated"
+        },
+        "docs/planning/FILE_LEVEL_SCORING_IMPLEMENTATION.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/FILE_LEVEL_SCORING_IMPLEMENTATION.md\nDocs: Documentation updated"
+        },
+        "docs/planning/INVESTIGATION_SUMMARY.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/INVESTIGATION_SUMMARY.md\nDocs: Documentation updated"
+        },
+        "docs/planning/LARGE_PR_BEST_PRACTICES.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 1,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/LARGE_PR_BEST_PRACTICES.md\nDocs: Documentation updated\nPerformance: Performance improvements detected (4 mentions)"
+        },
+        "docs/planning/MONITOR_CHANGES_POST_IMPLEMENTATION_AUDIT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/MONITOR_CHANGES_POST_IMPLEMENTATION_AUDIT.md\nDocs: Documentation updated with engineering decisions"
+        },
+        "docs/planning/PR_MERGE_SUCCESS.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/PR_MERGE_SUCCESS.md\nDocs: Documentation updated"
+        },
+        "docs/planning/REWARD_SCORE_AUTOMATION_TRIGGER.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/REWARD_SCORE_AUTOMATION_TRIGGER.md\nDocs: Documentation updated"
+        },
+        "docs/planning/REWARD_SCORE_GRANULARITY_ANALYSIS.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/REWARD_SCORE_GRANULARITY_ANALYSIS.md\nDocs: Documentation updated"
+        },
+        "docs/planning/REWARD_SCORE_SYSTEM_STATUS.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/REWARD_SCORE_SYSTEM_STATUS.md (no contributions)"
+        },
+        "frontend/src/components/billing/InvoiceTemplates.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/InvoiceTemplates.tsx (no contributions)"
+        },
+        "frontend/src/lib/enhanced-api.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/lib/enhanced-api.ts (no contributions)"
+        }
+      }
+    }
+  ],
   "aggregates": {
-    "total_prs": 0,
-    "average_score": 0.0,
-    "score_distribution": {},
-    "trends": [],
-    "category_performance": {},
-    "anti_patterns": []
+    "total_prs": 1,
+    "average_score": -7.0,
+    "score_distribution": {
+      "negative (<0)": 1
+    },
+    "trends": [
+      {
+        "period": "2025-W46",
+        "average": -7.0,
+        "count": 1
+      }
+    ],
+    "category_performance": {
+      "tests": {
+        "average": 0.0,
+        "total": 0,
+        "count": 0
+      },
+      "bug_fix": {
+        "average": 0.0,
+        "total": 0,
+        "count": 0
+      },
+      "docs": {
+        "average": 1.0,
+        "total": 1,
+        "count": 1
+      },
+      "performance": {
+        "average": 1.0,
+        "total": 1,
+        "count": 1
+      },
+      "security": {
+        "average": -3.0,
+        "total": -3,
+        "count": 1
+      },
+      "penalties": {
+        "average": -6.0,
+        "total": -6,
+        "count": 1
+      }
+    },
+    "anti_patterns": [
+      {
+        "pr": "18",
+        "score": -7,
+        "timestamp": "2025-11-18T14:50:36.278599Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 1,
+          "performance": 1,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      }
+    ]
   }
 }
