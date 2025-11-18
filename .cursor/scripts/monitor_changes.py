@@ -761,6 +761,27 @@ def main() -> None:
     state = load_state()
     repo_path = pathlib.Path(__file__).resolve().parents[2]
     
+    # Always run consolidation check first (even if no new changes)
+    # This ensures cleanup happens even when no new PRs are being created
+    if config.get("pr_settings", {}).get("consolidate_small_prs", True):
+        open_prs = get_open_auto_prs(repo_path)
+        if open_prs:
+            max_open_prs = config.get("pr_settings", {}).get("max_open_prs", 10)
+            if len(open_prs) > max_open_prs:
+                logger.info(
+                    f"Found {len(open_prs)} open PRs (max: {max_open_prs}), running consolidation",
+                    operation="main",
+                    open_pr_count=len(open_prs),
+                    max_open_prs=max_open_prs
+                )
+                closed_count = consolidate_small_prs(open_prs, config, repo_path)
+                if closed_count > 0:
+                    logger.info(
+                        f"Consolidated {closed_count} small PRs",
+                        operation="main",
+                        closed_count=closed_count
+                    )
+    
     # Get changed files
     all_changed_files = get_changed_files(repo_path)
     
