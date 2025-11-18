@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-18T22:07:12.400360Z",
+  "last_updated": "2025-11-18T22:43:44.560710Z",
   "scores": [
     {
       "pr": "56",
@@ -3272,51 +3272,93 @@
           "notes": "File: test_pr_system.md\nBug Fix: Bug fix with partial documentation"
         }
       }
+    },
+    {
+      "pr": "1763485868",
+      "score": -5,
+      "breakdown": {
+        "tests": 1,
+        "bug_fix": 1,
+        "docs": 1,
+        "performance": 1,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-18T17:13:43.052760Z",
+      "author": "unknown"
+    },
+    {
+      "pr": "1763485424",
+      "score": -6,
+      "breakdown": {
+        "tests": 1,
+        "bug_fix": 0,
+        "docs": 1,
+        "performance": 1,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-18T17:06:25.960360Z",
+      "author": "unknown"
+    },
+    {
+      "pr": "1763482688",
+      "score": -6,
+      "breakdown": {
+        "tests": 1,
+        "bug_fix": 0,
+        "docs": 1,
+        "performance": 1,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-18T16:20:53.431881Z",
+      "author": "unknown"
     }
   ],
   "aggregates": {
-    "total_prs": 1,
-    "average_score": -5.0,
+    "total_prs": 4,
+    "average_score": -5.5,
     "score_distribution": {
-      "negative (<0)": 1
+      "negative (<0)": 4
     },
     "trends": [
       {
         "period": "2025-W46",
-        "average": -5.0,
-        "count": 1
+        "average": -5.5,
+        "count": 4
       }
     ],
     "category_performance": {
       "tests": {
         "average": 1.0,
-        "total": 1,
-        "count": 1
+        "total": 4,
+        "count": 4
       },
       "bug_fix": {
-        "average": 1.0,
-        "total": 1,
-        "count": 1
+        "average": 0.5,
+        "total": 2,
+        "count": 2
       },
       "docs": {
         "average": 1.0,
-        "total": 1,
-        "count": 1
+        "total": 4,
+        "count": 4
       },
       "performance": {
         "average": 1.0,
-        "total": 1,
-        "count": 1
+        "total": 4,
+        "count": 4
       },
       "security": {
         "average": -3.0,
-        "total": -3,
-        "count": 1
+        "total": -12,
+        "count": 4
       },
       "penalties": {
         "average": -6.0,
-        "total": -6,
-        "count": 1
+        "total": -24,
+        "count": 4
       }
     },
     "anti_patterns": [
@@ -3327,6 +3369,48 @@
         "breakdown": {
           "tests": 1,
           "bug_fix": 1,
+          "docs": 1,
+          "performance": 1,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "1763485868",
+        "score": -5,
+        "timestamp": "2025-11-18T17:13:43.052760Z",
+        "breakdown": {
+          "tests": 1,
+          "bug_fix": 1,
+          "docs": 1,
+          "performance": 1,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "1763485424",
+        "score": -6,
+        "timestamp": "2025-11-18T17:06:25.960360Z",
+        "breakdown": {
+          "tests": 1,
+          "bug_fix": 0,
+          "docs": 1,
+          "performance": 1,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "1763482688",
+        "score": -6,
+        "timestamp": "2025-11-18T16:20:53.431881Z",
+        "breakdown": {
+          "tests": 1,
+          "bug_fix": 0,
           "docs": 1,
           "performance": 1,
           "security": -3,
