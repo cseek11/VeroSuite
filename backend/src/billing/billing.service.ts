@@ -1,8 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import { StructuredLoggerService } from '../common/services/logger.service';
 import { ConfigService } from '@nestjs/config';
 import { DatabaseService } from '../common/services/database.service';
 import { StripeService } from './stripe.service';
 import { EmailService } from '../common/services/email.service';
+import { MetricsService } from '../common/services/metrics.service';
 import { 
   CreateInvoiceDto, 
   UpdateInvoiceDto, 
@@ -18,13 +20,18 @@ import {
 @Injectable()
 export class BillingService {
   private readonly logger = new Logger(BillingService.name);
+  private readonly structuredLogger: StructuredLoggerService;
 
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly stripeService: StripeService,
     private readonly emailService: EmailService,
+    structuredLogger: StructuredLoggerService,
     private readonly configService: ConfigService,
-  ) {}
+    private readonly metricsService: MetricsService,
+  ) {
+    this.structuredLogger = structuredLogger;
+  }
 
   // ============================================================================
   // INVOICE MANAGEMENT
@@ -1928,7 +1935,14 @@ export class BillingService {
     userId: string,
     tenantId?: string
   ): Promise<any> {
-    this.logger.log(`Creating invoice template: ${createTemplateDto.name}`);
+    const startTime = Date.now();
+    this.structuredLogger.log(
+      `Creating invoice template: ${createTemplateDto.name}`,
+      'BillingService',
+      undefined,
+      'createInvoiceTemplate',
+      { templateName: createTemplateDto.name, userId, tenantId }
+    );
 
     try {
       let finalTenantId = tenantId;
@@ -1948,6 +1962,17 @@ export class BillingService {
         },
       });
 
+      const duration = Date.now() - startTime;
+      this.structuredLogger.log(
+        `Invoice template created successfully: ${template.id}`,
+        'BillingService',
+        undefined,
+        'createInvoiceTemplate',
+        { templateId: template.id, templateName: template.name, duration }
+      );
+      this.metricsService.incrementCounter('billing_template_created', { tenantId });
+      this.metricsService.recordHistogram('billing_template_create_duration', duration, { tenantId });
+
       return {
         id: template.id,
         tenant_id: template.tenant_id,
@@ -1961,13 +1986,31 @@ export class BillingService {
         updated_by: template.updated_by,
       };
     } catch (error) {
-      this.logger.error(`Failed to create invoice template: ${(error as Error).message}`, (error as Error).stack);
+      const duration = Date.now() - startTime;
+      this.structuredLogger.error(
+        `Failed to create invoice template: ${(error as Error).message}`,
+        (error as Error).stack,
+        'BillingService',
+        undefined,
+        'createInvoiceTemplate',
+        'TEMPLATE_CREATE_FAILED',
+        'Database operation failed or validation error',
+        { templateName: createTemplateDto.name, userId, tenantId, duration }
+      );
+      this.metricsService.incrementCounter('billing_template_create_failed', { tenantId });
       throw new BadRequestException('Failed to create invoice template');
     }
   }
 
   async getInvoiceTemplates(tenantId?: string): Promise<any[]> {
-    this.logger.log('Getting invoice templates');
+    const startTime = Date.now();
+    this.structuredLogger.log(
+      'Getting invoice templates',
+      'BillingService',
+      undefined,
+      'getInvoiceTemplates',
+      { tenantId }
+    );
 
     try {
       let finalTenantId = tenantId;
@@ -1984,6 +2027,17 @@ export class BillingService {
         },
       });
 
+      const duration = Date.now() - startTime;
+      this.structuredLogger.log(
+        `Retrieved ${templates.length} invoice templates`,
+        'BillingService',
+        undefined,
+        'getInvoiceTemplates',
+        { templateCount: templates.length, tenantId: finalTenantId, duration }
+      );
+      this.metricsService.recordHistogram('billing_templates_fetched', templates.length, { tenantId: finalTenantId });
+      this.metricsService.recordHistogram('billing_templates_fetch_duration', duration, { tenantId: finalTenantId });
+
       return templates.map(template => ({
         id: template.id,
         tenant_id: template.tenant_id,
@@ -1997,7 +2051,18 @@ export class BillingService {
         updated_by: template.updated_by,
       }));
     } catch (error) {
-      this.logger.error(`Failed to get invoice templates: ${(error as Error).message}`, (error as Error).stack);
+      const duration = Date.now() - startTime;
+      this.structuredLogger.error(
+        `Failed to get invoice templates: ${(error as Error).message}`,
+        (error as Error).stack,
+        'BillingService',
+        undefined,
+        'getInvoiceTemplates',
+        'TEMPLATE_FETCH_FAILED',
+        'Database query failed',
+        { tenantId, duration }
+      );
+      this.metricsService.incrementCounter('billing_templates_fetch_failed', { tenantId });
       throw new BadRequestException('Failed to get invoice templates');
     }
   }
@@ -2007,7 +2072,14 @@ export class BillingService {
     updateTemplateDto: any,
     userId: string
   ): Promise<any> {
-    this.logger.log(`Updating invoice template: ${id}`);
+    const startTime = Date.now();
+    this.structuredLogger.log(
+      `Updating invoice template: ${id}`,
+      'BillingService',
+      undefined,
+      'updateInvoiceTemplate',
+      { templateId: id, userId }
+    );
 
     try {
       const template = await this.databaseService.invoiceTemplate.update({
@@ -2022,6 +2094,17 @@ export class BillingService {
         },
       });
 
+      const duration = Date.now() - startTime;
+      this.structuredLogger.log(
+        `Invoice template updated successfully: ${template.id}`,
+        'BillingService',
+        undefined,
+        'updateInvoiceTemplate',
+        { templateId: template.id, duration }
+      );
+      this.metricsService.incrementCounter('billing_template_updated', { templateId: id });
+      this.metricsService.recordHistogram('billing_template_update_duration', duration, { templateId: id });
+
       return {
         id: template.id,
         tenant_id: template.tenant_id,
@@ -2035,20 +2118,60 @@ export class BillingService {
         updated_by: template.updated_by,
       };
     } catch (error) {
-      this.logger.error(`Failed to update invoice template: ${(error as Error).message}`, (error as Error).stack);
+      const duration = Date.now() - startTime;
+      this.structuredLogger.error(
+        `Failed to update invoice template: ${(error as Error).message}`,
+        (error as Error).stack,
+        'BillingService',
+        undefined,
+        'updateInvoiceTemplate',
+        'TEMPLATE_UPDATE_FAILED',
+        'Template not found or database operation failed',
+        { templateId: id, userId, duration }
+      );
+      this.metricsService.incrementCounter('billing_template_update_failed', { templateId: id });
       throw new NotFoundException('Invoice template not found');
     }
   }
 
   async deleteInvoiceTemplate(id: string): Promise<void> {
-    this.logger.log(`Deleting invoice template: ${id}`);
+    const startTime = Date.now();
+    this.structuredLogger.log(
+      `Deleting invoice template: ${id}`,
+      'BillingService',
+      undefined,
+      'deleteInvoiceTemplate',
+      { templateId: id }
+    );
 
     try {
       await this.databaseService.invoiceTemplate.delete({
         where: { id },
       });
+
+      const duration = Date.now() - startTime;
+      this.structuredLogger.log(
+        `Invoice template deleted successfully: ${id}`,
+        'BillingService',
+        undefined,
+        'deleteInvoiceTemplate',
+        { templateId: id, duration }
+      );
+      this.metricsService.incrementCounter('billing_template_deleted', { templateId: id });
+      this.metricsService.recordHistogram('billing_template_delete_duration', duration, { templateId: id });
     } catch (error) {
-      this.logger.error(`Failed to delete invoice template: ${(error as Error).message}`, (error as Error).stack);
+      const duration = Date.now() - startTime;
+      this.structuredLogger.error(
+        `Failed to delete invoice template: ${(error as Error).message}`,
+        (error as Error).stack,
+        'BillingService',
+        undefined,
+        'deleteInvoiceTemplate',
+        'TEMPLATE_DELETE_FAILED',
+        'Template not found or database operation failed',
+        { templateId: id, duration }
+      );
+      this.metricsService.incrementCounter('billing_template_delete_failed', { templateId: id });
       throw new NotFoundException('Invoice template not found');
     }
   }
@@ -2062,7 +2185,14 @@ export class BillingService {
     userId: string,
     tenantId?: string
   ): Promise<any> {
-    this.logger.log(`Creating invoice schedule for account: ${createScheduleDto.account_id}`);
+    const startTime = Date.now();
+    this.structuredLogger.log(
+      `Creating invoice schedule for account: ${createScheduleDto.account_id}`,
+      'BillingService',
+      undefined,
+      'createInvoiceSchedule',
+      { accountId: createScheduleDto.account_id, userId, tenantId, scheduleType: createScheduleDto.schedule_type }
+    );
 
     try {
       let finalTenantId = tenantId;
@@ -2114,6 +2244,17 @@ export class BillingService {
         },
       });
 
+      const duration = Date.now() - startTime;
+      this.structuredLogger.log(
+        `Invoice schedule created successfully: ${schedule.id}`,
+        'BillingService',
+        undefined,
+        'createInvoiceSchedule',
+        { scheduleId: schedule.id, accountId: schedule.account_id, duration }
+      );
+      this.metricsService.incrementCounter('billing_schedule_created', { tenantId: finalTenantId });
+      this.metricsService.recordHistogram('billing_schedule_create_duration', duration, { tenantId: finalTenantId });
+
       return {
         id: schedule.id,
         tenant_id: schedule.tenant_id,
@@ -2134,13 +2275,31 @@ export class BillingService {
         account: schedule.account,
       };
     } catch (error) {
-      this.logger.error(`Failed to create invoice schedule: ${(error as Error).message}`, (error as Error).stack);
+      const duration = Date.now() - startTime;
+      this.structuredLogger.error(
+        `Failed to create invoice schedule: ${(error as Error).message}`,
+        (error as Error).stack,
+        'BillingService',
+        undefined,
+        'createInvoiceSchedule',
+        'SCHEDULE_CREATE_FAILED',
+        'Database operation failed or validation error',
+        { accountId: createScheduleDto.account_id, userId, tenantId, duration }
+      );
+      this.metricsService.incrementCounter('billing_schedule_create_failed', { tenantId });
       throw new BadRequestException('Failed to create invoice schedule');
     }
   }
 
   async getInvoiceSchedules(tenantId?: string): Promise<any[]> {
-    this.logger.log('Getting invoice schedules');
+    const startTime = Date.now();
+    this.structuredLogger.log(
+      'Getting invoice schedules',
+      'BillingService',
+      undefined,
+      'getInvoiceSchedules',
+      { tenantId }
+    );
 
     try {
       let finalTenantId = tenantId;
@@ -2187,8 +2346,30 @@ export class BillingService {
         updated_by: schedule.updated_by,
         account: schedule.account,
       }));
+      
+      const duration = Date.now() - startTime;
+      this.structuredLogger.log(
+        `Retrieved ${schedules.length} invoice schedules`,
+        'BillingService',
+        undefined,
+        'getInvoiceSchedules',
+        { scheduleCount: schedules.length, tenantId: finalTenantId, duration }
+      );
+      this.metricsService.recordHistogram('billing_schedules_fetched', schedules.length, { tenantId: finalTenantId });
+      this.metricsService.recordHistogram('billing_schedules_fetch_duration', duration, { tenantId: finalTenantId });
     } catch (error) {
-      this.logger.error(`Failed to get invoice schedules: ${(error as Error).message}`, (error as Error).stack);
+      const duration = Date.now() - startTime;
+      this.structuredLogger.error(
+        `Failed to get invoice schedules: ${(error as Error).message}`,
+        (error as Error).stack,
+        'BillingService',
+        undefined,
+        'getInvoiceSchedules',
+        'SCHEDULE_FETCH_FAILED',
+        'Database query failed',
+        { tenantId, duration }
+      );
+      this.metricsService.incrementCounter('billing_schedules_fetch_failed', { tenantId });
       throw new BadRequestException('Failed to get invoice schedules');
     }
   }
@@ -2198,7 +2379,14 @@ export class BillingService {
     updateScheduleDto: any,
     userId: string
   ): Promise<any> {
-    this.logger.log(`Updating invoice schedule: ${id}`);
+    const startTime = Date.now();
+    this.structuredLogger.log(
+      `Updating invoice schedule: ${id}`,
+      'BillingService',
+      undefined,
+      'updateInvoiceSchedule',
+      { scheduleId: id, userId }
+    );
 
     try {
       const updateData: any = {
@@ -2252,27 +2440,85 @@ export class BillingService {
         updated_by: schedule.updated_by,
         account: schedule.account,
       };
+      
+      const duration = Date.now() - startTime;
+      this.structuredLogger.log(
+        `Invoice schedule updated successfully: ${schedule.id}`,
+        'BillingService',
+        undefined,
+        'updateInvoiceSchedule',
+        { scheduleId: schedule.id, duration }
+      );
+      this.metricsService.incrementCounter('billing_schedule_updated', { scheduleId: id });
+      this.metricsService.recordHistogram('billing_schedule_update_duration', duration, { scheduleId: id });
     } catch (error) {
-      this.logger.error(`Failed to update invoice schedule: ${(error as Error).message}`, (error as Error).stack);
+      const duration = Date.now() - startTime;
+      this.structuredLogger.error(
+        `Failed to update invoice schedule: ${(error as Error).message}`,
+        (error as Error).stack,
+        'BillingService',
+        undefined,
+        'updateInvoiceSchedule',
+        'SCHEDULE_UPDATE_FAILED',
+        'Schedule not found or database operation failed',
+        { scheduleId: id, userId, duration }
+      );
+      this.metricsService.incrementCounter('billing_schedule_update_failed', { scheduleId: id });
       throw new NotFoundException('Invoice schedule not found');
     }
   }
 
   async deleteInvoiceSchedule(id: string): Promise<void> {
-    this.logger.log(`Deleting invoice schedule: ${id}`);
+    const startTime = Date.now();
+    this.structuredLogger.log(
+      `Deleting invoice schedule: ${id}`,
+      'BillingService',
+      undefined,
+      'deleteInvoiceSchedule',
+      { scheduleId: id }
+    );
 
     try {
       await this.databaseService.invoiceSchedule.delete({
         where: { id },
       });
+      
+      const duration = Date.now() - startTime;
+      this.structuredLogger.log(
+        `Invoice schedule deleted successfully: ${id}`,
+        'BillingService',
+        undefined,
+        'deleteInvoiceSchedule',
+        { scheduleId: id, duration }
+      );
+      this.metricsService.incrementCounter('billing_schedule_deleted', { scheduleId: id });
+      this.metricsService.recordHistogram('billing_schedule_delete_duration', duration, { scheduleId: id });
     } catch (error) {
-      this.logger.error(`Failed to delete invoice schedule: ${(error as Error).message}`, (error as Error).stack);
+      const duration = Date.now() - startTime;
+      this.structuredLogger.error(
+        `Failed to delete invoice schedule: ${(error as Error).message}`,
+        (error as Error).stack,
+        'BillingService',
+        undefined,
+        'deleteInvoiceSchedule',
+        'SCHEDULE_DELETE_FAILED',
+        'Schedule not found or database operation failed',
+        { scheduleId: id, duration }
+      );
+      this.metricsService.incrementCounter('billing_schedule_delete_failed', { scheduleId: id });
       throw new NotFoundException('Invoice schedule not found');
     }
   }
 
   async toggleInvoiceSchedule(id: string, userId: string): Promise<any> {
-    this.logger.log(`Toggling invoice schedule: ${id}`);
+    const startTime = Date.now();
+    this.structuredLogger.log(
+      `Toggling invoice schedule: ${id}`,
+      'BillingService',
+      undefined,
+      'toggleInvoiceSchedule',
+      { scheduleId: id, userId }
+    );
 
     try {
       const schedule = await this.databaseService.invoiceSchedule.findUnique({
@@ -2322,8 +2568,30 @@ export class BillingService {
         updated_by: updatedSchedule.updated_by,
         account: updatedSchedule.account,
       };
+      
+      const duration = Date.now() - startTime;
+      this.structuredLogger.log(
+        `Invoice schedule toggled successfully: ${updatedSchedule.id} (is_active: ${updatedSchedule.is_active})`,
+        'BillingService',
+        undefined,
+        'toggleInvoiceSchedule',
+        { scheduleId: updatedSchedule.id, isActive: updatedSchedule.is_active, duration }
+      );
+      this.metricsService.incrementCounter('billing_schedule_toggled', { scheduleId: id });
+      this.metricsService.recordHistogram('billing_schedule_toggle_duration', duration, { scheduleId: id });
     } catch (error) {
-      this.logger.error(`Failed to toggle invoice schedule: ${(error as Error).message}`, (error as Error).stack);
+      const duration = Date.now() - startTime;
+      this.structuredLogger.error(
+        `Failed to toggle invoice schedule: ${(error as Error).message}`,
+        (error as Error).stack,
+        'BillingService',
+        undefined,
+        'toggleInvoiceSchedule',
+        'SCHEDULE_TOGGLE_FAILED',
+        'Schedule not found or database operation failed',
+        { scheduleId: id, userId, duration }
+      );
+      this.metricsService.incrementCounter('billing_schedule_toggle_failed', { scheduleId: id });
       if (error instanceof NotFoundException) {
         throw error;
       }
@@ -2336,7 +2604,14 @@ export class BillingService {
   // ============================================================================
 
   async getReminderHistory(tenantId?: string): Promise<any[]> {
-    this.logger.log('Getting reminder history');
+    const startTime = Date.now();
+    this.structuredLogger.log(
+      'Getting reminder history',
+      'BillingService',
+      undefined,
+      'getReminderHistory',
+      { tenantId }
+    );
 
     try {
       let finalTenantId = tenantId;
@@ -2366,6 +2641,17 @@ export class BillingService {
         },
       });
 
+      const duration = Date.now() - startTime;
+      this.structuredLogger.log(
+        `Retrieved ${reminders.length} reminder history entries`,
+        'BillingService',
+        undefined,
+        'getReminderHistory',
+        { reminderCount: reminders.length, tenantId: finalTenantId, duration }
+      );
+      this.metricsService.recordHistogram('billing_reminders_fetched', reminders.length, { tenantId: finalTenantId });
+      this.metricsService.recordHistogram('billing_reminders_fetch_duration', duration, { tenantId: finalTenantId });
+
       return reminders.map(reminder => ({
         id: reminder.id,
         invoice_id: reminder.invoice_id,
@@ -2378,7 +2664,18 @@ export class BillingService {
         created_by: reminder.created_by,
       }));
     } catch (error) {
-      this.logger.error(`Failed to get reminder history: ${(error as Error).message}`, (error as Error).stack);
+      const duration = Date.now() - startTime;
+      this.structuredLogger.error(
+        `Failed to get reminder history: ${(error as Error).message}`,
+        (error as Error).stack,
+        'BillingService',
+        undefined,
+        'getReminderHistory',
+        'REMINDER_HISTORY_FETCH_FAILED',
+        'Database query failed',
+        { tenantId, duration }
+      );
+      this.metricsService.incrementCounter('billing_reminders_fetch_failed', { tenantId });
       throw new BadRequestException('Failed to get reminder history');
     }
   }
