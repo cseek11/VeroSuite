@@ -460,11 +460,53 @@ def create_auto_pr(files: Dict[str, Dict], config: Dict, repo_path: pathlib.Path
         
         if result.returncode == 0:
             pr_url = result.stdout.strip()
+            # Extract PR number from URL (format: https://github.com/owner/repo/pull/123)
+            pr_number = None
+            if "/pull/" in pr_url:
+                pr_number = pr_url.split("/pull/")[-1].split()[0]
+            
             logger.info(
                 f"Auto-PR created successfully: {pr_url}",
                 operation="create_auto_pr",
-                pr_url=pr_url
+                pr_url=pr_url,
+                pr_number=pr_number
             )
+            
+            # Trigger workflow manually since GITHUB_TOKEN PRs don't auto-trigger workflows
+            if pr_number:
+                try:
+                    logger.info(
+                        f"Triggering compute reward score workflow for PR #{pr_number}",
+                        operation="create_auto_pr",
+                        pr_number=pr_number
+                    )
+                    # Trigger workflow using workflow_dispatch with PR number input
+                    # Note: --ref must be a branch that exists (use the branch we just created)
+                    workflow_result = subprocess.run(
+                        [gh_path, "workflow", "run", "swarm_compute_reward_score.yml", 
+                         "--ref", branch_name, "--field", f"pr_number={pr_number}"],
+                        cwd=repo_path,
+                        capture_output=True,
+                        text=True,
+                        timeout=30
+                    )
+                    if workflow_result.returncode == 0:
+                        logger.info(
+                            f"Successfully triggered workflow for PR #{pr_number}",
+                            operation="create_auto_pr"
+                        )
+                    else:
+                        logger.warn(
+                            f"Failed to trigger workflow: {workflow_result.stderr}",
+                            operation="create_auto_pr"
+                        )
+                except Exception as e:
+                    logger.warn(
+                        f"Could not trigger workflow (non-critical): {e}",
+                        operation="create_auto_pr",
+                        error=e
+                    )
+            
             return pr_url
         else:
             logger.error(
