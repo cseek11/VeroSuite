@@ -44,7 +44,12 @@ def load_workflow_file(file_path: Path) -> Optional[Dict]:
     """Load and parse YAML workflow file."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f)
+            data = yaml.safe_load(f)
+            # Fix YAML 1.1 quirk: 'on' is parsed as boolean True
+            # Convert True key back to 'on' if present
+            if data and True in data and "on" not in data:
+                data["on"] = data.pop(True)
+            return data
     except Exception as e:
         logger.error(
             f"Error loading workflow file: {file_path}",
@@ -62,13 +67,20 @@ def get_workflow_name(workflow: Dict) -> Optional[str]:
 
 def get_workflow_triggers(workflow: Dict) -> Optional[Dict]:
     """Extract triggers from workflow YAML."""
-    return workflow.get("on")
+    # Handle both 'on' and True (YAML 1.1 boolean) keys
+    if "on" in workflow:
+        return workflow.get("on")
+    elif True in workflow:
+        return workflow.get(True)
+    return None
 
 
 def check_has_on_section(workflow: Dict, file_path: Path) -> List[Dict]:
     """Check if workflow has `on:` section."""
     violations = []
-    if "on" not in workflow:
+    # Check for both 'on' and True (YAML 1.1 boolean) keys
+    has_on = "on" in workflow or True in workflow
+    if not has_on:
         violations.append({
             "type": "missing_on_section",
             "file": str(file_path),
@@ -84,9 +96,17 @@ def check_pr_trigger_types(workflow: Dict, file_path: Path) -> List[Dict]:
     violations = []
     triggers = get_workflow_triggers(workflow)
     
-    if triggers and "pull_request" in triggers:
-        pr_config = triggers["pull_request"]
-        if isinstance(pr_config, dict):
+    if triggers:
+        # Handle both 'pull_request' and True (YAML 1.1 boolean) keys in triggers
+        pr_config = None
+        if "pull_request" in triggers:
+            pr_config = triggers["pull_request"]
+        elif isinstance(triggers, dict) and True in triggers:
+            # If triggers is a dict with True key, it might be a single trigger
+            # Check if it's actually pull_request by checking the structure
+            pass
+        
+        if pr_config and isinstance(pr_config, dict):
             types = pr_config.get("types", [])
             required_types = {"opened", "synchronize", "reopened"}
             missing_types = required_types - set(types)
@@ -349,7 +369,7 @@ def main():
     else:
         if violations:
             # CLI output - print to stdout is acceptable for CLI output
-            print(f"❌ Found {len(violations)} violation(s):\n")
+            print(f"Found {len(violations)} violation(s):\n")
             for i, violation in enumerate(violations, 1):
                 print(f"{i}. [{violation['severity'].upper()}] {violation['type']}")                                                                            
                 print(f"   File: {violation['file']}")
@@ -364,7 +384,7 @@ def main():
             )
         else:
             # CLI output - print to stdout is acceptable for CLI output
-            print("✅ All workflows pass validation")
+            print("All workflows pass validation")
             logger.info(
                 "All workflows pass validation",
                 operation="main",

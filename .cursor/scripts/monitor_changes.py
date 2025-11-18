@@ -234,37 +234,61 @@ def group_files_logically(files: Dict[str, Dict], config: Dict) -> List[List[str
         # No grouping, return all files as one group
         return [list(files.keys())]
     
-    # Group by directory
+    max_size = grouping.get("max_group_size", 50)
+    min_size = grouping.get("min_group_size", 5)
+    
+    # Group by directory first (primary grouping)
     if grouping.get("group_by_directory", False):
         dir_groups = defaultdict(list)
         for file_path in files.keys():
             dir_path = str(pathlib.Path(file_path).parent)
             dir_groups[dir_path].append(file_path)
         
-        # Split large groups
-        max_size = grouping.get("max_group_size", 10)
+        # Combine small groups together
+        small_groups = []
         for dir_path, file_list in dir_groups.items():
-            if len(file_list) <= max_size:
+            if len(file_list) < min_size:
+                small_groups.extend(file_list)
+            elif len(file_list) <= max_size:
                 groups.append(file_list)
             else:
-                # Split into chunks
+                # Split large groups only if they exceed max_size
                 for i in range(0, len(file_list), max_size):
                     groups.append(file_list[i:i + max_size])
+        
+        # Combine small groups into one or more groups
+        if small_groups:
+            if len(small_groups) <= max_size:
+                groups.append(small_groups)
+            else:
+                # Split small groups if they exceed max_size
+                for i in range(0, len(small_groups), max_size):
+                    groups.append(small_groups[i:i + max_size])
     
-    # Group by file type
+    # Group by file type (secondary, only if directory grouping not enabled)
     elif grouping.get("group_by_file_type", False):
         type_groups = defaultdict(list)
         for file_path in files.keys():
             file_ext = pathlib.Path(file_path).suffix
             type_groups[file_ext].append(file_path)
         
-        max_size = grouping.get("max_group_size", 10)
+        # Combine small groups
+        small_groups = []
         for file_ext, file_list in type_groups.items():
-            if len(file_list) <= max_size:
+            if len(file_list) < min_size:
+                small_groups.extend(file_list)
+            elif len(file_list) <= max_size:
                 groups.append(file_list)
             else:
                 for i in range(0, len(file_list), max_size):
                     groups.append(file_list[i:i + max_size])
+        
+        if small_groups:
+            if len(small_groups) <= max_size:
+                groups.append(small_groups)
+            else:
+                for i in range(0, len(small_groups), max_size):
+                    groups.append(small_groups[i:i + max_size])
     
     else:
         # No grouping, return all files as one group
@@ -418,12 +442,225 @@ def generate_pr_body(files: Dict[str, Dict], config: Dict) -> str:
     return body
 
 
+def get_open_auto_prs(repo_path: pathlib.Path) -> List[Dict]:
+    """Get list of open Auto-PR pull requests."""
+    try:
+        gh_path = r"C:\Program Files\GitHub CLI\gh.exe"
+        if not os.path.exists(gh_path):
+            gh_path = "gh"
+        
+        result = subprocess.run(
+            [gh_path, "pr", "list", "--state", "open", "--json", "number,title,headRefName"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        if result.returncode == 0:
+            prs = json.loads(result.stdout)
+            # Filter to only Auto-PRs
+            auto_prs = [pr for pr in prs if pr.get("headRefName", "").startswith("auto-pr-")]
+            return auto_prs
+        else:
+            logger.warn(
+                "Failed to list open PRs",
+                operation="get_open_auto_prs",
+                stderr=result.stderr
+            )
+            return []
+    except Exception as e:
+        logger.error(
+            "Error getting open PRs",
+            operation="get_open_auto_prs",
+            error=str(e)
+        )
+        return []
+
+
+def get_files_in_open_prs(open_prs: List[Dict], repo_path: pathlib.Path) -> Set[str]:
+    """Get set of file paths that are already in open PRs by checking git diff."""
+    files_in_prs = set()
+    gh_path = r"C:\Program Files\GitHub CLI\gh.exe"
+    if not os.path.exists(gh_path):
+        gh_path = "gh"
+    
+    for pr in open_prs:
+        pr_number = pr.get("number")
+        if not pr_number:
+            continue
+        
+        try:
+            # Get files changed in this PR
+            result = subprocess.run(
+                [gh_path, "pr", "view", str(pr_number), "--json", "files"],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            if result.returncode == 0:
+                pr_data = json.loads(result.stdout)
+                pr_files = pr_data.get("files", [])
+                for file_info in pr_files:
+                    if isinstance(file_info, dict):
+                        file_path = file_info.get("path", "")
+                    else:
+                        file_path = str(file_info)
+                    if file_path:
+                        files_in_prs.add(file_path)
+        except Exception as e:
+            logger.warn(
+                f"Failed to get files for PR #{pr_number}",
+                operation="get_files_in_open_prs",
+                error=str(e)
+            )
+    
+    return files_in_prs
+
+
+def consolidate_small_prs(open_prs: List[Dict], config: Dict, repo_path: pathlib.Path) -> int:
+    """Consolidate small Auto-PRs by closing them if there are too many."""
+    if not open_prs:
+        return 0
+    
+    max_open_prs = config.get("pr_settings", {}).get("max_open_prs", 10)
+    if len(open_prs) <= max_open_prs:
+        return 0
+    
+    # Get file counts for each PR
+    gh_path = r"C:\Program Files\GitHub CLI\gh.exe"
+    if not os.path.exists(gh_path):
+        gh_path = "gh"
+    
+    pr_file_counts = []
+    for pr in open_prs:
+        pr_number = pr.get("number")
+        if not pr_number:
+            continue
+        
+        try:
+            result = subprocess.run(
+                [gh_path, "pr", "view", str(pr_number), "--json", "files"],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            if result.returncode == 0:
+                pr_data = json.loads(result.stdout)
+                files_list = pr_data.get("files", [])
+                file_count = len(files_list)
+                
+                # GitHub API limits files to 100, so if we see 100, check if there are more
+                # by looking at additions/deletions which gives us a better sense of PR size
+                if file_count >= 100:
+                    # Try to get additions/deletions as a proxy for size
+                    additions = sum(f.get("additions", 0) for f in files_list)
+                    deletions = sum(f.get("deletions", 0) for f in files_list)
+                    total_changes = additions + deletions
+                    # Use changes as secondary sort key for large PRs
+                    pr_file_counts.append((pr_number, file_count, total_changes, pr))
+                else:
+                    pr_file_counts.append((pr_number, file_count, 0, pr))
+        except Exception as e:
+            logger.warn(
+                f"Failed to get file count for PR #{pr_number}",
+                operation="consolidate_small_prs",
+                error=str(e)
+            )
+            # Assume it's small if we can't check
+            pr_file_counts.append((pr_number, 0, 0, pr))
+    
+    # Sort by file count (smallest first), then by total changes for large PRs
+    pr_file_counts.sort(key=lambda x: (x[1], x[2]))
+    
+    # Close the smallest ones until we're under the limit
+    # Only close PRs that are actually small (less than min_files threshold)
+    min_files = config.get("change_threshold", {}).get("min_files", 10)
+    small_prs_to_close = [(num, count, changes, pr) for num, count, changes, pr in pr_file_counts if count < min_files]
+    
+    # If we have small PRs, close those first
+    if small_prs_to_close:
+        to_close = small_prs_to_close[:len(open_prs) - max_open_prs]
+    else:
+        # If no small PRs, close the smallest ones overall
+        to_close = pr_file_counts[:len(open_prs) - max_open_prs]
+    
+    closed_count = 0
+    for pr_number, file_count, total_changes, pr in to_close:
+        try:
+            result = subprocess.run(
+                [gh_path, "pr", "close", str(pr_number), "--comment", 
+                 "Auto-closed: Too many small PRs. Changes will be included in a larger consolidated PR."],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            if result.returncode == 0:
+                closed_count += 1
+                logger.info(
+                    f"Consolidated small PR #{pr_number} ({file_count} files, {total_changes} changes)",
+                    operation="consolidate_small_prs",
+                    pr_number=pr_number,
+                    file_count=file_count,
+                    total_changes=total_changes
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to close PR #{pr_number}",
+                operation="consolidate_small_prs",
+                error=str(e)
+            )
+    
+    return closed_count
+
+
 def create_auto_pr(files: Dict[str, Dict], config: Dict, repo_path: pathlib.Path) -> Optional[str]:
     """Create automated PR using create_pr.py script."""
     logger.info(
         f"Creating auto-PR for {len(files)} files",
         operation="create_auto_pr"
     )
+    
+    # Check for existing open Auto-PRs
+    open_prs = get_open_auto_prs(repo_path)
+    if open_prs:
+        # Get files already in open PRs
+        files_in_prs = get_files_in_open_prs(open_prs, repo_path)
+        
+        # Filter out files that are already in open PRs
+        new_files = {f: d for f, d in files.items() if f not in files_in_prs}
+        
+        if not new_files:
+            logger.info(
+                "All files already in open PRs, skipping PR creation",
+                operation="create_auto_pr",
+                existing_prs=len(open_prs)
+            )
+            return None
+        
+        if len(new_files) < len(files):
+            logger.info(
+                f"Filtered {len(files) - len(new_files)} files already in open PRs",
+                operation="create_auto_pr",
+                original_count=len(files),
+                new_count=len(new_files)
+            )
+            files = new_files
+        
+        # Consolidate small PRs if we have too many (and enabled)
+        if config.get("pr_settings", {}).get("consolidate_small_prs", True):
+            closed_count = consolidate_small_prs(open_prs, config, repo_path)
+            if closed_count > 0:
+                logger.info(
+                    f"Consolidated {closed_count} small PRs",
+                    operation="create_auto_pr",
+                    closed_count=closed_count
+                )
     
     # Generate branch name
     branch_name = f"auto-pr-{int(time.time())}"
