@@ -91,48 +91,6 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
     },
   });
 
-  // Mock data fallback (for development/testing)
-  const mockTemplates = [
-        {
-          id: '1',
-          name: 'Standard Monthly Service',
-          description: 'Monthly pest control service invoice template',
-          items: [
-            {
-              service_type_id: '',
-              description: 'Monthly Pest Control Service',
-              quantity: 1,
-              unit_price: 150.00,
-            },
-          ],
-          tags: ['monthly', 'recurring'],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          name: 'One-Time Treatment',
-          description: 'Template for one-time treatment services',
-          items: [
-            {
-              service_type_id: '',
-              description: 'One-Time Treatment Service',
-              quantity: 1,
-              unit_price: 200.00,
-            },
-          ],
-          tags: ['one-time', 'treatment'],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      ];
-    },
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch invoice templates', error, 'InvoiceTemplates');
-      toast.error('Failed to load templates. Please try again.');
-    },
-  });
-
   // Extract unique tags from templates
   const availableTags = useMemo(() => {
     const tags = new Set<string>();
@@ -176,6 +134,27 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
     setShowTemplateForm(true);
   };
 
+  const saveTemplateMutation = useMutation({
+    mutationFn: async (templateData: { name: string; description?: string; items: InvoiceTemplateItem[]; tags?: string[] }) => {
+      if (editingTemplate) {
+        return await billing.updateInvoiceTemplate(editingTemplate.id, templateData);
+      } else {
+        return await billing.createInvoiceTemplate(templateData);
+      }
+    },
+    onSuccess: () => {
+      logger.debug('Template saved', {}, 'InvoiceTemplates');
+      toast.success(editingTemplate ? 'Template updated successfully' : 'Template created successfully');
+      queryClient.invalidateQueries({ queryKey: ['invoice-templates'] });
+      setShowTemplateForm(false);
+      setEditingTemplate(null);
+    },
+    onError: (error: unknown) => {
+      logger.error('Failed to save template', error, 'InvoiceTemplates');
+      toast.error('Failed to save template. Please try again.');
+    },
+  });
+
   const deleteTemplateMutation = useMutation({
     mutationFn: async (templateId: string) => {
       await billing.deleteInvoiceTemplate(templateId);
@@ -183,10 +162,10 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
     onSuccess: () => {
       logger.debug('Template deleted', {}, 'InvoiceTemplates');
       toast.success('Template deleted successfully');
-      queryClient.invalidateQueries({ queryKey: ['invoice-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['invoice-templates'] });     
     },
     onError: (error: unknown) => {
-      logger.error('Failed to delete template', error, 'InvoiceTemplates');
+      logger.error('Failed to delete template', error, 'InvoiceTemplates');   
       toast.error('Failed to delete template. Please try again.');
     },
   });
@@ -452,28 +431,98 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
               </DialogTitle>
             </DialogHeader>
             <div className="py-4">
-              <Card className="bg-yellow-50 border-yellow-200">
-                <div className="p-4">
-                  <div className="flex items-start">
-                    <AlertCircle className="w-5 h-5 text-yellow-600 mr-2 mt-0.5" />
-                    <div>
-                      <Text className="text-yellow-800 font-medium">
-                        Template Editor Coming Soon
-                      </Text>
-                      <Text variant="small" className="text-yellow-700 mt-1">
-                        Template creation and editing will be available in the next update.
-                        For now, templates are managed via the API.
-                      </Text>
-                    </div>
-                  </div>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const name = formData.get('name') as string;
+                  const description = formData.get('description') as string;
+                  const itemsJson = formData.get('items') as string;
+                  
+                  if (!name) {
+                    toast.error('Template name is required');
+                    return;
+                  }
+
+                  let items: InvoiceTemplateItem[] = [];
+                  try {
+                    items = itemsJson ? JSON.parse(itemsJson) : [];
+                  } catch {
+                    toast.error('Invalid items format');
+                    return;
+                  }
+
+                  saveTemplateMutation.mutate({
+                    name,
+                    description: description || undefined,
+                    items,
+                    tags: editingTemplate?.tags || [],
+                  });
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="block text-sm font-medium mb-1">Template Name *</label>
+                  <Input
+                    name="name"
+                    defaultValue={editingTemplate?.name || ''}
+                    required
+                    placeholder="e.g., Standard Monthly Service"
+                  />
                 </div>
-              </Card>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Description</label>
+                  <Textarea
+                    name="description"
+                    defaultValue={editingTemplate?.description || ''}
+                    placeholder="Template description..."
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Items (JSON)</label>
+                  <Textarea
+                    name="items"
+                    defaultValue={JSON.stringify(editingTemplate?.items || [], null, 2)}
+                    placeholder='[{"service_type_id": "...", "description": "...", "quantity": 1, "unit_price": 150.00}]'
+                    rows={6}
+                    className="font-mono text-sm"
+                  />
+                  <Text className="text-xs text-gray-500 mt-1">
+                    Enter items as JSON array. Each item should have: service_type_id, description, quantity, unit_price
+                  </Text>
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowTemplateForm(false);
+                      setEditingTemplate(null);
+                    }}
+                    disabled={saveTemplateMutation.isPending}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={saveTemplateMutation.isPending}
+                  >
+                    {saveTemplateMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        {editingTemplate ? 'Update Template' : 'Create Template'}
+                      </>
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowTemplateForm(false)}>
-                Close
-              </Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}

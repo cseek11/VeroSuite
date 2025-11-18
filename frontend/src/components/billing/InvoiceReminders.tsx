@@ -70,29 +70,29 @@ export default function InvoiceReminders({ onReminderSent }: InvoiceRemindersPro
   });
 
   // Fetch reminder history
-  const { data: reminderHistory = [], isLoading: historyLoading } = useQuery<ReminderHistory[]>({
+  const { data: reminderHistory = [], isLoading: historyLoading } = useQuery<ReminderHistory[]>({                                                               
     queryKey: ['billing', 'reminder-history'],
     queryFn: async () => {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/v1/billing/reminder-history');
-      // return response.json();
-      
-      // Mock data for now
-      return [
-        {
-          id: '1',
-          invoice_id: 'inv-1',
-          invoice_number: 'INV-001',
-          customer_name: 'Acme Corporation',
-          sent_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          reminder_type: 'email',
-          status: 'sent',
-          message: 'Payment reminder for overdue invoice',
-        },
-      ];
+      try {
+        const data = await billing.getReminderHistory();
+        return data.map(reminder => ({
+          id: reminder.id,
+          invoice_id: reminder.invoice_id,
+          invoice_number: reminder.invoice_number || '',
+          customer_name: reminder.customer_name || '',
+          sent_at: reminder.sent_at instanceof Date ? reminder.sent_at.toISOString() : reminder.sent_at,
+          reminder_type: reminder.reminder_type as 'email' | 'sms' | 'letter',
+          status: reminder.status as 'sent' | 'failed' | 'pending',
+          message: reminder.message,
+        }));
+      } catch (error) {
+        logger.error('Failed to fetch reminder history', error, 'InvoiceReminders');
+        toast.error('Failed to load reminder history. Please try again.');
+        return [];
+      }
     },
     onError: (error: unknown) => {
-      logger.error('Failed to fetch reminder history', error, 'InvoiceReminders');
+      logger.error('Failed to fetch reminder history', error, 'InvoiceReminders');                                                                              
     },
   });
 
