@@ -70,11 +70,23 @@ async function loadMetrics() {
         console.log('Response received, length:', text.length);
         console.log('First 500 chars:', text.substring(0, 500));
         
-        // Check for merge conflict markers
-        if (text.includes('<<<<<<<') || text.includes('=======') || text.includes('>>>>>>>')) {
+        // Check for merge conflict markers (more precise - look for the pattern, not just the strings)
+        // Conflict markers appear as: <<<<<<< HEAD ... ======= ... >>>>>>> hash
+        const hasConflictStart = text.includes('<<<<<<<');
+        const hasConflictMiddle = text.includes('=======') && (text.indexOf('=======') > text.indexOf('<<<<<<<') || text.indexOf('<<<<<<<') === -1);
+        const hasConflictEnd = text.includes('>>>>>>>');
+        
+        // Only flag as conflict if we see the start marker (most reliable indicator)
+        if (hasConflictStart) {
             console.error('⚠️ Conflict markers detected in response!');
+            console.error('Found <<<<<<< marker - this is definitely a merge conflict');
             console.error('Full response preview:', text.substring(0, 1000));
             throw new Error('JSON file contains merge conflict markers. Please resolve conflicts in the repository. Check console for details.');
+        }
+        
+        // Warn if we see middle/end markers without start (might be false positive)
+        if ((hasConflictMiddle || hasConflictEnd) && !hasConflictStart) {
+            console.warn('⚠️ Found ======= or >>>>>>> but no <<<<<<< - might be false positive, continuing...');
         }
         
         // Parse JSON
