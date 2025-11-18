@@ -147,7 +147,9 @@ describe('PaymentDashboard', () => {
         expect(screen.getByText(/payment dashboard/i)).toBeInTheDocument();
       });
 
-      expect(screen.getByText(/comprehensive payment metrics/i)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText(/comprehensive payment metrics and analytics overview/i)).toBeInTheDocument();
+      });
     });
 
     it('should display summary cards', async () => {

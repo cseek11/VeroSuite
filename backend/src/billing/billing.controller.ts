@@ -22,6 +22,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BillingService } from './billing.service';
 import { InvoicePdfService } from './invoice-pdf.service';
 import { OverdueAlertsService } from './overdue-alerts.service';
+import { FinancialReportsService } from './financial-reports.service';
 import { StructuredLoggerService } from '../common/services/logger.service';
 import { 
   CreateInvoiceDto, 
@@ -44,6 +45,7 @@ export class BillingController {
     private readonly billingService: BillingService,
     private readonly invoicePdfService: InvoicePdfService,
     private readonly overdueAlertsService: OverdueAlertsService,
+    private readonly financialReportsService: FinancialReportsService,
     private readonly structuredLogger: StructuredLoggerService,
   ) {}
 
@@ -491,6 +493,81 @@ export class BillingController {
       req.user.tenantId,
       startDate ? new Date(startDate) : undefined,
       endDate ? new Date(endDate) : undefined,
+      requestId
+    );
+  }
+
+  // ============================================================================
+  // FINANCIAL REPORTS ENDPOINTS
+  // ============================================================================
+
+  @Get('reports/pl')
+  @ApiOperation({ summary: 'Generate Profit & Loss (P&L) Report' })
+  @ApiQuery({ name: 'startDate', required: true, description: 'Start date for P&L report (ISO 8601 format: YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: true, description: 'End date for P&L report (ISO 8601 format: YYYY-MM-DD)' })
+  @ApiResponse({ status: 200, description: 'P&L report generated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - invalid date format or range' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async generatePLReport(
+    @Request() req: any,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string
+  ) {
+    // Extract trace context from request headers if available
+    const requestId = req.headers['x-request-id'] || req.id || undefined;
+    const traceId = req.headers['x-trace-id'] || undefined;
+    const spanId = req.headers['x-span-id'] || undefined;
+
+    // Set request context for structured logging
+    if (requestId) {
+      this.structuredLogger.setRequestContext(requestId, {
+        traceId,
+        spanId,
+        requestId,
+        userId: req.user?.userId,
+        tenantId: req.user?.tenantId,
+        operation: 'generatePLReport',
+      });
+    }
+
+    return this.financialReportsService.generatePLReport(
+      req.user.tenantId,
+      startDate,
+      endDate,
+      requestId
+    );
+  }
+
+  @Get('reports/ar-aging')
+  @ApiOperation({ summary: 'Generate AR Aging Report' })
+  @ApiQuery({ name: 'asOfDate', required: false, description: 'As of date for AR aging report (ISO 8601 format: YYYY-MM-DD, defaults to today)' })
+  @ApiResponse({ status: 200, description: 'AR aging report generated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - invalid date format' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async generateARAgingReport(
+    @Request() req: any,
+    @Query('asOfDate') asOfDate?: string
+  ) {
+    // Extract trace context from request headers if available
+    const requestId = req.headers['x-request-id'] || req.id || undefined;
+    const traceId = req.headers['x-trace-id'] || undefined;
+    const spanId = req.headers['x-span-id'] || undefined;
+
+    // Set request context for structured logging
+    if (requestId) {
+      this.structuredLogger.setRequestContext(requestId, {
+        traceId,
+        spanId,
+        requestId,
+        userId: req.user?.userId,
+        tenantId: req.user?.tenantId,
+        operation: 'generateARAgingReport',
+      });
+    }
+
+    return this.financialReportsService.generateARAgingReport(
+      req.user.tenantId,
+      asOfDate,
       requestId
     );
   }

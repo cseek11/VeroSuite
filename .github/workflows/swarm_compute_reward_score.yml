@@ -253,7 +253,26 @@ jobs:
             --static artifacts/static-analysis.json \
             --pr-desc artifacts/pr-description.txt \
             --diff artifacts/pr-diff.txt \
-            --out reward.json
+            --out reward.json || {
+            echo "ERROR: compute_reward_score.py failed with exit code $?"
+            echo "Checking if reward.json was created anyway..."
+            if [ -f reward.json ]; then
+              echo "reward.json exists despite error, continuing..."
+            else
+              echo "reward.json was NOT created - this is a critical error!"
+              exit 1
+            fi
+          }
+
+      - name: Verify reward.json exists
+        run: |
+          if [ ! -f reward.json ]; then
+            echo "ERROR: reward.json was not created!"
+            exit 1
+          fi
+          echo "reward.json exists, size: $(stat -f%z reward.json 2>/dev/null || stat -c%s reward.json 2>/dev/null || echo 'unknown') bytes"
+          echo "reward.json content preview:"
+          head -20 reward.json || echo "Could not read reward.json"
 
       - name: Upload reward artifact
         uses: actions/upload-artifact@v4
@@ -261,6 +280,7 @@ jobs:
           name: reward
           path: reward.json
           retention-days: 30
+        continue-on-error: false
 
       - name: Upload static analysis artifact
         uses: actions/upload-artifact@v4

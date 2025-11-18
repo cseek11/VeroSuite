@@ -535,14 +535,15 @@ export class OverdueAlertsService {
       });
 
       const stats = {
-        totalAlerts: alerts.length,
+        totalAlerts: alerts?.length || 0,
         alertsByType: {} as Record<string, number>,
         alertsByDaysOverdue: {} as Record<string, number>,
         successRate: 100 // Simplified - would need to track success/failure
       };
 
       // Analyze alerts
-      alerts.forEach(alert => {
+      if (alerts && Array.isArray(alerts)) {
+        alerts.forEach(alert => {
         // Extract alert type from message content
         const messageContent = alert.message_content || '';
         if (messageContent.includes('email')) {
@@ -560,6 +561,7 @@ export class OverdueAlertsService {
           stats.alertsByDaysOverdue[bucket] = (stats.alertsByDaysOverdue[bucket] || 0) + 1;
         }
       });
+      }
 
       return stats;
     } catch (error) {

@@ -526,7 +526,15 @@ def consolidate_small_prs(open_prs: List[Dict], config: Dict, repo_path: pathlib
         return 0
     
     max_open_prs = config.get("pr_settings", {}).get("max_open_prs", 10)
-    if len(open_prs) <= max_open_prs:
+    # Consolidate if we have max_open_prs or more (not just more than)
+    # This ensures we keep the count at or below max_open_prs
+    if len(open_prs) < max_open_prs:
+        logger.debug(
+            f"PR count ({len(open_prs)}) is below limit ({max_open_prs}), no consolidation needed",
+            operation="consolidate_small_prs",
+            pr_count=len(open_prs),
+            max_open_prs=max_open_prs
+        )
         return 0
     
     # Get file counts for each PR
@@ -582,12 +590,27 @@ def consolidate_small_prs(open_prs: List[Dict], config: Dict, repo_path: pathlib
     min_files = config.get("change_threshold", {}).get("min_files", 10)
     small_prs_to_close = [(num, count, changes, pr) for num, count, changes, pr in pr_file_counts if count < min_files]
     
+    # Calculate how many PRs to close to get under the limit
+    # If we're at or over the limit, close at least 1 to get under it
+    prs_to_close_count = max(1, len(open_prs) - max_open_prs + 1)
+    
     # If we have small PRs, close those first
     if small_prs_to_close:
-        to_close = small_prs_to_close[:len(open_prs) - max_open_prs]
+        to_close = small_prs_to_close[:prs_to_close_count]
     else:
         # If no small PRs, close the smallest ones overall
-        to_close = pr_file_counts[:len(open_prs) - max_open_prs]
+        # For PRs with 100 files (API limit), use total_changes to determine smallest
+        to_close = pr_file_counts[:prs_to_close_count]
+        
+        # If all PRs have 100 files (API limit), we still need to close some
+        # The sorting by (file_count, total_changes) should already handle this
+        if all(count >= 100 for _, count, _, _ in pr_file_counts):
+            logger.info(
+                f"All PRs appear to have 100+ files (API limit), closing smallest by change count",
+                operation="consolidate_small_prs",
+                pr_count=len(pr_file_counts),
+                to_close_count=len(to_close)
+            )
     
     closed_count = 0
     for pr_number, file_count, total_changes, pr in to_close:
