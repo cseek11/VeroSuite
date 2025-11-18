@@ -68,8 +68,17 @@ import type {
   UserKpi
 } from '@/types/kpi-templates';
 import type {
-  TechnicianProfile
+  TechnicianProfile,
+  TechnicianAvailabilityPattern,
+  TechnicianAvailabilitySchedule,
+  TechnicianAvailabilityResponse,
+  TechnicianListApiResponse
 } from '@/types/technician';
+import type {
+  AuthError,
+  ApiError,
+  ApiErrorResponse
+} from '@/types/enhanced-types';
 
 
 
@@ -215,12 +224,12 @@ const getAuthToken = async (): Promise<string> => {
     }
     
     // If no token found, throw a more specific error
-    const error = new Error('No authentication token found. Please log in again.');
-    (error as any).isAuthError = true;
+    const error = new Error('No authentication token found. Please log in again.') as AuthError;
+    error.isAuthError = true;
     throw error;
   } catch (error: unknown) {
     const traceContext = getOrCreateTraceContext();
-    if ((error as any)?.isAuthError) {
+    if (error && typeof error === 'object' && 'isAuthError' in error && (error as AuthError).isAuthError) {
       logger.warn(
         'No auth token available - user may not be logged in',
         {},
@@ -293,17 +302,19 @@ const _validateTenantAccess = async (claimedTenantId: string): Promise<boolean> 
 
 const handleApiError = (error: unknown, context: string) => {
   let errorMessage = 'Unknown error';
-  let errorDetails: any = null;
+  let errorDetails: ApiErrorResponse | null = null;
 
   if (error && typeof error === 'object') {
     if ('response' in error) {
-      const response = (error as any).response;
-      errorMessage = response.statusText || `HTTP ${response.status}`;
-      // Try to extract error details if available
-      if (response._bodyInit) {
-        try {
-          const errorBody = JSON.parse(response._bodyInit);
-          errorDetails = errorBody;
+      const apiError = error as ApiError;
+      const response = apiError.response;
+      if (response) {
+        errorMessage = response.statusText || `HTTP ${response.status || 'Unknown'}`;
+        // Try to extract error details if available
+        if (response._bodyInit) {
+          try {
+            const errorBody = JSON.parse(response._bodyInit) as ApiErrorResponse;
+            errorDetails = errorBody;
           if (errorBody.message) {
             if (Array.isArray(errorBody.message)) {
               errorMessage = errorBody.message.join(', ');
@@ -313,32 +324,38 @@ const handleApiError = (error: unknown, context: string) => {
           } else if (errorBody.error) {
             errorMessage = errorBody.error;
           }
-        } catch {
-          // If parsing fails, use status text
+          } catch {
+            // If parsing fails, use status text
+          }
         }
       }
-    } else if ('message' in error) {
-      errorMessage = (error as any).message;
+    } else if ('message' in error && error instanceof Error) {
+      errorMessage = error.message;
     }
   } else if (error instanceof Error) {
     errorMessage = error.message;
     // Check if error has validation details from api-utils
-    if ((error as any).details) {
-      if (Array.isArray((error as any).details)) {
-        errorDetails = (error as any).details;
-        errorMessage = `${errorMessage}\n${errorDetails.join('\n')}`;
-      } else if (typeof (error as any).details === 'object' && (error as any).details.errors) {
+    if ('details' in error && error.details) {
+      const errorWithDetails = error as Error & { details: unknown };
+      if (Array.isArray(errorWithDetails.details)) {
+        errorDetails = { message: errorWithDetails.details as string[] };
+        errorMessage = `${errorMessage}\n${(errorDetails.message as string[]).join('\n')}`;
+      } else if (typeof errorWithDetails.details === 'object' && errorWithDetails.details !== null) {
+        const detailsObj = errorWithDetails.details as Record<string, unknown>;
         // NestJS ValidationPipe format nested in details
-        errorDetails = (error as any).details.errors;
-        errorMessage = (error as any).details.message || errorMessage;
+        if ('errors' in detailsObj) {
+          errorDetails = { message: Array.isArray(detailsObj.errors) ? detailsObj.errors as string[] : [String(detailsObj.errors)] };
+          errorMessage = (typeof detailsObj.message === 'string' ? detailsObj.message : errorMessage);
+        }
       }
     }
     // Check if error has response data attached
-    if ((error as any).response?.data) {
-      const responseData = (error as any).response.data;
+    const apiError = error as ApiError;
+    if (apiError.response && 'data' in apiError.response) {
+      const responseData = apiError.response.data as Record<string, unknown>;
       if (responseData.errors && Array.isArray(responseData.errors)) {
-        errorDetails = responseData.errors;
-        errorMessage = responseData.message || errorMessage;
+        errorDetails = { message: responseData.errors as string[] };
+        errorMessage = (typeof responseData.message === 'string' ? responseData.message : errorMessage);
       } else if (responseData.message) {
         errorMessage = Array.isArray(responseData.message) 
           ? responseData.message.join(', ')
@@ -3960,7 +3977,7 @@ const technicians = {
         logger.debug('Fetching technicians', { url, baseUrl }, 'enhanced-api');
       }
       
-      const response = await enhancedApiCall<{ data: any; meta: any }>(url, {
+      const response = await enhancedApiCall<TechnicianListApiResponse | TechnicianProfile[]>(url, {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       
@@ -3973,36 +3990,37 @@ const technicians = {
       // TechnicianListResponseDto has structure: { data: [...], pagination: {...}, success: true, ... }
       // So final response is: { data: { data: [...], pagination: {...}, ... }, meta: {...} }
       
+      // If response is already an array, return it
+      if (Array.isArray(response)) {
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('Response is direct array', { count: response.length }, 'enhanced-api');
+        }
+        return response;
+      }
+      
       // Check if response.data.data exists (double-nested structure from controller wrapping DTO)
-      if (response && response.data && response.data.data && Array.isArray(response.data.data)) {
+      if (response && typeof response === 'object' && 'data' in response && response.data && typeof response.data === 'object' && 'data' in response.data && Array.isArray(response.data.data)) {
         if (process.env.NODE_ENV === 'development') {
           logger.debug('Extracted technicians from response.data.data (controller-wrapped DTO)', { count: response.data.data.length }, 'enhanced-api');
         }
         return response.data.data;
       }
       // Check if response.data.technicians exists (alternative nested structure)
-      else if (response && response.data && response.data.technicians && Array.isArray(response.data.technicians)) {
+      else if (response && typeof response === 'object' && 'data' in response && response.data && typeof response.data === 'object' && 'technicians' in response.data && Array.isArray(response.data.technicians)) {
         if (process.env.NODE_ENV === 'development') {
           logger.debug('Extracted technicians from response.data.technicians', { count: response.data.technicians.length }, 'enhanced-api');
         }
         return response.data.technicians;
       }
       // Check if response.data is a direct array
-      else if (response && response.data && Array.isArray(response.data)) {
+      else if (response && typeof response === 'object' && 'data' in response && Array.isArray(response.data)) {
         if (process.env.NODE_ENV === 'development') {
           logger.debug('Extracted technicians from response.data (direct array)', { count: response.data.length }, 'enhanced-api');
         }
         return response.data;
       }
-      // Check if response is a direct array
-      else if (Array.isArray(response)) {
-        if (process.env.NODE_ENV === 'development') {
-          logger.debug('Response is direct array', { count: response.length }, 'enhanced-api');
-        }
-        return response;
-      }
       // Check if response.technicians exists (alternative format)
-      else if (response && response.technicians && Array.isArray(response.technicians)) {
+      else if (response && typeof response === 'object' && 'technicians' in response && Array.isArray(response.technicians)) {
         if (process.env.NODE_ENV === 'development') {
           logger.debug('Extracted technicians from response.technicians', { count: response.technicians.length }, 'enhanced-api');
         }
@@ -4021,7 +4039,7 @@ const technicians = {
   },
 
   // Get technician availability
-  getAvailability: async (technicianId: string, startDate?: string, endDate?: string): Promise<any> => {
+  getAvailability: async (technicianId: string, startDate?: string, endDate?: string): Promise<TechnicianAvailabilityPattern[] | TechnicianAvailabilitySchedule> => {
     try {
       const token = await getAuthToken();
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
@@ -4029,12 +4047,26 @@ const technicians = {
       if (startDate && endDate) {
         url += `?start_date=${startDate}&end_date=${endDate}`;
       }
-      const response = await enhancedApiCall<{ data: any; meta: any }>(url, {
+      const response = await enhancedApiCall<TechnicianAvailabilityResponse | TechnicianAvailabilityPattern[] | TechnicianAvailabilitySchedule>(url, {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       // Handle v2 response format
-      const data = response?.data || response;
-      return data;
+      if (response && typeof response === 'object' && 'data' in response) {
+        const data = response.data;
+        if (Array.isArray(data)) {
+          return data;
+        } else if (typeof data === 'object' && 'patterns' in data) {
+          return data as TechnicianAvailabilitySchedule;
+        }
+      }
+      // If response is direct array or schedule
+      if (Array.isArray(response)) {
+        return response;
+      } else if (response && typeof response === 'object' && 'patterns' in response) {
+        return response as TechnicianAvailabilitySchedule;
+      }
+      // Fallback to empty array
+      return [];
     } catch (error) {
       handleApiError(error, 'get technician availability');
       throw error;
@@ -4048,12 +4080,12 @@ const technicians = {
     startTime: string,
     endTime: string,
     isActive: boolean = true
-  ): Promise<any> => {
+  ): Promise<TechnicianAvailabilityPattern> => {
     try {
       const token = await getAuthToken();
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
       const url = `${baseUrl}/v2/technicians/${technicianId}/availability`;
-      const response = await enhancedApiCall<{ data: any; meta: any }>(url, {
+      const response = await enhancedApiCall<TechnicianAvailabilityResponse | TechnicianAvailabilityPattern>(url, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -4064,7 +4096,26 @@ const technicians = {
         })
       });
       // Handle v2 response format
-      return response?.data || response;
+      if (response && typeof response === 'object' && 'data' in response) {
+        const data = response.data;
+        if (Array.isArray(data) && data.length > 0) {
+          return data[0];
+        } else if (typeof data === 'object' && 'day_of_week' in data) {
+          return data as TechnicianAvailabilityPattern;
+        }
+      }
+      // If response is direct pattern object
+      if (response && typeof response === 'object' && 'day_of_week' in response) {
+        return response as TechnicianAvailabilityPattern;
+      }
+      // Fallback: create pattern from input
+      return {
+        technician_id: technicianId,
+        day_of_week: dayOfWeek,
+        start_time: startTime,
+        end_time: endTime,
+        is_active: isActive
+      };
     } catch (error) {
       handleApiError(error, 'set technician availability');
       throw error;
