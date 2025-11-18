@@ -8,6 +8,7 @@ import ExpandableActivityFABSystem from './ExpandableActivityFABSystem';
 import { PageCardProvider } from '@/contexts/PageCardContext';
 import { usePageCards } from '@/routes/dashboard/hooks/usePageCards';
 import PageCardWrapper from '@/components/dashboard/PageCardWrapper';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
 
 interface V4LayoutProps {
   children: React.ReactNode;
@@ -66,7 +67,12 @@ function V4LayoutContent({ children, pageCards = [], updatePageCard, closePageCa
         {/* Secondary Navigation Bar */}
         <SecondaryNavigationBar />
 
-                 {/* Main Workspace */}
+        {/* Breadcrumbs */}
+        <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200/50 px-6 py-3">
+          <Breadcrumbs className="max-w-7xl mx-auto" />
+        </div>
+
+        {/* Main Workspace */}
         <div className="flex-1 flex min-w-0 overflow-hidden relative">
           {/* Main Content */}
           <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
