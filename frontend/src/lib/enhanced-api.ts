@@ -7,6 +7,7 @@
 import { supabase } from './supabase-client';
 import { enhancedApiCall } from './api-utils';
 import { logger } from '@/utils/logger';
+import { getOrCreateTraceContext } from './trace-propagation';
 import type { 
   Account, 
   CustomerProfile, 
@@ -99,8 +100,25 @@ const getTenantId = async (): Promise<string> => {
     return '7193113e-ece2-4f7b-ae8c-176df4367e28'; // Default tenant ID
     
   } catch (error: unknown) {
-    logger.error('Error resolving tenant ID', error, 'enhanced-api');
-    logger.debug('Using fallback tenant ID due to error', {}, 'enhanced-api');
+    const traceContext = getOrCreateTraceContext();
+    logger.error(
+      'Error resolving tenant ID',
+      error,
+      'enhanced-api',
+      'getTenantId',
+      traceContext.traceId,
+      traceContext.spanId,
+      traceContext.requestId
+    );
+    logger.debug(
+      'Using fallback tenant ID due to error',
+      {},
+      'enhanced-api',
+      'getTenantId',
+      traceContext.traceId,
+      traceContext.spanId,
+      traceContext.requestId
+    );
     return '7193113e-ece2-4f7b-ae8c-176df4367e28'; // Default tenant ID
   }
 };
@@ -127,8 +145,25 @@ const getUserId = async (): Promise<string> => {
     
     throw new Error('No authenticated user found');
   } catch (error: unknown) {
-    logger.error('Error getting user ID', error, 'enhanced-api');
-    logger.debug('Using fallback user ID due to error', {}, 'enhanced-api');
+    const traceContext = getOrCreateTraceContext();
+    logger.error(
+      'Error getting user ID',
+      error,
+      'enhanced-api',
+      'getUserId',
+      traceContext.traceId,
+      traceContext.spanId,
+      traceContext.requestId
+    );
+    logger.debug(
+      'Using fallback user ID due to error',
+      {},
+      'enhanced-api',
+      'getUserId',
+      traceContext.traceId,
+      traceContext.spanId,
+      traceContext.requestId
+    );
     return '85b4bc59-650a-4fdf-beac-1dd2ba3066f4'; // Default user ID for development
   }
 };
@@ -184,11 +219,28 @@ const getAuthToken = async (): Promise<string> => {
     (error as any).isAuthError = true;
     throw error;
   } catch (error: unknown) {
+    const traceContext = getOrCreateTraceContext();
     if ((error as any)?.isAuthError) {
-      logger.warn('No auth token available - user may not be logged in', {}, 'enhanced-api');
+      logger.warn(
+        'No auth token available - user may not be logged in',
+        {},
+        'enhanced-api',
+        'getAuthToken',
+        traceContext.traceId,
+        traceContext.spanId,
+        traceContext.requestId
+      );
       throw error;
     }
-    logger.error('Error getting auth token', error, 'enhanced-api');
+    logger.error(
+      'Error getting auth token',
+      error,
+      'enhanced-api',
+      'getAuthToken',
+      traceContext.traceId,
+      traceContext.spanId,
+      traceContext.requestId
+    );
     throw new Error('Authentication required. Please log in again.');
   }
 };
@@ -210,13 +262,31 @@ const _validateTenantAccess = async (claimedTenantId: string): Promise<boolean> 
       });
     
     if (validationError) {
-      logger.error('Tenant validation failed', new Error(validationError.message), 'enhanced-api');
+      const traceContext = getOrCreateTraceContext();
+      logger.error(
+        'Tenant validation failed',
+        new Error(validationError.message),
+        'enhanced-api',
+        '_validateTenantAccess',
+        traceContext.traceId,
+        traceContext.spanId,
+        traceContext.requestId
+      );
       return false;
     }
     
     return validationResult === true;
   } catch (error: unknown) {
-    logger.error('Error validating tenant access', error, 'enhanced-api');
+    const traceContext = getOrCreateTraceContext();
+    logger.error(
+      'Error validating tenant access',
+      error,
+      'enhanced-api',
+      '_validateTenantAccess',
+      traceContext.traceId,
+      traceContext.spanId,
+      traceContext.requestId
+    );
     return false;
   }
 };
@@ -283,13 +353,22 @@ const handleApiError = (error: unknown, context: string) => {
     fullMessage = `${errorMessage}\n\nValidation errors:\n${errorDetails.map((e, i) => `  ${i + 1}. ${e}`).join('\n')}`;
   }
 
-  logger.error(`API Error in ${context}`, { 
-    error, 
-    details: errorDetails, 
-    message: errorMessage,
-    fullMessage,
-    responseData: error?.response?.data 
-  }, 'enhanced-api');
+  const traceContext = getOrCreateTraceContext();
+  logger.error(
+    `API Error in ${context}`,
+    { 
+      error, 
+      details: errorDetails, 
+      message: errorMessage,
+      fullMessage,
+      responseData: error?.response?.data 
+    },
+    'enhanced-api',
+    context,
+    traceContext.traceId,
+    traceContext.spanId,
+    traceContext.requestId
+  );
   
   // Create error with validation details if available
   const finalError = new Error(`Failed to ${context}: ${fullMessage}`);
