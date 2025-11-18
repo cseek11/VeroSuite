@@ -51,7 +51,23 @@ async function loadMetrics() {
             throw new Error(`Failed to load metrics: ${response.statusText}`);
         }
         
-        const data = await response.json();
+        // Get response text first to check for issues
+        const text = await response.text();
+        
+        // Check for merge conflict markers
+        if (text.includes('<<<<<<<') || text.includes('=======') || text.includes('>>>>>>>')) {
+            throw new Error('JSON file contains merge conflict markers. Please resolve conflicts in the repository.');
+        }
+        
+        // Parse JSON
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (parseError) {
+            console.error('JSON parse error at position:', parseError.message);
+            console.error('First 200 chars of response:', text.substring(0, 200));
+            throw new Error(`Invalid JSON: ${parseError.message}. Check console for details.`);
+        }
         
         // Show data source indicator
         if (usingGitHub) {
