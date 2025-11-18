@@ -15,6 +15,7 @@ export { default as PaymentTracking } from './PaymentTracking';
 export { default as PaymentDashboard } from './PaymentDashboard';
 export { default as OverdueAlerts } from './OverdueAlerts';
 export { default as ReconciliationTools } from './ReconciliationTools';
+export { default as ReportExport } from './ReportExport';
 export { default as PLReport } from './PLReport';
 export { default as ARAgingReport } from './ARAgingReport';
 export { default as PaymentMethodSelector } from './PaymentMethodSelector';

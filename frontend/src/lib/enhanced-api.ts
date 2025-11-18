@@ -2698,6 +2698,83 @@ export const billing = {
     }
   },
 
+  // Financial Reports
+  getPLReport: async (startDate: string, endDate: string): Promise<any> => {
+    try {
+      const authData = localStorage.getItem('verofield_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const params = new URLSearchParams();
+      params.append('startDate', startDate);
+      params.append('endDate', endDate);
+
+      const response = await fetch(`http://localhost:3001/api/v1/billing/reports/pl?${params.toString()}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get P&L report: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'get P&L report');
+      throw error;
+    }
+  },
+
+  getARAgingReport: async (asOfDate?: string): Promise<any> => {
+    try {
+      const authData = localStorage.getItem('verofield_auth');
+      if (!authData) throw new Error('User not authenticated');
+
+      let token;
+      try {
+        const parsed = JSON.parse(authData);
+        token = parsed.token || parsed;
+      } catch {
+        token = authData;
+      }
+
+      if (!token) throw new Error('No access token found');
+
+      const params = new URLSearchParams();
+      if (asOfDate) {
+        params.append('asOfDate', asOfDate);
+      }
+
+      const url = `http://localhost:3001/api/v1/billing/reports/ar-aging${params.toString() ? `?${params.toString()}` : ''}`;
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get AR aging report: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleApiError(error, 'get AR aging report');
+      throw error;
+    }
+  },
+
   retryFailedPayment: async (invoiceId: string): Promise<Payment> => {
     try {
       const authData = localStorage.getItem('verofield_auth');

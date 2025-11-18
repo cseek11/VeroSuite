@@ -23,6 +23,7 @@ import { BillingService } from './billing.service';
 import { InvoicePdfService } from './invoice-pdf.service';
 import { OverdueAlertsService } from './overdue-alerts.service';
 import { FinancialReportsService } from './financial-reports.service';
+import { ReportAutomationService, ReportSchedule } from './report-automation.service';
 import { StructuredLoggerService } from '../common/services/logger.service';
 import { 
   CreateInvoiceDto, 
@@ -46,6 +47,7 @@ export class BillingController {
     private readonly invoicePdfService: InvoicePdfService,
     private readonly overdueAlertsService: OverdueAlertsService,
     private readonly financialReportsService: FinancialReportsService,
+    private readonly reportAutomationService: ReportAutomationService,
     private readonly structuredLogger: StructuredLoggerService,
   ) {}
 
@@ -570,6 +572,110 @@ export class BillingController {
       asOfDate,
       requestId
     );
+  }
+
+  // ============================================================================
+  // REPORT AUTOMATION ENDPOINTS
+  // ============================================================================
+
+  @Post('report-schedules')
+  @ApiOperation({ summary: 'Create a new report schedule' })
+  @ApiResponse({ status: 201, description: 'Report schedule created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async createReportSchedule(
+    @Request() req: any,
+    @Body() scheduleDto: Omit<ReportSchedule, 'id' | 'tenantId' | 'lastRunDate' | 'nextRunDate'>
+  ) {
+    // Extract trace context from request headers if available
+    const requestId = req.headers['x-request-id'] || req.id || undefined;
+    const traceId = req.headers['x-trace-id'] || undefined;
+    const spanId = req.headers['x-span-id'] || undefined;
+
+    // Set request context for structured logging
+    if (requestId) {
+      this.structuredLogger.setRequestContext(requestId, {
+        traceId,
+        spanId,
+        requestId,
+        userId: req.user?.userId,
+        tenantId: req.user?.tenantId,
+        operation: 'createReportSchedule',
+      });
+    }
+
+    const schedule: ReportSchedule = {
+      ...scheduleDto,
+      tenantId: req.user.tenantId,
+    };
+
+    return this.reportAutomationService.createReportSchedule(schedule, requestId);
+  }
+
+  @Get('report-schedules')
+  @ApiOperation({ summary: 'Get all report schedules for the tenant' })
+  @ApiResponse({ status: 200, description: 'Report schedules retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getReportSchedules(@Request() req: any) {
+    // Extract trace context from request headers if available
+    const requestId = req.headers['x-request-id'] || req.id || undefined;
+    const traceId = req.headers['x-trace-id'] || undefined;
+    const spanId = req.headers['x-span-id'] || undefined;
+
+    // Set request context for structured logging
+    if (requestId) {
+      this.structuredLogger.setRequestContext(requestId, {
+        traceId,
+        spanId,
+        requestId,
+        userId: req.user?.userId,
+        tenantId: req.user?.tenantId,
+        operation: 'getReportSchedules',
+      });
+    }
+
+    return this.reportAutomationService.getReportSchedules(req.user.tenantId, requestId);
+  }
+
+  @Post('report-schedules/:id/run')
+  @ApiOperation({ summary: 'Manually trigger a report schedule' })
+  @ApiResponse({ status: 200, description: 'Report generated and sent successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async runReportSchedule(
+    @Request() req: any,
+    @Param('id') scheduleId: string
+  ) {
+    // Extract trace context from request headers if available
+    const requestId = req.headers['x-request-id'] || req.id || undefined;
+    const traceId = req.headers['x-trace-id'] || undefined;
+    const spanId = req.headers['x-span-id'] || undefined;
+
+    // Set request context for structured logging
+    if (requestId) {
+      this.structuredLogger.setRequestContext(requestId, {
+        traceId,
+        spanId,
+        requestId,
+        userId: req.user?.userId,
+        tenantId: req.user?.tenantId,
+        operation: 'runReportSchedule',
+      });
+    }
+
+    // In production, would fetch schedule from database
+    // For now, create a temporary schedule for demonstration
+    const schedule: ReportSchedule = {
+      id: scheduleId,
+      tenantId: req.user.tenantId,
+      reportType: 'pl', // Default, would come from database
+      frequency: 'monthly',
+      recipients: [],
+      format: 'csv',
+      enabled: true,
+    };
+
+    return this.reportAutomationService.generateAndSendReport(schedule, requestId);
   }
 
     // ============================================================================
