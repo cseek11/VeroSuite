@@ -7,6 +7,8 @@ Reads reward.json artifacts and aggregates metrics for dashboard visualization.
 
 import argparse
 import json
+import os
+import sys
 import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -314,15 +316,22 @@ def main() -> None:
     parser.add_argument("--metadata", help="Path to metadata JSON (optional)")
     parser.add_argument("--reward-json", help="Path to reward.json artifact (contains score, breakdown, metadata, file_scores)")
     parser.add_argument("--reward-file", help="Path to reward.json artifact (alias for --reward-json)")
-    parser.add_argument("--output", required=True, help="Path to output metrics file")
+    parser.add_argument("--output", required=False, help="Path to output metrics file (defaults to docs/metrics/reward_scores.json)")
     parser.add_argument("--aggregate-only", action="store_true", help="Only recalculate aggregates")
     args = parser.parse_args()
     
     # Determine reward file to use (prefer --reward-file over --reward-json for backward compatibility)
     reward_file = args.reward_file or args.reward_json
     
+    # Determine output path (use provided --output or default to METRICS_FILE)
+    output_path = Path(args.output) if args.output else METRICS_FILE
+    
+    # Validate: reward_file is required unless --aggregate-only
+    if not args.aggregate_only and not reward_file:
+        logger.error("--reward-file (or --reward-json) is required unless --aggregate-only is specified", operation="main")
+        sys.exit(1)
+    
     # Load existing metrics from output path if it exists
-    output_path = Path(args.output)
     metrics = load_metrics(output_path) if output_path.exists() else load_metrics()
     
     # Add new score entry if provided
