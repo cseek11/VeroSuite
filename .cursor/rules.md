@@ -425,6 +425,11 @@ Show me each step as you complete it."
 - ❌ Workflow artifacts with inconsistent naming (not using standard names: reward, frontend-coverage, backend-coverage)
 - ❌ PR changes that will result in negative REWARD_SCORE without addressing issues
 - ❌ Metrics collection not configured for new workflows
+- ❌ Auto-PR system creating too many small PRs (not consolidating)
+- ❌ Auto-PR daemon not running (PRs not created automatically)
+- ❌ Workflow triggers requiring CI success (should run even if CI fails)
+- ❌ Consolidation logic closing large PRs instead of small ones
+- ❌ Files not filtered before PR creation (duplicate files in multiple PRs)
 
 **When you see a red flag, ask:**
 
@@ -579,8 +584,70 @@ Show me the compliance report."
 12. **Check REWARD_SCORE:** Before submitting PRs, explicitly verify expected score using `.cursor/reward_rubric.yaml`
 13. **Verify Artifacts:** For every workflow, explicitly verify artifact names match standard conventions
 14. **Check Metrics:** For every PR, explicitly verify metrics collection will work correctly
+15. **Verify Auto-PR System:** For Auto-PR changes, explicitly verify daemon status, consolidation logic, and self-healing features
+16. **Check Workflow Resilience:** For workflow changes, explicitly verify triggers work even if CI fails
+17. **Verify Dashboard Setup:** For dashboard changes, explicitly verify local setup instructions are documented
 
-### 10. Reference Documentation
+### 10. Auto-PR System Compliance
+
+**For Auto-PR system changes, always verify:**
+
+```
+"Please verify Auto-PR system compliance:
+- Is the daemon running? (Check .cursor/cache/auto_pr_daemon.pid or run check_auto_pr_status.ps1)
+- Are consolidation checks implemented? (Checks for existing open PRs before creating new ones)
+- Is self-healing enabled? (Automatically consolidates when > max_open_prs)
+- Are files filtered correctly? (Excludes files already in open PRs)
+- Is consolidation logic correct? (Closes smallest PRs first, uses additions/deletions for large PRs)
+- Are workflow triggers resilient? (Runs even if CI fails)
+- Show me the consolidation logic and PR creation flow"
+```
+
+**For Auto-PR daemon setup:**
+
+```
+"Please verify Auto-PR daemon setup:
+- Is daemon configured to start automatically? (Windows Task Scheduler or systemd)
+- Are PowerShell scripts working? (start_auto_pr_daemon.ps1, stop_auto_pr_daemon.ps1, check_auto_pr_status.ps1)
+- Is daemon checking at correct interval? (Default: 300 seconds / 5 minutes)
+- Are thresholds configured correctly? (min_files: 10, min_lines: 500, max_open_prs: 10)
+- Show me the daemon status and configuration"
+```
+
+**For Auto-PR consolidation verification:**
+
+```
+"Please verify Auto-PR consolidation:
+- Does system check for existing open PRs before creating new ones?
+- Are files already in open PRs filtered out?
+- Does consolidation run automatically when > max_open_prs?
+- Are small PRs closed first? (Uses file count and additions/deletions)
+- Is consolidation script available? (.cursor/scripts/auto_consolidate_prs.py)
+- Show me the consolidation logic and recent consolidation activity"
+```
+
+**For workflow trigger resilience:**
+
+```
+"Please verify workflow trigger resilience:
+- Does reward score workflow run even if CI fails? (Check if condition allows workflow_run without success requirement)
+- Are workflow conditions correct? (Should check event type, not just conclusion)
+- Will workflows trigger for Auto-PRs? (PR events should trigger regardless of CI status)
+- Show me the workflow trigger conditions"
+```
+
+**For dashboard setup and local use:**
+
+```
+"Please verify dashboard setup:
+- Is dashboard setup documented? (docs/metrics/README.md)
+- Are local setup instructions clear? (Python http.server, Node.js http-server, PowerShell serve.ps1)
+- Is Chart.js setup documented? (download-chartjs.ps1 script)
+- Are troubleshooting steps included? (CORS errors, Chart.js loading, no data showing)
+- Show me the dashboard setup documentation"
+```
+
+### 11. Reference Documentation
 
 For detailed compliance guidance, see:
 - `.cursor/rules/enforcement.md` - Complete mandatory workflow checklist
@@ -589,6 +656,8 @@ For detailed compliance guidance, see:
 - `docs/pattern-learning.md` - Pattern documentation requirements
 - `docs/predictive-prevention.md` - Regression test requirements
 - `docs/observability.md` - Structured logging requirements
+- `README_AUTO_PR_SETUP.md` - Auto-PR daemon setup guide
+- `AUTO_PR_FIXES_SUMMARY.md` - Recent Auto-PR system fixes
 
 ---
 
