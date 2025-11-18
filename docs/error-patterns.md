@@ -792,7 +792,89 @@ it('should handle job update errors gracefully', async () => {
 
 ---
 
-**Last Updated:** 2025-11-17
+## FRONTEND_TEST_EXPANSION_PATTERN - 2025-11-18
+
+### Summary
+Frontend test coverage was expanded systematically to improve reliability and prevent regressions. Test expansion followed a structured approach focusing on edge cases, error scenarios, accessibility, and performance.
+
+### Root Cause
+- Existing tests covered happy paths but lacked edge case coverage
+- Error scenarios were not comprehensively tested
+- Accessibility features were not verified
+- Performance with large datasets was not tested
+- Test coverage was below target (estimated ~10%)
+
+### Triggering Conditions
+- Need to improve test coverage to 80%+
+- Requirement to prevent regressions
+- Need to verify error handling works correctly
+- Need to ensure accessibility compliance
+- Need to verify performance with large datasets
+
+### Relevant Code/Modules
+- `frontend/src/components/work-orders/__tests__/WorkOrderForm.test.tsx` - Expanded from 22 to 52+ tests
+- `frontend/src/components/ui/__tests__/CustomerSearchSelector.test.tsx` - Expanded from 18 to 43+ tests
+- `frontend/src/components/billing/__tests__/InvoiceGenerator.test.tsx` - Added 5 edge case tests
+- `frontend/src/components/billing/__tests__/InvoiceTemplates.test.tsx` - Added 3 edge case tests
+- `frontend/src/components/billing/__tests__/InvoiceScheduler.test.tsx` - Added 4 edge case tests
+- `frontend/src/components/billing/__tests__/PaymentForm.test.tsx` - Added 5 error scenario tests
+- `frontend/src/components/scheduling/__tests__/ResourceTimeline.test.tsx` - Added 6 edge case tests
+
+### How It Was Fixed
+1. **Systematic Test Expansion:** Expanded existing test files rather than creating new ones
+2. **Edge Case Coverage:** Added tests for null/undefined values, invalid data formats, boundary conditions
+3. **Error Scenario Testing:** Added tests for network timeouts, API failures, retry logic, error recovery
+4. **Accessibility Testing:** Added tests for ARIA labels, keyboard navigation, screen reader support
+5. **Performance Testing:** Added tests for large datasets (1000+ items), rapid user interactions, concurrent operations
+6. **Integration Testing:** Maintained existing integration tests while expanding unit tests
+
+**Example Test Expansion:**
+```typescript
+// ✅ CORRECT: Comprehensive edge case testing
+describe('Customer Search Integration Edge Cases', () => {
+  it('should handle customer selection with null customer object', async () => {
+    // Test null handling
+  });
+
+  it('should handle customer search error during selection', async () => {
+    // Test error handling
+  });
+
+  it('should handle rapid customer selection changes', async () => {
+    // Test performance with rapid changes
+  });
+});
+
+describe('Accessibility', () => {
+  it('should have proper ARIA labels', () => {
+    // Test accessibility
+  });
+
+  it('should support keyboard navigation', async () => {
+    // Test keyboard support
+  });
+});
+```
+
+### How to Prevent It in the Future
+- **EXPAND** existing tests rather than creating new test files when possible
+- **TEST** edge cases systematically (null, undefined, invalid data, boundary conditions)
+- **TEST** error scenarios (network failures, timeouts, retry logic)
+- **TEST** accessibility features (ARIA labels, keyboard navigation, screen readers)
+- **TEST** performance with large datasets and rapid interactions
+- **MAINTAIN** test coverage above 80% for new code
+- **REVIEW** test coverage during code review
+- **DOCUMENT** test expansion patterns for future reference
+
+### Similar Historical Issues
+- Missing edge case coverage in tests
+- Incomplete error scenario testing
+- Lack of accessibility verification
+- Performance not tested with large datasets
+
+---
+
+**Last Updated:** 2025-11-18
 
 ---
 
@@ -919,6 +1001,280 @@ Reminder history retrieval fails due to database query errors or tenant isolatio
 - Add query timeout handling
 - Monitor query performance via metrics
 - Add caching for frequently accessed data
+
+---
+
+## TYPESCRIPT_ANY_TYPE_REMOVAL - 2025-11-17
+
+### Summary
+TypeScript `any` types were used throughout `enhanced-api.ts` and component props, reducing type safety and making the codebase prone to runtime errors. This pattern was systematically removed and replaced with proper TypeScript types.
+
+### Root Cause
+- TypeScript `any` types bypass type checking
+- Missing proper type definitions for API responses
+- Function parameters and return types not properly typed
+- Type assertions using `as any` to bypass type checking
+- Lack of comprehensive type definitions in `enhanced-types.ts`
+
+### Triggering Conditions
+- Function receives `any` type parameter
+- Function returns `any` type
+- Type assertion uses `as any`
+- Missing type definitions for data structures
+- API response types not defined
+
+### Relevant Code/Modules
+- `frontend/src/lib/enhanced-api.ts` - Fixed 30+ functions with `any` types
+- `frontend/src/types/enhanced-types.ts` - Added 20+ new type definitions
+- `frontend/src/types/kpi-templates.ts` - Added `UserKpi` interface
+- `frontend/src/types/technician.ts` - Added `TechnicianProfile` interface
+- `frontend/src/components/layout/V4Layout.tsx` - Fixed `any[]` and `any` prop types
+
+### How It Was Fixed
+1. **Identified all `any` types:** Used grep to find all occurrences of `any` in function signatures
+2. **Created type definitions:** Added missing interfaces to `enhanced-types.ts`, `kpi-templates.ts`, `technician.ts`
+3. **Updated function signatures:** Replaced `any` with proper types in 30+ functions
+4. **Fixed type assertions:** Replaced `(data as any)` with proper type guards
+5. **Updated component props:** Replaced `any[]` with `PageCard[]` and `any` with `Partial<PageCard>`
+
+**Example Fixes:**
+```typescript
+// ❌ WRONG: Using any
+async getRoutes(date?: string): Promise<any> {
+  const data = await enhancedApiCall<any>(url, {...});
+  return data || [];
+}
+
+// ✅ CORRECT: Using proper types
+async getRoutes(date?: string): Promise<Route[]> {
+  const data = await enhancedApiCall<Route[]>(url, {...});
+  return data || [];
+}
+```
+
+```typescript
+// ❌ WRONG: Component props with any
+interface V4LayoutContentProps {
+  pageCards?: any[];
+  updatePageCard?: (id: string, updates: any) => void;
+}
+
+// ✅ CORRECT: Properly typed props
+interface V4LayoutContentProps {
+  pageCards?: PageCard[];
+  updatePageCard?: (id: string, updates: Partial<PageCard>) => void;
+}
+```
+
+### How to Prevent It in the Future
+- **NEVER** use `any` type - always use proper types
+- **ALWAYS** define types for API responses
+- **USE** TypeScript strict mode to catch type errors
+- **CREATE** type definitions before implementing functions
+- **AVOID** `as any` type assertions - use proper type guards instead
+- **REVIEW** code for `any` types during code review
+- **USE** `unknown` instead of `any` when type is truly unknown
+
+### Similar Historical Issues
+- TYPESCRIPT_ANY_TYPES - Similar pattern in component event handlers
+- Missing type validation in API calls
+- Type assertion bypassing type safety
+
+---
+
+## API_ERROR_HANDLING_PATTERN - 2025-11-17
+
+### Summary
+API error handling was inconsistent across the codebase, with some errors not being logged with trace propagation and some error handlers not following the structured logging pattern.
+
+### Root Cause
+- Inconsistent error handling patterns across API calls
+- Missing trace propagation in error logs
+- Some errors not using `handleApiError` helper
+- Logger calls missing trace IDs, span IDs, and request IDs
+
+### Triggering Conditions
+- API call fails
+- Error handler doesn't include trace propagation
+- Logger call missing trace context
+- Error not properly structured for observability
+
+### Relevant Code/Modules
+- `frontend/src/lib/enhanced-api.ts` - Updated `handleApiError` and all error logger calls
+- `frontend/src/components/ui/Breadcrumbs.tsx` - Added trace propagation to error logging
+- `frontend/src/utils/logger.ts` - Updated logger signature to support trace propagation
+
+### How It Was Fixed
+1. **Updated logger signature:** Added `traceId`, `spanId`, `requestId` parameters to all logger methods
+2. **Updated `handleApiError`:** Added trace context generation and propagation
+3. **Updated all error logger calls:** Added trace context to all `logger.error()` calls
+4. **Created trace propagation utility:** Used existing `getOrCreateTraceContext()` from `trace-propagation.ts`
+
+**Example Fixes:**
+```typescript
+// ❌ WRONG: Missing trace propagation
+catch (error: unknown) {
+  logger.error('Error resolving tenant ID', error, 'enhanced-api');
+}
+
+// ✅ CORRECT: With trace propagation
+catch (error: unknown) {
+  const traceContext = getOrCreateTraceContext();
+  logger.error(
+    'Error resolving tenant ID',
+    error,
+    'enhanced-api',
+    'getTenantId',
+    traceContext.traceId,
+    traceContext.spanId,
+    traceContext.requestId
+  );
+}
+```
+
+```typescript
+// ❌ WRONG: Logger doesn't support trace IDs
+error(message: string, error?: Error | unknown, context?: string) {
+  console.error(`[${context}] ${message}`, error);
+}
+
+// ✅ CORRECT: Logger supports trace propagation
+error(
+  message: string,
+  error?: Error | unknown,
+  context?: string,
+  operation?: string,
+  traceId?: string,
+  spanId?: string,
+  requestId?: string
+) {
+  const traceInfo = traceId ? ` [traceId: ${traceId}, spanId: ${spanId}, requestId: ${requestId}]` : '';
+  console.error(`[${context}]${traceInfo} ${message}`, error);
+}
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** include trace propagation in error logs
+- **USE** `getOrCreateTraceContext()` before logging errors
+- **FOLLOW** structured logging pattern with trace IDs
+- **UPDATE** logger calls when adding new error handling
+- **REVIEW** error handling during code review
+- **TEST** error handling with trace propagation
+
+### Similar Historical Issues
+- Missing trace propagation in logs
+- Inconsistent error handling patterns
+- Logger signature not matching observability requirements
+
+---
+
+## AUTO_PR_CONSOLIDATION_NOT_RUNNING - 2025-11-18
+
+### Summary
+Auto-PR system was creating too many small PRs (50+) without consolidating them automatically. The consolidation logic existed but wasn't being triggered, and the system didn't check for existing open PRs before creating new ones, leading to duplicate files across multiple PRs.
+
+### Root Cause
+- Consolidation logic existed but only ran manually
+- No automatic check for existing open PRs before creating new ones
+- No file deduplication (files could appear in multiple PRs)
+- Consolidation threshold logic didn't properly identify small PRs (GitHub API limits files to 100)
+- Workflow triggers required CI success, causing workflows to be skipped
+
+### Triggering Conditions
+- Many files changed in working directory
+- Auto-PR daemon running and creating PRs automatically
+- No consolidation checks before PR creation
+- Workflow triggers too restrictive (require CI success)
+
+### Relevant Code/Modules
+- `.cursor/scripts/monitor_changes.py` - Missing consolidation checks before PR creation
+- `.cursor/scripts/auto_consolidate_prs.py` - Existed but not called automatically
+- `.github/workflows/swarm_compute_reward_score.yml` - Workflow condition too restrictive
+
+### How It Was Fixed
+1. **Added automatic consolidation checks:** System now checks for existing open PRs before creating new ones
+2. **Added file filtering:** Filters out files already in open PRs to prevent duplicates
+3. **Improved consolidation logic:** Uses additions/deletions as secondary sort key for PRs with 100+ files
+4. **Fixed workflow triggers:** Removed CI success requirement, workflows now run even if CI fails
+5. **Added self-healing:** Automatic consolidation when > max_open_prs exist
+
+**Example Fixes:**
+```python
+# ✅ GOOD: Check for existing PRs before creating
+open_prs = get_open_auto_prs(repo_path)
+if open_prs:
+    files_in_prs = get_files_in_open_prs(open_prs, repo_path)
+    new_files = {f: d for f, d in files.items() if f not in files_in_prs}
+    if not new_files:
+        return None  # All files already in PRs
+    # Consolidate if too many PRs
+    consolidate_small_prs(open_prs, config, repo_path)
+```
+
+```yaml
+# ✅ GOOD: Workflow runs even if CI fails
+if: github.event_name == 'pull_request' || 
+    github.event_name == 'workflow_dispatch' || 
+    (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request')
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** check for existing open PRs before creating new ones
+- **ALWAYS** filter files already in open PRs
+- **ALWAYS** enable automatic consolidation when > max_open_prs
+- **NEVER** require CI success for workflow triggers (check event type instead)
+- **USE** additions/deletions as secondary sort key for large PRs (GitHub API limit)
+- **VERIFY** consolidation runs automatically, not just manually
+- **TEST** consolidation logic with various PR sizes
+
+### Similar Historical Issues
+- MONITOR_CHANGES_DATETIME_PARSE_FAILURE - Similar pattern with missing automatic checks
+- Workflow trigger issues causing skipped workflows
+
+---
+
+## WORKFLOW_TRIGGER_SKIPPED - 2025-11-18
+
+### Summary
+Reward score workflows were being skipped because they required the CI workflow to complete successfully. When CI failed, the reward score workflow never ran, preventing scores from being computed and metrics from being collected.
+
+### Root Cause
+- Workflow condition required `github.event.workflow_run.conclusion == 'success'`
+- CI workflow was failing, so reward score workflow was skipped
+- No scores computed for PRs when CI failed
+- Metrics not collected, dashboard not updated
+
+### Triggering Conditions
+- CI workflow fails (tests, linting, build errors)
+- Reward score workflow depends on CI success
+- Workflow condition checks conclusion instead of event type
+
+### Relevant Code/Modules
+- `.github/workflows/swarm_compute_reward_score.yml` - Workflow condition too restrictive
+
+### How It Was Fixed
+1. **Removed CI success requirement:** Changed condition to check event type instead of conclusion
+2. **Allow workflow_run even if CI failed:** Workflow now runs if triggered by PR event, regardless of CI status
+
+**Example Fix:**
+```yaml
+# ❌ WRONG: Requires CI success
+if: ... && github.event.workflow_run.conclusion == 'success'
+
+# ✅ CORRECT: Runs if triggered by PR (even if CI failed)
+if: ... && github.event.workflow_run.event == 'pull_request'
+```
+
+### How to Prevent It in the Future
+- **NEVER** require parent workflow success for dependent workflows
+- **ALWAYS** check event type, not conclusion
+- **ALLOW** workflows to run even if parent workflow failed
+- **VERIFY** workflow conditions allow execution in failure scenarios
+- **TEST** workflow triggers with both success and failure cases
+
+### Similar Historical Issues
+- Workflow dependency issues causing cascading failures
+- Missing workflow triggers preventing automation
 
 ---
 
