@@ -1,0 +1,48 @@
+name: Reward Error Aggregation
+
+on:
+  workflow_run:
+    workflows:
+      - "Swarm - Compute Reward Score"
+      - "Update Metrics Dashboard"
+    types: [completed]
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  aggregate-errors:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Aggregate reward system errors
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python .cursor/scripts/aggregate_reward_errors.py
+
+      - name: Commit and push error log
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          if git diff --quiet docs/metrics/reward_error_log.json; then
+            echo "No error log changes"
+            exit 0
+          fi
+          git add docs/metrics/reward_error_log.json
+          git commit -m "chore: update reward error log [skip ci]"
+          git push origin HEAD:main || echo "Push skipped"
+
