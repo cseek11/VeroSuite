@@ -54,3 +54,4 @@ excluded_paths:
 # Included paths (only track these if specified)
 included_paths: []  # Empty = track all (except excluded)
 
+
