@@ -228,6 +228,35 @@ def check_artifact_consistency(
     return violations
 
 
+def check_reward_json_usage(workflow: Dict, file_path: Path) -> List[Dict]:
+    """Ensure collect_metrics.py always uses the --reward-json flag."""
+    violations = []
+    jobs = workflow.get("jobs", {})
+    for job_name, job_config in jobs.items():
+        steps = job_config.get("steps", [])
+        for step in steps:
+            run_cmd = step.get("run")
+            if not isinstance(run_cmd, str):
+                continue
+            if "collect_metrics.py" not in run_cmd:
+                continue
+            if "--reward-json" not in run_cmd:
+                violations.append({
+                    "type": "missing_reward_json_flag",
+                    "file": str(file_path),
+                    "reason": (
+                        "collect_metrics.py must be invoked with --reward-json "
+                        "to ensure schema consistency"
+                    ),
+                    "severity": "critical",
+                    "suggestion": (
+                        "Update the step to call `python .cursor/scripts/collect_metrics.py "
+                        "--pr \"$PR\" --reward-json reward.json`"
+                    )
+                })
+    return violations
+
+
 def validate_workflows(workflows_dir: Path) -> Tuple[List[Dict], Dict[str, Path]]:
     """Validate all workflows in directory."""
     violations = []
@@ -247,6 +276,10 @@ def validate_workflows(workflows_dir: Path) -> Tuple[List[Dict], Dict[str, Path]
     
     # Validate each workflow
     for file_path, workflow in all_workflows.items():
+        # Skip validation if workflow is None (parsing failed)
+        if workflow is None:
+            continue
+            
         # Check for on: section
         violations.extend(check_has_on_section(workflow, file_path))
         
@@ -255,6 +288,9 @@ def validate_workflows(workflows_dir: Path) -> Tuple[List[Dict], Dict[str, Path]
         
         # Check workflow_run dependencies
         violations.extend(check_workflow_run_dependencies(workflow, file_path, all_workflow_names))
+
+        # Check reward.json usage if collect_metrics invoked
+        violations.extend(check_reward_json_usage(workflow, file_path))
     
     # Check artifact consistency
     violations.extend(check_artifact_consistency(all_workflows, all_workflow_names))
@@ -336,10 +372,8 @@ def main():
             )
     
     if violations and args.exit_on_error:
-        critical_violations = [v for v in violations if v["severity"] == "critical"]
-        if critical_violations:
-            sys.exit(1)
-    
+        sys.exit(1)
+
     sys.exit(0 if not violations else 0)
 
 
