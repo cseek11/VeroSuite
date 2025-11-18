@@ -6,7 +6,7 @@ import SecondaryNavigationBar from './SecondaryNavigationBar';
 import ExpandableFABSystem from './ExpandableFABSystem';
 import ExpandableActivityFABSystem from './ExpandableActivityFABSystem';
 import { PageCardProvider } from '@/contexts/PageCardContext';
-import { usePageCards } from '@/routes/dashboard/hooks/usePageCards';
+import { usePageCards, type PageCard } from '@/routes/dashboard/hooks/usePageCards';
 import PageCardWrapper from '@/components/dashboard/PageCardWrapper';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
 
@@ -15,8 +15,8 @@ interface V4LayoutProps {
 }
 
 interface V4LayoutContentProps extends V4LayoutProps {
-  pageCards?: any[];
-  updatePageCard?: (id: string, updates: any) => void;
+  pageCards?: PageCard[];
+  updatePageCard?: (id: string, updates: Partial<PageCard>) => void;
   closePageCard?: (id: string) => void;
 }
 
@@ -56,7 +56,7 @@ function V4LayoutContent({ children, pageCards = [], updatePageCard, closePageCa
       <ExpandableActivityFABSystem />
 
       {/* Main Content Area - Full width since sidebars are fixed */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Bitrix24-Style Top Bar */}
         <V4TopBar 
           onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -67,9 +67,9 @@ function V4LayoutContent({ children, pageCards = [], updatePageCard, closePageCa
         {/* Secondary Navigation Bar */}
         <SecondaryNavigationBar />
 
-        {/* Breadcrumbs */}
-        <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200/50 px-6 py-3">
-          <Breadcrumbs className="max-w-7xl mx-auto" />
+        {/* Breadcrumbs - Responsive padding */}
+        <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200/50 px-3 sm:px-4 md:px-6 py-2 sm:py-3">
+          <Breadcrumbs className="max-w-7xl mx-auto" maxItems={3} />
         </div>
 
         {/* Main Workspace */}
@@ -78,7 +78,7 @@ function V4LayoutContent({ children, pageCards = [], updatePageCard, closePageCa
           <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
             <section className="flex-1 main-content-area overflow-hidden">
               <div className="relative bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200/50 h-full overflow-hidden">
-                {/* Content with embedded scrollbar */}
+                {/* Content with embedded scrollbar - Responsive padding */}
                 <div className="h-full overflow-y-auto
                   [&::-webkit-scrollbar]:w-2
                   [&::-webkit-scrollbar-track]:bg-gray-50
@@ -87,7 +87,7 @@ function V4LayoutContent({ children, pageCards = [], updatePageCard, closePageCa
                   dark:[&::-webkit-scrollbar-track]:bg-gray-50
                   dark:[&::-webkit-scrollbar-thumb]:bg-purple-300
                   dark:hover:[&::-webkit-scrollbar-thumb]:bg-purple-400">
-                  <div className="p-6">
+                  <div className="p-3 sm:p-4 md:p-6">
                     {children}
                   </div>
                 </div>
