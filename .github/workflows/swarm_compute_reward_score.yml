@@ -16,8 +16,8 @@ on:
 jobs:
   compute-score:
     runs-on: ubuntu-latest
-    # Only run if PR event, workflow_dispatch, or if workflow_run completed successfully and was triggered by a PR
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success')
+    # Only run if PR event, workflow_dispatch, or if workflow_run was triggered by a PR (even if CI failed, we still want to score)
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
