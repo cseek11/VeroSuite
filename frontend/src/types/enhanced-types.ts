@@ -1,4 +1,38 @@
 // ============================================================================
+// ERROR TYPES
+// ============================================================================
+
+/**
+ * Extended Error interface for authentication errors
+ */
+export interface AuthError extends Error {
+  isAuthError: true;
+}
+
+/**
+ * API Error Response structure
+ */
+export interface ApiErrorResponse {
+  message: string | string[];
+  error?: string;
+  status?: number;
+  statusText?: string;
+  details?: unknown;
+}
+
+/**
+ * API Error with response data
+ */
+export interface ApiError extends Error {
+  response?: {
+    status?: number;
+    statusText?: string;
+    _bodyInit?: string;
+  };
+  isAuthError?: boolean;
+}
+
+// ============================================================================
 // CORE SYSTEM TYPES
 // ============================================================================
 
