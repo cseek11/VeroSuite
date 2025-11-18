@@ -4,6 +4,14 @@
  * Provides navigation breadcrumbs for deep page hierarchies.
  * Automatically generates breadcrumbs from React Router location.
  * 
+ * Features:
+ * - Auto-generates breadcrumbs from route path
+ * - Supports custom breadcrumb items
+ * - Clickable navigation
+ * - Home icon support
+ * - Responsive design with mobile-friendly truncation
+ * - ARIA labels for accessibility
+ * 
  * @example
  * ```tsx
  * <Breadcrumbs />
@@ -17,11 +25,20 @@
  *     { label: 'Customers', path: '/customers' },
  *     { label: 'John Doe', path: '/customers/123' }
  *   ]}
+ *   maxItems={3}
+ * />
+ * ```
+ * 
+ * @example
+ * ```tsx
+ * <Breadcrumbs 
+ *   showHome={false}
+ *   separator={<span>/</span>}
  * />
  * ```
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 import { logger } from '@/utils/logger';
@@ -138,7 +155,7 @@ function generateBreadcrumbsFromRoute(
  * Displays navigation breadcrumbs for the current page.
  * Supports both auto-generated and custom breadcrumb items.
  */
-export default function Breadcrumbs({
+function Breadcrumbs({
   items,
   separator = <ChevronRight className="w-4 h-4 text-gray-400" />,
   maxItems,
@@ -186,9 +203,9 @@ export default function Breadcrumbs({
   return (
     <nav
       aria-label="Breadcrumb navigation"
-      className={`flex items-center space-x-2 text-sm ${className}`}
+      className={`flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm ${className}`}
     >
-      <ol className="flex items-center space-x-2" role="list">
+      <ol className="flex items-center space-x-1 sm:space-x-2 flex-wrap" role="list">
         {displayItems.map((item, index) => {
           const isLast = index === displayItems.length - 1;
           const isClickable = item.path && item.path !== location.pathname && !isLast;
@@ -205,15 +222,15 @@ export default function Breadcrumbs({
                 <button
                   type="button"
                   onClick={() => handleClick(item.path, index)}
-                  className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded px-2 py-1"
+                  className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded px-1 sm:px-2 py-1 truncate max-w-[120px] sm:max-w-none"
                   aria-label={`Navigate to ${item.label}`}
                 >
-                  {item.icon && <item.icon className="w-4 h-4" aria-hidden="true" />}
-                  <span>{item.label}</span>
+                  {item.icon && <item.icon className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" aria-hidden="true" />}
+                  <span className="truncate">{item.label}</span>
                 </button>
               ) : (
                 <span
-                  className={`flex items-center space-x-1 ${
+                  className={`flex items-center space-x-1 truncate max-w-[120px] sm:max-w-none ${
                     isLast
                       ? 'text-gray-900 font-medium'
                       : item.path === ''
@@ -222,8 +239,8 @@ export default function Breadcrumbs({
                   }`}
                   aria-current={isLast ? 'page' : undefined}
                 >
-                  {item.icon && <item.icon className="w-4 h-4" aria-hidden="true" />}
-                  <span>{item.label}</span>
+                  {item.icon && <item.icon className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" aria-hidden="true" />}
+                  <span className="truncate">{item.label}</span>
                 </span>
               )}
             </li>

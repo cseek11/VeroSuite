@@ -4,6 +4,16 @@
  * Provides user-friendly error messages with retry functionality,
  * better context, and actionable suggestions.
  * 
+ * Features:
+ * - User-friendly error message mapping
+ * - Automatic error suggestions based on error type
+ * - Retry functionality with loading states
+ * - Severity levels (error, warning, info)
+ * - Dismissible errors
+ * - Technical details toggle for debugging
+ * - ARIA labels for accessibility
+ * - Responsive design
+ * 
  * @example
  * ```tsx
  * <EnhancedErrorMessage
@@ -12,9 +22,20 @@
  *   context="Failed to load customers"
  * />
  * ```
+ * 
+ * @example
+ * ```tsx
+ * <EnhancedErrorMessage
+ *   error={error}
+ *   severity="warning"
+ *   dismissible
+ *   onDismiss={() => setError(null)}
+ *   suggestions={['Check your connection', 'Try again later']}
+ * />
+ * ```
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { AlertCircle, RefreshCw, X, Info, AlertTriangle, HelpCircle } from 'lucide-react';
 import Button from './Button';
 import Card from './Card';
@@ -204,7 +225,7 @@ function getErrorColorClasses(severity: 'error' | 'warning' | 'info') {
  * Displays user-friendly error messages with retry functionality,
  * context, and actionable suggestions.
  */
-export default function EnhancedErrorMessage({
+function EnhancedErrorMessage({
   error,
   onRetry,
   context,
@@ -339,3 +360,4 @@ export default function EnhancedErrorMessage({
   );
 }
 
+export default memo(EnhancedErrorMessage);

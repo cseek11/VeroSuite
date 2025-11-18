@@ -4,6 +4,18 @@
  * Provides consistent loading states, skeleton loaders, and progress indicators
  * across the application for better UX during data loading.
  * 
+ * Components:
+ * - TableSkeleton: Loading skeleton for tables
+ * - CardSkeleton: Loading skeleton for card grids
+ * - ListSkeleton: Loading skeleton for lists
+ * - FormSkeleton: Loading skeleton for forms
+ * - LoadingOverlay: Full-page loading overlay
+ * - ProgressIndicator: Progress bar component
+ * - InlineLoading: Inline loading spinner
+ * - LoadingStateWrapper: Conditional loading wrapper
+ * 
+ * All components are responsive and accessible.
+ * 
  * @example
  * ```tsx
  * {isLoading ? (
@@ -11,6 +23,16 @@
  * ) : (
  *   <Table data={data} />
  * )}
+ * ```
+ * 
+ * @example
+ * ```tsx
+ * <LoadingStateWrapper
+ *   isLoading={isLoading}
+ *   skeleton={<CardSkeleton count={3} />}
+ * >
+ *   <CardGrid cards={cards} />
+ * </LoadingStateWrapper>
  * ```
  */
 
