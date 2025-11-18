@@ -381,10 +381,10 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-5xl max-h-[92vh] overflow-hidden flex flex-col p-0">
+      <DialogContent className="max-w-5xl w-full mx-3 sm:mx-4 md:mx-auto max-h-[92vh] overflow-hidden flex flex-col p-0">
         {/* Header */}
-        <DialogHeader className="bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border-b border-white/20 p-6">
-          <div className="flex items-center justify-between">
+        <DialogHeader className="bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border-b border-white/20 p-3 sm:p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
             <div className="flex items-center space-x-4 flex-1">
               <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg">
                 <FileText className="w-6 h-6 text-white" />
@@ -710,21 +710,22 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
         </div>
 
         {/* Footer */}
-        <DialogFooter className="border-t border-white/20 bg-gradient-to-r from-slate-50 to-white backdrop-blur-xl p-6 flex-shrink-0">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center space-x-4">
+        <DialogFooter className="border-t border-white/20 bg-gradient-to-r from-slate-50 to-white backdrop-blur-xl p-3 sm:p-4 md:p-6 flex-shrink-0">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0 w-full">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
               <span className="text-sm font-medium text-slate-600">Invoice Total:</span>
-              <div className="px-4 py-2 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
-                <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">
+              <div className="px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
+                <span className="text-lg sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">
                   ${total.toFixed(2)}
                 </span>
               </div>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
+                className="w-full sm:w-auto justify-center"
               >
                 Cancel
               </Button>
@@ -735,8 +736,10 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
                 loading={submitMutation.isPending}
                 icon={Save}
                 disabled={submitMutation.isPending}
+                className="w-full sm:w-auto justify-center"
               >
-                {invoice ? 'Update Invoice' : 'Create Invoice'}
+                <span className="hidden sm:inline">{invoice ? 'Update Invoice' : 'Create Invoice'}</span>
+                <span className="sm:hidden">{invoice ? 'Update' : 'Create'}</span>
               </Button>
             </div>
           </div>

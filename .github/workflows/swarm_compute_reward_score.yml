@@ -16,8 +16,8 @@ on:
 jobs:
   compute-score:
     runs-on: ubuntu-latest
-    # Only run if PR event, workflow_dispatch, or if workflow_run completed successfully and was triggered by a PR
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success')
+    # Only run if PR event, workflow_dispatch, or if workflow_run was triggered by a PR (even if CI failed, we still want to score)
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,6 +32,12 @@ jobs:
       - name: Install dependencies
         run: |
           pip install pyyaml
+
+      - name: Verify workflow permissions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python .cursor/scripts/check_workflow_permissions.py
 
       - name: Setup GitHub CLI
         uses: actions/setup-python@v5
@@ -247,14 +253,51 @@ jobs:
             --static artifacts/static-analysis.json \
             --pr-desc artifacts/pr-description.txt \
             --diff artifacts/pr-diff.txt \
-            --out reward.json
+            --out reward.json || {
+            echo "ERROR: compute_reward_score.py failed with exit code $?"
+            echo "Checking if reward.json was created anyway..."
+            if [ -f reward.json ]; then
+              echo "reward.json exists despite error, continuing..."
+            else
+              echo "reward.json was NOT created - this is a critical error!"
+              exit 1
+            fi
+          }
+
+      - name: Verify reward.json exists and is valid
+        id: verify-reward
+        run: |
+          if [ ! -f "reward.json" ]; then
+            echo "❌ ERROR: reward.json was not created"
+            ls -la  # Show what files exist for debugging
+            exit 1
+          fi
+          
+          # Validate JSON structure
+          python3 << 'EOF'
+          import json, sys
+          try:
+              with open('reward.json', 'r') as f:
+                  data = json.load(f)
+              required = ['pr_number', 'total_score', 'timestamp']
+              missing = [f for f in required if f not in data]
+              if missing:
+                  print(f"❌ ERROR: Missing fields: {missing}")
+                  sys.exit(1)
+              print(f"✓ reward.json valid (PR #{data['pr_number']}, score: {data['total_score']})")
+          except Exception as e:
+              print(f"❌ ERROR: Invalid JSON: {e}")
+              sys.exit(1)
+          EOF
 
       - name: Upload reward artifact
+        if: success()  # Only if verification passed
         uses: actions/upload-artifact@v4
         with:
-          name: reward
+          name: reward-pr-${{ steps.pr.outputs.number }}
           path: reward.json
-          retention-days: 30
+          retention-days: 90
+          if-no-files-found: error
 
       - name: Upload static analysis artifact
         uses: actions/upload-artifact@v4

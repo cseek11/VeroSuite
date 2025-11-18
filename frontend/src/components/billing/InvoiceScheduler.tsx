@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
+import { billing } from '@/lib/enhanced-api';
 import CustomerSearchSelector from '@/components/ui/CustomerSearchSelector';
 import type { Account } from '@/types/enhanced-types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/Dialog';
@@ -68,48 +69,33 @@ export default function InvoiceScheduler({ onScheduleCreated }: InvoiceScheduler
 
   const queryClient = useQueryClient();
 
-  // Mock scheduled invoices - In production, this would fetch from API
-  const { data: schedules = [], isLoading } = useQuery<ScheduledInvoice[]>({
+  // Fetch schedules from API
+  const { data: schedules = [], isLoading } = useQuery<ScheduledInvoice[]>({    
     queryKey: ['invoice-schedules'],
     queryFn: async () => {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/v1/billing/invoice-schedules');
-      // return response.json();
-      
-      // Mock data for now
-      return [
-        {
-          id: '1',
-          customer_id: 'cust-1',
-          customer_name: 'Acme Corporation',
-          schedule_type: 'recurring',
-          frequency: 'monthly',
-          start_date: '2025-01-01',
-          next_run_date: '2025-12-01',
-          is_active: true,
-          amount: 150.00,
-          description: 'Monthly pest control service',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          customer_id: 'cust-2',
-          customer_name: 'Tech Solutions Inc',
-          schedule_type: 'one-time',
-          start_date: '2025-12-20',
-          next_run_date: '2025-12-20',
-          is_active: true,
-          amount: 500.00,
-          description: 'Quarterly deep cleaning',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      ];
-    },
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch invoice schedules', error, 'InvoiceScheduler');
-      toast.error('Failed to load schedules. Please try again.');
+      try {
+        const data = await billing.getInvoiceSchedules();
+        return data.map(schedule => ({
+          id: schedule.id,
+          customer_id: schedule.account_id || schedule.customer_id,
+          customer_name: schedule.customer_name || schedule.account?.name,
+          schedule_type: schedule.schedule_type as 'recurring' | 'one-time',
+          frequency: schedule.frequency as 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly' | undefined,
+          start_date: schedule.start_date instanceof Date ? schedule.start_date.toISOString().split('T')[0] : schedule.start_date,
+          end_date: schedule.end_date ? (schedule.end_date instanceof Date ? schedule.end_date.toISOString().split('T')[0] : schedule.end_date) : undefined,
+          next_run_date: schedule.next_run_date instanceof Date ? schedule.next_run_date.toISOString() : schedule.next_run_date,
+          is_active: schedule.is_active,
+          template_id: schedule.template_id,
+          amount: schedule.amount || 0,
+          description: schedule.description,
+          created_at: schedule.created_at instanceof Date ? schedule.created_at.toISOString() : schedule.created_at,
+          updated_at: schedule.updated_at instanceof Date ? schedule.updated_at.toISOString() : schedule.updated_at,
+        }));
+      } catch (error) {
+        logger.error('Failed to fetch invoice schedules', error, 'InvoiceScheduler');
+        toast.error('Failed to load schedules. Please try again.');
+        return [];
+      }
     },
   });
 
@@ -148,38 +134,45 @@ export default function InvoiceScheduler({ onScheduleCreated }: InvoiceScheduler
     setShowScheduleForm(true);
   };
 
+  const deleteScheduleMutation = useMutation({
+    mutationFn: async (scheduleId: string) => {
+      await billing.deleteInvoiceSchedule(scheduleId);
+    },
+    onSuccess: () => {
+      logger.debug('Schedule deleted', {}, 'InvoiceScheduler');
+      toast.success('Schedule deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['invoice-schedules'] });
+    },
+    onError: (error: unknown) => {
+      logger.error('Failed to delete schedule', error, 'InvoiceScheduler');
+      toast.error('Failed to delete schedule. Please try again.');
+    },
+  });
+
+  const toggleScheduleMutation = useMutation({
+    mutationFn: async (scheduleId: string) => {
+      return await billing.toggleInvoiceSchedule(scheduleId);
+    },
+    onSuccess: (data) => {
+      logger.debug('Schedule toggled', { scheduleId: data.id, newStatus: data.is_active }, 'InvoiceScheduler');
+      toast.success(`Schedule ${data.is_active ? 'activated' : 'paused'}`);
+      queryClient.invalidateQueries({ queryKey: ['invoice-schedules'] });
+    },
+    onError: (error: unknown) => {
+      logger.error('Failed to toggle schedule', error, 'InvoiceScheduler');
+      toast.error('Failed to update schedule. Please try again.');
+    },
+  });
+
   const handleDeleteSchedule = async (scheduleId: string) => {
     if (!confirm('Are you sure you want to delete this schedule?')) {
       return;
     }
-
-    try {
-      // TODO: Replace with actual API call
-      // await fetch(`/api/v1/billing/invoice-schedules/${scheduleId}`, { method: 'DELETE' });
-      
-      logger.debug('Schedule deleted', { scheduleId }, 'InvoiceScheduler');
-      toast.success('Schedule deleted successfully');
-      
-      queryClient.invalidateQueries({ queryKey: ['invoice-schedules'] });
-    } catch (error) {
-      logger.error('Failed to delete schedule', error, 'InvoiceScheduler');
-      toast.error('Failed to delete schedule. Please try again.');
-    }
+    deleteScheduleMutation.mutate(scheduleId);
   };
 
   const handleToggleActive = async (schedule: ScheduledInvoice) => {
-    try {
-      // TODO: Replace with actual API call
-      // await fetch(`/api/v1/billing/invoice-schedules/${schedule.id}/toggle`, { method: 'POST' });
-      
-      logger.debug('Schedule toggled', { scheduleId: schedule.id, newStatus: !schedule.is_active }, 'InvoiceScheduler');
-      toast.success(`Schedule ${!schedule.is_active ? 'activated' : 'paused'}`);
-      
-      queryClient.invalidateQueries({ queryKey: ['invoice-schedules'] });
-    } catch (error) {
-      logger.error('Failed to toggle schedule', error, 'InvoiceScheduler');
-      toast.error('Failed to update schedule. Please try again.');
-    }
+    toggleScheduleMutation.mutate(schedule.id);
   };
 
   const formatCurrency = (amount: number) => {

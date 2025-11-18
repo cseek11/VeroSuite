@@ -44,7 +44,12 @@ def load_workflow_file(file_path: Path) -> Optional[Dict]:
     """Load and parse YAML workflow file."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f)
+            data = yaml.safe_load(f)
+            # Fix YAML 1.1 quirk: 'on' is parsed as boolean True
+            # Convert True key back to 'on' if present
+            if data and True in data and "on" not in data:
+                data["on"] = data.pop(True)
+            return data
     except Exception as e:
         logger.error(
             f"Error loading workflow file: {file_path}",
@@ -62,13 +67,20 @@ def get_workflow_name(workflow: Dict) -> Optional[str]:
 
 def get_workflow_triggers(workflow: Dict) -> Optional[Dict]:
     """Extract triggers from workflow YAML."""
-    return workflow.get("on")
+    # Handle both 'on' and True (YAML 1.1 boolean) keys
+    if "on" in workflow:
+        return workflow.get("on")
+    elif True in workflow:
+        return workflow.get(True)
+    return None
 
 
 def check_has_on_section(workflow: Dict, file_path: Path) -> List[Dict]:
     """Check if workflow has `on:` section."""
     violations = []
-    if "on" not in workflow:
+    # Check for both 'on' and True (YAML 1.1 boolean) keys
+    has_on = "on" in workflow or True in workflow
+    if not has_on:
         violations.append({
             "type": "missing_on_section",
             "file": str(file_path),
@@ -84,9 +96,17 @@ def check_pr_trigger_types(workflow: Dict, file_path: Path) -> List[Dict]:
     violations = []
     triggers = get_workflow_triggers(workflow)
     
-    if triggers and "pull_request" in triggers:
-        pr_config = triggers["pull_request"]
-        if isinstance(pr_config, dict):
+    if triggers:
+        # Handle both 'pull_request' and True (YAML 1.1 boolean) keys in triggers
+        pr_config = None
+        if "pull_request" in triggers:
+            pr_config = triggers["pull_request"]
+        elif isinstance(triggers, dict) and True in triggers:
+            # If triggers is a dict with True key, it might be a single trigger
+            # Check if it's actually pull_request by checking the structure
+            pass
+        
+        if pr_config and isinstance(pr_config, dict):
             types = pr_config.get("types", [])
             required_types = {"opened", "synchronize", "reopened"}
             missing_types = required_types - set(types)
@@ -228,6 +248,35 @@ def check_artifact_consistency(
     return violations
 
 
+def check_reward_json_usage(workflow: Dict, file_path: Path) -> List[Dict]:
+    """Ensure collect_metrics.py always uses the --reward-json flag."""
+    violations = []
+    jobs = workflow.get("jobs", {})
+    for job_name, job_config in jobs.items():
+        steps = job_config.get("steps", [])
+        for step in steps:
+            run_cmd = step.get("run")
+            if not isinstance(run_cmd, str):
+                continue
+            if "collect_metrics.py" not in run_cmd:
+                continue
+            if "--reward-json" not in run_cmd:
+                violations.append({
+                    "type": "missing_reward_json_flag",
+                    "file": str(file_path),
+                    "reason": (
+                        "collect_metrics.py must be invoked with --reward-json "
+                        "to ensure schema consistency"
+                    ),
+                    "severity": "critical",
+                    "suggestion": (
+                        "Update the step to call `python .cursor/scripts/collect_metrics.py "
+                        "--pr \"$PR\" --reward-json reward.json`"
+                    )
+                })
+    return violations
+
+
 def validate_workflows(workflows_dir: Path) -> Tuple[List[Dict], Dict[str, Path]]:
     """Validate all workflows in directory."""
     violations = []
@@ -247,6 +296,10 @@ def validate_workflows(workflows_dir: Path) -> Tuple[List[Dict], Dict[str, Path]
     
     # Validate each workflow
     for file_path, workflow in all_workflows.items():
+        # Skip validation if workflow is None (parsing failed)
+        if workflow is None:
+            continue
+            
         # Check for on: section
         violations.extend(check_has_on_section(workflow, file_path))
         
@@ -255,6 +308,9 @@ def validate_workflows(workflows_dir: Path) -> Tuple[List[Dict], Dict[str, Path]
         
         # Check workflow_run dependencies
         violations.extend(check_workflow_run_dependencies(workflow, file_path, all_workflow_names))
+
+        # Check reward.json usage if collect_metrics invoked
+        violations.extend(check_reward_json_usage(workflow, file_path))
     
     # Check artifact consistency
     violations.extend(check_artifact_consistency(all_workflows, all_workflow_names))
@@ -288,11 +344,10 @@ def main():
     
     if not args.workflows_dir.exists():
         logger.error(
-            f"Workflows directory not found: {args.workflows_dir}",
+            "Workflows directory not found",
             operation="main",
             workflows_dir=str(args.workflows_dir)
         )
-        print(f"Error: Workflows directory not found: {args.workflows_dir}", file=sys.stderr)
         sys.exit(1)
     
     violations, workflow_names = validate_workflows(args.workflows_dir)
@@ -303,24 +358,42 @@ def main():
             "workflow_count": len(workflow_names),
             "violation_count": len(violations)
         }
+        # CLI output - print to stdout is acceptable for JSON output
         print(json.dumps(output, indent=2))
+        logger.info(
+            "Workflow validation completed",
+            operation="main",
+            violation_count=len(violations),
+            workflow_count=len(workflow_names)
+        )
     else:
         if violations:
-            print(f"❌ Found {len(violations)} violation(s):\n")
+            # CLI output - print to stdout is acceptable for CLI output
+            print(f"Found {len(violations)} violation(s):\n")
             for i, violation in enumerate(violations, 1):
-                print(f"{i}. [{violation['severity'].upper()}] {violation['type']}")
+                print(f"{i}. [{violation['severity'].upper()}] {violation['type']}")                                                                            
                 print(f"   File: {violation['file']}")
                 print(f"   Reason: {violation['reason']}")
                 print(f"   Suggestion: {violation['suggestion']}")
                 print()
+            logger.warn(
+                f"Found {len(violations)} workflow validation violation(s)",
+                operation="main",
+                violation_count=len(violations),
+                critical_count=len([v for v in violations if v["severity"] == "critical"])
+            )
         else:
-            print("✅ All workflows pass validation")
+            # CLI output - print to stdout is acceptable for CLI output
+            print("All workflows pass validation")
+            logger.info(
+                "All workflows pass validation",
+                operation="main",
+                workflow_count=len(workflow_names)
+            )
     
     if violations and args.exit_on_error:
-        critical_violations = [v for v in violations if v["severity"] == "critical"]
-        if critical_violations:
-            sys.exit(1)
-    
+        sys.exit(1)
+
     sys.exit(0 if not violations else 0)
 
 

@@ -469,36 +469,38 @@ export default function InvoiceList({
                   key={invoice.id}
                   className="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-3">
-                        <FileText className="w-5 h-5 text-gray-600" />
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2">
-                            <Heading level={4} className="font-semibold">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-3 sm:gap-0">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start space-x-3 mb-3">
+                        <FileText className="w-5 h-5 text-gray-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2">
+                            <Heading level={4} className="font-semibold truncate">
                               {invoice.invoice_number}
                             </Heading>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-2 flex-shrink-0">
                               {getStatusIcon(invoice.status)}
                               <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(invoice.status)}`}>
                                 {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                               </span>
                             </div>
                           </div>
-                          <Text variant="body" className="text-gray-600 mt-1">
+                          <Text variant="body" className="text-gray-600 mt-1 truncate">
                             {invoice.accounts?.name || 'Unknown Customer'}
                           </Text>
                           {invoice.accounts?.address && (
-                            <Text variant="small" className="text-gray-500 text-xs mt-1 flex items-center">
-                              <MapPin className="w-3 h-3 mr-1" />
-                              {[invoice.accounts.address, invoice.accounts.city, invoice.accounts.state, invoice.accounts.zip_code]
-                                .filter(Boolean).join(', ')}
+                            <Text variant="small" className="text-gray-500 text-xs mt-1 flex items-start sm:items-center">
+                              <MapPin className="w-3 h-3 mr-1 flex-shrink-0 mt-0.5 sm:mt-0" />
+                              <span className="line-clamp-2">
+                                {[invoice.accounts.address, invoice.accounts.city, invoice.accounts.state, invoice.accounts.zip_code]
+                                  .filter(Boolean).join(', ')}
+                              </span>
                             </Text>
                           )}
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                         <div>
                           <Text variant="small" className="text-gray-600">
                             Issue Date
@@ -538,7 +540,7 @@ export default function InvoiceList({
                     </div>
 
                     {showActions && (
-                      <div className="flex items-center space-x-2 ml-4">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 sm:ml-4 w-full sm:w-auto">
                         <Button
                           variant="outline"
                           size="sm"
@@ -547,6 +549,7 @@ export default function InvoiceList({
                             trackInvoiceView(invoice.id, customerId);
                             onInvoiceSelect?.(invoice);
                           }}
+                          className="w-full sm:w-auto justify-center"
                         >
                           View
                         </Button>
@@ -555,6 +558,7 @@ export default function InvoiceList({
                             variant="primary"
                             size="sm"
                             onClick={() => onInvoicePay(invoice)}
+                            className="w-full sm:w-auto justify-center"
                           >
                             Pay
                           </Button>

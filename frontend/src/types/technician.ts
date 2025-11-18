@@ -118,3 +118,64 @@ export interface TechnicianQueryParams {
   sort_order?: 'asc' | 'desc';
 }
 
+/**
+ * Technician availability pattern for a specific day of week
+ */
+export interface TechnicianAvailabilityPattern {
+  id?: string;
+  technician_id: string;
+  day_of_week: number; // 0-6 (Sunday-Saturday)
+  start_time: string; // HH:mm format
+  end_time: string; // HH:mm format
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
+ * Technician availability schedule (multiple patterns)
+ */
+export interface TechnicianAvailabilitySchedule {
+  technician_id: string;
+  patterns: TechnicianAvailabilityPattern[];
+  date_range?: {
+    start_date: string;
+    end_date: string;
+  };
+}
+
+/**
+ * API response wrapper for technician availability
+ */
+export interface TechnicianAvailabilityResponse {
+  data: TechnicianAvailabilityPattern[] | TechnicianAvailabilitySchedule;
+  meta?: {
+    total?: number;
+    page?: number;
+    limit?: number;
+  };
+}
+
+/**
+ * API response wrapper for technician list
+ */
+export interface TechnicianListApiResponse {
+  data?: TechnicianProfile[] | {
+    data: TechnicianProfile[];
+    technicians?: TechnicianProfile[];
+    pagination?: {
+      total: number;
+      page: number;
+      limit: number;
+      total_pages: number;
+    };
+  };
+  technicians?: TechnicianProfile[];
+  meta?: {
+    total?: number;
+    page?: number;
+    limit?: number;
+    total_pages?: number;
+  };
+}
+

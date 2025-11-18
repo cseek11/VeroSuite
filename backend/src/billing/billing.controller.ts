@@ -11,11 +11,20 @@ import {
   Request,
   HttpCode,
   HttpStatus,
-  BadRequestException
+  BadRequestException,
+  NotFoundException,
+  Res,
+  Header
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { Response } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BillingService } from './billing.service';
+import { InvoicePdfService } from './invoice-pdf.service';
+import { OverdueAlertsService } from './overdue-alerts.service';
+import { FinancialReportsService } from './financial-reports.service';
+import { ReportAutomationService, ReportSchedule } from './report-automation.service';
+import { StructuredLoggerService } from '../common/services/logger.service';
 import { 
   CreateInvoiceDto, 
   UpdateInvoiceDto, 
@@ -33,7 +42,14 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller({ path: 'billing', version: '1' })
 export class BillingController {
-  constructor(private readonly billingService: BillingService) {}
+  constructor(
+    private readonly billingService: BillingService,
+    private readonly invoicePdfService: InvoicePdfService,
+    private readonly overdueAlertsService: OverdueAlertsService,
+    private readonly financialReportsService: FinancialReportsService,
+    private readonly reportAutomationService: ReportAutomationService,
+    private readonly structuredLogger: StructuredLoggerService,
+  ) {}
 
   // ============================================================================
   // INVOICE ENDPOINTS
@@ -268,6 +284,43 @@ export class BillingController {
   }
 
   // ============================================================================
+  // PDF GENERATION ENDPOINTS
+  // ============================================================================
+
+  @Get('invoices/:id/pdf')
+  @ApiOperation({ summary: 'Download invoice as PDF' })
+  @ApiResponse({ status: 200, description: 'PDF generated successfully', content: { 'application/pdf': {} } })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Invoice not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Header('Content-Type', 'application/pdf')
+  async downloadInvoicePdf(
+    @Param('id') invoiceId: string,
+    @Request() req: any,
+    @Res() res: Response
+  ) {
+    try {
+      const pdfBuffer = await this.invoicePdfService.generateInvoicePdf(
+        invoiceId,
+        req.user?.tenantId
+      );
+
+      // Get invoice for filename
+      const invoice = await this.billingService.getInvoiceById(invoiceId);
+      const filename = `Invoice-${invoice.invoice_number}.pdf`;
+
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', pdfBuffer.length.toString());
+      res.send(pdfBuffer);
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(`Failed to generate PDF: ${(error as Error).message}`);
+    }
+  }
+
+  // ============================================================================
   // RECURRING PAYMENT ENDPOINTS
   // ============================================================================
 
@@ -366,7 +419,7 @@ export class BillingController {
     }
 
     if (invoiceIds.length === 0) {
-      throw new BadRequestException('At least one invoice ID is required');
+      throw new BadRequestException('At least one invoice ID is required');     
     }
 
     return this.billingService.sendInvoiceReminder(
@@ -375,4 +428,376 @@ export class BillingController {
       sendReminderDto.message
     );
   }
-}
+
+  // ============================================================================
+  // OVERDUE ALERTS ENDPOINTS
+  // ============================================================================
+
+  @Post('overdue-alerts/process')
+  @ApiOperation({ summary: 'Process overdue alerts for all overdue invoices' })
+  @ApiResponse({ status: 200, description: 'Overdue alerts processed successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async processOverdueAlerts(@Request() req: any) {
+    // Extract trace context from request headers if available
+    const requestId = req.headers['x-request-id'] || req.id || undefined;
+    const traceId = req.headers['x-trace-id'] || undefined;
+    const spanId = req.headers['x-span-id'] || undefined;
+
+    // Set request context for structured logging
+    if (requestId) {
+      this.structuredLogger.setRequestContext(requestId, {
+        traceId,
+        spanId,
+        requestId,
+        userId: req.user?.userId,
+        tenantId: req.user?.tenantId,
+        operation: 'processOverdueAlerts',
+      });
+    }
+
+    return this.overdueAlertsService.processOverdueAlerts(
+      req.user.tenantId,
+      undefined,
+      req.user.userId,
+      requestId
+    );
+  }
+
+  @Get('overdue-alerts/statistics')
+  @ApiOperation({ summary: 'Get overdue alert statistics' })
+  @ApiQuery({ name: 'startDate', required: false, description: 'Start date for statistics' })
+  @ApiQuery({ name: 'endDate', required: false, description: 'End date for statistics' })
+  @ApiResponse({ status: 200, description: 'Alert statistics retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getAlertStatistics(
+    @Request() req: any,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string
+  ) {
+    // Extract trace context from request headers if available
+    const requestId = req.headers['x-request-id'] || req.id || undefined;
+    const traceId = req.headers['x-trace-id'] || undefined;
+    const spanId = req.headers['x-span-id'] || undefined;
+
+    // Set request context for structured logging
+    if (requestId) {
+      this.structuredLogger.setRequestContext(requestId, {
+        traceId,
+        spanId,
+        requestId,
+        userId: req.user?.userId,
+        tenantId: req.user?.tenantId,
+        operation: 'getAlertStatistics',
+      });
+    }
+
+    return this.overdueAlertsService.getAlertStatistics(
+      req.user.tenantId,
+      startDate ? new Date(startDate) : undefined,
+      endDate ? new Date(endDate) : undefined,
+      requestId
+    );
+  }
+
+  // ============================================================================
+  // FINANCIAL REPORTS ENDPOINTS
+  // ============================================================================
+
+  @Get('reports/pl')
+  @ApiOperation({ summary: 'Generate Profit & Loss (P&L) Report' })
+  @ApiQuery({ name: 'startDate', required: true, description: 'Start date for P&L report (ISO 8601 format: YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: true, description: 'End date for P&L report (ISO 8601 format: YYYY-MM-DD)' })
+  @ApiResponse({ status: 200, description: 'P&L report generated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - invalid date format or range' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async generatePLReport(
+    @Request() req: any,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string
+  ) {
+    // Extract trace context from request headers if available
+    const requestId = req.headers['x-request-id'] || req.id || undefined;
+    const traceId = req.headers['x-trace-id'] || undefined;
+    const spanId = req.headers['x-span-id'] || undefined;
+
+    // Set request context for structured logging
+    if (requestId) {
+      this.structuredLogger.setRequestContext(requestId, {
+        traceId,
+        spanId,
+        requestId,
+        userId: req.user?.userId,
+        tenantId: req.user?.tenantId,
+        operation: 'generatePLReport',
+      });
+    }
+
+    return this.financialReportsService.generatePLReport(
+      req.user.tenantId,
+      startDate,
+      endDate,
+      requestId
+    );
+  }
+
+  @Get('reports/ar-aging')
+  @ApiOperation({ summary: 'Generate AR Aging Report' })
+  @ApiQuery({ name: 'asOfDate', required: false, description: 'As of date for AR aging report (ISO 8601 format: YYYY-MM-DD, defaults to today)' })
+  @ApiResponse({ status: 200, description: 'AR aging report generated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - invalid date format' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async generateARAgingReport(
+    @Request() req: any,
+    @Query('asOfDate') asOfDate?: string
+  ) {
+    // Extract trace context from request headers if available
+    const requestId = req.headers['x-request-id'] || req.id || undefined;
+    const traceId = req.headers['x-trace-id'] || undefined;
+    const spanId = req.headers['x-span-id'] || undefined;
+
+    // Set request context for structured logging
+    if (requestId) {
+      this.structuredLogger.setRequestContext(requestId, {
+        traceId,
+        spanId,
+        requestId,
+        userId: req.user?.userId,
+        tenantId: req.user?.tenantId,
+        operation: 'generateARAgingReport',
+      });
+    }
+
+    return this.financialReportsService.generateARAgingReport(
+      req.user.tenantId,
+      asOfDate,
+      requestId
+    );
+  }
+
+  // ============================================================================
+  // REPORT AUTOMATION ENDPOINTS
+  // ============================================================================
+
+  @Post('report-schedules')
+  @ApiOperation({ summary: 'Create a new report schedule' })
+  @ApiResponse({ status: 201, description: 'Report schedule created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async createReportSchedule(
+    @Request() req: any,
+    @Body() scheduleDto: Omit<ReportSchedule, 'id' | 'tenantId' | 'lastRunDate' | 'nextRunDate'>
+  ) {
+    // Extract trace context from request headers if available
+    const requestId = req.headers['x-request-id'] || req.id || undefined;
+    const traceId = req.headers['x-trace-id'] || undefined;
+    const spanId = req.headers['x-span-id'] || undefined;
+
+    // Set request context for structured logging
+    if (requestId) {
+      this.structuredLogger.setRequestContext(requestId, {
+        traceId,
+        spanId,
+        requestId,
+        userId: req.user?.userId,
+        tenantId: req.user?.tenantId,
+        operation: 'createReportSchedule',
+      });
+    }
+
+    const schedule: ReportSchedule = {
+      ...scheduleDto,
+      tenantId: req.user.tenantId,
+    };
+
+    return this.reportAutomationService.createReportSchedule(schedule, requestId);
+  }
+
+  @Get('report-schedules')
+  @ApiOperation({ summary: 'Get all report schedules for the tenant' })
+  @ApiResponse({ status: 200, description: 'Report schedules retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getReportSchedules(@Request() req: any) {
+    // Extract trace context from request headers if available
+    const requestId = req.headers['x-request-id'] || req.id || undefined;
+    const traceId = req.headers['x-trace-id'] || undefined;
+    const spanId = req.headers['x-span-id'] || undefined;
+
+    // Set request context for structured logging
+    if (requestId) {
+      this.structuredLogger.setRequestContext(requestId, {
+        traceId,
+        spanId,
+        requestId,
+        userId: req.user?.userId,
+        tenantId: req.user?.tenantId,
+        operation: 'getReportSchedules',
+      });
+    }
+
+    return this.reportAutomationService.getReportSchedules(req.user.tenantId, requestId);
+  }
+
+  @Post('report-schedules/:id/run')
+  @ApiOperation({ summary: 'Manually trigger a report schedule' })
+  @ApiResponse({ status: 200, description: 'Report generated and sent successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async runReportSchedule(
+    @Request() req: any,
+    @Param('id') scheduleId: string
+  ) {
+    // Extract trace context from request headers if available
+    const requestId = req.headers['x-request-id'] || req.id || undefined;
+    const traceId = req.headers['x-trace-id'] || undefined;
+    const spanId = req.headers['x-span-id'] || undefined;
+
+    // Set request context for structured logging
+    if (requestId) {
+      this.structuredLogger.setRequestContext(requestId, {
+        traceId,
+        spanId,
+        requestId,
+        userId: req.user?.userId,
+        tenantId: req.user?.tenantId,
+        operation: 'runReportSchedule',
+      });
+    }
+
+    // In production, would fetch schedule from database
+    // For now, create a temporary schedule for demonstration
+    const schedule: ReportSchedule = {
+      id: scheduleId,
+      tenantId: req.user.tenantId,
+      reportType: 'pl', // Default, would come from database
+      frequency: 'monthly',
+      recipients: [],
+      format: 'csv',
+      enabled: true,
+    };
+
+    return this.reportAutomationService.generateAndSendReport(schedule, requestId);
+  }
+
+    // ============================================================================
+    // INVOICE TEMPLATE ENDPOINTS
+    // ============================================================================
+
+    @Get('invoice-templates')
+    @ApiOperation({ summary: 'Get all invoice templates' })
+    @ApiResponse({ status: 200, description: 'Invoice templates retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async getInvoiceTemplates(@Request() req: any) {
+      const tenantId = req.user?.tenantId || req.tenantId;
+      return this.billingService.getInvoiceTemplates(tenantId);
+    }
+
+    @Post('invoice-templates')
+    @ApiOperation({ summary: 'Create a new invoice template' })
+    @ApiResponse({ status: 201, description: 'Invoice template created successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async createInvoiceTemplate(
+      @Body() createTemplateDto: any,
+      @Request() req: any
+    ) {
+      const tenantId = req.user?.tenantId || req.tenantId;
+      return this.billingService.createInvoiceTemplate(createTemplateDto, req.user.userId, tenantId);
+    }
+
+    @Put('invoice-templates/:id')
+    @ApiOperation({ summary: 'Update invoice template' })
+    @ApiResponse({ status: 200, description: 'Invoice template updated successfully' })
+    @ApiResponse({ status: 404, description: 'Invoice template not found' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async updateInvoiceTemplate(
+      @Param('id') id: string,
+      @Body() updateTemplateDto: any,
+      @Request() req: any
+    ) {
+      return this.billingService.updateInvoiceTemplate(id, updateTemplateDto, req.user.userId);
+    }
+
+    @Delete('invoice-templates/:id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Delete invoice template' })
+    @ApiResponse({ status: 204, description: 'Invoice template deleted successfully' })
+    @ApiResponse({ status: 404, description: 'Invoice template not found' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async deleteInvoiceTemplate(@Param('id') id: string) {
+      return this.billingService.deleteInvoiceTemplate(id);
+    }
+
+    // ============================================================================
+    // INVOICE SCHEDULE ENDPOINTS
+    // ============================================================================
+
+    @Get('invoice-schedules')
+    @ApiOperation({ summary: 'Get all invoice schedules' })
+    @ApiResponse({ status: 200, description: 'Invoice schedules retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async getInvoiceSchedules(@Request() req: any) {
+      const tenantId = req.user?.tenantId || req.tenantId;
+      return this.billingService.getInvoiceSchedules(tenantId);
+    }
+
+    @Post('invoice-schedules')
+    @ApiOperation({ summary: 'Create a new invoice schedule' })
+    @ApiResponse({ status: 201, description: 'Invoice schedule created successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async createInvoiceSchedule(
+      @Body() createScheduleDto: any,
+      @Request() req: any
+    ) {
+      const tenantId = req.user?.tenantId || req.tenantId;
+      return this.billingService.createInvoiceSchedule(createScheduleDto, req.user.userId, tenantId);
+    }
+
+    @Put('invoice-schedules/:id')
+    @ApiOperation({ summary: 'Update invoice schedule' })
+    @ApiResponse({ status: 200, description: 'Invoice schedule updated successfully' })
+    @ApiResponse({ status: 404, description: 'Invoice schedule not found' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async updateInvoiceSchedule(
+      @Param('id') id: string,
+      @Body() updateScheduleDto: any,
+      @Request() req: any
+    ) {
+      return this.billingService.updateInvoiceSchedule(id, updateScheduleDto, req.user.userId);
+    }
+
+    @Delete('invoice-schedules/:id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Delete invoice schedule' })
+    @ApiResponse({ status: 204, description: 'Invoice schedule deleted successfully' })
+    @ApiResponse({ status: 404, description: 'Invoice schedule not found' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async deleteInvoiceSchedule(@Param('id') id: string) {
+      return this.billingService.deleteInvoiceSchedule(id);
+    }
+
+    @Post('invoice-schedules/:id/toggle')
+    @ApiOperation({ summary: 'Toggle invoice schedule active status' })
+    @ApiResponse({ status: 200, description: 'Invoice schedule toggled successfully' })
+    @ApiResponse({ status: 404, description: 'Invoice schedule not found' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async toggleInvoiceSchedule(
+      @Param('id') id: string,
+      @Request() req: any
+    ) {
+      return this.billingService.toggleInvoiceSchedule(id, req.user.userId);
+    }
+
+    // ============================================================================
+    // REMINDER HISTORY ENDPOINTS
+    // ============================================================================
+
+    @Get('reminder-history')
+    @ApiOperation({ summary: 'Get reminder history' })
+    @ApiResponse({ status: 200, description: 'Reminder history retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async getReminderHistory(@Request() req: any) {
+      const tenantId = req.user?.tenantId || req.tenantId;
+      return this.billingService.getReminderHistory(tenantId);
+    }
+  }

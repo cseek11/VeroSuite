@@ -457,5 +457,95 @@ describe('InvoiceGenerator', () => {
       }, { timeout: 3000 });
     });
   });
+
+  describe('Edge Cases and Error Scenarios', () => {
+    it('should handle empty work orders list', async () => {
+      vi.mocked(workOrders.getByCustomerId).mockResolvedValue([]);
+
+      renderComponent();
+
+      const customerInput = screen.getByTestId('customer-input');
+      fireEvent.change(customerInput, { target: { value: 'Test Customer' } });
+
+      await waitFor(() => {
+        expect(screen.getByText(/no work orders found/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should handle work orders with missing required fields', async () => {
+      const incompleteWorkOrders = [
+        { id: 'wo-1', customer_id: 'cust-1' }, // Missing status, description
+        { id: 'wo-2', customer_id: 'cust-1', status: 'completed' }, // Missing description
+      ];
+
+      vi.mocked(workOrders.getByCustomerId).mockResolvedValue(incompleteWorkOrders);
+
+      renderComponent();
+
+      const customerInput = screen.getByTestId('customer-input');
+      fireEvent.change(customerInput, { target: { value: 'Test Customer' } });
+
+      await waitFor(() => {
+        // Component should handle incomplete data gracefully
+        expect(screen.queryByText(/work order/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should handle network timeout when fetching work orders', async () => {
+      vi.mocked(workOrders.getByCustomerId).mockImplementation(
+        () => new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Network timeout')), 100);
+        })
+      );
+
+      renderComponent();
+
+      const customerInput = screen.getByTestId('customer-input');
+      fireEvent.change(customerInput, { target: { value: 'Test Customer' } });
+
+      await waitFor(() => {
+        const errorText = screen.queryByText(/failed to load work orders/i);
+        const errorLogged = mockLogger.error.mock.calls.length > 0;
+        expect(errorText || errorLogged).toBeTruthy();
+      }, { timeout: 2000 });
+    });
+
+    it('should handle rapid customer selection changes', async () => {
+      vi.mocked(workOrders.getByCustomerId).mockResolvedValue(mockWorkOrdersList);
+
+      renderComponent();
+
+      const customerInput = screen.getByTestId('customer-input');
+      
+      // Rapidly change customer selection
+      fireEvent.change(customerInput, { target: { value: 'Customer 1' } });
+      fireEvent.change(customerInput, { target: { value: 'Customer 2' } });
+      fireEvent.change(customerInput, { target: { value: 'Customer 3' } });
+
+      // Component should handle rapid changes without errors
+      await waitFor(() => {
+        expect(secureApiClient.getAllAccounts).toHaveBeenCalled();
+      });
+    });
+
+    it('should handle invoice generation with invalid work order data', async () => {
+      const invalidWorkOrders = [
+        { id: null, customer_id: 'cust-1', status: 'completed' },
+        { id: 'wo-2', customer_id: null, status: 'completed' },
+      ];
+
+      vi.mocked(workOrders.getByCustomerId).mockResolvedValue(invalidWorkOrders);
+
+      renderComponent();
+
+      const customerInput = screen.getByTestId('customer-input');
+      fireEvent.change(customerInput, { target: { value: 'Test Customer' } });
+
+      await waitFor(() => {
+        // Component should filter out invalid work orders
+        expect(screen.queryByText(/work order/i)).toBeInTheDocument();
+      });
+    });
+  });
 });
 

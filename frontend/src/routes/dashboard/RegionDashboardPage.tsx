@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth';
 import { enhancedApi } from '@/lib/enhanced-api';
 import { RegionDashboard } from './RegionDashboard';
 
-export const RegionDashboardPage: React.FC = () => {
+const RegionDashboardPage: React.FC = () => {
   const user = useAuthStore((s) => s.user);
   const [layoutId, setLayoutId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

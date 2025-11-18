@@ -534,7 +534,7 @@ Thank you for your payment!
   // renderSuccess removed - now using PaymentConfirmation component
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto px-3 sm:px-4 md:px-6">
       {paymentStep === 'method' && renderPaymentMethodSelection()}
       {paymentStep === 'details' && renderPaymentDetails()}
       {paymentStep === 'processing' && renderProcessing()}

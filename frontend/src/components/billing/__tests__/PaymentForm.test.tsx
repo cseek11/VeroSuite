@@ -418,6 +418,118 @@ describe('PaymentForm', () => {
       expect(screen.queryByText(/select.*payment.*method/i)).toBeInTheDocument();
     });
   });
+
+  describe('Error Scenarios', () => {
+    it('should handle Stripe Elements initialization failure', async () => {
+      // Mock Stripe to fail
+      const mockStripe = await import('@stripe/stripe-js');
+      vi.mocked(mockStripe.loadStripe).mockResolvedValue(null as any);
+
+      renderComponent();
+
+      await waitFor(() => {
+        // Component should handle Stripe initialization failure
+        expect(mockLogger.error).toHaveBeenCalled();
+      });
+    });
+
+    it('should handle payment intent creation timeout', async () => {
+      mockBilling.createStripePaymentIntent.mockImplementation(
+        () => new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Request timeout')), 100);
+        })
+      );
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          'Failed to create payment intent',
+          expect.any(Error),
+          'PaymentForm'
+        );
+      }, { timeout: 2000 });
+    });
+
+    it('should handle concurrent payment attempts', async () => {
+      let paymentCount = 0;
+      mockBilling.processPayment.mockImplementation(async () => {
+        paymentCount++;
+        await new Promise(resolve => setTimeout(resolve, 100));
+        if (paymentCount === 1) {
+          throw new Error('Payment failed');
+        }
+        return { success: true };
+      });
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByText(/select.*payment.*method/i)).toBeInTheDocument();
+      });
+
+      const visaMethod = screen.getByText(/visa.*ending.*1234/i);
+      fireEvent.click(visaMethod);
+
+      await waitFor(() => {
+        expect(screen.getByText(/payment.*details/i)).toBeInTheDocument();
+      });
+
+      const payButton = screen.getByText(/pay.*now/i);
+      
+      // Click multiple times rapidly
+      fireEvent.click(payButton);
+      fireEvent.click(payButton);
+      fireEvent.click(payButton);
+
+      // Should only process once
+      await waitFor(() => {
+        expect(mockBilling.processPayment).toHaveBeenCalledTimes(1);
+      }, { timeout: 2000 });
+    });
+
+    it('should handle invalid payment method data', async () => {
+      renderComponent({ paymentMethods: [
+        { id: null, payment_type: 'credit_card' as const }, // Invalid ID
+        { id: 'pm-2', payment_type: null as any }, // Invalid type
+      ] });
+
+      // Component should handle invalid payment methods gracefully
+      await waitFor(() => {
+        expect(screen.queryByText(/select.*payment.*method/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should handle network disconnection during payment', async () => {
+      mockBilling.processPayment.mockRejectedValue(new Error('Network error'));
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByText(/select.*payment.*method/i)).toBeInTheDocument();
+      });
+
+      const visaMethod = screen.getByText(/visa.*ending.*1234/i);
+      fireEvent.click(visaMethod);
+
+      await waitFor(() => {
+        expect(screen.getByText(/payment.*details/i)).toBeInTheDocument();
+      });
+
+      const payButton = screen.getByText(/pay.*now/i);
+      fireEvent.click(payButton);
+
+      await waitFor(() => {
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          'Payment failed',
+          expect.any(Error),
+          'PaymentForm'
+        );
+        expect(screen.getByText(/retry/i)).toBeInTheDocument();
+      });
+    });
+  });
 });
+
 
 

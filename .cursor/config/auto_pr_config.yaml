@@ -1,0 +1,60 @@
+# Automated PR Creation Configuration
+# Last Updated: 2025-11-17
+
+version: 1.0
+
+# Time-based triggers
+time_based:
+  enabled: true
+  inactivity_hours: 4  # Create PR after 4 hours of no file changes
+  max_work_hours: 8    # Or after 8 hours of continuous work
+
+# Change threshold triggers
+change_threshold:
+  enabled: true
+  min_files: 10        # Create PR when 10+ files changed (increased to reduce PR count)
+  min_lines: 500       # Or when 500+ lines changed (increased to reduce PR count)
+  require_test_file: false  # Require at least one test file
+
+# Logical grouping
+logical_grouping:
+  enabled: true
+  group_by_directory: true   # Group files by directory (same feature area)
+  group_by_file_type: false  # Disabled - too many small PRs
+  max_group_size: 50         # Increased - allow larger groups before splitting
+  min_group_size: 5          # Minimum files per group (combine small groups)
+
+# Feature detection
+feature_detection:
+  enabled: false  # Disabled by default (can be enabled later)
+  require_tests: false
+  require_docs: false
+
+# Manual override
+manual_override:
+  enabled: true
+  command: "python .cursor/scripts/create_pr.py --auto"
+
+# PR creation settings
+pr_settings:
+  base_branch: "main"
+  auto_title: true  # Generate title from changes
+  auto_body: true   # Generate body from changes
+  include_file_list: true  # Include list of changed files in PR body
+  max_open_prs: 10  # Maximum open Auto-PRs before consolidating
+  consolidate_small_prs: true  # Automatically close small PRs when too many exist
+
+# Excluded paths (don't track these)
+excluded_paths:
+  - ".git/"
+  - "node_modules/"
+  - ".venv/"
+  - "__pycache__/"
+  - ".cursor/cache/"
+  - "*.log"
+  - "*.tmp"
+
+# Included paths (only track these if specified)
+included_paths: []  # Empty = track all (except excluded)
+
+

@@ -8,7 +8,7 @@ Provides structured logging with trace ID support per `.cursor/rules/observabili
 import json
 import sys
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, Optional
 
 
@@ -59,7 +59,7 @@ class StructuredLogger:
             "requestId": self.request_id,
             "operation": operation,
             "severity": severity,
-            "timestamp": datetime.utcnow().isoformat() + "Z"
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         if error:

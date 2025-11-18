@@ -53,8 +53,20 @@ def main() -> None:
         try:
             # Import here to avoid circular imports
             from monitor_changes import main as check_changes
+            from auto_consolidate_prs import main as consolidate_prs
             
-            # Run check
+            # Run consolidation check (even if no new PRs to create)
+            try:
+                logger.debug("Running consolidation check", operation="main")
+                consolidate_prs()
+            except Exception as e:
+                logger.warn(
+                    "Error in consolidation check",
+                    operation="main",
+                    error=e
+                )
+            
+            # Run file change check
             logger.debug("Running periodic check", operation="main")
             check_changes()
             
@@ -75,4 +87,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 

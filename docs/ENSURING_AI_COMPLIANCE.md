@@ -2,7 +2,7 @@
 
 **Purpose:** This guide provides practical strategies to ensure the AI agent follows all VeroField development rules consistently.
 
-**Last Updated:** 2025-11-16
+**Last Updated:** 2025-11-18
 
 ---
 
@@ -156,6 +156,14 @@ Watch for these signs that rules aren't being followed:
 **Sign:** Code completed but no audit performed
 **Action:** Ask: "Please perform post-implementation audit (see Step 5 in enforcement.md)"
 
+### ❌ **Red Flag 8: Auto-PR System Not Self-Healing**
+**Sign:** Too many small PRs created, no consolidation happening
+**Action:** Ask: "Please verify Auto-PR consolidation is working (check for existing PRs, filter files, consolidate small PRs)"
+
+### ❌ **Red Flag 9: Workflow Triggers Too Restrictive**
+**Sign:** Workflows skipped because they require CI success
+**Action:** Ask: "Please verify workflow triggers allow execution even if CI fails (check workflow conditions)"
+
 ---
 
 ## 📋 Standard Verification Checklist
@@ -282,6 +290,7 @@ If you detect a rule violation:
 
 ---
 
-**Last Updated:** 2025-11-16
+**Last Updated:** 2025-11-18
+
 
 

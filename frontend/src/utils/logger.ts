@@ -1,6 +1,7 @@
 /**
  * Centralized logging utility
  * Replaces console.log/error/warn with structured logging
+ * Supports trace propagation (traceId, spanId, requestId) for observability
  */
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
@@ -11,6 +12,10 @@ interface LogEntry {
   data?: Record<string, any>;
   timestamp: string;
   context?: string;
+  operation?: string;
+  traceId?: string;
+  spanId?: string;
+  requestId?: string;
 }
 
 class Logger {
@@ -18,13 +23,26 @@ class Logger {
   private logHistory: LogEntry[] = [];
   private maxHistorySize = 100;
 
-  private formatMessage(level: LogLevel, message: string, data?: Record<string, any>, context?: string): LogEntry {
+  private formatMessage(
+    level: LogLevel,
+    message: string,
+    data?: Record<string, any>,
+    context?: string,
+    operation?: string,
+    traceId?: string,
+    spanId?: string,
+    requestId?: string
+  ): LogEntry {
     return {
       level,
       message,
       data: data || {},
       timestamp: new Date().toISOString(),
       context: context || 'CardSystem',
+      operation,
+      traceId,
+      spanId,
+      requestId,
     };
   }
 
@@ -43,40 +61,76 @@ class Logger {
     return true;
   }
 
-  debug(message: string, data?: Record<string, any>, context?: string) {
-    const entry = this.formatMessage('debug', message, data, context);
+  debug(
+    message: string,
+    data?: Record<string, any>,
+    context?: string,
+    operation?: string,
+    traceId?: string,
+    spanId?: string,
+    requestId?: string
+  ) {
+    const entry = this.formatMessage('debug', message, data, context, operation, traceId, spanId, requestId);
     this.addToHistory(entry);
     
     if (this.shouldLog('debug')) {
-      console.debug(`[${entry.context}] ${message}`, data || '');
+      const traceInfo = traceId ? ` [traceId: ${traceId}]` : '';
+      console.debug(`[${entry.context}]${traceInfo} ${message}`, data || '');
     }
   }
 
-  info(message: string, data?: Record<string, any>, context?: string) {
-    const entry = this.formatMessage('info', message, data, context);
+  info(
+    message: string,
+    data?: Record<string, any>,
+    context?: string,
+    operation?: string,
+    traceId?: string,
+    spanId?: string,
+    requestId?: string
+  ) {
+    const entry = this.formatMessage('info', message, data, context, operation, traceId, spanId, requestId);
     this.addToHistory(entry);
     
     if (this.shouldLog('info')) {
-      console.info(`[${entry.context}] ${message}`, data || '');
+      const traceInfo = traceId ? ` [traceId: ${traceId}]` : '';
+      console.info(`[${entry.context}]${traceInfo} ${message}`, data || '');
     }
   }
 
-  warn(message: string, data?: Record<string, any>, context?: string) {
-    const entry = this.formatMessage('warn', message, data, context);
+  warn(
+    message: string,
+    data?: Record<string, any>,
+    context?: string,
+    operation?: string,
+    traceId?: string,
+    spanId?: string,
+    requestId?: string
+  ) {
+    const entry = this.formatMessage('warn', message, data, context, operation, traceId, spanId, requestId);
     this.addToHistory(entry);
     
-    console.warn(`[${entry.context}] ⚠️ ${message}`, data || '');
+    const traceInfo = traceId ? ` [traceId: ${traceId}]` : '';
+    console.warn(`[${entry.context}]${traceInfo} ⚠️ ${message}`, data || '');
   }
 
-  error(message: string, error?: Error | unknown, context?: string) {
+  error(
+    message: string,
+    error?: Error | unknown,
+    context?: string,
+    operation?: string,
+    traceId?: string,
+    spanId?: string,
+    requestId?: string
+  ) {
     const errorData = error instanceof Error 
       ? { message: error.message, stack: error.stack, name: error.name }
       : { error };
     
-    const entry = this.formatMessage('error', message, errorData, context);
+    const entry = this.formatMessage('error', message, errorData, context, operation, traceId, spanId, requestId);
     this.addToHistory(entry);
     
-    console.error(`[${entry.context}] ❌ ${message}`, errorData);
+    const traceInfo = traceId ? ` [traceId: ${traceId}, spanId: ${spanId}, requestId: ${requestId}]` : '';
+    console.error(`[${entry.context}]${traceInfo} ❌ ${message}`, errorData);
     
     // In production, send to error tracking service (e.g., Sentry)
     if (!this.isDevelopment && typeof window !== 'undefined') {
@@ -104,14 +158,45 @@ class Logger {
 export const logger = new Logger();
 
 // Convenience functions
-export const logDebug = (message: string, data?: Record<string, any>, context?: string) => 
-  logger.debug(message, data, context);
-export const logInfo = (message: string, data?: Record<string, any>, context?: string) => 
-  logger.info(message, data, context);
-export const logWarn = (message: string, data?: Record<string, any>, context?: string) => 
-  logger.warn(message, data, context);
-export const logError = (message: string, error?: Error | unknown, context?: string) => 
-  logger.error(message, error, context);
+export const logDebug = (
+  message: string,
+  data?: Record<string, any>,
+  context?: string,
+  operation?: string,
+  traceId?: string,
+  spanId?: string,
+  requestId?: string
+) => logger.debug(message, data, context, operation, traceId, spanId, requestId);
+
+export const logInfo = (
+  message: string,
+  data?: Record<string, any>,
+  context?: string,
+  operation?: string,
+  traceId?: string,
+  spanId?: string,
+  requestId?: string
+) => logger.info(message, data, context, operation, traceId, spanId, requestId);
+
+export const logWarn = (
+  message: string,
+  data?: Record<string, any>,
+  context?: string,
+  operation?: string,
+  traceId?: string,
+  spanId?: string,
+  requestId?: string
+) => logger.warn(message, data, context, operation, traceId, spanId, requestId);
+
+export const logError = (
+  message: string,
+  error?: Error | unknown,
+  context?: string,
+  operation?: string,
+  traceId?: string,
+  spanId?: string,
+  requestId?: string
+) => logger.error(message, error, context, operation, traceId, spanId, requestId);
 
 
 

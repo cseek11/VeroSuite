@@ -402,11 +402,11 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
   const isEditMode = !!customer;
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-6">
       {/* Header */}
-      <Card className="mb-6">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
+      <Card className="mb-4 sm:mb-6">
+        <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"

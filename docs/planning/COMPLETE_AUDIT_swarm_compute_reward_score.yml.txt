@@ -1,0 +1,351 @@
+﻿name: Swarm - Compute Reward Score
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to compute score for (optional)'
+        required: false
+        type: string
+
+jobs:
+  compute-score:
+    runs-on: ubuntu-latest
+    # Only run if PR event, workflow_dispatch, or if workflow_run was triggered by a PR (even if CI failed, we still want to score)
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+
+      - name: Verify workflow permissions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python .cursor/scripts/check_workflow_permissions.py
+
+      - name: Setup GitHub CLI
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+        continue-on-error: true
+
+      - name: Get PR number
+        id: pr
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            # Use provided PR number or find from current branch
+            if [ -n "${{ github.event.inputs.pr_number }}" ]; then
+              echo "number=${{ github.event.inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+            else
+              # Try to find PR from current branch
+              PR_NUM=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '.[0].number' || echo "")
+              if [ -z "$PR_NUM" ]; then
+                echo "Error: No PR number provided and could not find PR for branch ${{ github.ref_name }}" >&2
+                exit 1
+              fi
+              echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            # Extract PR number from workflow_run
+            PR_NUM=$(gh pr list --head "${{ github.event.workflow_run.head_branch }}" --json number --jq '.[0].number' || echo "")
+            if [ -z "$PR_NUM" ]; then
+              echo "number=${{ github.event.workflow_run.pull_requests[0].number }}" >> "$GITHUB_OUTPUT"
+            else
+              echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Download frontend coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-coverage
+          path: artifacts/frontend
+        continue-on-error: true
+
+      - name: Download backend coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-coverage
+          path: artifacts/backend
+        continue-on-error: true
+
+      - name: Download frontend coverage from CI workflow
+        if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-coverage
+          path: artifacts/frontend
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+        continue-on-error: true
+
+      - name: Download backend coverage from CI workflow
+        if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-coverage
+          path: artifacts/backend
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+        continue-on-error: true
+
+      - name: Find coverage files
+        id: coverage
+        run: |
+          FRONTEND_COV=""
+          BACKEND_COV=""
+          
+          # Check for frontend coverage (prioritize artifacts from CI workflow)
+          if [ -f "artifacts/frontend/coverage-final.json" ]; then
+            FRONTEND_COV="artifacts/frontend/coverage-final.json"
+            echo "Found frontend coverage in artifacts"
+          elif [ -f "frontend/coverage/coverage-final.json" ]; then
+            FRONTEND_COV="frontend/coverage/coverage-final.json"
+            echo "Found frontend coverage in frontend directory"
+          else
+            echo "No frontend coverage found"
+          fi
+          
+          # Check for backend coverage (prioritize artifacts from CI workflow)
+          if [ -f "artifacts/backend/coverage-summary.json" ]; then
+            BACKEND_COV="artifacts/backend/coverage-summary.json"
+            echo "Found backend coverage in artifacts"
+          elif [ -f "backend/coverage/coverage-summary.json" ]; then
+            BACKEND_COV="backend/coverage/coverage-summary.json"
+            echo "Found backend coverage in backend directory"
+          else
+            echo "No backend coverage found"
+          fi
+          
+          # Combine paths (comma-separated for script)
+          if [ -n "$FRONTEND_COV" ] && [ -n "$BACKEND_COV" ]; then
+            echo "paths=$FRONTEND_COV,$BACKEND_COV" >> "$GITHUB_OUTPUT"
+            echo "Using both frontend and backend coverage"
+          elif [ -n "$FRONTEND_COV" ]; then
+            echo "paths=$FRONTEND_COV" >> "$GITHUB_OUTPUT"
+            echo "Using frontend coverage only"
+          elif [ -n "$BACKEND_COV" ]; then
+            echo "paths=$BACKEND_COV" >> "$GITHUB_OUTPUT"
+            echo "Using backend coverage only"
+          else
+            echo "paths=" >> "$GITHUB_OUTPUT"
+            echo "No coverage files found - will use empty coverage"
+          fi
+
+      - name: Run static analysis (Semgrep)
+        continue-on-error: true
+        run: |
+          pip install semgrep || true
+          semgrep --config=auto --json -o artifacts/semgrep-output.json || echo '{}' > artifacts/semgrep-output.json
+
+      - name: Setup Node.js for static analysis
+        if: always()
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Run ESLint (frontend)
+        continue-on-error: true
+        if: always()
+        run: |
+          cd frontend
+          npm ci || true
+          npm run lint -- --format json --output-file ../artifacts/eslint-frontend.json || echo '[]' > ../artifacts/eslint-frontend.json
+
+      - name: Run TypeScript check (frontend)
+        continue-on-error: true
+        if: always()
+        run: |
+          cd frontend
+          npm ci || true
+          npm run typecheck 2>&1 | tee ../artifacts/tsc-frontend.log || true
+
+      - name: Aggregate static analysis
+        run: |
+          python3 << 'EOF'
+          import json
+          import pathlib
+          
+          semgrep_data = {}
+          eslint_data = []
+          tsc_data = {"errors": []}
+          
+          # Load Semgrep
+          semgrep_path = pathlib.Path("artifacts/semgrep-output.json")
+          if semgrep_path.exists():
+              semgrep_data = json.loads(semgrep_path.read_text())
+          
+          # Load ESLint
+          eslint_path = pathlib.Path("artifacts/eslint-frontend.json")
+          if eslint_path.exists():
+              try:
+                  eslint_data = json.loads(eslint_path.read_text())
+              except:
+                  pass
+          
+          # Parse TypeScript errors (basic)
+          tsc_path = pathlib.Path("artifacts/tsc-frontend.log")
+          if tsc_path.exists():
+              tsc_content = tsc_path.read_text()
+              # Count error lines
+              error_count = len([l for l in tsc_content.split('\n') if 'error TS' in l])
+              tsc_data["errors"] = [{"count": error_count}]
+          
+          # Combine
+          combined = {
+              "results": semgrep_data.get("results", []),
+              "eslint": eslint_data,
+              "typescript": tsc_data
+          }
+          
+          pathlib.Path("artifacts/static-analysis.json").write_text(json.dumps(combined, indent=2))
+          EOF
+
+      - name: Get PR description
+        id: pr-desc
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr view $PR_NUM --json body --jq '.body' > artifacts/pr-description.txt || echo "" > artifacts/pr-description.txt
+
+      - name: Get PR diff
+        id: pr-diff
+        run: |
+          git fetch origin main || true
+          git diff origin/main...HEAD > artifacts/pr-diff.txt || echo "" > artifacts/pr-diff.txt
+
+      - name: Compute reward score
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          COVERAGE_PATHS="${{ steps.coverage.outputs.paths }}"
+          if [ -z "$COVERAGE_PATHS" ]; then
+            COVERAGE_PATHS="artifacts/empty-coverage.json"
+            echo '{}' > "$COVERAGE_PATHS"
+          fi
+
+          python .cursor/scripts/compute_reward_score.py \
+            --pr "$PR_NUM" \
+            --coverage "$COVERAGE_PATHS" \
+            --static artifacts/static-analysis.json \
+            --pr-desc artifacts/pr-description.txt \
+            --diff artifacts/pr-diff.txt \
+            --out reward.json || {
+            echo "ERROR: compute_reward_score.py failed with exit code $?"
+            echo "Checking if reward.json was created anyway..."
+            if [ -f reward.json ]; then
+              echo "reward.json exists despite error, continuing..."
+            else
+              echo "reward.json was NOT created - this is a critical error!"
+              exit 1
+            fi
+          }
+
+      - name: Verify reward.json exists
+        run: |
+          if [ ! -f reward.json ]; then
+            echo "ERROR: reward.json was not created!"
+            exit 1
+          fi
+          echo "reward.json exists, size: $(stat -f%z reward.json 2>/dev/null || stat -c%s reward.json 2>/dev/null || echo 'unknown') bytes"
+          echo "reward.json content preview:"
+          head -20 reward.json || echo "Could not read reward.json"
+
+      - name: Upload reward artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: reward
+          path: reward.json
+          retention-days: 30
+        continue-on-error: false
+
+      - name: Upload static analysis artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: static-analysis
+          path: artifacts/static-analysis.json
+          retention-days: 7
+        continue-on-error: true
+
+      - name: Trigger metrics update
+        if: always()
+        run: |
+          # Metrics will be updated by update_metrics_dashboard.yml workflow
+          # which triggers on workflow_run completion
+          echo "Metrics update will be triggered by workflow_run event"
+
+      - name: Post or update reward comment
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          if [ ! -f reward.json ]; then
+            echo "No reward.json found, skipping comment"
+            exit 0
+          fi
+
+          COMMENT=$(jq -r '.comment' reward.json)
+          SCORE=$(jq -r '.score' reward.json)
+
+          # Find existing comment from this bot (look for REWARD_SCORE header)
+          EXISTING_COMMENT_ID=$(gh pr view "$PR_NUM" --json comments --jq '.comments[] | select(.body | contains("REWARD_SCORE")) | .id' | head -1) || true
+
+          if [ -n "$EXISTING_COMMENT_ID" ]; then
+            echo "Updating existing comment $EXISTING_COMMENT_ID"
+            gh api \
+              --method PATCH \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/${{ github.repository }}/issues/comments/$EXISTING_COMMENT_ID" \
+              -f body="$COMMENT" || true
+          else
+            echo "Posting new comment"
+            # Try to post comment, but don't fail if permissions are insufficient
+            gh pr comment "$PR_NUM" --body "$COMMENT" 2>&1 || {
+              echo "Warning: Could not post comment (may need write permissions). Score computed: $SCORE"
+              echo "Comment content saved to reward.json artifact"
+            }
+          fi
+
+          # Set decision based on score
+          if [ "$SCORE" -lt -3 ]; then
+            echo "::error::REWARD_SCORE is $SCORE (blocking threshold: -3)"
+            # Extract decision from comment
+            DECISION=$(echo "$COMMENT" | grep -oP 'Decision Recommendation: \*\*\K[^*]+' || echo "BLOCK")
+            echo "Decision: $DECISION"
+            # Don't exit 1 here - let metrics collection run even with low scores
+            # The artifact is already uploaded, so metrics can be collected
+            echo "::warning::Score is below threshold, but continuing to allow metrics collection"
+          elif [ "$SCORE" -le 3 ]; then
+            echo "::warning::REWARD_SCORE is $SCORE (requires improvement)"
+            DECISION=$(echo "$COMMENT" | grep -oP 'Decision Recommendation: \*\*\K[^*]+' || echo "REQUEST_CHANGES")
+            echo "Decision: $DECISION"
+          else
+            echo "::notice::REWARD_SCORE is $SCORE (meets quality standards)"
+            DECISION=$(echo "$COMMENT" | grep -oP 'Decision Recommendation: \*\*\K[^*]+' || echo "APPROVE")
+            echo "Decision: $DECISION"
+          fi

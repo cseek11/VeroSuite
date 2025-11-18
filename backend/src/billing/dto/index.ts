@@ -15,3 +15,16 @@ export * from './payment-method-response.dto';
 export * from './send-reminder.dto';
 export * from './create-recurring-payment.dto';
 
+// Invoice Template DTOs
+export * from './create-invoice-template.dto';
+export * from './update-invoice-template.dto';
+export * from './invoice-template-response.dto';
+
+// Invoice Schedule DTOs
+export * from './create-invoice-schedule.dto';
+export * from './update-invoice-schedule.dto';
+export * from './invoice-schedule-response.dto';
+
+// Reminder History DTOs
+export * from './reminder-history-response.dto';
+

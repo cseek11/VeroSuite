@@ -76,6 +76,7 @@ jobs:
           python3 << 'EOF'
           import json
           import pathlib
+          from textwrap import dedent
           
           detection_path = pathlib.Path("anti-patterns/detection.json")
           if not detection_path.exists():
@@ -90,13 +91,13 @@ jobs:
               exit(0)
           
           # Generate markdown report
-          report = f"""# Anti-Pattern Detection Report (PR #{data.get('metadata', {}).get('pr', 'unknown')})
-          
-**REWARD_SCORE:** {data.get('metadata', {}).get('score', 'unknown')} (triggered anti-pattern detection)
-          
-## Detected Violations ({len(violations)})
-          
-"""
+          report = dedent(f"""
+              # Anti-Pattern Detection Report (PR #{data.get('metadata', {}).get('pr', 'unknown')})
+
+              **REWARD_SCORE:** {data.get('metadata', {}).get('score', 'unknown')} (triggered anti-pattern detection)
+
+              ## Detected Violations ({len(violations)})
+          """)
           
           # Group by type
           by_type = {}
@@ -107,33 +108,33 @@ jobs:
               by_type[v_type].append(v)
           
           for v_type, v_list in by_type.items():
-              report += f"""### {v_type.replace('_', ' ').title()} ({len(v_list)})
-          
-"""
+              report += dedent(f"""
+                  ### {v_type.replace('_', ' ').title()} ({len(v_list)})
+              """)
               for v in v_list:
-                  report += f"""- **{v.get('severity', 'unknown')}:** {v.get('description', 'N/A')}
-  - Pattern: `{v.get('pattern', 'N/A')[:100]}`
-  - Line: {v.get('line', 'N/A')}
-  
-"""
+                  report += dedent(f"""
+                      - **{v.get('severity', 'unknown')}:** {v.get('description', 'N/A')}
+                        - Pattern: `{v.get('pattern', 'N/A')[:100]}`
+                        - Line: {v.get('line', 'N/A')}
+                  """)
           
-          report += """
-## Suggested Actions
+          report += dedent("""
+              ## Suggested Actions
 
-1. Review each violation above
-2. Fix empty catch blocks by adding proper error handling
-3. Add missing await keywords for async operations
-4. Add try/catch blocks around error-prone operations
-5. Remove hardcoded secrets and use environment variables
-6. Add tests for new or modified code
-7. Ensure consistent logging patterns with traceId
+              1. Review each violation above
+              2. Fix empty catch blocks by adding proper error handling
+              3. Add missing await keywords for async operations
+              4. Add try/catch blocks around error-prone operations
+              5. Remove hardcoded secrets and use environment variables
+              6. Add tests for new or modified code
+              7. Ensure consistent logging patterns with traceId
 
-## Next Steps
+              ## Next Steps
 
-This report will be appended to `.cursor/anti_patterns.md` and `.cursor/BUG_LOG.md` after human review.
+              This report will be appended to `.cursor/anti_patterns.md` and `.cursor/BUG_LOG.md` after human review.
 
-**Note:** Anti-pattern entries require human review before being committed.
-"""
+              **Note:** Anti-pattern entries require human review before being committed.
+          """)
           
           pathlib.Path("anti-patterns/REPORT.md").write_text(report)
           print(f"Generated report with {len(violations)} violations")

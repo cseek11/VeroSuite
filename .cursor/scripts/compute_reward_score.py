@@ -653,9 +653,13 @@ def get_decision_recommendation(score: int, breakdown: dict, static_analysis: di
     tests_failing = (frontend_cov == 0 and backend_cov == 0) or breakdown.get("penalties", 0) < -3
     
     # Decision logic
-    if score < -3 and (critical_security or tests_failing):
+    # Critical security issues always block, regardless of score
+    if critical_security:
         decision = "BLOCK"
-        reason = "Score below -3 with critical issues (security or failing tests)"
+        reason = "Critical security issues detected (blocking threshold)"
+    elif score < -3 and tests_failing:
+        decision = "BLOCK"
+        reason = "Score below -3 with failing tests (blocking threshold)"
     elif score < -3:
         decision = "BLOCK"
         reason = "Score below -3 (blocking threshold)"
@@ -799,116 +803,188 @@ def get_pr_description(pr_num: str) -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--pr", required=True, help="PR number")
-    parser.add_argument("--coverage", required=True, help="Path to coverage JSON (or comma-separated frontend,backend paths)")
-    parser.add_argument("--static", required=True, help="Path to static analysis JSON")
-    parser.add_argument("--pr-desc", help="Path to PR description file (optional)")
-    parser.add_argument("--diff", help="Path to PR diff file (optional)")
-    parser.add_argument("--out", required=True, help="Output JSON path")
-    args = parser.parse_args()
-    
-    # Load rubric
-    rubric = load_yaml(str(RUBRIC_PATH))
-    if not rubric:
-        logger.warn(
-            "Could not load reward_rubric.yaml, using defaults",
-            operation="main",
-            rubric_path=str(RUBRIC_PATH)
-        )
-        rubric = {
-            "tests": 3,
-            "bug_fix": 2,
-            "docs": 1,
-            "performance": 1,
-            "security": 2,
-            "penalties": {
-                "failing_ci": -4,
-                "missing_tests": -2,
-                "regression": -3
+    try:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--pr", required=True, help="PR number")
+        parser.add_argument("--coverage", required=True, help="Path to coverage JSON (or comma-separated frontend,backend paths)")
+        parser.add_argument("--static", required=True, help="Path to static analysis JSON")
+        parser.add_argument("--pr-desc", help="Path to PR description file (optional)")
+        parser.add_argument("--diff", help="Path to PR diff file (optional)")
+        parser.add_argument("--out", required=True, help="Output JSON path")
+        args = parser.parse_args()
+        
+        # Load rubric
+        rubric = load_yaml(str(RUBRIC_PATH))
+        if not rubric:
+            logger.warn(
+                "Could not load reward_rubric.yaml, using defaults",
+                operation="main",
+                rubric_path=str(RUBRIC_PATH)
+            )
+            rubric = {
+                "tests": 3,
+                "bug_fix": 2,
+                "docs": 1,
+                "performance": 1,
+                "security": 2,
+                "penalties": {
+                    "failing_ci": -4,
+                    "missing_tests": -2,
+                    "regression": -3
+                }
             }
-        }
-    
-    # Load coverage data
-    coverage = {}
-    if "," in args.coverage:
-        # Separate frontend and backend coverage paths
-        frontend_path, backend_path = args.coverage.split(",", 1)
-        coverage["frontend"] = parse_frontend_coverage(frontend_path.strip())
-        coverage["backend"] = parse_backend_coverage(backend_path.strip())
-    else:
-        # Single coverage file (try to detect format)
-        coverage_data = load_json(args.coverage)
-        if "frontend" in args.coverage.lower() or "vitest" in args.coverage.lower():
-            coverage["frontend"] = parse_frontend_coverage(args.coverage)
+        
+        # Load coverage data
+        coverage = {}
+        if "," in args.coverage:
+            # Separate frontend and backend coverage paths
+            frontend_path, backend_path = args.coverage.split(",", 1)
+            coverage["frontend"] = parse_frontend_coverage(frontend_path.strip())
+            coverage["backend"] = parse_backend_coverage(backend_path.strip())
         else:
-            coverage["backend"] = parse_backend_coverage(args.coverage)
-    
-    # Load static analysis
-    static_analysis = load_json(args.static)
-    
-    # Get PR description
-    if args.pr_desc:
-        with open(args.pr_desc, "r", encoding="utf-8") as handle:
-            pr_desc = handle.read()
-    else:
-        pr_desc = get_pr_description(args.pr)
-    
-    # Get PR diff
-    if args.diff:
-        with open(args.diff, "r", encoding="utf-8") as handle:
-            diff = handle.read()
-    else:
-        repo_path = pathlib.Path(__file__).resolve().parents[2]
-        diff = get_pr_diff(args.pr, repo_path)
-    
-    # Compute score
-    score, breakdown, notes, file_scores = compute_score(
-        coverage,
-        static_analysis,
-        pr_desc,
-        diff,
-        rubric,
-        include_file_level=True
-    )
-    
-    # Generate comment with decision recommendation
-    template_path = RUBRIC_PATH.parent / "ci" / "reward_score_comment_template.md"
-    pr_num = args.pr
-    run_id = os.environ.get("GITHUB_RUN_ID")
-    comment = generate_comment(
-        score, 
-        breakdown, 
-        notes, 
-        template_path,
-        static_analysis=static_analysis,
-        pr_num=pr_num,
-        run_id=run_id
-    )
-    
-    # Write output
-    output = {
-        "score": score,
-        "breakdown": breakdown,
-        "comment": comment,
-        "file_scores": file_scores,  # File-level scoring breakdown
-        "metadata": {
-            "pr": args.pr,
-            "computed_at": datetime.utcnow().isoformat() + "Z",
-            "rubric_version": rubric.get("version", "unknown"),
-            "file_level_scoring": True
+            # Single coverage file (try to detect format)
+            coverage_data = load_json(args.coverage)
+            if "frontend" in args.coverage.lower() or "vitest" in args.coverage.lower():
+                coverage["frontend"] = parse_frontend_coverage(args.coverage)
+            else:
+                coverage["backend"] = parse_backend_coverage(args.coverage)
+        
+        # Load static analysis
+        static_analysis = load_json(args.static)
+        
+        # Get PR description
+        if args.pr_desc:
+            with open(args.pr_desc, "r", encoding="utf-8") as handle:
+                pr_desc = handle.read()
+        else:
+            pr_desc = get_pr_description(args.pr)
+        
+        # Get PR diff
+        if args.diff:
+            with open(args.diff, "r", encoding="utf-8") as handle:
+                diff = handle.read()
+        else:
+            repo_path = pathlib.Path(__file__).resolve().parents[2]
+            diff = get_pr_diff(args.pr, repo_path)
+        
+        # Compute score
+        score, breakdown, notes, file_scores = compute_score(
+            coverage,
+            static_analysis,
+            pr_desc,
+            diff,
+            rubric,
+            include_file_level=True
+        )
+        
+        # Generate comment with decision recommendation
+        template_path = RUBRIC_PATH.parent / "ci" / "reward_score_comment_template.md"
+        pr_num = args.pr
+        run_id = os.environ.get("GITHUB_RUN_ID")
+        comment = generate_comment(
+            score, 
+            breakdown, 
+            notes, 
+            template_path,
+            static_analysis=static_analysis,
+            pr_num=pr_num,
+            run_id=run_id
+        )
+        
+        # Write output
+        output = {
+            "score": score,
+            "breakdown": breakdown,
+            "comment": comment,
+            "file_scores": file_scores,  # File-level scoring breakdown
+            "metadata": {
+                "pr": args.pr,
+                "computed_at": datetime.utcnow().isoformat() + "Z",
+                "rubric_version": rubric.get("version", "unknown"),
+                "file_level_scoring": True
+            },
+            # Add fields for validation compatibility
+            "pr_number": args.pr,
+            "total_score": score,
+            "timestamp": datetime.utcnow().isoformat() + "Z"
         }
-    }
-    
-    with open(args.out, "w", encoding="utf-8") as handle:
-        json.dump(output, handle, indent=2)
-    
-    logger.info(
-        f"REWARD_SCORE computed: {score}/10",
-        operation="main",
-        score=score,
-        breakdown=breakdown
-    )
+        
+        with open(args.out, "w", encoding="utf-8") as handle:
+            json.dump(output, handle, indent=2)
+        
+        # CRITICAL: Verify file creation
+        if not os.path.exists(args.out):
+            logger.error(
+                f"FATAL: reward.json was not created at {args.out}",
+                operation="main",
+                output_path=args.out
+            )
+            sys.exit(1)
+        
+        file_size = os.path.getsize(args.out)
+        if file_size == 0:
+            logger.error(
+                f"FATAL: reward.json is empty (0 bytes) at {args.out}",
+                operation="main",
+                output_path=args.out
+            )
+            sys.exit(1)
+        
+        # Validate JSON structure
+        try:
+            with open(args.out, "r", encoding="utf-8") as f:
+                validation_data = json.load(f)
+            
+            required_fields = ["pr_number", "total_score", "timestamp"]
+            missing = [f for f in required_fields if f not in validation_data]
+            if missing:
+                logger.error(
+                    f"FATAL: Missing required fields in reward.json: {missing}",
+                    operation="main",
+                    missing_fields=missing,
+                    output_path=args.out
+                )
+                sys.exit(1)
+            
+            logger.info(
+                f"✓ Successfully wrote valid reward.json ({file_size} bytes)",
+                operation="main",
+                file_size=file_size,
+                pr_number=validation_data.get("pr_number"),
+                total_score=validation_data.get("total_score")
+            )
+        except json.JSONDecodeError as e:
+            logger.error(
+                f"FATAL: Invalid JSON in reward.json: {e}",
+                operation="main",
+                error=str(e),
+                output_path=args.out
+            )
+            sys.exit(1)
+        except Exception as e:
+            logger.error(
+                f"FATAL: Error validating reward.json: {e}",
+                operation="main",
+                error=str(e),
+                output_path=args.out
+            )
+            sys.exit(1)
+        
+        logger.info(
+            f"REWARD_SCORE computed: {score}/10",
+            operation="main",
+            score=score,
+            breakdown=breakdown
+        )
+        sys.exit(0)  # Explicit success
+    except Exception as e:
+        logger.error(
+            f"FATAL: Unhandled exception in compute_reward_score.py: {e}",
+            operation="main",
+            error=str(e)
+        )
+        logger.exception("Full traceback:")
+        sys.exit(1)  # Explicit failure
 
 
 if __name__ == "__main__":
