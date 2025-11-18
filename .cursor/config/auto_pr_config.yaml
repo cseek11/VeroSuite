@@ -12,16 +12,17 @@ time_based:
 # Change threshold triggers
 change_threshold:
   enabled: true
-  min_files: 5         # Create PR when 5+ files changed
-  min_lines: 200       # Or when 200+ lines changed
+  min_files: 10        # Create PR when 10+ files changed (increased to reduce PR count)
+  min_lines: 500       # Or when 500+ lines changed (increased to reduce PR count)
   require_test_file: false  # Require at least one test file
 
 # Logical grouping
 logical_grouping:
   enabled: true
   group_by_directory: true   # Group files by directory (same feature area)
-  group_by_file_type: true   # Group files by type (tests, docs, etc.)
-  max_group_size: 10         # Maximum files per group
+  group_by_file_type: false  # Disabled - too many small PRs
+  max_group_size: 50         # Increased - allow larger groups before splitting
+  min_group_size: 5          # Minimum files per group (combine small groups)
 
 # Feature detection
 feature_detection:
@@ -40,6 +41,8 @@ pr_settings:
   auto_title: true  # Generate title from changes
   auto_body: true   # Generate body from changes
   include_file_list: true  # Include list of changed files in PR body
+  max_open_prs: 10  # Maximum open Auto-PRs before consolidating
+  consolidate_small_prs: true  # Automatically close small PRs when too many exist
 
 # Excluded paths (don't track these)
 excluded_paths:
