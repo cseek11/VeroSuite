@@ -192,16 +192,16 @@ export default function WorkOrderForm({
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
+    <div className="max-w-4xl mx-auto p-3 sm:p-4 md:p-6">
+      <Card className="p-3 sm:p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
             {mode === 'create' ? 'Create Work Order' : 'Edit Work Order'}
           </h2>
           <Button
             variant="outline"
             onClick={onCancel}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 w-full sm:w-auto"
           >
             <X className="h-4 w-4" />
             Cancel
@@ -461,12 +461,13 @@ export default function WorkOrderForm({
           </div>
 
           {/* Form Actions */}
-          <div className="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-gray-200">
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
               disabled={isLoading}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
@@ -474,14 +475,15 @@ export default function WorkOrderForm({
               type="submit"
               variant="primary"
               disabled={isLoading || !isDirty}
-              className="flex items-center gap-2"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               {isLoading ? (
                 <LoadingSpinner text="Saving..." />
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  {mode === 'create' ? 'Create Work Order' : 'Update Work Order'}
+                  <span className="hidden sm:inline">{mode === 'create' ? 'Create Work Order' : 'Update Work Order'}</span>
+                  <span className="sm:hidden">{mode === 'create' ? 'Create' : 'Update'}</span>
                 </>
               )}
             </Button>
