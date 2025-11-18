@@ -885,4 +885,111 @@ The CI automation suite provides:
 
 ---
 
-**Last Updated:** 2025-11-17
+## Trace Propagation in Frontend API Calls - 2025-11-18
+
+### Decision
+Implemented automatic trace propagation for all frontend API calls and enhanced the logger to automatically include trace IDs in all log entries for improved observability.
+
+### Context
+**Problem Statement:**
+- Frontend API calls were not propagating trace IDs to the backend
+- Logger calls were not including trace IDs, making it difficult to correlate logs across services
+- Manual trace propagation would be error-prone and inconsistent
+
+**Requirements:**
+- All API calls must include trace headers (x-trace-id, x-span-id, x-request-id)
+- Logger must automatically include trace IDs without requiring code changes
+- Solution must be transparent to existing code
+
+### Trade-offs
+**Pros:**
+- Automatic trace propagation ensures consistency
+- No code changes required for existing logger calls
+- Improved observability and debugging capabilities
+- Trace IDs automatically included in all log entries
+
+**Cons:**
+- Slight performance overhead for trace ID generation
+- Requires updating all fetch calls to use new helper (gradual migration)
+
+### Alternatives Considered
+**Alternative 1: Manual Trace Propagation**
+- Description: Developers manually add trace headers to each API call
+- Why rejected: Error-prone, inconsistent, easy to forget
+
+**Alternative 2: Fetch Wrapper**
+- Description: Create a wrapper around fetch that automatically adds trace headers
+- Why rejected: Would require changing all fetch calls, more invasive
+
+**Alternative 3: Middleware/Interceptor**
+- Description: Use a request interceptor to add trace headers
+- Why rejected: More complex, harder to debug
+
+### Rationale
+The selected approach provides:
+- Centralized trace header creation via `createApiHeaders()` helper
+- Automatic trace ID inclusion in logger without code changes
+- Gradual migration path (update fetch calls as needed)
+- Consistent trace propagation across all API calls
+
+### Implementation Pattern
+1. **API Headers Helper:**
+   - `createApiHeaders()` function in `enhanced-api.ts`
+   - Automatically gets auth token and creates trace context
+   - Adds trace headers (x-trace-id, x-span-id, x-request-id) to all requests
+   - Fallback handling if auth fails
+
+2. **Logger Enhancement:**
+   - Logger automatically includes traceId, spanId, requestId in all log entries
+   - Trace IDs included in both LogEntry interface and data object
+   - Console output shows trace ID in readable format: `[context][trace:abc123...] message`
+
+3. **Migration Pattern:**
+   ```typescript
+   // OLD:
+   const response = await fetch(url, {
+     headers: {
+       'Authorization': `Bearer ${token}`,
+       'Content-Type': 'application/json',
+     },
+   });
+   
+   // NEW:
+   const headers = await createApiHeaders();
+   const response = await fetch(url, { headers });
+   ```
+
+### Impact
+**Short-term:**
+- `getRevenueAnalytics()` and `getBillingAnalytics()` updated as examples
+- Logger now includes trace IDs automatically
+- Other API calls can be migrated gradually
+
+**Long-term:**
+- All API calls will have trace propagation
+- Improved debugging and observability
+- Better correlation of logs across frontend and backend
+
+**Affected Areas:**
+- `frontend/src/lib/enhanced-api.ts` - Added `createApiHeaders()` helper
+- `frontend/src/utils/logger.ts` - Enhanced to include trace IDs
+- All future API calls should use `createApiHeaders()`
+
+### Lessons Learned
+**What Worked Well:**
+- Centralized helper function makes migration straightforward
+- Automatic trace ID inclusion in logger requires no code changes
+- Fallback handling ensures trace propagation even if auth fails
+
+**What Would Be Done Differently:**
+- Could add automated migration script to update all fetch calls at once
+- Could add validation to ensure trace headers are present in all API calls
+
+### Related Decisions
+- Structured logging and trace propagation pattern
+- Observability infrastructure
+- Error handling standards
+
+---
+
+**Last Updated:** 2025-11-18

@@ -1,7 +1,10 @@
 /**
  * Centralized logging utility
  * Replaces console.log/error/warn with structured logging
+ * MANDATORY: Automatically includes trace IDs for observability
  */
+
+import { getCurrentTraceId, generateSpanId, generateRequestId } from '@/lib/trace-propagation';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
@@ -11,6 +14,9 @@ interface LogEntry {
   data?: Record<string, any>;
   timestamp: string;
   context?: string;
+  traceId?: string;
+  spanId?: string;
+  requestId?: string;
 }
 
 class Logger {
@@ -19,12 +25,26 @@ class Logger {
   private maxHistorySize = 100;
 
   private formatMessage(level: LogLevel, message: string, data?: Record<string, any>, context?: string): LogEntry {
+    // Automatically include trace IDs for observability
+    const traceId = getCurrentTraceId();
+    const spanId = generateSpanId(); // New span for each log entry
+    const requestId = generateRequestId(); // New request ID for each log entry
+    
     return {
       level,
       message,
-      data: data || {},
+      data: {
+        ...(data || {}),
+        // Include trace IDs in data for structured logging
+        traceId: traceId || undefined,
+        spanId,
+        requestId,
+      },
       timestamp: new Date().toISOString(),
       context: context || 'CardSystem',
+      traceId: traceId || undefined,
+      spanId,
+      requestId,
     };
   }
 
@@ -48,7 +68,8 @@ class Logger {
     this.addToHistory(entry);
     
     if (this.shouldLog('debug')) {
-      console.debug(`[${entry.context}] ${message}`, data || '');
+      const traceInfo = entry.traceId ? `[trace:${entry.traceId.substring(0, 8)}...]` : '';
+      console.debug(`[${entry.context}]${traceInfo} ${message}`, entry.data || '');
     }
   }
 
@@ -57,7 +78,8 @@ class Logger {
     this.addToHistory(entry);
     
     if (this.shouldLog('info')) {
-      console.info(`[${entry.context}] ${message}`, data || '');
+      const traceInfo = entry.traceId ? `[trace:${entry.traceId.substring(0, 8)}...]` : '';
+      console.info(`[${entry.context}]${traceInfo} ${message}`, entry.data || '');
     }
   }
 
@@ -65,7 +87,8 @@ class Logger {
     const entry = this.formatMessage('warn', message, data, context);
     this.addToHistory(entry);
     
-    console.warn(`[${entry.context}] ⚠️ ${message}`, data || '');
+    const traceInfo = entry.traceId ? `[trace:${entry.traceId.substring(0, 8)}...]` : '';
+    console.warn(`[${entry.context}]${traceInfo} ⚠️ ${message}`, entry.data || '');
   }
 
   error(message: string, error?: Error | unknown, context?: string) {
@@ -76,7 +99,8 @@ class Logger {
     const entry = this.formatMessage('error', message, errorData, context);
     this.addToHistory(entry);
     
-    console.error(`[${entry.context}] ❌ ${message}`, errorData);
+    const traceInfo = entry.traceId ? `[trace:${entry.traceId.substring(0, 8)}...]` : '';
+    console.error(`[${entry.context}]${traceInfo} ❌ ${message}`, entry.data || '');
     
     // In production, send to error tracking service (e.g., Sentry)
     if (!this.isDevelopment && typeof window !== 'undefined') {

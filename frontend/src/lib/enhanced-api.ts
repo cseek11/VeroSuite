@@ -7,6 +7,7 @@
 import { supabase } from './supabase-client';
 import { enhancedApiCall } from './api-utils';
 import { logger } from '@/utils/logger';
+import { createTraceContextForApiCall, addTraceContextToHeaders } from './trace-propagation';
 import type { 
   Account, 
   CustomerProfile, 
@@ -188,6 +189,37 @@ const _validateTenantAccess = async (claimedTenantId: string): Promise<boolean> 
   } catch (error: unknown) {
     logger.error('Error validating tenant access', error, 'enhanced-api');
     return false;
+  }
+};
+
+/**
+ * Create headers with authentication and trace propagation
+ * MANDATORY: All API calls must include trace headers for observability
+ */
+const createApiHeaders = async (additionalHeaders: Record<string, string> = {}): Promise<HeadersInit> => {
+  try {
+    const token = await getAuthToken();
+    const traceContext = createTraceContextForApiCall();
+    
+    const baseHeaders: Record<string, string> = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      ...additionalHeaders,
+    };
+    
+    // Add trace propagation headers
+    const headersWithTrace = addTraceContextToHeaders(baseHeaders, traceContext);
+    
+    return headersWithTrace;
+  } catch (error) {
+    logger.error('Error creating API headers', error, 'enhanced-api');
+    // Fallback: return headers without auth but with trace if auth fails
+    const traceContext = createTraceContextForApiCall();
+    const fallbackHeaders: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...additionalHeaders,
+    };
+    return addTraceContextToHeaders(fallbackHeaders, traceContext);
   }
 };
 
@@ -2391,24 +2423,9 @@ export const billing = {
   // Billing Analytics
   getBillingAnalytics: async (): Promise<BillingAnalytics> => {
     try {
-      const authData = localStorage.getItem('verofield_auth');
-      if (!authData) throw new Error('User not authenticated');
-
-      let token;
-      try {
-        const parsed = JSON.parse(authData);
-        token = parsed.token || parsed;
-      } catch {
-        token = authData;
-      }
-
-      if (!token) throw new Error('No access token found');
-
+      const headers = await createApiHeaders();
       const response = await fetch('http://localhost:3001/api/v1/billing/analytics/overview', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       if (!response.ok) {
@@ -2431,28 +2448,13 @@ export const billing = {
 
   getRevenueAnalytics: async (startDate?: string, endDate?: string): Promise<RevenueAnalytics> => {
     try {
-      const authData = localStorage.getItem('verofield_auth');
-      if (!authData) throw new Error('User not authenticated');
-
-      let token;
-      try {
-        const parsed = JSON.parse(authData);
-        token = parsed.token || parsed;
-      } catch {
-        token = authData;
-      }
-
-      if (!token) throw new Error('No access token found');
-
       const params = new URLSearchParams();
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
 
+      const headers = await createApiHeaders();
       const response = await fetch(`http://localhost:3001/api/v1/billing/analytics/revenue?${params.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       if (!response.ok) {
