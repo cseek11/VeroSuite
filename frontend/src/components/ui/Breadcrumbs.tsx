@@ -42,6 +42,7 @@ import React, { memo } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 import { logger } from '@/utils/logger';
+import { getOrCreateTraceContext } from '@/lib/trace-propagation';
 
 export interface BreadcrumbItem {
   label: string;
@@ -191,7 +192,16 @@ function Breadcrumbs({
     try {
       navigate(path);
     } catch (error) {
-      logger.error('Breadcrumb navigation failed', error, 'Breadcrumbs', 'handleClick');
+      const traceContext = getOrCreateTraceContext();
+      logger.error(
+        'Breadcrumb navigation failed',
+        error,
+        'Breadcrumbs',
+        'handleClick',
+        traceContext.traceId,
+        traceContext.spanId,
+        traceContext.requestId
+      );
     }
   };
   
