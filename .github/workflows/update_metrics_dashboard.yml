@@ -9,6 +9,11 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pull-requests: read
+  actions: read
+
 jobs:
   update-metrics:
     runs-on: ubuntu-latest
