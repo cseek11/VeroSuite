@@ -1,4 +1,12 @@
 // ============================================================================
+// UI Components Exports
+// ============================================================================
+export { ErrorMessage } from './ErrorMessage';
+export { LoadingOverlay } from './LoadingOverlay';
+export { default as ErrorMessage } from './ErrorMessage';
+export { default as LoadingOverlay } from './LoadingOverlay';
+
+// ============================================================================
 // DEPRECATED: EnhancedUI Components
 // ============================================================================
 // ⚠️  These components are DEPRECATED and should NOT be used in new code.

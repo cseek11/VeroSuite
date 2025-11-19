@@ -8,9 +8,10 @@ import {
   Mail,
   Phone,
   MapPin,
-  Loader2,
-  AlertCircle
+  Loader2
 } from 'lucide-react';
+import { ErrorMessage } from './ErrorMessage';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { secureApiClient } from '@/lib/secure-api-client';
 import { Account } from '@/types/enhanced-types';
 import { logger } from '@/utils/logger';
@@ -208,7 +209,7 @@ export default function CustomerSearchSelector({
   const isLoading = searchLoading || customersLoading;
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative w-full ${className}`}>
       {label && (
         <label className="crm-label">
           {label} {required && <span className="text-red-500">*</span>}
@@ -227,7 +228,9 @@ export default function CustomerSearchSelector({
           onChange={handleInputChange}
           onFocus={handleInputFocus}
           placeholder={placeholder}
-          className={`crm-input pl-10 pr-10 ${error ? 'border-red-500' : ''}`}
+          className={`crm-input pl-10 pr-10 ${error ? 'border-red-500' : ''} w-full`}
+          aria-invalid={error ? 'true' : 'false'}
+          aria-describedby={error ? 'customer-search-error' : undefined}
         />
         
         {searchTerm && (
@@ -235,24 +238,24 @@ export default function CustomerSearchSelector({
             <button
               onClick={handleClear}
               className="text-gray-400 hover:text-gray-600 transition-colors"
+              data-testid="clear-button"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" data-testid="x-icon" />
             </button>
           </div>
         )}
 
         {isLoading && (
           <div className="absolute inset-y-0 right-8 pr-3 flex items-center">
-            <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+            <LoadingSpinner size="sm" />
           </div>
         )}
       </div>
 
       {error && (
-        <p className="crm-error flex items-center">
-          <AlertCircle className="w-4 h-4 mr-1" />
-          {error}
-        </p>
+        <div id="customer-search-error" className="mt-2">
+          <ErrorMessage message={error} type="error" />
+        </div>
       )}
 
       {/* Selected Customer Box (when showSelectedBox is true) */}
@@ -282,12 +285,11 @@ export default function CustomerSearchSelector({
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute z-[9999] w-full mt-1 bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/20"
+          className="absolute z-[9999] w-full mt-1 bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/20 max-h-[80vh] overflow-y-auto"
         >
           {isLoading ? (
             <div className="px-4 py-8 text-center">
-              <Loader2 className="w-6 h-6 animate-spin mx-auto text-purple-500" />
-              <p className="mt-2 text-sm text-gray-500">Searching customers...</p>
+              <LoadingSpinner size="md" text="Searching customers..." />
             </div>
           ) : displayCustomers.length === 0 ? (
             <div className="px-4 py-8 text-center">
