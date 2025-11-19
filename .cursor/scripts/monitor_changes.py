@@ -615,13 +615,45 @@ def analyze_and_improve_pr_quality(files: Dict[str, Dict], repo_path: pathlib.Pa
     Analyze past Reward Scores and generate improvement recommendations before PR creation.
     
     This function:
-    1. Reads last 5-10 Reward Scores from docs/metrics/reward_scores.json
-    2. Analyzes trends using analyze_reward_trends.py
-    3. Generates improvement recommendations
-    4. Writes feedback file that Cursor reads via enforcement rules
-    5. Logs analysis to docs/ai/self_improvement_log.md
+    1. Syncs reward_scores.json from GitHub main branch (if available)
+    2. Reads last 5-10 Reward Scores from docs/metrics/reward_scores.json
+    3. Analyzes trends using analyze_reward_trends.py
+    4. Generates improvement recommendations
+    5. Writes feedback file that Cursor reads via enforcement rules
+    6. Logs analysis to docs/ai/self_improvement_log.md
     """
     try:
+        # Sync reward_scores.json from origin/main before analysis (non-blocking)
+        # This ensures we have the latest scores for trend analysis
+        reward_scores_path = repo_path / "docs" / "metrics" / "reward_scores.json"
+        try:
+            # Fetch latest from origin (quiet, non-blocking)
+            subprocess.run(
+                ["git", "fetch", "origin", "main"],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False
+            )
+            # Checkout file from origin/main if it exists there (non-destructive)
+            subprocess.run(
+                ["git", "checkout", "origin/main", "--", "docs/metrics/reward_scores.json"],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False  # Non-fatal: continue with local file if sync fails
+            )
+            logger.debug("Attempted to sync reward_scores.json from origin/main", operation="analyze_and_improve_pr_quality")
+        except Exception as e:
+            # Non-fatal: continue with local file
+            logger.debug(
+                f"Could not sync reward_scores.json (non-fatal): {e}",
+                operation="analyze_and_improve_pr_quality",
+                error=str(e)
+            )
+        
         # Get script paths
         analyze_script = pathlib.Path(__file__).resolve().parent / "analyze_reward_trends.py"
         feedback_dir = pathlib.Path(__file__).resolve().parents[1] / "feedback"

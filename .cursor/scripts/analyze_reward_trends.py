@@ -15,6 +15,7 @@ Usage:
 import argparse
 import json
 import pathlib
+import subprocess
 import sys
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
@@ -31,8 +32,140 @@ except ImportError:
 REWARD_SCORES_PATH = pathlib.Path(__file__).resolve().parents[2] / "docs" / "metrics" / "reward_scores.json"
 
 
+def sync_reward_scores_file(repo_path: pathlib.Path, file_path: pathlib.Path) -> bool:
+    """
+    Sync reward_scores.json from GitHub main branch if available.
+    
+    Returns True if sync was attempted (success or failure), False if skipped.
+    """
+    try:
+        # Check if we're in a git repository
+        result = subprocess.run(
+            ["git", "rev-parse", "--git-dir"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        if result.returncode != 0:
+            # Not a git repo, skip sync
+            return False
+        
+        # Check current branch
+        branch_result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        current_branch = branch_result.stdout.strip() if branch_result.returncode == 0 else None
+        
+        # Fetch latest from origin (non-blocking, quiet)
+        try:
+            subprocess.run(
+                ["git", "fetch", "origin", "main"],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False  # Don't fail if fetch fails
+            )
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            # Git not available or timeout, skip sync
+            return False
+        
+        # Check if file exists on origin/main
+        check_result = subprocess.run(
+            ["git", "cat-file", "-e", "origin/main:docs/metrics/reward_scores.json"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        
+        if check_result.returncode != 0:
+            # File doesn't exist on origin/main, skip
+            return False
+        
+        # Check if local file is outdated (compare with origin/main)
+        # Get last commit time of file on origin/main
+        origin_time_result = subprocess.run(
+            ["git", "log", "-1", "--format=%ct", "origin/main", "--", str(file_path.relative_to(repo_path))],
+            cwd=repo_path,
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        
+        if origin_time_result.returncode == 0 and origin_time_result.stdout.strip():
+            origin_timestamp = int(origin_time_result.stdout.strip())
+            
+            # Get local file modification time
+            if file_path.exists():
+                local_timestamp = int(file_path.stat().st_mtime)
+                
+                # If origin is newer (or within 1 second tolerance), sync
+                if origin_timestamp > local_timestamp + 1:
+                    logger.info(
+                        f"Syncing reward_scores.json from origin/main (local: {local_timestamp}, origin: {origin_timestamp})",
+                        operation="sync_reward_scores_file"
+                    )
+                    
+                    # Checkout file from origin/main (non-destructive, only updates if different)
+                    sync_result = subprocess.run(
+                        ["git", "checkout", "origin/main", "--", str(file_path.relative_to(repo_path))],
+                        cwd=repo_path,
+                        capture_output=True,
+                        text=True,
+                        timeout=10
+                    )
+                    
+                    if sync_result.returncode == 0:
+                        logger.info(
+                            "Successfully synced reward_scores.json from origin/main",
+                            operation="sync_reward_scores_file"
+                        )
+                        return True
+                    else:
+                        logger.warn(
+                            f"Failed to sync reward_scores.json: {sync_result.stderr}",
+                            operation="sync_reward_scores_file",
+                            error=sync_result.stderr
+                        )
+                        return True  # Attempted but failed
+            else:
+                # Local file doesn't exist, try to get it from origin
+                logger.info(
+                    "Local reward_scores.json not found, fetching from origin/main",
+                    operation="sync_reward_scores_file"
+                )
+                sync_result = subprocess.run(
+                    ["git", "checkout", "origin/main", "--", str(file_path.relative_to(repo_path))],
+                    cwd=repo_path,
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                return sync_result.returncode == 0
+        
+        return False
+    except Exception as e:
+        # Non-fatal: log and continue with local file
+        logger.debug(
+            f"Could not sync reward_scores.json from GitHub: {e}",
+            operation="sync_reward_scores_file",
+            error=str(e)
+        )
+        return False
+
+
 def load_reward_scores() -> Dict:
-    """Load reward scores JSON file."""
+    """Load reward scores JSON file, syncing from GitHub if needed."""
+    # Auto-sync from origin/main before loading (non-blocking)
+    repo_path = REWARD_SCORES_PATH.resolve().parents[2]
+    sync_reward_scores_file(repo_path, REWARD_SCORES_PATH)
+    
     try:
         with open(REWARD_SCORES_PATH, "r", encoding="utf-8") as handle:
             return json.load(handle)
