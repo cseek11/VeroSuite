@@ -885,4 +885,138 @@ The CI automation suite provides:
 
 ---
 
-**Last Updated:** 2025-11-17
+## Breadcrumb Navigation Component - 2025-11-19
+
+### Decision
+Implement automatic breadcrumb navigation component that generates breadcrumb trails from URL paths using React Router's `useLocation` hook, with customizable route labels, UUID detection, and full accessibility support.
+
+### Context
+**Problem Statement:**
+- Users need clear navigation context to understand their location in the application
+- Deep navigation paths make it difficult to understand hierarchy
+- No existing breadcrumb component in the codebase
+- Need consistent navigation UX across all pages
+
+**Constraints:**
+- Must work with existing React Router v6 setup
+- Must be accessible (WCAG AA compliance)
+- Must handle dynamic routes with UUIDs
+- Must be performant (no unnecessary re-renders)
+- Must follow VeroField development rules (error handling, logging, trace propagation)
+
+**Requirements:**
+- Automatic route parsing from URL path
+- Customizable route labels for known routes
+- UUID detection and label inference
+- Accessible navigation (ARIA labels, schema.org structured data)
+- Error handling with graceful fallback
+- Structured logging with trace propagation
+- Responsive design matching existing UI patterns
+
+### Trade-offs
+**Pros:**
+- Automatic breadcrumb generation reduces maintenance burden
+- UUID detection handles dynamic routes intelligently
+- Full accessibility support improves UX for all users
+- Schema.org structured data improves SEO
+- Graceful error handling ensures component never breaks navigation
+- Trace propagation enables observability for debugging
+- Memoization ensures efficient rendering
+
+**Cons:**
+- Route label mapping requires maintenance as routes are added
+- UUID detection logic adds complexity
+- Fallback label generation may not always be perfect
+- Component doesn't handle query parameters or hash fragments
+
+### Alternatives Considered
+**Alternative 1: Manual Breadcrumb Configuration**
+- Description: Each page manually configures its breadcrumb trail
+- Why rejected: High maintenance burden, easy to forget, inconsistent UX
+
+**Alternative 2: Route Configuration File**
+- Description: Centralized route configuration file with breadcrumb metadata
+- Why rejected: Requires maintaining separate config, harder to keep in sync with actual routes
+
+**Alternative 3: Third-Party Breadcrumb Library**
+- Description: Use library like `react-breadcrumbs` or `use-react-router-breadcrumbs`
+- Why rejected: Adds external dependency, may not match our patterns, harder to customize
+
+**Alternative 4: Server-Side Breadcrumb Generation**
+- Description: Generate breadcrumbs on backend based on route metadata
+- Why rejected: Adds API overhead, requires backend changes, breaks client-side navigation
+
+### Rationale
+The automatic breadcrumb generation approach provides:
+- Low maintenance: Route labels defined once in component
+- Intelligent fallbacks: UUID detection and capitalization for unknown routes
+- Full accessibility: ARIA labels and schema.org structured data
+- Error resilience: Graceful fallback ensures navigation never breaks
+- Observability: Trace propagation enables debugging
+- Performance: Memoization prevents unnecessary re-renders
+- Consistency: Matches existing UI patterns and styling
+
+### Implementation Pattern
+1. **Route Label Mapping:**
+   - Centralized `routeLabels` object in component
+   - Maps URL paths to readable labels
+   - Supports nested routes (e.g., `/billing/invoices`)
+   - Easy to extend as new routes are added
+
+2. **Breadcrumb Generation:**
+   - Uses `useLocation` hook to get current pathname
+   - Splits path into segments
+   - Matches segments against route labels
+   - Falls back to UUID detection or capitalization
+
+3. **UUID Detection:**
+   - Regex pattern matching for UUID format
+   - Infers label from previous route segment
+   - Handles common patterns (e.g., `/work-orders/:id` → "Work Orders Details")
+
+4. **Error Handling:**
+   - Try-catch around breadcrumb generation
+   - Structured logging with trace propagation
+   - Graceful fallback returns minimal breadcrumb (Home)
+
+5. **Accessibility:**
+   - ARIA labels on navigation element
+   - `aria-current="page"` on current breadcrumb
+   - `aria-hidden="true"` on decorative separators
+   - Schema.org BreadcrumbList and ListItem microdata
+
+6. **Performance:**
+   - `useMemo` for breadcrumb generation
+   - Only re-renders on pathname change
+   - Early return on home page (no breadcrumbs shown)
+
+### Affected Areas
+- `frontend/src/components/common/Breadcrumbs.tsx` - Main component (163 lines)
+- `frontend/src/components/common/index.ts` - Export file
+- `frontend/src/components/common/__tests__/Breadcrumbs.test.tsx` - Test suite (350 lines)
+- Layout components (future integration)
+
+### Lessons Learned
+**What Worked Well:**
+- Automatic route parsing reduces maintenance
+- UUID detection handles dynamic routes elegantly
+- Memoization prevents performance issues
+- Graceful error handling ensures reliability
+- Accessibility features improve UX for all users
+
+**What Would Be Done Differently:**
+- Could add query parameter support for filtered views
+- Could add hash fragment support for anchor links
+- Could add breadcrumb customization props for special cases
+- Could add breadcrumb history navigation (back button)
+
+### Related Decisions
+- React Router data fetching pattern
+- Accessibility enforcement (WCAG AA)
+- Error handling and resilience patterns
+- Structured logging and trace propagation
+- UX consistency patterns
+
+---
+
+**Last Updated:** 2025-11-19
