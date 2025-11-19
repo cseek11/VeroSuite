@@ -164,14 +164,14 @@ This document consolidates all development tasks from multiple planning document
 
 ### **Category: Frontend Testing**
 
-- [ ] WorkOrderForm Component Tests
+- [x] WorkOrderForm Component Tests ✅ **COMPLETED 2025-11-19**
   - **File:** `frontend/src/components/work-orders/__tests__/WorkOrderForm.test.tsx`
-  - **Estimated:** 4-6 hours
+  - **Status:** Enhanced with error handling tests (26 tests passing). Fixed silent catch block, added toast error display, comprehensive error scenario coverage.
   - **Reference:** `docs/TASKS_WITHOUT_MIGRATION.md` lines 22-28
 
-- [ ] CustomerSearchSelector Component Tests
-  - **File:** `frontend/src/components/common/__tests__/CustomerSearchSelector.test.tsx`
-  - **Estimated:** 3-4 hours
+- [x] CustomerSearchSelector Component Tests ✅ **COMPLETED 2025-11-19**
+  - **File:** `frontend/src/components/ui/__tests__/CustomerSearchSelector.test.tsx` (corrected path)
+  - **Status:** Fixed failing test by adding `data-testid="clear-button"` to clear button and improving test event handling. All 23 tests passing.
   - **Reference:** `docs/TASKS_WITHOUT_MIGRATION.md` lines 30-36
 
 - [ ] Billing Component Tests

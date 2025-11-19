@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-19T16:00:06.387579Z",
+  "last_updated": "2025-11-19T17:03:24.521292Z",
   "scores": [
     {
       "pr": "56",
@@ -37628,54 +37628,1142 @@
       "files_changed": 0,
       "coverage_delta": null,
       "file_scores": {}
+    },
+    {
+      "pr": "217",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:03:25.373519Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "220",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:04:22.803611Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "219",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:04:59.126143Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "221",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:14:36.657769Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "223",
+      "score": -8,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 1,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:15:05.507518Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "224",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:30:33.731257Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "226",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:36:12.476098Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "229",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:36:53.362614Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "231",
+      "score": -8,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 1,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:37:21.718236Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "233",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:37:56.330668Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "235",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:38:25.816121Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "237",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:38:58.563525Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "240",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:39:31.262064Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "243",
+      "score": -8,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 1,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:40:44.339317Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "245",
+      "score": -8,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 1,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:41:17.437037Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "248",
+      "score": -8,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 1,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:41:48.026412Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "250",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:42:19.573245Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "253",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:42:50.904744Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "252",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:44:07.386407Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "255",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:48:21.346653Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "258",
+      "score": -8,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 1,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:48:54.214568Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "260",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:49:25.197889Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "261",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:55:02.940677Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "263",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:55:33.458737Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "265",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:56:02.661877Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "268",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:56:38.953412Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "272",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:57:13.723385Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "274",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:57:40.985554Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "277",
+      "score": -8,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 1,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:58:13.020322Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "279",
+      "score": -8,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 1,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:58:40.837272Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "282",
+      "score": -8,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 1,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:59:19.799458Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "286",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T17:00:03.044373Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "288",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T17:00:34.589725Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
+    },
+    {
+      "pr": "284",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T17:01:21.714593Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
     }
   ],
   "aggregates": {
-    "total_prs": 61,
-    "average_score": -7.11,
+    "total_prs": 95,
+    "average_score": -7.69,
     "score_distribution": {
-      "negative (<0)": 61
+      "negative (<0)": 95
     },
     "trends": [
       {
         "period": "2025-W46",
-        "average": -7.114754098360656,
-        "count": 61
+        "average": -7.6947368421052635,
+        "count": 95
       }
     ],
     "category_performance": {
       "tests": {
-        "average": 0.66,
+        "average": 0.42,
         "total": 40.0,
         "count": 28
       },
       "bug_fix": {
-        "average": 0.16,
-        "total": 10,
-        "count": 10
+        "average": 0.2,
+        "total": 19,
+        "count": 19
       },
       "docs": {
-        "average": 0.46,
+        "average": 0.29,
         "total": 28.0,
         "count": 28
       },
       "performance": {
-        "average": 0.41,
+        "average": 0.26,
         "total": 25,
         "count": 25
       },
       "security": {
         "average": -3.0,
-        "total": -183,
-        "count": 61
+        "total": -285,
+        "count": 95
       },
       "penalties": {
-        "average": -5.74,
-        "total": -350,
-        "count": 61
+        "average": -5.83,
+        "total": -554,
+        "count": 95
       }
     },
     "anti_patterns": [
+      {
+        "pr": "284",
+        "score": -9,
+        "timestamp": "2025-11-19T17:01:21.714593Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "288",
+        "score": -9,
+        "timestamp": "2025-11-19T17:00:34.589725Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "286",
+        "score": -9,
+        "timestamp": "2025-11-19T17:00:03.044373Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "282",
+        "score": -8,
+        "timestamp": "2025-11-19T16:59:19.799458Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 1,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "279",
+        "score": -8,
+        "timestamp": "2025-11-19T16:58:40.837272Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 1,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "277",
+        "score": -8,
+        "timestamp": "2025-11-19T16:58:13.020322Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 1,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "274",
+        "score": -9,
+        "timestamp": "2025-11-19T16:57:40.985554Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "272",
+        "score": -9,
+        "timestamp": "2025-11-19T16:57:13.723385Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "268",
+        "score": -9,
+        "timestamp": "2025-11-19T16:56:38.953412Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "265",
+        "score": -9,
+        "timestamp": "2025-11-19T16:56:02.661877Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "263",
+        "score": -9,
+        "timestamp": "2025-11-19T16:55:33.458737Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "261",
+        "score": -9,
+        "timestamp": "2025-11-19T16:55:02.940677Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "260",
+        "score": -9,
+        "timestamp": "2025-11-19T16:49:25.197889Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "258",
+        "score": -8,
+        "timestamp": "2025-11-19T16:48:54.214568Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 1,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "255",
+        "score": -9,
+        "timestamp": "2025-11-19T16:48:21.346653Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "252",
+        "score": -9,
+        "timestamp": "2025-11-19T16:44:07.386407Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "253",
+        "score": -9,
+        "timestamp": "2025-11-19T16:42:50.904744Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "250",
+        "score": -9,
+        "timestamp": "2025-11-19T16:42:19.573245Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "248",
+        "score": -8,
+        "timestamp": "2025-11-19T16:41:48.026412Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 1,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "245",
+        "score": -8,
+        "timestamp": "2025-11-19T16:41:17.437037Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 1,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "243",
+        "score": -8,
+        "timestamp": "2025-11-19T16:40:44.339317Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 1,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "240",
+        "score": -9,
+        "timestamp": "2025-11-19T16:39:31.262064Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "237",
+        "score": -9,
+        "timestamp": "2025-11-19T16:38:58.563525Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "235",
+        "score": -9,
+        "timestamp": "2025-11-19T16:38:25.816121Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "233",
+        "score": -9,
+        "timestamp": "2025-11-19T16:37:56.330668Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "231",
+        "score": -8,
+        "timestamp": "2025-11-19T16:37:21.718236Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 1,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "229",
+        "score": -9,
+        "timestamp": "2025-11-19T16:36:53.362614Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "226",
+        "score": -9,
+        "timestamp": "2025-11-19T16:36:12.476098Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "224",
+        "score": -9,
+        "timestamp": "2025-11-19T16:30:33.731257Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "223",
+        "score": -8,
+        "timestamp": "2025-11-19T16:15:05.507518Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 1,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "221",
+        "score": -9,
+        "timestamp": "2025-11-19T16:14:36.657769Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "219",
+        "score": -9,
+        "timestamp": "2025-11-19T16:04:59.126143Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "220",
+        "score": -9,
+        "timestamp": "2025-11-19T16:04:22.803611Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
+      {
+        "pr": "217",
+        "score": -9,
+        "timestamp": "2025-11-19T16:03:25.373519Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
       {
         "pr": "211",
         "score": -9,
@@ -37895,482 +38983,6 @@
           "bug_fix": 0,
           "docs": 0,
           "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "162",
-        "score": -9,
-        "timestamp": "2025-11-19T15:41:49.681480Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 0,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "160",
-        "score": -3,
-        "timestamp": "2025-11-19T15:36:43.134825Z",
-        "breakdown": {
-          "tests": 2.5,
-          "bug_fix": 0,
-          "docs": 1.0,
-          "performance": 1,
-          "security": -3,
-          "penalties": -4
-        },
-        "penalties": -4
-      },
-      {
-        "pr": "156",
-        "score": -3,
-        "timestamp": "2025-11-19T15:35:35.883807Z",
-        "breakdown": {
-          "tests": 2.5,
-          "bug_fix": 0,
-          "docs": 1.0,
-          "performance": 1,
-          "security": -3,
-          "penalties": -4
-        },
-        "penalties": -4
-      },
-      {
-        "pr": "146",
-        "score": -8,
-        "timestamp": "2025-11-19T15:31:12.103355Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 1,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "154",
-        "score": -3,
-        "timestamp": "2025-11-19T15:30:51.616229Z",
-        "breakdown": {
-          "tests": 2.5,
-          "bug_fix": 0,
-          "docs": 1.0,
-          "performance": 1,
-          "security": -3,
-          "penalties": -4
-        },
-        "penalties": -4
-      },
-      {
-        "pr": "153",
-        "score": -3,
-        "timestamp": "2025-11-19T15:30:14.344451Z",
-        "breakdown": {
-          "tests": 2.5,
-          "bug_fix": 0,
-          "docs": 1.0,
-          "performance": 1,
-          "security": -3,
-          "penalties": -4
-        },
-        "penalties": -4
-      },
-      {
-        "pr": "148",
-        "score": -8,
-        "timestamp": "2025-11-19T15:29:10.501015Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 1,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "135",
-        "score": -9,
-        "timestamp": "2025-11-19T15:23:00.720375Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 0,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "129",
-        "score": -3,
-        "timestamp": "2025-11-19T15:20:18.957536Z",
-        "breakdown": {
-          "tests": 2.5,
-          "bug_fix": 0,
-          "docs": 1.0,
-          "performance": 1,
-          "security": -3,
-          "penalties": -4
-        },
-        "penalties": -4
-      },
-      {
-        "pr": "125",
-        "score": -3,
-        "timestamp": "2025-11-19T15:15:34.947783Z",
-        "breakdown": {
-          "tests": 2.5,
-          "bug_fix": 0,
-          "docs": 1.0,
-          "performance": 1,
-          "security": -3,
-          "penalties": -4
-        },
-        "penalties": -4
-      },
-      {
-        "pr": "127",
-        "score": -3,
-        "timestamp": "2025-11-19T15:14:57.715065Z",
-        "breakdown": {
-          "tests": 2.5,
-          "bug_fix": 0,
-          "docs": 1.0,
-          "performance": 1,
-          "security": -3,
-          "penalties": -4
-        },
-        "penalties": -4
-      },
-      {
-        "pr": "126",
-        "score": -9,
-        "timestamp": "2025-11-19T15:14:33.815978Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 0,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "124",
-        "score": -9,
-        "timestamp": "2025-11-19T15:14:03.490538Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 0,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "123",
-        "score": -9,
-        "timestamp": "2025-11-19T14:48:32.824939Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 0,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "117",
-        "score": -9,
-        "timestamp": "2025-11-19T14:38:01.982134Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 0,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "108",
-        "score": -9,
-        "timestamp": "2025-11-19T14:36:39.552074Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 0,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "102",
-        "score": -9,
-        "timestamp": "2025-11-19T14:31:12.873169Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 0,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "94",
-        "score": -3,
-        "timestamp": "2025-11-19T14:28:07.323816Z",
-        "breakdown": {
-          "tests": 2.5,
-          "bug_fix": 0,
-          "docs": 1.0,
-          "performance": 1,
-          "security": -3,
-          "penalties": -4
-        },
-        "penalties": -4
-      },
-      {
-        "pr": "90",
-        "score": -9,
-        "timestamp": "2025-11-19T14:12:17.560184Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 0,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "87",
-        "score": -9,
-        "timestamp": "2025-11-19T14:06:51.697924Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 0,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "85",
-        "score": -6,
-        "timestamp": "2025-11-19T13:41:31.865142Z",
-        "breakdown": {
-          "tests": 1,
-          "bug_fix": 0,
-          "docs": 1,
-          "performance": 1,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "84",
-        "score": -9,
-        "timestamp": "2025-11-19T12:26:18.129951Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 0,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "81",
-        "score": -9,
-        "timestamp": "2025-11-19T12:25:50.353429Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 0,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "77",
-        "score": -6,
-        "timestamp": "2025-11-19T12:02:21.036581Z",
-        "breakdown": {
-          "tests": 1,
-          "bug_fix": 0,
-          "docs": 1,
-          "performance": 1,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "75",
-        "score": -9,
-        "timestamp": "2025-11-19T11:54:59.089451Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 0,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "74",
-        "score": -6,
-        "timestamp": "2025-11-19T06:00:44.346005Z",
-        "breakdown": {
-          "tests": 1,
-          "bug_fix": 0,
-          "docs": 1,
-          "performance": 1,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "72",
-        "score": -6,
-        "timestamp": "2025-11-19T06:00:40.875901Z",
-        "breakdown": {
-          "tests": 1,
-          "bug_fix": 0,
-          "docs": 1,
-          "performance": 1,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "73",
-        "score": -6,
-        "timestamp": "2025-11-19T06:00:37.729818Z",
-        "breakdown": {
-          "tests": 1,
-          "bug_fix": 0,
-          "docs": 1,
-          "performance": 1,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "70",
-        "score": -6,
-        "timestamp": "2025-11-19T06:00:05.943879Z",
-        "breakdown": {
-          "tests": 1,
-          "bug_fix": 0,
-          "docs": 1,
-          "performance": 1,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "71",
-        "score": -6,
-        "timestamp": "2025-11-19T06:00:04.092749Z",
-        "breakdown": {
-          "tests": 1,
-          "bug_fix": 0,
-          "docs": 1,
-          "performance": 1,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "69",
-        "score": -5,
-        "timestamp": "2025-11-19T05:55:05.498811Z",
-        "breakdown": {
-          "tests": 1,
-          "bug_fix": 1,
-          "docs": 1,
-          "performance": 1,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "67",
-        "score": -6,
-        "timestamp": "2025-11-19T05:50:19.585072Z",
-        "breakdown": {
-          "tests": 1,
-          "bug_fix": 0,
-          "docs": 1,
-          "performance": 1,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "68",
-        "score": -6,
-        "timestamp": "2025-11-19T05:50:15.418556Z",
-        "breakdown": {
-          "tests": 1,
-          "bug_fix": 0,
-          "docs": 1,
-          "performance": 1,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "65",
-        "score": -5,
-        "timestamp": "2025-11-19T05:50:05.179689Z",
-        "breakdown": {
-          "tests": 1,
-          "bug_fix": 1,
-          "docs": 1,
-          "performance": 1,
           "security": -3,
           "penalties": -6
         },
