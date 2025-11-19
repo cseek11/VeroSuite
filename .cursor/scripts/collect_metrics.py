@@ -174,6 +174,9 @@ def add_score_entry(metrics: Dict, pr_num: str, score: int, breakdown: Dict, met
     
     # Keep only last 1000 entries
     metrics["scores"] = metrics["scores"][-1000:]
+    
+    # Sort by timestamp (most recent first) after adding/updating
+    metrics["scores"].sort(key=lambda x: x.get("timestamp", ""), reverse=True)
 
 
 def calculate_aggregates(metrics: Dict) -> Dict:
@@ -316,92 +319,123 @@ def main() -> None:
     parser.add_argument("--metadata", help="Path to metadata JSON (optional)")
     parser.add_argument("--reward-json", help="Path to reward.json artifact (contains score, breakdown, metadata, file_scores)")
     parser.add_argument("--reward-file", help="Path to reward.json artifact (alias for --reward-json)")
+    parser.add_argument("--reward-files", help="Comma-separated list of reward.json files to process in batch")
     parser.add_argument("--output", required=False, help="Path to output metrics file (defaults to docs/metrics/reward_scores.json)")
     parser.add_argument("--aggregate-only", action="store_true", help="Only recalculate aggregates")
     args = parser.parse_args()
     
-    # Determine reward file to use (prefer --reward-file over --reward-json for backward compatibility)
+    # Determine reward file(s) to use (prefer --reward-file over --reward-json for backward compatibility)
     reward_file = args.reward_file or args.reward_json
+    reward_files = []
+    
+    # Handle batch processing
+    if args.reward_files:
+        reward_files = [f.strip() for f in args.reward_files.split(",") if f.strip()]
+    
+    # If single reward file provided, add to list
+    if reward_file:
+        reward_files.append(reward_file)
     
     # Determine output path (use provided --output or default to METRICS_FILE)
     output_path = Path(args.output) if args.output else METRICS_FILE
     
-    # Validate: reward_file is required unless --aggregate-only
-    if not args.aggregate_only and not reward_file:
-        logger.error("--reward-file (or --reward-json) is required unless --aggregate-only is specified", operation="main")
+    # Validate: reward_file(s) is required unless --aggregate-only
+    if not args.aggregate_only and not reward_files and not (args.pr and args.score is not None):
+        logger.error("--reward-file, --reward-files, or --pr with --score is required unless --aggregate-only is specified", operation="main")
         sys.exit(1)
     
-    # Load existing metrics from output path if it exists
+    # Load existing metrics from output path if it exists (load once for batch processing)
     metrics = load_metrics(output_path) if output_path.exists() else load_metrics()
     
-    # Add new score entry if provided
-    if reward_file or (args.pr and args.score is not None):
-        # If reward.json provided, read all data from it
-        if reward_file:
-            # Validate reward file exists
-            if not os.path.exists(reward_file):
-                logger.error(f"Reward file not found: {reward_file}", operation="main")
-                sys.exit(1)
-            
-            try:
-                with open(reward_file, "r", encoding="utf-8") as handle:
-                    reward_data = json.load(handle)
-            except json.JSONDecodeError as e:
-                logger.error(f"Invalid JSON in reward file: {reward_file}", operation="main", error=str(e))
-                sys.exit(1)
-            except Exception as e:
-                logger.error(f"Error reading reward file: {reward_file}", operation="main", error=str(e))
-                sys.exit(1)
-            
-            # Handle both old and new field name formats
-            # Old format: pr_number, total_score, timestamp
-            # New format: metadata.pr, score, metadata.computed_at
-            score = reward_data.get("total_score") or reward_data.get("score", 0)
-            breakdown = reward_data.get("breakdown", {})
-            metadata = reward_data.get("metadata", {})
-            file_scores = reward_data.get("file_scores", {})
-            pr_num = reward_data.get("pr_number") or (metadata.get("pr") if isinstance(metadata, dict) else None) or args.pr
-            
-            # Validate we have the essential fields (score and PR number)
-            if not pr_num:
-                logger.error("PR number not found in reward.json (pr_number, metadata.pr, or --pr argument)", operation="main")
-                sys.exit(1)
-            
-            # Check for timestamp (either at root or in metadata)
-            timestamp = reward_data.get("timestamp") or metadata.get("computed_at") or reward_data.get("metadata", {}).get("computed_at")
-            if not timestamp:
-                logger.warn("No timestamp found in reward.json, using current time", operation="main")
-                from datetime import datetime
-                timestamp = datetime.utcnow().isoformat() + "Z"
-        else:
-            # Use individual arguments
-            score = args.score
-            breakdown = {}
-            if args.breakdown:
-                with open(args.breakdown, "r", encoding="utf-8") as handle:
-                    breakdown = json.load(handle)
-            metadata = {}
-            if args.metadata:
-                with open(args.metadata, "r", encoding="utf-8") as handle:
-                    metadata = json.load(handle)
-            file_scores = {}
-            pr_num = args.pr
+    # Get repo path for PR info (used for all entries)
+    repo_path = Path(__file__).resolve().parents[0].parents[0]
+    
+    # Process all reward files in batch
+    processed_count = 0
+    failed_count = 0
+    
+    for reward_file_path in reward_files:
+        if not os.path.exists(reward_file_path):
+            logger.warn(f"Reward file not found: {reward_file_path}, skipping", operation="main", file_path=reward_file_path)
+            failed_count += 1
+            continue
         
-        # Get repo path for PR info
-        repo_path = Path(__file__).resolve().parents[0].parents[0]
+        try:
+            with open(reward_file_path, "r", encoding="utf-8") as handle:
+                reward_data = json.load(handle)
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in reward file: {reward_file_path}", operation="main", error=str(e), file_path=reward_file_path)
+            failed_count += 1
+            continue
+        except Exception as e:
+            logger.error(f"Error reading reward file: {reward_file_path}", operation="main", error=str(e), file_path=reward_file_path)
+            failed_count += 1
+            continue
+        
+        # Handle both old and new field name formats
+        # Old format: pr_number, total_score, timestamp
+        # New format: metadata.pr, score, metadata.computed_at
+        score = reward_data.get("total_score") or reward_data.get("score", 0)
+        breakdown = reward_data.get("breakdown", {})
+        metadata = reward_data.get("metadata", {})
+        file_scores = reward_data.get("file_scores", {})
+        pr_num = reward_data.get("pr_number") or (metadata.get("pr") if isinstance(metadata, dict) else None) or args.pr
+        
+        # Validate we have the essential fields (score and PR number)
+        if not pr_num:
+            logger.error(f"PR number not found in reward.json: {reward_file_path} (pr_number, metadata.pr, or --pr argument)", operation="main", file_path=reward_file_path)
+            failed_count += 1
+            continue
+        
+        # Check for timestamp (either at root or in metadata)
+        timestamp = reward_data.get("timestamp") or metadata.get("computed_at") or reward_data.get("metadata", {}).get("computed_at")
+        if not timestamp:
+            logger.warn(f"No timestamp found in reward.json: {reward_file_path}, using current time", operation="main", file_path=reward_file_path)
+            timestamp = datetime.utcnow().isoformat() + "Z"
+            if isinstance(metadata, dict):
+                metadata["computed_at"] = timestamp
+        
+        # Add entry to metrics (in-memory, not saved yet)
         add_score_entry(metrics, pr_num, score, breakdown, metadata, repo_path, file_scores)
+        processed_count += 1
+        logger.info(f"Processed reward file: {reward_file_path} (PR #{pr_num}, score: {score})", operation="main", pr_num=pr_num, score=score)
+    
+    # Handle single PR entry via arguments (if not using reward files)
+    if not reward_files and (args.pr and args.score is not None):
+        # Use individual arguments
+        score = args.score
+        breakdown = {}
+        if args.breakdown:
+            with open(args.breakdown, "r", encoding="utf-8") as handle:
+                breakdown = json.load(handle)
+        metadata = {}
+        if args.metadata:
+            with open(args.metadata, "r", encoding="utf-8") as handle:
+                metadata = json.load(handle)
+        file_scores = {}
+        pr_num = args.pr
+        
+        # Add entry to metrics (in-memory, not saved yet)
+        add_score_entry(metrics, pr_num, score, breakdown, metadata, repo_path, file_scores)
+        processed_count += 1
     
     # Recalculate aggregates
     metrics["aggregates"] = calculate_aggregates(metrics)
     
-    # Save metrics to output path
+    # Ensure scores are sorted by timestamp (most recent first) before saving
+    if "scores" in metrics and metrics["scores"]:
+        metrics["scores"].sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+    
+    # Save metrics to output path (single save after batch processing)
     save_metrics(metrics, args.output)
     
     logger.info(
-        f"Metrics updated: {metrics['aggregates']['total_prs']} PRs, avg score: {metrics['aggregates']['average_score']}",
+        f"Metrics updated: {metrics['aggregates']['total_prs']} PRs, avg score: {metrics['aggregates']['average_score']}, processed: {processed_count}, failed: {failed_count}",
         operation="main",
         total_prs=metrics['aggregates']['total_prs'],
-        average_score=metrics['aggregates']['average_score']
+        average_score=metrics['aggregates']['average_score'],
+        processed_count=processed_count,
+        failed_count=failed_count
     )
 
 
