@@ -662,3 +662,4 @@ unified rules override on conflicts.
 **Report Generated:** 2025-11-17  
 **Next Review:** After `.cursor/rules/security.md` is created
 
+
