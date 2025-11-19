@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-19T12:02:51.868704Z",
+  "last_updated": "2025-11-19T12:26:18.906942Z",
   "scores": [
     {
       "pr": "56",
@@ -22289,54 +22289,86 @@
           "notes": "File: tatus\nDocs: Documentation updated"
         }
       }
+    },
+    {
+      "pr": "81",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T12:25:50.353429Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
     }
   ],
   "aggregates": {
-    "total_prs": 22,
-    "average_score": -6.32,
+    "total_prs": 23,
+    "average_score": -6.43,
     "score_distribution": {
-      "negative (<0)": 22
+      "negative (<0)": 23
     },
     "trends": [
       {
         "period": "2025-W46",
-        "average": -6.318181818181818,
-        "count": 22
+        "average": -6.434782608695652,
+        "count": 23
       }
     ],
     "category_performance": {
       "tests": {
-        "average": 0.86,
+        "average": 0.83,
         "total": 19,
         "count": 19
       },
       "bug_fix": {
-        "average": 0.23,
+        "average": 0.22,
         "total": 5,
         "count": 5
       },
       "docs": {
-        "average": 0.86,
+        "average": 0.83,
         "total": 19,
         "count": 19
       },
       "performance": {
-        "average": 0.73,
+        "average": 0.7,
         "total": 16,
         "count": 16
       },
       "security": {
         "average": -3.0,
-        "total": -66,
-        "count": 22
+        "total": -69,
+        "count": 23
       },
       "penalties": {
         "average": -6.0,
-        "total": -132,
-        "count": 22
+        "total": -138,
+        "count": 23
       }
     },
     "anti_patterns": [
+      {
+        "pr": "81",
+        "score": -9,
+        "timestamp": "2025-11-19T12:25:50.353429Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
       {
         "pr": "77",
         "score": -6,
