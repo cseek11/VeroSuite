@@ -129,6 +129,17 @@ The REWARD_SCORE system automatically evaluates code quality for every Pull Requ
    - Maintain test coverage
    - Don't introduce regressions
 
+## Score Normalization (Future Enhancement)
+
+Score normalization is planned as a future enhancement to provide fair scoring across different PR types and sizes:
+
+- **PR Size Normalization:** Adjust scores based on lines/files changed
+- **Repository Maturity:** Compare against historical score averages
+- **Module Criticality:** Stricter scoring for critical modules (auth, tenant, security)
+- **PR Type Normalization:** Different expectations for bug fixes vs. features vs. refactors
+
+Currently, normalization is disabled. The framework exists in `.cursor/scripts/compute_reward_score.py` for future implementation.
+
 ## Reference
 
 - **Rubric:** `.cursor/reward_rubric.yaml`
