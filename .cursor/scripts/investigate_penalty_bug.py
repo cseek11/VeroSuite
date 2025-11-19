@@ -122,3 +122,4 @@ def investigate_penalties():
 if __name__ == "__main__":
     investigate_penalties()
 
+
