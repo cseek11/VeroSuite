@@ -4,7 +4,7 @@ This document catalogs error patterns, their root causes, fixes, and prevention 
 
 ---
 
-## SECURITY_SCORING_FALSE_POSITIVES - 2025-01-27
+## SECURITY_SCORING_FALSE_POSITIVES - 2025-11-19
 
 ### Summary
 Security scoring system incorrectly treated all Semgrep ERROR severity results as security issues, regardless of rule type. This caused false positives where performance, correctness, and other non-security rules were penalized as critical security issues, resulting in consistent -3 security scores.

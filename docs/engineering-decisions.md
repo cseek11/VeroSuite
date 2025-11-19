@@ -1178,7 +1178,7 @@ Users need quick access to find any entity in the system without navigating thro
 
 ---
 
-## Security Scoring Multi-Heuristic Filtering Approach - 2025-01-27
+## Security Scoring Multi-Heuristic Filtering Approach - 2025-11-19
 
 ### Decision
 Use multiple heuristics (rule ID patterns, metadata tags, OWASP/CWE categories, message keywords) to identify security rules in Semgrep results rather than relying solely on severity levels or a single detection method.
@@ -1291,4 +1291,4 @@ Use multiple heuristics (rule ID patterns, metadata tags, OWASP/CWE categories, 
 
 ---
 
-**Last Updated:** 2025-01-27
+**Last Updated:** 2025-11-19
