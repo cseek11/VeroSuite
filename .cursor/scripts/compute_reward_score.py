@@ -743,9 +743,8 @@ def calculate_penalties(coverage: dict, static_analysis: dict, rubric: dict) -> 
         penalty = penalties.get("failing_ci", -4)
         total_penalty += penalty
         notes.append("No test coverage detected (possible CI failure)")
-    
-    # Check for missing tests (low coverage)
-    if frontend_coverage < 20 and backend_coverage < 20:
+    elif frontend_coverage < 20 and backend_coverage < 20:
+        # Only apply missing_tests penalty if coverage exists but is low
         penalty = penalties.get("missing_tests", -2)
         total_penalty += penalty
         notes.append("Low test coverage")
