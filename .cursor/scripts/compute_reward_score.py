@@ -25,12 +25,15 @@ from typing import Dict, List, Optional, Tuple, Any
 
 # Import structured logger
 try:
-    from logger_util import get_logger
+    from logger_util import get_logger, get_or_create_trace_context
     logger = get_logger(context="compute_reward_score")
 except ImportError:
     # Fallback if logger_util not available (should not happen)
     import logging
     logger = logging.getLogger("compute_reward_score")
+    # Fallback trace context
+    def get_or_create_trace_context():
+        return {"traceId": None, "spanId": None, "requestId": None}
 
 RUBRIC_PATH = pathlib.Path(__file__).resolve().parents[1] / "reward_rubric.yaml"
 BUG_LOG_PATH = pathlib.Path(__file__).resolve().parents[1] / "BUG_LOG.md"
@@ -786,8 +789,18 @@ def result_fingerprint(r: Dict[str, Any]) -> str:
             start = str(start_obj.get("line", ""))
         else:
             start = str(start_obj)
-    except Exception:
-        pass
+    except Exception as e:
+        # Non-critical: line number extraction failed, use empty string
+        trace_context = get_or_create_trace_context()
+        logger.debug(
+            "Could not extract line number from Semgrep result",
+            operation="result_fingerprint",
+            traceId=trace_context.get("traceId"),
+            spanId=trace_context.get("spanId"),
+            error=str(e),
+            result_id=rid
+        )
+        start = ""
     return f"{rid}::{path}::{start}"
 
 
@@ -855,7 +868,18 @@ def confidence_meets_threshold(result: Dict[str, Any], min_level: Optional[str] 
     try:
         conf_s = str(conf).lower()
         return MIN_CONFIDENCE.get(conf_s, 0) >= MIN_CONFIDENCE.get(min_level, 0)
-    except Exception:
+    except Exception as e:
+        # Non-critical: confidence parsing failed, return True (conservative)
+        trace_context = get_or_create_trace_context()
+        logger.debug(
+            "Could not parse confidence level, defaulting to True (conservative)",
+            operation="confidence_meets_threshold",
+            traceId=trace_context.get("traceId"),
+            spanId=trace_context.get("spanId"),
+            error=str(e),
+            confidence=str(conf),
+            min_level=min_level
+        )
         return True
 
 
@@ -1060,9 +1084,13 @@ def score_security(
             security_results.append(r)
         except Exception as e:
             # If any unexpected structure, log and skip (don't silently include non-security)
+            trace_context = get_or_create_trace_context()
             logger.debug(
                 f"Error processing Semgrep result: {e}",
                 operation="score_security",
+                traceId=trace_context.get("traceId"),
+                spanId=trace_context.get("spanId"),
+                requestId=trace_context.get("requestId"),
                 error=str(e),
                 result_id=r.get("check_id", "unknown")
             )
@@ -1128,8 +1156,18 @@ def score_security(
                 line = str(start_obj.get("line", ""))
             else:
                 line = str(start_obj)
-        except Exception:
-            pass
+        except Exception as e:
+            # Non-critical: line number extraction failed for offender list
+            trace_context = get_or_create_trace_context()
+            logger.debug(
+                "Could not extract line number for offender list",
+                operation="score_security",
+                traceId=trace_context.get("traceId"),
+                spanId=trace_context.get("spanId"),
+                error=str(e),
+                result_id=rid
+            )
+            line = ""
         offenders.append(f"{rid}@{path}:{line}")
     if offenders:
         notes.append("Top offenders: " + ", ".join(offenders))
@@ -1165,9 +1203,13 @@ def calculate_penalties(coverage: dict, static_analysis: dict, rubric: dict) -> 
     backend_coverage = safe_get_percentage(coverage.get("backend", {}))
     
     # Log coverage values for debugging (non-blocking)
+    trace_context = get_or_create_trace_context()
     logger.debug(
         f"Penalty calculation: frontend={frontend_coverage}, backend={backend_coverage}",
         operation="calculate_penalties",
+        traceId=trace_context.get("traceId"),
+        spanId=trace_context.get("spanId"),
+        requestId=trace_context.get("requestId"),
         frontend_coverage=frontend_coverage,
         backend_coverage=backend_coverage
     )
@@ -1189,18 +1231,26 @@ def calculate_penalties(coverage: dict, static_analysis: dict, rubric: dict) -> 
             # Coverage entirely missing - do NOT penalize (fallback logic)
             # This handles malformed PR workflows gracefully
             notes.append("Coverage data missing (no penalty applied - may be workflow issue)")
+            trace_context = get_or_create_trace_context()
             logger.debug(
                 "Coverage data structure missing entirely - skipping penalty",
-                operation="calculate_penalties"
+                operation="calculate_penalties",
+                traceId=trace_context.get("traceId"),
+                spanId=trace_context.get("spanId"),
+                requestId=trace_context.get("requestId")
             )
         else:
             # Coverage exists but is 0% - likely CI failure
             penalty = penalties.get("failing_ci", -4)
             total_penalty += penalty
             notes.append(f"No test coverage detected (possible CI failure): {penalty} penalty")
+            trace_context = get_or_create_trace_context()
             logger.info(
                 f"Applied failing_ci penalty: {penalty}",
                 operation="calculate_penalties",
+                traceId=trace_context.get("traceId"),
+                spanId=trace_context.get("spanId"),
+                requestId=trace_context.get("requestId"),
                 penalty=penalty
             )
     
@@ -1212,9 +1262,13 @@ def calculate_penalties(coverage: dict, static_analysis: dict, rubric: dict) -> 
             penalty = penalties.get("missing_tests", -2)
             total_penalty += penalty
             notes.append(f"Low test coverage (<20%): {penalty} penalty")
+            trace_context = get_or_create_trace_context()
             logger.info(
                 f"Applied missing_tests penalty: {penalty}",
                 operation="calculate_penalties",
+                traceId=trace_context.get("traceId"),
+                spanId=trace_context.get("spanId"),
+                requestId=trace_context.get("requestId"),
                 penalty=penalty,
                 frontend_coverage=frontend_coverage,
                 backend_coverage=backend_coverage
