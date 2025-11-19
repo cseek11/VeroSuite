@@ -48,3 +48,4 @@ export interface BasicTechnician {
   status: 'available' | 'busy' | 'unavailable';
 }
 
+
