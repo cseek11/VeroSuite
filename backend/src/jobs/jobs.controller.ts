@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Delete, Body, Query, UseGuards, Request, Pa
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JobsService } from './jobs.service';
+import { AutoSchedulerService } from './auto-scheduler.service';
 import { 
   CreateJobDto, 
   AssignJobDto,
@@ -20,7 +21,10 @@ import { StartJobDto, CompleteJobDto } from './jobs.actions';
 @UseGuards(JwtAuthGuard)
 @Controller({ path: 'jobs', version: '1' })
 export class JobsController {
-  constructor(private readonly jobsService: JobsService) {}
+  constructor(
+    private readonly jobsService: JobsService,
+    private readonly autoSchedulerService: AutoSchedulerService,
+  ) {}
 
   @Get('today')
   @ApiOperation({ summary: "Get today's jobs" })
@@ -77,6 +81,29 @@ export class JobsController {
       req.user.tenantId,
       dto.exclude_job_ids || []
     );
+  }
+
+  @Post('auto-schedule')
+  @ApiOperation({ summary: 'Automatically schedule unassigned jobs using route optimization' })
+  @ApiQuery({ name: 'date', required: false, description: 'YYYY-MM-DD format (defaults to today)' })
+  @ApiQuery({ name: 'strategy', required: false, description: 'Optimization strategy (balanced | priority-first | distance-first)' })
+  @ApiQuery({ name: 'commit', required: false, description: 'Whether to actually assign jobs (default: false)' })
+  async autoSchedule(
+    @Query('date') date?: string,
+    @Query('strategy') strategy?: string,
+    @Query('commit') commit?: string,
+    @Request() req: any,
+  ) {
+    const parsedStrategy = strategy && ['balanced', 'priority-first', 'distance-first'].includes(strategy)
+      ? (strategy as 'balanced' | 'priority-first' | 'distance-first')
+      : undefined;
+    const commitFlag = commit === 'true' || commit === '1';
+
+    return this.autoSchedulerService.autoSchedule(req.user.tenantId, {
+      date,
+      strategy: parsedStrategy,
+      commit: commitFlag,
+    });
   }
 
   // ===== RECURRING JOBS ENDPOINTS =====
