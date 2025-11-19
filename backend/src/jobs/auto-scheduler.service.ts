@@ -9,6 +9,12 @@ import {
   OptimizationResult,
 } from '../routing/route-optimization.engine';
 import { JobStatus } from './dto';
+import { TraceContext, createOrExtendTraceContext } from '../common/utils/trace-propagation.util';
+import {
+  JobWithWorkOrder,
+  AvailableTechnician,
+  BasicTechnician,
+} from './types/auto-scheduler.types';
 
 export interface AutoScheduleOptions {
   date?: string; // YYYY-MM-DD format, defaults to today
@@ -16,6 +22,7 @@ export interface AutoScheduleOptions {
   respectTimeWindows?: boolean;
   allowOverbook?: boolean;
   commit?: boolean; // Whether to actually assign jobs (default: false for safety)
+  traceContext?: TraceContext | null; // Trace context for distributed tracing
 }
 
 export interface AutoScheduleResult {
@@ -57,6 +64,9 @@ export class AutoSchedulerService {
     tenantId: string,
     options: AutoScheduleOptions = {},
   ): Promise<AutoScheduleResult> {
+    // Create or extend trace context
+    const traceContext = createOrExtendTraceContext(options.traceContext);
+    
     try {
       const targetDate = options.date
         ? this.parseDate(options.date)
@@ -68,13 +78,24 @@ export class AutoSchedulerService {
         date: dateStr,
         strategy: options.strategy ?? 'balanced',
         commit: options.commit ?? false,
+        traceId: traceContext.traceId,
+        spanId: traceContext.spanId,
+        requestId: traceContext.requestId,
+        operation: 'autoSchedule',
       });
 
       // Get unassigned jobs for the date
       const unassignedJobs = await this.getUnassignedJobs(tenantId, targetDate);
       
       if (unassignedJobs.length === 0) {
-        this.logger.log(`No unassigned jobs found for ${dateStr}`, { tenantId, date: dateStr });
+        this.logger.log(`No unassigned jobs found for ${dateStr}`, {
+          tenantId,
+          date: dateStr,
+          traceId: traceContext.traceId,
+          spanId: traceContext.spanId,
+          requestId: traceContext.requestId,
+          operation: 'autoSchedule',
+        });
         return {
           date: dateStr,
           totalUnassignedJobs: 0,
@@ -92,11 +113,18 @@ export class AutoSchedulerService {
       }
 
       // Get available technicians
-      const technicians = await this.getAvailableTechnicians(tenantId, dateStr);
+      const technicians = await this.getAvailableTechnicians(tenantId, dateStr, traceContext);
       
       if (technicians.length === 0) {
         const warning = `No available technicians found for ${dateStr}`;
-        this.logger.warn(warning, { tenantId, date: dateStr });
+        this.logger.warn(warning, {
+          tenantId,
+          date: dateStr,
+          traceId: traceContext.traceId,
+          spanId: traceContext.spanId,
+          requestId: traceContext.requestId,
+          operation: 'autoSchedule',
+        });
         return {
           date: dateStr,
           totalUnassignedJobs: unassignedJobs.length,
@@ -136,6 +164,7 @@ export class AutoSchedulerService {
           targetDate,
           optimizationResult,
           unassignedJobs,
+          traceContext,
         );
       }
 
@@ -166,6 +195,10 @@ export class AutoSchedulerService {
         optimized: result.optimizedJobs,
         unassigned: result.unassignedJobs,
         commitApplied,
+        traceId: traceContext.traceId,
+        spanId: traceContext.spanId,
+        requestId: traceContext.requestId,
+        operation: 'autoSchedule',
       });
 
       return result;
@@ -177,6 +210,10 @@ export class AutoSchedulerService {
           tenantId,
           date: options.date,
           error: error instanceof Error ? error.message : String(error),
+          traceId: traceContext.traceId,
+          spanId: traceContext.spanId,
+          requestId: traceContext.requestId,
+          operation: 'autoSchedule',
         },
       );
       
@@ -191,7 +228,7 @@ export class AutoSchedulerService {
   /**
    * Get unassigned jobs for a specific date
    */
-  private async getUnassignedJobs(tenantId: string, date: Date) {
+  private async getUnassignedJobs(tenantId: string, date: Date): Promise<JobWithWorkOrder[]> {
     const dateStart = new Date(date);
     dateStart.setHours(0, 0, 0, 0);
     const dateEnd = new Date(date);
@@ -228,7 +265,11 @@ export class AutoSchedulerService {
   /**
    * Get available technicians for a date
    */
-  private async getAvailableTechnicians(tenantId: string, date: string) {
+  private async getAvailableTechnicians(
+    tenantId: string,
+    date: string,
+    traceContext?: TraceContext,
+  ): Promise<Array<AvailableTechnician | BasicTechnician>> {
     try {
       // Get all active technicians
       const technicians = await this.technicianService.getAvailableTechnicians(
@@ -239,23 +280,29 @@ export class AutoSchedulerService {
       );
 
       // Filter to only available ones
-      return technicians.filter((tech) => tech.is_available);
+      return technicians.filter((tech) => tech.is_available) as AvailableTechnician[];
     } catch (error) {
       // Fallback: get basic available technicians
       this.logger.warn('Error getting detailed availability, using basic method', {
         tenantId,
         date,
         error: error instanceof Error ? error.message : String(error),
+        ...(traceContext && {
+          traceId: traceContext.traceId,
+          spanId: traceContext.spanId,
+          requestId: traceContext.requestId,
+        }),
+        operation: 'getAvailableTechnicians',
       });
       
-      return await this.technicianService.getAvailableTechniciansBasic(tenantId, date);
+      return await this.technicianService.getAvailableTechniciansBasic(tenantId, date) as BasicTechnician[];
     }
   }
 
   /**
    * Convert database jobs to RouteJob format
    */
-  private convertJobsToRouteJobs(jobs: any[]): RouteJob[] {
+  private convertJobsToRouteJobs(jobs: JobWithWorkOrder[]): RouteJob[] {
     return jobs.map((job) => {
       const location = job.workOrder?.location;
       const hasValidCoords =
@@ -305,7 +352,7 @@ export class AutoSchedulerService {
    * Convert technicians to RouteTechnician format
    */
   private convertTechniciansToRouteTechnicians(
-    technicians: any[],
+    technicians: Array<AvailableTechnician | BasicTechnician>,
     date: string,
   ): RouteTechnician[] {
     // Default shift: 8 AM to 5 PM
@@ -340,7 +387,8 @@ export class AutoSchedulerService {
     tenantId: string,
     date: Date,
     optimizationResult: OptimizationResult,
-    originalJobs: any[],
+    originalJobs: JobWithWorkOrder[],
+    traceContext: TraceContext,
   ): Promise<boolean> {
     try {
       const jobMap = new Map(originalJobs.map((job) => [job.id, job]));
@@ -356,6 +404,10 @@ export class AutoSchedulerService {
               this.logger.warn(`Job ${stop.jobId} not found in original jobs`, {
                 tenantId,
                 jobId: stop.jobId,
+                traceId: traceContext.traceId,
+                spanId: traceContext.spanId,
+                requestId: traceContext.requestId,
+                operation: 'commitAssignments',
               });
               continue;
             }
@@ -385,6 +437,10 @@ export class AutoSchedulerService {
         tenantId,
         date: date.toISOString().split('T')[0],
         assignedJobs: optimizationResult.metadata.optimizedJobs,
+        traceId: traceContext.traceId,
+        spanId: traceContext.spanId,
+        requestId: traceContext.requestId,
+        operation: 'commitAssignments',
       });
 
       return true;
@@ -396,6 +452,10 @@ export class AutoSchedulerService {
           tenantId,
           date: date.toISOString().split('T')[0],
           error: error instanceof Error ? error.message : String(error),
+          traceId: traceContext.traceId,
+          spanId: traceContext.spanId,
+          requestId: traceContext.requestId,
+          operation: 'commitAssignments',
         },
       );
       throw new InternalServerErrorException('Failed to commit job assignments');

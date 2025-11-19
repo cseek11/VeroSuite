@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JobsService } from './jobs.service';
 import { AutoSchedulerService } from './auto-scheduler.service';
+import { getTraceContextFromRequest, createTraceContextForRequest } from '../common/utils/trace-propagation.util';
 import { 
   CreateJobDto, 
   AssignJobDto,
@@ -99,10 +100,14 @@ export class JobsController {
       : undefined;
     const commitFlag = commit === 'true' || commit === '1';
 
+    // Extract or create trace context from request
+    const traceContext = getTraceContextFromRequest(req) || createTraceContextForRequest(req);
+
     return this.autoSchedulerService.autoSchedule(req.user.tenantId, {
       date,
       strategy: parsedStrategy,
       commit: commitFlag,
+      traceContext,
     });
   }
 
