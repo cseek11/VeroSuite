@@ -88,8 +88,8 @@ jobs:
           IFS=',' read -ra RUN_ID_ARRAY <<< "$RUN_IDS"
           for RUN_ID in "${RUN_ID_ARRAY[@]}"; do
             echo "Downloading artifacts from run $RUN_ID..."
-            # List artifacts for this run and download reward-pr-* artifacts
-            ARTIFACT_NAMES=$(gh run view $RUN_ID --json artifacts --jq '.artifacts[] | select(.name | startswith("reward-pr-")) | .name' || echo "")
+            # List artifacts for this run using API and download reward-pr-* artifacts
+            ARTIFACT_NAMES=$(gh api repos/cseek11/VeroSuite/actions/runs/$RUN_ID/artifacts --jq '.artifacts[] | select(.name | startswith("reward-pr-")) | .name' 2>/dev/null || echo "")
             if [ -n "$ARTIFACT_NAMES" ]; then
               echo "$ARTIFACT_NAMES" | while read -r ARTIFACT_NAME; do
                 if [ -n "$ARTIFACT_NAME" ]; then
@@ -132,7 +132,10 @@ jobs:
           try:
               with open('$REWARD_FILE', 'r') as f:
                   data = json.load(f)
-              print(f"✓ Valid JSON (PR #{data.get('pr_number', 'unknown')}, score: {data.get('total_score', 'unknown')})")
+              # Handle both old and new field names
+              pr_num = data.get('pr_number') or (data.get('metadata', {}) or {}).get('pr', 'unknown')
+              score = data.get('total_score') or data.get('score', 'unknown')
+              print(f"✓ Valid JSON (PR #{pr_num}, score: {score})")
           except Exception as e:
               print(f"✗ Invalid JSON in $REWARD_FILE: {e}")
           EOF
