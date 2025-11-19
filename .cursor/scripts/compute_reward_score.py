@@ -1222,6 +1222,47 @@ def compute_score(
     return total_score, breakdown, notes, file_scores
 
 
+def normalize_score(
+    score: int,
+    breakdown: dict,
+    pr_size: Optional[Dict[str, int]] = None,
+    changed_files: Optional[List[str]] = None,
+    historical_scores: Optional[List[int]] = None
+) -> Tuple[int, str]:
+    """
+    Normalize score based on PR size, repository maturity, and historical context.
+    
+    This is a future enhancement framework. Currently returns score unchanged.
+    
+    Future normalization factors:
+    - PR size (lines changed, files changed)
+    - Repository maturity (historical average scores)
+    - Module/area touched (critical vs. non-critical)
+    - PR type (bug fix vs. feature vs. refactor)
+    
+    Args:
+        score: Raw score before normalization
+        breakdown: Score breakdown by category
+        pr_size: Dict with 'lines' and 'files' keys
+        changed_files: List of changed file paths
+        historical_scores: List of historical scores for context
+    
+    Returns:
+        Tuple of (normalized_score, normalization_note)
+    """
+    # Future enhancement: Implement normalization logic
+    # For now, return score unchanged
+    normalization_note = "Score normalization disabled (future enhancement)"
+    
+    # Placeholder for future implementation:
+    # - Normalize by PR size (small PRs get slight boost, large PRs slight reduction)
+    # - Normalize by repo maturity (compare to historical averages)
+    # - Normalize by module criticality (auth/tenant modules scored more strictly)
+    # - Normalize by PR type (bug fixes vs. features have different expectations)
+    
+    return score, normalization_note
+
+
 def get_decision_recommendation(score: int, breakdown: dict, static_analysis: dict) -> Tuple[str, str]:
     """Get decision recommendation based on score and analysis."""
     # Check for critical security issues
