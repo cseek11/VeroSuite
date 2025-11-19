@@ -18,7 +18,6 @@ import {
   CheckCircle,
   AlertCircle,
   ArrowLeft,
-  Loader2,
   Download,
   RefreshCw,
   XCircle,
@@ -28,6 +27,8 @@ import { billing } from '@/lib/enhanced-api';
 import { Invoice, PaymentMethod } from '@/types/enhanced-types';
 import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
+import { ErrorMessage } from '@/components/ui/ErrorMessage';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import PaymentMethodSelector from './PaymentMethodSelector';
 import PaymentConfirmation from './PaymentConfirmation';
 
@@ -339,6 +340,18 @@ function PaymentFormInner({
           </div>
 
           {paymentError && (
+            <div className="mb-6">
+              <ErrorMessage 
+                message={paymentError} 
+                type="error"
+                actionable={retryCount < 3 ? {
+                  label: 'Retry Payment',
+                  onClick: handleRetryPayment
+                } : undefined}
+              />
+            </div>
+          )}
+          {paymentError && false && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
               <div className="flex items-start">
                 <AlertCircle className="w-5 h-5 text-red-600 mr-2 mt-0.5 flex-shrink-0" />
@@ -393,8 +406,7 @@ function PaymentFormInner({
             <div className="space-y-4">
               {!clientSecret ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-purple-600 mr-2" />
-                  <span>Loading secure payment form...</span>
+                  <LoadingSpinner size="md" text="Loading secure payment form..." />
                 </div>
               ) : (
                 <>
@@ -408,7 +420,9 @@ function PaymentFormInner({
                       />
                     </div>
                     {cardError && (
-                      <div className="mt-2 text-sm text-red-600">{cardError}</div>
+                      <div className="mt-2">
+                        <ErrorMessage message={cardError} type="error" />
+                      </div>
                     )}
                   </div>
                   
@@ -463,9 +477,9 @@ function PaymentFormInner({
 
   const renderProcessing = () => (
     <Card>
-      <div className="p-12 text-center">
+      <div className="p-4 md:p-12 text-center">
         <div className="relative inline-block mb-6">
-          <Loader2 className="w-16 h-16 animate-spin text-purple-600 mx-auto" />
+          <LoadingSpinner size="xl" />
           <div className="absolute inset-0 flex items-center justify-center">
             <Shield className="w-6 h-6 text-purple-400" />
           </div>
@@ -605,9 +619,9 @@ export default function PaymentForm({ invoice, paymentMethods, onSuccess, onCanc
   if (!clientSecret && isLoadingIntent) {
     return (
       <Card>
-        <div className="p-12 text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-purple-600 mx-auto mb-4" />
-          <Heading level={3} className="font-semibold mb-2">
+        <div className="p-4 md:p-12 text-center">
+          <LoadingSpinner size="lg" />
+          <Heading level={3} className="font-semibold mb-2 mt-4">
             Initializing Payment
           </Heading>
           <Text variant="small" className="text-gray-600">
