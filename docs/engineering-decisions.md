@@ -1291,4 +1291,142 @@ Use multiple heuristics (rule ID patterns, metadata tags, OWASP/CWE categories, 
 
 ---
 
+## Auto-PR and REWARD_SCORE System Improvements - 2025-11-19
+
+### Decision
+Rebalance reward scoring weights, enhance security scoring granularity, add test quality assessment, improve Auto-PR batching rules, and reduce documentation scoring to create more accurate incentives and prevent gaming.
+
+### Context
+**Problem Statement:**
+- Reward scoring weights created distorted incentives (security weight too low, docs too high)
+- Security scoring was overly binary and didn't guide remediation
+- Test scoring was too shallow (didn't differentiate quality or test types)
+- Auto-PR batching rules could create fragmented PRs or PR spam
+- Documentation scoring was too high for normal PRs
+- Performance scoring could be gamed with comments
+
+**Constraints:**
+- Must not break existing working Auto-PR system
+- Must maintain backward compatibility with existing rubric format
+- Must work with existing CI workflows
+- Changes should be configuration-driven where possible
+
+**Requirements:**
+- Security should be highest weight (production priority)
+- Test quality should matter more than presence
+- Documentation shouldn't exceed 0.5 for normal PRs
+- Auto-PR should prevent spam from inactivity alone
+- Semantic grouping should prevent unnatural PR splits
+
+### Trade-offs
+**Pros:**
+- More accurate scoring that reflects actual code quality
+- Better incentives (security prioritized, quality over quantity)
+- Prevents gaming (comments ignored, actual code required)
+- Reduces PR spam (minimum requirements for time-based triggers)
+- Better PR grouping (semantic grouping prevents fragmentation)
+- Granular security scoring rewards proactive security work
+
+**Cons:**
+- Scoring logic is more complex
+- May require rubric adjustments over time
+- Semantic grouping may need keyword pattern updates
+- Existing PRs will be re-scored with new weights (expected behavior)
+
+### Alternatives Considered
+1. **Keep existing weights**
+   - **Pros:** No changes needed
+   - **Cons:** Distorted incentives remain, gaming possible
+   - **Rejected:** Doesn't solve the problem
+
+2. **Complete rewrite of scoring system**
+   - **Pros:** Could design from scratch
+   - **Cons:** Too disruptive, high risk of breaking existing system
+   - **Rejected:** Too risky, incremental improvements are safer
+
+3. **External scoring service**
+   - **Pros:** Could use industry-standard tools
+   - **Cons:** Adds external dependency, harder to customize
+   - **Rejected:** Prefer self-contained solution
+
+### Implementation Details
+**Reward Scoring Weight Changes:**
+- Security: 2 → 4 (highest priority)
+- Tests: 3 (unchanged, but enhanced quality assessment)
+- Documentation: 1 → 0.5 (reduced, except engineering decisions)
+- Bug Fix: 2 (unchanged)
+- Performance: 1 (unchanged)
+
+**Security Scoring Enhancements:**
+- Granular breakdown: +1 no issues, +1 improvements, +1 documentation
+- Detects security improvements: sanitization, RLS tests, auth checks, CSP headers
+- Detects security documentation: diagrams, ADRs, guides
+- Critical issues remain automatic blockers (-3)
+
+**Test Quality Assessment:**
+- Detects test types: unit vs integration vs e2e
+- Rewards integration/e2e tests more (+0.5 bonus)
+- Assesses quality: assertions, mocking, edge cases (+0.5 bonus)
+- Detects test impact: tests covering critical modules (+0.5 bonus)
+- Removed redundant "+1 for tests passing" (covered by CI penalty)
+
+**Documentation Scoring Reduction:**
+- Normal docs: max +0.5 (reduced from +1)
+- Engineering decisions: +1 (can exceed weight, architectural importance)
+- Date updates: +0.25 (reduced from +0.5)
+- Basic updates: +0.1 (reduced from +0.25)
+
+**Performance Scoring Improvements:**
+- Ignores comments (only counts actual code changes)
+- Requires code changes (not just mentions)
+- Improved performance test file detection
+
+**Auto-PR Improvements:**
+- Time-based triggers now require minimum files (3) and lines (50)
+- Optional test file requirement for time-based PRs
+- Semantic grouping by feature keywords (auth, tenant, billing, etc.)
+- Cross-directory grouping for same feature
+- Prevents PR spam from inactivity alone
+
+### Impact
+**Affected Areas:**
+- `.cursor/reward_rubric.yaml` - Updated weights (version 2)
+- `.cursor/scripts/compute_reward_score.py` - Enhanced scoring functions
+- `.cursor/scripts/monitor_changes.py` - Improved batching and grouping
+- `docs/metrics/REWARD_SCORE_GUIDE.md` - Updated documentation
+- All future PRs will use new scoring weights
+
+**Scoring Accuracy:**
+- Before: Security weight too low, docs too high, gaming possible
+- After: Security prioritized, quality-focused, gaming prevented
+- Test quality now assessed (not just presence)
+- Performance comments ignored (only code counts)
+
+**Auto-PR Quality:**
+- Before: Could create PRs with minimal changes during breaks
+- After: Minimum requirements prevent PR spam
+- Before: Directory-only grouping could split related refactors
+- After: Semantic grouping prevents unnatural splits
+
+### Lessons Learned
+**What Worked Well:**
+- Incremental improvements maintain backward compatibility
+- Configuration-driven changes allow tuning without code changes
+- Granular scoring provides better feedback
+- Semantic grouping improves PR organization
+
+**What Could Be Improved:**
+- Score normalization (future enhancement for PR size/repo maturity)
+- CODEOWNERS integration (future enhancement for critical paths)
+- Semantic PR type detection (future enhancement for bug/feature/refactor)
+- Test isolation detection (future enhancement)
+
+### Related Decisions
+- CI Automation Suite Implementation - 2025-11-17
+- Security Scoring Multi-Heuristic Filtering Approach - 2025-11-19
+- Error handling and resilience patterns
+- Structured logging and trace propagation
+
+---
+
 **Last Updated:** 2025-11-19
