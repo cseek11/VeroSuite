@@ -8,6 +8,7 @@ import ExpandableActivityFABSystem from './ExpandableActivityFABSystem';
 import { PageCardProvider } from '@/contexts/PageCardContext';
 import { usePageCards } from '@/routes/dashboard/hooks/usePageCards';
 import PageCardWrapper from '@/components/dashboard/PageCardWrapper';
+import GlobalSearch from '@/components/common/GlobalSearch';
 
 interface V4LayoutProps {
   children: React.ReactNode;
@@ -109,6 +110,8 @@ function V4LayoutContent({ children, pageCards = [], updatePageCard, closePageCa
         );
       })}
 
+      {/* Global Search */}
+      <GlobalSearch />
     </div>
   );
 }
