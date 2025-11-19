@@ -417,13 +417,14 @@ class TestComputeScoreIntegration(unittest.TestCase):
 +++ b/docs/README.md
 """
         
-        score, breakdown, notes = compute_reward_score.compute_score(
+        score, breakdown, notes, file_scores = compute_reward_score.compute_score(
             coverage, static_analysis, pr_desc, diff, self.rubric
         )
         
         self.assertIsInstance(score, int)
         self.assertIsInstance(breakdown, dict)
         self.assertIsInstance(notes, str)
+        self.assertIsInstance(file_scores, dict)
         self.assertIn("tests", breakdown)
         self.assertIn("docs", breakdown)
     
@@ -437,7 +438,7 @@ class TestComputeScoreIntegration(unittest.TestCase):
         pr_desc = "Update code"
         diff = ""
         
-        score, breakdown, notes = compute_reward_score.compute_score(
+        score, breakdown, notes, file_scores = compute_reward_score.compute_score(
             coverage, static_analysis, pr_desc, diff, self.rubric
         )
         
@@ -456,7 +457,7 @@ class TestComputeScoreIntegration(unittest.TestCase):
         pr_desc = "Update code"
         diff = ""
         
-        score, breakdown, notes = compute_reward_score.compute_score(
+        score, breakdown, notes, file_scores = compute_reward_score.compute_score(
             coverage, static_analysis, pr_desc, diff, self.rubric
         )
         
@@ -521,6 +522,258 @@ Breakdown:
         self.assertIn("REWARD_SCORE", comment)
         self.assertIn("5", comment)
         self.assertIn("Decision Recommendation", comment)
+
+
+class TestSecurityScoringGranularity(unittest.TestCase):
+    """Test new granular security scoring."""
+    
+    def setUp(self):
+        """Set up test fixtures."""
+        self.rubric = {
+            "security": 4
+        }
+        self.static_analysis_no_issues = {"results": []}
+        self.static_analysis_critical = {
+            "results": [{
+                "check_id": "p/security/injection",
+                "extra": {"severity": "ERROR"},
+                "path": "test.py",
+                "start": {"line": 10}
+            }]
+        }
+    
+    def test_security_scoring_no_issues_base(self):
+        """Test security scoring with no issues (base +1)."""
+        diff = ""
+        pr_desc = ""
+        score, note = compute_reward_score.score_security(
+            self.static_analysis_no_issues, self.rubric, diff=diff, pr_desc=pr_desc
+        )
+        self.assertEqual(score, 1)
+        self.assertIn("No high/critical security issues detected", note)
+    
+    def test_security_scoring_with_improvements(self):
+        """Test security scoring with improvements (+1 base +1 improvements)."""
+        diff = """
++++ b/src/auth/middleware.ts
++export function sanitizeInput(input: string) {
++  return input.replace(/<script>/gi, '');
++}
++++ b/src/db/rls-policy.ts
++CREATE POLICY tenant_isolation ON users FOR ALL USING (tenant_id = current_setting('app.tenant_id'));
+"""
+        pr_desc = "Add input sanitization and RLS policies"
+        score, note = compute_reward_score.score_security(
+            self.static_analysis_no_issues, self.rubric, diff=diff, pr_desc=pr_desc
+        )
+        self.assertGreaterEqual(score, 2)  # +1 no issues +1 improvements
+        self.assertIn("Security improvements detected", note)
+    
+    def test_security_scoring_with_documentation(self):
+        """Test security scoring with security documentation (+1 base +1 docs)."""
+        diff = """
++++ b/docs/security/security-architecture.md
++# Security Architecture
++This document describes the security architecture.
+"""
+        pr_desc = "Add security architecture documentation"
+        score, note = compute_reward_score.score_security(
+            self.static_analysis_no_issues, self.rubric, diff=diff, pr_desc=pr_desc
+        )
+        self.assertGreaterEqual(score, 2)  # +1 no issues +1 documentation
+        self.assertIn("Security documentation added", note)
+    
+    def test_security_scoring_critical_blocks(self):
+        """Test that critical security issues block PR."""
+        diff = ""
+        pr_desc = ""
+        score, note = compute_reward_score.score_security(
+            self.static_analysis_critical, self.rubric, diff=diff, pr_desc=pr_desc
+        )
+        self.assertEqual(score, -3)
+        self.assertIn("Critical security issues", note)
+
+
+class TestTestQualityAssessment(unittest.TestCase):
+    """Test new test quality assessment features."""
+    
+    def setUp(self):
+        """Set up test fixtures."""
+        self.rubric = {
+            "tests": 3
+        }
+        self.coverage = {
+            "frontend": {"percentage": 80},
+            "backend": {"percentage": 75}
+        }
+    
+    def test_test_type_detection_integration(self):
+        """Test detection of integration tests."""
+        diff = """
++++ b/backend/test/integration/auth.integration.test.ts
++describe('Auth Integration Tests', () => {
++  it('should authenticate user', () => {
++    expect(true).toBe(true);
++  });
++});
+"""
+        score, note = compute_reward_score.score_tests(self.coverage, self.rubric, diff)
+        self.assertGreaterEqual(score, 1)  # At least +1 for new test files
+        self.assertIn("integration", note.lower())
+    
+    def test_test_quality_assessment(self):
+        """Test test quality assessment (assertions, mocking)."""
+        diff = """
++++ b/frontend/src/components/Button.test.tsx
++import { vi } from 'vitest';
++describe('Button', () => {
++  it('should render', () => {
++    const mockFn = vi.fn();
++    expect(mockFn).toBeDefined();
++  });
++});
+"""
+        score, note = compute_reward_score.score_tests(self.coverage, self.rubric, diff)
+        # Should have +1 for new test files +0.5 for quality
+        self.assertGreaterEqual(score, 1)
+        note_lower = note.lower()
+        self.assertTrue("quality" in note_lower or "mocking" in note_lower or "assertions" in note_lower)
+    
+    def test_test_impact_detection(self):
+        """Test detection of tests covering critical modules."""
+        diff = """
++++ b/backend/test/unit/auth/auth.service.test.ts
++describe('AuthService', () => {
++  it('should validate tenant isolation', () => {
++    expect(true).toBe(true);
++  });
++});
+"""
+        score, note = compute_reward_score.score_tests(self.coverage, self.rubric, diff)
+        self.assertGreaterEqual(score, 1)
+        # Impact detection may or may not trigger, but should not break
+
+
+class TestDocumentationScoringReduction(unittest.TestCase):
+    """Test reduced documentation scoring."""
+    
+    def setUp(self):
+        """Set up test fixtures."""
+        self.rubric = {
+            "docs": 0.5
+        }
+    
+    def test_documentation_basic_update_reduced(self):
+        """Test that basic documentation updates give +0.1 (reduced from +0.25)."""
+        diff = """
++++ b/docs/README.md
++# Updated README
++Some documentation updates.
+"""
+        score, note = compute_reward_score.score_documentation(diff, self.rubric)
+        self.assertEqual(score, 0.1)
+        self.assertIn("Documentation updated (+0.1)", note)
+    
+    def test_documentation_date_update_reduced(self):
+        """Test that date updates give +0.25 (reduced from +0.5)."""
+        from datetime import datetime
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        diff = f"""
++++ b/docs/README.md
++# README
++**Last Updated:** {current_date}
+"""
+        score, note = compute_reward_score.score_documentation(diff, self.rubric)
+        self.assertEqual(score, 0.25)
+        self.assertIn("Documentation updated with current dates (+0.25)", note)
+    
+    def test_documentation_engineering_decision_exceeds(self):
+        """Test that engineering decisions can exceed weight (+1)."""
+        diff = """
++++ b/docs/engineering-decisions.md
++## New Decision
++Some architectural decision.
+"""
+        score, note = compute_reward_score.score_documentation(diff, self.rubric)
+        self.assertEqual(score, 1.0)
+        self.assertIn("engineering decisions", note.lower())
+        self.assertIn("exceeds", note.lower())
+
+
+class TestPerformanceScoringImprovements(unittest.TestCase):
+    """Test improved performance scoring (comment filtering)."""
+    
+    def setUp(self):
+        """Set up test fixtures."""
+        self.rubric = {
+            "performance": 1
+        }
+    
+    def test_performance_scoring_ignores_comments(self):
+        """Test that performance mentions in comments are ignored."""
+        diff = """
++++ b/src/utils.ts
++// This is a performance optimization comment
++// Performance improvement here
++// Another performance note
++const x = 1;
+"""
+        score, note = compute_reward_score.score_performance(diff, self.rubric)
+        self.assertEqual(score, 0)
+        self.assertIn("comments ignored", note.lower())
+    
+    def test_performance_scoring_requires_code_changes(self):
+        """Test that performance scoring requires actual code changes."""
+        diff = """
++++ b/src/utils.ts
++const optimizedFunction = () => {
++  // Performance optimization
++  return cache.get('key');
+};
++++ b/src/other.ts
++function debounce(fn, delay) {
++  // Performance improvement
++  return debounced;
+}
+"""
+        score, note = compute_reward_score.score_performance(diff, self.rubric)
+        # Should detect performance improvements in actual code
+        self.assertGreaterEqual(score, 0)
+
+
+class TestRebalancedWeights(unittest.TestCase):
+    """Test that rebalanced weights are used correctly."""
+    
+    def test_security_weight_updated(self):
+        """Test that security weight is 4 (updated from 2)."""
+        rubric = {
+            "security": 4,
+            "tests": 3,
+            "docs": 0.5,
+            "bug_fix": 2,
+            "performance": 1
+        }
+        static_analysis = {"results": []}
+        score, note = compute_reward_score.score_security(
+            static_analysis, rubric, diff="", pr_desc=""
+        )
+        # With no issues, should get +1 base, can get up to +3 total
+        self.assertGreaterEqual(score, 1)
+        self.assertLessEqual(score, 4)  # Capped at weight
+    
+    def test_docs_weight_updated(self):
+        """Test that docs weight is 0.5 (updated from 1)."""
+        rubric = {
+            "docs": 0.5
+        }
+        diff = """
++++ b/docs/README.md
++# Updated
+"""
+        score, note = compute_reward_score.score_documentation(diff, rubric)
+        # Basic update should be +0.1, capped at weight 0.5
+        self.assertEqual(score, 0.1)
+        self.assertLessEqual(score, 0.5)
 
 
 if __name__ == '__main__':
