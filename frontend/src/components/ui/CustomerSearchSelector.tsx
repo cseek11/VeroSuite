@@ -235,8 +235,9 @@ export default function CustomerSearchSelector({
             <button
               onClick={handleClear}
               className="text-gray-400 hover:text-gray-600 transition-colors"
+              data-testid="clear-button"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" data-testid="x-icon" />
             </button>
           </div>
         )}
