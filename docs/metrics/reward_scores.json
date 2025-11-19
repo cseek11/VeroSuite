@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-19T06:19:58.630382Z",
+  "last_updated": "2025-11-19T11:55:28.229533Z",
   "scores": [
     {
       "pr": "56",
@@ -20812,54 +20812,86 @@
           "notes": "File: tatus\nDocs: Documentation updated"
         }
       }
+    },
+    {
+      "pr": "75",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T11:54:59.089451Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
     }
   ],
   "aggregates": {
-    "total_prs": 20,
-    "average_score": -6.2,
+    "total_prs": 21,
+    "average_score": -6.33,
     "score_distribution": {
-      "negative (<0)": 20
+      "negative (<0)": 21
     },
     "trends": [
       {
         "period": "2025-W46",
-        "average": -6.2,
-        "count": 20
+        "average": -6.333333333333333,
+        "count": 21
       }
     ],
     "category_performance": {
       "tests": {
-        "average": 0.9,
+        "average": 0.86,
         "total": 18,
         "count": 18
       },
       "bug_fix": {
-        "average": 0.25,
+        "average": 0.24,
         "total": 5,
         "count": 5
       },
       "docs": {
-        "average": 0.9,
+        "average": 0.86,
         "total": 18,
         "count": 18
       },
       "performance": {
-        "average": 0.75,
+        "average": 0.71,
         "total": 15,
         "count": 15
       },
       "security": {
         "average": -3.0,
-        "total": -60,
-        "count": 20
+        "total": -63,
+        "count": 21
       },
       "penalties": {
         "average": -6.0,
-        "total": -120,
-        "count": 20
+        "total": -126,
+        "count": 21
       }
     },
     "anti_patterns": [
+      {
+        "pr": "75",
+        "score": -9,
+        "timestamp": "2025-11-19T11:54:59.089451Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
       {
         "pr": "74",
         "score": -6,
