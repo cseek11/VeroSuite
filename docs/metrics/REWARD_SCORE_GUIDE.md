@@ -1,6 +1,6 @@
 # REWARD_SCORE Guide
 
-**Last Updated:** 2025-11-17
+**Last Updated:** 2025-11-19
 
 ## Overview
 
@@ -11,9 +11,13 @@ The REWARD_SCORE system automatically evaluates code quality for every Pull Requ
 ### Tests (Weight: 3)
 - **New Test Files:** +1 point (max +1)
 - **Coverage Increase (>5%):** +1 point
-- **Tests Passing:** +1 point (if coverage exists)
+- **Integration/E2E Tests:** +0.5 bonus (rewarded more than unit tests)
+- **Test Quality:** +0.5 bonus (assertions, mocking, edge cases)
+- **Test Impact:** +0.5 bonus (tests covering critical modules: auth, tenant, security)
 - **Maximum:** +3 points (capped at weight)
 - **No Coverage:** 0 points
+
+**Note:** The redundant "+1 for tests passing" has been removed (covered by CI penalty system).
 
 ### Bug Fixes (Weight: 2)
 - **Complete Fix:** +2 points
@@ -25,22 +29,28 @@ The REWARD_SCORE system automatically evaluates code quality for every Pull Requ
 - **Basic Fix:** +0.5 points
   - Bug fix detected but missing documentation
 
-### Documentation (Weight: 1)
-- **With Engineering Decisions:** +1 point
-- **With Updated Dates:** +0.5 points
-- **Basic Updates:** +0.25 points
+### Documentation (Weight: 0.5)
+- **With Engineering Decisions:** +1 point (architectural decisions only, exceeds weight)
+- **With Updated Dates:** +0.25 points
+- **Basic Updates:** +0.1 points
 - **No Documentation Changes:** 0 points
+- **Maximum:** +0.5 points for normal documentation (engineering decisions can exceed)
 
 ### Performance (Weight: 1)
 - **Performance Tests Added:** +1 point
-- **Performance Improvements (3+ mentions):** +1 point
-- **Performance-Related Changes (1+ mentions):** +0.5 points
+- **Performance Improvements (3+ code changes):** +1 point
+- **Performance-Related Changes (1+ code changes):** +0.5 points
 - **No Performance Improvements:** 0 points
 
-### Security (Weight: 2)
-- **No Issues:** +2 points
+**Note:** Performance mentions in comments are ignored. Only actual code changes are counted.
+
+### Security (Weight: 4)
+- **No Issues:** +1 point
+- **Security Improvements:** +1 point (middleware, sanitization, RLS tests, auth checks)
+- **Security Documentation:** +1 point (security diagrams, security ADRs)
 - **High Severity Issues:** -1 point
 - **Critical Issues:** -3 points (blocks PR)
+- **Maximum:** +3 points (capped at weight, but can go negative)
 
 ## Penalties
 
@@ -91,6 +101,9 @@ The REWARD_SCORE system automatically evaluates code quality for every Pull Requ
 
 1. **Add Tests**
    - Write unit tests for new code
+   - Prefer integration tests over unit tests (higher reward)
+   - Include assertions, mocking, and edge cases (quality indicators)
+   - Test critical modules (auth, tenant, security) for impact bonus
    - Aim for 80%+ coverage
    - Add regression tests for bug fixes
 
@@ -108,6 +121,8 @@ The REWARD_SCORE system automatically evaluates code quality for every Pull Requ
    - No hardcoded secrets
    - Proper input validation
    - Use parameterized queries
+   - Add security improvements (middleware, sanitization, RLS tests) for bonus points
+   - Document security architecture for additional points
 
 5. **Avoid Penalties**
    - Ensure CI passes
