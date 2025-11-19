@@ -455,20 +455,18 @@ describe('CustomerSearchSelector', () => {
 
       const input = screen.getByPlaceholderText(/search customers/i) as HTMLInputElement;
       
-      // Type to set search term
-      fireEvent.change(input, { target: { value: 'John' } });
+      // Type to set search term - use both change and input events to ensure state updates
       fireEvent.focus(input);
+      fireEvent.change(input, { target: { value: 'John' } });
+      fireEvent.input(input, { target: { value: 'John' } });
 
       // Wait for the clear button to appear (it only appears when searchTerm is not empty)
-      await waitFor(() => {
-        const clearButton = screen.queryByTestId('x-icon')?.closest('button');
-        expect(clearButton).toBeInTheDocument();
-      });
+      const clearButton = await waitFor(() => {
+        return screen.getByTestId('clear-button');
+      }, { timeout: 3000 });
 
-      // Find and click the clear button
-      const clearButton = screen.getByTestId('x-icon').closest('button');
-      expect(clearButton).toBeInTheDocument();
-      fireEvent.click(clearButton!);
+      // Click the clear button
+      fireEvent.click(clearButton);
 
       // Wait for the input to be cleared and onChange to be called
       await waitFor(() => {
