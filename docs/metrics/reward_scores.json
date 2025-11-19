@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-19T14:38:30.625544Z",
+  "last_updated": "2025-11-19T14:49:02.128340Z",
   "scores": [
     {
       "pr": "56",
@@ -25549,24 +25549,42 @@
       "files_changed": 0,
       "coverage_delta": null,
       "file_scores": {}
+    },
+    {
+      "pr": "123",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T14:48:32.824939Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
     }
   ],
   "aggregates": {
-    "total_prs": 31,
-    "average_score": -6.81,
+    "total_prs": 32,
+    "average_score": -6.88,
     "score_distribution": {
-      "negative (<0)": 31
+      "negative (<0)": 32
     },
     "trends": [
       {
         "period": "2025-W46",
-        "average": -6.806451612903226,
-        "count": 31
+        "average": -6.875,
+        "count": 32
       }
     ],
     "category_performance": {
       "tests": {
-        "average": 0.73,
+        "average": 0.7,
         "total": 22.5,
         "count": 21
       },
@@ -25576,27 +25594,41 @@
         "count": 5
       },
       "docs": {
-        "average": 0.68,
+        "average": 0.66,
         "total": 21.0,
         "count": 21
       },
       "performance": {
-        "average": 0.58,
+        "average": 0.56,
         "total": 18,
         "count": 18
       },
       "security": {
         "average": -3.0,
-        "total": -93,
-        "count": 31
+        "total": -96,
+        "count": 32
       },
       "penalties": {
         "average": -5.94,
-        "total": -184,
-        "count": 31
+        "total": -190,
+        "count": 32
       }
     },
     "anti_patterns": [
+      {
+        "pr": "123",
+        "score": -9,
+        "timestamp": "2025-11-19T14:48:32.824939Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
       {
         "pr": "117",
         "score": -9,
