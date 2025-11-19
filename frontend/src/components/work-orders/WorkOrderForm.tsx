@@ -20,6 +20,7 @@ import Card from '@/components/ui/Card';
 import CustomerSearchSelector from '@/components/ui/CustomerSearchSelector';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { logger } from '@/utils/logger';
+import { toast } from '@/utils/toast';
 import { enhancedApi } from '@/lib/enhanced-api';
 
 // Form validation schema
@@ -147,7 +148,14 @@ export default function WorkOrderForm({
         setTechnicians(transformedTechnicians);
         // Auto-select if only one technician is available and none selected
         if (transformedTechnicians.length === 1) {
-          try { setValue('assigned_to', transformedTechnicians[0].id); } catch {}
+          try {
+            setValue('assigned_to', transformedTechnicians[0].id);
+          } catch (error) {
+            logger.warn('Failed to auto-select technician', {
+              error: error instanceof Error ? error.message : String(error),
+              technicianId: transformedTechnicians[0].id,
+            }, 'WorkOrderForm');
+          }
         }
       } catch (error) {
         logger.error('Error loading technicians', { 
@@ -188,6 +196,10 @@ export default function WorkOrderForm({
       reset(submissionData); // Reset form with submitted data to mark as not dirty
     } catch (error) {
       logger.error('Work order form submission failed', error, 'WorkOrderForm');
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Failed to save work order. Please try again.';
+      toast.error(errorMessage);
     }
   };
 
