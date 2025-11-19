@@ -148,12 +148,12 @@ This document consolidates all development tasks from multiple planning document
   - **Status:** Multi-technician optimization engine implemented with TSP-style heuristics, constraint handling, structured logging, and optional commit capability via `GET /v1/routing/optimize`. Includes regression tests for engine behavior.
   - **Reference:** `docs/MASTER_DEVELOPMENT_PLAN.md` line 101
 
-- [ ] Auto-scheduling engine - Phase 2
-  - **File:** `apps/api/src/jobs/auto-scheduler.service.ts` (new)
-  - **Estimated:** 20-24 hours
+- [x] Auto-scheduling engine - Phase 2 ✅ **COMPLETED 2025-11-19**
+  - **Files:** `backend/src/jobs/auto-scheduler.service.ts`, `backend/src/jobs/jobs.controller.ts`, `backend/src/jobs/__tests__/auto-scheduler.service.spec.ts`
+  - **Status:** Auto-scheduling service implemented with RouteOptimizationEngine integration, automatic job assignment, structured logging, comprehensive test coverage, and API endpoint at `POST /v1/jobs/auto-schedule`. Supports dry-run mode (commit=false) and multiple optimization strategies.
   - **Reference:** `docs/MASTER_DEVELOPMENT_PLAN.md` line 102
 
-**Total Estimated Time:** 20-24 hours remaining (Auto-scheduling engine outstanding)
+**Total Estimated Time:** 0 hours remaining (All Job Scheduling Phase 2 tasks complete)
 
 ---
 
