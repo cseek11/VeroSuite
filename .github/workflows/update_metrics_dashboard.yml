@@ -162,13 +162,15 @@ jobs:
             exit 1
           fi
           
-          # Process each reward file
-          echo "$REWARD_FILES" | while read -r REWARD_FILE; do
+          # Process each reward file (handle multiline output)
+          echo "$REWARD_FILES" | while IFS= read -r REWARD_FILE; do
             if [ -n "$REWARD_FILE" ] && [ -f "$REWARD_FILE" ]; then
               echo "Processing: $REWARD_FILE"
               python3 .cursor/scripts/collect_metrics.py \
                 --reward-file "$REWARD_FILE" \
                 --output docs/metrics/reward_scores.json
+            else
+              echo "Skipping invalid file: $REWARD_FILE"
             fi
           done
           
