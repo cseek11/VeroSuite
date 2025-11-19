@@ -148,6 +148,37 @@ METADATA: domain=[backend|frontend|infra|data], complexity=[simple|medium|comple
 
 ---
 
+## REWARD SCORE IMPROVEMENT RULE
+
+**Priority:** CRITICAL - This rule is MANDATORY and must be enforced before any code is finalized.
+
+**Trigger:** Before finalizing any code changes, whether manual or via Auto-PR.
+
+**Workflow:**
+1. **MUST** read the 5 most recent Reward Scores from `docs/metrics/reward_scores.json`
+2. **MUST** identify recurring areas of point loss (tests, security, docs, performance, penalties)
+3. **MUST** generate an improvement plan tailored to the current code modifications
+4. **MUST** apply all appropriate code modifications needed to maximize Reward_Score
+5. **MUST** re-run the Reward Feedback Prompt (`.cursor/prompts/reward_feedback.md`) to verify improvements
+
+**Enforcement:**
+- Cursor **MUST refuse** to finalize code until all applicable Reward Score criteria are met
+- This analysis is **MANDATORY** and cannot be skipped
+- If `docs/metrics/reward_scores.json` has insufficient data (< 3 scores), use default improvement checklist based on `.cursor/reward_rubric.yaml`
+
+**Integration:**
+- This rule integrates with `.cursor/prompts/reward_feedback.md` for detailed analysis
+- Self-improvement learnings from `docs/ai/self_improvement_log.md` should be incorporated
+- Anti-patterns from `.cursor/anti_patterns.md` must be avoided
+- Patterns from `.cursor/patterns/` should be applied where relevant
+
+**Quality Gate:**
+- Code changes are blocked from finalization until Reward Score analysis is complete
+- Estimated score improvement should be calculated
+- All identified recurring issues must be addressed in current changes
+
+---
+
 ## DISTILLATION AGENTS (IN-PROMPT)
 Cursor uses distilled knowledge from:
 - `.cursor/patterns/` (primary)
