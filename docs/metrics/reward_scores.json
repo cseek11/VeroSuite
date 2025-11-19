@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-19T16:41:21.292703Z",
+  "last_updated": "2025-11-19T16:41:50.672898Z",
   "scores": [
     {
       "pr": "56",
@@ -37880,19 +37880,37 @@
       "files_changed": 0,
       "coverage_delta": null,
       "file_scores": {}
+    },
+    {
+      "pr": "245",
+      "score": -8,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 1,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:41:17.437037Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
     }
   ],
   "aggregates": {
-    "total_prs": 75,
+    "total_prs": 76,
     "average_score": -7.43,
     "score_distribution": {
-      "negative (<0)": 75
+      "negative (<0)": 76
     },
     "trends": [
       {
         "period": "2025-W46",
-        "average": -7.426666666666667,
-        "count": 75
+        "average": -7.434210526315789,
+        "count": 76
       }
     ],
     "category_performance": {
@@ -37902,9 +37920,9 @@
         "count": 28
       },
       "bug_fix": {
-        "average": 0.17,
-        "total": 13,
-        "count": 13
+        "average": 0.18,
+        "total": 14,
+        "count": 14
       },
       "docs": {
         "average": 0.37,
@@ -37918,16 +37936,30 @@
       },
       "security": {
         "average": -3.0,
-        "total": -225,
-        "count": 75
+        "total": -228,
+        "count": 76
       },
       "penalties": {
         "average": -5.79,
-        "total": -434,
-        "count": 75
+        "total": -440,
+        "count": 76
       }
     },
     "anti_patterns": [
+      {
+        "pr": "245",
+        "score": -8,
+        "timestamp": "2025-11-19T16:41:17.437037Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 1,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
       {
         "pr": "243",
         "score": -8,
@@ -38604,20 +38636,6 @@
         "pr": "90",
         "score": -9,
         "timestamp": "2025-11-19T14:12:17.560184Z",
-        "breakdown": {
-          "tests": 0,
-          "bug_fix": 0,
-          "docs": 0,
-          "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "87",
-        "score": -9,
-        "timestamp": "2025-11-19T14:06:51.697924Z",
         "breakdown": {
           "tests": 0,
           "bug_fix": 0,
