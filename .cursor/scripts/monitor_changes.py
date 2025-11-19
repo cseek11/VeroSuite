@@ -610,12 +610,133 @@ def generate_pr_body(files: Dict[str, Dict], config: Dict) -> str:
     return body
 
 
+def analyze_and_improve_pr_quality(files: Dict[str, Dict], repo_path: pathlib.Path) -> None:
+    """
+    Analyze past Reward Scores and generate improvement recommendations before PR creation.
+    
+    This function:
+    1. Reads last 5-10 Reward Scores from docs/metrics/reward_scores.json
+    2. Analyzes trends using analyze_reward_trends.py
+    3. Generates improvement recommendations
+    4. Writes feedback file that Cursor reads via enforcement rules
+    5. Logs analysis to docs/ai/self_improvement_log.md
+    """
+    try:
+        # Get script paths
+        analyze_script = pathlib.Path(__file__).resolve().parent / "analyze_reward_trends.py"
+        feedback_dir = pathlib.Path(__file__).resolve().parents[1] / "feedback"
+        feedback_file = feedback_dir / "pr_quality_feedback.md"
+        self_improvement_log = repo_path / "docs" / "ai" / "self_improvement_log.md"
+        
+        # Create feedback directory if it doesn't exist
+        feedback_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Run trend analysis
+        if analyze_script.exists():
+            try:
+                result = subprocess.run(
+                    [sys.executable, str(analyze_script), "--count", "10", "--output-format", "markdown"],
+                    cwd=repo_path,
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                
+                if result.returncode == 0:
+                    analysis_output = result.stdout
+                    
+                    # Write feedback file for Cursor to read
+                    feedback_content = f"""# PR Quality Feedback
+
+**Generated:** {datetime.utcnow().isoformat()}Z
+**Files in PR:** {len(files)}
+
+## Reward Score Analysis
+
+{analysis_output}
+
+## Action Required
+
+Before finalizing this PR, Cursor MUST:
+1. Review the trend analysis above
+2. Address all weak categories identified
+3. Apply recommended improvements
+4. Ensure all tests pass
+5. Verify documentation is updated
+
+See `.cursor/prompts/reward_feedback.md` for detailed guidance.
+"""
+                    
+                    with open(feedback_file, "w", encoding="utf-8") as f:
+                        f.write(feedback_content)
+                    
+                    logger.info(
+                        "PR quality feedback generated",
+                        operation="analyze_and_improve_pr_quality",
+                        feedback_file=str(feedback_file)
+                    )
+                    
+                    # Append to self-improvement log if score analysis indicates issues
+                    # (This would be enhanced to check actual scores, but for now we log the analysis)
+                    if self_improvement_log.exists():
+                        with open(self_improvement_log, "a", encoding="utf-8") as f:
+                            f.write(f"\n\n## Pre-PR Analysis - {datetime.utcnow().isoformat()}Z\n\n")
+                            f.write(f"**Files:** {len(files)} files\n\n")
+                            f.write(f"**Analysis:**\n{analysis_output}\n")
+                    else:
+                        # Create initial log entry
+                        with open(self_improvement_log, "w", encoding="utf-8") as f:
+                            f.write(f"# Self-Improvement Log\n\n")
+                            f.write(f"## Pre-PR Analysis - {datetime.utcnow().isoformat()}Z\n\n")
+                            f.write(f"**Files:** {len(files)} files\n\n")
+                            f.write(f"**Analysis:**\n{analysis_output}\n")
+                    
+                    logger.info(
+                        "Self-improvement log updated",
+                        operation="analyze_and_improve_pr_quality",
+                        log_file=str(self_improvement_log)
+                    )
+                else:
+                    logger.warn(
+                        f"Trend analysis script failed: {result.stderr}",
+                        operation="analyze_and_improve_pr_quality",
+                        returncode=result.returncode
+                    )
+            except subprocess.TimeoutExpired:
+                logger.warn(
+                    "Trend analysis script timed out",
+                    operation="analyze_and_improve_pr_quality"
+                )
+            except Exception as e:
+                logger.warn(
+                    f"Error running trend analysis: {e}",
+                    operation="analyze_and_improve_pr_quality",
+                    error=str(e)
+                )
+        else:
+            logger.warn(
+                f"Trend analysis script not found: {analyze_script}",
+                operation="analyze_and_improve_pr_quality"
+            )
+    except Exception as e:
+        # Non-fatal: log error but don't block PR creation
+        logger.warn(
+            f"Error in pre-PR quality analysis (non-fatal): {e}",
+            operation="analyze_and_improve_pr_quality",
+            error=str(e)
+        )
+
+
 def create_auto_pr(files: Dict[str, Dict], config: Dict, repo_path: pathlib.Path) -> Optional[str]:
     """Create automated PR using create_pr.py script."""
     logger.info(
         f"Creating auto-PR for {len(files)} files",
         operation="create_auto_pr"
     )
+    
+    # Pre-PR quality analysis: Analyze past scores and generate improvement recommendations
+    # This creates a feedback file that Cursor reads via enforcement rules
+    analyze_and_improve_pr_quality(files, repo_path)
     
     # Generate branch name
     branch_name = f"auto-pr-{int(time.time())}"
