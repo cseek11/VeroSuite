@@ -137,6 +137,42 @@ always_apply: true
 
 ---
 
+## PRIORITY: CRITICAL - Reward Score Quality Enforcement (Anti-Gaming)
+
+**Purpose:** Prevent artificial inflation of Reward Scores through low-quality additions.
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** ensure tests are substantive, accurate, and context-appropriate
+- ✅ **ALWAYS** ensure documentation is meaningful and relevant to the changes
+- ✅ **ALWAYS** prioritize quality over quantity
+- ✅ **ALWAYS** verify tests actually test functionality (not just pass)
+- ✅ **ALWAYS** verify documentation adds value (not just filler text)
+
+**NEVER:**
+- ❌ **NEVER** add low-quality, trivial, or meaningless tests for the purpose of increasing Reward Score
+- ❌ **NEVER** add low-quality, trivial, or meaningless documentation for the purpose of increasing Reward Score
+- ❌ **NEVER** add tests that don't actually test anything meaningful
+- ❌ **NEVER** add documentation that doesn't provide useful information
+- ❌ **NEVER** add placeholder comments or empty test cases just to meet requirements
+
+**Quality Standards:**
+- Tests must cover actual functionality, edge cases, and error conditions
+- Tests must use proper assertions and mocking where appropriate
+- Documentation must explain why, not just what
+- Documentation must be accurate and up-to-date
+- Better to have fewer high-quality tests than many trivial ones
+- Better to have no documentation than misleading documentation
+
+**Enforcement:**
+- Cursor must verify test quality before adding tests
+- Cursor must verify documentation value before adding documentation
+- If in doubt, prioritize correctness and usefulness over score points
+- Reference `.cursor/reward_rubric.yaml` for quality requirements
+
+**Reference:** `.cursor/rules.md` - REWARD SCORE IMPROVEMENT RULE
+
+---
+
 ## PRIORITY: CRITICAL - Secrets Management
 
 ### Environment Variables

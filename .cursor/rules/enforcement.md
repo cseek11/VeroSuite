@@ -97,6 +97,16 @@ always_apply: true
   - [ ] Assets are in `branding/assets/` or `docs/assets/`
   - [ ] Test outputs are gitignored or archived
   - [ ] Temporary files are cleaned up
+- [ ] **MUST** perform Reward Score analysis before finalizing code (see `.cursor/rules.md` - REWARD SCORE IMPROVEMENT RULE)
+  - [ ] Read last 5 Reward Scores from `docs/metrics/reward_scores.json`
+  - [ ] Identify recurring areas of point loss (tests, security, docs, performance, penalties)
+  - [ ] Generate improvement plan tailored to current code modifications
+  - [ ] Apply code modifications to maximize Reward_Score
+  - [ ] Verify improvements address identified issues
+- [ ] **MUST** treat Reward Score review comments as authoritative instructions
+  - [ ] If Reward Score comments indicate areas for improvement, apply those improvements before writing new code
+  - [ ] Read historical Reward Score feedback from `docs/metrics/reward_scores.json` before making changes
+  - [ ] Incorporate learnings from `docs/ai/self_improvement_log.md` if available
 
 **STOP if any rule violation detected.**
 
