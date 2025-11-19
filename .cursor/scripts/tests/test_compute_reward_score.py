@@ -364,7 +364,55 @@ class TestPenalties(unittest.TestCase):
             coverage, static_analysis, self.rubric
         )
         self.assertEqual(penalty, 0)
-        self.assertIn("No penalties", note)
+        self.assertIn("Adequate test coverage detected", note or "No penalties", note)
+    
+    def test_calculate_penalties_mutually_exclusive(self):
+        """REGRESSION: Test that only one penalty applies (not both failing_ci and missing_tests)."""
+        # This test ensures the -6 bug (double penalty) is fixed
+        coverage = {
+            "frontend": {"percentage": 0},
+            "backend": {"percentage": 0}
+        }
+        static_analysis = {}
+        penalty, note = compute_reward_score.calculate_penalties(
+            coverage, static_analysis, self.rubric
+        )
+        # Should only get failing_ci penalty (-4), not both failing_ci (-4) and missing_tests (-2)
+        self.assertEqual(penalty, -4, "Should only apply failing_ci penalty, not both penalties")
+        # Check that note contains "CI failure" or "failing" (actual note text)
+        note_lower = note.lower()
+        self.assertTrue(
+            "ci failure" in note_lower or "failing" in note_lower or "no test coverage" in note_lower,
+            f"Note should mention CI failure or no coverage, got: {note}"
+        )
+        self.assertNotIn("missing_tests", note_lower, "Should not apply missing_tests when coverage is 0")
+    
+    def test_calculate_penalties_missing_coverage_no_penalty(self):
+        """REGRESSION: Test that missing coverage data structure doesn't trigger penalty."""
+        # Empty coverage dict (malformed workflow) should not penalize
+        coverage = {}
+        static_analysis = {}
+        penalty, note = compute_reward_score.calculate_penalties(
+            coverage, static_analysis, self.rubric
+        )
+        # Should not penalize when coverage data is entirely missing
+        self.assertEqual(penalty, 0, "Should not penalize when coverage data is missing")
+        self.assertIn("Coverage data missing", note or "no penalty applied", note)
+    
+    def test_calculate_penalties_type_safety(self):
+        """REGRESSION: Test that type coercion handles None and invalid values safely."""
+        # Test with None values
+        coverage = {
+            "frontend": {"percentage": None},
+            "backend": {"percentage": "invalid"}
+        }
+        static_analysis = {}
+        penalty, note = compute_reward_score.calculate_penalties(
+            coverage, static_analysis, self.rubric
+        )
+        # Should handle gracefully without crashing
+        self.assertIsInstance(penalty, (int, float))
+        self.assertIsInstance(note, str)
 
 
 class TestDecisionRecommendation(unittest.TestCase):
@@ -780,6 +828,132 @@ class TestPerformanceScoringImprovements(unittest.TestCase):
         score, note = compute_reward_score.score_performance(diff, self.rubric)
         # Should detect performance improvements in actual code
         self.assertGreaterEqual(score, 0)
+
+
+class TestSecurityDiffFiltering(unittest.TestCase):
+    """REGRESSION: Test security scoring filters by diff (only changed files)."""
+    
+    def setUp(self):
+        self.rubric = {
+            "security": 4,
+            "penalties": {}
+        }
+    
+    def test_score_security_filters_by_diff(self):
+        """REGRESSION: Test that security scoring only counts findings in changed files."""
+        # Simulate Semgrep results with findings in both changed and unchanged files
+        static_analysis = {
+            "results": [
+                {
+                    "check_id": "security-rule-1",
+                    "path": "apps/api/src/auth.ts",  # Changed file
+                    "extra": {"severity": "ERROR"},
+                    "start": {"line": 10}
+                },
+                {
+                    "check_id": "security-rule-2",
+                    "path": "libs/common/utils.ts",  # Unchanged file
+                    "extra": {"severity": "ERROR"},
+                    "start": {"line": 20}
+                }
+            ]
+        }
+        changed_files = ["apps/api/src/auth.ts"]  # Only this file changed
+        
+        score, note = compute_reward_score.score_security(
+            static_analysis,
+            self.rubric,
+            changed_files=changed_files
+        )
+        
+        # Should only count the finding in the changed file
+        # Since there's 1 critical finding in changed file, score should be -3
+        self.assertEqual(score, -3, "Should only count findings in changed files")
+        self.assertIn("security-filtered: 1", note or "apps/api/src/auth.ts", note)
+    
+    def test_score_security_ignores_repo_wide_issues(self):
+        """REGRESSION: Test that repo-wide issues are not counted as new findings."""
+        # Simulate repo-wide security issue (not in changed files)
+        static_analysis = {
+            "results": [
+                {
+                    "check_id": "security-rule-1",
+                    "path": "libs/common/old-code.ts",  # Not in changed files
+                    "extra": {"severity": "ERROR"},
+                    "start": {"line": 10}
+                }
+            ]
+        }
+        changed_files = ["apps/api/src/new-feature.ts"]  # Different file changed
+        
+        score, note = compute_reward_score.score_security(
+            static_analysis,
+            self.rubric,
+            changed_files=changed_files
+        )
+        
+        # Should not penalize for issues in unchanged files
+        # Should return positive score (no issues in changed files)
+        self.assertGreaterEqual(score, 0, "Should not penalize for repo-wide issues")
+        self.assertIn("skipped_by_diff_filter", note.lower() or "no high/critical", note.lower())
+    
+    def test_score_security_no_changed_files_fallback(self):
+        """Test that security scoring works when changed_files is None (fallback)."""
+        static_analysis = {
+            "results": [
+                {
+                    "check_id": "security-rule-1",
+                    "path": "any-file.ts",
+                    "extra": {"severity": "ERROR"},
+                    "start": {"line": 10}
+                }
+            ]
+        }
+        changed_files = None  # Unknown changed files
+        
+        score, note = compute_reward_score.score_security(
+            static_analysis,
+            self.rubric,
+            changed_files=changed_files
+        )
+        
+        # Should still work (conservative: include all findings)
+        self.assertIsInstance(score, (int, float))
+        self.assertIsInstance(note, str)
+
+
+class TestStabilizedScore(unittest.TestCase):
+    """Test stabilized score calculation."""
+    
+    def test_calculate_stabilized_score_single_file(self):
+        """Test stabilized score for micro-PR (1 file)."""
+        score = 10
+        files_changed = 1
+        stabilized_score, note = compute_reward_score.calculate_stabilized_score(score, files_changed)
+        
+        # Should reduce weight: sqrt(1/10) ≈ 0.316
+        expected = score * (1 / 10) ** 0.5
+        self.assertAlmostEqual(stabilized_score, expected, places=2)
+        self.assertIn("Stabilized Score", note)
+    
+    def test_calculate_stabilized_score_ten_files(self):
+        """Test stabilized score for standard PR (10 files)."""
+        score = 10
+        files_changed = 10
+        stabilized_score, note = compute_reward_score.calculate_stabilized_score(score, files_changed)
+        
+        # Should be unchanged: sqrt(10/10) = 1.0
+        self.assertAlmostEqual(stabilized_score, score, places=2)
+    
+    def test_calculate_stabilized_score_many_files(self):
+        """Test stabilized score for large PR (25 files)."""
+        score = 10
+        files_changed = 25
+        stabilized_score, note = compute_reward_score.calculate_stabilized_score(score, files_changed)
+        
+        # Should boost slightly: sqrt(25/10) ≈ 1.58
+        expected = score * (25 / 10) ** 0.5
+        self.assertAlmostEqual(stabilized_score, expected, places=2)
 
 
 class TestRebalancedWeights(unittest.TestCase):
