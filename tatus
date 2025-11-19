@@ -1,0 +1,31 @@
+[33mcommit d33ca42f4148d0cf695b7afb0703c8b9880bdd8d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mauto-pr-1763527065[m[33m, [m[1;31morigin/auto-pr-1763527065[m[33m)[m
+Author: cseek11 <seeksfx@gmail.com>
+Date:   Tue Nov 18 23:37:46 2025 -0500
+
+    Auto-PR: 5 files changed
+    
+    ## Automated PR
+    
+    This PR was automatically created based on smart batching rules.
+    
+    ### Changed Files
+    
+    - `"t --workflow=swarm_compute_reward_score.yml --limit 1 --json databaseId,status,conclusion,event,workflowName \357\201\274 ConvertFrom-Json \357\201\274 Format-List"` (??, 0 lines)
+    - `"t --workflow=update_metrics_dashboard.yml --limit 1 --json databaseId,status,conclusion \357\201\274 ConvertFrom-Json \357\201\274 Format-List"` (??, 0 lines)
+    - `"t n"` (??, 0 lines)
+    - `.cursor/scripts/test_workflow_trigger_manual.py` (??, 0 lines)
+    - `docs/testing/AUTO_PR_WORKFLOW_TRIGGER_TEST_REPORT.md` (??, 0 lines)
+    
+    ### Summary
+    
+    - **Files changed:** 5
+    - **Lines changed:** 0
+    - **File types:** , .md, .py
+    
+    ### Testing
+    
+    REWARD_SCORE will be computed automatically for this PR.
+
+ .cursor/scripts/test_workflow_trigger_manual.py    | 336 [32m+++++++++++++++++++++[m
+ .../AUTO_PR_WORKFLOW_TRIGGER_TEST_REPORT.md        | 291 [32m++++++++++++++++++[m
+ 2 files changed, 627 insertions(+)
