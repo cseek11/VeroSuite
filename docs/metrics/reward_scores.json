@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-19T15:55:13.700295Z",
+  "last_updated": "2025-11-19T15:55:49.239303Z",
   "scores": [
     {
       "pr": "56",
@@ -37502,24 +37502,42 @@
       "files_changed": 0,
       "coverage_delta": null,
       "file_scores": {}
+    },
+    {
+      "pr": "194",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T15:54:46.376800Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
     }
   ],
   "aggregates": {
-    "total_prs": 54,
-    "average_score": -6.93,
+    "total_prs": 55,
+    "average_score": -6.96,
     "score_distribution": {
-      "negative (<0)": 54
+      "negative (<0)": 55
     },
     "trends": [
       {
         "period": "2025-W46",
-        "average": -6.925925925925926,
-        "count": 54
+        "average": -6.963636363636364,
+        "count": 55
       }
     ],
     "category_performance": {
       "tests": {
-        "average": 0.74,
+        "average": 0.73,
         "total": 40.0,
         "count": 28
       },
@@ -37529,27 +37547,41 @@
         "count": 7
       },
       "docs": {
-        "average": 0.52,
+        "average": 0.51,
         "total": 28.0,
         "count": 28
       },
       "performance": {
-        "average": 0.46,
+        "average": 0.45,
         "total": 25,
         "count": 25
       },
       "security": {
         "average": -3.0,
-        "total": -162,
-        "count": 54
+        "total": -165,
+        "count": 55
       },
       "penalties": {
-        "average": -5.7,
-        "total": -308,
-        "count": 54
+        "average": -5.71,
+        "total": -314,
+        "count": 55
       }
     },
     "anti_patterns": [
+      {
+        "pr": "194",
+        "score": -9,
+        "timestamp": "2025-11-19T15:54:46.376800Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
       {
         "pr": "198",
         "score": -9,
@@ -38231,20 +38263,6 @@
           "bug_fix": 0,
           "docs": 1,
           "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "56",
-        "score": -5,
-        "timestamp": "2025-11-18T22:01:50.302871Z",
-        "breakdown": {
-          "tests": 1,
-          "bug_fix": 1,
-          "docs": 1,
-          "performance": 1,
           "security": -3,
           "penalties": -6
         },
