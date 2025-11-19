@@ -143,3 +143,4 @@ Reindex + semantic search availability → informs next PR
 
 
 
+
