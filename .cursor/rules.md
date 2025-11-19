@@ -406,7 +406,159 @@ Show me each step as you complete it."
 - Show me the error handling code"
 ```
 
-### 5. Watch for Red Flags
+### 5. Security Compliance Verification (CRITICAL)
+
+**Before any code change involving security, authentication, or database operations, use this prompt:**
+
+```
+"Please verify security compliance per .cursor/rules/security.md:
+1. Tenant Isolation & RLS:
+   - [ ] Is tenant_id verified before all database queries?
+   - [ ] Are RLS policies enabled and tested?
+   - [ ] Is tenant context set per request (SET LOCAL app.tenant_id)?
+   - [ ] Is tenant_id extracted from JWT (never from request body/params)?
+   - [ ] Is cross-tenant access prevented?
+   - [ ] Show me all database queries and tenant isolation checks
+
+2. Authentication & Authorization:
+   - [ ] Is JWT validation implemented on all protected routes?
+   - [ ] Are permissions checked at controller/service layer?
+   - [ ] Is RBAC properly enforced?
+   - [ ] Are user roles verified before allowing actions?
+   - [ ] Show me authentication and authorization checks
+
+3. Secrets Management:
+   - [ ] Are all secrets in environment variables (not hardcoded)?
+   - [ ] Is .env file in .gitignore?
+   - [ ] Are JWT secrets strong (32+ characters, randomly generated)?
+   - [ ] Are different secrets used for dev/staging/prod?
+   - [ ] Are secrets never logged or exposed in errors?
+   - [ ] Show me all secret usage and environment variable configuration
+
+4. Input Validation & XSS Prevention:
+   - [ ] Is all user input validated on backend?
+   - [ ] Is HTML content sanitized before storage?
+   - [ ] Are XSS vectors checked (script tags, javascript:, event handlers)?
+   - [ ] Is dangerouslySetInnerHTML avoided or sanitized?
+   - [ ] Are widget configs sanitized?
+   - [ ] Show me input validation and sanitization code
+
+5. Production Security (if deploying):
+   - [ ] Are security headers configured (CSP, X-Frame-Options, etc.)?
+   - [ ] Is rate limiting enabled?
+   - [ ] Is CORS configured correctly (production domains only)?
+   - [ ] Is HTTPS enforced?
+   - [ ] Are OWASP security tests passing?
+   - [ ] Show me security headers and production security configuration
+
+6. Widget Security (if applicable):
+   - [ ] Are widgets rendered in isolated iframes?
+   - [ ] Is widget CSP configured?
+   - [ ] Are widget manifests validated?
+   - [ ] Is postMessage communication validated?
+   - [ ] Is PII properly tagged?
+   - [ ] Show me widget security implementation
+
+Show me the security compliance report with file paths and line numbers"
+```
+
+**Why this works:** Ensures all security requirements from `.cursor/rules/security.md` are verified before code changes.
+
+**For database operations specifically:**
+
+```
+"Please verify database security compliance:
+- [ ] Is tenant_id set before query (SET LOCAL app.tenant_id = <tenant_id>)?
+- [ ] Is RLS enabled on all tenant-scoped tables?
+- [ ] Are RLS policies tested for cross-tenant isolation?
+- [ ] Is tenant context verified in all queries?
+- [ ] Are Prisma queries using parameterized queries (never SQL concatenation)?
+- [ ] Show me all database operations with tenant isolation verification"
+```
+
+**For authentication/authorization changes:**
+
+```
+"Please verify auth compliance:
+- [ ] Is JWT secret strong and stored in environment variable?
+- [ ] Is token validation implemented on every request?
+- [ ] Are permissions checked at multiple layers?
+- [ ] Is tenant_id extracted from validated JWT (never from client)?
+- [ ] Is audit logging enabled for auth events?
+- [ ] Show me JWT validation, permission checks, and audit logging"
+```
+
+**For API endpoints:**
+
+```
+"Please verify API security compliance:
+- [ ] Is authentication required?
+- [ ] Is authorization checked (RBAC)?
+- [ ] Is tenant isolation enforced?
+- [ ] Is input validation implemented?
+- [ ] Is XSS prevention in place?
+- [ ] Are errors sanitized (no sensitive data exposed)?
+- [ ] Show me authentication, authorization, validation, and error handling"
+```
+
+**For production deployment:**
+
+```
+"Please verify production security readiness:
+- [ ] Complete docs/PRODUCTION_SECURITY_CHECKLIST.md checklist
+- [ ] Are security headers configured and tested?
+- [ ] Is rate limiting enabled and tested?
+- [ ] Is CORS configured for production domains only?
+- [ ] Is HTTPS enforced?
+- [ ] Are OWASP security tests passing?
+- [ ] Is monitoring configured (Sentry, logging)?
+- [ ] Are secrets stored in secure secret management?
+- [ ] Show me production security configuration and test results"
+```
+
+**For widget development:**
+
+```
+"Please verify widget security compliance:
+- [ ] Is widget rendered in isolated iframe?
+- [ ] Is widget CSP configured correctly?
+- [ ] Is widget manifest validated (widget_id, entry_point, config_schema)?
+- [ ] Is postMessage origin validated?
+- [ ] Is widget config sanitized before storage?
+- [ ] Is PII properly tagged (if applicable)?
+- [ ] Show me widget security implementation and validation"
+```
+
+**For OWASP security testing:**
+
+```
+"Please verify OWASP security testing:
+- [ ] Are injection attack tests present (SQL, NoSQL, command)?
+- [ ] Are broken authentication tests present?
+- [ ] Are XSS tests present (stored, reflected, DOM-based)?
+- [ ] Are security misconfiguration tests present?
+- [ ] Are tests in backend/test/security/owasp-security.test.ts?
+- [ ] Do tests cover all new endpoints/features?
+- [ ] Show me OWASP test coverage and results"
+```
+
+**Security red flags to watch for:**
+
+```
+"Please check for security violations:
+- [ ] Any hardcoded secrets or credentials?
+- [ ] Any database queries without tenant_id?
+- [ ] Any RLS policies bypassed?
+- [ ] Any client-provided tenant_id trusted?
+- [ ] Any authentication checks skipped?
+- [ ] Any input validation missing?
+- [ ] Any XSS vectors introduced?
+- [ ] Any secrets logged or exposed?
+- [ ] Any cross-tenant data access possible?
+- [ ] Show me any security violations found"
+```
+
+### 6. Watch for Red Flags
 
 **Stop and intervene if you see:**
 
@@ -425,6 +577,17 @@ Show me each step as you complete it."
 - ❌ Workflow artifacts with inconsistent naming (not using standard names: reward, frontend-coverage, backend-coverage)
 - ❌ PR changes that will result in negative REWARD_SCORE without addressing issues
 - ❌ Metrics collection not configured for new workflows
+- ❌ **SECURITY:** Database queries without tenant_id verification
+- ❌ **SECURITY:** RLS policies bypassed or disabled
+- ❌ **SECURITY:** Client-provided tenant_id trusted
+- ❌ **SECURITY:** Secrets hardcoded in source code
+- ❌ **SECURITY:** .env files committed to version control
+- ❌ **SECURITY:** Authentication checks skipped
+- ❌ **SECURITY:** Input validation missing
+- ❌ **SECURITY:** XSS vectors introduced (dangerouslySetInnerHTML without sanitization)
+- ❌ **SECURITY:** Secrets logged or exposed in error messages
+- ❌ **SECURITY:** Cross-tenant data access possible
+- ❌ **SECURITY:** No security compliance verification performed (see Section 5)
 
 **When you see a red flag, ask:**
 
@@ -459,10 +622,37 @@ Show me the corrected code and compliance verification."
 - [ ] File paths match monorepo structure
 - [ ] No old naming (VeroSuite, @verosuite/*)
 
-✅ Security:
+✅ Security (see Section 5 for comprehensive security prompts):
 - [ ] Tenant isolation maintained (if database operations)
-- [ ] No secrets hardcoded
-- [ ] Input validation present
+  - [ ] tenant_id verified before all database queries
+  - [ ] RLS policies enabled and tested
+  - [ ] tenant_id extracted from JWT (never from request body/params)
+  - [ ] Cross-tenant access prevented
+- [ ] Authentication & Authorization:
+  - [ ] JWT validation on all protected routes
+  - [ ] Permissions checked at controller/service layer
+  - [ ] RBAC properly enforced
+- [ ] Secrets Management:
+  - [ ] All secrets in environment variables (not hardcoded)
+  - [ ] .env file in .gitignore
+  - [ ] JWT secrets strong (32+ characters)
+  - [ ] Secrets never logged or exposed
+- [ ] Input Validation & XSS Prevention:
+  - [ ] All user input validated on backend
+  - [ ] HTML content sanitized before storage
+  - [ ] XSS vectors checked (script tags, javascript:, event handlers)
+  - [ ] dangerouslySetInnerHTML avoided or sanitized
+- [ ] Production Security (if deploying):
+  - [ ] Security headers configured (CSP, X-Frame-Options, etc.)
+  - [ ] Rate limiting enabled
+  - [ ] CORS configured correctly
+  - [ ] HTTPS enforced
+  - [ ] OWASP security tests passing
+- [ ] Widget Security (if applicable):
+  - [ ] Widgets rendered in isolated iframes
+  - [ ] Widget CSP configured
+  - [ ] Widget manifests validated
+  - [ ] postMessage communication validated
 
 ✅ Documentation:
 - [ ] 'Last Updated' field uses current date (not hardcoded)
