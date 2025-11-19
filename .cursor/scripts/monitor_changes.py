@@ -144,6 +144,103 @@ def save_state(state: Dict) -> None:
         )
 
 
+def authenticate_gh_cli(gh_path: str) -> bool:
+    """Authenticate GitHub CLI if needed."""
+    try:
+        auth_check = subprocess.run(
+            [gh_path, "auth", "status"],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        if auth_check.returncode == 0:
+            if logger:
+                logger.debug("GitHub CLI already authenticated", operation="authenticate_gh_cli")
+            return True
+        
+        # Not authenticated, try to authenticate with token
+        token = os.environ.get("GH_DISPATCH_PAT") or os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+        if not token:
+            if logger:
+                logger.warn(
+                    "GitHub CLI not authenticated and no token found",
+                    operation="authenticate_gh_cli"
+                )
+            return False
+        
+        # Authenticate GitHub CLI with token
+        try:
+            auth_result = subprocess.run(
+                [gh_path, "auth", "login", "--with-token"],
+                input=token,
+                text=True,
+                capture_output=True,
+                timeout=10,
+                check=True
+            )
+            if logger:
+                logger.debug("GitHub CLI authenticated successfully", operation="authenticate_gh_cli")
+            return True
+        except subprocess.CalledProcessError as e:
+            if logger:
+                logger.error(
+                    f"Failed to authenticate GitHub CLI: {e.stderr}",
+                    operation="authenticate_gh_cli",
+                    error=e.stderr,
+                    stdout=e.stdout
+                )
+            return False
+    except Exception as e:
+        if logger:
+            logger.error(
+                f"Error checking GitHub CLI authentication: {e}",
+                operation="authenticate_gh_cli",
+                error=str(e)
+            )
+        return False
+
+
+def extract_pr_number(pr_url: Optional[str]) -> Optional[str]:
+    """Extract PR number from GitHub PR URL."""
+    if not pr_url:
+        return None
+    
+    try:
+        # Handle whitespace and trailing slashes
+        pr_url = pr_url.strip()
+        
+        # Check if URL contains /pull/
+        if "/pull/" not in pr_url:
+            if logger:
+                logger.warn(
+                    f"PR URL does not contain /pull/: {pr_url}",
+                    operation="extract_pr_number"
+                )
+            return None
+        
+        # Extract PR number (everything after /pull/ up to next / or end)
+        pr_number = pr_url.split("/pull/")[-1].split("/")[0].split("?")[0].split()[0]
+        
+        # Validate it's numeric
+        if pr_number.isdigit():
+            return pr_number
+        else:
+            if logger:
+                logger.warn(
+                    f"PR number is not numeric: {pr_number}",
+                    operation="extract_pr_number"
+                )
+            return None
+    except Exception as e:
+        if logger:
+            logger.warn(
+                f"Error extracting PR number from URL: {pr_url}",
+                operation="extract_pr_number",
+                error=str(e)
+            )
+        return None
+
+
 def is_excluded(file_path: str, config: Dict) -> bool:
     """Check if file path should be excluded from tracking."""
     excluded = config.get("excluded_paths", [])

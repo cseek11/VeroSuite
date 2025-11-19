@@ -689,7 +689,17 @@ def score_performance(diff: str, rubric: dict) -> Tuple[int, str]:
         if line.startswith("+") and not line.startswith("+++"):
             # Remove the + prefix for checking
             code_line = line[1:].strip()
-            # Check if line contains performance keywords
+            # Strip inline comments (//, #, /* */) before checking for keywords
+            # Remove // comments
+            if "//" in code_line:
+                code_line = code_line.split("//")[0].strip()
+            # Remove # comments (but not at start of line, already handled above)
+            if "#" in code_line and not code_line.startswith("#"):
+                code_line = code_line.split("#")[0].strip()
+            # Remove /* */ comments (simple case, not handling nested)
+            if "/*" in code_line:
+                code_line = code_line.split("/*")[0].strip()
+            # Check if line contains performance keywords (only in actual code, not comments)
             for keyword in performance_keywords:
                 if keyword in code_line.lower():
                     performance_mentions += 1
@@ -1169,7 +1179,7 @@ def compute_score(
             notes_list.append(f"\n## File-Level Breakdown ({len(file_scores)} files):")
             for file_path, file_data in sorted(file_scores.items()):
                 file_score = file_data["score"]
-                notes_list.append(f"- **{file_path}**: {file_score:+d}/10")
+                notes_list.append(f"- **{file_path}**: {file_score:+.1f}/10")
                 if file_data["breakdown"]["tests"] > 0:
                     notes_list.append(f"  - Tests: +{file_data['breakdown']['tests']}")
                 if file_data["breakdown"]["bug_fix"] > 0:
