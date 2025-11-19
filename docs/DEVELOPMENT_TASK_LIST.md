@@ -1,6 +1,6 @@
 # VeroField Development Task List
 
-**Last Updated:** 2025-11-18  
+**Last Updated:** 2025-11-19  
 **Status:** Active Development  
 **Source of Truth:** `docs/MASTER_DEVELOPMENT_PLAN.md`  
 **Overall Progress:** 91% Complete
@@ -138,14 +138,14 @@ This document consolidates all development tasks from multiple planning document
 **Source:** `docs/MASTER_DEVELOPMENT_PLAN.md` lines 76-104
 
 #### Remaining Work
-- [ ] Resource timeline view (technician lanes) - Phase 2
-  - **File:** `frontend/src/components/scheduling/ResourceTimeline.tsx` (exists, needs enhancement)
-  - **Estimated:** 12-16 hours
-  - **Reference:** `docs/MASTER_DEVELOPMENT_PLAN.md` line 100
+- [x] Resource timeline view (technician lanes) - Phase 2 ✅ **COMPLETED 2025-11-17**
+  - **File:** `frontend/src/components/scheduling/ResourceTimeline.tsx`
+  - **Status:** Timeline/Gantt view implemented with technician lanes, zoom controls, conflict detection, and comprehensive test coverage (`ResourceTimeline.test.tsx`, `ResourceTimeline.integration.test.tsx`).
+  - **Reference:** `docs/planning/JOB_SCHEDULING_PHASE_2_RESOURCE_TIMELINE_COMPLETE.md`
 
-- [ ] Advanced route optimization - Phase 2
-  - **File:** `apps/api/src/jobs/route-optimization.service.ts` (new)
-  - **Estimated:** 16-20 hours
+- [x] Advanced route optimization - Phase 2 ✅ **COMPLETED 2025-11-19**
+  - **Files:** `backend/src/routing/routing.module.ts`, `backend/src/routing/route-optimization.engine.ts`, `backend/src/routing/__tests__/route-optimization.engine.spec.ts`
+  - **Status:** Multi-technician optimization engine implemented with TSP-style heuristics, constraint handling, structured logging, and optional commit capability via `GET /v1/routing/optimize`. Includes regression tests for engine behavior.
   - **Reference:** `docs/MASTER_DEVELOPMENT_PLAN.md` line 101
 
 - [ ] Auto-scheduling engine - Phase 2
@@ -153,7 +153,7 @@ This document consolidates all development tasks from multiple planning document
   - **Estimated:** 20-24 hours
   - **Reference:** `docs/MASTER_DEVELOPMENT_PLAN.md` line 102
 
-**Total Estimated Time:** 48-60 hours (1-2 weeks)
+**Total Estimated Time:** 20-24 hours remaining (Auto-scheduling engine outstanding)
 
 ---
 
@@ -443,7 +443,7 @@ This document consolidates all development tasks from multiple planning document
 
 ---
 
-**Last Updated:** 2025-11-18  
+**Last Updated:** 2025-11-19  
 **Status:** Active Development  
 **Next Review:** Weekly during active development
 
