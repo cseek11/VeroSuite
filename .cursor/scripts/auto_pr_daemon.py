@@ -3,7 +3,8 @@
 Daemon/service script for continuous automated PR creation monitoring.
 
 This script runs in the background and periodically checks for file changes,
-creating PRs when batching thresholds are met.
+creating PRs when batching thresholds are met. Also runs periodic cleanup
+of old Auto-PRs on a separate timer.
 """
 
 import argparse
@@ -31,6 +32,7 @@ def signal_handler(sig, frame):
 def main() -> None:
     parser = argparse.ArgumentParser(description="Auto-PR creation daemon")
     parser.add_argument("--interval", type=int, default=300, help="Check interval in seconds (default: 300 = 5 minutes)")
+    parser.add_argument("--cleanup-interval", type=int, default=3600, help="Cleanup interval in seconds (default: 3600 = 1 hour)")
     parser.add_argument("--daemon", action="store_true", help="Run as daemon (background process)")
     args = parser.parse_args()
     
@@ -39,7 +41,7 @@ def main() -> None:
     signal.signal(signal.SIGTERM, signal_handler)
     
     logger.info(
-        f"Starting auto-PR daemon (interval: {args.interval}s)",
+        f"Starting auto-PR daemon (check interval: {args.interval}s, cleanup interval: {args.cleanup_interval}s)",
         operation="main"
     )
     
@@ -49,14 +51,33 @@ def main() -> None:
     inactivity_hours = time_config.get("inactivity_hours", 4)
     check_interval = min(args.interval, inactivity_hours * 3600 // 4)  # Check at least 4 times per inactivity period
     
+    # Track last cleanup time
+    last_cleanup_time = 0
+    
     while True:
         try:
             # Import here to avoid circular imports
             from monitor_changes import main as check_changes
             
-            # Run check
+            # Run PR creation check
             logger.debug("Running periodic check", operation="main")
             check_changes()
+            
+            # Check if cleanup should run
+            current_time = time.time()
+            if current_time - last_cleanup_time >= args.cleanup_interval:
+                try:
+                    logger.info("Running Auto-PR cleanup", operation="main")
+                    from close_old_auto_prs import main as cleanup_auto_prs
+                    cleanup_auto_prs()
+                    last_cleanup_time = current_time
+                except Exception as e:
+                    logger.error(
+                        "Error running cleanup (non-fatal)",
+                        operation="main",
+                        error=str(e)
+                    )
+                    # Don't exit on cleanup errors - it's not critical
             
             # Sleep until next check
             time.sleep(check_interval)
