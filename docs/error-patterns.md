@@ -4,6 +4,62 @@ This document catalogs error patterns, their root causes, fixes, and prevention 
 
 ---
 
+## SECURITY_SCORING_FALSE_POSITIVES - 2025-01-27
+
+### Summary
+Security scoring system incorrectly treated all Semgrep ERROR severity results as security issues, regardless of rule type. This caused false positives where performance, correctness, and other non-security rules were penalized as critical security issues, resulting in consistent -3 security scores.
+
+### Root Cause
+- Semgrep `--config=auto` includes ALL rule types (security, correctness, performance, best practices, etc.)
+- `score_security()` function only checked severity level (`ERROR`/`WARNING`) without filtering by rule type
+- No distinction between security rules and non-security rules
+- All ERROR severity results were treated as critical security issues
+
+### Triggering Conditions
+- Semgrep run with `--config=auto` (includes all rule types)
+- Any non-security rule with ERROR severity (e.g., performance rules, correctness rules)
+- Security scoring function called without filtering results by rule type first
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - `score_security()` function (lines 481-506 before fix)
+- `.github/workflows/swarm_compute_reward_score.yml` - Semgrep execution step
+- Any PR scoring workflow that uses Semgrep results
+
+### How It Was Fixed
+1. **Added security rule detection:** Implemented `is_security_rule()` function with multiple heuristics:
+   - Rule ID patterns (contains "security", "owasp", "cwe", "taint", "secrets", "injection")
+   - Metadata tags (security, owasp, cwe, taint, secrets, crypto, injection)
+   - Metadata categories (OWASP, CWE indicators)
+   - Mode detection (taint mode)
+   - Message keyword matching (fallback)
+2. **Filtered results before scoring:** Only security-filtered results are checked for severity
+3. **Added baseline support:** `.security-baseline.json` allows ignoring previously-approved findings
+4. **Added confidence filtering:** Filters out low-confidence findings (configurable threshold)
+5. **Added tenant-sensitive path escalation:** Escalates severity when DB/auth files are changed
+
+**Example Fixes:**
+```python
+# ❌ WRONG: Treating all ERROR results as security
+critical_issues = [r for r in results if r.get("extra", {}).get("severity") == "ERROR"]
+
+# ✅ CORRECT: Filtering by security rule type first
+security_results = [r for r in results if is_security_rule(r)]
+critical = [r for r in security_results if r.get("extra", {}).get("severity") == "ERROR"]
+```
+
+### Prevention Strategies
+1. **Always filter by rule type/category before applying severity-based scoring**
+2. **Use multiple heuristics for rule type detection** (don't rely on single field)
+3. **Test with mixed rule types** to ensure non-security rules don't affect security scores
+4. **Consider using security-specific Semgrep config** (`--config=p/security-audit`) if workflow allows
+5. **Add baseline file support** to ignore approved findings and reduce noise
+
+### Related Patterns
+- Similar to other false positive patterns where severity is checked without context
+- Applies to any scoring system that processes multi-category analysis results
+
+---
+
 ## TYPESCRIPT_ANY_TYPES - 2025-11-16
 
 ### Summary
