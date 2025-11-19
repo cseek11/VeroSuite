@@ -36,3 +36,4 @@ Notes:
 ## Fail-safe
 If information missing (e.g., no diff, no module context), respond `MISSING: change summary` and request clarification.
 
+
