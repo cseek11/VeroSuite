@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-19T15:41:08.680674Z",
+  "last_updated": "2025-11-19T15:44:56.505997Z",
   "scores": [
     {
       "pr": "56",
@@ -37322,24 +37322,42 @@
           "notes": "File: tatus\nDocs: Documentation updated (+0.1)"
         }
       }
+    },
+    {
+      "pr": "162",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T15:41:49.681480Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
     }
   ],
   "aggregates": {
-    "total_prs": 44,
-    "average_score": -6.45,
+    "total_prs": 45,
+    "average_score": -6.51,
     "score_distribution": {
-      "negative (<0)": 44
+      "negative (<0)": 45
     },
     "trends": [
       {
         "period": "2025-W46",
-        "average": -6.454545454545454,
-        "count": 44
+        "average": -6.511111111111111,
+        "count": 45
       }
     ],
     "category_performance": {
       "tests": {
-        "average": 0.91,
+        "average": 0.89,
         "total": 40.0,
         "count": 28
       },
@@ -37349,27 +37367,41 @@
         "count": 7
       },
       "docs": {
-        "average": 0.64,
+        "average": 0.62,
         "total": 28.0,
         "count": 28
       },
       "performance": {
-        "average": 0.57,
+        "average": 0.56,
         "total": 25,
         "count": 25
       },
       "security": {
         "average": -3.0,
-        "total": -132,
-        "count": 44
+        "total": -135,
+        "count": 45
       },
       "penalties": {
         "average": -5.64,
-        "total": -248,
-        "count": 44
+        "total": -254,
+        "count": 45
       }
     },
     "anti_patterns": [
+      {
+        "pr": "162",
+        "score": -9,
+        "timestamp": "2025-11-19T15:41:49.681480Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
       {
         "pr": "160",
         "score": -3,
