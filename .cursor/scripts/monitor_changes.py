@@ -12,6 +12,7 @@ import os
 import pathlib
 import subprocess
 import sys
+import tempfile
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
@@ -170,6 +171,16 @@ def get_changed_files(repo_path: pathlib.Path) -> Dict[str, Dict]:
             
             status = line[:2].strip()
             file_path = line[3:].strip()
+            
+            # Validate file path - skip garbage entries (command fragments, invalid paths)
+            if not file_path or file_path.startswith("-"):
+                continue
+            if " " in file_path and not os.path.exists(repo_path / file_path):
+                # If it has spaces and doesn't exist, it's likely a command fragment
+                continue
+            if not os.path.exists(repo_path / file_path) and status != "??":
+                # Skip non-existent files unless they're untracked (??)
+                continue
             
             if status in ["M", "A", "??"]:  # Modified, Added, Untracked
                 # Get file stats
@@ -411,6 +422,47 @@ def create_auto_pr(files: Dict[str, Dict], config: Dict, repo_path: pathlib.Path
     if not os.path.exists(gh_path):
         gh_path = "gh"
     
+    # CRITICAL: Authenticate GitHub CLI before any gh command
+    # This prevents timeouts when gh waits for interactive login
+    token = os.environ.get("GH_DISPATCH_PAT") or os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    if not token:
+        logger.error(
+            "No GitHub token found (GH_DISPATCH_PAT, GH_TOKEN, or GITHUB_TOKEN). Cannot create PR.",
+            operation="create_auto_pr",
+            error="Missing authentication token"
+        )
+        return None
+    
+    # Authenticate GitHub CLI
+    try:
+        auth_result = subprocess.run(
+            [gh_path, "auth", "login", "--with-token"],
+            input=token,
+            text=True,
+            capture_output=True,
+            timeout=10,
+            check=True
+        )
+        logger.debug(
+            "GitHub CLI authenticated successfully",
+            operation="create_auto_pr"
+        )
+    except subprocess.CalledProcessError as e:
+        logger.error(
+            f"Failed to authenticate GitHub CLI: {e.stderr}",
+            operation="create_auto_pr",
+            error=e.stderr,
+            stdout=e.stdout
+        )
+        return None
+    except Exception as e:
+        logger.error(
+            f"Error during GitHub CLI authentication: {e}",
+            operation="create_auto_pr",
+            error=str(e)
+        )
+        return None
+    
     # Create PR using GitHub CLI directly (simpler than calling create_pr.py)
     try:
         # First, create and checkout branch
@@ -448,15 +500,28 @@ def create_auto_pr(files: Dict[str, Dict], config: Dict, repo_path: pathlib.Path
             timeout=30
         )
         
-        # Create PR
+        # Create PR using --body-file to avoid timeout with large PR bodies
         base_branch = config.get("pr_settings", {}).get("base_branch", "main")
-        result = subprocess.run(
-            [gh_path, "pr", "create", "--title", title, "--body", body, "--base", base_branch],
-            cwd=repo_path,
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
+        
+        # Write PR body to temp file to avoid streaming issues with large bodies
+        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', suffix='.md', delete=False) as temp_body:
+            temp_body.write(body)
+            temp_body_path = temp_body.name
+        
+        try:
+            result = subprocess.run(
+                [gh_path, "pr", "create", "--title", title, "--body-file", temp_body_path, "--base", base_branch],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                timeout=120  # Increased timeout to 120 seconds
+            )
+        finally:
+            # Clean up temp file
+            try:
+                os.unlink(temp_body_path)
+            except Exception:
+                pass
         
         if result.returncode == 0:
             pr_url = result.stdout.strip()
@@ -480,13 +545,21 @@ def create_auto_pr(files: Dict[str, Dict], config: Dict, repo_path: pathlib.Path
                         operation="create_auto_pr",
                         pr_number=pr_number
                     )
+                    # Fix: Use -f instead of --field, and --ref main instead of branch_name
+                    # The workflow file is on main branch, not on the PR branch
                     workflow_result = subprocess.run(
-                        [gh_path, "workflow", "run", "swarm_compute_reward_score.yml",
-                         "--ref", branch_name, "--field", f"pr_number={pr_number}"],
+                        [
+                            gh_path,
+                            "workflow",
+                            "run",
+                            "swarm_compute_reward_score.yml",
+                            "--ref", "main",  # Workflow file is on main branch
+                            "-f", f"pr_number={pr_number}"  # Correct flag for workflow inputs
+                        ],
                         cwd=repo_path,
                         capture_output=True,
                         text=True,
-                        timeout=30
+                        timeout=120  # Increased timeout
                     )
                     if workflow_result.returncode == 0:
                         logger.info(
