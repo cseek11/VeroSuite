@@ -5,6 +5,7 @@ import { DatabaseService } from '../../common/services/database.service';
 import { JobsService } from '../jobs.service';
 import { TechnicianService } from '../../technician/technician.service';
 import { JobStatus } from '../dto';
+import { createOrExtendTraceContext } from '../../common/utils/trace-propagation.util';
 
 describe('AutoSchedulerService', () => {
   let service: AutoSchedulerService;
@@ -374,6 +375,31 @@ describe('AutoSchedulerService', () => {
 
       expect(technicianService.getAvailableTechniciansBasic).toHaveBeenCalled();
       expect(result).toBeDefined();
+    });
+
+    it('should propagate trace context in all logger calls', async () => {
+      const mockTraceContext = createOrExtendTraceContext(null);
+      const mockJobs: any[] = [];
+      
+      dbService.job.findMany.mockResolvedValue(mockJobs);
+
+      const loggerSpy = jest.spyOn(service['logger'], 'log');
+
+      await service.autoSchedule(mockTenantId, {
+        date: mockDate,
+        traceContext: mockTraceContext,
+      });
+
+      // Verify trace context is included in logger calls
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          traceId: mockTraceContext.traceId,
+          spanId: expect.any(String), // New span ID will be generated
+          requestId: mockTraceContext.requestId,
+          operation: 'autoSchedule',
+        }),
+      );
     });
   });
 });
