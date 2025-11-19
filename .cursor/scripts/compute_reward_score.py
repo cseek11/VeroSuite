@@ -779,11 +779,14 @@ def compute_score(
 
     notes_list = []
     file_scores = {}
-    files = {}  # Initialize files dict for use in security scoring
-
-    # Parse files from diff if file-level scoring enabled
-    if include_file_level and diff:
+    
+    # Parse files from diff (needed for security scoring even if file-level scoring is disabled)
+    files = {}
+    if diff:
         files = parse_diff_files(diff)
+    
+    # File-level scoring (if enabled)
+    if include_file_level and files:
         
         # Score each file individually
         for file_path, file_diff in files.items():
@@ -842,7 +845,7 @@ def compute_score(
 
     # Security and penalties are PR-level (not file-level)
     # Extract changed files list from parsed diff for security scoring
-    changed_files_list = list(files.keys()) if include_file_level and diff and files else None
+    changed_files_list = list(files.keys()) if files else None
     security_score, security_note = score_security(static_analysis, rubric, changed_files=changed_files_list)
     breakdown["security"] = security_score
     notes_list.append(f"Security: {security_note}")
