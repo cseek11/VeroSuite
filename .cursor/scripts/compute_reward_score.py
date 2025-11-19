@@ -1001,21 +1001,62 @@ def score_security(
     results = static_analysis.get("results", []) or []
     baseline = load_baseline(baseline_path or SECURITY_BASELINE_FILE)
     
+    # CRITICAL FIX: Filter results to only changed files in this PR
+    # This prevents repo-wide issues from being counted as new findings
+    def result_in_changed_files(result: Dict[str, Any], changed_files_list: Optional[List[str]]) -> bool:
+        """Check if a Semgrep result is in a file changed by this PR."""
+        if not changed_files_list:
+            # If we don't know changed files, include all (fallback)
+            return True
+        
+        result_path = result.get("path") or result.get("extra", {}).get("metadata", {}).get("path") or ""
+        if not result_path:
+            # Can't determine path, include it (conservative)
+            return True
+        
+        # Normalize paths for comparison
+        result_path_normalized = result_path.replace("\\", "/").lstrip("./")
+        
+        for changed_file in changed_files_list:
+            if not isinstance(changed_file, str):
+                continue
+            changed_file_normalized = changed_file.replace("\\", "/").lstrip("./")
+            
+            # Match if result path starts with changed file path or vice versa
+            if (result_path_normalized.startswith(changed_file_normalized) or
+                changed_file_normalized.startswith(result_path_normalized) or
+                result_path_normalized == changed_file_normalized):
+                return True
+        
+        return False
+    
     security_results = []
     skipped_by_confidence = 0
     skipped_by_baseline = 0
+    skipped_by_diff_filter = 0
     
     for r in results:
         try:
+            # Filter by baseline first (most efficient)
             fp = result_fingerprint(r)
             if fp in baseline:
                 skipped_by_baseline += 1
                 continue
+            
+            # Filter by security rule type
             if not is_security_rule(r):
                 continue
+            
+            # CRITICAL: Filter by changed files - only count findings in PR diff
+            if not result_in_changed_files(r, changed_files):
+                skipped_by_diff_filter += 1
+                continue
+            
+            # Filter by confidence threshold
             if not confidence_meets_threshold(r):
                 skipped_by_confidence += 1
                 continue
+            
             security_results.append(r)
         except Exception as e:
             # If any unexpected structure, log and skip (don't silently include non-security)
@@ -1026,7 +1067,8 @@ def score_security(
                 result_id=r.get("check_id", "unknown")
             )
             # Only include if we can verify it's a security rule despite the error
-            if is_security_rule(r):
+            # AND it's in changed files
+            if is_security_rule(r) and result_in_changed_files(r, changed_files):
                 security_results.append(r)
     
     # categorize by severity (Semgrep sometimes uses 'ERROR'/'WARNING' in extra.severity)
@@ -1037,7 +1079,7 @@ def score_security(
     escalate = touches_sensitive_path(changed_files)
     
     notes: List[str] = []
-    notes.append(f"Total semgrep results: {len(results)}; security-filtered: {len(security_results)}; skipped_by_baseline: {skipped_by_baseline}; skipped_by_confidence: {skipped_by_confidence}")
+    notes.append(f"Total semgrep results: {len(results)}; security-filtered: {len(security_results)}; skipped_by_baseline: {skipped_by_baseline}; skipped_by_confidence: {skipped_by_confidence}; skipped_by_diff_filter: {skipped_by_diff_filter}")
     
     # Granular scoring components
     score = 0
@@ -1096,24 +1138,92 @@ def score_security(
 
 
 def calculate_penalties(coverage: dict, static_analysis: dict, rubric: dict) -> Tuple[int, str]:
-    """Calculate penalties for failing CI, missing tests, regressions."""
+    """
+    Calculate penalties for failing CI, missing tests, regressions.
+    
+    CRITICAL: Conditions are mutually exclusive to prevent double-penalty bugs.
+    Only one penalty type applies per PR.
+    """
     penalties = rubric.get("penalties", {})
     total_penalty = 0
     notes = []
     
-    # Check for failing CI (would be detected by workflow status, but we check coverage/test data)
-    frontend_coverage = coverage.get("frontend", {}).get("percentage", 0)
-    backend_coverage = coverage.get("backend", {}).get("percentage", 0)
+    # Safely extract coverage percentages with type coercion and fallback handling
+    def safe_get_percentage(cov_dict: dict, default: float = 0.0) -> float:
+        """Safely extract percentage, handling None, missing keys, and type issues."""
+        if not cov_dict or not isinstance(cov_dict, dict):
+            return default
+        pct = cov_dict.get("percentage")
+        if pct is None:
+            return default
+        try:
+            return float(pct)
+        except (ValueError, TypeError):
+            return default
     
-    if frontend_coverage == 0 and backend_coverage == 0:
-        penalty = penalties.get("failing_ci", -4)
-        total_penalty += penalty
-        notes.append("No test coverage detected (possible CI failure)")
-    elif frontend_coverage < 20 and backend_coverage < 20:
-        # Only apply missing_tests penalty if coverage exists but is low
-        penalty = penalties.get("missing_tests", -2)
-        total_penalty += penalty
-        notes.append("Low test coverage")
+    frontend_coverage = safe_get_percentage(coverage.get("frontend", {}))
+    backend_coverage = safe_get_percentage(coverage.get("backend", {}))
+    
+    # Log coverage values for debugging (non-blocking)
+    logger.debug(
+        f"Penalty calculation: frontend={frontend_coverage}, backend={backend_coverage}",
+        operation="calculate_penalties",
+        frontend_coverage=frontend_coverage,
+        backend_coverage=backend_coverage
+    )
+    
+    # MUTUALLY EXCLUSIVE CONDITIONS (if/elif ensures only one applies)
+    # Priority: failing_ci > missing_tests > no penalty
+    
+    # Check if coverage is completely missing (indicates CI failure or malformed workflow)
+    # Only apply if BOTH are exactly 0 (not just low)
+    if frontend_coverage == 0.0 and backend_coverage == 0.0:
+        # Check if coverage data structure exists at all
+        has_coverage_data = (
+            "frontend" in coverage or 
+            "backend" in coverage or
+            len(coverage) > 0
+        )
+        
+        if not has_coverage_data:
+            # Coverage entirely missing - do NOT penalize (fallback logic)
+            # This handles malformed PR workflows gracefully
+            notes.append("Coverage data missing (no penalty applied - may be workflow issue)")
+            logger.debug(
+                "Coverage data structure missing entirely - skipping penalty",
+                operation="calculate_penalties"
+            )
+        else:
+            # Coverage exists but is 0% - likely CI failure
+            penalty = penalties.get("failing_ci", -4)
+            total_penalty += penalty
+            notes.append(f"No test coverage detected (possible CI failure): {penalty} penalty")
+            logger.info(
+                f"Applied failing_ci penalty: {penalty}",
+                operation="calculate_penalties",
+                penalty=penalty
+            )
+    
+    # Only check low coverage if we didn't already apply failing_ci penalty
+    # AND if coverage exists (not missing)
+    elif frontend_coverage > 0 or backend_coverage > 0:
+        # Coverage exists but is low (< 20%)
+        if frontend_coverage < 20.0 and backend_coverage < 20.0:
+            penalty = penalties.get("missing_tests", -2)
+            total_penalty += penalty
+            notes.append(f"Low test coverage (<20%): {penalty} penalty")
+            logger.info(
+                f"Applied missing_tests penalty: {penalty}",
+                operation="calculate_penalties",
+                penalty=penalty,
+                frontend_coverage=frontend_coverage,
+                backend_coverage=backend_coverage
+            )
+        # If one side has good coverage, don't penalize
+        elif frontend_coverage >= 20.0 or backend_coverage >= 20.0:
+            notes.append("Adequate test coverage detected (no penalty)")
+    
+    # If coverage is missing entirely (empty dict), no penalty (handled above)
     
     return total_penalty, "; ".join(notes) if notes else "No penalties"
 
@@ -1221,15 +1331,113 @@ def compute_score(
     
     # Calculate total score
     total_score = sum(breakdown.values())
-
+    
     # Apply security blocker rule
     if security_score <= -3:
         total_score = min(total_score, -3)
         notes_list.append("Security blocker: Score capped at -3")
     
+    # Calculate stabilized score (reduces noise from micro-PRs)
+    files_changed_count = len(files) if files else 0
+    stabilized_score, stabilized_note = calculate_stabilized_score(total_score, files_changed_count)
+    notes_list.append(stabilized_note)
+    
+    # Add stabilized score to breakdown for tracking
+    breakdown["stabilized_score"] = round(stabilized_score, 2)
+    
     notes = "\n".join(f"- {note}" for note in notes_list)
     
     return total_score, breakdown, notes, file_scores
+
+
+def calculate_stabilized_score(score: int, files_changed: int) -> Tuple[float, str]:
+    """
+    Calculate Stabilized Score (SS) to prevent PR spam from skewing metrics.
+    
+    Formula: stable_score = score * sqrt(files_changed / 10)
+    
+    This reduces noise for micro-PRs (1-2 files) while maintaining full weight
+    for substantial PRs (10+ files).
+    
+    Args:
+        score: Raw reward score
+        files_changed: Number of files changed in PR
+    
+    Returns:
+        Tuple of (stabilized_score, note)
+    """
+    import math
+    
+    if files_changed <= 0:
+        files_changed = 1  # Avoid division by zero
+    
+    # Calculate stabilization factor
+    # For 10 files: sqrt(10/10) = 1.0 (no change)
+    # For 1 file: sqrt(1/10) = 0.316 (reduced weight)
+    # For 25 files: sqrt(25/10) = 1.58 (slight boost)
+    stabilization_factor = math.sqrt(files_changed / 10.0)
+    stabilized_score = score * stabilization_factor
+    
+    note = f"Stabilized Score: {stabilized_score:.2f} (raw: {score}, files: {files_changed}, factor: {stabilization_factor:.2f})"
+    
+    return stabilized_score, note
+
+
+def calculate_trend_bonus(historical_scores: Optional[List[int]], breakdown: dict) -> Tuple[int, str]:
+    """
+    Calculate trend-based bonus/penalty based on improvement patterns.
+    
+    Rewards:
+    - If 10 PRs in a row reduce security warnings → bonus
+    - If trend is improving → bonus
+    - If trend is worsening → warning (no penalty, just note)
+    
+    Args:
+        historical_scores: List of recent scores (most recent first)
+        breakdown: Current PR breakdown for category analysis
+    
+    Returns:
+        Tuple of (trend_bonus, trend_note)
+    """
+    if not historical_scores or len(historical_scores) < 3:
+        return 0, "Insufficient history for trend analysis"
+    
+    # Analyze last 10 scores for trends
+    recent_scores = historical_scores[:10]
+    
+    # Security trend: count PRs with security issues
+    # We'd need historical breakdowns for this, so for now use score trend
+    score_trend = []
+    for i in range(len(recent_scores) - 1):
+        if recent_scores[i] is not None and recent_scores[i + 1] is not None:
+            score_trend.append(recent_scores[i] - recent_scores[i + 1])
+    
+    if not score_trend:
+        return 0, "Cannot calculate trend (missing data)"
+    
+    # Calculate average improvement
+    avg_improvement = sum(score_trend) / len(score_trend)
+    
+    trend_bonus = 0
+    trend_note = ""
+    
+    # Reward consistent improvement
+    if avg_improvement > 0.5 and len([t for t in score_trend if t > 0]) >= 7:
+        # Strong positive trend
+        trend_bonus = 1
+        trend_note = f"Strong improvement trend detected (+{trend_bonus} bonus): average improvement of {avg_improvement:.2f} over {len(recent_scores)} PRs"
+    elif avg_improvement > 0:
+        # Weak positive trend
+        trend_bonus = 0
+        trend_note = f"Improving trend: average improvement of {avg_improvement:.2f} over {len(recent_scores)} PRs"
+    elif avg_improvement < -0.5:
+        # Declining trend
+        trend_bonus = 0
+        trend_note = f"WARNING: Declining trend detected: average decline of {abs(avg_improvement):.2f} over {len(recent_scores)} PRs"
+    else:
+        trend_note = f"Stable trend: average change of {avg_improvement:.2f} over {len(recent_scores)} PRs"
+    
+    return trend_bonus, trend_note
 
 
 def normalize_score(
