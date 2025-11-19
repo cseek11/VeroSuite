@@ -144,10 +144,17 @@ class TestTestScoring(unittest.TestCase):
             "frontend": {"percentage": 85},
             "backend": {"percentage": 0}
         }
-        diff = ""
+        diff = """
++++ b/src/__tests__/utils.test.ts
++describe('utils', () => {
++  it('should work', () => {
++    expect(true).toBe(true);
++  });
++});
+"""
         score, note = compute_reward_score.score_tests(coverage, self.rubric, diff)
-        self.assertGreaterEqual(score, 1)  # At least tests passing
-        self.assertIn("Tests passing", note)
+        self.assertGreaterEqual(score, 1)  # At least new test file (+1)
+        self.assertIn("New test files added", note)
     
     def test_score_tests_with_new_test_files(self):
         """Test scoring with new test files."""
@@ -230,7 +237,21 @@ class TestPerformanceScoring(unittest.TestCase):
     
     def test_score_performance_with_keywords(self):
         """Test scoring with performance keywords."""
-        diff = "optimize performance cache speed latency"
+        diff = """
++++ b/src/utils.ts
++function optimize() {
++  const cache = new Map();
++  return cache.get('key');
++}
++++ b/src/other.ts
++function debounce(fn, delay) {
++  return debounced;
++}
++++ b/src/more.ts
++function throttle(fn, limit) {
++  return throttled;
++}
+"""
         score, note = compute_reward_score.score_performance(diff, self.rubric)
         self.assertGreater(score, 0)
         self.assertIn("Performance", note)
@@ -260,15 +281,25 @@ class TestSecurityScoring(unittest.TestCase):
         """Test scoring with no security issues."""
         static_analysis = {"results": []}
         score, note = compute_reward_score.score_security(static_analysis, self.rubric)
-        self.assertEqual(score, 2)
-        self.assertIn("No security issues", note)
+        self.assertEqual(score, 1)  # Updated: granular scoring gives +1 for no issues (base)
+        self.assertIn("No high/critical security issues detected", note)
     
     def test_score_security_critical_issues(self):
         """Test scoring with critical security issues."""
         static_analysis = {
             "results": [
-                {"extra": {"severity": "ERROR"}},
-                {"extra": {"severity": "WARNING"}}
+                {
+                    "check_id": "p/security/injection",
+                    "extra": {"severity": "ERROR"},
+                    "path": "test.py",
+                    "start": {"line": 10}
+                },
+                {
+                    "check_id": "p/security/xss",
+                    "extra": {"severity": "WARNING"},
+                    "path": "test2.py",
+                    "start": {"line": 20}
+                }
             ]
         }
         score, note = compute_reward_score.score_security(static_analysis, self.rubric)
@@ -374,16 +405,21 @@ class TestDecisionRecommendation(unittest.TestCase):
     
     def test_decision_block_critical_security(self):
         """Test BLOCK decision with critical security issues."""
-        score = -2
+        score = -4  # Updated: score must be < -3 for BLOCK decision
         breakdown = {}
         static_analysis = {
-            "results": [{"extra": {"severity": "ERROR"}}]
+            "results": [{
+                "check_id": "p/security/injection",
+                "extra": {"severity": "ERROR"},
+                "path": "test.py",
+                "start": {"line": 10}
+            }]
         }
         decision, reason = compute_reward_score.get_decision_recommendation(
             score, breakdown, static_analysis
         )
         self.assertEqual(decision, "BLOCK")
-        self.assertIn("critical issues", reason)
+        self.assertIn("critical issues", reason.lower())
 
 
 class TestComputeScoreIntegration(unittest.TestCase):
@@ -421,7 +457,7 @@ class TestComputeScoreIntegration(unittest.TestCase):
             coverage, static_analysis, pr_desc, diff, self.rubric
         )
         
-        self.assertIsInstance(score, int)
+        self.assertIsInstance(score, (int, float))  # Score can be float due to granular scoring
         self.assertIsInstance(breakdown, dict)
         self.assertIsInstance(notes, str)
         self.assertIsInstance(file_scores, dict)
@@ -452,7 +488,12 @@ class TestComputeScoreIntegration(unittest.TestCase):
             "backend": {"percentage": 75}
         }
         static_analysis = {
-            "results": [{"extra": {"severity": "ERROR"}}]
+            "results": [{
+                "check_id": "p/security/injection",
+                "extra": {"severity": "ERROR"},
+                "path": "test.py",
+                "start": {"line": 10}
+            }]
         }
         pr_desc = "Update code"
         diff = ""
@@ -461,9 +502,9 @@ class TestComputeScoreIntegration(unittest.TestCase):
             coverage, static_analysis, pr_desc, diff, self.rubric
         )
         
-        # Score should be capped at -3
+        # Score should be -3 or less due to critical security issues
         self.assertLessEqual(score, -3)
-        self.assertIn("Security blocker", notes)
+        self.assertIn("Critical security issues", notes)
 
 
 class TestCommentGeneration(unittest.TestCase):
@@ -681,7 +722,7 @@ class TestDocumentationScoringReduction(unittest.TestCase):
         diff = f"""
 +++ b/docs/README.md
 +# README
-+**Last Updated:** {current_date}
++Last Updated: {current_date}
 """
         score, note = compute_reward_score.score_documentation(diff, self.rubric)
         self.assertEqual(score, 0.25)
@@ -716,7 +757,7 @@ class TestPerformanceScoringImprovements(unittest.TestCase):
 +// This is a performance optimization comment
 +// Performance improvement here
 +// Another performance note
-+const x = 1;
++const x = 1;  // No performance keywords in actual code
 """
         score, note = compute_reward_score.score_performance(diff, self.rubric)
         self.assertEqual(score, 0)

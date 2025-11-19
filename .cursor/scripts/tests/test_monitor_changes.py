@@ -77,7 +77,7 @@ class TestAuthenticateGhCli(unittest.TestCase):
         auth_call = mock_run.call_args_list[1]
         self.assertEqual(auth_call[0][0], [self.gh_path, "auth", "login", "--with-token"])
         self.assertEqual(auth_call[1]["input"], "test_token_123")
-        mock_logger.info.assert_called()
+        mock_logger.debug.assert_called()  # Function uses logger.debug, not logger.info
 
     @patch('monitor_changes.subprocess.run')
     @patch('monitor_changes.logger')
@@ -130,9 +130,12 @@ class TestAuthenticateGhCli(unittest.TestCase):
         """Test that function returns False when authentication fails."""
         os.environ["GITHUB_TOKEN"] = "invalid_token"
         
+        from subprocess import CalledProcessError
+        
         mock_run.side_effect = [
-            Mock(returncode=1, stdout="", stderr="Not logged in"),
-            Mock(returncode=1, stdout="", stderr="Authentication failed")
+            Mock(returncode=1, stdout="", stderr="Not logged in"),  # auth status fails
+            CalledProcessError(1, [self.gh_path, "auth", "login", "--with-token"], 
+                             stderr="Authentication failed")  # auth login fails
         ]
         
         result = authenticate_gh_cli(self.gh_path)
