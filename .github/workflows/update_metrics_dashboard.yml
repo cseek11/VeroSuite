@@ -145,7 +145,12 @@ jobs:
             fi
           done
           
-          echo "reward_files=$REWARD_FILES" >> $GITHUB_OUTPUT
+          # Output reward files as multiline (using delimiter)
+          {
+            echo "reward_files<<EOF"
+            echo "$REWARD_FILES"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Update metrics
         run: |
