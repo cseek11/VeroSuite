@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-19T04:37:35.020329Z",
+  "last_updated": "2025-11-19T05:00:58.455487Z",
   "scores": [
     {
       "pr": "56",
@@ -7798,54 +7798,123 @@
       "files_changed": 0,
       "coverage_delta": null,
       "file_scores": {}
+    },
+    {
+      "pr": "59",
+      "score": -7,
+      "breakdown": {
+        "tests": 1,
+        "bug_fix": 0,
+        "docs": 1,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T05:00:28.670235Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {
+        ".cursor/scripts/test_workflow_trigger_manual.py": {
+          "score": 1,
+          "breakdown": {
+            "tests": 1,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/test_workflow_trigger_manual.py\nTests: New test files added: 1; No test coverage detected"
+        },
+        ".cursor/test_workflow_trigger_test_file.txt": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/test_workflow_trigger_test_file.txt\nDocs: Documentation updated"
+        },
+        "docs/testing/AUTO_PR_WORKFLOW_TRIGGER_TEST_REPORT.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/testing/AUTO_PR_WORKFLOW_TRIGGER_TEST_REPORT.md\nDocs: Documentation updated"
+        }
+      }
     }
   ],
   "aggregates": {
-    "total_prs": 7,
-    "average_score": -6.14,
+    "total_prs": 8,
+    "average_score": -6.25,
     "score_distribution": {
-      "negative (<0)": 7
+      "negative (<0)": 8
     },
     "trends": [
       {
         "period": "2025-W46",
-        "average": -6.142857142857143,
-        "count": 7
+        "average": -6.25,
+        "count": 8
       }
     ],
     "category_performance": {
       "tests": {
-        "average": 0.86,
-        "total": 6,
-        "count": 6
+        "average": 0.88,
+        "total": 7,
+        "count": 7
       },
       "bug_fix": {
-        "average": 0.43,
+        "average": 0.38,
         "total": 3,
         "count": 3
       },
       "docs": {
-        "average": 0.86,
-        "total": 6,
-        "count": 6
+        "average": 0.88,
+        "total": 7,
+        "count": 7
       },
       "performance": {
-        "average": 0.71,
+        "average": 0.62,
         "total": 5,
         "count": 5
       },
       "security": {
         "average": -3.0,
-        "total": -21,
-        "count": 7
+        "total": -24,
+        "count": 8
       },
       "penalties": {
         "average": -6.0,
-        "total": -42,
-        "count": 7
+        "total": -48,
+        "count": 8
       }
     },
     "anti_patterns": [
+      {
+        "pr": "59",
+        "score": -7,
+        "timestamp": "2025-11-19T05:00:28.670235Z",
+        "breakdown": {
+          "tests": 1,
+          "bug_fix": 0,
+          "docs": 1,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
       {
         "pr": "58",
         "score": -8,
