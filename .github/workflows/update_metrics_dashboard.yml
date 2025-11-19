@@ -162,17 +162,30 @@ jobs:
             exit 1
           fi
           
-          # Process each reward file (handle multiline output)
-          echo "$REWARD_FILES" | while IFS= read -r REWARD_FILE; do
+          # Collect all valid reward file paths
+          VALID_FILES=""
+          while IFS= read -r REWARD_FILE; do
             if [ -n "$REWARD_FILE" ] && [ -f "$REWARD_FILE" ]; then
-              echo "Processing: $REWARD_FILE"
-              python3 .cursor/scripts/collect_metrics.py \
-                --reward-file "$REWARD_FILE" \
-                --output docs/metrics/reward_scores.json
+              if [ -z "$VALID_FILES" ]; then
+                VALID_FILES="$REWARD_FILE"
+              else
+                VALID_FILES="$VALID_FILES,$REWARD_FILE"
+              fi
             else
               echo "Skipping invalid file: $REWARD_FILE"
             fi
-          done
+          done <<< "$REWARD_FILES"
+          
+          if [ -z "$VALID_FILES" ]; then
+            echo "No valid reward files to process"
+            exit 1
+          fi
+          
+          # Process all files in batch (single load, add all entries, single save)
+          echo "Processing $VALID_FILES in batch..."
+          python3 .cursor/scripts/collect_metrics.py \
+            --reward-files "$VALID_FILES" \
+            --output docs/metrics/reward_scores.json
           
           echo "Metrics update complete"
 
