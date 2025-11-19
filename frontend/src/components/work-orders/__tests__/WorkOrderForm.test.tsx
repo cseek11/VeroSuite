@@ -74,10 +74,10 @@ const mockToastWarn = vi.fn();
 
 vi.mock('@/utils/toast', () => ({
   toast: {
-    error: () => mockToastError(),
-    success: () => mockToastSuccess(),
-    info: () => mockToastInfo(),
-    warn: () => mockToastWarn(),
+    error: (message: string) => mockToastError(message),
+    success: (message: string) => mockToastSuccess(message),
+    info: (message: string) => mockToastInfo(message),
+    warn: (message: string) => mockToastWarn(message),
   },
 }));
 
