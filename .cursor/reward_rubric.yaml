@@ -1,11 +1,11 @@
 # REWARD_SCORE Rubric
-version: 1
+version: 2
 weights:
   tests: 3
   bug_fix: 2
-  docs: 1
+  docs: 0.5
   performance: 1
-  security: 2
+  security: 4
 penalties:
   failing_ci: -4
   missing_tests: -2
