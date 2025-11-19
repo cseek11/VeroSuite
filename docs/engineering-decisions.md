@@ -1429,4 +1429,129 @@ Rebalance reward scoring weights, enhance security scoring granularity, add test
 
 ---
 
+## Auto-Scheduling Engine Architecture - 2025-11-19
+
+### Decision
+Implemented auto-scheduling engine as a separate service (`AutoSchedulerService`) that integrates with the existing `RouteOptimizationEngine` to automatically assign unassigned jobs to technicians based on optimization algorithms, rather than embedding scheduling logic directly into the jobs service or creating a separate microservice.
+
+### Context
+**Problem Statement:**
+- Need to automatically assign unassigned jobs to available technicians
+- Must leverage existing route optimization algorithms
+- Should support multiple optimization strategies
+- Must maintain tenant isolation and transaction safety
+- Should provide dry-run capability for testing
+
+**Constraints:**
+- Must integrate with existing `RouteOptimizationEngine`
+- Must use existing `JobsService` and `TechnicianService`
+- Must follow NestJS service patterns
+- Must maintain backward compatibility
+
+**Requirements:**
+- Automatic job assignment based on optimization
+- Support for multiple strategies (balanced, priority-first, distance-first)
+- Dry-run mode (commit=false) for safety
+- Comprehensive error handling
+- Structured logging
+- Transaction-safe assignments
+
+### Trade-offs
+**Pros:**
+- Separation of concerns - scheduling logic separate from job management
+- Reuses existing optimization engine (no duplication)
+- Easy to test in isolation
+- Can be extended with additional scheduling strategies
+- Dry-run mode allows safe testing
+- Follows existing service patterns
+
+**Cons:**
+- Additional service layer adds complexity
+- Requires coordination between multiple services
+- Type safety could be improved (uses `any[]` for Prisma results)
+- Trace propagation not implemented (matches existing pattern but doesn't meet observability rules)
+
+### Alternatives Considered
+**Alternative 1: Embed in JobsService**
+- Description: Add auto-scheduling methods directly to `JobsService`
+- Why rejected: Would bloat JobsService with scheduling-specific logic, violates single responsibility principle
+
+**Alternative 2: Separate Microservice**
+- Description: Create standalone auto-scheduling microservice
+- Why rejected: Over-engineering for current scale, adds deployment complexity, network latency
+
+**Alternative 3: Background Job/Cron Task**
+- Description: Run auto-scheduling as scheduled background task
+- Why rejected: Need on-demand scheduling capability, not just scheduled runs
+
+### Rationale
+**Primary Reasons:**
+- Follows existing service architecture pattern (similar to `RoutingService`)
+- Maintains clear separation between job management and scheduling logic
+- Allows independent testing and evolution of scheduling algorithms
+- Reuses proven optimization engine without duplication
+
+**Supporting Factors:**
+- NestJS dependency injection makes service coordination straightforward
+- Transaction support ensures atomic job assignments
+- Dry-run mode provides safety for production use
+
+**Key Considerations:**
+- Must maintain tenant isolation in all operations
+- Error handling must be comprehensive (database failures, optimization failures)
+- Logging must provide sufficient context for debugging
+
+### Impact
+**Short-term:**
+- New API endpoint: `POST /v1/jobs/auto-schedule`
+- New service: `AutoSchedulerService`
+- Integration with existing `RouteOptimizationEngine`
+- No breaking changes to existing APIs
+
+**Long-term:**
+- Foundation for advanced scheduling features (recurring schedules, predictive scheduling)
+- Can be extended with machine learning-based optimization
+- May need trace propagation enhancement for better observability
+- Type safety improvements (Prisma type definitions) would reduce `any[]` usage
+
+**Affected Areas:**
+- `backend/src/jobs/auto-scheduler.service.ts` (new)
+- `backend/src/jobs/jobs.controller.ts` (modified - added endpoint)
+- `backend/src/jobs/jobs.module.ts` (modified - added service)
+- `backend/src/jobs/__tests__/auto-scheduler.service.spec.ts` (new)
+
+### Implementation Pattern
+- Service follows NestJS `@Injectable()` pattern
+- Uses constructor injection for dependencies
+- Structured logging with NestJS Logger
+- Error handling with try/catch and proper exceptions
+- Transaction safety for database operations
+- Tenant isolation in all database queries
+
+### Lessons Learned
+**What Worked Well:**
+- Reusing `RouteOptimizationEngine` avoided code duplication
+- Dry-run mode (commit=false) provides safety for testing
+- Comprehensive test coverage (10 tests) caught edge cases
+- Fallback mechanism for technician availability provides resilience
+
+**What Could Be Improved:**
+- Trace propagation should be added to match observability rules
+- Type safety could be improved with proper Prisma type definitions
+- Technician start location currently defaults to (0,0) - should use actual location
+- Shift times are hardcoded - should come from technician availability data
+
+**What Would Be Done Differently:**
+- Consider adding trace propagation from the start
+- Create proper type definitions for Prisma query results
+- Integrate with technician availability system for shift times and locations
+
+### Related Decisions
+- Route Optimization Engine Architecture - 2025-11-19
+- Job Scheduling Phase 2 Implementation
+- Structured logging and error handling patterns
+- Tenant isolation and security patterns
+
+---
+
 **Last Updated:** 2025-11-19
