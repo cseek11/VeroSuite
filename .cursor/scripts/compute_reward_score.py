@@ -309,8 +309,180 @@ def calculate_coverage_increase(coverage: dict, diff: str) -> float:
     return 0.0
 
 
+def detect_test_types(diff: str) -> Dict[str, int]:
+    """
+    Detect test types in PR diff.
+    
+    Returns dict with counts: {'unit': 0, 'integration': 0, 'e2e': 0}
+    """
+    if not diff:
+        return {"unit": 0, "integration": 0, "e2e": 0}
+    
+    test_types = {"unit": 0, "integration": 0, "e2e": 0}
+    diff_lower = diff.lower()
+    
+    # Integration test patterns
+    integration_patterns = [
+        r"integration.*test|integration.*spec",
+        r"\.integration\.(test|spec)",
+        r"__integration__",
+        r"test.*integration",
+        r"spec.*integration",
+    ]
+    
+    # E2E test patterns
+    e2e_patterns = [
+        r"e2e.*test|e2e.*spec|end.*to.*end.*test",
+        r"\.e2e\.(test|spec)",
+        r"__e2e__",
+        r"cypress|playwright|selenium",
+        r"test.*e2e|spec.*e2e",
+    ]
+    
+    # Check file paths and content
+    lines = diff.split("\n")
+    for line in lines:
+        if line.startswith("+++") or line.startswith("---"):
+            line_lower = line.lower()
+            
+            # Check for integration tests
+            for pattern in integration_patterns:
+                if re.search(pattern, line_lower):
+                    test_types["integration"] += 1
+                    break
+            
+            # Check for e2e tests
+            for pattern in e2e_patterns:
+                if re.search(pattern, line_lower):
+                    test_types["e2e"] += 1
+                    break
+    
+    # Unit tests are default (any test file that's not integration or e2e)
+    # We'll count them separately by checking test files that don't match integration/e2e
+    unit_test_patterns = [
+        r"\.test\.(ts|tsx|js|jsx|py)",
+        r"\.spec\.(ts|tsx|js|jsx|py)",
+        r"__tests__",
+    ]
+    
+    for line in lines:
+        if line.startswith("+++") or line.startswith("---"):
+            line_lower = line.lower()
+            is_integration = any(re.search(p, line_lower) for p in integration_patterns)
+            is_e2e = any(re.search(p, line_lower) for p in e2e_patterns)
+            
+            if not is_integration and not is_e2e:
+                for pattern in unit_test_patterns:
+                    if re.search(pattern, line_lower):
+                        test_types["unit"] += 1
+                        break
+    
+    return test_types
+
+
+def assess_test_quality(diff: str) -> Tuple[int, List[str]]:
+    """
+    Assess test quality indicators.
+    
+    Returns (quality_score, quality_indicators)
+    quality_score: 0-2 (0 = low, 1 = medium, 2 = high)
+    """
+    if not diff:
+        return 0, []
+    
+    indicators = []
+    quality_score = 0
+    
+    diff_lower = diff.lower()
+    
+    # Quality indicators
+    # Assertions (indicates actual testing logic)
+    assertion_patterns = [
+        r"expect\(|assert\(|should\.|to\.be|to\.equal|to\.contain",
+        r"describe\(|it\(|test\(|spec\(",
+    ]
+    has_assertions = any(re.search(p, diff_lower) for p in assertion_patterns)
+    if has_assertions:
+        quality_score += 1
+        indicators.append("Assertions present")
+    
+    # Mocking (indicates isolation and proper test setup)
+    mock_patterns = [
+        r"mock|stub|spy|jest\.mock|vi\.mock|sinon",
+        r"__mocks__",
+    ]
+    has_mocking = any(re.search(p, diff_lower) for p in mock_patterns)
+    if has_mocking:
+        quality_score += 1
+        indicators.append("Mocking used")
+    
+    # Edge cases (indicates thorough testing)
+    edge_case_patterns = [
+        r"edge.*case|boundary|null|undefined|empty|error.*case",
+        r"should.*handle.*error|should.*handle.*null",
+    ]
+    has_edge_cases = any(re.search(p, diff_lower) for p in edge_case_patterns)
+    if has_edge_cases:
+        indicators.append("Edge cases considered")
+    
+    # Test organization (indicates maintainability)
+    org_patterns = [
+        r"describe\(|context\(|suite\(",
+        r"beforeEach|afterEach|beforeAll|afterAll",
+    ]
+    has_organization = any(re.search(p, diff_lower) for p in org_patterns)
+    if has_organization:
+        indicators.append("Well-organized tests")
+    
+    return min(quality_score, 2), indicators
+
+
+def detect_test_impact(diff: str) -> bool:
+    """
+    Detect if tests touch critical modules.
+    
+    Returns True if tests cover critical areas (auth, tenant, database, security).
+    """
+    if not diff:
+        return False
+    
+    diff_lower = diff.lower()
+    
+    # Critical module patterns
+    critical_patterns = [
+        r"auth|authentication|authorization",
+        r"tenant|multi.*tenant",
+        r"database|db|prisma|migration",
+        r"security|rls|row.*level",
+        r"middleware|guard|interceptor",
+    ]
+    
+    # Check if test files reference critical modules
+    for pattern in critical_patterns:
+        if re.search(pattern, diff_lower):
+            # Verify it's in a test file context
+            lines = diff.split("\n")
+            for i, line in enumerate(lines):
+                if re.search(pattern, line.lower()):
+                    # Check if nearby lines indicate test file
+                    context = "\n".join(lines[max(0, i-2):min(len(lines), i+2)])
+                    if any(keyword in context.lower() for keyword in ["test", "spec", "describe", "it("]):
+                        return True
+    
+    return False
+
+
 def score_tests(coverage: dict, rubric: dict, diff: str = "") -> Tuple[int, str]:
-    """Score based on test coverage, new test files, and coverage increase."""
+    """
+    Score based on test coverage, new test files, test types, quality, and impact.
+    
+    Scoring breakdown:
+    - +1 for new test files (max +1)
+    - +1 for coverage increase >5%
+    - +0.5 bonus for integration tests (rewarded more than unit tests)
+    - +0.5 bonus for test quality (assertions, mocking)
+    - +0.5 bonus for test impact (tests covering critical modules)
+    """
     weight = rubric.get("tests", 3)
     score = 0
     notes = []
@@ -335,19 +507,41 @@ def score_tests(coverage: dict, rubric: dict, diff: str = "") -> Tuple[int, str]
         score += 1
         notes.append(f"Coverage increase: {coverage_increase:.1f}%")
 
-    # 3. Check if all tests passing (coverage exists and is reasonable) (+1)
-    if frontend_percentage > 0 or backend_percentage > 0:
-        score += 1
-        notes.append(f"Tests passing: frontend={frontend_percentage:.1f}%, backend={backend_percentage:.1f}%")
-    else:
-        notes.append("No test coverage detected")
+    # 3. Test type detection and bonus for integration tests (+0.5)
+    # Removed: "+1 for tests passing" (redundant with CI penalty system)
+    test_types = detect_test_types(diff)
+    if test_types["integration"] > 0 or test_types["e2e"] > 0:
+        score += 0.5
+        type_summary = []
+        if test_types["integration"] > 0:
+            type_summary.append(f"{test_types['integration']} integration")
+        if test_types["e2e"] > 0:
+            type_summary.append(f"{test_types['e2e']} e2e")
+        if test_types["unit"] > 0:
+            type_summary.append(f"{test_types['unit']} unit")
+        notes.append(f"Test types: {', '.join(type_summary)} (+0.5 for integration/e2e)")
+
+    # 4. Test quality assessment (+0.5)
+    quality_score, quality_indicators = assess_test_quality(diff)
+    if quality_score > 0:
+        score += 0.5
+        notes.append(f"Test quality: {', '.join(quality_indicators[:2])} (+0.5)")
+
+    # 5. Test impact scoring (+0.5 for critical modules)
+    has_critical_impact = detect_test_impact(diff)
+    if has_critical_impact:
+        score += 0.5
+        notes.append("Tests cover critical modules (auth/tenant/security) (+0.5)")
 
     # Cap at maximum weight
     score = min(score, weight)
 
     # If no points awarded, provide feedback
     if score == 0:
-        notes.append("No test improvements detected")
+        if frontend_percentage == 0 and backend_percentage == 0:
+            notes.append("No test coverage detected")
+        else:
+            notes.append("No test improvements detected")
 
     return score, "; ".join(notes)
 
@@ -392,8 +586,16 @@ def detect_bug_fix(pr_desc: str, diff: str, rubric: dict) -> Tuple[int, str]:
 
 
 def score_documentation(diff: str, rubric: dict) -> Tuple[int, str]:
-    """Score based on documentation changes."""
-    weight = rubric.get("docs", 1)
+    """
+    Score based on documentation changes.
+    
+    Scoring breakdown:
+    - +1 for engineering decisions (architectural, can exceed weight)
+    - +0.25 for updated dates
+    - +0.1 for basic documentation updates
+    - Maximum: +0.5 for normal documentation (engineering decisions can exceed)
+    """
+    weight = rubric.get("docs", 0.5)  # Updated default to 0.5
     score = 0
     notes = []
     
@@ -412,14 +614,19 @@ def score_documentation(diff: str, rubric: dict) -> Tuple[int, str]:
     
     if docs_changed:
         if has_engineering_decision:
-            score = weight
-            notes.append("Documentation updated with engineering decisions")
+            # Engineering decisions can exceed weight (architectural importance)
+            score = 1.0
+            notes.append("Documentation updated with engineering decisions (+1.0, exceeds normal weight)")
         elif dates_updated:
-            score = weight // 2
-            notes.append("Documentation updated with current dates")
+            score = 0.25
+            notes.append("Documentation updated with current dates (+0.25)")
         else:
-            score = 1
-            notes.append("Documentation updated")
+            score = 0.1
+            notes.append("Documentation updated (+0.1)")
+        
+        # Cap normal documentation at weight (but allow engineering decisions to exceed)
+        if not has_engineering_decision and score > weight:
+            score = weight
     else:
         notes.append("No documentation changes")
     
@@ -427,7 +634,11 @@ def score_documentation(diff: str, rubric: dict) -> Tuple[int, str]:
 
 
 def score_performance(diff: str, rubric: dict) -> Tuple[int, str]:
-    """Score based on performance-related changes."""
+    """
+    Score based on performance-related changes.
+    
+    Ignores comments and requires actual code changes (not just comments).
+    """
     weight = rubric.get("performance", 1)
     score = 0
     notes = []
@@ -442,16 +653,13 @@ def score_performance(diff: str, rubric: dict) -> Tuple[int, str]:
         "debounce", "throttle", "performance test", "load test"
     ]
 
-    # Check for performance-related changes in diff
-    diff_lower = diff.lower()
-    performance_mentions = sum(1 for keyword in performance_keywords if keyword in diff_lower)
-
-    # Check for performance test files
+    # Check for performance test files (most reliable indicator)
     performance_test_patterns = [
-        r"\.performance\.(test|spec)\.(ts|tsx|js|jsx)",
-        r"\.benchmark\.(test|spec)\.(ts|tsx|js|jsx)",
-        r"performance.*\.(test|spec)\.(ts|tsx|js|jsx)",
+        r"\.performance\.(test|spec)\.(ts|tsx|js|jsx|py)",
+        r"\.benchmark\.(test|spec)\.(ts|tsx|js|jsx|py)",
+        r"performance.*\.(test|spec)\.(ts|tsx|js|jsx|py)",
         r"load.*test.*\.(ts|tsx|js|jsx|py)",
+        r"benchmark.*\.(test|spec)\.(ts|tsx|js|jsx|py)",
     ]
 
     performance_tests_added = 0
@@ -462,18 +670,44 @@ def score_performance(diff: str, rubric: dict) -> Tuple[int, str]:
                     performance_tests_added += 1
                     break
 
+    # Check for performance-related changes in actual code (ignore comments)
+    performance_mentions = 0
+    code_lines_with_performance = []
+    
+    lines = diff.split("\n")
+    for line in lines:
+        # Skip comment-only lines
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or stripped.startswith("//") or stripped.startswith("*"):
+            continue
+        
+        # Skip diff metadata lines
+        if line.startswith("+++") or line.startswith("---") or line.startswith("@@"):
+            continue
+        
+        # Only count lines that are actual code changes (added lines start with +)
+        if line.startswith("+") and not line.startswith("+++"):
+            # Remove the + prefix for checking
+            code_line = line[1:].strip()
+            # Check if line contains performance keywords
+            for keyword in performance_keywords:
+                if keyword in code_line.lower():
+                    performance_mentions += 1
+                    code_lines_with_performance.append(code_line[:50])  # Store snippet for notes
+                    break  # Count each line only once
+
     # Award points
     if performance_tests_added > 0:
         score = weight
-        notes.append(f"Performance tests added: {performance_tests_added}")
+        notes.append(f"Performance tests added: {performance_tests_added} (+{weight})")
     elif performance_mentions >= 3:
         score = weight
-        notes.append(f"Performance improvements detected ({performance_mentions} mentions)")
+        notes.append(f"Performance improvements detected in code ({performance_mentions} code changes, +{weight})")
     elif performance_mentions >= 1:
         score = weight // 2
-        notes.append(f"Performance-related changes detected ({performance_mentions} mentions)")
+        notes.append(f"Performance-related code changes detected ({performance_mentions} changes, +{weight // 2})")
     else:
-        notes.append("No performance improvements detected")
+        notes.append("No performance improvements detected (comments ignored)")
 
     return score, "; ".join(notes)
 
@@ -633,19 +867,122 @@ def touches_sensitive_path(changed_files: Optional[List[str]]) -> bool:
     return False
 
 
+def detect_security_improvements(diff: str, pr_desc: str = "") -> Tuple[bool, List[str]]:
+    """
+    Detect security improvements in PR diff.
+    
+    Returns (has_improvements, list_of_improvements)
+    """
+    if not diff:
+        return False, []
+    
+    improvements = []
+    diff_lower = diff.lower()
+    pr_desc_lower = pr_desc.lower() if pr_desc else ""
+    combined = diff_lower + " " + pr_desc_lower
+    
+    # Security improvement patterns
+    security_patterns = [
+        (r"sanitize|sanitization|sanitizing", "Input sanitization"),
+        (r"xss.*protection|xss.*prevent", "XSS protection"),
+        (r"csrf.*protection|csrf.*token", "CSRF protection"),
+        (r"content-security-policy|csp", "CSP headers"),
+        (r"row.*level.*security|rls|row.*level.*policy", "RLS policies"),
+        (r"auth.*middleware|authentication.*middleware", "Auth middleware"),
+        (r"tenant.*isolation|multi.*tenant.*isolation", "Tenant isolation"),
+        (r"input.*validation|validate.*input", "Input validation"),
+        (r"parameterized.*query|prepared.*statement", "Parameterized queries"),
+        (r"rate.*limit|rate.*limiting", "Rate limiting"),
+        (r"encrypt|encryption", "Encryption"),
+        (r"hash.*password|bcrypt|argon2", "Password hashing"),
+        (r"jwt.*validation|token.*validation", "Token validation"),
+        (r"security.*test|security.*spec", "Security tests"),
+        (r"rls.*test|row.*level.*test", "RLS tests"),
+    ]
+    
+    for pattern, description in security_patterns:
+        if re.search(pattern, combined, re.IGNORECASE):
+            # Check if it's in actual code (not just comments)
+            # Look for the pattern in lines that aren't pure comments
+            lines = diff.split("\n")
+            for line in lines:
+                if re.search(pattern, line, re.IGNORECASE):
+                    # Skip if line is mostly comment
+                    stripped = line.strip()
+                    if not stripped.startswith("#") and not stripped.startswith("//") and not stripped.startswith("*"):
+                        improvements.append(description)
+                        break
+    
+    return len(improvements) > 0, list(set(improvements))
+
+
+def detect_security_documentation(diff: str, pr_desc: str = "") -> bool:
+    """
+    Detect security documentation in PR diff.
+    
+    Returns True if security documentation is found.
+    """
+    if not diff:
+        return False
+    
+    diff_lower = diff.lower()
+    pr_desc_lower = pr_desc.lower() if pr_desc else ""
+    combined = diff_lower + " " + pr_desc_lower
+    
+    # Security documentation patterns
+    security_doc_patterns = [
+        r"security.*diagram",
+        r"security.*architecture",
+        r"security.*adr|security.*decision",
+        r"security.*policy",
+        r"security.*guide",
+        r"owasp.*guide",
+        r"security.*best.*practice",
+        r"docs.*security|security.*docs",
+    ]
+    
+    # Check for security documentation files
+    security_doc_files = [
+        "security.md",
+        "security-policy.md",
+        "security-guide.md",
+        "security-architecture.md",
+        "docs/security",
+    ]
+    
+    # Check file paths
+    for doc_file in security_doc_files:
+        if doc_file in diff_lower:
+            return True
+    
+    # Check content patterns
+    for pattern in security_doc_patterns:
+        if re.search(pattern, combined, re.IGNORECASE):
+            return True
+    
+    return False
+
+
 def score_security(
     static_analysis: Dict[str, Any],
     rubric: Dict[str, int],
     changed_files: Optional[List[str]] = None,
-    baseline_path: Optional[str] = None
+    baseline_path: Optional[str] = None,
+    diff: str = "",
+    pr_desc: str = ""
 ) -> Tuple[int, str]:
     """
-    Score based on security analysis (Semgrep JSON).
+    Score based on security analysis (Semgrep JSON) with granular components.
+    
+    Scoring breakdown:
+    - +1 for no issues detected (base)
+    - +1 for security improvements (middleware, sanitization, RLS tests, auth checks)
+    - +1 for security documentation (diagrams, ADRs, guides)
+    - Negative scores for issues (high: -1, critical: -3)
     
     Returns (score:int, notes:str)
     """
-    weight = rubric.get("security", 2)
-    default_positive = weight
+    weight = rubric.get("security", 4)  # Updated default to 4
     
     # validation
     if not static_analysis:
@@ -692,10 +1029,12 @@ def score_security(
     notes: List[str] = []
     notes.append(f"Total semgrep results: {len(results)}; security-filtered: {len(security_results)}; skipped_by_baseline: {skipped_by_baseline}; skipped_by_confidence: {skipped_by_confidence}")
     
-    # Determine score
-    score = default_positive
+    # Granular scoring components
+    score = 0
+    
+    # Check for security issues first (negative scores take precedence)
     if critical:
-        # Critical issues always block, escalation doesn't change critical score
+        # Critical issues always block
         score = -3
         notes.append(f"Critical security issues (security rules marked ERROR): {len(critical)}")
     elif high:
@@ -705,8 +1044,25 @@ def score_security(
         if escalate:
             notes.append("Escalated due to changes in tenant-sensitive paths")
     else:
-        score = default_positive
-        notes.append("No high/critical security issues detected")
+        # No issues detected: +1 base score
+        score += 1
+        notes.append("No high/critical security issues detected (+1)")
+        
+        # Check for security improvements: +1
+        has_improvements, improvements_list = detect_security_improvements(diff, pr_desc)
+        if has_improvements:
+            score += 1
+            notes.append(f"Security improvements detected (+1): {', '.join(improvements_list[:3])}")
+        
+        # Check for security documentation: +1
+        has_security_docs = detect_security_documentation(diff, pr_desc)
+        if has_security_docs:
+            score += 1
+            notes.append("Security documentation added (+1)")
+    
+    # Cap positive score at weight (but allow negative scores)
+    if score > 0:
+        score = min(score, weight)
     
     # Add short list of top offenders for explainability (cap to 5)
     offenders = []
@@ -845,7 +1201,7 @@ def compute_score(
     # Security and penalties are PR-level (not file-level)
     # Extract changed files list from parsed diff for security scoring
     changed_files_list = list(files.keys()) if files else None
-    security_score, security_note = score_security(static_analysis, rubric, changed_files=changed_files_list)
+    security_score, security_note = score_security(static_analysis, rubric, changed_files=changed_files_list, diff=diff, pr_desc=pr_desc)
     breakdown["security"] = security_score
     notes_list.append(f"Security: {security_note}")
 

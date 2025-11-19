@@ -72,7 +72,10 @@ def get_default_config() -> Dict:
         "time_based": {
             "enabled": True,
             "inactivity_hours": 4,
-            "max_work_hours": 8
+            "max_work_hours": 8,
+            "min_files": 3,  # Minimum files required for time-based PR
+            "min_lines": 50,  # Minimum lines required for time-based PR
+            "require_test_file": False  # Require test file for time-based PRs
         },
         "change_threshold": {
             "enabled": True,
@@ -84,6 +87,7 @@ def get_default_config() -> Dict:
             "enabled": True,
             "group_by_directory": True,
             "group_by_file_type": True,
+            "group_by_semantic": True,  # Group by feature keywords (auth, tenant, billing, etc.)
             "max_group_size": 10
         },
         "pr_settings": {
@@ -231,8 +235,48 @@ def get_changed_files(repo_path: pathlib.Path) -> Dict[str, Dict]:
     return changed_files
 
 
+def extract_feature_keywords(file_path: str) -> List[str]:
+    """
+    Extract feature keywords from file path.
+    
+    Returns list of feature keywords found (auth, tenant, billing, etc.)
+    """
+    file_lower = file_path.lower()
+    feature_keywords = []
+    
+    # Feature keyword patterns
+    feature_patterns = {
+        "auth": [r"auth", r"login", r"logout", r"session", r"jwt", r"token"],
+        "tenant": [r"tenant", r"multi.*tenant", r"organization", r"org"],
+        "billing": [r"billing", r"invoice", r"payment", r"subscription", r"pricing"],
+        "customer": [r"customer", r"client", r"account"],
+        "job": [r"job", r"work.*order", r"service.*call"],
+        "scheduling": [r"schedule", r"calendar", r"appointment", r"booking"],
+        "user": [r"user", r"profile", r"settings"],
+        "notification": [r"notification", r"alert", r"message", r"email"],
+        "report": [r"report", r"analytics", r"dashboard", r"metric"],
+        "security": [r"security", r"permission", r"role", r"access"],
+    }
+    
+    for feature, patterns in feature_patterns.items():
+        for pattern in patterns:
+            if re.search(pattern, file_lower):
+                feature_keywords.append(feature)
+                break  # Only add feature once
+    
+    return feature_keywords
+
+
 def group_files_logically(files: Dict[str, Dict], config: Dict) -> List[List[str]]:
-    """Group files logically based on configuration."""
+    """
+    Group files logically based on configuration.
+    
+    Supports:
+    - Semantic grouping (by feature keywords: auth, tenant, billing, etc.)
+    - Cross-directory grouping for same feature
+    - Directory-based grouping (fallback)
+    - File type grouping
+    """
     groups = []
     grouping = config.get("logical_grouping", {})
     
@@ -240,7 +284,34 @@ def group_files_logically(files: Dict[str, Dict], config: Dict) -> List[List[str
         # No grouping, return all files as one group
         return [list(files.keys())]
     
-    # Group by directory
+    # Semantic grouping (by feature keywords)
+    if grouping.get("group_by_semantic", False):
+        semantic_groups = defaultdict(list)
+        
+        for file_path in files.keys():
+            feature_keywords = extract_feature_keywords(file_path)
+            if feature_keywords:
+                # Group by primary feature (first keyword found)
+                primary_feature = feature_keywords[0]
+                semantic_groups[primary_feature].append(file_path)
+            else:
+                # Files without clear feature keywords go to "other"
+                semantic_groups["other"].append(file_path)
+        
+        # Split large groups
+        max_size = grouping.get("max_group_size", 10)
+        for feature, file_list in semantic_groups.items():
+            if len(file_list) <= max_size:
+                groups.append(file_list)
+            else:
+                # Split into chunks
+                for i in range(0, len(file_list), max_size):
+                    groups.append(file_list[i:i + max_size])
+        
+        if groups:
+            return groups
+    
+    # Group by directory (fallback if semantic grouping didn't produce groups)
     if grouping.get("group_by_directory", False):
         dir_groups = defaultdict(list)
         for file_path in files.keys():
@@ -280,13 +351,54 @@ def group_files_logically(files: Dict[str, Dict], config: Dict) -> List[List[str
 
 
 def check_time_based_trigger(state: Dict, config: Dict) -> bool:
-    """Check if time-based trigger should fire."""
+    """
+    Check if time-based trigger should fire.
+    
+    Now includes minimum file/line requirements to prevent PR spam from inactivity alone.
+    """
     time_config = config.get("time_based", {})
     if not time_config.get("enabled", False):
         return False
     
     if not state.get("last_change_time"):
         return False
+    
+    # Get tracked files to check minimum requirements
+    tracked_files = state.get("tracked_files", {})
+    if not tracked_files:
+        return False
+    
+    # Check minimum file requirement
+    min_files = time_config.get("min_files", 3)
+    if len(tracked_files) < min_files:
+        logger.debug(
+            f"Time-based trigger blocked: only {len(tracked_files)} files (min: {min_files})",
+            operation="check_time_based_trigger"
+        )
+        return False
+    
+    # Check minimum line requirement
+    min_lines = time_config.get("min_lines", 50)
+    total_lines = sum(f.get("lines_changed", 0) for f in tracked_files.values())
+    if total_lines < min_lines:
+        logger.debug(
+            f"Time-based trigger blocked: only {total_lines} lines (min: {min_lines})",
+            operation="check_time_based_trigger"
+        )
+        return False
+    
+    # Check test file requirement (if enabled)
+    if time_config.get("require_test_file", False):
+        has_test_file = any(
+            "test" in f.lower() or "spec" in f.lower()
+            for f in tracked_files.keys()
+        )
+        if not has_test_file:
+            logger.debug(
+                "Time-based trigger blocked: no test file found (required)",
+                operation="check_time_based_trigger"
+            )
+            return False
     
     last_change = datetime.fromisoformat(state["last_change_time"].replace("Z", "+00:00"))
     now = datetime.utcnow()
@@ -295,7 +407,7 @@ def check_time_based_trigger(state: Dict, config: Dict) -> bool:
     inactivity_hours = time_config.get("inactivity_hours", 4)
     if (now - last_change.replace(tzinfo=None)).total_seconds() >= inactivity_hours * 3600:
         logger.info(
-            f"Inactivity threshold met: {inactivity_hours} hours",
+            f"Inactivity threshold met: {inactivity_hours} hours ({len(tracked_files)} files, {total_lines} lines)",
             operation="check_time_based_trigger"
         )
         return True
@@ -306,7 +418,7 @@ def check_time_based_trigger(state: Dict, config: Dict) -> bool:
         max_work_hours = time_config.get("max_work_hours", 8)
         if (now - first_change.replace(tzinfo=None)).total_seconds() >= max_work_hours * 3600:
             logger.info(
-                f"Max work hours threshold met: {max_work_hours} hours",
+                f"Max work hours threshold met: {max_work_hours} hours ({len(tracked_files)} files, {total_lines} lines)",
                 operation="check_time_based_trigger"
             )
             return True
