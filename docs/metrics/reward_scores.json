@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-19T16:40:01.184288Z",
+  "last_updated": "2025-11-19T16:41:21.292703Z",
   "scores": [
     {
       "pr": "56",
@@ -37862,54 +37862,86 @@
       "files_changed": 0,
       "coverage_delta": null,
       "file_scores": {}
+    },
+    {
+      "pr": "243",
+      "score": -8,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 1,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T16:40:44.339317Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
     }
   ],
   "aggregates": {
-    "total_prs": 74,
-    "average_score": -7.42,
+    "total_prs": 75,
+    "average_score": -7.43,
     "score_distribution": {
-      "negative (<0)": 74
+      "negative (<0)": 75
     },
     "trends": [
       {
         "period": "2025-W46",
-        "average": -7.418918918918919,
-        "count": 74
+        "average": -7.426666666666667,
+        "count": 75
       }
     ],
     "category_performance": {
       "tests": {
-        "average": 0.54,
+        "average": 0.53,
         "total": 40.0,
         "count": 28
       },
       "bug_fix": {
-        "average": 0.16,
-        "total": 12,
-        "count": 12
+        "average": 0.17,
+        "total": 13,
+        "count": 13
       },
       "docs": {
-        "average": 0.38,
+        "average": 0.37,
         "total": 28.0,
         "count": 28
       },
       "performance": {
-        "average": 0.34,
+        "average": 0.33,
         "total": 25,
         "count": 25
       },
       "security": {
         "average": -3.0,
-        "total": -222,
-        "count": 74
+        "total": -225,
+        "count": 75
       },
       "penalties": {
-        "average": -5.78,
-        "total": -428,
-        "count": 74
+        "average": -5.79,
+        "total": -434,
+        "count": 75
       }
     },
     "anti_patterns": [
+      {
+        "pr": "243",
+        "score": -8,
+        "timestamp": "2025-11-19T16:40:44.339317Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 1,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
       {
         "pr": "240",
         "score": -9,
@@ -38591,20 +38623,6 @@
           "bug_fix": 0,
           "docs": 0,
           "performance": 0,
-          "security": -3,
-          "penalties": -6
-        },
-        "penalties": -6
-      },
-      {
-        "pr": "85",
-        "score": -6,
-        "timestamp": "2025-11-19T13:41:31.865142Z",
-        "breakdown": {
-          "tests": 1,
-          "bug_fix": 0,
-          "docs": 1,
-          "performance": 1,
           "security": -3,
           "penalties": -6
         },
