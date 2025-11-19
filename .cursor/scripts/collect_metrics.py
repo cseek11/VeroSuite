@@ -353,20 +353,26 @@ def main() -> None:
                 logger.error(f"Error reading reward file: {reward_file}", operation="main", error=str(e))
                 sys.exit(1)
             
-            # Check for required fields (pr_number, total_score, timestamp)
-            required_fields = ["pr_number", "total_score", "timestamp"]
-            missing_fields = [f for f in required_fields if f not in reward_data]
-            if missing_fields:
-                logger.error(f"Missing required fields in reward.json: {missing_fields}", operation="main")
-                sys.exit(1)
-            score = reward_data.get("total_score", reward_data.get("score", 0))
+            # Handle both old and new field name formats
+            # Old format: pr_number, total_score, timestamp
+            # New format: metadata.pr, score, metadata.computed_at
+            score = reward_data.get("total_score") or reward_data.get("score", 0)
             breakdown = reward_data.get("breakdown", {})
             metadata = reward_data.get("metadata", {})
             file_scores = reward_data.get("file_scores", {})
-            pr_num = reward_data.get("pr_number") or metadata.get("pr") or args.pr
+            pr_num = reward_data.get("pr_number") or (metadata.get("pr") if isinstance(metadata, dict) else None) or args.pr
+            
+            # Validate we have the essential fields (score and PR number)
             if not pr_num:
                 logger.error("PR number not found in reward.json (pr_number, metadata.pr, or --pr argument)", operation="main")
                 sys.exit(1)
+            
+            # Check for timestamp (either at root or in metadata)
+            timestamp = reward_data.get("timestamp") or metadata.get("computed_at") or reward_data.get("metadata", {}).get("computed_at")
+            if not timestamp:
+                logger.warn("No timestamp found in reward.json, using current time", operation="main")
+                from datetime import datetime
+                timestamp = datetime.utcnow().isoformat() + "Z"
         else:
             # Use individual arguments
             score = args.score
