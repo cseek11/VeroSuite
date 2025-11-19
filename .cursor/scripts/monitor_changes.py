@@ -424,40 +424,55 @@ def create_auto_pr(files: Dict[str, Dict], config: Dict, repo_path: pathlib.Path
     
     # CRITICAL: Authenticate GitHub CLI before any gh command
     # This prevents timeouts when gh waits for interactive login
-    token = os.environ.get("GH_DISPATCH_PAT") or os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
-    if not token:
-        logger.error(
-            "No GitHub token found (GH_DISPATCH_PAT, GH_TOKEN, or GITHUB_TOKEN). Cannot create PR.",
-            operation="create_auto_pr",
-            error="Missing authentication token"
-        )
-        return None
-    
-    # Authenticate GitHub CLI
+    # First check if already authenticated (via keyring)
     try:
-        auth_result = subprocess.run(
-            [gh_path, "auth", "login", "--with-token"],
-            input=token,
-            text=True,
+        auth_check = subprocess.run(
+            [gh_path, "auth", "status"],
             capture_output=True,
-            timeout=10,
-            check=True
+            text=True,
+            timeout=10
         )
-        logger.debug(
-            "GitHub CLI authenticated successfully",
-            operation="create_auto_pr"
-        )
-    except subprocess.CalledProcessError as e:
-        logger.error(
-            f"Failed to authenticate GitHub CLI: {e.stderr}",
-            operation="create_auto_pr",
-            error=e.stderr,
-            stdout=e.stdout
-        )
-        return None
+        if auth_check.returncode == 0:
+            logger.debug(
+                "GitHub CLI already authenticated (keyring)",
+                operation="create_auto_pr"
+            )
+        else:
+            # Not authenticated, try to authenticate with token
+            token = os.environ.get("GH_DISPATCH_PAT") or os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+            if not token:
+                logger.error(
+                    "GitHub CLI not authenticated and no token found (GH_DISPATCH_PAT, GH_TOKEN, or GITHUB_TOKEN). Cannot create PR.",
+                    operation="create_auto_pr",
+                    error="Missing authentication"
+                )
+                return None
+            
+            # Authenticate GitHub CLI with token
+            try:
+                auth_result = subprocess.run(
+                    [gh_path, "auth", "login", "--with-token"],
+                    input=token,
+                    text=True,
+                    capture_output=True,
+                    timeout=10,
+                    check=True
+                )
+                logger.debug(
+                    "GitHub CLI authenticated successfully with token",
+                    operation="create_auto_pr"
+                )
+            except subprocess.CalledProcessError as e:
+                logger.error(
+                    f"Failed to authenticate GitHub CLI: {e.stderr}",
+                    operation="create_auto_pr",
+                    error=e.stderr,
+                    stdout=e.stdout
+                )
+                return None
     except Exception as e:
         logger.error(
-            f"Error during GitHub CLI authentication: {e}",
+            f"Error checking GitHub CLI authentication: {e}",
             operation="create_auto_pr",
             error=str(e)
         )
