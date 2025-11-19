@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-19T18:18:29.108204Z",
+  "last_updated": "2025-11-19T18:18:56.671382Z",
   "scores": [
     {
       "pr": "56",
@@ -40520,28 +40520,324 @@
           "notes": "File: frontend/src/components/work-orders/WorkOrderForm.tsx\nTests: Test quality: Assertions present (+0.5)"
         }
       }
+    },
+    {
+      "pr": "324",
+      "score": 2.0,
+      "breakdown": {
+        "tests": 2.0,
+        "bug_fix": 0,
+        "docs": 1.0,
+        "performance": 1,
+        "security": 2,
+        "penalties": -4,
+        "stabilized_score": 3.03
+      },
+      "timestamp": "2025-11-19T18:18:27.000248Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {
+        ".cursor/prompts/reward_feedback.md": {
+          "score": 1.6,
+          "breakdown": {
+            "tests": 0.5,
+            "bug_fix": 0,
+            "docs": 0.1,
+            "performance": 1,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/reward_feedback.md\nTests: Tests cover critical modules (auth/tenant/security) (+0.5)\nDocs: Documentation updated (+0.1)\nPerformance: Performance improvements detected in code (9 code changes, +1)"
+        },
+        ".cursor/rules/security.md": {
+          "score": 1.1,
+          "breakdown": {
+            "tests": 1.0,
+            "bug_fix": 0,
+            "docs": 0.1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/rules/security.md\nTests: Test quality: Mocking used, Edge cases considered (+0.5); Tests cover critical modules (auth/tenant/security) (+0.5)\nDocs: Documentation updated (+0.1)"
+        },
+        ".cursor/scripts/analyze_reward_trends.py": {
+          "score": 1.6,
+          "breakdown": {
+            "tests": 0.5,
+            "bug_fix": 0,
+            "docs": 0.1,
+            "performance": 1,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/analyze_reward_trends.py\nTests: Tests cover critical modules (auth/tenant/security) (+0.5)\nDocs: Documentation updated (+0.1)\nPerformance: Performance improvements detected in code (5 code changes, +1)"
+        },
+        ".cursor/scripts/analyze_score_patterns.py": {
+          "score": 0.5,
+          "breakdown": {
+            "tests": 0.5,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/analyze_score_patterns.py\nTests: Tests cover critical modules (auth/tenant/security) (+0.5)"
+        },
+        ".cursor/scripts/investigate_penalty_bug.py": {
+          "score": 1.0,
+          "breakdown": {
+            "tests": 1.0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/investigate_penalty_bug.py\nTests: Test quality: Assertions present, Edge cases considered (+0.5); Tests cover critical modules (auth/tenant/security) (+0.5)"
+        },
+        ".cursor/scripts/sync_reward_scores.py": {
+          "score": 0.6,
+          "breakdown": {
+            "tests": 0.5,
+            "bug_fix": 0,
+            "docs": 0.1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/sync_reward_scores.py\nTests: Test quality: Assertions present, Edge cases considered (+0.5)\nDocs: Documentation updated (+0.1)"
+        },
+        ".cursor/scripts/tests/test_analyze_reward_trends_sync.py": {
+          "score": 1.5,
+          "breakdown": {
+            "tests": 1.5,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/tests/test_analyze_reward_trends_sync.py\nTests: New test files added: 1; Test quality: Mocking used, Edge cases considered (+0.5)"
+        },
+        ".cursor/scripts/tests/test_sync_manual_verification.py": {
+          "score": 1,
+          "breakdown": {
+            "tests": 1,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/tests/test_sync_manual_verification.py\nTests: New test files added: 1"
+        },
+        ".github/workflows/apply_reward_feedback.yml": {
+          "score": 1.0,
+          "breakdown": {
+            "tests": 1.0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/apply_reward_feedback.yml\nTests: Test quality: Assertions present, Edge cases considered (+0.5); Tests cover critical modules (auth/tenant/security) (+0.5)"
+        },
+        "backend/src/jobs/__tests__/auto-scheduler.service.spec.ts": {
+          "score": 3.0,
+          "breakdown": {
+            "tests": 2.0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 1,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/jobs/__tests__/auto-scheduler.service.spec.ts\nTests: New test files added: 1; Test quality: Assertions present, Mocking used (+0.5); Tests cover critical modules (auth/tenant/security) (+0.5)\nPerformance: Performance improvements detected in code (6 code changes, +1)"
+        },
+        "backend/src/jobs/auto-scheduler.service.ts": {
+          "score": 2.0,
+          "breakdown": {
+            "tests": 1.0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 1,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/jobs/auto-scheduler.service.ts\nTests: Test quality: Assertions present, Edge cases considered (+0.5); Tests cover critical modules (auth/tenant/security) (+0.5)\nPerformance: Performance improvements detected in code (23 code changes, +1)"
+        },
+        "backend/src/jobs/types/auto-scheduler.types.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/jobs/types/auto-scheduler.types.ts (no contributions)"
+        },
+        "backend/src/routing/__tests__/route-optimization.engine.spec.ts": {
+          "score": 2.5,
+          "breakdown": {
+            "tests": 1.5,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 1,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/routing/__tests__/route-optimization.engine.spec.ts\nTests: New test files added: 1; Test quality: Assertions present, Edge cases considered (+0.5)\nPerformance: Performance improvements detected in code (9 code changes, +1)"
+        },
+        "backend/src/routing/route-optimization.engine.ts": {
+          "score": 1.1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0.1,
+            "performance": 1,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/src/routing/route-optimization.engine.ts\nDocs: Documentation updated (+0.1)\nPerformance: Performance improvements detected in code (21 code changes, +1)"
+        },
+        "docs/ai/self_improvement_log.md": {
+          "score": 0.6,
+          "breakdown": {
+            "tests": 0.5,
+            "bug_fix": 0,
+            "docs": 0.1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/ai/self_improvement_log.md\nTests: Tests cover critical modules (auth/tenant/security) (+0.5)\nDocs: Documentation updated (+0.1)"
+        },
+        "docs/compliance-reports/auto-scheduler-compliance-2025-11-19.md": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/compliance-reports/auto-scheduler-compliance-2025-11-19.md (no contributions)"
+        },
+        "frontend/src/components/LoadingSpinner.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/LoadingSpinner.tsx (no contributions)"
+        },
+        "frontend/src/components/billing/PaymentForm.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/billing/PaymentForm.tsx (no contributions)"
+        },
+        "frontend/src/components/ui/CustomerSearchSelector.tsx": {
+          "score": 0.5,
+          "breakdown": {
+            "tests": 0.5,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/ui/CustomerSearchSelector.tsx\nTests: Tests cover critical modules (auth/tenant/security) (+0.5)"
+        },
+        "frontend/src/components/ui/ErrorMessage.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/ui/ErrorMessage.tsx (no contributions)"
+        },
+        "frontend/src/components/ui/LoadingOverlay.tsx": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/ui/LoadingOverlay.tsx (no contributions)"
+        },
+        "frontend/src/components/ui/index.ts": {
+          "score": 0,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/ui/index.ts (no contributions)"
+        },
+        "frontend/src/components/work-orders/WorkOrderForm.tsx": {
+          "score": 0.5,
+          "breakdown": {
+            "tests": 0.5,
+            "bug_fix": 0,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: frontend/src/components/work-orders/WorkOrderForm.tsx\nTests: Test quality: Assertions present (+0.5)"
+        }
+      }
     }
   ],
   "aggregates": {
-    "total_prs": 106,
-    "average_score": -7.55,
+    "total_prs": 107,
+    "average_score": -7.46,
     "score_distribution": {
       "negative (<0)": 104,
       "medium (3-5)": 1,
-      "low (0-2)": 1
+      "low (0-2)": 2
     },
     "trends": [
       {
         "period": "2025-W46",
-        "average": -7.5495283018867925,
-        "count": 106
+        "average": -7.460280373831775,
+        "count": 107
       }
     ],
     "category_performance": {
       "tests": {
-        "average": 0.42,
-        "total": 44.5,
-        "count": 30
+        "average": 0.43,
+        "total": 46.5,
+        "count": 31
       },
       "bug_fix": {
         "average": 0.19,
@@ -40550,23 +40846,23 @@
       },
       "docs": {
         "average": 0.28,
-        "total": 29.25,
-        "count": 30
+        "total": 30.25,
+        "count": 31
       },
       "performance": {
-        "average": 0.25,
-        "total": 27,
-        "count": 27
+        "average": 0.26,
+        "total": 28,
+        "count": 28
       },
       "security": {
-        "average": -2.86,
-        "total": -303,
-        "count": 106
+        "average": -2.81,
+        "total": -301,
+        "count": 107
       },
       "penalties": {
-        "average": -5.79,
-        "total": -614,
-        "count": 106
+        "average": -5.78,
+        "total": -618,
+        "count": 107
       }
     },
     "anti_patterns": [
