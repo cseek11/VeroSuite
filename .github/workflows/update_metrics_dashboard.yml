@@ -5,8 +5,8 @@ on:
     workflows: ["Swarm - Compute Reward Score"]
     types: [completed]
   schedule:
-    # Run daily at midnight UTC
-    - cron: '0 0 * * *'
+    # Run every 6 hours to collect any missed artifacts
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -31,82 +31,137 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Get latest REWARD_SCORE run ID
-        id: get-run-id
-        if: github.event_name == 'workflow_dispatch'
+      - name: Get recent successful REWARD_SCORE run IDs
+        id: get-run-ids
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Get the most recent successful run that actually completed (not skipped)
-          # Filter by conclusion == "success" and status == "completed", then take the first one
+          # Get all recent successful runs that actually completed (not skipped)
+          # Filter by conclusion == "success" and status == "completed", limit to last 20
           echo "Fetching successful REWARD_SCORE runs..."
-          RUN_ID=$(gh run list --workflow="swarm_compute_reward_score.yml" --limit 50 --json databaseId,conclusion,status --jq '[.[] | select(.conclusion == "success" and .status == "completed")] | first | .databaseId')
-          echo "Query result: $RUN_ID"
-          if [ -z "$RUN_ID" ] || [ "$RUN_ID" == "null" ]; then
-            echo "No successful REWARD_SCORE run found"
-            exit 1
+          RUN_IDS=$(gh run list --workflow="swarm_compute_reward_score.yml" --limit 50 --json databaseId,conclusion,status,createdAt --jq '[.[] | select(.conclusion == "success" and .status == "completed")] | .[0:20] | .[].databaseId' | tr '\n' ',' | sed 's/,$//')
+          echo "Query result: $RUN_IDS"
+          if [ -z "$RUN_IDS" ] || [ "$RUN_IDS" == "null" ]; then
+            echo "No successful REWARD_SCORE runs found"
+            # Use the workflow_run ID if available, otherwise exit
+            if [ -n "${{ github.event.workflow_run.id }}" ]; then
+              echo "run_ids=${{ github.event.workflow_run.id }}" >> "$GITHUB_OUTPUT"
+            else
+              exit 1
+            fi
+          else
+            echo "run_ids=$RUN_IDS" >> "$GITHUB_OUTPUT"
+            echo "Found run IDs: $RUN_IDS"
           fi
-          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
-          echo "Found successful run ID: $RUN_ID"
 
       - name: Wait for artifacts to finalize
         if: github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch'
-        run: sleep 10  # Give GitHub 10 seconds to finalize artifacts
+        run: sleep 10  # Give GitHub 10 seconds to finalize artifacts (not needed for schedule)
 
-      - name: Download reward artifact (new format)
-        if: github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch'
-        id: download-new
+      - name: Download reward artifacts from workflow_run
+        if: github.event_name == 'workflow_run'
+        id: download-workflow-run
         uses: dawidd6/action-download-artifact@v6
         with:
           workflow: swarm_compute_reward_score.yml
-          run_id: ${{ github.event.workflow_run.id || steps.get-run-id.outputs.run_id }}
+          run_id: ${{ github.event.workflow_run.id }}
           name: reward-pr-*
           name_is_regexp: true
           path: ./artifacts
           if_no_artifact_found: ignore
-          continue-on-error: true
 
-      - name: Download reward artifact (old format fallback)
-        if: (github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch') && steps.download-new.outcome == 'failure'
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          workflow: swarm_compute_reward_score.yml
-          run_id: ${{ github.event.workflow_run.id || steps.get-run-id.outputs.run_id }}
-          name: reward
-          path: ./artifacts
-          if_no_artifact_found: fail
+      - name: Download reward artifacts from multiple runs
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Download artifacts from all recent successful runs
+          RUN_IDS="${{ steps.get-run-ids.outputs.run_ids }}"
+          if [ -z "$RUN_IDS" ]; then
+            echo "No run IDs to process"
+            exit 0
+          fi
+          
+          mkdir -p ./artifacts
+          
+          IFS=',' read -ra RUN_ID_ARRAY <<< "$RUN_IDS"
+          for RUN_ID in "${RUN_ID_ARRAY[@]}"; do
+            echo "Downloading artifacts from run $RUN_ID..."
+            # List artifacts for this run and download reward-pr-* artifacts
+            ARTIFACT_NAMES=$(gh run view $RUN_ID --json artifacts --jq '.artifacts[] | select(.name | startswith("reward-pr-")) | .name' || echo "")
+            if [ -n "$ARTIFACT_NAMES" ]; then
+              echo "$ARTIFACT_NAMES" | while read -r ARTIFACT_NAME; do
+                if [ -n "$ARTIFACT_NAME" ]; then
+                  echo "  Downloading artifact: $ARTIFACT_NAME"
+                  gh run download $RUN_ID --name "$ARTIFACT_NAME" --dir ./artifacts || echo "Failed to download $ARTIFACT_NAME"
+                fi
+              done
+            else
+              echo "  No reward artifacts found for run $RUN_ID"
+            fi
+          done
+          
+          echo "Artifact download complete"
+          ls -laR ./artifacts/ || echo "No artifacts directory"
 
-      - name: Verify artifact contents
-        id: verify-artifact
-        if: github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch'
+      - name: Verify and process artifacts
+        id: verify-artifacts
         run: |
           echo "Listing artifact contents:"
-          ls -laR ./artifacts/
+          ls -laR ./artifacts/ || echo "No artifacts directory found"
           
-          REWARD_FILE=$(find ./artifacts -name "reward.json" -type f | head -n 1)
+          # Find all reward.json files
+          REWARD_FILES=$(find ./artifacts -name "reward.json" -type f 2>/dev/null || echo "")
           
-          if [ -z "$REWARD_FILE" ]; then
-            echo "❌ ERROR: No reward.json found in artifacts"
+          if [ -z "$REWARD_FILES" ]; then
+            echo "❌ ERROR: No reward.json files found in artifacts"
             exit 1
           fi
           
-          echo "Found: $REWARD_FILE"
-          echo "reward_file=$REWARD_FILE" >> $GITHUB_OUTPUT
+          # Count files
+          FILE_COUNT=$(echo "$REWARD_FILES" | wc -l | tr -d ' ')
+          echo "Found $FILE_COUNT reward.json file(s)"
           
-          # Validate JSON
-          python3 << EOF
+          # Validate all JSON files and list them
+          echo "$REWARD_FILES" | while read -r REWARD_FILE; do
+            if [ -n "$REWARD_FILE" ]; then
+              echo "Validating: $REWARD_FILE"
+              python3 << EOF
           import json
-          with open('$REWARD_FILE', 'r') as f:
-              data = json.load(f)
-          print(f"✓ Valid JSON (PR #{data['pr_number']}, score: {data['total_score']})")
+          try:
+              with open('$REWARD_FILE', 'r') as f:
+                  data = json.load(f)
+              print(f"✓ Valid JSON (PR #{data.get('pr_number', 'unknown')}, score: {data.get('total_score', 'unknown')})")
+          except Exception as e:
+              print(f"✗ Invalid JSON in $REWARD_FILE: {e}")
           EOF
+            fi
+          done
+          
+          echo "reward_files=$REWARD_FILES" >> $GITHUB_OUTPUT
 
       - name: Update metrics
-        if: github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch'
         run: |
-          python3 .cursor/scripts/collect_metrics.py \
-            --reward-file "${{ steps.verify-artifact.outputs.reward_file }}" \
-            --output docs/metrics/reward_scores.json
+          # Process all reward files found
+          REWARD_FILES="${{ steps.verify-artifacts.outputs.reward_files }}"
+          
+          if [ -z "$REWARD_FILES" ]; then
+            echo "No reward files to process"
+            exit 1
+          fi
+          
+          # Process each reward file
+          echo "$REWARD_FILES" | while read -r REWARD_FILE; do
+            if [ -n "$REWARD_FILE" ] && [ -f "$REWARD_FILE" ]; then
+              echo "Processing: $REWARD_FILE"
+              python3 .cursor/scripts/collect_metrics.py \
+                --reward-file "$REWARD_FILE" \
+                --output docs/metrics/reward_scores.json
+            fi
+          done
+          
+          echo "Metrics update complete"
 
       - name: Commit and push metrics
         run: |
