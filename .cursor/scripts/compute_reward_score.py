@@ -21,7 +21,7 @@ import re
 import subprocess
 import sys
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 
 # Import structured logger
 try:
@@ -478,30 +478,253 @@ def score_performance(diff: str, rubric: dict) -> Tuple[int, str]:
     return score, "; ".join(notes)
 
 
-def score_security(static_analysis: dict, rubric: dict) -> Tuple[int, str]:
-    """Score based on security analysis."""
-    weight = rubric.get("security", 2)
-    score = 0
-    notes = []
+# Security scoring configuration
+SECURITY_RULE_PREFIXES = [
+    "p/security", "p/owasp", "semgrep-rules/security", "security.", ".security.", "lang.security"
+]
+SECURITY_TAGS = {"security", "owasp", "cwe", "taint", "secrets", "crypto", "injection"}
+RULE_ID_SECURITY_PATTERNS = [
+    re.compile(r".*security.*", re.I),
+    re.compile(r".*owasp.*", re.I),
+    re.compile(r".*cwe.*", re.I),
+    re.compile(r".*taint.*", re.I),
+    re.compile(r".*secrets?.*", re.I),
+    re.compile(r".*injection.*", re.I),
+]
+# Minimum confidence threshold (optional). Semgrep may not always include this field.
+MIN_CONFIDENCE = {"low": 0, "medium": 1, "high": 2}
+MIN_CONFIDENCE_LEVEL = "medium"  # set to None to disable confidence filtering
+
+# Files/paths considered tenant-sensitive / critical (increase weight)
+TENANT_SENSITIVE_PATHS = [
+    "src/db/", "migrations/", "src/models/", "src/repo/", "src/services/auth", "src/services/tenant",
+    "src/controllers/auth", "src/controllers/tenant", "backend/src/", "backend/migrations/",
+    "backend/prisma/", "backend/src/database/", "backend/src/auth/", "backend/src/tenant/"
+]
+
+# Baseline path (json file containing list of rule fingerprints to ignore)
+SECURITY_BASELINE_FILE = ".security-baseline.json"
+
+
+def load_baseline(baseline_path: str = SECURITY_BASELINE_FILE) -> set:
+    """Load security baseline file containing ignored rule fingerprints."""
+    try:
+        baseline_file = pathlib.Path(baseline_path)
+        if not baseline_file.is_absolute():
+            # Make relative to repo root
+            baseline_file = pathlib.Path(__file__).resolve().parents[2] / baseline_path
+        if baseline_file.exists():
+            with open(baseline_file, "r", encoding="utf-8") as fh:
+                data = json.load(fh)
+                # baseline expected to be {"ignore": ["<fingerprint>", ...]}
+                return set(data.get("ignore", []))
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        logger.debug(
+            f"Could not load baseline file: {baseline_path}",
+            operation="load_baseline",
+            error=e,
+            baseline_path=str(baseline_path)
+        )
+    return set()
+
+
+def result_fingerprint(r: Dict[str, Any]) -> str:
+    """Create a stable fingerprint for baseline deduping."""
+    # Use rule id + path + start line
+    rid = r.get("check_id") or r.get("rule_id") or r.get("metadata", {}).get("id") or r.get("id", "")
+    path = r.get("path") or r.get("extra", {}).get("metadata", {}).get("path") or ""
+    start = ""
+    try:
+        start_obj = r.get("start") or r.get("extra", {}).get("start", {})
+        if isinstance(start_obj, dict):
+            start = str(start_obj.get("line", ""))
+        else:
+            start = str(start_obj)
+    except Exception:
+        pass
+    return f"{rid}::{path}::{start}"
+
+
+def is_security_rule(result: Dict[str, Any]) -> bool:
+    """
+    Detect if a Semgrep result is a security rule.
     
-    # Parse Semgrep output
+    Uses multiple heuristics: rule id, metadata.category/owasp/cwe, tags, mode.
+    """
+    # 1) check known fields
+    extra = result.get("extra", {}) or {}
+    metadata = extra.get("metadata", {}) or result.get("metadata", {}) or {}
+    check_id = result.get("check_id") or result.get("rule_id") or result.get("id") or ""
+    tags = set()
+    
+    if isinstance(metadata.get("tags"), list):
+        tags.update([t.lower() for t in metadata.get("tags", [])])
+    elif isinstance(metadata.get("tags"), str):
+        tags.update([t.strip().lower() for t in metadata.get("tags", "").split(",")])
+    
+    # metadata.category / owasp / cwe
+    cat = (metadata.get("category") or metadata.get("owasp") or metadata.get("cwe") or "")
+    if isinstance(cat, str) and cat.strip():
+        if any(tok.lower() in cat.lower() for tok in ["security", "owasp", "cwe", "taint", "injection", "crypto"]):
+            return True
+    
+    # check tag matches
+    if tags & SECURITY_TAGS:
+        return True
+    
+    # check check_id / rule id strings
+    for pat in RULE_ID_SECURITY_PATTERNS:
+        if check_id and pat.search(str(check_id)):
+            return True
+    
+    # check known rule prefixes
+    for pref in SECURITY_RULE_PREFIXES:
+        if check_id and pref in check_id:
+            return True
+    
+    # some Semgrep outputs include 'mode' set to 'taint' or 'security' marker
+    if metadata.get("mode", "").lower() == "taint":
+        return True
+    
+    # fallback: if the result message or extra contains security keywords
+    message = result.get("message") or extra.get("message") or ""
+    if isinstance(message, str) and re.search(r"\b(security|secret|credential|token|jwt|injection|xss|cwe|owasp|sql\s*injection)\b", message, re.I):
+        return True
+    
+    return False
+
+
+def confidence_meets_threshold(result: Dict[str, Any], min_level: Optional[str] = MIN_CONFIDENCE_LEVEL) -> bool:
+    """Check if result confidence meets minimum threshold."""
+    if not min_level:
+        return True
+    # Semgrep sometimes stores in extra.metadata.confidence or in result['extra']['confidence']
+    extra = result.get("extra", {}) or {}
+    metadata = extra.get("metadata", {}) or result.get("metadata", {}) or {}
+    conf = metadata.get("confidence") or extra.get("confidence") or result.get("confidence")
+    if conf is None:
+        # no confidence info -> allow
+        return True
+    # normalize
+    try:
+        conf_s = str(conf).lower()
+        return MIN_CONFIDENCE.get(conf_s, 0) >= MIN_CONFIDENCE.get(min_level, 0)
+    except Exception:
+        return True
+
+
+def touches_sensitive_path(changed_files: Optional[List[str]]) -> bool:
+    """
+    If the PR changed files in tenant-sensitive directories, treat findings as higher risk.
+    
+    `changed_files` should be the list of files modified in the PR.
+    """
+    if not changed_files or not isinstance(changed_files, list):
+        return False
+    
+    for f in changed_files:
+        if not isinstance(f, str):
+            continue
+        for p in TENANT_SENSITIVE_PATHS:
+            if f.startswith(p) or f.startswith("./" + p) or ("/" + p) in f:
+                return True
+    return False
+
+
+def score_security(
+    static_analysis: Dict[str, Any],
+    rubric: Dict[str, int],
+    changed_files: Optional[List[str]] = None,
+    baseline_path: Optional[str] = None
+) -> Tuple[int, str]:
+    """
+    Score based on security analysis (Semgrep JSON).
+    
+    Returns (score:int, notes:str)
+    """
+    weight = rubric.get("security", 2)
+    default_positive = weight
+    
+    # validation
     if not static_analysis:
         return 0, "No static analysis data"
     
-    # Semgrep output format
-    results = static_analysis.get("results", [])
-    critical_issues = [r for r in results if r.get("extra", {}).get("severity") == "ERROR"]
-    high_issues = [r for r in results if r.get("extra", {}).get("severity") == "WARNING"]
+    results = static_analysis.get("results", []) or []
+    baseline = load_baseline(baseline_path or SECURITY_BASELINE_FILE)
     
-    if critical_issues:
-        score = -3  # Security blocker
-        notes.append(f"Critical security issues found: {len(critical_issues)}")
-    elif high_issues:
-        score = -1
-        notes.append(f"High severity security issues found: {len(high_issues)}")
+    security_results = []
+    skipped_by_confidence = 0
+    skipped_by_baseline = 0
+    
+    for r in results:
+        try:
+            fp = result_fingerprint(r)
+            if fp in baseline:
+                skipped_by_baseline += 1
+                continue
+            if not is_security_rule(r):
+                continue
+            if not confidence_meets_threshold(r):
+                skipped_by_confidence += 1
+                continue
+            security_results.append(r)
+        except Exception as e:
+            # If any unexpected structure, log and skip (don't silently include non-security)
+            logger.debug(
+                f"Error processing Semgrep result: {e}",
+                operation="score_security",
+                error=str(e),
+                result_id=r.get("check_id", "unknown")
+            )
+            # Only include if we can verify it's a security rule despite the error
+            if is_security_rule(r):
+                security_results.append(r)
+    
+    # categorize by severity (Semgrep sometimes uses 'ERROR'/'WARNING' in extra.severity)
+    critical = [r for r in security_results if (r.get("extra", {}).get("severity") or "").upper() == "ERROR"]
+    high = [r for r in security_results if (r.get("extra", {}).get("severity") or "").upper() == "WARNING"]
+    
+    # If PR touches tenant-sensitive paths, escalate
+    escalate = touches_sensitive_path(changed_files)
+    
+    notes: List[str] = []
+    notes.append(f"Total semgrep results: {len(results)}; security-filtered: {len(security_results)}; skipped_by_baseline: {skipped_by_baseline}; skipped_by_confidence: {skipped_by_confidence}")
+    
+    # Determine score
+    score = default_positive
+    if critical:
+        # Critical issues always block, escalation doesn't change critical score
+        score = -3
+        notes.append(f"Critical security issues (security rules marked ERROR): {len(critical)}")
+    elif high:
+        # Escalate high severity if sensitive paths touched
+        score = -2 if escalate else -1
+        notes.append(f"High severity security issues (security rules marked WARNING): {len(high)}")
+        if escalate:
+            notes.append("Escalated due to changes in tenant-sensitive paths")
     else:
-        score = weight
-        notes.append("No security issues detected")
+        score = default_positive
+        notes.append("No high/critical security issues detected")
+    
+    # Add short list of top offenders for explainability (cap to 5)
+    offenders = []
+    for r in (critical + high)[:5]:
+        rid = r.get("check_id") or r.get("rule_id") or r.get("id") or "unknown"
+        path = r.get("path") or r.get("extra", {}).get("metadata", {}).get("path") or r.get("start", {}).get("path", "<unknown>")
+        line = ""
+        try:
+            start_obj = r.get("start") or r.get("extra", {}).get("start", {})
+            if isinstance(start_obj, dict):
+                line = str(start_obj.get("line", ""))
+            else:
+                line = str(start_obj)
+        except Exception:
+            pass
+        offenders.append(f"{rid}@{path}:{line}")
+    if offenders:
+        notes.append("Top offenders: " + ", ".join(offenders))
     
     return score, "; ".join(notes)
 
@@ -556,6 +779,7 @@ def compute_score(
 
     notes_list = []
     file_scores = {}
+    files = {}  # Initialize files dict for use in security scoring
 
     # Parse files from diff if file-level scoring enabled
     if include_file_level and diff:
@@ -617,7 +841,9 @@ def compute_score(
     notes_list.append(f"Performance: {performance_note}")
 
     # Security and penalties are PR-level (not file-level)
-    security_score, security_note = score_security(static_analysis, rubric)
+    # Extract changed files list from parsed diff for security scoring
+    changed_files_list = list(files.keys()) if include_file_level and diff and files else None
+    security_score, security_note = score_security(static_analysis, rubric, changed_files=changed_files_list)
     breakdown["security"] = security_score
     notes_list.append(f"Security: {security_note}")
 
