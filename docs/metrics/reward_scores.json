@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-19T15:46:39.311509Z",
+  "last_updated": "2025-11-19T15:47:02.985534Z",
   "scores": [
     {
       "pr": "56",
@@ -37376,24 +37376,42 @@
       "files_changed": 0,
       "coverage_delta": null,
       "file_scores": {}
+    },
+    {
+      "pr": "185",
+      "score": -9,
+      "breakdown": {
+        "tests": 0,
+        "bug_fix": 0,
+        "docs": 0,
+        "performance": 0,
+        "security": -3,
+        "penalties": -6
+      },
+      "timestamp": "2025-11-19T15:46:36.115846Z",
+      "rubric_version": "unknown",
+      "author": null,
+      "files_changed": 0,
+      "coverage_delta": null,
+      "file_scores": {}
     }
   ],
   "aggregates": {
-    "total_prs": 47,
-    "average_score": -6.62,
+    "total_prs": 48,
+    "average_score": -6.67,
     "score_distribution": {
-      "negative (<0)": 47
+      "negative (<0)": 48
     },
     "trends": [
       {
         "period": "2025-W46",
-        "average": -6.617021276595745,
-        "count": 47
+        "average": -6.666666666666667,
+        "count": 48
       }
     ],
     "category_performance": {
       "tests": {
-        "average": 0.85,
+        "average": 0.83,
         "total": 40.0,
         "count": 28
       },
@@ -37403,27 +37421,41 @@
         "count": 7
       },
       "docs": {
-        "average": 0.6,
+        "average": 0.58,
         "total": 28.0,
         "count": 28
       },
       "performance": {
-        "average": 0.53,
+        "average": 0.52,
         "total": 25,
         "count": 25
       },
       "security": {
         "average": -3.0,
-        "total": -141,
-        "count": 47
+        "total": -144,
+        "count": 48
       },
       "penalties": {
-        "average": -5.66,
-        "total": -266,
-        "count": 47
+        "average": -5.67,
+        "total": -272,
+        "count": 48
       }
     },
     "anti_patterns": [
+      {
+        "pr": "185",
+        "score": -9,
+        "timestamp": "2025-11-19T15:46:36.115846Z",
+        "breakdown": {
+          "tests": 0,
+          "bug_fix": 0,
+          "docs": 0,
+          "performance": 0,
+          "security": -3,
+          "penalties": -6
+        },
+        "penalties": -6
+      },
       {
         "pr": "183",
         "score": -9,
