@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-19T05:50:12.777423Z",
+  "last_updated": "2025-11-19T05:50:35.931771Z",
   "scores": [
     {
       "pr": "56",
@@ -8013,41 +8013,966 @@
     },
     {
       "pr": "65",
-      "score": -8,
+      "score": -5,
       "breakdown": {
-        "tests": 0,
+        "tests": 1,
         "bug_fix": 1,
-        "docs": 0,
-        "performance": 0,
+        "docs": 1,
+        "performance": 1,
         "security": -3,
         "penalties": -6
       },
-      "timestamp": "2025-11-19T05:49:39.433392Z",
+      "timestamp": "2025-11-19T05:50:05.179689Z",
       "rubric_version": "unknown",
       "author": null,
       "files_changed": 0,
       "coverage_delta": null,
-      "file_scores": {}
+      "file_scores": {
+        ".cursor/anti_patterns.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/anti_patterns.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/ci/reward_score_comment_template.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/ci/reward_score_comment_template.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/golden_patterns.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/golden_patterns.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/patterns/001_backend_circuit_breaker.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/patterns/001_backend_circuit_breaker.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/prompts/coach.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/coach.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/prompts/distill_backend.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/distill_backend.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/prompts/distill_data.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/distill_data.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/prompts/distill_frontend.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/distill_frontend.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/prompts/distill_infra.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/distill_infra.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/prompts/lead_review.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/lead_review.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/prompts/security_review.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/security_review.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/prompts/tester.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/prompts/tester.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/reward_rubric.yaml": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/reward_rubric.yaml\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/rules/ci-automation.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/rules/ci-automation.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/rules/file-organization.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/rules/file-organization.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/rules/verification.md": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/rules/verification.md\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/scripts/detect_anti_patterns.py": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/detect_anti_patterns.py\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/scripts/detect_silent_failures.py": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/detect_silent_failures.py\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/scripts/monitor_changes.py": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/monitor_changes.py\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/scripts/reindex_embeddings.py": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/reindex_embeddings.py\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/scripts/suggest_patterns.py": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/suggest_patterns.py\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/scripts/test_workflow_trigger_manual.py": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/test_workflow_trigger_manual.py\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/scripts/validate_documentation_dates.py": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/validate_documentation_dates.py\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/scripts/validate_file_organization.py": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/validate_file_organization.py\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/scripts/validate_trace_propagation.py": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/scripts/validate_trace_propagation.py\nBug Fix: Bug fix with partial documentation"
+        },
+        ".cursor/test_workflow_trigger_test_file.txt": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .cursor/test_workflow_trigger_test_file.txt\nBug Fix: Bug fix with partial documentation"
+        },
+        ".github/workflows/detect_silent_failures.yml": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/detect_silent_failures.yml\nBug Fix: Bug fix with partial documentation"
+        },
+        ".github/workflows/swarm_reindex_patterns.yml": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/swarm_reindex_patterns.yml\nBug Fix: Bug fix with partial documentation"
+        },
+        ".github/workflows/validate_documentation.yml": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/validate_documentation.yml\nBug Fix: Bug fix with partial documentation"
+        },
+        ".github/workflows/validate_file_organization.yml": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/validate_file_organization.yml\nBug Fix: Bug fix with partial documentation"
+        },
+        ".github/workflows/validate_pattern_learning.yml": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/validate_pattern_learning.yml\nBug Fix: Bug fix with partial documentation"
+        },
+        ".github/workflows/validate_trace_propagation.yml": {
+          "score": 1,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 0,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: .github/workflows/validate_trace_propagation.yml\nBug Fix: Bug fix with partial documentation"
+        },
+        "backend/test/setup.js": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: backend/test/setup.js\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/DEVELOPMENT_TASK_LIST.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/DEVELOPMENT_TASK_LIST.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/architecture/cursor_rules_upgrade.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/architecture/cursor_rules_upgrade.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/archive/CLEANUP_REPORT_2025-11-16.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/archive/CLEANUP_REPORT_2025-11-16.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/archive/DOCUMENTATION_ORGANIZATION_SUMMARY.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/archive/DOCUMENTATION_ORGANIZATION_SUMMARY.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/archive/ROOT_FILES_AUDIT.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/archive/ROOT_FILES_AUDIT.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated with engineering decisions"
+        },
+        "docs/engineering-decisions.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/engineering-decisions.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/metrics/AUTOMATION_TRIGGERS.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/metrics/AUTOMATION_TRIGGERS.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/metrics/lib/.gitkeep": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/metrics/lib/.gitkeep\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/metrics/serve.ps1": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/metrics/serve.ps1\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/CI_AUTOMATION_POST_IMPLEMENTATION_AUDIT.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/CI_AUTOMATION_POST_IMPLEMENTATION_AUDIT.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/JOB_SCHEDULING_PHASE_2_RESOURCE_TIMELINE_TEST_FIXES.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/JOB_SCHEDULING_PHASE_2_RESOURCE_TIMELINE_TEST_FIXES.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/JOB_SCHEDULING_PHASE_2_RESOURCE_TIMELINE_TEST_SUITE_SUMMARY.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/JOB_SCHEDULING_PHASE_2_RESOURCE_TIMELINE_TEST_SUITE_SUMMARY.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/PAYMENT_TRACKING_FINAL_AUDIT.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/PAYMENT_TRACKING_FINAL_AUDIT.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/PAYMENT_TRACKING_HOOKS_FIX.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/PAYMENT_TRACKING_HOOKS_FIX.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/PAYMENT_TRACKING_POST_IMPLEMENTATION_AUDIT.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/PAYMENT_TRACKING_POST_IMPLEMENTATION_AUDIT.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/PR_SYSTEM_FIX_AUDIT_REPORT.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/PR_SYSTEM_FIX_AUDIT_REPORT.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/PR_SYSTEM_TEST_RESULTS.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/PR_SYSTEM_TEST_RESULTS.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/REWARD_SCORE_CI_AUTOMATION_PLAN.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/REWARD_SCORE_CI_AUTOMATION_PLAN.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/REWARD_SCORE_DASHBOARD_TROUBLESHOOTING.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/REWARD_SCORE_DASHBOARD_TROUBLESHOOTING.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_1_2_IMPLEMENTATION_COMPLETE.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_1_2_IMPLEMENTATION_COMPLETE.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_1_2_POST_IMPLEMENTATION_AUDIT.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_1_2_POST_IMPLEMENTATION_AUDIT.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_API_ERRORS_STATUS.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_API_ERRORS_STATUS.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_AUDIT_SUMMARY.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_AUDIT_SUMMARY.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_BACKEND_API_FIXES.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_BACKEND_API_FIXES.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_BACKEND_API_INVESTIGATION.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_BACKEND_API_INVESTIGATION.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_COMPLETE_1_4_SUMMARY.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_COMPLETE_1_4_SUMMARY.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_DEBUG_API_ERRORS.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_DEBUG_API_ERRORS.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_ERROR_EVALUATION.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_ERROR_EVALUATION.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_ERROR_EVALUATION_FINAL.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_ERROR_EVALUATION_FINAL.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_ERROR_FIX_SUMMARY.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_ERROR_FIX_SUMMARY.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_ERROR_PATTERNS_VERIFICATION.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_ERROR_PATTERNS_VERIFICATION.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_FINAL_SUMMARY.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_FINAL_SUMMARY.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_PAYMENT_PROCESSING_AUDIT.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_PAYMENT_PROCESSING_AUDIT.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_PAYMENT_PROCESSING_COMPLETE.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_PAYMENT_PROCESSING_COMPLETE.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_ROUTES_REFERENCE.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_ROUTES_REFERENCE.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_2_3_TEST_RESULTS.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_2_3_TEST_RESULTS.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_3_4_FINANCIAL_MANAGEMENT_COMPLETE.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_3_4_FINANCIAL_MANAGEMENT_COMPLETE.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_4_5_INVOICE_GENERATION_COMPLETE.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_4_5_INVOICE_GENERATION_COMPLETE.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/planning/WEEK_4_5_INVOICE_GENERATION_PROGRESS.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/planning/WEEK_4_5_INVOICE_GENERATION_PROGRESS.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/reference/FILE_ORGANIZATION.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/reference/FILE_ORGANIZATION.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/testing/AUTO_PR_TIMEOUT_FIXES.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/testing/AUTO_PR_TIMEOUT_FIXES.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/testing/AUTO_PR_WORKFLOW_TRIGGER_E2E_REPORT.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/testing/AUTO_PR_WORKFLOW_TRIGGER_E2E_REPORT.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "docs/testing/AUTO_PR_WORKFLOW_TRIGGER_TEST_REPORT.md": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: docs/testing/AUTO_PR_WORKFLOW_TRIGGER_TEST_REPORT.md\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        },
+        "tatus": {
+          "score": 2,
+          "breakdown": {
+            "tests": 0,
+            "bug_fix": 1,
+            "docs": 1,
+            "performance": 0,
+            "security": 0,
+            "penalties": 0
+          },
+          "notes": "File: tatus\nBug Fix: Bug fix with partial documentation\nDocs: Documentation updated"
+        }
+      }
     }
   ],
   "aggregates": {
     "total_prs": 11,
-    "average_score": -6.73,
+    "average_score": -6.45,
     "score_distribution": {
       "negative (<0)": 11
     },
     "trends": [
       {
         "period": "2025-W46",
-        "average": -6.7272727272727275,
+        "average": -6.454545454545454,
         "count": 11
       }
     ],
     "category_performance": {
       "tests": {
-        "average": 0.73,
-        "total": 8,
-        "count": 8
+        "average": 0.82,
+        "total": 9,
+        "count": 9
       },
       "bug_fix": {
         "average": 0.36,
@@ -8055,14 +8980,14 @@
         "count": 4
       },
       "docs": {
-        "average": 0.73,
-        "total": 8,
-        "count": 8
+        "average": 0.82,
+        "total": 9,
+        "count": 9
       },
       "performance": {
-        "average": 0.45,
-        "total": 5,
-        "count": 5
+        "average": 0.55,
+        "total": 6,
+        "count": 6
       },
       "security": {
         "average": -3.0,
@@ -8078,13 +9003,13 @@
     "anti_patterns": [
       {
         "pr": "65",
-        "score": -8,
-        "timestamp": "2025-11-19T05:49:39.433392Z",
+        "score": -5,
+        "timestamp": "2025-11-19T05:50:05.179689Z",
         "breakdown": {
-          "tests": 0,
+          "tests": 1,
           "bug_fix": 1,
-          "docs": 0,
-          "performance": 0,
+          "docs": 1,
+          "performance": 1,
           "security": -3,
           "penalties": -6
         },
