@@ -4,6 +4,151 @@ This document catalogs error patterns, their root causes, fixes, and prevention 
 
 ---
 
+## PENALTY_DOUBLE_APPLICATION_BUG - 2025-11-19
+
+### Summary
+Penalty calculation was applying both `failing_ci` (-4) and `missing_tests` (-2) penalties simultaneously, resulting in -6 instead of the expected -4. This broke the feedback loop by making all PRs appear worse than they actually were.
+
+### Root Cause
+1. **Type coercion issues:** Coverage percentage extraction didn't handle None/invalid values safely
+2. **Missing fallback logic:** No handling for malformed coverage data structures
+3. **Condition logic flaw:** Both `if` and `elif` conditions could potentially evaluate true due to type issues
+4. **No mutual exclusivity enforcement:** Conditions weren't explicitly mutually exclusive
+
+### Triggering Conditions
+- Coverage data with `percentage: 0` for both frontend and backend
+- Coverage data with `percentage: null` or invalid types
+- Empty coverage dictionary `{}`
+- Type coercion failures causing unexpected comparisons
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - `calculate_penalties()` function
+- `.cursor/reward_rubric.yaml` - Penalty definitions
+
+### How It Was Fixed
+1. **Added `safe_get_percentage()` helper:** Type-safe percentage extraction with proper coercion
+2. **Made conditions mutually exclusive:** Used `if/elif` structure with explicit priority
+3. **Added fallback logic:** Empty coverage dict → no penalty (handles malformed workflows)
+4. **Added debug logging:** Trace coverage values for debugging
+5. **Added trace propagation:** All logger calls now include traceId/spanId
+
+**Code Changes:**
+```python
+# Before: Both penalties could apply
+if frontend_coverage == 0 and backend_coverage == 0:
+    penalty = penalties.get("failing_ci", -4)
+    total_penalty += penalty
+elif frontend_coverage < 20 and backend_coverage < 20:
+    penalty = penalties.get("missing_tests", -2)
+    total_penalty += penalty  # BUG: Could add to existing penalty
+
+# After: Mutually exclusive with type safety
+def safe_get_percentage(cov_dict: dict, default: float = 0.0) -> float:
+    """Safely extract percentage with type coercion."""
+    if not cov_dict or not isinstance(cov_dict, dict):
+        return default
+    pct = cov_dict.get("percentage")
+    if pct is None:
+        return default
+    try:
+        return float(pct)
+    except (ValueError, TypeError):
+        return default
+
+if frontend_coverage == 0.0 and backend_coverage == 0.0:
+    if not has_coverage_data:
+        # No penalty for missing data
+        pass
+    else:
+        # Only failing_ci penalty
+        penalty = penalties.get("failing_ci", -4)
+        total_penalty += penalty
+elif frontend_coverage > 0 or backend_coverage > 0:
+    # Only missing_tests penalty (mutually exclusive)
+    if frontend_coverage < 20.0 and backend_coverage < 20.0:
+        penalty = penalties.get("missing_tests", -2)
+        total_penalty += penalty
+```
+
+### Prevention Strategies
+1. **Always use type-safe extraction helpers** for numeric values from dictionaries
+2. **Enforce mutual exclusivity** in conditional logic (if/elif, not multiple ifs)
+3. **Add regression tests** for edge cases (None, invalid types, empty dicts)
+4. **Log intermediate values** for debugging (coverage percentages, penalty calculations)
+5. **Use type hints** to catch type issues early
+
+### Related Patterns
+- `SECURITY_SCORING_FALSE_POSITIVES` - Similar issue with filtering logic
+- Type coercion bugs in general
+
+---
+
+## SECURITY_REPO_WIDE_ISSUE_COUNTING - 2025-11-19
+
+### Summary
+Security scoring was counting findings from the entire repository, not just files changed by the PR. This caused all PRs to receive -3 security scores even when they didn't introduce new security issues, breaking the feedback loop.
+
+### Root Cause
+1. **No diff-based filtering:** Semgrep scans entire repo, but scoring didn't filter by changed files
+2. **Baseline not effective:** Baseline only filtered known issues, not repo-wide issues
+3. **No file path matching:** Security results weren't checked against PR diff
+
+### Triggering Conditions
+- PR changes files without security issues
+- Repo has existing security issues in unchanged files
+- Semgrep scans entire repository (default behavior)
+
+### Relevant Code/Modules
+- `.cursor/scripts/compute_reward_score.py` - `score_security()` function
+- Semgrep static analysis results
+
+### How It Was Fixed
+1. **Added `result_in_changed_files()` function:** Filters Semgrep results to only changed files
+2. **Added diff-based filtering:** Only count findings in files changed by PR
+3. **Added `skipped_by_diff_filter` counter:** Transparency in filtering
+4. **Normalized file paths:** Cross-platform path matching
+
+**Code Changes:**
+```python
+# Before: Counted all findings
+for r in results:
+    if fp in baseline:
+        continue
+    if is_security_rule(r):
+        security_results.append(r)  # BUG: Includes repo-wide issues
+
+# After: Filter by changed files
+def result_in_changed_files(result: Dict[str, Any], changed_files_list: Optional[List[str]]) -> bool:
+    """Check if Semgrep result is in a file changed by this PR."""
+    if not changed_files_list:
+        return True  # Fallback: include all if unknown
+    result_path = result.get("path") or ...
+    # Normalize and match paths
+    ...
+
+for r in results:
+    if fp in baseline:
+        continue
+    if not is_security_rule(r):
+        continue
+    if not result_in_changed_files(r, changed_files):  # FIX: Filter by diff
+        skipped_by_diff_filter += 1
+        continue
+    security_results.append(r)  # Only changed files
+```
+
+### Prevention Strategies
+1. **Always filter by diff** when scoring PR changes
+2. **Use file path matching** for any PR-based analysis
+3. **Log filtering statistics** (skipped_by_diff_filter) for transparency
+4. **Test with repo-wide issues** to ensure they're ignored
+
+### Related Patterns
+- `PENALTY_DOUBLE_APPLICATION_BUG` - Similar filtering logic issues
+- Diff-based analysis patterns
+
+---
+
 ## SECURITY_SCORING_FALSE_POSITIVES - 2025-11-19
 
 ### Summary

@@ -105,6 +105,142 @@ Why was this approach chosen?
 
 ## Engineering Decisions
 
+### Reward Score Penalty Calculation Fix - 2025-11-19
+
+#### Decision
+Fixed penalty calculation bug that was applying both `failing_ci` (-4) and `missing_tests` (-2) penalties simultaneously, resulting in -6 instead of expected -4. Made penalty conditions mutually exclusive with type-safe coverage extraction and fallback logic for malformed workflows.
+
+#### Context
+**Problem:** Auto-PR system was generating PRs with consistent -6 penalty scores, breaking the feedback loop. Investigation revealed that penalty calculation was applying both `failing_ci` and `missing_tests` penalties when coverage was 0%, instead of just `failing_ci`.
+
+**Impact:** All PRs appeared worse than they actually were, preventing positive feedback and breaking the AI improvement loop. Pattern extraction never ran because all scores were negative.
+
+#### Trade-offs
+- **Type safety vs. simplicity:** Added `safe_get_percentage()` helper adds complexity but prevents type coercion bugs
+- **Mutual exclusivity vs. flexibility:** Strict if/elif structure prevents double penalties but is less flexible
+- **Fallback logic vs. strictness:** No penalty for missing coverage data is lenient but handles malformed workflows gracefully
+
+#### Alternatives Considered
+1. **Keep both penalties:** Rejected - breaks scoring ontology and feedback loop
+2. **Remove one penalty:** Rejected - both penalties serve different purposes
+3. **Add penalty cap:** Rejected - doesn't fix root cause, just masks it
+4. **Type-safe extraction + mutual exclusivity:** **Chosen** - Fixes root cause while maintaining scoring accuracy
+
+#### Rationale
+- Type-safe extraction prevents edge cases (None, invalid types, empty dicts)
+- Mutual exclusivity ensures only one penalty applies per PR
+- Fallback logic handles malformed workflows without penalizing
+- Debug logging enables future debugging and monitoring
+
+#### Impact
+- **Immediate:** Penalty scores now accurate (-4 or -2, not -6)
+- **Feedback loop:** Positive scores possible, enabling pattern extraction
+- **Auto-PR:** More accurate scoring for incremental PRs
+- **Maintainability:** Type-safe code reduces future bugs
+
+#### Lessons Learned
+1. **Always use type-safe extraction** for numeric values from dictionaries
+2. **Enforce mutual exclusivity** in conditional logic (if/elif, not multiple ifs)
+3. **Add regression tests** for edge cases (None, invalid types, empty dicts)
+4. **Log intermediate values** for debugging (coverage percentages, penalty calculations)
+5. **Test with real data** - the bug only appeared with actual PR data, not unit tests
+
+#### Related Decisions
+- Security scoring diff-based filtering (similar filtering logic)
+- Stabilized score calculation (reduces noise from micro-PRs)
+
+---
+
+### Security Scoring Diff-Based Filtering - 2025-11-19
+
+#### Decision
+Added diff-based filtering to security scoring so that only findings in files changed by the PR are counted. This prevents repo-wide issues from being counted as new findings, enabling positive security scores when PRs don't introduce new issues.
+
+#### Context
+**Problem:** All PRs received -3 security scores even when they didn't introduce new security issues. Semgrep scans the entire repository, but scoring was counting all findings, not just those in changed files.
+
+**Impact:** Feedback loop broken - all PRs appeared to have security issues, preventing positive reinforcement and pattern extraction.
+
+#### Trade-offs
+- **Accuracy vs. performance:** Filtering adds computation but provides accurate scoring
+- **Changed files vs. all files:** Requires PR diff parsing but prevents false negatives
+- **Fallback behavior:** When changed files unknown, includes all findings (conservative)
+
+#### Alternatives Considered
+1. **Scan only changed files:** Rejected - Semgrep doesn't support this easily
+2. **Baseline all repo issues:** Rejected - Too many issues, baseline would be huge
+3. **Filter by diff in scoring:** **Chosen** - Accurate and maintainable
+4. **Ignore security scoring:** Rejected - Security is critical
+
+#### Rationale
+- Diff-based filtering accurately reflects PR changes
+- File path matching is reliable and cross-platform
+- Fallback to include all findings when diff unknown (conservative)
+- Transparency via `skipped_by_diff_filter` counter
+
+#### Impact
+- **Immediate:** Security scores now reflect actual PR changes
+- **Feedback loop:** Positive security scores possible
+- **Accuracy:** Only new issues counted, not repo-wide issues
+- **Transparency:** Filtering statistics logged for debugging
+
+#### Lessons Learned
+1. **Always filter by diff** when scoring PR changes
+2. **Use file path matching** for any PR-based analysis
+3. **Log filtering statistics** for transparency
+4. **Test with repo-wide issues** to ensure they're ignored
+
+#### Related Decisions
+- Penalty calculation fix (similar filtering logic)
+- Stabilized score calculation (reduces noise)
+
+---
+
+### Stabilized Score Feature - 2025-11-19
+
+#### Decision
+Added Stabilized Score (SS) calculation to prevent PR spam from skewing metrics. Formula: `stable_score = score * sqrt(files_changed / 10)`. This reduces noise for micro-PRs (1-2 files) while maintaining full weight for substantial PRs (10+ files).
+
+#### Context
+**Problem:** Auto-PR system generates many small, incremental PRs (1-2 files). These micro-PRs were skewing reward score metrics, making it difficult to identify quality trends.
+
+**Impact:** Metrics were dominated by micro-PR scores, hiding quality improvements in larger PRs.
+
+#### Trade-offs
+- **Noise reduction vs. accuracy:** Stabilization reduces noise but slightly modifies raw scores
+- **Formula complexity vs. simplicity:** Square root formula is more complex but provides smooth scaling
+- **Tracking vs. storage:** Stabilized score added to breakdown increases storage but enables analysis
+
+#### Alternatives Considered
+1. **Ignore micro-PRs:** Rejected - They're still valid PRs
+2. **Weighted average:** Rejected - Doesn't address individual PR scoring
+3. **Stabilized score formula:** **Chosen** - Reduces noise while maintaining accuracy
+4. **Separate metrics:** Rejected - Adds complexity
+
+#### Rationale
+- Square root formula provides smooth scaling (not linear)
+- 10 files as baseline (standard PR size)
+- Reduces noise for micro-PRs without eliminating them
+- Maintains full weight for substantial PRs
+
+#### Impact
+- **Metrics:** More accurate quality trends
+- **Auto-PR:** Better scoring for incremental PRs
+- **Analysis:** Stabilized score enables better pattern detection
+- **Feedback loop:** More meaningful scores for AI learning
+
+#### Lessons Learned
+1. **Consider PR size** when designing scoring systems
+2. **Use non-linear scaling** for smooth transitions
+3. **Track both raw and stabilized** scores for analysis
+4. **Test with various PR sizes** to validate formula
+
+#### Related Decisions
+- Penalty calculation fix (improves accuracy)
+- Trend-based rewards (complements stabilization)
+
+---
+
 ### Example Decision: Structured Logging Format - 2025-01-27
 
 **Note:** This is an example entry. Replace with actual decisions as they are made.
