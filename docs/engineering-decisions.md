@@ -1020,3 +1020,162 @@ The automatic breadcrumb generation approach provides:
 ---
 
 **Last Updated:** 2025-11-19
+
+---
+
+## Global Search Functionality - 2025-11-19
+
+### Decision
+Implement a global search component with keyboard shortcut (Ctrl+K/Cmd+K) that searches across multiple entity types (customers, work orders, jobs, invoices, technicians, agreements) with grouped results, keyboard navigation, and full accessibility support.
+
+### Context
+Users need quick access to find any entity in the system without navigating through multiple pages. Modern applications (VS Code, GitHub, Slack) use global search with keyboard shortcuts as a standard pattern for productivity. The VeroField application has multiple entity types that users frequently need to find quickly.
+
+### Trade-offs
+**Pros:**
+- Fast navigation to any entity
+- Improved productivity with keyboard shortcut
+- Consistent UX with modern application patterns
+- Reduces navigation clicks
+- Power user friendly
+
+**Cons:**
+- Additional API calls when searching
+- Requires debouncing for performance
+- More complex component with multiple entity types
+- Requires comprehensive test coverage
+
+### Alternatives Considered
+1. **Separate search pages per entity type**
+   - Rejected: Too many clicks, inconsistent UX
+2. **Simple search bar in header**
+   - Rejected: Limited space, less discoverable
+3. **Command palette pattern (like VS Code)**
+   - Considered: Similar to implemented solution, but dialog-based is more accessible
+4. **Search results page**
+   - Rejected: Requires navigation, breaks workflow
+
+### Rationale
+1. **Keyboard Shortcut (Ctrl+K/Cmd+K):**
+   - Industry standard pattern
+   - Discoverable through documentation
+   - Fast access from anywhere in app
+
+2. **Dialog-Based Modal:**
+   - Non-intrusive (doesn't take up permanent space)
+   - Focus management for accessibility
+   - Can be dismissed easily (Escape key)
+
+3. **Multi-Entity Search:**
+   - Searches customers, work orders, jobs simultaneously
+   - Grouped results by entity type for clarity
+   - Limited to 5 results per type for performance
+
+4. **Keyboard Navigation:**
+   - Arrow keys for navigation
+   - Enter to select
+   - Escape to close
+   - Power user friendly
+
+5. **Accessibility First:**
+   - ARIA labels and roles
+   - Keyboard navigation support
+   - Screen reader friendly
+   - WCAG AA compliant
+
+6. **Performance Optimizations:**
+   - 300ms debounce for search input
+   - React Query for caching
+   - Result limiting (5 per type)
+   - Only searches when dialog is open
+
+### Implementation Details
+1. **Component Structure:**
+   - Dialog-based modal using existing Dialog component
+   - Search input with debouncing
+   - Grouped results display
+   - Keyboard navigation support
+
+2. **API Integration:**
+   - Uses `enhanced-api.ts` methods with `SearchFilters`
+   - Parallel queries for multiple entity types
+   - Error handling with structured logging
+   - Trace propagation for observability
+
+3. **State Management:**
+   - React Query for data fetching and caching
+   - Local state for search term and selected index
+   - Debounced search term for API calls
+
+4. **Error Handling:**
+   - Try-catch around all API calls
+   - Structured logging with trace propagation
+   - Graceful degradation (continues if one entity type fails)
+   - Safe defaults (empty arrays)
+
+5. **Accessibility:**
+   - ARIA labels: `aria-label="Global search"`, `aria-label="Search results"`
+   - ARIA attributes: `aria-autocomplete="list"`, `aria-expanded`, `aria-controls`
+   - Role attributes: `role="listbox"`, `role="option"`, `aria-selected`
+   - Keyboard navigation: Arrow keys, Enter, Escape
+   - Focus management: Auto-focus on input when dialog opens
+
+6. **Performance:**
+   - 300ms debounce for search input
+   - `useMemo` for grouped results
+   - React Query with staleTime (5 minutes) and gcTime (10 minutes)
+   - Result limiting (5 per entity type)
+   - Only searches when dialog is open
+
+### Impact
+**Affected Areas:**
+- `frontend/src/components/common/GlobalSearch.tsx` - Main component (456 lines)
+- `frontend/src/components/common/index.ts` - Export file
+- `frontend/src/components/common/__tests__/GlobalSearch.test.tsx` - Test suite (523 lines)
+- `frontend/src/components/layout/V4Layout.tsx` - Integration point
+- `docs/DEVELOPMENT_TASK_LIST.md` - Task status update
+
+**User Experience:**
+- Faster navigation to entities
+- Improved productivity with keyboard shortcut
+- Consistent UX with modern applications
+- Better accessibility for all users
+
+**Performance:**
+- Minimal impact (debounced, cached, limited results)
+- Only searches when dialog is open
+- React Query caching reduces API calls
+
+**Maintenance:**
+- Well-tested component (39 test cases)
+- Follows existing patterns
+- Comprehensive error handling
+- Structured logging for debugging
+
+### Lessons Learned
+**What Worked Well:**
+- Dialog-based modal provides good UX
+- Keyboard shortcut is discoverable and fast
+- Grouped results make it easy to find entities
+- React Query caching improves performance
+- Comprehensive test coverage ensures reliability
+
+**What Would Be Done Differently:**
+- Could add search history/recent searches
+- Could add search suggestions/autocomplete
+- Could add search filters (date range, status, etc.)
+- Could add search analytics (track popular searches)
+- Could add keyboard shortcut customization
+
+### Related Decisions
+- React Query data fetching pattern
+- Accessibility enforcement (WCAG AA)
+- Error handling and resilience patterns
+- Structured logging and trace propagation
+- UX consistency patterns
+- Dialog component pattern
+- Keyboard navigation patterns
+
+---
+
+**Last Updated:** 2025-11-19
