@@ -42,6 +42,7 @@ import ServiceManagement from '@/pages/ServiceManagement';
 import AgreementsPage from '@/pages/AgreementsPage';
 import CreateAgreementPage from '@/pages/CreateAgreementPage';
 import UserManagement from '@/pages/UserManagement';
+import SessionsPage from '@/pages/SessionsPage';
 
 const LoginPage = lazy(() => import('@/routes/Login'));
 
@@ -540,22 +541,36 @@ export default function App() {
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/settings/users"
-              element={
-                <PrivateRoute>
-                  <RoleProtectedRoute allowedRoles={['admin', 'owner']} requiredPermissions={['users:manage']}>
-                    <V4Layout>
-                      <Suspense fallback={<DashboardFallback />}>
-                        <UserManagement />
-                      </Suspense>
-                    </V4Layout>
-                  </RoleProtectedRoute>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/communications"
+              <Route
+                path="/settings/users"
+                element={
+                  <PrivateRoute>
+                    <RoleProtectedRoute allowedRoles={['admin', 'owner']} requiredPermissions={['users:manage']}>
+                      <V4Layout>
+                        <Suspense fallback={<DashboardFallback />}>
+                          <UserManagement />
+                        </Suspense>
+                      </V4Layout>
+                    </RoleProtectedRoute>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/sessions"
+                element={
+                  <PrivateRoute>
+                    <RoleProtectedRoute allowedRoles={['admin', 'owner']} requiredPermissions={['settings:view']}>
+                      <V4Layout>
+                        <Suspense fallback={<DashboardFallback />}>
+                          <SessionsPage />
+                        </Suspense>
+                      </V4Layout>
+                    </RoleProtectedRoute>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/communications"
               element={
                 <PrivateRoute>
                   <V4Layout>
