@@ -281,6 +281,16 @@ def generate_report() -> str:
 
 if __name__ == "__main__":
     try:
+        # Fix Unicode encoding for Windows console
+        import sys
+        if sys.platform == 'win32':
+            try:
+                sys.stdout.reconfigure(encoding='utf-8')
+                sys.stderr.reconfigure(encoding='utf-8')
+            except (AttributeError, ValueError):
+                # Python < 3.7 or reconfigure not available
+                pass
+        
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
         
         report = generate_report()
@@ -288,7 +298,7 @@ if __name__ == "__main__":
         output_file = OUTPUT_DIR / f"session_analytics_{datetime.now().strftime('%Y%m%d')}.md"
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(report)
-        
+
         print(f"✅ Analytics report generated: {output_file}")
         print("\n" + report)
         
