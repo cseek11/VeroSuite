@@ -6,7 +6,25 @@ import {
   GitPullRequest,
   TrendingUp,
   PlayCircle,
+  BarChart3,
+  FileText,
+  AlertCircle,
 } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -36,7 +54,8 @@ const AutoPRSessionManager: React.FC = () => {
     avgPRsPerSession: 0,
     completionRate: 0,
   });
-  const [view, setView] = useState<'dashboard' | 'analytics'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'analytics' | 'breakdown'>('dashboard');
+  const [selectedSessionForBreakdown, setSelectedSessionForBreakdown] = useState<Session | null>(null);
 
   const calculateStats = useCallback((data: SessionData) => {
     const active = Object.keys(data.active_sessions).length;
@@ -254,6 +273,226 @@ const AutoPRSessionManager: React.FC = () => {
     </div>
   );
 
+  const BreakdownView = ({ session }: { session: Session }) => {
+    // Prepare breakdown data for charts
+    const breakdownData = session.breakdown
+      ? [
+          { name: 'Tests', value: session.breakdown.tests || 0, color: '#10b981' },
+          { name: 'Bug Fix', value: session.breakdown.bug_fix || 0, color: '#3b82f6' },
+          { name: 'Docs', value: session.breakdown.docs || 0, color: '#8b5cf6' },
+          { name: 'Performance', value: session.breakdown.performance || 0, color: '#f59e0b' },
+          { name: 'Security', value: session.breakdown.security || 0, color: '#ef4444' },
+          { name: 'Penalties', value: (session.breakdown.penalties || 0) * -1, color: '#dc2626' },
+        ].filter((item) => item.value !== 0)
+      : [];
+
+    // Prepare file scores data
+    const fileScoresData = session.file_scores
+      ? Object.entries(session.file_scores)
+          .map(([file, fileScore]) => ({
+            file: file.length > 40 ? file.substring(0, 40) + '...' : file,
+            fullFile: file,
+            score: fileScore.score,
+            breakdown: fileScore.breakdown,
+            notes: fileScore.notes,
+          }))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 10) // Top 10 files
+      : [];
+
+    // Score distribution chart data
+    const scoreDistribution = fileScoresData.map((item, index) => ({
+      name: `File ${index + 1}`,
+      score: item.score,
+      file: item.file,
+    }));
+
+    return (
+      <div className="space-y-6">
+        {/* Back Button */}
+        <Button
+          onClick={() => {
+            setSelectedSessionForBreakdown(null);
+            setView('dashboard');
+          }}
+          variant="outline"
+          className="mb-4"
+        >
+          ← Back to Dashboard
+        </Button>
+
+        {/* Session Header */}
+        <Card>
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Session Breakdown</h2>
+                <p className="text-sm text-gray-500 mt-1">Session ID: {session.session_id}</p>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-blue-600">
+                  {session.final_score !== undefined ? session.final_score.toFixed(1) : 'N/A'}
+                </div>
+                <div className="text-sm text-gray-500">Final Score</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+              <div>
+                <div className="text-sm text-gray-500">Author</div>
+                <div className="font-semibold">{session.author}</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">PRs</div>
+                <div className="font-semibold">{session.prs.length}</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">Files Changed</div>
+                <div className="font-semibold">{session.total_files_changed}</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">Duration</div>
+                <div className="font-semibold">
+                  {session.duration_minutes ? `${session.duration_minutes}m` : 'N/A'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Score Breakdown Chart */}
+        {breakdownData.length > 0 && (
+          <Card>
+            <div className="p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Score Breakdown
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={breakdownData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="value" fill="#3b82f6">
+                    {breakdownData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        )}
+
+        {/* File Scores */}
+        {fileScoresData.length > 0 && (
+          <>
+            <Card>
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Top Files by Score
+                </h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={scoreDistribution} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis dataKey="file" type="category" width={200} />
+                    <Tooltip />
+                    <Bar dataKey="score" fill="#8b5cf6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+
+            {/* File Scores Table */}
+            <Card>
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-4">File-Level Breakdown</h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          File
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Score
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Breakdown
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Notes
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {fileScoresData.map((item, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm text-gray-900 font-mono">{item.fullFile}</td>
+                          <td className="px-4 py-3 text-sm">
+                            <span
+                              className={`font-semibold ${
+                                item.score > 0 ? 'text-green-600' : item.score < 0 ? 'text-red-600' : 'text-gray-600'
+                              }`}
+                            >
+                              {item.score > 0 ? '+' : ''}
+                              {item.score.toFixed(1)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            <div className="flex flex-wrap gap-2">
+                              {item.breakdown.tests !== undefined && item.breakdown.tests > 0 && (
+                                <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                                  Tests: +{item.breakdown.tests}
+                                </span>
+                              )}
+                              {item.breakdown.bug_fix !== undefined && item.breakdown.bug_fix > 0 && (
+                                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                                  Bug Fix: +{item.breakdown.bug_fix}
+                                </span>
+                              )}
+                              {item.breakdown.docs !== undefined && item.breakdown.docs > 0 && (
+                                <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                                  Docs: +{item.breakdown.docs}
+                                </span>
+                              )}
+                              {item.breakdown.penalties !== undefined && item.breakdown.penalties > 0 && (
+                                <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">
+                                  Penalties: -{item.breakdown.penalties}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{item.notes || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </Card>
+          </>
+        )}
+
+        {/* No Breakdown Data Message */}
+        {breakdownData.length === 0 && fileScoresData.length === 0 && (
+          <Card>
+            <div className="p-6 text-center text-gray-500">
+              <AlertCircle className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+              <p>No detailed breakdown data available for this session.</p>
+              <p className="text-sm mt-2">
+                Breakdown data will appear here once the session is scored by the reward score system.
+              </p>
+            </div>
+          </Card>
+        )}
+      </div>
+    );
+  };
+
   const AnalyticsView = () => {
     const sessionsByAuthor = [...sessions.completed_sessions].reduce(
       (acc, session) => {
@@ -345,7 +584,10 @@ const AutoPRSessionManager: React.FC = () => {
             </h1>
             <div className="flex gap-2">
               <button
-                onClick={() => setView('dashboard')}
+                onClick={() => {
+                  setView('dashboard');
+                  setSelectedSessionForBreakdown(null);
+                }}
                 className={`px-4 py-2 rounded ${
                   view === 'dashboard'
                     ? 'bg-blue-600 text-white'
@@ -355,7 +597,10 @@ const AutoPRSessionManager: React.FC = () => {
                 Dashboard
               </button>
               <button
-                onClick={() => setView('analytics')}
+                onClick={() => {
+                  setView('analytics');
+                  setSelectedSessionForBreakdown(null);
+                }}
                 className={`px-4 py-2 rounded ${
                   view === 'analytics'
                     ? 'bg-blue-600 text-white'
@@ -371,7 +616,13 @@ const AutoPRSessionManager: React.FC = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {view === 'dashboard' ? <DashboardView /> : <AnalyticsView />}
+        {selectedSessionForBreakdown ? (
+          <BreakdownView session={selectedSessionForBreakdown} />
+        ) : view === 'dashboard' ? (
+          <DashboardView />
+        ) : (
+          <AnalyticsView />
+        )}
       </div>
     </div>
   );
