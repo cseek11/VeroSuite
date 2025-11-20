@@ -10,7 +10,6 @@ import {
 } from '@/types/work-orders';
 import { 
   DollarSign, 
-  AlertCircle,
   Save,
   X
 } from 'lucide-react';
@@ -18,8 +17,10 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 import CustomerSearchSelector from '@/components/ui/CustomerSearchSelector';
+import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { logger } from '@/utils/logger';
+import { toast } from '@/utils/toast';
 import { enhancedApi } from '@/lib/enhanced-api';
 
 // Form validation schema
@@ -192,8 +193,8 @@ export default function WorkOrderForm({
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <Card className="p-6">
+    <div className="max-w-4xl mx-auto p-4 md:p-6">
+      <Card className="p-4 md:p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
             {mode === 'create' ? 'Create Work Order' : 'Edit Work Order'}
@@ -201,14 +202,14 @@ export default function WorkOrderForm({
           <Button
             variant="outline"
             onClick={onCancel}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 min-h-[44px]"
           >
             <X className="h-4 w-4" />
             Cancel
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 md:space-y-6">
           {/* Customer Selection */}
           <div className="space-y-2">
             <Controller
@@ -233,7 +234,7 @@ export default function WorkOrderForm({
           </div>
 
           {/* Service Type and Priority */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-2">
               <label htmlFor="service_type" className="block text-sm font-medium text-gray-700">Service Type</label>
               <Controller
@@ -298,10 +299,7 @@ export default function WorkOrderForm({
               )}
             />
             {errors.description && (
-              <p className="text-sm text-red-600 flex items-center gap-1">
-                <AlertCircle className="h-4 w-4" />
-                {errors.description.message}
-              </p>
+              <ErrorMessage message={errors.description.message} type="error" />
             )}
           </div>
 
@@ -341,7 +339,7 @@ export default function WorkOrderForm({
           </div>
 
           {/* Scheduling and Duration */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-2">
               <label htmlFor="scheduled_date" className="block text-sm font-medium text-gray-700">Scheduled Date & Time</label>
               <Controller
@@ -390,10 +388,7 @@ export default function WorkOrderForm({
                 )}
               />
               {errors.estimated_duration && (
-                <p className="text-sm text-red-600 flex items-center gap-1">
-                  <AlertCircle className="h-4 w-4" />
-                  {errors.estimated_duration.message}
-                </p>
+                <ErrorMessage message={errors.estimated_duration.message} type="error" />
               )}
             </div>
           </div>
@@ -429,10 +424,7 @@ export default function WorkOrderForm({
               />
             </div>
             {errors.service_price && (
-              <p className="text-sm text-red-600 flex items-center gap-1">
-                <AlertCircle className="h-4 w-4" />
-                {errors.service_price.message}
-              </p>
+              <ErrorMessage message={errors.service_price.message} type="error" />
             )}
           </div>
 
@@ -453,20 +445,18 @@ export default function WorkOrderForm({
               )}
             />
             {errors.notes && (
-              <p className="text-sm text-red-600 flex items-center gap-1">
-                <AlertCircle className="h-4 w-4" />
-                {errors.notes.message}
-              </p>
+              <ErrorMessage message={errors.notes.message} type="error" />
             )}
           </div>
 
           {/* Form Actions */}
-          <div className="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-gray-200">
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
               disabled={isLoading}
+              className="min-h-[44px] w-full sm:w-auto"
             >
               Cancel
             </Button>
@@ -474,7 +464,7 @@ export default function WorkOrderForm({
               type="submit"
               variant="primary"
               disabled={isLoading || !isDirty}
-              className="flex items-center gap-2"
+              className="flex items-center justify-center gap-2 min-h-[44px] w-full sm:w-auto"
             >
               {isLoading ? (
                 <LoadingSpinner text="Saving..." />

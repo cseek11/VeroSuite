@@ -13,11 +13,34 @@ import time
 from pathlib import Path
 
 try:
-    from logger_util import get_logger
+    from logger_util import get_logger, get_or_create_trace_context
     logger = get_logger(context="auto_pr_daemon")
+    trace_context = get_or_create_trace_context()
 except ImportError:
     import logging
     logger = logging.getLogger("auto_pr_daemon")
+    trace_context = {"traceId": None, "spanId": None, "requestId": None}
+
+# Import session hooks for PR creation
+try:
+    from cursor_session_hook import (
+        get_or_create_session_id,
+        format_session_metadata,
+        clear_session
+    )
+    SESSION_HOOKS_AVAILABLE = True
+    logger.debug(
+        "Session hooks available",
+        operation="import",
+        **trace_context
+    )
+except ImportError:
+    SESSION_HOOKS_AVAILABLE = False
+    logger.warn(
+        "Session hooks not available (cursor_session_hook not found)",
+        operation="import",
+        **trace_context
+    )
 
 from monitor_changes import main as check_changes, load_config
 
@@ -40,7 +63,9 @@ def main() -> None:
     
     logger.info(
         f"Starting auto-PR daemon (interval: {args.interval}s)",
-        operation="main"
+        operation="main",
+        session_hooks_available=SESSION_HOOKS_AVAILABLE,
+        **trace_context
     )
     
     # Load config to get check interval
@@ -68,7 +93,9 @@ def main() -> None:
             logger.error(
                 "Error in daemon loop",
                 operation="main",
-                error=e
+                error=str(e),
+                error_type=type(e).__name__,
+                **trace_context
             )
             time.sleep(check_interval)  # Wait before retrying
 

@@ -1,0 +1,195 @@
+name: Swarm - Apply Reward Feedback
+
+on:
+  workflow_run:
+    workflows: ["Swarm - Compute Reward Score"]
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+
+jobs:
+  apply-feedback:
+    runs-on: ubuntu-latest
+    # Only run if parent workflow succeeded
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+
+      - name: Setup GitHub CLI
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+        continue-on-error: true
+
+      - name: Get PR number
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Try to get PR number from workflow_run
+          PR_NUM=$(gh pr list --head "${{ github.event.workflow_run.head_branch }}" --json number --jq '.[0].number' || echo "")
+          if [ -z "$PR_NUM" ]; then
+            PR_NUM="${{ github.event.workflow_run.pull_requests[0].number }}"
+          fi
+          if [ -z "$PR_NUM" ] || [ "$PR_NUM" = "null" ]; then
+            echo "Could not determine PR number"
+            exit 0
+          fi
+          echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
+
+      - name: Analyze reward trends
+        id: analyze
+        run: |
+          python3 .cursor/scripts/analyze_reward_trends.py \
+            --count 10 \
+            --output-format markdown \
+            --output-file feedback/trend_analysis.md || true
+          
+          if [ -f feedback/trend_analysis.md ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate feedback comment
+        if: steps.analyze.outputs.found == 'true'
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+        run: |
+          mkdir -p feedback
+          
+          python3 << 'EOF'
+          import pathlib
+          from datetime import datetime
+          
+          analysis_path = pathlib.Path("feedback/trend_analysis.md")
+          if not analysis_path.exists():
+              print("No trend analysis found")
+              exit(0)
+          
+          analysis = analysis_path.read_text()
+          
+          # Check if this is a session-completed score
+          session_context = ""
+          try:
+              import json
+              import os
+              # Get PR number from environment
+              pr_num = os.environ.get("PR_NUM", "")
+              if pr_num:
+                  # Try to get session info from reward_scores.json
+                  reward_scores_path = pathlib.Path("docs/metrics/reward_scores.json")
+                  if reward_scores_path.exists():
+                      reward_scores = json.loads(reward_scores_path.read_text())
+                      scores = reward_scores.get("scores", [])
+                      # Find most recent score for this PR
+                      for score in reversed(scores):
+                          if str(score.get("pr", "")) == pr_num:
+                              session_id = score.get("metadata", {}).get("session_id")
+                              if session_id:
+                                  session_context = f"\n**Session Context:** This PR is part of session `{session_id}`. Score represents the entire session.\n"
+                              break
+          except Exception:
+              # Non-fatal: continue without session context
+              pass
+
+          # Generate feedback comment
+          comment = f"""# Reward Score Feedback Analysis
+
+**Generated:** {datetime.utcnow().isoformat()}Z
+**PR:** #{pathlib.Path().cwd().name}{session_context}
+
+## Historical Performance Analysis
+
+{analysis}
+
+## Action Required for Next PR
+
+Cursor: These areas need improvement before next PR:
+
+"""
+          
+          # Extract recommendations from analysis
+          in_recommendations = False
+          recommendations = []
+          for line in analysis.split('\n'):
+              if '## Recommendations' in line:
+                  in_recommendations = True
+                  continue
+              if in_recommendations and line.strip().startswith('##'):
+                  break
+              if in_recommendations and line.strip() and line.strip()[0].isdigit():
+                  recommendations.append(line.strip())
+          
+          if recommendations:
+              for rec in recommendations:
+                  comment += f"- {rec}\n"
+          else:
+              comment += "- Review the trend analysis above and address weak categories\n"
+          
+          comment += """
+## Integration
+
+This feedback is automatically generated from historical Reward Scores. Cursor will:
+1. Read this comment before making changes
+2. Apply improvements based on recurring issues
+3. Use `.cursor/prompts/reward_feedback.md` for detailed guidance
+
+See `.cursor/rules.md` - REWARD SCORE IMPROVEMENT RULE for enforcement details.
+"""
+          
+          pathlib.Path("feedback/comment.md").write_text(comment)
+          print(f"Generated feedback comment with {len(recommendations)} recommendations")
+          EOF
+
+      - name: Post feedback comment
+        if: steps.analyze.outputs.found == 'true' && steps.pr.outputs.number != ''
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ ! -f feedback/comment.md ]; then
+            echo "No feedback comment found"
+            exit 0
+          fi
+          
+          # Check if comment already exists (avoid duplicates)
+          EXISTING=$(gh pr view "$PR_NUM" --comments --json comments --jq '.comments[] | select(.body | contains("Reward Score Feedback Analysis")) | .id' | head -1 || echo "")
+          
+          if [ -z "$EXISTING" ]; then
+            gh pr comment "$PR_NUM" --body-file feedback/comment.md || true
+            echo "Posted feedback comment to PR #$PR_NUM"
+          else
+            echo "Feedback comment already exists, skipping"
+          fi
+
+      - name: Upload feedback artifact
+        if: steps.analyze.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: reward-feedback
+          path: feedback/
+          retention-days: 30
+
+
+
+
+
+
+
+

@@ -35,6 +35,18 @@ except ImportError:
     def get_or_create_trace_context():
         return {"traceId": None, "spanId": None, "requestId": None}
 
+# Import session manager for batching
+try:
+    from auto_pr_session_manager import AutoPRSessionManager
+    SESSION_MANAGEMENT_AVAILABLE = True
+except ImportError:
+    SESSION_MANAGEMENT_AVAILABLE = False
+    logger.warn(
+        "Session management not available (auto_pr_session_manager not found)",
+        operation="import",
+        **get_or_create_trace_context()
+    )
+
 RUBRIC_PATH = pathlib.Path(__file__).resolve().parents[1] / "reward_rubric.yaml"
 BUG_LOG_PATH = pathlib.Path(__file__).resolve().parents[1] / "BUG_LOG.md"
 ERROR_PATTERNS_PATH = pathlib.Path(__file__).resolve().parents[0].parents[0] / "docs" / "error-patterns.md"
@@ -1702,8 +1714,126 @@ def main() -> None:
     parser.add_argument("--static", required=True, help="Path to static analysis JSON")
     parser.add_argument("--pr-desc", help="Path to PR description file (optional)")
     parser.add_argument("--diff", help="Path to PR diff file (optional)")
+    parser.add_argument("--session-id", help="Session ID for session management (optional)")
     parser.add_argument("--out", required=True, help="Output JSON path")
     args = parser.parse_args()
+    
+    # Check if PR should be batched (session management)
+    if SESSION_MANAGEMENT_AVAILABLE:
+        try:
+            manager = AutoPRSessionManager()
+            
+            # Get PR data for session check
+            pr_desc_text = ""
+            if args.pr_desc:
+                with open(args.pr_desc, "r", encoding="utf-8") as handle:
+                    pr_desc_text = handle.read()
+            else:
+                pr_desc_text = get_pr_description(args.pr)
+            
+            # Extract PR title from description (first line)
+            pr_title = pr_desc_text.split('\n')[0] if pr_desc_text else ""
+            
+            # Get PR diff to count files
+            if args.diff:
+                with open(args.diff, "r", encoding="utf-8") as handle:
+                    diff_text = handle.read()
+            else:
+                repo_path = pathlib.Path(__file__).resolve().parents[2]
+                diff_text = get_pr_diff(args.pr, repo_path)
+            
+            files_changed = len(parse_diff_files(diff_text))
+            
+            # Check if this is an auto-PR
+            is_auto = manager.is_auto_pr(
+                pr_title,
+                pr_desc_text,
+                [pr_title],  # Simplified commit messages
+                files_changed
+            )
+            
+            if is_auto:
+                logger.info(
+                    "Auto-PR detected, checking session status",
+                    operation="main",
+                    pr_number=args.pr,
+                    **trace_context
+                )
+                
+                # Add to session
+                pr_data = {
+                    "pr_number": args.pr,
+                    "pr_title": pr_title,
+                    "pr_body": pr_desc_text,
+                    "author": os.environ.get("GIT_AUTHOR_NAME") or os.environ.get("USER") or "unknown",
+                    "timestamp": datetime.now().isoformat(),
+                    "files_changed": files_changed,
+                    "commit_messages": [pr_title]
+                }
+                
+                should_skip, session_id, session_data = manager.add_to_session(
+                    args.pr,
+                    pr_data,
+                    args.session_id
+                )
+                
+                # Check if session should be completed
+                should_complete, trigger = manager.should_complete_session(session_id, pr_data)
+                
+                if should_complete:
+                    logger.info(
+                        "Session completion triggered",
+                        operation="main",
+                        session_id=session_id,
+                        trigger=trigger,
+                        **trace_context
+                    )
+                    # Complete session and continue with scoring
+                    completed_session = manager.complete_session(session_id, trigger)
+                    # Note: Continue with normal scoring for completed session
+                else:
+                    # Skip scoring for incomplete session
+                    logger.info(
+                        "Skipping score (session incomplete)",
+                        operation="main",
+                        session_id=session_id,
+                        prs_in_session=len(session_data.get("prs", [])),
+                        **trace_context
+                    )
+                    
+                    # Write skip output
+                    output = {
+                        "score": None,
+                        "skipped": True,
+                        "reason": "session_batching",
+                        "session_id": session_id,
+                        "message": f"PR added to session {session_id}. Score will be computed when session completes.",
+                        "metadata": {
+                            "pr": args.pr,
+                            "computed_at": datetime.utcnow().isoformat() + "Z"
+                        }
+                    }
+                    
+                    with open(args.out, "w", encoding="utf-8") as f:
+                        json.dump(output, f, indent=2)
+                    
+                    logger.info(
+                        "Score computation skipped (session batching)",
+                        operation="main",
+                        pr_number=args.pr,
+                        session_id=session_id,
+                        **trace_context
+                    )
+                    return
+        except Exception as e:
+            logger.error(
+                "Error in session management, continuing with normal scoring",
+                operation="main",
+                error=str(e),
+                error_type=type(e).__name__,
+                **trace_context
+            )
+            # Continue with normal scoring if session management fails
     
     # Load rubric
     rubric = load_yaml(str(RUBRIC_PATH))

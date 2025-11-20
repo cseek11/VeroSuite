@@ -1,0 +1,22 @@
+auto_pr_patterns:
+- '^auto-pr:'
+- '^wip:'
+- ^\[auto\]
+- '^checkpoint:'
+- ^cursor-session
+- "^\U0001F916"
+completion_markers:
+- ready for review
+- ready to review
+- complete
+- final pr
+- '[session-complete]'
+- '[ready]'
+- done with session
+- finished
+- "\u2705"
+enable_heuristic_completion: true
+enable_timeout_completion: true
+idle_warning_minutes: 15
+min_files_for_manual: 5
+timeout_minutes: 30

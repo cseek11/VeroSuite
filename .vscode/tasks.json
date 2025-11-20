@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Auto-PR Session Manager",
+      "type": "shell",
+      "command": "python ${workspaceFolder}/.cursor/scripts/start_session_manager.py 2>&1",
+      "options": {
+        "env": {
+          "PYTHONUNBUFFERED": "1",
+          "VSCODE_TASK": "1"
+        }
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "never",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "isBackground": true
+    }
+  ]
+}
+
+
+

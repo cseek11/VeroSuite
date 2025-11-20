@@ -138,3 +138,11 @@ Reindex + semantic search availability → informs next PR
 - Configure CI workflows (`compute reward`, `suggest patterns`, `reindex`).
 - Establish meeting cadence for reviewing metrics and overrides.
 
+
+
+
+
+
+
+
+

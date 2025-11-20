@@ -14,10 +14,92 @@ on:
         type: string
 
 jobs:
-  compute-score:
+  # First check if this should be batched
+  check-session:
+    name: Check Session Status
     runs-on: ubuntu-latest
-    # Only run if PR event, workflow_dispatch, or if workflow_run completed successfully and was triggered by a PR
     if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success')
+    outputs:
+      should_skip: ${{ steps.check.outputs.skip }}
+      session_id: ${{ steps.check.outputs.session_id }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      
+      - name: Install dependencies
+        run: pip install pyyaml
+      
+      - name: Get PR number
+        id: pr
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [ -n "${{ github.event.inputs.pr_number }}" ]; then
+              echo "number=${{ github.event.inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+            else
+              PR_NUM=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '.[0].number' || echo "")
+              if [ -z "$PR_NUM" ]; then
+                echo "Error: No PR number provided" >&2
+                exit 1
+              fi
+              echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            PR_NUM=$(gh pr list --head "${{ github.event.workflow_run.head_branch }}" --json number --jq '.[0].number' || echo "")
+            if [ -z "$PR_NUM" ]; then
+              echo "number=${{ github.event.workflow_run.pull_requests[0].number }}" >> "$GITHUB_OUTPUT"
+            else
+              echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+      
+      - name: Check Session Status
+        id: check
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          PR_TITLE: ${{ github.event.pull_request.title || '' }}
+          PR_BODY: ${{ github.event.pull_request.body || '' }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login || 'unknown' }}
+        run: |
+          # Get PR details if not available from event
+          if [ -z "$PR_TITLE" ] || [ -z "$PR_BODY" ]; then
+            PR_DATA=$(gh pr view "$PR_NUMBER" --json title,body,author --jq '{title: .title, body: .body, author: .author.login}')
+            PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
+            PR_BODY=$(echo "$PR_DATA" | jq -r '.body')
+            PR_AUTHOR=$(echo "$PR_DATA" | jq -r '.author')
+          fi
+          
+          # Check if this is an auto-PR that should be skipped
+          python .cursor/scripts/auto_pr_session_manager.py check \
+            --pr-number "$PR_NUMBER" \
+            --title "$PR_TITLE" \
+            --body "$PR_BODY" \
+            --author "$PR_AUTHOR" \
+            --files 0 > check_result.json || echo '{"is_auto_pr": false, "should_skip_scoring": false}' > check_result.json
+          
+          SKIP=$(jq -r '.should_skip_scoring // .is_auto_pr' check_result.json)
+          SESSION_ID=$(jq -r '.session_id // ""' check_result.json)
+          
+          echo "skip=$SKIP" >> "$GITHUB_OUTPUT"
+          echo "session_id=$SESSION_ID" >> "$GITHUB_OUTPUT"
+          
+          if [ "$SKIP" = "true" ]; then
+            echo "📦 Auto-PR detected - skipping score (session: $SESSION_ID)"
+          else
+            echo "📊 Regular PR - will compute score"
+          fi
+
+  compute-score:
+    name: Compute Reward Score
+    needs: check-session
+    if: needs.check-session.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -247,6 +329,7 @@ jobs:
             --static artifacts/static-analysis.json \
             --pr-desc artifacts/pr-description.txt \
             --diff artifacts/pr-diff.txt \
+            --session-id "${{ needs.check-session.outputs.session_id }}" \
             --out reward.json
 
       - name: Upload reward artifact
