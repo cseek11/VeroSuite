@@ -101,8 +101,7 @@ export const useAutoPRSessions = () => {
             }
           }
           
-          if (scoresResponse && scoresResponse.ok) {
-          if (scoresResponse.ok) {
+          if (scoresResponse?.ok) {
             const scoresData = await scoresResponse.json();
             // Transform reward scores into session format for testing
             const testSessions: SessionData = {
