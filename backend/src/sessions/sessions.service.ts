@@ -49,9 +49,16 @@ export class SessionsService {
   private readonly logger = new Logger(SessionsService.name);
   // Resolve paths relative to project root
   // Backend runs from backend/ directory, so we need to go up one level
-  private readonly projectRoot = process.cwd().endsWith('backend') 
-    ? resolve(process.cwd(), '..')
-    : process.cwd();
+  private readonly projectRoot = (() => {
+    const cwd = process.cwd();
+    const pathParts = cwd.split(/[/\\]/);
+    const lastPart = pathParts[pathParts.length - 1];
+    // Check if we're in backend directory
+    if (lastPart === 'backend') {
+      return resolve(cwd, '..');
+    }
+    return cwd;
+  })();
   private readonly sessionDataFile = join(this.projectRoot, 'docs', 'metrics', 'auto_pr_sessions.json');
   private readonly stateFile = join(this.projectRoot, '.cursor', 'data', 'session_state.json');
   private readonly rewardScoresFile = join(this.projectRoot, 'docs', 'metrics', 'reward_scores.json');
@@ -70,6 +77,8 @@ export class SessionsService {
         traceId: context.traceId,
         spanId: context.spanId,
         requestId: context.requestId,
+        processCwd: process.cwd(),
+        projectRoot: this.projectRoot,
         sessionDataFile: this.sessionDataFile,
         fileExists: existsSync(this.sessionDataFile),
       });
