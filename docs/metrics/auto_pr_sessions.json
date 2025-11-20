@@ -1,10 +1,10 @@
 {
   "active_sessions": {
-    "unknown-20251120-1451": {
-      "session_id": "unknown-20251120-1451",
-      "author": "unknown",
-      "started": "2025-11-20T14:51:25.140711",
-      "last_activity": "2025-11-20T14:51:25.140711",
+    "cseek_cursor-20251120-1459": {
+      "session_id": "cseek_cursor-20251120-1459",
+      "author": "cseek_cursor",
+      "started": "2025-11-20T14:59:41.686046",
+      "last_activity": "2025-11-20T14:59:41.686046",
       "prs": [],
       "total_files_changed": 0,
       "test_files_added": 0,
@@ -271,8 +271,34 @@
       "completed": "2025-11-20T14:51:24.833584",
       "completion_trigger": "manual_cli",
       "duration_minutes": 14
+    },
+    {
+      "session_id": "unknown-20251120-1451",
+      "author": "unknown",
+      "started": "2025-11-20T14:51:25.140711",
+      "last_activity": "2025-11-20T14:51:25.140711",
+      "prs": [],
+      "total_files_changed": 0,
+      "test_files_added": 0,
+      "status": "completed",
+      "completed": "2025-11-20T14:53:43.360858",
+      "completion_trigger": "manual_cli",
+      "duration_minutes": 2
+    },
+    {
+      "session_id": "unknown-20251120-1453",
+      "author": "unknown",
+      "started": "2025-11-20T14:53:43.702022",
+      "last_activity": "2025-11-20T14:53:43.702022",
+      "prs": [],
+      "total_files_changed": 0,
+      "test_files_added": 0,
+      "status": "completed",
+      "completed": "2025-11-20T14:59:41.477267",
+      "completion_trigger": "manual_cli",
+      "duration_minutes": 5
     }
   ],
   "version": "1.0",
-  "last_updated": "2025-11-20T14:51:25.140711"
+  "last_updated": "2025-11-20T14:59:41.686046"
 }
