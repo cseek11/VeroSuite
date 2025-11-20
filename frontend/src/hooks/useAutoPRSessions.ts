@@ -81,8 +81,27 @@ export const useAutoPRSessions = () => {
       } catch (apiError) {
         // API endpoint not available - try to read from reward_scores.json for development
         // This allows testing the UI with real PR score data
+        // Note: In production, this should be served by the backend API
         try {
-          const scoresResponse = await fetch('/docs/metrics/reward_scores.json');
+          // Try multiple possible paths for the reward_scores.json file
+          // First try public folder (for Vite dev server), then try other paths
+          const possiblePaths = [
+            '/reward_scores.json', // Public folder (Vite serves this)
+            '/docs/metrics/reward_scores.json',
+            '../docs/metrics/reward_scores.json',
+          ];
+          
+          let scoresResponse: Response | null = null;
+          for (const path of possiblePaths) {
+            try {
+              scoresResponse = await fetch(path);
+              if (scoresResponse.ok) break;
+            } catch {
+              continue;
+            }
+          }
+          
+          if (scoresResponse && scoresResponse.ok) {
           if (scoresResponse.ok) {
             const scoresData = await scoresResponse.json();
             // Transform reward scores into session format for testing
