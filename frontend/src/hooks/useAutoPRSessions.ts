@@ -44,11 +44,10 @@ export interface SessionData {
 }
 
 /**
- * Hook for fetching Auto-PR session data
+ * Hook for fetching Auto-PR session data from the backend API
  * 
- * TODO: Replace mock data with actual API call
- * The API endpoint should be: GET /api/sessions
- * It should return SessionData from the session state file
+ * API endpoint: GET /api/v1/sessions
+ * Returns: SessionData from the session state files
  */
 export const useAutoPRSessions = () => {
   const [sessions, setSessions] = useState<SessionData>({
@@ -63,91 +62,41 @@ export const useAutoPRSessions = () => {
       setLoading(true);
       setError(null);
 
-      // TODO: Implement actual API call
-      // const response = await fetch('/api/sessions');
-      // if (!response.ok) throw new Error('Failed to fetch sessions');
-      // const data = await response.json();
-      // setSessions(data);
+      const response = await fetch('/api/v1/sessions', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include cookies for authentication
+      });
 
-      // Fetch from API endpoint
-      // TODO: Replace with actual API endpoint when backend is ready
-      try {
-        const response = await fetch('/api/sessions');
-        if (!response.ok) {
-          throw new Error('API endpoint not available');
-        }
-        const data = await response.json();
-        setSessions(data);
-      } catch (apiError) {
-        // API endpoint not available - try to read from reward_scores.json for development
-        // This allows testing the UI with real PR score data
-        // Note: In production, this should be served by the backend API
-        try {
-          // Try multiple possible paths for the reward_scores.json file
-          // First try public folder (for Vite dev server), then try other paths
-          const possiblePaths = [
-            '/reward_scores.json', // Public folder (Vite serves this)
-            '/docs/metrics/reward_scores.json',
-            '../docs/metrics/reward_scores.json',
-          ];
-          
-          let scoresResponse: Response | null = null;
-          for (const path of possiblePaths) {
-            try {
-              scoresResponse = await fetch(path);
-              if (scoresResponse.ok) break;
-            } catch {
-              continue;
-            }
-          }
-          
-          if (scoresResponse?.ok) {
-            const scoresData = await scoresResponse.json();
-            // Transform reward scores into session format for testing
-            const testSessions: SessionData = {
-              active_sessions: {},
-              completed_sessions: scoresData.scores
-                ?.slice(0, 5)
-                .map((score: any, index: number) => ({
-                  session_id: `test-session-${score.pr || index}`,
-                  author: 'test-user',
-                  started: new Date(Date.now() - (index + 1) * 60 * 60 * 1000).toISOString(),
-                  completed: new Date(Date.now() - index * 60 * 60 * 1000).toISOString(),
-                  prs: [`#${score.pr || index}`],
-                  total_files_changed: Object.keys(score.file_scores || {}).length,
-                  test_files_added: 0,
-                  final_score: score.score,
-                  duration_minutes: 30,
-                  breakdown: score.breakdown,
-                  file_scores: score.file_scores,
-                  metadata: {
-                    pr: score.pr?.toString(),
-                    computed_at: score.computed_at,
-                  },
-                })) || [],
-            };
-            setSessions(testSessions);
-            logger.info('Loaded test data from reward_scores.json for development', {
-              sessionCount: testSessions.completed_sessions.length,
-            });
-          } else {
-            throw apiError;
-          }
-        } catch (fallbackError) {
-          // If all else fails, return empty data
-          setSessions({
-            active_sessions: {},
-            completed_sessions: [],
-          });
-          logger.warn('No session data available. API endpoint not ready and fallback failed.', {
-            error: fallbackError instanceof Error ? fallbackError.message : 'Unknown error',
-          });
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Authentication required. Please log in.');
+        } else if (response.status === 404) {
+          // API endpoint not found - backend might not be running
+          throw new Error('API endpoint not found. Please ensure the backend server is running.');
+        } else {
+          throw new Error(`Failed to fetch sessions: ${response.status} ${response.statusText}`);
         }
       }
+
+      const data = await response.json();
+      setSessions(data);
+      logger.info('Session data loaded successfully', {
+        activeCount: Object.keys(data.active_sessions || {}).length,
+        completedCount: (data.completed_sessions || []).length,
+      });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load sessions';
       logger.error('Failed to fetch session data', { error: errorMessage });
       setError(errorMessage);
+      
+      // Set empty data on error to allow UI to show error message
+      setSessions({
+        active_sessions: {},
+        completed_sessions: [],
+      });
     } finally {
       setLoading(false);
     }
@@ -161,9 +110,25 @@ export const useAutoPRSessions = () => {
 
   const completeSession = async (sessionId: string) => {
     try {
-      // TODO: Implement API call
-      // await fetch(`/api/sessions/${sessionId}/complete`, { method: 'POST' });
-      logger.info('Completing session', { sessionId });
+      const response = await fetch(`/api/v1/sessions/${sessionId}/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include cookies for authentication
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Authentication required. Please log in.');
+        } else if (response.status === 404) {
+          throw new Error(`Session with ID ${sessionId} not found.`);
+        } else {
+          throw new Error(`Failed to complete session: ${response.status} ${response.statusText}`);
+        }
+      }
+
+      logger.info('Session completed successfully', { sessionId });
       await fetchSessions(); // Reload after completion
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to complete session';
