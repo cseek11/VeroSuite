@@ -1,10 +1,10 @@
 {
   "active_sessions": {
-    "unknown-20251120-1436": {
-      "session_id": "unknown-20251120-1436",
+    "unknown-20251120-1451": {
+      "session_id": "unknown-20251120-1451",
       "author": "unknown",
-      "started": "2025-11-20T14:36:39.880163",
-      "last_activity": "2025-11-20T14:36:39.880163",
+      "started": "2025-11-20T14:51:25.140711",
+      "last_activity": "2025-11-20T14:51:25.140711",
       "prs": [],
       "total_files_changed": 0,
       "test_files_added": 0,
@@ -258,8 +258,21 @@
       "completed": "2025-11-20T14:36:39.694889",
       "completion_trigger": "manual_cli",
       "duration_minutes": 1
+    },
+    {
+      "session_id": "unknown-20251120-1436",
+      "author": "unknown",
+      "started": "2025-11-20T14:36:39.880163",
+      "last_activity": "2025-11-20T14:36:39.880163",
+      "prs": [],
+      "total_files_changed": 0,
+      "test_files_added": 0,
+      "status": "completed",
+      "completed": "2025-11-20T14:51:24.833584",
+      "completion_trigger": "manual_cli",
+      "duration_minutes": 14
     }
   ],
   "version": "1.0",
-  "last_updated": "2025-11-20T14:36:39.880163"
+  "last_updated": "2025-11-20T14:51:25.140711"
 }
