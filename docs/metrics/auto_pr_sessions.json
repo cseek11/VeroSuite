@@ -1,20 +1,10 @@
 {
   "active_sessions": {
-    "cseek_cursor-20251120-0617": {
-      "session_id": "cseek_cursor-20251120-0617",
-      "author": "cseek_cursor",
-      "started": "2025-11-20T06:17:51.491514",
-      "last_activity": "2025-11-20T06:17:51.491514",
-      "prs": [],
-      "total_files_changed": 0,
-      "test_files_added": 0,
-      "status": "active"
-    },
-    "cseek_cursor-20251120-0618": {
-      "session_id": "cseek_cursor-20251120-0618",
-      "author": "cseek_cursor",
-      "started": "2025-11-20T06:18:40.709407",
-      "last_activity": "2025-11-20T06:18:40.709407",
+    "unknown-20251120-1436": {
+      "session_id": "unknown-20251120-1436",
+      "author": "unknown",
+      "started": "2025-11-20T14:36:39.880163",
+      "last_activity": "2025-11-20T14:36:39.880163",
       "prs": [],
       "total_files_changed": 0,
       "test_files_added": 0,
@@ -216,8 +206,60 @@
       "completed": "2025-11-20T06:17:51.216865",
       "completion_trigger": "manual_cli",
       "duration_minutes": 1
+    },
+    {
+      "session_id": "cseek_cursor-20251120-0617",
+      "author": "cseek_cursor",
+      "started": "2025-11-20T06:17:51.491514",
+      "last_activity": "2025-11-20T06:17:51.491514",
+      "prs": [],
+      "total_files_changed": 0,
+      "test_files_added": 0,
+      "status": "completed",
+      "completed": "2025-11-20T14:33:18.182674",
+      "completion_trigger": "manual_cli",
+      "duration_minutes": 495
+    },
+    {
+      "session_id": "cseek_cursor-20251120-0618",
+      "author": "cseek_cursor",
+      "started": "2025-11-20T06:18:40.709407",
+      "last_activity": "2025-11-20T06:18:40.709407",
+      "prs": [],
+      "total_files_changed": 0,
+      "test_files_added": 0,
+      "status": "completed",
+      "completed": "2025-11-20T14:33:19.248653",
+      "completion_trigger": "manual_cli",
+      "duration_minutes": 494
+    },
+    {
+      "session_id": "unknown-20251120-1433",
+      "author": "unknown",
+      "started": "2025-11-20T14:33:19.806463",
+      "last_activity": "2025-11-20T14:33:19.806463",
+      "prs": [],
+      "total_files_changed": 0,
+      "test_files_added": 0,
+      "status": "completed",
+      "completed": "2025-11-20T14:35:14.206673",
+      "completion_trigger": "manual_cli",
+      "duration_minutes": 1
+    },
+    {
+      "session_id": "unknown-20251120-1435",
+      "author": "unknown",
+      "started": "2025-11-20T14:35:14.468495",
+      "last_activity": "2025-11-20T14:35:14.468495",
+      "prs": [],
+      "total_files_changed": 0,
+      "test_files_added": 0,
+      "status": "completed",
+      "completed": "2025-11-20T14:36:39.694889",
+      "completion_trigger": "manual_cli",
+      "duration_minutes": 1
     }
   ],
   "version": "1.0",
-  "last_updated": "2025-11-20T06:18:40.709407"
+  "last_updated": "2025-11-20T14:36:39.880163"
 }
