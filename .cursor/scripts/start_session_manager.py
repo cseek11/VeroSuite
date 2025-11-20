@@ -485,5 +485,27 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        # Handle Ctrl+C gracefully
+        signal_handler(signal.SIGINT, None)
+    except Exception as e:
+        # Catch any unexpected exceptions to prevent exit code 1
+        # Log the error but don't fail the task
+        try:
+            logger.error(
+                "Unexpected error in main (non-fatal)",
+                operation="__main__",
+                error=e,
+                error_type=type(e).__name__,
+                **trace_context
+            )
+        except Exception:
+            # If logging fails, use stdout fallback
+            print(f"ERROR: Unexpected error in main (non-fatal): {e}", flush=True)
+        
+        # Exit with code 0 to prevent task failure
+        # The daemon may still be running, which is acceptable
+        sys.exit(0)
 

@@ -71,11 +71,21 @@ class StructuredLogger:
         
         # Add any additional context
         log_entry.update(kwargs)
-        
+
         # Output as JSON to stderr (structured format)
-        json.dump(log_entry, sys.stderr, indent=None, separators=(',', ':'))
-        sys.stderr.write('\n')
-        sys.stderr.flush()
+        # Wrap in try/except to prevent crashes if JSON serialization fails
+        try:
+            json.dump(log_entry, sys.stderr, indent=None, separators=(',', ':'))    
+            sys.stderr.write('\n')
+            sys.stderr.flush()
+        except (TypeError, ValueError, OSError, BrokenPipeError) as e:
+            # If JSON serialization fails or stderr is closed, fallback to simple print
+            # This prevents the script from crashing due to logging issues
+            try:
+                print(f"[{severity.upper()}] {self.context}: {message}", file=sys.stderr, flush=True)
+            except Exception:
+                # If even print fails, silently ignore (prevents cascading failures)
+                pass
     
     def info(self, message: str, operation: str, error: Optional[Exception] = None, **kwargs) -> None:
         """Log info message."""
