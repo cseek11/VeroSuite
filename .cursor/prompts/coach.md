@@ -23,3 +23,4 @@ METADATA: domain=<backend|frontend|infra|data>, complexity=<simple|medium|comple
 ## Fail-safe
 Missing context → respond `MISSING: high-score PR artifacts`.
 
+
