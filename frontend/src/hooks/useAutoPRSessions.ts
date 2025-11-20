@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { logger } from '@/utils/logger';
+import { useAuthStore } from '@/stores/auth';
 
 // Types
 export interface ScoreBreakdown {
@@ -62,10 +63,17 @@ export const useAutoPRSessions = () => {
       setLoading(true);
       setError(null);
 
+      // Get auth token from store
+      const token = useAuthStore.getState().token;
+      if (!token) {
+        throw new Error('Authentication required. Please log in.');
+      }
+
       const response = await fetch('/api/v1/sessions', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         credentials: 'include', // Include cookies for authentication
       });
@@ -131,10 +139,17 @@ export const useAutoPRSessions = () => {
 
   const completeSession = async (sessionId: string) => {
     try {
+      // Get auth token from store
+      const token = useAuthStore.getState().token;
+      if (!token) {
+        throw new Error('Authentication required. Please log in.');
+      }
+
       const response = await fetch(`/api/v1/sessions/${sessionId}/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         credentials: 'include', // Include cookies for authentication
       });
