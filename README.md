@@ -78,6 +78,8 @@ The system has been fully implemented with:
 
 See [Documentation Contributing Guide](docs/CONTRIBUTING.md) for how to contribute to documentation.
 
+<!-- Test PR: Verifying REWARD_SCORE CI automation system -->
+
 ---
 
 For complete documentation, see the [Documentation Hub](docs/README.md).
