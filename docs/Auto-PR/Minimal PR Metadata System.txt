@@ -1,0 +1,435 @@
+#!/usr/bin/env python3
+"""
+Minimal PR Metadata System
+Stores session data in .cursor/data/session_state.json instead of PR body.
+Keeps PR bodies clean while maintaining full session tracking.
+
+Benefits:
+- Clean PR history (no metadata bloat)
+- Faster PR body parsing
+- Easy bulk operations on session data
+- Better git history
+- Backward compatible with existing system
+"""
+
+import json
+from pathlib import Path
+from typing import Dict, Optional, List
+from datetime import datetime
+
+# File paths
+SESSION_STATE_FILE = Path(".cursor/data/session_state.json")
+SESSION_DATA_FILE = Path("docs/metrics/auto_pr_sessions.json")
+
+# Minimal marker for PR bodies (optional, for user reference only)
+MINIMAL_MARKER_TEMPLATE = """
+<!-- 🤖 Auto-PR: Session {session_id} -->
+"""
+
+
+class SessionStateManager:
+    """
+    Manages session state with minimal PR body footprint.
+    
+    Uses .cursor/data/session_state.json as source of truth.
+    PR bodies only get minimal comment markers for user reference.
+    """
+    
+    def __init__(self, state_file: Path = SESSION_STATE_FILE):
+        self.state_file = state_file
+        self.state = self.load_state()
+    
+    def load_state(self) -> Dict:
+        """Load session state from file."""
+        if self.state_file.exists():
+            with open(self.state_file, 'r') as f:
+                return json.load(f)
+        
+        return {
+            "version": "1.0",
+            "last_updated": datetime.now().isoformat(),
+            "pr_to_session": {},  # pr_number -> session_id
+            "session_to_prs": {},  # session_id -> [pr_numbers]
+            "session_metadata": {}  # session_id -> metadata
+        }
+    
+    def save_state(self):
+        """Persist state to file."""
+        self.state["last_updated"] = datetime.now().isoformat()
+        self.state_file.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(self.state_file, 'w') as f:
+            json.dump(self.state, f, indent=2)
+    
+    def register_pr(
+        self, 
+        pr_number: str, 
+        session_id: str,
+        metadata: Optional[Dict] = None
+    ):
+        """
+        Register PR with session without modifying PR body.
+        
+        Args:
+            pr_number: PR number (e.g., "326")
+            session_id: Session ID
+            metadata: Optional metadata (author, timestamp, etc.)
+        """
+        # Link PR to session
+        self.state["pr_to_session"][pr_number] = session_id
+        
+        # Add PR to session's PR list
+        if session_id not in self.state["session_to_prs"]:
+            self.state["session_to_prs"][session_id] = []
+        
+        if pr_number not in self.state["session_to_prs"][session_id]:
+            self.state["session_to_prs"][session_id].append(pr_number)
+        
+        # Store session metadata if provided
+        if metadata and session_id not in self.state["session_metadata"]:
+            self.state["session_metadata"][session_id] = metadata
+        
+        self.save_state()
+    
+    def get_session_for_pr(self, pr_number: str) -> Optional[str]:
+        """Get session ID for a given PR."""
+        return self.state["pr_to_session"].get(pr_number)
+    
+    def get_prs_for_session(self, session_id: str) -> List[str]:
+        """Get all PRs in a session."""
+        return self.state["session_to_prs"].get(session_id, [])
+    
+    def get_session_metadata(self, session_id: str) -> Optional[Dict]:
+        """Get metadata for a session."""
+        return self.state["session_metadata"].get(session_id)
+    
+    def remove_pr(self, pr_number: str):
+        """Remove PR from session tracking."""
+        session_id = self.state["pr_to_session"].pop(pr_number, None)
+        
+        if session_id and session_id in self.state["session_to_prs"]:
+            prs = self.state["session_to_prs"][session_id]
+            if pr_number in prs:
+                prs.remove(pr_number)
+            
+            # Clean up empty sessions
+            if not prs:
+                self.state["session_to_prs"].pop(session_id, None)
+                self.state["session_metadata"].pop(session_id, None)
+        
+        self.save_state()
+    
+    def clear_session(self, session_id: str):
+        """Clear all data for a session."""
+        # Remove all PRs from session
+        prs = self.state["session_to_prs"].pop(session_id, [])
+        
+        for pr in prs:
+            self.state["pr_to_session"].pop(pr, None)
+        
+        # Remove metadata
+        self.state["session_metadata"].pop(session_id, None)
+        
+        self.save_state()
+    
+    def get_minimal_pr_marker(self, session_id: str) -> str:
+        """
+        Generate minimal HTML comment for PR body.
+        
+        This is optional and only for user visibility.
+        The actual tracking is in session_state.json.
+        """
+        return MINIMAL_MARKER_TEMPLATE.format(session_id=session_id)
+
+
+# Integration with existing auto_pr_session_manager.py
+class MinimalMetadataSessionManager:
+    """
+    Modified AutoPRSessionManager that uses minimal PR metadata.
+    
+    Drop-in replacement for AutoPRSessionManager with identical API
+    but stores data in session_state.json instead of PR bodies.
+    """
+    
+    def __init__(self):
+        from auto_pr_session_manager import AutoPRSessionManager
+        
+        # Keep existing session manager for backward compatibility
+        self.session_manager = AutoPRSessionManager()
+        
+        # Add state manager for minimal metadata
+        self.state_manager = SessionStateManager()
+    
+    def add_to_session(
+        self, 
+        pr_number: str,
+        pr_data: Dict,
+        session_id: Optional[str] = None
+    ) -> tuple[bool, str, Dict]:
+        """
+        Add PR to session with minimal metadata.
+        
+        Returns:
+            (should_skip_scoring, session_id, session_data)
+        """
+        # Use existing logic to determine session
+        should_skip, session_id, session_data = self.session_manager.add_to_session(
+            pr_number,
+            pr_data,
+            session_id
+        )
+        
+        # Register in state manager (minimal storage)
+        self.state_manager.register_pr(
+            pr_number,
+            session_id,
+            metadata={
+                "author": pr_data.get("author"),
+                "timestamp": pr_data.get("timestamp"),
+                "title": pr_data.get("pr_title", "")[:100]  # Truncated
+            }
+        )
+        
+        return should_skip, session_id, session_data
+    
+    def generate_session_metadata(self, session_id: str) -> str:
+        """
+        Generate minimal metadata for PR body.
+        
+        Instead of full metadata block, just returns a minimal HTML comment.
+        """
+        return self.state_manager.get_minimal_pr_marker(session_id)
+
+
+# Modified cursor_session_hook.py functions
+def format_session_metadata_minimal(session_id: str, pr_title: str) -> tuple[str, str]:
+    """
+    Format PR title and body with minimal session metadata.
+    
+    Returns:
+        (updated_title, minimal_metadata_block)
+    """
+    # Add emoji prefix if not present
+    if not pr_title.startswith("🤖") and not pr_title.startswith("auto-pr:"):
+        pr_title = f"🤖 {pr_title}"
+    
+    # Minimal HTML comment (won't show in rendered PR)
+    metadata_block = f"\n<!-- 🤖 Auto-PR: Session {session_id} -->"
+    
+    return pr_title, metadata_block
+
+
+# GitHub Actions workflow integration
+def extract_session_id_from_state(pr_number: str) -> Optional[str]:
+    """
+    Extract session ID from state file instead of parsing PR body.
+    
+    Use in GitHub Actions workflow:
+    ```bash
+    SESSION_ID=$(python -c "
+    from minimal_metadata_system import extract_session_id_from_state
+    print(extract_session_id_from_state('$PR_NUMBER'))
+    ")
+    ```
+    """
+    state_manager = SessionStateManager()
+    return state_manager.get_session_for_pr(pr_number)
+
+
+# Migration tool for existing PRs with full metadata
+def migrate_to_minimal_metadata():
+    """
+    Migrate existing PRs from full metadata to minimal system.
+    
+    Run once to:
+    1. Extract session data from PR bodies
+    2. Store in session_state.json
+    3. Optionally clean up PR bodies
+    """
+    from auto_pr_session_manager import AutoPRSessionManager
+    import re
+    
+    session_manager = AutoPRSessionManager()
+    state_manager = SessionStateManager()
+    
+    print("🔄 Migrating to minimal metadata system...")
+    
+    # Load existing sessions
+    sessions = session_manager.sessions
+    migrated_count = 0
+    
+    # Migrate active sessions
+    for session_id, session_data in sessions.get("active_sessions", {}).items():
+        for pr_number in session_data.get("prs", []):
+            state_manager.register_pr(
+                pr_number,
+                session_id,
+                metadata={
+                    "author": session_data.get("author"),
+                    "timestamp": session_data.get("last_activity"),
+                    "title": f"Session {session_id}"
+                }
+            )
+            migrated_count += 1
+    
+    # Migrate completed sessions
+    for session in sessions.get("completed_sessions", []):
+        session_id = session.get("session_id")
+        for pr_number in session.get("prs", []):
+            state_manager.register_pr(
+                pr_number,
+                session_id,
+                metadata={
+                    "author": session.get("author"),
+                    "timestamp": session.get("completed"),
+                    "title": f"Completed session {session_id}"
+                }
+            )
+            migrated_count += 1
+    
+    print(f"✅ Migrated {migrated_count} PRs to minimal metadata system")
+    print(f"   State file: {SESSION_STATE_FILE}")
+    print(f"   Size: {SESSION_STATE_FILE.stat().st_size if SESSION_STATE_FILE.exists() else 0} bytes")
+    
+    return migrated_count
+
+
+# Comparison: Before vs After
+def compare_metadata_footprint():
+    """
+    Compare metadata footprint: full vs minimal.
+    """
+    session_id = "user1-20251119-1430"
+    
+    # Full metadata (old system)
+    full_metadata = f"""
+
+---
+[cursor-session: {session_id}]
+<!-- Auto-PR Session Tracking -->
+<!-- To complete this session: add [ready] to title or comment /complete-session -->
+<!-- Session metadata: -->
+<!-- - Author: alice -->
+<!-- - Started: 2025-11-19T14:30:00 -->
+<!-- - PRs in session: 3 -->
+<!-- - Files changed: 12 -->
+<!-- - Tests added: 2 -->
+"""
+    
+    # Minimal metadata (new system)
+    minimal_metadata = f"\n<!-- 🤖 Auto-PR: Session {session_id} -->"
+    
+    print("📊 Metadata Footprint Comparison\n")
+    print(f"Full metadata:    {len(full_metadata)} bytes")
+    print(f"Minimal metadata: {len(minimal_metadata)} bytes")
+    print(f"Reduction:        {len(full_metadata) - len(minimal_metadata)} bytes ({(1 - len(minimal_metadata)/len(full_metadata))*100:.1f}%)")
+    print(f"\nFor 100 PRs:      {(len(full_metadata) - len(minimal_metadata)) * 100 / 1024:.1f} KB saved")
+
+
+# CLI commands for state management
+def cli_state_status():
+    """Show state file statistics."""
+    state_manager = SessionStateManager()
+    
+    print("📊 Session State Status\n")
+    print(f"State file: {SESSION_STATE_FILE}")
+    print(f"Total PRs tracked: {len(state_manager.state['pr_to_session'])}")
+    print(f"Active sessions: {len(state_manager.state['session_to_prs'])}")
+    
+    if SESSION_STATE_FILE.exists():
+        size_kb = SESSION_STATE_FILE.stat().st_size / 1024
+        print(f"File size: {size_kb:.2f} KB")
+    
+    print("\nSession breakdown:")
+    for session_id, prs in state_manager.state["session_to_prs"].items():
+        print(f"  {session_id}: {len(prs)} PRs")
+
+
+def cli_state_export():
+    """Export state to human-readable format."""
+    state_manager = SessionStateManager()
+    
+    output = {
+        "summary": {
+            "total_prs": len(state_manager.state["pr_to_session"]),
+            "active_sessions": len(state_manager.state["session_to_prs"]),
+            "last_updated": state_manager.state.get("last_updated")
+        },
+        "sessions": []
+    }
+    
+    for session_id, prs in state_manager.state["session_to_prs"].items():
+        metadata = state_manager.get_session_metadata(session_id)
+        output["sessions"].append({
+            "session_id": session_id,
+            "prs": prs,
+            "pr_count": len(prs),
+            "author": metadata.get("author") if metadata else None
+        })
+    
+    print(json.dumps(output, indent=2))
+
+
+def cli_state_cleanup():
+    """Clean up orphaned entries in state."""
+    state_manager = SessionStateManager()
+    
+    print("🧹 Cleaning up state file...")
+    
+    # Find PRs without sessions
+    orphaned_prs = []
+    for pr, session_id in list(state_manager.state["pr_to_session"].items()):
+        if session_id not in state_manager.state["session_to_prs"]:
+            orphaned_prs.append(pr)
+            del state_manager.state["pr_to_session"][pr]
+    
+    # Find sessions without PRs
+    empty_sessions = []
+    for session_id, prs in list(state_manager.state["session_to_prs"].items()):
+        if not prs:
+            empty_sessions.append(session_id)
+            del state_manager.state["session_to_prs"][session_id]
+            state_manager.state["session_metadata"].pop(session_id, None)
+    
+    state_manager.save_state()
+    
+    print(f"✅ Cleanup complete")
+    print(f"   Removed {len(orphaned_prs)} orphaned PRs")
+    print(f"   Removed {len(empty_sessions)} empty sessions")
+
+
+# Main CLI
+if __name__ == "__main__":
+    import sys
+    
+    if len(sys.argv) < 2:
+        print("""
+Minimal PR Metadata System
+
+Commands:
+  compare    - Compare full vs minimal metadata footprint
+  migrate    - Migrate existing PRs to minimal system
+  status     - Show state file status
+  export     - Export state to JSON
+  cleanup    - Clean up orphaned entries
+  
+Usage:
+  python minimal_metadata_system.py <command>
+        """)
+        sys.exit(0)
+    
+    command = sys.argv[1]
+    
+    if command == "compare":
+        compare_metadata_footprint()
+    elif command == "migrate":
+        migrate_to_minimal_metadata()
+    elif command == "status":
+        cli_state_status()
+    elif command == "export":
+        cli_state_export()
+    elif command == "cleanup":
+        cli_state_cleanup()
+    else:
+        print(f"❌ Unknown command: {command}")
+        sys.exit(1)

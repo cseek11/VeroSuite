@@ -1,0 +1,222 @@
+name: Auto-PR Session Manager
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  issue_comment:
+    types: [created]
+  schedule:
+    # Cleanup orphaned sessions daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  session-check:
+    name: Check and Manage PR Session
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip_scoring: ${{ steps.session_check.outputs.skip }}
+      session_id: ${{ steps.session_check.outputs.session_id }}
+      
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+      
+      - name: Check if Auto-PR
+        id: session_check
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          FILES_CHANGED: ${{ github.event.pull_request.changed_files }}
+        run: |
+          python .cursor/scripts/auto_pr_session_manager.py check \
+            --pr-number "$PR_NUMBER" \
+            --title "$PR_TITLE" \
+            --body "$PR_BODY" \
+            --author "$PR_AUTHOR" \
+            --files "$FILES_CHANGED" > check_result.json
+          
+          # Parse result
+          IS_AUTO=$(jq -r '.is_auto_pr' check_result.json)
+          SESSION_ID=$(jq -r '.session_id' check_result.json)
+          
+          echo "skip=$IS_AUTO" >> "$GITHUB_OUTPUT"
+          echo "session_id=$SESSION_ID" >> "$GITHUB_OUTPUT"
+          
+          if [ "$IS_AUTO" = "true" ]; then
+            echo "📦 Auto-PR detected - adding to session $SESSION_ID"
+          else
+            echo "📊 Regular PR - will score normally"
+          fi
+      
+      - name: Add Session Metadata Comment
+        if: steps.session_check.outputs.skip == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sessionId = '${{ steps.session_check.outputs.session_id }}';
+            const comment = `🤖 **Auto-PR Session Manager**
+            
+            This PR has been added to session: \`${sessionId}\`
+            
+            To complete this session and trigger scoring:
+            - Add \`[ready]\` or \`ready for review\` to PR title/description
+            - Comment \`/complete-session\` on this PR
+            - Wait 30 minutes (automatic timeout)
+            
+            Current session status: Check the [Session Dashboard](https://github.com/${{ github.repository }}/actions/workflows/auto_pr_session_manager.yml)`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+      
+      - name: Commit session data
+        if: steps.session_check.outputs.skip == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/metrics/auto_pr_sessions.json
+          git commit -m "📦 Update auto-PR session data [skip ci]" || echo "No changes to commit"
+          git push || echo "Nothing to push"
+  
+  manual-complete:
+    name: Manual Session Completion
+    if: |
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/complete-session')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install pyyaml
+      
+      - name: Extract Session ID
+        id: extract
+        run: |
+          PR_BODY="${{ github.event.issue.body }}"
+          SESSION_ID=$(echo "$PR_BODY" | grep -oP '\[cursor-session:\s*\K[\w-]+' | head -1)
+          
+          if [ -z "$SESSION_ID" ]; then
+            echo "❌ No session ID found in PR body"
+            exit 1
+          fi
+          
+          echo "session_id=$SESSION_ID" >> "$GITHUB_OUTPUT"
+          echo "Found session: $SESSION_ID"
+      
+      - name: Complete Session
+        id: complete
+        run: |
+          python .cursor/scripts/auto_pr_session_manager.py complete \
+            --session-id "${{ steps.extract.outputs.session_id }}" > completed_session.json
+          
+          echo "✅ Session completed successfully"
+          cat completed_session.json
+      
+      - name: Trigger Reward Score
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const sessionData = JSON.parse(fs.readFileSync('completed_session.json', 'utf8'));
+            
+            const comment = `✅ **Session Completed**
+            
+            Session \`${sessionData.session_id}\` has been completed manually.
+            
+            **Summary:**
+            - PRs: ${sessionData.prs.join(', ')}
+            - Duration: ${sessionData.duration_minutes} minutes
+            - Files changed: ${sessionData.total_files_changed}
+            - Tests added: ${sessionData.test_files_added}
+            
+            Reward score computation has been triggered.`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+      
+      - name: Commit session data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/metrics/auto_pr_sessions.json
+          git commit -m "✅ Complete session ${{ steps.extract.outputs.session_id }} [skip ci]"
+          git push
+  
+  cleanup-orphaned:
+    name: Cleanup Orphaned Sessions
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install pyyaml
+      
+      - name: Cleanup Orphaned Sessions
+        run: |
+          python .cursor/scripts/auto_pr_session_manager.py cleanup --max-age 24 > cleanup_result.json
+          
+          echo "Cleanup completed:"
+          cat cleanup_result.json
+      
+      - name: Commit session data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/metrics/auto_pr_sessions.json
+          git commit -m "🧹 Cleanup orphaned sessions [skip ci]" || echo "No changes"
+          git push || echo "Nothing to push"
+      
+      - name: Create Summary
+        run: |
+          COMPLETED=$(jq -r '.completed | length' cleanup_result.json)
+          echo "### 🧹 Session Cleanup Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Completed $COMPLETED orphaned sessions" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$COMPLETED" -gt 0 ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Sessions cleaned up:" >> $GITHUB_STEP_SUMMARY
+            jq -r '.completed[]' cleanup_result.json | while read session; do
+              echo "- $session" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+

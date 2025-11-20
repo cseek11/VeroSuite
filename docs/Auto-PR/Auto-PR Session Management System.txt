@@ -1,0 +1,426 @@
+import React, { useState, useEffect } from 'react';
+import { Activity, CheckCircle, Clock, GitPullRequest, Users, TrendingUp, XCircle, PlayCircle, StopCircle } from 'lucide-react';
+
+const AutoPRSessionManager = () => {
+  const [sessions, setSessions] = useState({
+    active_sessions: {},
+    completed_sessions: []
+  });
+  const [stats, setStats] = useState({
+    totalSessions: 0,
+    activeSessions: 0,
+    avgSessionDuration: 0,
+    avgPRsPerSession: 0,
+    completionRate: 0
+  });
+  const [selectedSession, setSelectedSession] = useState(null);
+  const [view, setView] = useState('dashboard');
+
+  // Load session data
+  useEffect(() => {
+    loadSessions();
+    const interval = setInterval(loadSessions, 30000); // Refresh every 30s
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadSessions = async () => {
+    // In production, this would fetch from your API
+    const mockData = generateMockData();
+    setSessions(mockData);
+    calculateStats(mockData);
+  };
+
+  const generateMockData = () => {
+    const now = new Date();
+    return {
+      active_sessions: {
+        'user1-20251119-1430': {
+          author: 'alice',
+          started: new Date(now - 25 * 60000).toISOString(),
+          last_activity: new Date(now - 5 * 60000).toISOString(),
+          prs: ['#326', '#327', '#328'],
+          total_files_changed: 12,
+          test_files_added: 2,
+          status: 'active'
+        },
+        'user2-20251119-1500': {
+          author: 'bob',
+          started: new Date(now - 45 * 60000).toISOString(),
+          last_activity: new Date(now - 35 * 60000).toISOString(),
+          prs: ['#329'],
+          total_files_changed: 3,
+          test_files_added: 0,
+          status: 'idle'
+        }
+      },
+      completed_sessions: [
+        {
+          session_id: 'user1-20251119-1200',
+          author: 'alice',
+          started: new Date(now - 180 * 60000).toISOString(),
+          completed: new Date(now - 120 * 60000).toISOString(),
+          prs: ['#320', '#321', '#322', '#323'],
+          total_files_changed: 24,
+          test_files_added: 3,
+          final_score: 5.5,
+          duration_minutes: 60
+        },
+        {
+          session_id: 'user3-20251119-0900',
+          author: 'charlie',
+          started: new Date(now - 360 * 60000).toISOString(),
+          completed: new Date(now - 300 * 60000).toISOString(),
+          prs: ['#315', '#316'],
+          total_files_changed: 8,
+          test_files_added: 1,
+          final_score: 2.0,
+          duration_minutes: 60
+        }
+      ]
+    };
+  };
+
+  const calculateStats = (data) => {
+    const active = Object.keys(data.active_sessions).length;
+    const completed = data.completed_sessions.length;
+    const total = active + completed;
+
+    const avgDuration = completed > 0
+      ? data.completed_sessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) / completed
+      : 0;
+
+    const avgPRs = completed > 0
+      ? data.completed_sessions.reduce((sum, s) => sum + s.prs.length, 0) / completed
+      : 0;
+
+    const completionRate = total > 0 ? (completed / total) * 100 : 0;
+
+    setStats({
+      totalSessions: total,
+      activeSessions: active,
+      avgSessionDuration: avgDuration,
+      avgPRsPerSession: avgPRs,
+      completionRate: completionRate
+    });
+  };
+
+  const completeSession = (sessionId) => {
+    // In production, this would call your API
+    console.log(`Completing session: ${sessionId}`);
+    alert(`Session ${sessionId} marked as complete. Score will be computed.`);
+    loadSessions();
+  };
+
+  const getSessionStatus = (session) => {
+    const lastActivity = new Date(session.last_activity);
+    const now = new Date();
+    const minutesIdle = (now - lastActivity) / 60000;
+
+    if (minutesIdle > 30) return 'idle';
+    if (minutesIdle > 15) return 'warning';
+    return 'active';
+  };
+
+  const formatDuration = (startTime, endTime = new Date()) => {
+    const start = new Date(startTime);
+    const end = typeof endTime === 'string' ? new Date(endTime) : endTime;
+    const minutes = Math.floor((end - start) / 60000);
+    
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours}h ${mins}m`;
+  };
+
+  const DashboardView = () => (
+    <div className="space-y-6">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Total Sessions</p>
+              <p className="text-3xl font-bold text-gray-900">{stats.totalSessions}</p>
+            </div>
+            <Activity className="text-blue-500" size={32} />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Active Sessions</p>
+              <p className="text-3xl font-bold text-gray-900">{stats.activeSessions}</p>
+            </div>
+            <PlayCircle className="text-green-500" size={32} />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Avg Duration</p>
+              <p className="text-3xl font-bold text-gray-900">{stats.avgSessionDuration.toFixed(0)}m</p>
+            </div>
+            <Clock className="text-purple-500" size={32} />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Completion Rate</p>
+              <p className="text-3xl font-bold text-gray-900">{stats.completionRate.toFixed(0)}%</p>
+            </div>
+            <TrendingUp className="text-orange-500" size={32} />
+          </div>
+        </div>
+      </div>
+
+      {/* Active Sessions */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <PlayCircle size={24} className="text-green-500" />
+            Active Sessions
+          </h2>
+        </div>
+        <div className="divide-y divide-gray-200">
+          {Object.entries(sessions.active_sessions).map(([id, session]) => {
+            const status = getSessionStatus(session);
+            const statusColors = {
+              active: 'bg-green-100 text-green-800',
+              warning: 'bg-yellow-100 text-yellow-800',
+              idle: 'bg-gray-100 text-gray-800'
+            };
+
+            return (
+              <div key={id} className="px-6 py-4 hover:bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="font-semibold text-gray-900">{id}</span>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${statusColors[status]}`}>
+                        {status}
+                      </span>
+                      <span className="text-sm text-gray-600">by {session.author}</span>
+                    </div>
+                    <div className="flex items-center gap-6 text-sm text-gray-600">
+                      <span className="flex items-center gap-1">
+                        <GitPullRequest size={16} />
+                        {session.prs.length} PRs: {session.prs.join(', ')}
+                      </span>
+                      <span>{session.total_files_changed} files</span>
+                      <span>{session.test_files_added} tests</span>
+                      <span className="flex items-center gap-1">
+                        <Clock size={16} />
+                        {formatDuration(session.started)}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => completeSession(id)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2"
+                  >
+                    <CheckCircle size={16} />
+                    Complete
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+          {Object.keys(sessions.active_sessions).length === 0 && (
+            <div className="px-6 py-8 text-center text-gray-500">
+              No active sessions
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Recent Completed Sessions */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <CheckCircle size={24} className="text-green-500" />
+            Recently Completed
+          </h2>
+        </div>
+        <div className="divide-y divide-gray-200">
+          {sessions.completed_sessions.slice(0, 5).map((session) => (
+            <div key={session.session_id} className="px-6 py-4 hover:bg-gray-50">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="font-semibold text-gray-900">{session.session_id}</span>
+                    <span className="text-sm text-gray-600">by {session.author}</span>
+                    <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+                      Score: {session.final_score}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-6 text-sm text-gray-600">
+                    <span className="flex items-center gap-1">
+                      <GitPullRequest size={16} />
+                      {session.prs.length} PRs
+                    </span>
+                    <span>{session.total_files_changed} files</span>
+                    <span>{session.test_files_added} tests</span>
+                    <span className="flex items-center gap-1">
+                      <Clock size={16} />
+                      {formatDuration(session.started, session.completed)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const AnalyticsView = () => {
+    const sessionsByAuthor = [...sessions.completed_sessions].reduce((acc, session) => {
+      if (!acc[session.author]) {
+        acc[session.author] = { count: 0, totalScore: 0, totalPRs: 0 };
+      }
+      acc[session.author].count++;
+      acc[session.author].totalScore += session.final_score || 0;
+      acc[session.author].totalPRs += session.prs.length;
+      return acc;
+    }, {});
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-lg shadow">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900">Author Performance</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Author</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sessions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total PRs</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg Score</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">PRs/Session</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {Object.entries(sessionsByAuthor).map(([author, data]) => (
+                  <tr key={author} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{author}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{data.count}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{data.totalPRs}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {(data.totalScore / data.count).toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {(data.totalPRs / data.count).toFixed(1)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Session Duration Distribution</h3>
+            <div className="space-y-3">
+              {[
+                { range: '< 30 min', count: 5, color: 'bg-green-500' },
+                { range: '30-60 min', count: 8, color: 'bg-blue-500' },
+                { range: '60-90 min', count: 3, color: 'bg-yellow-500' },
+                { range: '> 90 min', count: 1, color: 'bg-red-500' }
+              ].map((item) => (
+                <div key={item.range}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-gray-600">{item.range}</span>
+                    <span className="text-sm font-medium text-gray-900">{item.count}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`${item.color} h-2 rounded-full`}
+                      style={{ width: `${(item.count / 17) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Completion Triggers</h3>
+            <div className="space-y-3">
+              {[
+                { trigger: 'Manual', count: 12, color: 'bg-blue-500' },
+                { trigger: 'Timeout', count: 3, color: 'bg-yellow-500' },
+                { trigger: 'Tests + Docs', count: 2, color: 'bg-green-500' }
+              ].map((item) => (
+                <div key={item.trigger}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-gray-600">{item.trigger}</span>
+                    <span className="text-sm font-medium text-gray-900">{item.count}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`${item.color} h-2 rounded-full`}
+                      style={{ width: `${(item.count / 17) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <div className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <GitPullRequest size={28} className="text-blue-600" />
+              Auto-PR Session Manager
+            </h1>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setView('dashboard')}
+                className={`px-4 py-2 rounded ${
+                  view === 'dashboard'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => setView('analytics')}
+                className={`px-4 py-2 rounded ${
+                  view === 'analytics'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Analytics
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {view === 'dashboard' ? <DashboardView /> : <AnalyticsView />}
+      </div>
+    </div>
+  );
+};
+
+export default AutoPRSessionManager;

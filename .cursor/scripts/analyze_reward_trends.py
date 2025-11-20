@@ -189,14 +189,34 @@ def get_recent_scores(data: Dict, count: int = 10) -> List[Dict]:
     scores = data.get("scores", [])
     if not scores:
         return []
-    
+
+    # Filter out skipped PRs (session-batched PRs that haven't been scored yet)
+    # Only include scores that have a valid score value and are not skipped
+    skipped_count = sum(1 for score in scores if score.get("skipped", False) or score.get("score") is None)
+    valid_scores = [
+        score for score in scores
+        if not score.get("skipped", False) and score.get("score") is not None
+    ]
+
+    if skipped_count > 0:
+        logger.debug(
+            f"Filtered out {skipped_count} skipped/incomplete scores from analysis",
+            operation="get_recent_scores",
+            total_scores=len(scores),
+            valid_scores=len(valid_scores),
+            skipped_count=skipped_count
+        )
+
+    if not valid_scores:
+        return []
+
     # Sort by timestamp (most recent first)
     sorted_scores = sorted(
-        scores,
+        valid_scores,
         key=lambda x: x.get("timestamp", ""),
         reverse=True
     )
-    
+
     return sorted_scores[:count]
 
 

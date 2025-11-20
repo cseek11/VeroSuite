@@ -84,11 +84,35 @@ jobs:
           
           analysis = analysis_path.read_text()
           
+          # Check if this is a session-completed score
+          session_context = ""
+          try:
+              import json
+              import os
+              # Get PR number from environment
+              pr_num = os.environ.get("PR_NUM", "")
+              if pr_num:
+                  # Try to get session info from reward_scores.json
+                  reward_scores_path = pathlib.Path("docs/metrics/reward_scores.json")
+                  if reward_scores_path.exists():
+                      reward_scores = json.loads(reward_scores_path.read_text())
+                      scores = reward_scores.get("scores", [])
+                      # Find most recent score for this PR
+                      for score in reversed(scores):
+                          if str(score.get("pr", "")) == pr_num:
+                              session_id = score.get("metadata", {}).get("session_id")
+                              if session_id:
+                                  session_context = f"\n**Session Context:** This PR is part of session `{session_id}`. Score represents the entire session.\n"
+                              break
+          except Exception:
+              # Non-fatal: continue without session context
+              pass
+
           # Generate feedback comment
           comment = f"""# Reward Score Feedback Analysis
 
 **Generated:** {datetime.utcnow().isoformat()}Z
-**PR:** #{pathlib.Path().cwd().name}
+**PR:** #{pathlib.Path().cwd().name}{session_context}
 
 ## Historical Performance Analysis
 
@@ -161,6 +185,7 @@ See `.cursor/rules.md` - REWARD SCORE IMPROVEMENT RULE for enforcement details.
           name: reward-feedback
           path: feedback/
           retention-days: 30
+
 
 
 
