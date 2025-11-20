@@ -97,27 +97,19 @@ export const useAutoPRSessions = () => {
       const data = await response.json();
       setSessions(data);
       logger.info('Session data loaded successfully', {
-        context: 'useAutoPRSessions',
         activeCount: Object.keys(data.active_sessions || {}).length,
         completedCount: (data.completed_sessions || []).length,
-      });
+      }, 'useAutoPRSessions');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load sessions';
       
       // Check if it's a network error (backend not running)
       if (err instanceof TypeError && err.message.includes('fetch')) {
         const networkError = 'Cannot connect to backend API. Please ensure the backend server is running on http://localhost:3001';
-        logger.error('Failed to fetch session data - network error', {
-          context: 'useAutoPRSessions',
-          error: networkError,
-          originalError: errorMessage,
-        });
+        logger.error('Failed to fetch session data - network error', new Error(networkError), 'useAutoPRSessions');
         setError(networkError);
       } else {
-        logger.error('Failed to fetch session data', {
-          context: 'useAutoPRSessions',
-          error: errorMessage,
-        });
+        logger.error('Failed to fetch session data', new Error(errorMessage), 'useAutoPRSessions');
         setError(errorMessage);
       }
       
@@ -157,11 +149,11 @@ export const useAutoPRSessions = () => {
         }
       }
 
-      logger.info('Session completed successfully', { sessionId });
+      logger.info('Session completed successfully', { sessionId }, 'useAutoPRSessions');
       await fetchSessions(); // Reload after completion
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to complete session';
-      logger.error('Failed to complete session', { error: errorMessage, sessionId });
+      logger.error('Failed to complete session', new Error(errorMessage), 'useAutoPRSessions');
       throw new Error(errorMessage);
     }
   };
