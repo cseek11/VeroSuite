@@ -50,8 +50,29 @@ def get_or_create_session_id(author: Optional[str] = None) -> str:
                     now = datetime.now()
                     
                     if (now - last_updated).total_seconds() < SESSION_TIMEOUT_SECONDS:
-                        # Update timestamp and return existing ID
-                        data["last_updated"] = now.isoformat()
+                        # Check if session uses old "unknown" author and migrate to "cseek_cursor"
+                        existing_session_id = data.get("session_id", "")
+                        existing_author = data.get("author", "unknown")
+                        
+                        if existing_author == "unknown" and "unknown-" in existing_session_id:
+                            # Migrate old "unknown" session to "cseek_cursor"
+                            logger.info(
+                                "Migrating session from 'unknown' to 'cseek_cursor'",
+                                operation="get_or_create_session_id",
+                                old_session_id=existing_session_id,
+                                **trace_context
+                            )
+                            # Create new session ID with cseek_cursor
+                            timestamp = datetime.now().strftime("%Y%m%d-%H%M")
+                            new_session_id = f"cseek_cursor-{timestamp}"
+                            data["session_id"] = new_session_id
+                            data["author"] = "cseek_cursor"
+                            data["created"] = now.isoformat()
+                            data["last_updated"] = now.isoformat()
+                        else:
+                            # Update timestamp and return existing ID
+                            data["last_updated"] = now.isoformat()
+                        
                         try:
                             with open(SESSION_MARKER_FILE, 'w', encoding='utf-8') as f:
                                 json.dump(data, f, indent=2)
