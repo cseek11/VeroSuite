@@ -47,11 +47,35 @@ export const useAutoPRSessions = () => {
       // const data = await response.json();
       // setSessions(data);
 
-      // Mock data for now
+      // Mock data for now (for development/testing)
+      // TODO: Replace with actual API call: const response = await fetch('/api/sessions');
       const now = new Date();
       const mockData: SessionData = {
-        active_sessions: {},
-        completed_sessions: [],
+        active_sessions: {
+          'user1-20251119-1430': {
+            session_id: 'user1-20251119-1430',
+            author: 'alice',
+            started: new Date(now.getTime() - 25 * 60000).toISOString(),
+            last_activity: new Date(now.getTime() - 5 * 60000).toISOString(),
+            prs: ['#326', '#327', '#328'],
+            total_files_changed: 12,
+            test_files_added: 2,
+            status: 'active',
+          },
+        },
+        completed_sessions: [
+          {
+            session_id: 'user1-20251119-1200',
+            author: 'alice',
+            started: new Date(now.getTime() - 180 * 60000).toISOString(),
+            completed: new Date(now.getTime() - 120 * 60000).toISOString(),
+            prs: ['#320', '#321', '#322', '#323'],
+            total_files_changed: 24,
+            test_files_added: 3,
+            final_score: 5.5,
+            duration_minutes: 60,
+          },
+        ],
       };
       setSessions(mockData);
     } catch (err) {

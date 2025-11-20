@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Activity,
   CheckCircle,
@@ -38,12 +38,7 @@ const AutoPRSessionManager: React.FC = () => {
   });
   const [view, setView] = useState<'dashboard' | 'analytics'>('dashboard');
 
-  // Calculate stats when sessions change
-  useEffect(() => {
-    calculateStats(sessions);
-  }, [sessions]);
-
-  const calculateStats = (data: SessionData) => {
+  const calculateStats = useCallback((data: SessionData) => {
     const active = Object.keys(data.active_sessions).length;
     const completed = data.completed_sessions.length;
     const total = active + completed;
@@ -67,7 +62,12 @@ const AutoPRSessionManager: React.FC = () => {
       avgPRsPerSession: avgPRs,
       completionRate,
     });
-  };
+  }, []);
+
+  // Calculate stats when sessions change
+  useEffect(() => {
+    calculateStats(sessions);
+  }, [sessions, calculateStats]);
 
   const getSessionStatus = (session: Session): 'active' | 'warning' | 'idle' => {
     if (!session.last_activity) return 'idle';
