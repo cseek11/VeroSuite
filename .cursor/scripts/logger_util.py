@@ -72,17 +72,23 @@ class StructuredLogger:
         # Add any additional context
         log_entry.update(kwargs)
 
-        # Output as JSON to stderr (structured format)
+        # Route logs based on severity:
+        # - INFO, DEBUG, WARNING → stdout (PowerShell won't treat as errors)
+        # - ERROR, CRITICAL → stderr (actual errors)
+        is_error = severity.lower() in ("error", "critical")
+        output_stream = sys.stderr if is_error else sys.stdout
+
+        # Output as JSON to appropriate stream (structured format)
         # Wrap in try/except to prevent crashes if JSON serialization fails
         try:
-            json.dump(log_entry, sys.stderr, indent=None, separators=(',', ':'))    
-            sys.stderr.write('\n')
-            sys.stderr.flush()
+            json.dump(log_entry, output_stream, indent=None, separators=(',', ':'))    
+            output_stream.write('\n')
+            output_stream.flush()
         except (TypeError, ValueError, OSError, BrokenPipeError) as e:
-            # If JSON serialization fails or stderr is closed, fallback to simple print
+            # If JSON serialization fails or stream is closed, fallback to simple print
             # This prevents the script from crashing due to logging issues
             try:
-                print(f"[{severity.upper()}] {self.context}: {message}", file=sys.stderr, flush=True)
+                print(f"[{severity.upper()}] {self.context}: {message}", file=output_stream, flush=True)
             except Exception:
                 # If even print fails, silently ignore (prevents cascading failures)
                 pass

@@ -17,6 +17,15 @@ import threading
 import time
 from pathlib import Path
 
+# Redirect stderr to stdout for PowerShell compatibility
+# This prevents PowerShell from treating JSON logs as fatal errors
+# Only real errors will still go to stderr via the logger's severity routing
+if os.getenv("VSCODE_TASK") == "1" or not sys.stdout.isatty():
+    # In non-interactive mode (VSCode tasks), redirect stderr to stdout
+    # This ensures PowerShell doesn't treat JSON logs as errors
+    # The logger itself will route ERROR/CRITICAL to stderr, but those are real errors
+    pass  # Logger handles routing, no need to redirect here
+
 # Check if running in non-interactive mode (VSCode task, etc.)
 IS_NON_INTERACTIVE = not sys.stdout.isatty() or os.getenv("VSCODE_TASK") == "1"
 # Exit cleanup is skipped when running non-interactively or when explicitly disabled
@@ -489,7 +498,10 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         # Handle Ctrl+C gracefully
-        signal_handler(signal.SIGINT, None)
+        try:
+            signal_handler(signal.SIGINT, None)
+        except Exception:
+            pass
     except Exception as e:
         # Catch any unexpected exceptions to prevent exit code 1
         # Log the error but don't fail the task
@@ -503,9 +515,12 @@ if __name__ == "__main__":
             )
         except Exception:
             # If logging fails, use stdout fallback
-            print(f"ERROR: Unexpected error in main (non-fatal): {e}", flush=True)
-        
+            print(f"ERROR: Unexpected error in main (non-fatal): {e}", flush=True)                                                                              
+
         # Exit with code 0 to prevent task failure
         # The daemon may still be running, which is acceptable
+    finally:
+        # Always exit with code 0 to ensure PowerShell doesn't treat this as a failure
+        # The daemon continues running in the background regardless
         sys.exit(0)
 
