@@ -1,6 +1,6 @@
 import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
 import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { existsSync } from 'fs';
 import {
   SessionDataResponseDto,
@@ -47,9 +47,14 @@ interface RawSessionData {
 @Injectable()
 export class SessionsService {
   private readonly logger = new Logger(SessionsService.name);
-  private readonly sessionDataFile = join(process.cwd(), 'docs', 'metrics', 'auto_pr_sessions.json');
-  private readonly stateFile = join(process.cwd(), '.cursor', 'data', 'session_state.json');
-  private readonly rewardScoresFile = join(process.cwd(), 'docs', 'metrics', 'reward_scores.json');
+  // Resolve paths relative to project root
+  // Backend runs from backend/ directory, so we need to go up one level
+  private readonly projectRoot = process.cwd().endsWith('backend') 
+    ? resolve(process.cwd(), '..')
+    : process.cwd();
+  private readonly sessionDataFile = join(this.projectRoot, 'docs', 'metrics', 'auto_pr_sessions.json');
+  private readonly stateFile = join(this.projectRoot, '.cursor', 'data', 'session_state.json');
+  private readonly rewardScoresFile = join(this.projectRoot, 'docs', 'metrics', 'reward_scores.json');
 
   /**
    * Get all sessions (active + completed) with merged score data
