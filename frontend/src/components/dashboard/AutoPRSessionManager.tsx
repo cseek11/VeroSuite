@@ -262,6 +262,20 @@ const AutoPRSessionManager: React.FC = () => {
                     )}
                   </div>
                 </div>
+                <div className="ml-4">
+                  <Button
+                    onClick={() => {
+                      setSelectedSessionForBreakdown(session);
+                      setView('breakdown');
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <BarChart3 size={16} />
+                    View Breakdown
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
