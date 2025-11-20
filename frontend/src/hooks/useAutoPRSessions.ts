@@ -71,26 +71,55 @@ export const useAutoPRSessions = () => {
       });
 
       if (!response.ok) {
+        let errorMessage = `Failed to fetch sessions: ${response.status} ${response.statusText}`;
+        
         if (response.status === 401) {
-          throw new Error('Authentication required. Please log in.');
+          errorMessage = 'Authentication required. Please log in.';
         } else if (response.status === 404) {
-          // API endpoint not found - backend might not be running
-          throw new Error('API endpoint not found. Please ensure the backend server is running.');
-        } else {
-          throw new Error(`Failed to fetch sessions: ${response.status} ${response.statusText}`);
+          errorMessage = 'API endpoint not found. Please ensure the backend server is running on port 3001.';
+        } else if (response.status >= 500) {
+          errorMessage = `Backend server error: ${response.status} ${response.statusText}`;
         }
+        
+        // Try to get error details from response body
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch {
+          // Ignore JSON parse errors
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
       setSessions(data);
       logger.info('Session data loaded successfully', {
+        context: 'useAutoPRSessions',
         activeCount: Object.keys(data.active_sessions || {}).length,
         completedCount: (data.completed_sessions || []).length,
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load sessions';
-      logger.error('Failed to fetch session data', { error: errorMessage });
-      setError(errorMessage);
+      
+      // Check if it's a network error (backend not running)
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        const networkError = 'Cannot connect to backend API. Please ensure the backend server is running on http://localhost:3001';
+        logger.error('Failed to fetch session data - network error', {
+          context: 'useAutoPRSessions',
+          error: networkError,
+          originalError: errorMessage,
+        });
+        setError(networkError);
+      } else {
+        logger.error('Failed to fetch session data', {
+          context: 'useAutoPRSessions',
+          error: errorMessage,
+        });
+        setError(errorMessage);
+      }
       
       // Set empty data on error to allow UI to show error message
       setSessions({
