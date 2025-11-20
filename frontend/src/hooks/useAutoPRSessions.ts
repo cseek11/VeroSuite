@@ -71,26 +71,60 @@ export const useAutoPRSessions = () => {
 
       // Fetch from API endpoint
       // TODO: Replace with actual API endpoint when backend is ready
-      // For now, try to fetch from local session state files or API
       try {
         const response = await fetch('/api/sessions');
         if (!response.ok) {
-          // If API not available, return empty data (will show "No sessions" message)
-          setSessions({
-            active_sessions: {},
-            completed_sessions: [],
-          });
-          return;
+          throw new Error('API endpoint not available');
         }
         const data = await response.json();
         setSessions(data);
       } catch (apiError) {
-        // API endpoint not available yet - return empty data
-        // This allows the component to load and show "No sessions" message
-        setSessions({
-          active_sessions: {},
-          completed_sessions: [],
-        });
+        // API endpoint not available - try to read from reward_scores.json for development
+        // This allows testing the UI with real PR score data
+        try {
+          const scoresResponse = await fetch('/docs/metrics/reward_scores.json');
+          if (scoresResponse.ok) {
+            const scoresData = await scoresResponse.json();
+            // Transform reward scores into session format for testing
+            const testSessions: SessionData = {
+              active_sessions: {},
+              completed_sessions: scoresData.scores
+                ?.slice(0, 5)
+                .map((score: any, index: number) => ({
+                  session_id: `test-session-${score.pr || index}`,
+                  author: 'test-user',
+                  started: new Date(Date.now() - (index + 1) * 60 * 60 * 1000).toISOString(),
+                  completed: new Date(Date.now() - index * 60 * 60 * 1000).toISOString(),
+                  prs: [`#${score.pr || index}`],
+                  total_files_changed: Object.keys(score.file_scores || {}).length,
+                  test_files_added: 0,
+                  final_score: score.score,
+                  duration_minutes: 30,
+                  breakdown: score.breakdown,
+                  file_scores: score.file_scores,
+                  metadata: {
+                    pr: score.pr?.toString(),
+                    computed_at: score.computed_at,
+                  },
+                })) || [],
+            };
+            setSessions(testSessions);
+            logger.info('Loaded test data from reward_scores.json for development', {
+              sessionCount: testSessions.completed_sessions.length,
+            });
+          } else {
+            throw apiError;
+          }
+        } catch (fallbackError) {
+          // If all else fails, return empty data
+          setSessions({
+            active_sessions: {},
+            completed_sessions: [],
+          });
+          logger.warn('No session data available. API endpoint not ready and fallback failed.', {
+            error: fallbackError instanceof Error ? fallbackError.message : 'Unknown error',
+          });
+        }
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load sessions';
