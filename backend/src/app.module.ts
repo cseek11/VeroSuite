@@ -26,6 +26,7 @@ import { KPIsModule } from './kpis/kpis.module';
 import { KpiTemplatesModule } from './kpi-templates/kpi-templates.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { WebSocketModule } from './websocket/websocket.module';
+import { SessionsModule } from './sessions/sessions.module';
 import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
 
 @Module({
@@ -53,6 +54,7 @@ import { SecurityHeadersMiddleware } from './common/middleware/security-headers.
     KpiTemplatesModule,
     DashboardModule,
     WebSocketModule,
+    SessionsModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: TenantContextInterceptor },
