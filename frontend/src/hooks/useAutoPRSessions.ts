@@ -103,10 +103,20 @@ export const useAutoPRSessions = () => {
       }
 
       const data = await response.json();
+      
+      // Debug logging
+      logger.debug('Raw session data received from API', {
+        activeSessions: Object.keys(data.active_sessions || {}),
+        activeCount: Object.keys(data.active_sessions || {}).length,
+        completedCount: (data.completed_sessions || []).length,
+        dataKeys: Object.keys(data),
+      }, 'useAutoPRSessions');
+      
       setSessions(data);
       logger.info('Session data loaded successfully', {
         activeCount: Object.keys(data.active_sessions || {}).length,
         completedCount: (data.completed_sessions || []).length,
+        activeSessionIds: Object.keys(data.active_sessions || {}),
       }, 'useAutoPRSessions');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load sessions';

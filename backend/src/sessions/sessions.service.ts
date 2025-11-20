@@ -65,6 +65,8 @@ export class SessionsService {
         traceId: context.traceId,
         spanId: context.spanId,
         requestId: context.requestId,
+        sessionDataFile: this.sessionDataFile,
+        fileExists: existsSync(this.sessionDataFile),
       });
 
       // Load session data
@@ -178,6 +180,18 @@ export class SessionsService {
 
       const fileContent = await readFile(this.sessionDataFile, 'utf-8');
       const data: RawSessionData = JSON.parse(fileContent);
+
+      this.logger.debug('Session data loaded from file', {
+        context: 'SessionsService',
+        operation,
+        traceId: traceContext.traceId,
+        spanId: traceContext.spanId,
+        requestId: traceContext.requestId,
+        filePath: this.sessionDataFile,
+        activeCount: Object.keys(data.active_sessions || {}).length,
+        completedCount: (data.completed_sessions || []).length,
+        activeSessionIds: Object.keys(data.active_sessions || {}),
+      });
 
       return {
         active_sessions: data.active_sessions || {},
