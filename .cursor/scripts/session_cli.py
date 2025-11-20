@@ -56,9 +56,13 @@ def cmd_start():
             
             # Add new session if it doesn't exist
             if session_id not in data.get("active_sessions", {}):
+                # Extract author from session_id (format: "author-timestamp")
+                # e.g., "cseek_cursor-20251119-2226" -> "cseek_cursor"
+                author = session_id.split("-", 1)[0] if "-" in session_id else "unknown"
+                
                 data.setdefault("active_sessions", {})[session_id] = {
                     "session_id": session_id,
-                    "author": "unknown",  # Will be updated when PR is created
+                    "author": author,
                     "started": datetime.now().isoformat(),
                     "last_activity": datetime.now().isoformat(),
                     "prs": [],

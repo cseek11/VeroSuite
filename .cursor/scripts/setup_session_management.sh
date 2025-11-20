@@ -96,3 +96,10 @@ echo "📊 View analytics:    python .cursor/scripts/session_analytics.py"
 echo ""
 echo "For GitHub Actions integration, ensure workflows are committed to .github/workflows/"
 
+
+
+
+
+
+
+

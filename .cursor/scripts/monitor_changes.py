@@ -144,6 +144,50 @@ def is_excluded(file_path: str, config: Dict) -> bool:
     for pattern in excluded:
         if pattern in file_path or file_path.endswith(pattern.replace("*", "")):
             return True
+    
+    # CRITICAL: Filter out command-like filenames that look like PowerShell/CLI commands
+    # These are often accidentally created when commands get redirected to files
+    suspicious_patterns = [
+        "gh run list",
+        "gh workflow",
+        "gh pr list",
+        "ConvertFrom-Json",
+        "Format-List",
+        "ConvertFrom-Json",
+        "--workflow=",
+        "--limit",
+        "--json",
+        "databaseId",
+        "status",
+        "conclusion",
+    ]
+    
+    file_path_lower = file_path.lower()
+    for pattern in suspicious_patterns:
+        if pattern.lower() in file_path_lower:
+            logger.debug(
+                f"Excluding suspicious command-like filename: {file_path}",
+                operation="is_excluded",
+                pattern=pattern
+            )
+            return True
+    
+    # Filter out files that look like command fragments (start with quotes and contain CLI syntax)
+    if file_path.startswith('"') and ("--" in file_path or "|" in file_path or "ConvertFrom" in file_path):
+        logger.debug(
+            f"Excluding command fragment filename: {file_path}",
+            operation="is_excluded"
+        )
+        return True
+    
+    # Filter out very short filenames that are likely typos (like "t n")
+    if len(file_path.strip('"').strip()) <= 3 and " " in file_path:
+        logger.debug(
+            f"Excluding suspicious short filename: {file_path}",
+            operation="is_excluded"
+        )
+        return True
+    
     return False
 
 
@@ -170,6 +214,20 @@ def get_changed_files(repo_path: pathlib.Path) -> Dict[str, Dict]:
             
             status = line[:2].strip()
             file_path = line[3:].strip()
+            
+            # Skip files with invalid characters or command-like patterns
+            # This prevents accidentally tracking command artifacts
+            if not file_path or len(file_path) < 1:
+                continue
+            
+            # Skip files that look like command fragments (contain CLI syntax)
+            # This early filtering prevents processing invalid files
+            if any(pattern in file_path for pattern in ["--workflow=", "ConvertFrom-Json", "Format-List", "gh run list"]):
+                logger.debug(
+                    f"Skipping command-like file: {file_path}",
+                    operation="get_changed_files"
+                )
+                continue
             
             if status in ["M", "A", "??"]:  # Modified, Added, Untracked
                 # Get file stats
