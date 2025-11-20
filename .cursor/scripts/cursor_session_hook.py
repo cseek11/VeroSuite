@@ -101,7 +101,13 @@ def get_or_create_session_id(author: Optional[str] = None) -> str:
         
         # Create new session ID
         if author is None:
-            author = os.environ.get("GIT_AUTHOR_NAME") or os.environ.get("USER") or "unknown"
+            # Check for explicit session identifier, then git author, then user, then default to cseek_cursor
+            author = (
+                os.environ.get("AUTO_PR_SESSION_AUTHOR") or 
+                os.environ.get("GIT_AUTHOR_NAME") or 
+                os.environ.get("USER") or 
+                "cseek_cursor"
+            )
         
         timestamp = datetime.now().strftime("%Y%m%d-%H%M")
         session_id = f"{author}-{timestamp}"
@@ -145,7 +151,13 @@ def get_or_create_session_id(author: Optional[str] = None) -> str:
             **trace_context
         )
         # Fallback: generate session ID without persistence
-        author = author or os.environ.get("GIT_AUTHOR_NAME") or os.environ.get("USER") or "unknown"
+        author = (
+            author or 
+            os.environ.get("AUTO_PR_SESSION_AUTHOR") or 
+            os.environ.get("GIT_AUTHOR_NAME") or 
+            os.environ.get("USER") or 
+            "cseek_cursor"
+        )
         fallback_id = f"{author}-{datetime.now().strftime('%Y%m%d-%H%M')}"
         logger.warn(
             "Using fallback session ID",
