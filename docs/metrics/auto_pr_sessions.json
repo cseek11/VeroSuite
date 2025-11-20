@@ -1,0 +1,17 @@
+{
+  "active_sessions": {
+    "unknown-20251119-2155": {
+      "session_id": "unknown-20251119-2155",
+      "author": "unknown",
+      "started": "2025-11-19T21:57:38.563087",
+      "last_activity": "2025-11-19T21:57:38.563087",
+      "prs": [],
+      "total_files_changed": 0,
+      "test_files_added": 0,
+      "status": "active"
+    }
+  },
+  "completed_sessions": [],
+  "version": "1.0",
+  "last_updated": "2025-11-19T21:57:38.563087"
+}

@@ -39,6 +39,55 @@ def cmd_start():
     try:
         clear_session()  # Clear any existing session
         session_id = get_or_create_session_id()
+        
+        # Add session to auto_pr_sessions.json so it appears in the dashboard
+        try:
+            script_path = Path(__file__).parent / "auto_pr_session_manager.py"
+            from datetime import datetime
+            import json
+            
+            # Load current sessions
+            sessions_file = Path("docs/metrics/auto_pr_sessions.json")
+            if sessions_file.exists():
+                with open(sessions_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+            else:
+                data = {"active_sessions": {}, "completed_sessions": [], "version": "1.0"}
+            
+            # Add new session if it doesn't exist
+            if session_id not in data.get("active_sessions", {}):
+                data.setdefault("active_sessions", {})[session_id] = {
+                    "session_id": session_id,
+                    "author": "unknown",  # Will be updated when PR is created
+                    "started": datetime.now().isoformat(),
+                    "last_activity": datetime.now().isoformat(),
+                    "prs": [],
+                    "total_files_changed": 0,
+                    "test_files_added": 0,
+                    "status": "active"
+                }
+                data["last_updated"] = datetime.now().isoformat()
+                
+                # Save updated sessions
+                sessions_file.parent.mkdir(parents=True, exist_ok=True)
+                with open(sessions_file, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=2, ensure_ascii=False)
+                
+                logger.debug(
+                    "Session added to auto_pr_sessions.json",
+                    operation="cmd_start",
+                    session_id=session_id,
+                    **trace_context
+                )
+        except Exception as e:
+            logger.warn(
+                "Failed to add session to auto_pr_sessions.json (will be added when PR is created)",
+                operation="cmd_start",
+                error=str(e),
+                session_id=session_id,
+                **trace_context
+            )
+        
         print(f"✅ Started new session: {session_id}")
         print(f"   All commits will be tracked under this session.")
         print(f"   Use 'session complete' when done.")
