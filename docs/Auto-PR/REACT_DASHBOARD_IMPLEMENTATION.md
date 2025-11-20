@@ -217,3 +217,10 @@ Add a link to the sessions dashboard in your navigation:
 
 **Component is ready for API integration!** 🎉
 
+
+
+
+
+
+
+

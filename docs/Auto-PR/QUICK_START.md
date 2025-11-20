@@ -6,6 +6,23 @@
 
 ## 🚀 Quick Start (5 Minutes)
 
+### ✅ Automatic Setup (Recommended)
+
+**The system is now fully automatic!** When you open Cursor:
+
+1. ✅ **Session starts automatically** (via `.vscode/tasks.json`)
+2. ✅ **Monitoring starts automatically** (daemon runs in background)
+3. ✅ **PRs created automatically** when thresholds are met
+4. ✅ **Session completes automatically** when Cursor closes
+
+**No manual steps required!** Just open Cursor and start coding.
+
+See `docs/Auto-PR/AUTOMATIC_STARTUP_SETUP.md` for details.
+
+### Manual Commands (If Needed)
+
+If automatic startup isn't working:
+
 ### 1. Check System Status
 
 ```bash
@@ -14,7 +31,7 @@ python .cursor/scripts/session_cli.py status
 
 **Expected Output:**
 ```
-📦 Active session: user-20251119-1430
+📦 Active session: cseek_cursor-20251119-1430
 Status: active
 PRs in Session: 3
 ```
@@ -23,6 +40,11 @@ PRs in Session: 3
 
 ```bash
 python .cursor/scripts/session_cli.py start
+```
+
+Or start the full manager:
+```bash
+python .cursor/scripts/start_session_manager.py
 ```
 
 ### 3. Complete Current Session
@@ -65,10 +87,17 @@ python .cursor/scripts/session_analytics.py
 
 ## ⚡ How It Works
 
-1. **Automatic:** Sessions created automatically when PRs are made
-2. **Batching:** Related PRs grouped into sessions
-3. **Scoring:** Session scored as one unit when complete
-4. **Analytics:** Reports generated automatically
+1. **Automatic Startup:** Session and monitoring start when Cursor opens
+2. **Automatic Monitoring:** File changes tracked continuously (every 5 minutes)
+3. **Automatic PR Creation:** PRs created when thresholds are met:
+   - ⏰ 4 hours of inactivity
+   - ⏰ 8 hours of total work time
+   - 📁 5+ files changed
+   - 📝 200+ lines changed
+4. **Automatic Session Completion:** Session completes when Cursor closes
+5. **Batching:** Related PRs grouped into sessions
+6. **Scoring:** Session scored as one unit when complete
+7. **Analytics:** Reports generated automatically
 
 ---
 
@@ -83,7 +112,30 @@ python .cursor/scripts/session_analytics.py
 **Issue:** "Invalid JSON"  
 **Fix:** Already fixed - encoding corrected ✅
 
+**Issue:** "Multiple daemons running" or conflicts  
+**Fix:** Run cleanup script:
+```bash
+python .cursor/scripts/stop_all_session_managers.py
+```
+Then restart Cursor. See `docs/Auto-PR/CLEANUP_OLD_SYSTEM.md` for details.
+
+**Issue:** "Old scheduled task conflicts"  
+**Fix:** Disable old task (requires admin):
+```powershell
+# Run PowerShell as Administrator
+Disable-ScheduledTask -TaskName "VeroField_AutoPR_Daemon"
+```
+See `docs/Auto-PR/CONFLICT_PREVENTION_SUMMARY.md` for complete cleanup guide.
+
+**Issue:** "Sessions still active after closing Cursor"  
+**Fix:** Orphaned sessions are automatically completed on next Cursor startup. To manually complete:
+```bash
+python .cursor/scripts/complete_orphaned_sessions.py --max-inactivity-minutes 1
+```
+See `docs/Auto-PR/ORPHANED_SESSION_CLEANUP.md` for details.
+
 ---
 
 **For detailed information, see:** `docs/Auto-PR/ACCESS_GUIDE.md`
+
 
