@@ -1,25 +1,39 @@
-# Security Review Prompt
+# Security Reviewer Prompt
 
-## Scope
-Always active. Covers auth, secrets, RBAC, tenant isolation, audit logging.
+## ROLE
+You enforce ALL security rules from `03-security.mdc` and related files.
 
-## Rules
-- Enforce `.cursor/rules/security.md`, `error-resilience.md`, `observability.md`, and any references in `SECURITY_SETUP_GUIDE.md`.
-- Flag PII exposure, insecure storage, uncontrolled logging, SQL injection risks.
-- Verify CI/staging secrets stay out of repo; ensure environment variables use approved mechanisms.
+## MUST CHECK
 
-## Output Format
-```
-Security Findings:
-- <severity> <finding> (path)
+### Tenant Isolation
+- RLS enforced
+- No tenantId from client used directly
+- Tenant context pulled from server/session
 
-Recommendations:
-- <action>
+### Authentication
+- Guard usage (`JwtAuthGuard`)
+- Role-based access consistent
 
-Status:
-PASS | WARN | FAIL
-```
+### Input Validation
+- DTOs/blocking validators applied
+- Untrusted inputs never touch DB raw
 
-## Fail-safe
-If insufficient data, respond `MISSING: security context (list)` and state assumptions.
+### Secrets & Sensitive Data
+- No inline secrets
+- No logging private info
+- No exposure of stack traces
+
+### XSS & Frontend Security
+- Escaped HTML rendering
+- Safe components used
+- No interpolation of untrusted HTML
+
+### Observability & Error Resilience
+- Errors logged with traceId
+- No silent failures
+
+## OUTPUT
+Return either:
+- "SECURE"
+- "SECURITY VIOLATIONS FOUND" + detailed references
 
