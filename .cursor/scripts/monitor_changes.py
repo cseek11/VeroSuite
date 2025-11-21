@@ -752,8 +752,10 @@ def main() -> None:
     }
     
     if not changed_files:
-        logger.info("No changed files to track", operation="main")
-        return
+        logger.debug("No changed files to track", operation="main", tracked_count=len(state.get("tracked_files", {})))
+        # Don't return early - still check if existing tracked files meet thresholds
+        if not state.get("tracked_files"):
+            return
     
     # Update state
     now = datetime.utcnow().isoformat() + "Z"
