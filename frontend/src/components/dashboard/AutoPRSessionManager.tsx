@@ -9,6 +9,7 @@ import {
   BarChart3,
   FileText,
   AlertCircle,
+  PieChart as PieChartIcon,
 } from 'lucide-react';
 import {
   BarChart,
@@ -54,7 +55,7 @@ const AutoPRSessionManager: React.FC = () => {
     avgPRsPerSession: 0,
     completionRate: 0,
   });
-  const [view, setView] = useState<'dashboard' | 'analytics' | 'breakdown'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'analytics' | 'performance' | 'breakdown'>('dashboard');
   const [selectedSessionForBreakdown, setSelectedSessionForBreakdown] = useState<Session | null>(null);
 
   const calculateStats = useCallback((data: SessionData) => {
@@ -232,56 +233,74 @@ const AutoPRSessionManager: React.FC = () => {
             <CheckCircle size={24} className="text-green-500" />
             Recently Completed
           </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Showing all sessions with activity (PRs, files changed, or tests)
+          </p>
         </div>
-        <div className="divide-y divide-gray-200">
-          {sessions.completed_sessions.slice(0, 5).map((session) => (
-            <div key={session.session_id} className="px-6 py-4 hover:bg-gray-50">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="font-semibold text-gray-900">{session.session_id}</span>
-                    <span className="text-sm text-gray-600">by {session.author}</span>
-                    {session.final_score !== undefined && (
-                      <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
-                        Score: {session.final_score}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-6 text-sm text-gray-600">
-                    <span className="flex items-center gap-1">
-                      <GitPullRequest size={16} />
-                      {session.prs.length} PRs
-                    </span>
-                    <span>{session.total_files_changed} files</span>
-                    <span>{session.test_files_added} tests</span>
-                    {session.completed && (
-                      <span className="flex items-center gap-1">
-                        <Clock size={16} />
-                        {formatDuration(session.started, session.completed)}
-                      </span>
-                    )}
-                  </div>
+        <div className="max-h-[600px] overflow-y-auto divide-y divide-gray-200">
+          {(() => {
+            // Filter sessions that have activity (PRs, files changed, or tests)
+            const sessionsWithActivity = sessions.completed_sessions.filter(
+              (session) =>
+                session.prs.length > 0 ||
+                session.total_files_changed > 0 ||
+                session.test_files_added > 0
+            );
+
+            if (sessionsWithActivity.length === 0) {
+              return (
+                <div className="px-6 py-8 text-center text-gray-500">
+                  No completed sessions with activity
                 </div>
-                <div className="ml-4">
-                  <Button
-                    onClick={() => {
-                      setSelectedSessionForBreakdown(session);
-                      setView('breakdown');
-                    }}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    <BarChart3 size={16} />
-                    View Breakdown
-                  </Button>
+              );
+            }
+
+            return sessionsWithActivity.map((session) => (
+              <div key={session.session_id} className="px-6 py-4 hover:bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="font-semibold text-gray-900">{session.session_id}</span>
+                      <span className="text-sm text-gray-600">by {session.author}</span>
+                      {session.final_score !== undefined && (
+                        <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+                          Score: {session.final_score.toFixed(1)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-6 text-sm text-gray-600">
+                      <span className="flex items-center gap-1">
+                        <GitPullRequest size={16} />
+                        {session.prs.length} PRs
+                      </span>
+                      <span>{session.total_files_changed} files</span>
+                      <span>{session.test_files_added} tests</span>
+                      {session.completed && (
+                        <span className="flex items-center gap-1">
+                          <Clock size={16} />
+                          {formatDuration(session.started, session.completed)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <Button
+                      onClick={() => {
+                        setSelectedSessionForBreakdown(session);
+                        setView('breakdown');
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <BarChart3 size={16} />
+                      View Breakdown
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-          {sessions.completed_sessions.length === 0 && (
-            <div className="px-6 py-8 text-center text-gray-500">No completed sessions</div>
-          )}
+            ));
+          })()}
         </div>
       </Card>
     </div>
@@ -570,6 +589,254 @@ const AutoPRSessionManager: React.FC = () => {
     );
   };
 
+  const PerformanceView = () => {
+    // Filter sessions with activity and scores
+    const scoredSessions = sessions.completed_sessions.filter(
+      (session) =>
+        session.final_score !== undefined &&
+        (session.prs.length > 0 || session.total_files_changed > 0 || session.test_files_added > 0)
+    );
+
+    // Sort by completion date (most recent first)
+    const sortedSessions = [...scoredSessions].sort((a, b) => {
+      const dateA = a.completed ? new Date(a.completed).getTime() : 0;
+      const dateB = b.completed ? new Date(b.completed).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    // Prepare line chart data (score trend over time)
+    const scoreTrendData = sortedSessions
+      .slice()
+      .reverse() // Oldest first for trend
+      .map((session, index) => ({
+        name: `Session ${index + 1}`,
+        date: session.completed
+          ? new Date(session.completed).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+            })
+          : 'N/A',
+        score: session.final_score || 0,
+        prs: session.prs.length,
+        files: session.total_files_changed,
+        tests: session.test_files_added,
+      }));
+
+    // Score distribution for pie chart
+    const scoreRanges = {
+      excellent: scoredSessions.filter((s) => (s.final_score || 0) >= 8).length,
+      good: scoredSessions.filter((s) => (s.final_score || 0) >= 6 && (s.final_score || 0) < 8)
+        .length,
+      average: scoredSessions.filter((s) => (s.final_score || 0) >= 4 && (s.final_score || 0) < 6)
+        .length,
+      poor: scoredSessions.filter((s) => (s.final_score || 0) >= 0 && (s.final_score || 0) < 4)
+        .length,
+      negative: scoredSessions.filter((s) => (s.final_score || 0) < 0).length,
+    };
+
+    const pieChartData = [
+      { name: 'Excellent (8+)', value: scoreRanges.excellent, color: '#10b981' },
+      { name: 'Good (6-8)', value: scoreRanges.good, color: '#3b82f6' },
+      { name: 'Average (4-6)', value: scoreRanges.average, color: '#f59e0b' },
+      { name: 'Poor (0-4)', value: scoreRanges.poor, color: '#ef4444' },
+      { name: 'Negative (<0)', value: scoreRanges.negative, color: '#dc2626' },
+    ].filter((item) => item.value > 0);
+
+    // Calculate performance metrics
+    const avgScore =
+      scoredSessions.length > 0
+        ? scoredSessions.reduce((sum, s) => sum + (s.final_score || 0), 0) / scoredSessions.length
+        : 0;
+    const maxScore = Math.max(...scoredSessions.map((s) => s.final_score || 0), 0);
+    const minScore = Math.min(...scoredSessions.map((s) => s.final_score || 0), 0);
+    const totalPRs = scoredSessions.reduce((sum, s) => sum + s.prs.length, 0);
+    const totalFiles = scoredSessions.reduce((sum, s) => sum + s.total_files_changed, 0);
+    const totalTests = scoredSessions.reduce((sum, s) => sum + s.test_files_added, 0);
+
+    return (
+      <div className="space-y-6">
+        {/* Performance Metrics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="border-l-4 border-l-blue-500">
+            <div className="p-6">
+              <p className="text-sm text-gray-600">Average Score</p>
+              <p className="text-3xl font-bold text-gray-900">{avgScore.toFixed(2)}</p>
+              <p className="text-xs text-gray-500 mt-1">Across {scoredSessions.length} sessions</p>
+            </div>
+          </Card>
+          <Card className="border-l-4 border-l-green-500">
+            <div className="p-6">
+              <p className="text-sm text-gray-600">Highest Score</p>
+              <p className="text-3xl font-bold text-gray-900">{maxScore.toFixed(1)}</p>
+              <p className="text-xs text-gray-500 mt-1">Best session performance</p>
+            </div>
+          </Card>
+          <Card className="border-l-4 border-l-purple-500">
+            <div className="p-6">
+              <p className="text-sm text-gray-600">Total PRs</p>
+              <p className="text-3xl font-bold text-gray-900">{totalPRs}</p>
+              <p className="text-xs text-gray-500 mt-1">Across all sessions</p>
+            </div>
+          </Card>
+          <Card className="border-l-4 border-l-orange-500">
+            <div className="p-6">
+              <p className="text-sm text-gray-600">Total Files</p>
+              <p className="text-3xl font-bold text-gray-900">{totalFiles}</p>
+              <p className="text-xs text-gray-500 mt-1">Files changed</p>
+            </div>
+          </Card>
+        </div>
+
+        {/* Score Trend Line Chart */}
+        {scoreTrendData.length > 0 && (
+          <Card>
+            <div className="p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Score Trend Over Time
+              </h3>
+              <ResponsiveContainer width="100%" height={400}>
+                <LineChart data={scoreTrendData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-white p-3 border border-gray-200 rounded shadow-lg">
+                            <p className="font-semibold">{data.name}</p>
+                            <p className="text-sm text-gray-600">Date: {data.date}</p>
+                            <p className="text-sm">
+                              <span className="font-semibold">Score:</span> {data.score.toFixed(1)}
+                            </p>
+                            <p className="text-sm">
+                              <span className="font-semibold">PRs:</span> {data.prs}
+                            </p>
+                            <p className="text-sm">
+                              <span className="font-semibold">Files:</span> {data.files}
+                            </p>
+                            <p className="text-sm">
+                              <span className="font-semibold">Tests:</span> {data.tests}
+                            </p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="score"
+                    stroke="#3b82f6"
+                    strokeWidth={2}
+                    dot={{ r: 4 }}
+                    activeDot={{ r: 6 }}
+                    name="Score"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        )}
+
+        {/* Score Distribution Pie Chart */}
+        {pieChartData.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <PieChartIcon className="w-5 h-5" />
+                  Score Distribution
+                </h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={pieChartData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {pieChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+
+            {/* Additional Metrics */}
+            <Card>
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Performance Summary
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Average Score</span>
+                    <span className="font-semibold text-gray-900">{avgScore.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Highest Score</span>
+                    <span className="font-semibold text-green-600">{maxScore.toFixed(1)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Lowest Score</span>
+                    <span className="font-semibold text-red-600">{minScore.toFixed(1)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total Sessions</span>
+                    <span className="font-semibold text-gray-900">{scoredSessions.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total PRs</span>
+                    <span className="font-semibold text-gray-900">{totalPRs}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total Files Changed</span>
+                    <span className="font-semibold text-gray-900">{totalFiles}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total Tests Added</span>
+                    <span className="font-semibold text-gray-900">{totalTests}</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {scoredSessions.length === 0 && (
+          <Card>
+            <div className="p-6 text-center text-gray-500">
+              <AlertCircle className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+              <p>No scored sessions with activity available.</p>
+              <p className="text-sm mt-2">
+                Performance metrics will appear here once sessions are completed and scored.
+              </p>
+            </div>
+          </Card>
+        )}
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -623,6 +890,19 @@ const AutoPRSessionManager: React.FC = () => {
               >
                 Analytics
               </button>
+              <button
+                onClick={() => {
+                  setView('performance');
+                  setSelectedSessionForBreakdown(null);
+                }}
+                className={`px-4 py-2 rounded ${
+                  view === 'performance'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Performance
+              </button>
             </div>
           </div>
         </div>
@@ -634,8 +914,10 @@ const AutoPRSessionManager: React.FC = () => {
           <BreakdownView session={selectedSessionForBreakdown} />
         ) : view === 'dashboard' ? (
           <DashboardView />
-        ) : (
+        ) : view === 'analytics' ? (
           <AnalyticsView />
+        ) : (
+          <PerformanceView />
         )}
       </div>
     </div>

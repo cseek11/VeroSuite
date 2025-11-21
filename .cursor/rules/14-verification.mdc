@@ -1,0 +1,59 @@
+---
+description: "Verification & testing standards for unit, integration, and E2E tests"
+alwaysApply: false
+---
+<!-- @version: 2.0 @owner: qa-team -->
+
+# VERIFICATION & TESTING STANDARDS
+
+## PURPOSE
+Define when to write unit, integration, and E2E tests, and how to structure them.
+
+---
+
+## TEST TYPES
+
+### Unit Tests (MANDATORY for new features)
+- New functions, helpers, components, endpoints.
+- Must cover:
+  - Happy path
+  - Error paths
+  - Edge cases
+- Target: ≥ 80% coverage for new code.
+
+### Integration Tests (RECOMMENDED)
+- Endpoints hitting DB.
+- Services integrating multiple modules.
+- Cross-service behaviors.
+
+### E2E Tests (RECOMMENDED for critical workflows)
+- Multi-step business flows (invoice creation, payment, onboarding).
+- End-to-end behavior from frontend → backend → DB.
+
+---
+
+## WHEN TO USE WHAT
+- New feature, local logic only → Unit tests.
+- New API touching DB and services → Unit + Integration.
+- High-value workflow → Add E2E.
+- Bug fix → Regression test that reproduces the bug, at appropriate level.
+- Refactor → Behavior-diff tests and full suite passing.
+
+---
+
+## PIPELINE INTEGRATION
+
+**Step 3:** Check:
+- For each change, correct test type(s) planned and created.
+- Bug fixes have regression tests.
+
+**Step 5:** Confirm:
+- Tests run and pass.
+- New tests follow naming/location conventions.
+
+---
+
+## VIOLATIONS (HARD STOP)
+- Bug fix shipped with no regression test.
+- Critical workflow changed without any integration/E2E coverage.
+- New feature without unit tests.

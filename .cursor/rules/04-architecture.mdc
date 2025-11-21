@@ -1,0 +1,96 @@
+---
+description: "Monorepo structure, service boundaries, and architectural scope limits"
+alwaysApply: true
+---
+<!-- @version: 2.0 @owner: platform-core -->
+
+# ARCHITECTURE & MONOREPO RULES
+
+## PURPOSE
+Define the canonical monorepo structure, enforce service boundaries, and strictly limit what architectural changes the AI may make.
+
+---
+
+## MONOREPO STRUCTURE (AUTHORITATIVE)
+- `apps/api/src/` – NestJS API (primary backend)
+- `apps/crm-ai/src/` – CRM AI service
+- `apps/ai-soc/src/` – SOC/alerting AI
+- `apps/feature-ingestion/src/` – ingestion/ETL
+- `apps/kpi-gate/src/` – metrics & KPIs
+- `libs/common/prisma/schema.prisma` – **single DB schema source of truth**
+- `libs/common/src/` – shared types, auth helpers, domain utilities
+- `frontend/src/` – React web app (components, hooks, pages, types)
+- `VeroFieldMobile/src/` – React Native app (if present)
+- `docs/architecture/` – architecture docs
+- `docs/state-machines/` – state machine docs
+- `docs/contracts/` – API and event contracts
+
+### ✅ Correct Example Paths
+- `apps/api/src/work-orders/work-orders.service.ts`
+- `libs/common/src/auth/tenant-context.service.ts`
+- `frontend/src/components/ui/Button.tsx`
+
+### ❌ Wrong / Legacy Paths (HARD STOP)
+- `backend/src/...` → use `apps/api/src/...`
+- `backend/prisma/...` → use `libs/common/prisma/...`
+- Root-level `src/` not under `apps/` or `libs/`
+- New top-level directories created by AI
+
+---
+
+## SERVICE BOUNDARIES
+- Each app in `apps/` is independently deployable.
+- **No cross-service relative imports.**
+- ❌ `../../crm-ai/src/...`
+- ✅ communicate via HTTP/events, and share *only* via `libs/common`.
+- Shared code **must** live in `libs/common` (or a future explicit shared-lib path).
+- Backend never imports frontend or mobile code.
+- Frontend/mobile never import backend implementation types directly; they consume contracts/types.
+
+---
+
+## ARCHITECTURE SCOPE LIMITS
+The AI **MAY NOT** without explicit human approval:
+- Create a new microservice in `apps/`.
+- Add a new database or schema file outside `libs/common/prisma/schema.prisma`.
+- Introduce a new message bus (Kafka, etc.).
+- Change authentication architecture (guards, JWT strategy, tenant context).
+- Introduce a new top-level folder.
+
+The AI **MAY**:
+- Add new endpoints to an existing service.
+- Add new NestJS modules under `apps/api/src/`.
+- Add new React components, hooks, and pages under `frontend/src/`.
+- Add new shared utilities under `libs/common/src/`.
+
+If requested to exceed scope:
+> "HARD STOP: This change modifies architecture/service boundaries and requires human approval."
+
+---
+
+## ENFORCEMENT PIPELINE INTEGRATION
+
+**Step 1 (Search):**
+- Search for similar modules in the same app (`apps/api/src/**`).
+- Search `docs/architecture/` for existing patterns.
+- Search `monorepo`/file organization docs for valid paths.
+
+**Step 3 (Compliance Check):**
+- Confirm file paths match the monorepo structure.
+- Confirm no cross-service relative imports.
+- Confirm shared logic is in `libs/common`.
+
+**Step 5 (Post-Implementation Audit):**
+- Re-scan touched files for:
+  - Wrong paths
+  - Cross-service imports
+  - New top-level directories
+
+---
+
+## VIOLATIONS (HARD STOP)
+- Creating new apps/services without permission.
+- Adding a new database/schema outside `libs/common/prisma`.
+- Cross-service relative imports.
+- Placing files in deprecated paths (e.g., `backend/src/`).
+- Creating new top-level folders not previously approved.
