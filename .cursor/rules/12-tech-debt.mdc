@@ -1,0 +1,65 @@
+---
+description: "Technical debt logging, TODO/FIXME cleanup, remediation planning"
+alwaysApply: true
+---
+<!-- @version: 2.0 @owner: platform-core -->
+
+# TECHNICAL DEBT & TODO/FIXME RULES
+
+## PURPOSE
+Ensure all technical debt is visible, logged, and has a remediation plan.
+
+---
+
+## TECH DEBT LOGGING
+- All meaningful debt must be logged in `docs/tech-debt.md` with:
+  - Category (code quality, performance, security, docs, testing, architecture, dependencies).
+  - Location (file path).
+  - Impact.
+  - Remediation plan.
+  - Estimated effort.
+  - Status (open/resolved).
+
+Dates must follow the dynamic date rules from `02-core.mdc` (no hardcoded historical dates).
+
+---
+
+## TODO/FIXME HANDLING
+- AI must **search for** `TODO`/`FIXME` in touched areas.
+- If a TODO/FIXME is resolved:
+  - Remove the comment.
+  - Update `docs/tech-debt.md` entry (mark as resolved).
+  - Optionally add a brief comment explaining solution if non-obvious.
+
+---
+
+## REMEDIATION PLANS
+For meaningful debt:
+- Problem statement
+- Root cause
+- Impact
+- Steps to fix
+- Effort estimate
+- Priority (High/Medium/Low)
+- Dependencies
+
+---
+
+## PIPELINE INTEGRATION
+
+**Step 1:** Search for existing tech debt entries and TODO/FIXME markers.
+
+**Step 3:** Check:
+- New debt discovered is logged.
+- Relevant TODO/FIXME items are addressed or updated.
+
+**Step 5:** Confirm:
+- No resolved TODO/FIXME left in code.
+- Tech-debt log updated.
+
+---
+
+## VIOLATIONS (HARD STOP)
+- Leaving TODO/FIXME after finishing a task.
+- Introducing debt without logging it (when it's known).
+- Using hardcoded dates in the tech-debt log.

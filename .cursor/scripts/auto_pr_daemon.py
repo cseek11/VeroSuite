@@ -79,9 +79,20 @@ def main() -> None:
             # Import here to avoid circular imports
             from monitor_changes import main as check_changes
             
-            # Run check
-            logger.debug("Running periodic check", operation="main")
-            check_changes()
+            # Run check with --check flag to ensure it runs once and exits
+            logger.info("Running periodic check", operation="main", check_interval=check_interval, **trace_context)
+            
+            # Import sys to modify argv for check_changes
+            import sys
+            original_argv = sys.argv.copy()
+            sys.argv = ["monitor_changes.py", "--check"]
+            
+            try:
+                check_changes()
+            finally:
+                sys.argv = original_argv
+            
+            logger.debug("Periodic check completed", operation="main", **trace_context)
             
             # Sleep until next check
             time.sleep(check_interval)

@@ -1,92 +1,25 @@
----
-# Cursor Rule Metadata
-version: 1.3
-project: VeroField
-scope:
-  - frontend
-  - backend
-  - mobile
-priority: high
-last_updated: 2025-11-11 20:13:54
-always_apply: true
----
+# VeroField Hybrid Rule System v2.0
+# This file loads all .mdc rule files from .cursor/rules/
 
-# VeroField Development Rules for Cursor AI
+# Cursor automatically loads all .mdc files from .cursor/rules/ directory
+# Rule files are loaded in alphabetical order (00-master.mdc first, then 01-enforcement.mdc, etc.)
 
-This file serves as the main entry point for Cursor rules. Rules are organized into modular files for better maintainability and context scoping.
+# For manual reference, the rule files are:
+# - .cursor/rules/00-master.mdc (Master rule with CI integration, REWARD_SCORE, pattern extraction)
+# - .cursor/rules/01-enforcement.mdc (Mandatory 5-step enforcement pipeline)
+# - .cursor/rules/02-core.mdc (Core philosophy, date handling, tech stack)
+# - .cursor/rules/03-security.mdc (Security rules: tenant isolation, RLS, auth)
+# - .cursor/rules/04-architecture.mdc (Monorepo structure, service boundaries)
+# - .cursor/rules/05-data.mdc (Data contracts, state machines, layer sync)
+# - .cursor/rules/06-error-resilience.mdc (Error handling, no silent failures)
+# - .cursor/rules/07-observability.mdc (Structured logging, tracing, metrics)
+# - .cursor/rules/08-backend.mdc (NestJS/Prisma patterns)
+# - .cursor/rules/09-frontend.mdc (React/React Native architecture)
+# - .cursor/rules/10-quality.mdc (Testing, coverage, performance)
+# - .cursor/rules/11-operations.mdc (CI/CD, workflows, reward score)
+# - .cursor/rules/12-tech-debt.mdc (Tech debt logging, TODO/FIXME)
+# - .cursor/rules/13-ux-consistency.mdc (UI/UX coherence)
+# - .cursor/rules/14-verification.mdc (Verification & testing standards)
 
-## Modular Rule Structure
-
-Rules are split into domain-specific files located in `.cursor/rules/`:
-
-**CRITICAL Priority:**
-- **enforcement.md** - Rule enforcement and compliance (READ FIRST)
-- **core.md** - Core philosophy, date/time handling, code quality standards, prohibited actions
-- **security.md** - Security standards, tenant isolation, RLS policies
-- **naming-consistency.md** - Project naming consistency (VeroField)
-- **monorepo.md** - Monorepo structure and microservices
-- **state-integrity.md** - State machine integrity and transitions
-- **contracts.md** - Data contract consistency and schema versioning
-- **dependencies.md** - Dependency governance and safety
-- **database-integrity.md** - Transaction safety and data integrity
-- **layer-sync.md** - UI/Backend layer synchronization
-- **architecture-scope.md** - Architectural decision autonomy limits
-- **ai-behavior.md** - AI behavior directives, tool usage strategy, implementation workflow
-- **forms.md** - Form patterns, validation rules, dialog/modal patterns
-- **frontend.md** - Frontend component rules, import patterns, code organization
-- **error-resilience.md** - Error handling and silent failure elimination
-- **observability.md** - Structured logging and traceability
-- **pattern-learning.md** - Error pattern memory and engineering decisions
-- **predictive-prevention.md** - Predictive guardrails and failure mode mapping
-
-**HIGH Priority:**
-- **performance.md** - Performance budgets and efficiency
-- **eventing.md** - Message queue and event consistency
-- **cross-platform.md** - Cross-platform resilience
-- **accessibility.md** - Accessibility enforcement (WCAG AA)
-- **tooling.md** - Tooling consistency and lockfile protection
-- **refactoring.md** - Refactor integrity and behavior preservation
-- **backend.md** - Backend architecture, module structure, database safety
-- **veroai.md** - VeroAI development patterns
-- **docs.md** - Documentation standards, update propagation rules
-- **verification.md** - Automated verification checks, CI integration
-- **ownership.md** - File ownership and domain boundaries
-
-**NORMAL-HIGH Priority:**
-- **ux-consistency.md** - UI/UX coherence and interaction rules
-- **tech-debt.md** - Project health and tech debt logging
-
-**NORMAL Priority:**
-- **styling.md** - Styling guidelines, UI patterns
-
-## Quick Reference
-
-For the complete rules, Cursor will automatically load all files from `.cursor/rules/` directory. The rules are prioritized as follows:
-
-1. **CRITICAL** - Core philosophy, security, tenant isolation, date/time handling
-2. **HIGH** - Component usage, form patterns, code organization
-3. **NORMAL** - Styling, documentation formatting
-
-## Core Principles
-
-- **Reuse > Reinvent** - Always search first!
-- **Parallel > Sequential** - Use multiple tools simultaneously
-- **Pattern > Custom** - Follow established conventions
-- **Security > Speed** - Maintain tenant isolation
-- **Documentation > Code** - Keep docs current with date/time
-
-## Documentation References
-
-- `AI_CONSISTENCY_PROTOCOL.md` - Component reuse and pattern matching
-- `DEVELOPMENT_BEST_PRACTICES.md` - Complete best practices guide
-- `COMPONENT_LIBRARY_CATALOG.md` - Available reusable components
-- `AI_ASSISTANT_BEST_PRACTICES.md` - AI development guidelines
-- `DATABASE.md` - Database schema and RLS policies
-- `API.md` - API endpoints and patterns
-- `SECURITY_SETUP_GUIDE.md` - Security best practices
-
----
-
-**Note:** For detailed rules, see the modular files in `.cursor/rules/` directory. This file provides a quick overview and entry point.
-
-**Last Updated:** 2025-11-16
+# All rules are automatically loaded from .cursor/rules/*.mdc
+# See .cursor/README.md for complete system documentation
