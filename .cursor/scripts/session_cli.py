@@ -3,7 +3,7 @@
 Cursor Session Manager CLI
 CLI tool for managing sessions from cursor.
 
-Last Updated: 2025-11-19
+Last Updated: 2025-11-21
 """
 
 import argparse
@@ -118,6 +118,45 @@ def cmd_status():
     try:
         session_id = get_or_create_session_id()
         print(f"📦 Active session: {session_id}")
+        
+        # Ensure session is registered with session manager
+        # If session exists in marker file but not in manager, register it
+        try:
+            from auto_pr_session_manager import AutoPRSessionManager
+            from datetime import datetime
+            manager = AutoPRSessionManager()
+            
+            # Check if session exists in manager
+            if session_id not in manager.sessions["active_sessions"]:
+                # Extract author from session_id (format: "author-timestamp")
+                author = session_id.split("-", 1)[0] if "-" in session_id else "unknown"
+                
+                # Register session with manager
+                manager.sessions["active_sessions"][session_id] = {
+                    "session_id": session_id,
+                    "author": author,
+                    "started": datetime.now().isoformat(),
+                    "last_activity": datetime.now().isoformat(),
+                    "prs": [],
+                    "total_files_changed": 0,
+                    "test_files_added": 0,
+                    "status": "active"
+                }
+                manager.save_sessions()
+                logger.info(
+                    "Session registered with session manager",
+                    operation="cmd_status",
+                    session_id=session_id,
+                    **trace_context
+                )
+        except Exception as e:
+            logger.warn(
+                "Failed to register session with manager (non-critical)",
+                operation="cmd_status",
+                error=str(e),
+                session_id=session_id,
+                **trace_context
+            )
         
         # Get session details from manager
         script_path = Path(__file__).parent / "auto_pr_session_manager.py"

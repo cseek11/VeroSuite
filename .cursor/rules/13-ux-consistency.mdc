@@ -1,0 +1,53 @@
+---
+description: "UI/UX coherence, spacing, typography, component usage, and interaction patterns"
+globs: "frontend/**/*.{ts,tsx},VeroFieldMobile/**/*.{ts,tsx}"
+alwaysApply: false
+---
+<!-- @version: 2.0 @owner: design-team -->
+
+# UX CONSISTENCY RULES
+
+## PURPOSE
+Enforce consistent UI/UX patterns across the entire app, complementing `09-frontend.mdc`.
+
+---
+
+## PATTERN SOURCES
+- `docs/reference/COMPONENT_LIBRARY_CATALOG.md`
+- `CRM_STYLING_GUIDE.md`
+- `DESIGN_SYSTEM.md`
+- Existing production screens
+
+---
+
+## CONSISTENCY RULES
+- **Spacing:**
+  - Page wrappers use agreed padding (e.g., `p-6`).
+  - Vertical rhythm via `space-y-*` utilities.
+- **Typography:**
+  - Reuse heading/body sizes instead of inventing new ones.
+- **Error/loading patterns:**
+  - Use standard error block and skeleton/loading UX.
+- **Component variants:**
+  - Use existing `variant` props (primary/secondary/danger/etc.), don't invent new color one-offs.
+
+---
+
+## PIPELINE INTEGRATION
+
+**Step 1:** Search for "similar" screens and components to mimic.
+
+**Step 3:** Check:
+- Spacing classes align with existing pages.
+- Typography scale matches established patterns.
+- Errors and loading follow documented patterns.
+
+**Step 5:** Audit:
+- New components/screens for style drift.
+
+---
+
+## VIOLATIONS (HARD STOP)
+- Inconsistent spacing against comparable pages.
+- New, ad-hoc visual patterns without design system alignment.
+- Ignoring documented UX patterns when a match exists.

@@ -61,6 +61,18 @@ jobs:
           
           if [ "$IS_AUTO" = "true" ]; then
             echo "📦 Auto-PR detected - adding to session $SESSION_ID"
+            
+            # Add PR to session
+            python .cursor/scripts/auto_pr_session_manager.py add \
+              --pr-number "$PR_NUMBER" \
+              --title "$PR_TITLE" \
+              --body "$PR_BODY" \
+              --author "$PR_AUTHOR" \
+              --files "$FILES_CHANGED" \
+              --session-id "$SESSION_ID" > add_result.json
+            
+            echo "✅ PR added to session"
+            cat add_result.json
           else
             echo "📊 Regular PR - will score normally"
           fi
