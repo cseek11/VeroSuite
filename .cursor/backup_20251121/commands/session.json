@@ -1,0 +1,28 @@
+{
+  "commands": [
+    {
+      "name": "session:start",
+      "description": "Start a new auto-PR session",
+      "command": "python .cursor/scripts/session_cli.py start",
+      "shortcut": "cmd+shift+s"
+    },
+    {
+      "name": "session:status",
+      "description": "Show current session status",
+      "command": "python .cursor/scripts/session_cli.py status",
+      "shortcut": "cmd+shift+i"
+    },
+    {
+      "name": "session:complete",
+      "description": "Complete current session and trigger scoring",
+      "command": "python .cursor/scripts/session_cli.py complete",
+      "shortcut": "cmd+shift+c"
+    },
+    {
+      "name": "session:clear",
+      "description": "Clear session without completing",
+      "command": "python .cursor/scripts/session_cli.py clear"
+    }
+  ]
+}
+

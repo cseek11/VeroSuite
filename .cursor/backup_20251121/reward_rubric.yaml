@@ -1,0 +1,25 @@
+# REWARD_SCORE Rubric
+version: 1
+weights:
+  tests: 3
+  bug_fix: 2
+  docs: 1
+  performance: 1
+  security: 2
+penalties:
+  failing_ci: -4
+  missing_tests: -2
+  regression: -3
+rules:
+  - id: tests_pass
+    description: Award when automated tests are added/updated and pass CI.
+  - id: bug_fix
+    description: Documented bugs fixed with regression coverage.
+  - id: docs_updated
+    description: User-facing docs or ADRs updated.
+  - id: security_blocker
+    description: If CI reports critical security issue, auto set score ≤ -3.
+notes: >
+  CI pipelines must emit reward.json containing score, breakdown, and comment body
+  using `.cursor/ci/reward_score_comment_template.md`.
+
