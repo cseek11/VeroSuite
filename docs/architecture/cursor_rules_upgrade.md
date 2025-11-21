@@ -1,10 +1,11 @@
 # Cursor Rules Upgrade
 
 ## 1. Overview
-This document complements `.cursor/rules.md`, capturing diagrams, rollout phases, changelog, and ownership expectations.
+This document complements the Hybrid Rule System v2.0 (`.cursor/rules/*.mdc` files), capturing diagrams, rollout phases, changelog, and ownership expectations.
 
 ### Version & Changelog
-- **2025-11-17:** Initial rollout (version 1.0). Future updates must append entries here and in `.cursor/rules.md`.
+- **2025-11-17:** Initial rollout (version 1.0)
+- **2025-11-21:** Updated to reference new Hybrid Rule System v2.0 structure (`.cursor/rules/*.mdc` files). See `.cursor/README.md` for complete system overview.
 
 ### Rules Champions
 - Primary: TBA
@@ -88,7 +89,7 @@ Reindex + semantic search availability → informs next PR
 ## 3. Implementation Checklist
 
 ### Phase 0 — Validation (Week 0–1)
-- [x] Add `.cursor/rules.md` with precedence & namespaces.
+- [x] Add Hybrid Rule System v2.0 (`.cursor/rules/*.mdc` files) with precedence & namespaces. See `.cursor/README.md` for overview.
 - [x] Create base prompts (`lead_review`, `tester`, `coach`, `distill_*`, `security_review`).
 - [x] Seed metadata files (`reward_rubric.yaml`, `golden_patterns.md`, `anti_patterns.md`, `BUG_LOG.md`, `DEPRECATED_RULES.md`).
 - [x] Add initial CI scripts and templates.
@@ -119,7 +120,7 @@ Reindex + semantic search availability → informs next PR
 
 ## 5. Rollback & Emergency Override
 - Overrides must cite `@emergency_override:<rule-id>:<expires>` in PR descriptions and be logged here.
-- To rollback rules, revert the specific commit touching `.cursor/rules.md` plus associated prompt/script changes.
+- To rollback rules, revert the specific commit touching `.cursor/rules/*.mdc` files plus associated prompt/script changes.
 - Ensure `DEPRECATED_RULES.md` is updated when reverting to avoid stale reconciliation state.
 
 ## 6. Legacy Reconciliation Process
