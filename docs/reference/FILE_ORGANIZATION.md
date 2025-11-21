@@ -1,8 +1,8 @@
 # File Organization Guide
 
-**Date:** 2025-11-16  
+**Date:** 2025-11-21  
 **Status:** Active  
-**Reference:** `.cursor/rules/file-organization.md`
+**Reference:** `.cursor/rules/04-architecture.mdc`
 
 ## Overview
 
@@ -16,7 +16,7 @@ This guide provides comprehensive instructions for organizing all files in the V
 
 ### Documentation
 - **Location:** `docs/` subdirectories
-- **Organization:** See `.cursor/rules/docs.md`
+- **Organization:** See `.cursor/rules/04-architecture.mdc` and `.cursor/rules/02-core.mdc`
 
 ### Assets
 - **Images:** `branding/assets/images/` or `docs/assets/images/`
@@ -85,7 +85,7 @@ VeroField/
 
 | File Type | Target Directory | Notes |
 |-----------|----------------|-------|
-| `.md` (except README.md) | `docs/` subdirectories | See `.cursor/rules/docs.md` for categorization |
+| `.md` (except README.md) | `docs/` subdirectories | See `.cursor/rules/04-architecture.mdc` and `.cursor/rules/02-core.mdc` for categorization |
 | `.txt` (documentation) | `docs/archive/misc/` | Temporary or historical text files |
 | `.docx`, `.doc`, `.pdf` | `docs/archive/misc/` | Should be converted to markdown when possible |
 
@@ -95,7 +95,7 @@ VeroField/
 |-----------|----------------|-------|
 | `.sql` (migrations) | `supabase/migrations/` or `docs/archive/migrations/` | Database migration scripts |
 | `.sql` (setup) | `scripts/database/` | Database setup scripts |
-| Source code | Per monorepo structure | See `.cursor/rules/monorepo.md` |
+| Source code | Per monorepo structure | See `.cursor/rules/04-architecture.mdc` |
 
 ### Asset Files
 
@@ -238,7 +238,7 @@ VeroField/
 
 1. **Check file organization rules** - Verify where the file should go
 2. **Use appropriate directory** - Don't create new directories without checking rules
-3. **Follow naming conventions** - See `.cursor/rules/naming-consistency.md`
+3. **Follow naming conventions** - See `.cursor/rules/04-architecture.mdc` and `.cursor/rules/02-core.mdc`
 4. **Verify not duplicate** - Check if similar file already exists
 
 ### When Moving Files
@@ -260,7 +260,7 @@ VeroField/
 ### Adding New Documentation
 
 1. Create file in appropriate `docs/` subdirectory
-2. Follow documentation standards (see `.cursor/rules/docs.md`)
+2. Follow documentation standards (see `.cursor/rules/04-architecture.mdc` and `.cursor/rules/02-core.mdc`)
 3. Update "Last Updated" date
 4. Add to documentation index if needed
 
@@ -332,15 +332,14 @@ Add to CI/CD pipeline:
 
 ## Related Documentation
 
-- `.cursor/rules/file-organization.md` - Complete file organization rules
-- `.cursor/rules/docs.md` - Documentation organization (subset)
-- `.cursor/rules/monorepo.md` - Monorepo structure and code organization
-- `.cursor/rules/naming-consistency.md` - File and directory naming standards
+- `.cursor/rules/04-architecture.mdc` - Complete file organization and monorepo structure rules
+- `.cursor/rules/02-core.mdc` - Core standards including documentation organization
+- `docs/developer/RULE_FILE_MAPPING_REFERENCE.md` - Mapping from old to new rule files
 
 ## Support
 
 For questions or issues with file organization:
-1. Review `.cursor/rules/file-organization.md`
+1. Review `.cursor/rules/04-architecture.mdc`
 2. Run validation script to identify issues
 3. Check this guide for common scenarios
 4. Review related rule files
