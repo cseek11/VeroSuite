@@ -1,5 +1,16 @@
 {
-  "active_sessions": {},
+  "active_sessions": {
+    "cseek_cursor-20251121-1659": {
+      "session_id": "cseek_cursor-20251121-1659",
+      "author": "cseek_cursor",
+      "started": "2025-11-21T17:00:34.712578",
+      "last_activity": "2025-11-21T17:00:34.712578",
+      "prs": [],
+      "total_files_changed": 0,
+      "test_files_added": 0,
+      "status": "active"
+    }
+  },
   "completed_sessions": [
     {
       "session_id": "unknown-20251119-2204",
@@ -332,8 +343,21 @@
       "completed": "2025-11-21T16:26:06.156220",
       "completion_trigger": "restart_cleanup",
       "duration_minutes": 14
+    },
+    {
+      "session_id": "cseek_cursor-20251121-1627",
+      "author": "cseek_cursor",
+      "started": "2025-11-21T16:30:50.171582",
+      "last_activity": "2025-11-21T16:30:50.171582",
+      "prs": [],
+      "total_files_changed": 0,
+      "test_files_added": 0,
+      "status": "completed",
+      "completed": "2025-11-21T16:45:30.553549",
+      "completion_trigger": "restart_cleanup",
+      "duration_minutes": 14
     }
   ],
   "version": "1.0",
-  "last_updated": "2025-11-21T16:26:06.156220"
+  "last_updated": "2025-11-21T17:00:34.712578"
 }
