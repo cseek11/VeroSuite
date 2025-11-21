@@ -8,8 +8,8 @@
 
 ## Files Modified
 
-1. `.cursor/rules.md` - Added workflow trigger requirements section
-2. `.cursor/rules/enforcement.md` - Added workflow trigger checklist items, updated date
+1. `.cursor/rules/00-master.mdc` - Added workflow trigger requirements section
+2. `.cursor/rules/01-enforcement.mdc` - Added workflow trigger checklist items, updated date
 3. `docs/planning/WORKFLOW_TRIGGER_COMPLIANCE_AUDIT.md` - New audit document
 
 ---
@@ -19,8 +19,8 @@
 ### ✅ File Organization
 - **Status:** PASS
 - **Details:**
-  - `.cursor/rules.md` - Correct location ✓
-  - `.cursor/rules/enforcement.md` - Correct location ✓
+  - `.cursor/rules/00-master.mdc` - Correct location ✓
+  - `.cursor/rules/01-enforcement.mdc` - Correct location ✓
   - `docs/planning/WORKFLOW_TRIGGER_COMPLIANCE_AUDIT.md` - Correct location ✓
   - All files in appropriate directories ✓
 
@@ -110,11 +110,11 @@
 - **Status:** PASS (after fix)
 - **Details:**
   - `WORKFLOW_TRIGGER_COMPLIANCE_AUDIT.md`: Uses current date **2025-11-17** ✓
-  - `.cursor/rules/enforcement.md`: **FIXED** - Updated from 2025-11-16 to 2025-11-17 ✓
+  - `.cursor/rules/01-enforcement.mdc`: **FIXED** - Updated from 2025-11-16 to 2025-11-17 ✓ (Note: File now uses .mdc format)
   - No hardcoded dates found ✓
 
 **Issue Fixed:**
-- **File:** `.cursor/rules/enforcement.md`
+- **File:** `.cursor/rules/01-enforcement.mdc`
 - **Issue:** `last_updated: 2025-11-16` (should be current date)
 - **Fix:** Updated to `last_updated: 2025-11-17`
 - **Status:** ✅ FIXED
@@ -171,7 +171,7 @@
 - ✅ No medium severity issues
 
 ### Low Severity Issues: 1
-- ✅ **FIXED:** Date compliance in `.cursor/rules/enforcement.md`
+- ✅ **FIXED:** Date compliance in `.cursor/rules/01-enforcement.mdc`
 
 ### Fixed Issues: 1
 - ✅ **Date Compliance in enforcement.md**
@@ -206,7 +206,7 @@
    - Properly formatted
    - No issues found
 
-2. `.cursor/rules/enforcement.md` ✅ (date fixed)
+2. `.cursor/rules/01-enforcement.mdc` ✅ (date fixed, now using .mdc format)
    - Added workflow trigger checklist items
    - Updated date to current (2025-11-17)
    - Properly formatted
