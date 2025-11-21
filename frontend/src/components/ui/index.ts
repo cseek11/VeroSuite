@@ -3,8 +3,6 @@
 // ============================================================================
 export { ErrorMessage } from './ErrorMessage';
 export { LoadingOverlay } from './LoadingOverlay';
-export { default as ErrorMessage } from './ErrorMessage';
-export { default as LoadingOverlay } from './LoadingOverlay';
 
 // ============================================================================
 // DEPRECATED: EnhancedUI Components

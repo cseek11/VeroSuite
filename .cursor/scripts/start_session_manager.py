@@ -17,6 +17,19 @@ import threading
 import time
 from pathlib import Path
 
+# Add script directory to Python path for local imports
+# This ensures imports work when script is run from workspace root (e.g., VSCode tasks)
+sys.path.insert(0, str(Path(__file__).parent))
+
+# Redirect stderr to stdout for PowerShell compatibility
+# This prevents PowerShell from treating JSON logs as fatal errors
+# Only real errors will still go to stderr via the logger's severity routing
+if os.getenv("VSCODE_TASK") == "1" or not sys.stdout.isatty():
+    # In non-interactive mode (VSCode tasks), redirect stderr to stdout
+    # This ensures PowerShell doesn't treat JSON logs as errors
+    # The logger itself will route ERROR/CRITICAL to stderr, but those are real errors
+    pass  # Logger handles routing, no need to redirect here
+
 # Check if running in non-interactive mode (VSCode task, etc.)
 IS_NON_INTERACTIVE = not sys.stdout.isatty() or os.getenv("VSCODE_TASK") == "1"
 # Exit cleanup is skipped when running non-interactively or when explicitly disabled
@@ -46,88 +59,137 @@ session_id = None
 def _safe_stdout(message: str) -> None:
     """Write message to stdout without raising during shutdown."""
     try:
-        sys.stdout.write(message)
-        if not message.endswith("\n"):
-            sys.stdout.write("\n")
-        sys.stdout.flush()
-    except Exception:
+        print(message, flush=True)
+    except (BrokenPipeError, OSError):
         pass
 
 
-def complete_session_on_exit():
-    """
-    Complete the session when Cursor closes.
-    
-    IMPORTANT: This function must NOT create threads, subprocesses, or use async
-    operations during interpreter shutdown, as Python's thread system is
-    already torn down. This causes RuntimeError: can't create new thread.
-    
-    In VSCode tasks (non-interactive mode) or when explicitly disabled via
-    `AUTO_PR_SKIP_EXIT_CLEANUP`, we skip cleanup entirely and let the daemon
-    handle session completion.
-    """
-    global session_id
-    
-    # Skip cleanup in non-interactive mode (VSCode tasks)
-    # The daemon will handle session completion when Cursor closes
-    if SKIP_EXIT_CLEANUP:
-        _safe_stdout("[INFO] Skipping exit cleanup (handled by daemon)")
-        return
-    
-    # Skip if session hooks not available or no session ID
-    if not SESSION_HOOKS_AVAILABLE or not session_id:
-        return
-    
-    # During shutdown, avoid subprocess calls (they can spawn threads)
-    # Instead, use direct function calls if available, or skip entirely
+def stop_conflicting_processes():
+    """Stop any conflicting Auto-PR processes."""
     try:
-        # Try to use direct function call instead of subprocess
-        # This avoids thread creation during shutdown
-        if SESSION_HOOKS_AVAILABLE:
+        logger.info("Checking for conflicting processes", operation="stop_conflicting_processes", **trace_context)
+        
+        # Check for existing daemon processes
+        scripts_dir = Path(__file__).parent
+        daemon_script = scripts_dir / "auto_pr_daemon.py"
+        
+        if daemon_script.exists():
+            # Check if daemon is already running
             try:
-                from cursor_session_hook import clear_session
-                # Direct function call - no threads, no subprocess
-                clear_session()
-                _safe_stdout(f"[INFO] Session {session_id} completed via direct call")
-            except ImportError:
-                # Fallback: skip if direct call not available
-                _safe_stdout("[WARN] Direct session completion not available, skipping")
-            except Exception as e:
-                # Don't use logger - it may create threads
-                _safe_stdout(f"[WARN] Failed to complete session on exit: {e}")
+                result = subprocess.run(
+                    ["python", str(daemon_script), "--check"],
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if result.returncode == 0:
+                    logger.debug("No conflicting processes found", operation="stop_conflicting_processes", **trace_context)
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                pass
     except Exception as e:
-        # Use stdout helper instead of logger to avoid thread creation
-        _safe_stdout(f"[WARN] Exit cleanup failed (non-critical): {e}")
+        logger.warn(f"Error checking for conflicting processes: {e}", operation="stop_conflicting_processes", **trace_context)
 
 
-def signal_handler(sig, frame):
-    """Handle shutdown signals."""
-    global daemon_process
-    
-    logger.info("Received shutdown signal", operation="signal_handler", signal=sig, **trace_context)
-    
-    # Stop daemon
-    if daemon_process:
-        try:
-            daemon_process.terminate()
-            daemon_process.wait(timeout=5)
-            logger.info("Daemon stopped", operation="signal_handler", **trace_context)
-        except Exception as e:
-            logger.warn(
-                "Error stopping daemon",
-                operation="signal_handler",
-                error=str(e),
+def complete_orphaned_sessions_on_startup():
+    """Complete any orphaned sessions from previous Cursor sessions."""
+    try:
+        logger.info("Checking for orphaned sessions from previous Cursor sessions", operation="complete_orphaned_sessions_on_startup", **trace_context)
+        
+        from auto_pr_session_manager import AutoPRSessionManager
+        from datetime import datetime, timedelta
+        manager = AutoPRSessionManager()
+        
+        # Complete ALL active sessions on restart (they're from previous Cursor instances)
+        # This ensures no sessions accumulate as "active" indefinitely
+        active_session_ids = list(manager.sessions["active_sessions"].keys())
+        completed_on_restart = []
+        
+        for session_id in active_session_ids:
+            try:
+                logger.info(
+                    "Completing active session on restart",
+                    operation="complete_orphaned_sessions_on_startup",
+                    session_id=session_id,
+                    **trace_context
+                )
+                manager.complete_session(session_id, trigger="restart_cleanup")
+                completed_on_restart.append(session_id)
+            except Exception as e:
+                logger.warn(
+                    f"Failed to complete session {session_id}: {e}",
+                    operation="complete_orphaned_sessions_on_startup",
+                    session_id=session_id,
+                    **trace_context
+                )
+        
+        if completed_on_restart:
+            logger.info(
+                f"Completed {len(completed_on_restart)} active sessions on restart",
+                operation="complete_orphaned_sessions_on_startup",
+                completed_count=len(completed_on_restart),
+                session_ids=completed_on_restart,
                 **trace_context
             )
-    
-    # Complete session
-    complete_session_on_exit()
-    
-    sys.exit(0)
+        
+        # Check for existing session marker file and expire it
+        session_marker_file = Path(".cursor/.session_id")
+        if session_marker_file.exists():
+            try:
+                import json
+                
+                # Read the marker file
+                with open(session_marker_file, 'r', encoding='utf-8') as f:
+                    marker_data = json.load(f)
+                
+                # Mark the session as expired by setting last_updated to old timestamp
+                # This ensures get_or_create_session_id() will create a new session
+                marker_data["last_updated"] = (datetime.now() - timedelta(hours=1)).isoformat()
+                
+                try:
+                    with open(session_marker_file, 'w', encoding='utf-8') as f:
+                        json.dump(marker_data, f, indent=2)
+                    logger.debug(
+                        "Session marker expired for fresh start",
+                        operation="complete_orphaned_sessions_on_startup",
+                        **trace_context
+                    )
+                except Exception as write_error:
+                    # If we can't write, that's okay - get_or_create_session_id will handle it
+                    logger.debug(
+                        f"Could not update session marker (will be handled by get_or_create_session_id): {write_error}",
+                        operation="complete_orphaned_sessions_on_startup",
+                        **trace_context
+                    )
+            except Exception as e:
+                logger.warn(
+                    f"Error processing session marker: {e}",
+                    operation="complete_orphaned_sessions_on_startup",
+                    **trace_context
+                )
+                # If marker file is corrupted, try to remove it (but don't fail if locked)
+                try:
+                    session_marker_file.unlink()
+                except:
+                    pass
+        
+        # Complete sessions older than 24 hours (additional cleanup for edge cases)
+        completed_old = manager.cleanup_orphaned_sessions(max_age_hours=24)
+        
+        if completed_old:
+            logger.info(
+                f"Completed {len(completed_old)} additional orphaned sessions",
+                operation="complete_orphaned_sessions_on_startup",
+                completed_count=len(completed_old),
+                **trace_context
+            )
+        else:
+            logger.debug("No additional orphaned sessions found", operation="complete_orphaned_sessions_on_startup", **trace_context)
+    except Exception as e:
+        logger.warn(f"Error completing orphaned sessions: {e}", operation="complete_orphaned_sessions_on_startup", **trace_context)
 
 
-def start_session():
-    """Start or get existing session."""
+def start_session() -> str:
+    """Start or retrieve current session."""
     global session_id
     
     if not SESSION_HOOKS_AVAILABLE:
@@ -136,352 +198,124 @@ def start_session():
     
     try:
         session_id = get_or_create_session_id()
-        logger.info(
-            "Session started/retrieved",
-            operation="start_session",
-            session_id=session_id,
-            **trace_context
-        )
-        
-        # Ensure session is in auto_pr_sessions.json
-        try:
-            script_path = Path(__file__).parent / "session_cli.py"
-            result = subprocess.run(
-                [sys.executable, str(script_path), "start"],
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-            if result.returncode == 0:
-                logger.info(
-                    "Session added to dashboard",
-                    operation="start_session",
-                    session_id=session_id,
-                    **trace_context
-                )
-        except Exception as e:
-            logger.warn(
-                "Failed to add session to dashboard (non-critical)",
-                operation="start_session",
-                error=str(e),
-                **trace_context
-            )
-        
+        logger.info("Session started/retrieved", operation="start_session", session_id=session_id, **trace_context)
         return session_id
     except Exception as e:
-        logger.error(
-            "Failed to start session",
-            operation="start_session",
-            error=str(e),
-            error_type=type(e).__name__,
-            **trace_context
-        )
+        logger.error(f"Failed to start session: {e}", operation="start_session", **trace_context)
         return None
 
 
-def start_monitoring_daemon():
+def start_monitoring_daemon() -> int:
     """Start the monitoring daemon in background."""
     global daemon_process
     
     try:
-        daemon_script = Path(__file__).parent / "auto_pr_daemon.py"
+        scripts_dir = Path(__file__).parent
+        daemon_script = scripts_dir / "auto_pr_daemon.py"
         
-        # Start daemon as background process
+        if not daemon_script.exists():
+            logger.warn("Daemon script not found", operation="start_monitoring_daemon", daemon_script=str(daemon_script), **trace_context)
+            return None
+        
+        # Start daemon in background
         daemon_process = subprocess.Popen(
-            [sys.executable, str(daemon_script), "--interval", "300"],
+            [sys.executable, str(daemon_script)],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+            cwd=scripts_dir.parent.parent  # Project root
         )
         
-        logger.info(
-            "Monitoring daemon started",
-            operation="start_monitoring_daemon",
-            daemon_pid=daemon_process.pid,
-            **trace_context
-        )
-        
-        return daemon_process
+        logger.info("Monitoring daemon started", operation="start_monitoring_daemon", daemon_pid=daemon_process.pid, **trace_context)
+        return daemon_process.pid
     except Exception as e:
-        logger.error(
-            "Failed to start monitoring daemon",
-            operation="start_monitoring_daemon",
-            error=str(e),
-            error_type=type(e).__name__,
-            **trace_context
-        )
+        logger.error(f"Failed to start monitoring daemon: {e}", operation="start_monitoring_daemon", **trace_context)
         return None
 
 
-def stop_conflicting_processes():
-    """
-    Stop any existing session managers to avoid conflicts.
+def cleanup_on_exit():
+    """Cleanup on exit - complete session and stop daemon."""
+    global daemon_process, session_id
     
-    This function is designed to NEVER fail - it always returns True to prevent
-    the script from exiting with code 1 at startup.
-    """
+    if SKIP_EXIT_CLEANUP:
+        logger.debug("Exit cleanup disabled (non-interactive mode)", operation="main", **trace_context)
+        return
+    
     try:
-        cleanup_script = Path(__file__).parent / "stop_all_session_managers.py"
+        logger.info("Cleaning up on exit", operation="cleanup_on_exit", **trace_context)
         
-        if not cleanup_script.exists():
-            return True  # Not an error - script just doesn't exist
-        
-        try:
-            logger.info(
-                "Checking for conflicting processes",
-                operation="stop_conflicting_processes",
-                **trace_context
-            )
-        except Exception:
-            # Even logging can fail - continue anyway
-            pass
-        
-        # Skip cleanup script in VSCode tasks to avoid hanging
-        # The cleanup is non-critical and can cause the script to hang on Windows
-        if IS_NON_INTERACTIVE:
-            return True  # Just return - cleanup is not critical for VSCode tasks
-        
-        try:
-            # Try to run cleanup script with very short timeout
-            # If it hangs, we'll just continue anyway
-            result = subprocess.run(
-                [sys.executable, str(cleanup_script)],
-                capture_output=True,
-                text=True,
-                timeout=2  # Very short timeout - 2 seconds max
-            )
-            
-            if result.returncode == 0 and result.stdout:
-                output = result.stdout.strip()
+        # Stop daemon
+        if daemon_process:
+            try:
+                daemon_process.terminate()
+                daemon_process.wait(timeout=5)
+                logger.debug("Daemon stopped", operation="cleanup_on_exit", **trace_context)
+            except (subprocess.TimeoutExpired, ProcessLookupError):
                 try:
-                    logger.info(
-                        "Stopped conflicting processes",
-                        operation="stop_conflicting_processes",
-                        output=output,
-                        **trace_context
-                    )
-                    print(output, flush=True)
-                except:
+                    daemon_process.kill()
+                except ProcessLookupError:
                     pass
-            # Non-zero return code is fine - just means nothing to clean up
-                    
-        except (subprocess.TimeoutExpired, Exception):
-            # Timeout or any exception is completely fine - just continue
-            # Don't log - this is expected behavior
-            pass
         
-        return True  # Always return True - never fail at startup
-        
-    except Exception as e:
-        # Catch ALL exceptions - this function must NEVER cause script to exit
-        print(f"DEBUG: Exception in stop_conflicting_processes (non-critical): {e}", flush=True)
-        try:
-            logger.warn(
-                "Failed to stop conflicting processes (non-critical)",
-                operation="stop_conflicting_processes",
-                error=str(e),
-                **trace_context
-            )
-        except:
-            # Even logging the error can fail - that's okay
-            pass
-        
-        # Always return True - DO NOT FAIL TASK AT STARTUP
-        return True
-
-
-def complete_orphaned_sessions_on_startup():
-    """
-    Complete any orphaned sessions from previous Cursor sessions.
-    
-    This function is designed to NEVER fail - it always returns True to prevent
-    the script from exiting with code 1 at startup.
-    """
-    try:
-        orphaned_script = Path(__file__).parent / "complete_orphaned_sessions.py"
-        if not orphaned_script.exists():
-            return True  # Not an error - script just doesn't exist
-        
-        try:
-            logger.info(
-                "Checking for orphaned sessions from previous Cursor sessions",
-                operation="complete_orphaned_sessions_on_startup",
-                **trace_context
-            )
-        except:
-            pass  # Logging failure is non-critical
-        
-        try:
-            result = subprocess.run(
-                [sys.executable, str(orphaned_script), "--max-inactivity-minutes", "1"],
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
-            if result.returncode == 0:
-                output = result.stdout.strip()
-                if output and "Completed" in output:
-                    try:
-                        logger.info(
-                            "Completed orphaned sessions",
-                            operation="complete_orphaned_sessions_on_startup",
-                            output=output,
-                            **trace_context
-                        )
-                    except:
-                        pass
-                    try:
-                        print(output, flush=True)  # Show user what was completed
-                    except:
-                        pass
-        except subprocess.TimeoutExpired:
-            # Timeout is non-critical
+        # Complete session
+        if session_id and SESSION_HOOKS_AVAILABLE:
             try:
-                logger.warn(
-                    "Orphaned sessions check timed out (non-critical)",
-                    operation="complete_orphaned_sessions_on_startup",
-                    **trace_context
-                )
-            except:
-                pass
-        except Exception as sub_err:
-            # Subprocess errors are non-critical
-            try:
-                logger.warn(
-                    f"Subprocess error in orphaned sessions check (non-critical): {sub_err}",
-                    operation="complete_orphaned_sessions_on_startup",
-                    **trace_context
-                )
-            except:
-                pass
-        
-        return True  # Always return True - never fail
-        
+                from auto_pr_session_manager import AutoPRSessionManager
+                manager = AutoPRSessionManager()
+                manager.complete_session(session_id, trigger="cursor_exit")
+                logger.info("Session completed on exit", operation="cleanup_on_exit", session_id=session_id, **trace_context)
+            except Exception as e:
+                logger.warn(f"Failed to complete session on exit: {e}", operation="cleanup_on_exit", **trace_context)
     except Exception as e:
-        # Catch ALL exceptions - this function must NEVER cause script to exit
-        try:
-            logger.warn(
-                "Failed to complete orphaned sessions (non-critical)",
-                operation="complete_orphaned_sessions_on_startup",
-                error=str(e),
-                **trace_context
-            )
-        except:
-            pass  # Even logging can fail
-        
-        # Always return True - DO NOT FAIL TASK AT STARTUP
-        return True
+        logger.error(f"Error during cleanup: {e}", operation="cleanup_on_exit", **trace_context)
 
 
 def main():
-    """Main startup function."""
-    # Stop any conflicting processes first
-    stop_conflicting_processes()
+    """Main entry point."""
+    global session_id, daemon_process
     
-    # Complete orphaned sessions from previous Cursor sessions
-    complete_orphaned_sessions_on_startup()
-    
-    # Register signal handlers
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-    
-    # Register atexit handler (runs on normal exit) only when allowed
-    if not SKIP_EXIT_CLEANUP:
-        atexit.register(complete_session_on_exit)
-    else:
-        logger.debug(
-            "Exit cleanup disabled (non-interactive mode)",
-            operation="main",
-            **trace_context
-        )
-    
-    logger.info(
-        "Starting Auto-PR Session Manager",
-        operation="main",
-        session_hooks_available=SESSION_HOOKS_AVAILABLE,
-        **trace_context
-    )
-    
-    # Start session
     try:
+        # Register cleanup handlers
+        if not SKIP_EXIT_CLEANUP:
+            atexit.register(cleanup_on_exit)
+            signal.signal(signal.SIGTERM, lambda s, f: cleanup_on_exit())
+            signal.signal(signal.SIGINT, lambda s, f: cleanup_on_exit())
+        
+        # Stop conflicting processes
+        stop_conflicting_processes()
+        
+        # Complete orphaned sessions
+        complete_orphaned_sessions_on_startup()
+        
+        logger.info("Starting Auto-PR Session Manager", operation="main", session_hooks_available=SESSION_HOOKS_AVAILABLE, **trace_context)
+        
+        # Start session
         session_id = start_session()
         if not session_id:
-            # Don't exit with code 1 - log warning and continue
-            # This allows the task to start even if session hooks aren't available
-            logger.warn(
-                "Failed to start session (session hooks may not be available)",
-                operation="main",
-                session_hooks_available=SESSION_HOOKS_AVAILABLE,
-                **trace_context
-            )
-            # Continue anyway - don't fail the task at startup
-            # The session manager can still run without a session ID
-    except Exception as e:
-        # Log the error but don't exit with code 1 - allow task to continue
-        try:
-            logger.error(
-                "Exception starting session (non-fatal)",
-                operation="main",
-                error=str(e),
-                error_type=type(e).__name__,
-                **trace_context
-            )
-            import traceback
-            logger.error(
-                "Traceback",
-                operation="main",
-                traceback=traceback.format_exc(),
-                **trace_context
-            )
-        except:
-            # Even error logging can fail - print to stdout as fallback
-            print(f"ERROR: Exception in main (non-fatal): {e}", flush=True)
+            logger.error("Failed to start session", operation="main", **trace_context)
+            sys.exit(1)
         
-        # Continue anyway - don't fail the task at startup
-        # Set session_id to None and continue
-        session_id = None
-    
-    # Start monitoring daemon
-    daemon = start_monitoring_daemon()
-    if not daemon:
-        logger.warn("Failed to start daemon, continuing without monitoring", operation="main", **trace_context)
-    
-    logger.info(
-        "Auto-PR Session Manager started successfully",
-        operation="main",
-        session_id=session_id,
-        daemon_pid=daemon.pid if daemon else None,
-        **trace_context
-    )
-    
-    # Keep process alive (for daemon mode)
-    if "--daemon" in sys.argv:
+        # Start monitoring daemon
+        daemon_pid = start_monitoring_daemon()
+        if not daemon_pid:
+            logger.warn("Failed to start monitoring daemon", operation="main", **trace_context)
+        
+        logger.info("Auto-PR Session Manager started successfully", operation="main", session_id=session_id, daemon_pid=daemon_pid, **trace_context)
+        
+        # In non-interactive mode, exit immediately after starting
+        if IS_NON_INTERACTIVE:
+            logger.debug("Non-interactive mode: exiting after startup", operation="main", **trace_context)
+            sys.exit(0)
+        
+        # In interactive mode, wait for interrupt
         try:
             while True:
-                time.sleep(60)  # Check every minute
-                # Check if daemon is still running
-                if daemon and daemon.poll() is not None:
-                    logger.warn(
-                        "Daemon process died, restarting",
-                        operation="main",
-                        exit_code=daemon.returncode,
-                        **trace_context
-                    )
-                    daemon = start_monitoring_daemon()
+                time.sleep(1)
         except KeyboardInterrupt:
-            signal_handler(signal.SIGINT, None)
-    else:
-        # Interactive mode - for VSCode tasks, exit immediately after starting
-        # The daemon will continue running in the background
-        # Use logger (which writes to stdout) to avoid PowerShell stderr issues
-        logger.info("Session Manager started successfully", operation="start_session")
-        logger.info(f"Session ID: {session_id}", operation="start_session")
-        logger.info(f"Monitoring: {'Active' if daemon else 'Inactive'}", operation="start_session")
-        logger.info("Daemon running in background. Session will complete automatically on Cursor close.", operation="start_session")
-        
-        # For VSCode tasks, exit immediately (daemon runs in background)
-        # The task will complete, but the daemon process continues
-        sys.exit(0)
+            logger.info("Interrupted by user", operation="main", **trace_context)
+            cleanup_on_exit()
+    
+    except Exception as e:
+        logger.error(f"Fatal error: {e}", operation="main", **trace_context)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
