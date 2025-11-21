@@ -1,0 +1,152 @@
+---
+description: "Mandatory 5-step enforcement pipeline for all code changes"
+alwaysApply: true
+---
+
+# PRIORITY: CRITICAL - Rule Enforcement & Compliance
+
+## ⚠️ MANDATORY PRE-IMPLEMENTATION CHECKLIST
+
+**BEFORE writing ANY code, you MUST complete this checklist:**
+
+### Step 1: Search & Discovery (MANDATORY)
+- [ ] **MUST** search for existing components: `codebase_search("How does [feature] work?")`
+- [ ] **MUST** check component library: `read_file("docs/reference/COMPONENT_LIBRARY_CATALOG.md")`
+- [ ] **MUST** find 2-3 similar implementations using `grep` and `codebase_search`
+- [ ] **MUST** verify file location using `list_dir` and `glob_file_search`
+- [ ] **MUST** read relevant documentation files
+- [ ] **MUST** search `docs/error-patterns.md` for similar past issues
+- [ ] **MUST** search `docs/engineering-decisions.md` for relevant decisions
+- [ ] **MUST** identify all error-prone operations (external I/O, async/await, user input, parsing, cross-service, auth, caching, events, concurrency)
+- [ ] **MUST** search for existing logging patterns in similar code
+- [ ] **MUST** search for trace propagation implementations
+- [ ] **MUST** search for state machine documentation (if stateful component)
+- [ ] **MUST** search for contract definitions (if schema changes)
+- [ ] **MUST** check for existing dependencies (if adding new dependency)
+- [ ] **MUST** verify transaction requirements (if multi-step DB operations)
+- [ ] **MUST** check layer synchronization needs (if touching any layer)
+- [ ] **MUST** check for old naming (VeroSuite, @verosuite/*) in affected files
+
+**STOP if you haven't completed all searches above.**
+
+### Step 2: Pattern Analysis (MANDATORY)
+- [ ] **MUST** identify the pattern to follow from similar implementations
+- [ ] **MUST** verify correct file path (check `.cursor/rules/04-architecture.mdc` for structure)
+- [ ] **MUST** check if component should be in `ui/` (reusable) or feature-specific
+- [ ] **MUST** verify import patterns match existing code
+- [ ] **MUST** analyze identified risks from Step 1
+- [ ] **MUST** check for known error patterns from `docs/error-patterns.md`
+- [ ] **MUST** verify error handling patterns match existing codebase
+- [ ] **MUST** check trace propagation patterns
+- [ ] **MUST** evaluate whether similar risks exist and plan guardrails
+- [ ] **MUST** verify state machine pattern matches existing implementations (if stateful)
+- [ ] **MUST** verify contract patterns match existing implementations (if schema changes)
+- [ ] **MUST** verify dependency patterns match existing code (if adding dependency)
+- [ ] **MUST** verify transaction patterns match existing code (if multi-step DB operations)
+- [ ] **MUST** verify layer synchronization patterns (if touching any layer)
+
+**STOP if pattern is unclear - ask for clarification.**
+
+### Step 3: Rule Compliance Check (MANDATORY)
+- [ ] **MUST** verify tenant isolation if touching database
+- [ ] **MUST** check if using correct file paths (see `.cursor/rules/04-architecture.mdc`)
+- [ ] **MUST** verify using shared libraries from `libs/common/` if applicable
+- [ ] **MUST** use current system date (check device date) - NEVER hardcode dates ⭐ **CRITICAL**
+- [ ] **MUST** verify structured logging requirements met
+- [ ] **MUST** verify trace ID propagation present
+- [ ] **MUST** verify error handling blocks present for all error-prone operations
+- [ ] **MUST** check for silent failures (empty catch blocks, swallowed promises, missing awaits)
+- [ ] **MUST** verify security event logging (if applicable)
+- [ ] **MUST** verify no architecture changes without permission
+- [ ] **MUST** verify no old naming (VeroSuite, @verosuite/*) introduced
+- [ ] **MUST** verify performance characteristics analyzed
+- [ ] **MUST** verify event schemas validated (if producing/consuming events)
+- [ ] **MUST** verify cross-platform compatibility (if applicable)
+- [ ] **MUST** verify accessibility requirements met (if UI component)
+- [ ] **MUST** verify tooling compliance (lint/format, TypeScript)
+- [ ] **MUST** verify refactor integrity (if refactoring)
+- [ ] **MUST** verify UX consistency (if UI component)
+- [ ] **MUST** verify file ownership respected
+- [ ] **MUST** verify tech debt logged (if applicable)
+- [ ] **MUST** verify file organization compliance
+- [ ] **MUST** verify workflow triggers are properly configured (if modifying workflows)
+
+**STOP if any rule violation detected.**
+
+### Step 4: Implementation Plan (MANDATORY)
+- [ ] **MUST** create todo list for complex features (>3 steps)
+- [ ] **MUST** explain what you found in searches
+- [ ] **MUST** describe the pattern you'll follow
+- [ ] **MUST** list files you'll create/modify
+
+**STOP if plan is not clear.**
+
+### Step 5: Post-Implementation Audit (MANDATORY) ⭐ **CRITICAL**
+- [ ] **MUST** audit ALL files touched for code compliance
+- [ ] **MUST** verify file paths are correct (monorepo structure)
+- [ ] **MUST** verify imports use correct paths (`@verofield/common/*`)
+- [ ] **MUST** verify no old naming (VeroSuite, @verosuite/*) remains
+- [ ] **MUST** verify tenant isolation (if database queries)
+- [ ] **MUST** verify file organization compliance
+- [ ] **MUST** verify date compliance (current system date, not hardcoded)
+- [ ] **MUST** verify following established patterns
+- [ ] **MUST** verify no duplicate components created
+- [ ] **MUST** verify TypeScript types are correct (no `any`)
+- [ ] **MUST** verify security boundaries maintained
+- [ ] **MUST** verify documentation updated with current date
+- [ ] **MUST** verify all error paths have tests
+- [ ] **MUST** verify logging meets structured logging policy
+- [ ] **MUST** verify no silent failures remain
+- [ ] **MUST** verify observability hooks present (trace IDs, structured logs)
+- [ ] **MUST** verify tests pass (regression + preventative)
+- [ ] **MUST** verify cross-layer traceability intact (traceId, spanId, requestId propagated)
+- [ ] **MUST** verify workflow triggers validated (if workflows modified)
+
+**STOP if any compliance violation found - fix before proceeding.**
+
+---
+
+## 🚫 HARD STOPS - DO NOT PROCEED IF:
+
+1. **File Path Violations**
+   - ❌ Using `backend/src/` instead of `apps/api/src/`
+   - ❌ Using `backend/prisma/` instead of `libs/common/prisma/`
+   - ❌ Creating files in wrong directory
+   - **ACTION:** Read `.cursor/rules/04-architecture.mdc` and correct path
+
+2. **Component Duplication**
+   - ❌ Creating component that already exists
+   - ❌ Not checking `frontend/src/components/ui/` first
+   - **ACTION:** Search for existing component, use it instead
+
+3. **Security Violations**
+   - ❌ Database query without `tenantId` filter
+   - ❌ Bypassing RLS policies
+   - ❌ Not validating tenant context
+   - **ACTION:** Read `.cursor/rules/03-security.mdc` and fix
+
+4. **Import Violations**
+   - ❌ Using relative imports across services
+   - ❌ Not using `@verofield/common/*` for shared code
+   - ❌ Duplicating code instead of using shared library
+   - **ACTION:** Read `.cursor/rules/04-architecture.mdc` and fix imports
+
+5. **Pattern Violations**
+   - ❌ Creating custom form pattern instead of using standard
+   - ❌ Not using `CustomerSearchSelector` for customer fields
+   - ❌ Not following established component patterns
+   - **ACTION:** Read relevant rule files
+
+6. **Date Violations** ⭐ **CRITICAL**
+   - ❌ Hardcoding dates (e.g., "2025-01-27" instead of checking current date)
+   - ❌ Using old dates in "Last Updated" fields
+   - ❌ Not updating "Last Updated" when modifying documentation
+   - **ACTION:** Always check device/system date before writing dates
+   - **FORMAT:** Use ISO 8601: `YYYY-MM-DD` (e.g., `2025-11-21`)
+   - **VERIFY:** Date must match current system date, not a hardcoded value
+
+---
+
+**Last Updated:** 2025-11-21  
+**Status:** Active Enforcement  
+**Priority:** CRITICAL - Must be followed for every implementation

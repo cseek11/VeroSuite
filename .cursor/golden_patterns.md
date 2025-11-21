@@ -6,3 +6,8 @@
 
 > Update this table whenever a new pattern file is merged under `.cursor/patterns/NNN_*`.
 
+
+
+
+
+
