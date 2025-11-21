@@ -3,6 +3,8 @@
 **Date:** 2025-11-20  
 **Status:** ✅ **FULLY RESTORED AND OPERATIONAL**
 
+**Note:** This document references historical file paths. Current monorepo structure uses `apps/api/src/` instead of `backend/src/` and `libs/common/prisma/` instead of `backend/prisma/`. See `.cursor/rules/04-architecture.mdc` for current structure.
+
 ---
 
 ## Summary
