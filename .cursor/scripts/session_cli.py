@@ -92,7 +92,7 @@ def cmd_start():
                 **trace_context
             )
         
-        print(f"✅ Started new session: {session_id}")
+        print(f"[OK] Started new session: {session_id}")
         print(f"   All commits will be tracked under this session.")
         print(f"   Use 'session complete' when done.")
         logger.info(
@@ -109,7 +109,7 @@ def cmd_start():
             error_type=type(e).__name__,
             **trace_context
         )
-        print(f"❌ Error: {e}", file=sys.stderr)
+        print(f"[ERROR] {e}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -117,7 +117,8 @@ def cmd_status():
     """Show current session status."""
     try:
         session_id = get_or_create_session_id()
-        print(f"📦 Active session: {session_id}")
+        # Use ASCII-safe output for Windows console compatibility
+        print(f"[Active session]: {session_id}")
         
         # Ensure session is registered with session manager
         # If session exists in marker file but not in manager, register it
@@ -191,7 +192,7 @@ def cmd_status():
             operation="cmd_status",
             **trace_context
         )
-        print("❌ Error: Session status check timed out", file=sys.stderr)
+        print("[ERROR] Session status check timed out", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
         logger.error(
@@ -201,7 +202,7 @@ def cmd_status():
             error_type=type(e).__name__,
             **trace_context
         )
-        print(f"❌ Error: {e}", file=sys.stderr)
+        print(f"[ERROR] {e}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -221,7 +222,7 @@ def cmd_complete():
         
         if result.returncode == 0:
             clear_session()
-            print(f"✅ Session {session_id} completed")
+            print(f"[OK] Session {session_id} completed")
             print(result.stdout)
             logger.info(
                 "Session completed",
@@ -256,7 +257,7 @@ def cmd_complete():
             error_type=type(e).__name__,
             **trace_context
         )
-        print(f"❌ Error: {e}", file=sys.stderr)
+        print(f"[ERROR] {e}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -264,7 +265,7 @@ def cmd_clear():
     """Clear session without completing (start fresh)."""
     try:
         clear_session()
-        print("✅ Session cleared - next commit will start a new session")
+        print("[OK] Session cleared - next commit will start a new session")
         logger.info(
             "Session cleared",
             operation="cmd_clear",
@@ -278,7 +279,7 @@ def cmd_clear():
             error_type=type(e).__name__,
             **trace_context
         )
-        print(f"❌ Error: {e}", file=sys.stderr)
+        print(f"[ERROR] {e}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -332,7 +333,7 @@ Examples:
             command=args.command,
             **trace_context
         )
-        print(f"❌ Unknown command: {args.command}", file=sys.stderr)
+        print(f"[ERROR] Unknown command: {args.command}", file=sys.stderr)
         parser.print_help()
         sys.exit(1)
     except Exception as e:
@@ -344,7 +345,7 @@ Examples:
             command=args.command,
             **trace_context
         )
-        print(f"❌ Unexpected error: {e}", file=sys.stderr)
+        print(f"[ERROR] Unexpected error: {e}", file=sys.stderr)
         sys.exit(1)
 
 

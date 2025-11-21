@@ -13,7 +13,7 @@ import pathlib
 import subprocess
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Set
 from collections import defaultdict
 
@@ -153,14 +153,13 @@ def is_excluded(file_path: str, config: Dict) -> bool:
         "gh pr list",
         "ConvertFrom-Json",
         "Format-List",
-        "ConvertFrom-Json",
         "--workflow=",
         "--limit",
         "--json",
         "databaseId",
-        "status",
         "conclusion",
     ]
+    # Note: "status" removed from patterns - too broad, excludes legitimate files
     
     file_path_lower = file_path.lower()
     for pattern in suspicious_patterns:
@@ -262,7 +261,7 @@ def get_changed_files(repo_path: pathlib.Path) -> Dict[str, Dict]:
                     changed_files[file_path] = {
                         "status": status,
                         "lines_changed": lines_changed,
-                        "last_modified": datetime.utcnow().isoformat() + "Z"
+                        "last_modified": datetime.now(timezone.utc).isoformat()
                     }
                 except Exception as e:
                     logger.debug(
@@ -273,7 +272,7 @@ def get_changed_files(repo_path: pathlib.Path) -> Dict[str, Dict]:
                     changed_files[file_path] = {
                         "status": status,
                         "lines_changed": 0,
-                        "last_modified": datetime.utcnow().isoformat() + "Z"
+                        "last_modified": datetime.now(timezone.utc).isoformat()
                     }
     
     except Exception as e:
@@ -344,11 +343,15 @@ def check_time_based_trigger(state: Dict, config: Dict) -> bool:
         return False
     
     last_change = datetime.fromisoformat(state["last_change_time"].replace("Z", "+00:00"))
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
+    
+    # Ensure both datetimes are timezone-aware for comparison
+    if last_change.tzinfo is None:
+        last_change = last_change.replace(tzinfo=timezone.utc)
     
     # Check inactivity threshold
     inactivity_hours = time_config.get("inactivity_hours", 4)
-    if (now - last_change.replace(tzinfo=None)).total_seconds() >= inactivity_hours * 3600:
+    if (now - last_change).total_seconds() >= inactivity_hours * 3600:
         logger.info(
             f"Inactivity threshold met: {inactivity_hours} hours",
             operation="check_time_based_trigger"
@@ -358,8 +361,11 @@ def check_time_based_trigger(state: Dict, config: Dict) -> bool:
     # Check max work hours
     if state.get("first_change_time"):
         first_change = datetime.fromisoformat(state["first_change_time"].replace("Z", "+00:00"))
+        # Ensure both datetimes are timezone-aware for comparison
+        if first_change.tzinfo is None:
+            first_change = first_change.replace(tzinfo=timezone.utc)
         max_work_hours = time_config.get("max_work_hours", 8)
-        if (now - first_change.replace(tzinfo=None)).total_seconds() >= max_work_hours * 3600:
+        if (now - first_change).total_seconds() >= max_work_hours * 3600:
             logger.info(
                 f"Max work hours threshold met: {max_work_hours} hours",
                 operation="check_time_based_trigger"
@@ -758,7 +764,7 @@ def main() -> None:
             return
     
     # Update state
-    now = datetime.utcnow().isoformat() + "Z"
+    now = datetime.now(timezone.utc).isoformat()
     state["last_change_time"] = now
     if not state.get("first_change_time"):
         state["first_change_time"] = now
