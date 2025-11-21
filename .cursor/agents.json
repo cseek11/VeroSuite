@@ -1,0 +1,102 @@
+{
+  "version": "2.0",
+  "agents": [
+    {
+      "id": "backend_refactor",
+      "name": "Backend Refactor Agent",
+      "description": "Refactors backend code and implements new features using NestJS + Prisma while enforcing tenant isolation, RLS, error handling, observability, and all backend rules.",
+      "promptPath": ".cursor/prompts/backend_reviewer.md",
+      "tags": ["backend", "nest", "prisma", "refactor", "implementation", "api"],
+      "rules": ["00-master", "01-enforcement", "02-core", "03-security", "06-error-resilience", "07-observability", "08-backend", "10-quality"]
+    },
+    {
+      "id": "frontend_component_agent",
+      "name": "UI Component Generator",
+      "description": "Generates React/React Native components, hooks, and design-system aligned UI following UX consistency, accessibility, and frontend architecture rules.",
+      "promptPath": ".cursor/prompts/frontend_reviewer.md",
+      "tags": ["frontend", "react", "react-native", "ui", "design-system"],
+      "rules": ["00-master", "01-enforcement", "02-core", "09-frontend", "13-ux-consistency", "10-quality"]
+    },
+    {
+      "id": "migration_assistant",
+      "name": "Migration Assistant",
+      "description": "Handles schema changes, Prisma migrations, DTO updates, type synchronization, and contract integrity across all layers.",
+      "promptPath": ".cursor/prompts/backend_reviewer.md",
+      "tags": ["backend", "database", "migration", "prisma", "contracts"],
+      "rules": ["00-master", "01-enforcement", "05-data", "08-backend", "10-quality"]
+    },
+    {
+      "id": "bug_fix_agent",
+      "name": "Bug Fix Agent",
+      "description": "Reproduces bugs via regression tests, identifies root causes, applies minimal fixes, and verifies compliance with the enforcement pipeline.",
+      "promptPath": ".cursor/prompts/tester.md",
+      "tags": ["bugfix", "regression", "testing", "backend", "frontend"],
+      "rules": ["00-master", "01-enforcement", "06-error-resilience", "10-quality", "14-verification"]
+    },
+    {
+      "id": "testing_agent",
+      "name": "Test Coverage Agent",
+      "description": "Generates complete test suites, regression tests, integration tests, and verifies full compliance with testing + verification standards.",
+      "promptPath": ".cursor/prompts/tester.md",
+      "tags": ["testing", "coverage", "quality", "verification"],
+      "rules": ["00-master", "01-enforcement", "10-quality", "14-verification"]
+    },
+    {
+      "id": "security_auditor",
+      "name": "Security Auditor",
+      "description": "Performs full security analysis across backend/frontend, enforcing tenant isolation, RLS, authentication, authorization, and safe coding patterns.",
+      "promptPath": ".cursor/prompts/security_review.md",
+      "tags": ["security", "rls", "auth", "audit"],
+      "rules": ["00-master", "03-security", "06-error-resilience", "07-observability"]
+    },
+    {
+      "id": "monorepo_navigator",
+      "name": "Monorepo Navigator",
+      "description": "Ensures correct file organization, boundaries between services, shared library usage, and overall monorepo integrity.",
+      "promptPath": ".cursor/prompts/infra_reviewer.md",
+      "tags": ["architecture", "monorepo", "file-structure"],
+      "rules": ["00-master", "01-enforcement", "04-architecture", "11-operations"]
+    },
+    {
+      "id": "ci_workflow_auditor",
+      "name": "CI Workflow Auditor",
+      "description": "Validates GitHub Actions workflows, Reward Score pipelines, triggers, artifacts, security scanning, and CI correctness.",
+      "promptPath": ".cursor/prompts/infra_reviewer.md",
+      "tags": ["ci", "workflow", "github-actions"],
+      "rules": ["00-master", "11-operations"]
+    },
+    {
+      "id": "architecture_advisor",
+      "name": "Architecture Advisor",
+      "description": "Evaluates proposed designs, ensures compliance with monorepo and service boundaries, and recommends safe architecture patterns.",
+      "promptPath": ".cursor/prompts/lead_review.md",
+      "tags": ["architecture", "design", "review", "patterns"],
+      "rules": ["00-master", "04-architecture", "05-data", "07-observability"]
+    },
+    {
+      "id": "tech_debt_agent",
+      "name": "Tech Debt Sweeper",
+      "description": "Identifies and resolves tech debt, simplifies legacy code, removes anti-patterns, and modernizes architecture without breaking rules.",
+      "promptPath": ".cursor/prompts/coach.md",
+      "tags": ["tech-debt", "cleanup", "refactor"],
+      "rules": ["00-master", "01-enforcement", "06-error-resilience", "07-observability", "12-tech-debt"]
+    },
+    {
+      "id": "coach_agent",
+      "name": "AI Coach",
+      "description": "Explains code, extracts reusable patterns, teaches best practices, and generates documentation-ready pattern suggestions.",
+      "promptPath": ".cursor/prompts/coach.md",
+      "tags": ["coach", "explain", "patterns"],
+      "rules": ["00-master"]
+    },
+    {
+      "id": "lead_review_agent",
+      "name": "Lead Engineer Review",
+      "description": "Performs full PR-grade review using Reward Score, enforcement pipeline, architecture rules, security rules, and domain patterns.",
+      "promptPath": ".cursor/prompts/lead_review.md",
+      "tags": ["review", "lead", "ci", "quality"],
+      "rules": ["00-master", "01-enforcement", "02-core", "03-security", "06-error-resilience", "07-observability", "08-backend", "09-frontend", "10-quality", "11-operations", "12-tech-debt", "13-ux-consistency", "14-verification"]
+    }
+  ]
+}
+

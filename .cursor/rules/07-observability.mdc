@@ -1,0 +1,63 @@
+---
+description: "Structured logging, tracing, and metrics"
+alwaysApply: true
+---
+<!-- @version: 2.0 @owner: platform-core -->
+
+# OBSERVABILITY
+
+## PURPOSE
+Guarantee that all important operations are observable via structured logs, traces, and metrics.
+
+---
+
+## STRUCTURED LOGGING
+All logs must be **structured** (JSON-like) and include:
+- `level`
+- `message`
+- `timestamp` (ISO 8601)
+- `traceId`
+- `tenantId` (when applicable)
+- Additional contextual fields
+
+❌ No `console.log` in production code.
+✅ Use centralized logger utilities.
+
+---
+
+## TRACE ID PROPAGATION
+- Generate a `traceId` for each incoming request.
+- Propagate it:
+  - Through service calls
+  - Into DB/logging layer
+  - Into external calls
+
+Every log for a request must include the same `traceId`.
+
+---
+
+## METRICS (AT MINIMUM)
+- API latency per endpoint (p50, p95, p99)
+- Error rate per endpoint
+- DB query counts or slow query metric
+- External service call latency/failure rate
+
+---
+
+## ENFORCEMENT PIPELINE INTEGRATION
+
+**Step 3:** Check that:
+- New/changed code uses structured logger.
+- Trace/tenant context is available and used.
+- No `console.log` or ad hoc logging was introduced.
+
+**Step 5:** Audit:
+- Every important path has at least one meaningful log.
+- Errors are logged once, near their source.
+
+---
+
+## VIOLATIONS (HARD STOP)
+- `console.log` in runtime code.
+- Unstructured free-text logging.
+- Missing traceId in logs for new/changed code.

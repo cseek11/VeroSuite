@@ -1,0 +1,80 @@
+---
+description: "Data contracts, state machines, and layer synchronization (DB ↔ API ↔ Frontend ↔ Events)"
+alwaysApply: true
+---
+<!-- @version: 2.0 @owner: data-team -->
+
+# DATA CONTRACTS & STATE INTEGRITY
+
+## PURPOSE
+Keep DB schema, DTOs, frontend types, and event contracts **perfectly synchronized**, and enforce correct state machine design.
+
+---
+
+## SOURCES OF TRUTH
+- **Database schema:** `libs/common/prisma/schema.prisma`
+- **Backend DTOs:** `apps/*/src/**/dto/*.ts`
+- **Frontend types:** `frontend/src/types/**`
+- **Events:** `docs/contracts/events/*.md`
+- **State machines:** `docs/state-machines/*.md`
+
+Any change to **one** must be reflected in the **others**.
+
+---
+
+## STATE MACHINES
+For stateful entities (e.g., WorkOrder, Invoice, Payment):
+- Must have a state machine doc: `docs/state-machines/<entity>-state-machine.md`
+- Include:
+  - All valid states
+  - Legal transitions
+  - Illegal transitions & error behavior
+  - Side effects & audit events
+
+**Code MUST:**
+- Enforce legal transitions in the service layer.
+- Emit audit logs on transitions.
+- Reject illegal transitions with explicit errors.
+
+---
+
+## LAYER SYNCHRONIZATION RULE
+If you change:
+- `schema.prisma` → you **must**:
+  - Create Prisma migration
+  - Update DTOs
+  - Update frontend types
+  - Update validators (Zod/class-validator)
+  - Update tests
+  - Update docs/contracts and state machines
+- DTOs → you **must**:
+  - Update frontend types
+  - Update tests
+  - Update docs/contracts
+- Frontend types → you **must** verify they still match backend DTOs.
+
+---
+
+## ENFORCEMENT PIPELINE INTEGRATION
+
+**Step 1: Search**
+- Search for existing DTOs, types, state machines.
+- Search `docs/contracts/` and `docs/state-machines/`.
+
+**Step 3: Compliance Check**
+- Confirm DB ⇄ DTO ⇄ types ⇄ events are synced.
+- Confirm state transitions are documented and legal.
+
+**Step 5: Post-Implementation Audit**
+- Re-run a "layer sync" check:
+  - Does every changed contract have corresponding updates?
+  - Are tests updated to reflect constraints?
+
+---
+
+## VIOLATIONS (HARD STOP)
+- Schema changes with no migration.
+- DTOs not matching schema.
+- Frontend types not matching DTOs.
+- State transitions implemented without docs.
+- Illegal transitions left unguarded.

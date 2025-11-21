@@ -1,25 +1,47 @@
-# REWARD_SCORE Rubric
-version: 1
-weights:
-  tests: 3
-  bug_fix: 2
-  docs: 1
-  performance: 1
-  security: 2
+version: 1.0
+name: "VeroField CI Reward Score Rubric"
+scoring:
+  search_first:
+    description: "AI searched existing code/patterns before implementing."
+    points: 10
+  pattern_match:
+    description: "Output matched an existing golden pattern."
+    points: 10
+  security_correct:
+    description: "RLS/Auth/Secrets correct with no violations."
+    points: 20
+  architecture_compliant:
+    description: "No cross-service imports, correct file placement."
+    points: 10
+  test_quality:
+    description: "Unit + regression tests meet 10-quality + 14-verification rules."
+    points: 15
+  observability_correct:
+    description: "Logging + errors follow 06-error-resilience + 07-observability."
+    points: 10
+  docs_updated:
+    description: "Docs, patterns, and state machines kept in sync."
+    points: 5
 penalties:
-  failing_ci: -4
-  missing_tests: -2
-  regression: -3
-rules:
-  - id: tests_pass
-    description: Award when automated tests are added/updated and pass CI.
-  - id: bug_fix
-    description: Documented bugs fixed with regression coverage.
-  - id: docs_updated
-    description: User-facing docs or ADRs updated.
-  - id: security_blocker
-    description: If CI reports critical security issue, auto set score ≤ -3.
-notes: >
-  CI pipelines must emit reward.json containing score, breakdown, and comment body
-  using `.cursor/ci/reward_score_comment_template.md`.
-
+  hardcoded_values:
+    description: "Dates, secrets, tenantId, or absolute URLs hardcoded."
+    points: -20
+  rls_violation:
+    description: "Query missing tenant isolation or bypassing RLS."
+    points: -50
+  missing_tests:
+    description: "Feature/bug fix shipped with no tests."
+    points: -20
+  architecture_drift:
+    description: "Code violates boundaries, service layering, or monorepo rules."
+    points: -25
+  unstructured_logging:
+    description: "console.log or missing traceId."
+    points: -10
+  unsafe_frontend:
+    description: "XSS-vulnerable rendering or unsafe interpolation."
+    points: -15
+output:
+  min_pass_score: 40
+  warning_score: 20
+  fail_score: 0
