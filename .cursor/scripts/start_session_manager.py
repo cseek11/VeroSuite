@@ -96,50 +96,70 @@ def complete_orphaned_sessions_on_startup():
         logger.info("Checking for orphaned sessions from previous Cursor sessions", operation="complete_orphaned_sessions_on_startup", **trace_context)
         
         from auto_pr_session_manager import AutoPRSessionManager
+        from datetime import datetime, timedelta
         manager = AutoPRSessionManager()
         
-        # Check for existing session marker file - if it exists, complete that session first
+        # Complete ALL active sessions on restart (they're from previous Cursor instances)
+        # This ensures no sessions accumulate as "active" indefinitely
+        active_session_ids = list(manager.sessions["active_sessions"].keys())
+        completed_on_restart = []
+        
+        for session_id in active_session_ids:
+            try:
+                logger.info(
+                    "Completing active session on restart",
+                    operation="complete_orphaned_sessions_on_startup",
+                    session_id=session_id,
+                    **trace_context
+                )
+                manager.complete_session(session_id, trigger="restart_cleanup")
+                completed_on_restart.append(session_id)
+            except Exception as e:
+                logger.warn(
+                    f"Failed to complete session {session_id}: {e}",
+                    operation="complete_orphaned_sessions_on_startup",
+                    session_id=session_id,
+                    **trace_context
+                )
+        
+        if completed_on_restart:
+            logger.info(
+                f"Completed {len(completed_on_restart)} active sessions on restart",
+                operation="complete_orphaned_sessions_on_startup",
+                completed_count=len(completed_on_restart),
+                session_ids=completed_on_restart,
+                **trace_context
+            )
+        
+        # Check for existing session marker file and expire it
         session_marker_file = Path(".cursor/.session_id")
         if session_marker_file.exists():
             try:
                 import json
-                from datetime import datetime, timedelta
                 
                 # Read the marker file
                 with open(session_marker_file, 'r', encoding='utf-8') as f:
                     marker_data = json.load(f)
-                    existing_session_id = marker_data.get("session_id")
-                    
-                    if existing_session_id:
-                        # Check if this session is still active in the session manager
-                        if existing_session_id in manager.sessions["active_sessions"]:
-                            logger.info(
-                                "Completing previous session from session marker",
-                                operation="complete_orphaned_sessions_on_startup",
-                                session_id=existing_session_id,
-                                **trace_context
-                            )
-                            manager.complete_session(existing_session_id, trigger="restart_cleanup")
-                        
-                        # Mark the session as expired by setting last_updated to old timestamp
-                        # This ensures get_or_create_session_id() will create a new session
-                        marker_data["last_updated"] = (datetime.now() - timedelta(hours=1)).isoformat()
-                        
-                        try:
-                            with open(session_marker_file, 'w', encoding='utf-8') as f:
-                                json.dump(marker_data, f, indent=2)
-                            logger.debug(
-                                "Session marker expired for fresh start",
-                                operation="complete_orphaned_sessions_on_startup",
-                                **trace_context
-                            )
-                        except Exception as write_error:
-                            # If we can't write, that's okay - get_or_create_session_id will handle it
-                            logger.debug(
-                                f"Could not update session marker (will be handled by get_or_create_session_id): {write_error}",
-                                operation="complete_orphaned_sessions_on_startup",
-                                **trace_context
-                            )
+                
+                # Mark the session as expired by setting last_updated to old timestamp
+                # This ensures get_or_create_session_id() will create a new session
+                marker_data["last_updated"] = (datetime.now() - timedelta(hours=1)).isoformat()
+                
+                try:
+                    with open(session_marker_file, 'w', encoding='utf-8') as f:
+                        json.dump(marker_data, f, indent=2)
+                    logger.debug(
+                        "Session marker expired for fresh start",
+                        operation="complete_orphaned_sessions_on_startup",
+                        **trace_context
+                    )
+                except Exception as write_error:
+                    # If we can't write, that's okay - get_or_create_session_id will handle it
+                    logger.debug(
+                        f"Could not update session marker (will be handled by get_or_create_session_id): {write_error}",
+                        operation="complete_orphaned_sessions_on_startup",
+                        **trace_context
+                    )
             except Exception as e:
                 logger.warn(
                     f"Error processing session marker: {e}",
@@ -152,13 +172,18 @@ def complete_orphaned_sessions_on_startup():
                 except:
                     pass
         
-        # Complete sessions older than 24 hours (additional cleanup)
-        completed = manager.cleanup_orphaned_sessions(max_age_hours=24)
+        # Complete sessions older than 24 hours (additional cleanup for edge cases)
+        completed_old = manager.cleanup_orphaned_sessions(max_age_hours=24)
         
-        if completed:
-            logger.info(f"Completed {len(completed)} orphaned sessions", operation="complete_orphaned_sessions_on_startup", completed_count=len(completed), **trace_context)
+        if completed_old:
+            logger.info(
+                f"Completed {len(completed_old)} additional orphaned sessions",
+                operation="complete_orphaned_sessions_on_startup",
+                completed_count=len(completed_old),
+                **trace_context
+            )
         else:
-            logger.debug("No orphaned sessions found", operation="complete_orphaned_sessions_on_startup", **trace_context)
+            logger.debug("No additional orphaned sessions found", operation="complete_orphaned_sessions_on_startup", **trace_context)
     except Exception as e:
         logger.warn(f"Error completing orphaned sessions: {e}", operation="complete_orphaned_sessions_on_startup", **trace_context)
 
