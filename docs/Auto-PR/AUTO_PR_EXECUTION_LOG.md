@@ -191,3 +191,6 @@ if file_path.startswith("cursor/") and not file_path.startswith(".cursor/"):
 **Compliance Sections:** ✅ Present  
 **Workflows:** ⚠️ Some issues detected
 
+
+
+
