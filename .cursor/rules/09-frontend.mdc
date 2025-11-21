@@ -1,0 +1,80 @@
+---
+description: "Frontend architecture: React/React Native, hooks, components, design system, and UX coherence"
+globs: "frontend/**/*.{ts,tsx},VeroFieldMobile/**/*.{ts,tsx}"
+alwaysApply: false
+---
+<!-- @version: 2.0 @owner: frontend-team -->
+
+# FRONTEND & UX ARCHITECTURE
+
+## PURPOSE
+Define React/React Native structure, enforce design system usage, and maintain consistent UX across the app.
+
+---
+
+## DIRECTORY STRUCTURE
+- `frontend/src/components/ui/` – design system components
+- `frontend/src/components/features/` – feature-level components
+- `frontend/src/hooks/` – shared hooks (data fetching, state)
+- `frontend/src/types/` – UI types and DTO mirrors
+
+---
+
+## DATA FETCHING
+- Use React Query (TanStack) in hooks, not directly in components:
+  - ✅ `useWorkOrders()`, `useCustomer(id)`
+  - ❌ `fetch`/`axios` inside React components
+
+Components should consume hooks, not manage data fetching themselves.
+
+---
+
+## DESIGN SYSTEM USAGE (MANDATORY)
+- Buttons, inputs, dialogs, alerts, etc. **must** use `components/ui` primitives.
+- No ad-hoc HTML elements with custom Tailwind for productized UI unless you are building the design system itself.
+
+---
+
+## UX CONSISTENCY RULES
+- **Spacing:**
+  - Use consistent padding (e.g., `p-6` for pages), `space-y-*` for vertical rhythm.
+- **Typography:**
+  - Standardize headings/body sizes (`text-xl`, `text-base`, `text-sm`, etc.).
+- **Error patterns:**
+  - Consistent error display (e.g., `text-red-600 text-sm mt-1`).
+- **Loading states:**
+  - Prefer skeletons/placeholders over raw "Loading...".
+  - Reuse standard loading components.
+
+---
+
+## ACCESSIBILITY
+- Use proper `role`, `aria-*` attributes on interactive elements.
+- Keyboard navigation must work for dialogs, menus, and buttons.
+- Sufficient contrast and accessible focus states.
+
+---
+
+## ENFORCEMENT PIPELINE INTEGRATION
+
+**Step 1:** Search for existing components, hooks, and UX patterns:
+- Component catalog docs
+- Existing implementation of similar flows
+
+**Step 3:** Check:
+- Design system components used where possible.
+- Spacing/typo consistent with existing screens.
+- Error/loading patterns aligned with existing UX.
+
+**Step 5:** Audit new/changed UI for:
+- Rogue ad-hoc components
+- Inconsistent spacing/typography
+- Missing accessibility attributes
+
+---
+
+## VIOLATIONS (HARD STOP)
+- Not using design system for standard UI elements.
+- New one-off buttons/forms when equivalents exist.
+- Inconsistent spacing/typography.
+- "Loading…" text instead of standard loading pattern.

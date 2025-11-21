@@ -402,3 +402,5 @@ Write-Host "  3. Run scripts/validate-file-organization.ps1 to verify" -Foregrou
 Write-Host "  4. Update .gitignore if needed" -ForegroundColor White
 
 
+
+

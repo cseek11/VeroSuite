@@ -1,0 +1,63 @@
+---
+description: "Error handling, resilience patterns, and no silent failures"
+alwaysApply: true
+---
+<!-- @version: 2.0 @owner: platform-core -->
+
+# ERROR RESILIENCE
+
+## PURPOSE
+Eliminate silent failures, categorize errors, and enforce robust, observable error handling across backend and frontend.
+
+---
+
+## NO SILENT FAILURES (NON-NEGOTIABLE)
+- ❌ No empty `catch` blocks.
+- ❌ No `.catch(() => {})`.
+- ❌ No ignoring `await`/Promise results.
+- ❌ No hidden failures with vague comments.
+
+**Every error path must:**
+- Log with `traceId` (and `tenantId` where applicable).
+- Throw/propagate a typed error (e.g., `AppError`, `HttpException`).
+- Surface a safe, user-appropriate message.
+
+---
+
+## ERROR CATEGORIES
+- **Validation errors** → 400 / user fixable
+- **Business rule errors** → 422 / domain constraints
+- **System errors** → 500 / infrastructure or unknown
+
+Backend must map errors to appropriate HTTP responses; frontend must show appropriate UX messages.
+
+---
+
+## USER-FACING MESSAGES
+- Never leak stack traces, internal IDs, or secrets.
+- Use concise, helpful messages:
+  - ✅ "Unable to save work order. Please check required fields."
+  - ❌ "NullReferenceException at WorkOrderService:42"
+
+---
+
+## ENFORCEMENT PIPELINE INTEGRATION
+
+**Step 1:** Search for similar error handling patterns in the same service/module.
+
+**Step 3:** Check:
+- All risky operations are wrapped in `try/catch` where needed.
+- All errors are logged with context and traceId.
+- Caller behavior is correct (propagate or handle with UI feedback).
+
+**Step 5:** Audit changed files for:
+- Empty catches
+- Unlogged throws
+- Missing error paths in tests
+
+---
+
+## VIOLATIONS (HARD STOP)
+- Silent failure patterns (empty catches, swallowed promises).
+- Raw system errors sent to clients.
+- Missing logs for failure paths.
