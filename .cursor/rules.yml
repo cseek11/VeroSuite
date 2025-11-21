@@ -1,60 +1,31 @@
 ---
 # Cursor Rules Index
-# This file defines the order and priority of rule files
+# This file defines the order and priority of rule files for Hybrid Rule System v2.0
 
-version: 3.0
+version: 2.0
 project: VeroField
-last_updated: 2025-11-16
+last_updated: 2025-11-21
 
 # Rule files are loaded in order (top to bottom)
 # Higher priority rules should be listed first
+# All .mdc files in .cursor/rules/ are automatically loaded in alphabetical order
+
 include:
-  - .cursor/rules/enforcement.md   # CRITICAL: Rule enforcement and compliance ⭐ NEW - READ FIRST
-  - .cursor/rules/core.md          # CRITICAL: Core philosophy, date/time, prohibited actions
-  - .cursor/rules/security.md      # CRITICAL: Security and tenant isolation
-  - .cursor/rules/naming-consistency.md  # CRITICAL: Project naming consistency (VeroField) ⭐ NEW
-  - .cursor/rules/monorepo.md     # CRITICAL: Monorepo structure and microservices ⭐ NEW
-  - .cursor/rules/state-integrity.md      # CRITICAL: State machines ⭐ NEW
-  - .cursor/rules/contracts.md            # CRITICAL: Data contracts ⭐ NEW
-  - .cursor/rules/dependencies.md          # CRITICAL: Dependency governance ⭐ NEW
-  - .cursor/rules/database-integrity.md   # CRITICAL: DB transactions ⭐ NEW
-  - .cursor/rules/layer-sync.md            # CRITICAL: Layer synchronization ⭐ NEW
-  - .cursor/rules/architecture-scope.md    # CRITICAL: Architecture limits ⭐ NEW
-  - .cursor/rules/ai-behavior.md   # CRITICAL: AI behavior directives and tool usage
-  - .cursor/rules/forms.md         # CRITICAL: Form patterns and validation
-  - .cursor/rules/frontend.md      # CRITICAL: Frontend component rules
-  - .cursor/rules/error-resilience.md       # CRITICAL: Error handling
-  - .cursor/rules/observability.md        # CRITICAL: Logging
-  - .cursor/rules/pattern-learning.md     # CRITICAL: Pattern learning
-  - .cursor/rules/predictive-prevention.md # CRITICAL: Prevention
-  - .cursor/rules/performance.md           # HIGH: Performance budgets ⭐ NEW
-  - .cursor/rules/eventing.md              # HIGH: Event consistency ⭐ NEW
-  - .cursor/rules/cross-platform.md        # HIGH: Cross-platform ⭐ NEW
-  - .cursor/rules/accessibility.md         # HIGH: Accessibility ⭐ NEW
-  - .cursor/rules/tooling.md               # HIGH: Tooling consistency ⭐ NEW
-  - .cursor/rules/refactoring.md           # HIGH: Refactor integrity ⭐ NEW
-  - .cursor/rules/backend.md       # HIGH: Backend development rules
-  - .cursor/rules/veroai.md        # HIGH: VeroAI development patterns ⭐ NEW
-  - .cursor/rules/docs.md          # HIGH: Documentation standards
-  - .cursor/rules/verification.md # HIGH: Verification and CI rules
-  - .cursor/rules/ux-consistency.md        # NORMAL-HIGH: UX coherence ⭐ NEW
-  - .cursor/rules/ownership.md             # HIGH: File ownership ⭐ NEW
-  - .cursor/rules/tech-debt.md             # NORMAL-HIGH: Tech debt ⭐ NEW
-  - .cursor/rules/styling.md       # NORMAL: Styling guidelines
+  - .cursor/rules/00-master.mdc          # CRITICAL: Master rule with CI, REWARD_SCORE, pattern system
+  - .cursor/rules/01-enforcement.mdc     # CRITICAL: Mandatory 5-step enforcement pipeline
+  - .cursor/rules/02-core.mdc            # CRITICAL: Core philosophy, date handling, tech stack
+  - .cursor/rules/03-security.mdc        # CRITICAL: Security rules: tenant isolation, RLS, auth
+  - .cursor/rules/04-architecture.mdc    # CRITICAL: Monorepo structure, service boundaries
+  - .cursor/rules/05-data.mdc            # CRITICAL: Data contracts, state machines, layer sync
+  - .cursor/rules/06-error-resilience.mdc # CRITICAL: Error handling, no silent failures
+  - .cursor/rules/07-observability.mdc   # CRITICAL: Structured logging, tracing, metrics
+  - .cursor/rules/08-backend.mdc         # HIGH: Backend architecture (NestJS, Prisma)
+  - .cursor/rules/09-frontend.mdc         # HIGH: Frontend architecture (React, React Native)
+  - .cursor/rules/10-quality.mdc         # HIGH: Quality standards (testing, performance)
+  - .cursor/rules/11-operations.mdc      # HIGH: CI/CD, workflows, reward score
+  - .cursor/rules/12-tech-debt.mdc       # NORMAL: Tech debt logging, TODO/FIXME
+  - .cursor/rules/13-ux-consistency.mdc # NORMAL: UI/UX coherence
+  - .cursor/rules/14-verification.mdc     # NORMAL: Verification & testing standards
 
-# Priority levels
-priority: sequential  # Load rules sequentially, earlier rules take precedence
-
-# Environment context (optional)
-environment_context:
-  dev:
-    database: local
-    auth: mock
-  prod:
-    database: supabase
-    auth: jwt
-
-
-
-
-
+# Note: Cursor should auto-discover .mdc files, but this file ensures explicit loading order
+# See .cursor/README.md for complete system documentation

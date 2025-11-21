@@ -1,0 +1,71 @@
+---
+description: "Backend architecture: NestJS, Prisma, controller-service-DTO patterns"
+globs: "apps/*/src/**/*.ts,libs/common/**/*.ts"
+alwaysApply: false
+---
+<!-- @version: 2.0 @owner: backend-team -->
+
+# BACKEND ARCHITECTURE (NESTJS + PRISMA)
+
+## PURPOSE
+Enforce clean NestJS architecture, safe Prisma usage, and consistent backend patterns.
+
+---
+
+## MODULE STRUCTURE
+- **Controllers**
+  - Thin; handle HTTP/transport only.
+  - No business logic.
+  - Use DTOs for request bodies.
+  - Use `@UseGuards(JwtAuthGuard)` and RBAC decorators.
+- **Services**
+  - Contain business logic.
+  - Use injected repositories/Prisma service.
+  - Implement state transitions and invariants.
+- **DTOs**
+  - Co-located with feature modules (`dto/*.ts`).
+  - Use `class-validator` or Zod.
+  - No `any` types.
+
+---
+
+## PRISMA USAGE
+- All tenant-scoped queries must:
+  - Include tenant filters **or**
+  - Rely on RLS with the correct session context.
+- Multi-step operations must use `prisma.$transaction`.
+- Avoid raw SQL unless performance-critical and justified.
+
+---
+
+## TESTING
+- Every non-trivial service method should have unit tests.
+- Controllers should have integration tests for:
+  - Validation
+  - Auth/RBAC
+  - Basic happy/error paths
+
+---
+
+## ENFORCEMENT PIPELINE INTEGRATION
+
+**Step 1:** Search for existing modules/services for similar features.
+
+**Step 3:** Check:
+- Controllers are thin and delegate to services.
+- DTOs exist and validate inputs.
+- Tenant isolation enforced according to `03-security.mdc`.
+- Transactions used where needed.
+
+**Step 5:** Audit touched files for:
+- Business logic in controllers
+- DTO/validation gaps
+- Missing tests for new logic
+
+---
+
+## VIOLATIONS (HARD STOP)
+- Business logic implemented in controllers.
+- Tenant-scoped queries without tenant filters.
+- Multi-table writes without transactions.
+- Endpoints with no DTO/validation.

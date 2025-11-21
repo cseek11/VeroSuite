@@ -1,0 +1,61 @@
+---
+description: "CI/CD workflows, reward score integration, deployments, tooling consistency"
+globs: ".github/workflows/**/*.{yml,yaml}"
+alwaysApply: false
+---
+<!-- @version: 2.0 @owner: devops-team -->
+
+# OPERATIONS & CI/CD
+
+## PURPOSE
+Define CI/CD standards, workflow structure, and Reward Score integration.
+
+---
+
+## WORKFLOW REQUIREMENTS
+- All workflows must define `on:` triggers.
+- PR workflows must handle: `opened`, `synchronize`, `reopened`.
+- `workflow_run` triggers must match workflow names exactly (case-sensitive).
+- Artifact names (for reward scores, coverage, etc.) must be consistent across workflows.
+
+---
+
+## REQUIRED CHECKS
+For each PR:
+- Lint/format checks.
+- Unit tests.
+- Integration tests (where applicable).
+- Security scans.
+- Reward Score publishing (JSON/markdown).
+
+Reward Score rules are defined in `00-master.mdc` and your existing CI automation docs.
+
+---
+
+## DEPLOYMENT RULES
+- Staging deployment before production.
+- Smoke tests on staging after deploy.
+- Health checks must pass before considering deployment successful.
+- Rollback strategy documented for each environment.
+
+---
+
+## ENFORCEMENT PIPELINE INTEGRATION
+
+**Step 1:** Search `.github/workflows/` for relevant workflow(s).
+
+**Step 3:** Check:
+- New/modified workflows have proper triggers.
+- Required checks run on PRs.
+- Reward Score artifacts/comments are consistent with expectations.
+
+**Step 5:** Audit:
+- Workflows aligned with current naming conventions.
+- No accidental disabling of tests or scans.
+
+---
+
+## VIOLATIONS (HARD STOP)
+- PR workflows lacking tests.
+- Reward Score not published where expected.
+- Inconsistent artifact names that break automation.

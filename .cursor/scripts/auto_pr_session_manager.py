@@ -899,6 +899,15 @@ Examples:
     status_parser = subparsers.add_parser('status', help='Get session status')
     status_parser.add_argument('--session-id', help='Specific session ID (optional)')
     
+    # Add command - Add PR to session
+    add_parser = subparsers.add_parser('add', help='Add PR to session')
+    add_parser.add_argument('--pr-number', required=True, help='PR number')
+    add_parser.add_argument('--title', required=True, help='PR title')
+    add_parser.add_argument('--body', default='', help='PR body')
+    add_parser.add_argument('--author', required=True, help='PR author')
+    add_parser.add_argument('--files', type=int, default=0, help='Files changed')
+    add_parser.add_argument('--session-id', help='Session ID (optional, will be generated if not provided)')
+    
     args = parser.parse_args()
     
     if not args.command:
@@ -960,6 +969,30 @@ Examples:
                 "count": len(completed)
             }
             print(json.dumps(result))
+        
+        elif args.command == 'add':
+            pr_data = {
+                "pr_title": args.title,
+                "pr_body": args.body,
+                "author": args.author,
+                "files_changed": args.files,
+                "timestamp": datetime.now().isoformat(),
+                "commit_messages": [args.title]
+            }
+            
+            should_skip, session_id, session_data = manager.add_to_session(
+                args.pr_number,
+                pr_data,
+                args.session_id if hasattr(args, 'session_id') and args.session_id else None
+            )
+            
+            result = {
+                "pr_number": args.pr_number,
+                "session_id": session_id,
+                "should_skip_scoring": should_skip,
+                "session": session_data
+            }
+            print(json.dumps(result, indent=2, default=str))
         
         elif args.command == 'status':
             status = manager.get_session_status(
