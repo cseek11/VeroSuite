@@ -53,3 +53,5 @@ When reviewing proposed changes:
 - "APPROVED" → Only if ZERO violations exist.
 - "CHANGES REQUIRED" → List each violation clearly and map it to its originating `.mdc` rule file.
 
+
+
