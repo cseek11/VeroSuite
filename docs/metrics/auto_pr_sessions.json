@@ -1,16 +1,5 @@
 {
-  "active_sessions": {
-    "cseek_cursor-20251121-1609": {
-      "session_id": "cseek_cursor-20251121-1609",
-      "author": "cseek_cursor",
-      "started": "2025-11-21T16:11:54.705422",
-      "last_activity": "2025-11-21T16:11:54.705422",
-      "prs": [],
-      "total_files_changed": 0,
-      "test_files_added": 0,
-      "status": "active"
-    }
-  },
+  "active_sessions": {},
   "completed_sessions": [
     {
       "session_id": "unknown-20251119-2204",
@@ -330,8 +319,21 @@
       "completed": "2025-11-21T13:23:20.540294",
       "completion_trigger": "restart_cleanup",
       "duration_minutes": -251
+    },
+    {
+      "session_id": "cseek_cursor-20251121-1609",
+      "author": "cseek_cursor",
+      "started": "2025-11-21T16:11:54.705422",
+      "last_activity": "2025-11-21T16:11:54.705422",
+      "prs": [],
+      "total_files_changed": 0,
+      "test_files_added": 0,
+      "status": "completed",
+      "completed": "2025-11-21T16:26:06.156220",
+      "completion_trigger": "restart_cleanup",
+      "duration_minutes": 14
     }
   ],
   "version": "1.0",
-  "last_updated": "2025-11-21T16:11:54.705422"
+  "last_updated": "2025-11-21T16:26:06.156220"
 }
