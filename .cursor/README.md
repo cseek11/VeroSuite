@@ -5,7 +5,7 @@
 This directory contains the complete VeroField AI Governance System for Cursor.
 
 It includes:
-- The Hybrid 15-File Rule System (00–14 .mdc files)
+- The Hybrid Rule System (15 core rule files 00–14 .mdc, plus additional specialized rules)
 - Persona Prompts for review, refactor, testing, frontend, backend, security
 - A Multi-Agent System with .cursor/agents.json
 - Full CI/Reward Score integration
