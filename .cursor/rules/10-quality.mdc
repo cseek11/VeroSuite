@@ -1,0 +1,72 @@
+---
+description: "Quality standards: testing, regression, performance budgets"
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+<!-- @version: 2.0 @owner: qa-team -->
+
+# QUALITY STANDARDS
+
+## PURPOSE
+Define testing requirements, regression expectations, and performance constraints for all changes.
+
+---
+
+## TESTING RULES (SUMMARY)
+- **New features:**
+  - MUST have unit tests.
+  - SHOULD have integration tests if DB/API involved.
+- **Bug fixes:**
+  - MUST have regression tests that reproduce the bug.
+- **Critical workflows:**
+  - SHOULD have E2E tests (Playwright).
+
+(See `14-verification.mdc` for full matrix.)
+
+---
+
+## PERFORMANCE BUDGETS
+**Backend:**
+- Simple GET: median < 200ms
+- Typical POST/PUT: median < 300ms
+- Heavy operations: median < 500ms with clear justification
+
+**Frontend:**
+- FCP < 1.5s (target)
+- LCP < 2s
+- TTI < 3s (for main flows)
+
+---
+
+## ANTI-PERFORMANCE PATTERNS (HARD STOP)
+- N+1 queries in loops.
+- Redundant API calls from multiple components.
+- Missing indexes for high-volume queries.
+
+---
+
+## TECH DEBT HOOKS
+- If you knowingly introduce or touch tech debt:
+  - Log/update it in `docs/tech-debt.md`.
+  - Ensure TODO/FIXME rules in `12-tech-debt.mdc` are followed.
+
+---
+
+## ENFORCEMENT PIPELINE INTEGRATION
+
+**Step 3:** Check:
+- Tests added/updated for new logic.
+- Potential N+1 or redundant calls.
+- Any tech debt identified and logged.
+
+**Step 5:** Audit:
+- Tests exist and pass.
+- Performance risks documented or mitigated.
+- Tech debt, if introduced, has remediation plan.
+
+---
+
+## VIOLATIONS (HARD STOP)
+- New feature with zero tests.
+- Bug fix without regression test.
+- Known N+1 queries introduced.

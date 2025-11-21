@@ -1,0 +1,169 @@
+---
+description: "Security rules: tenant isolation, RLS, authentication, secrets, input validation"
+alwaysApply: true
+---
+
+# PRIORITY: CRITICAL - Security & Tenant Isolation
+
+**⚠️ CRITICAL:** This file consolidates all security requirements for VeroField. All security rules are NON-NEGOTIABLE.
+
+---
+
+## PRIORITY: CRITICAL - Tenant Isolation & Row Level Security (RLS)
+
+### Database Operations
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** verify `tenant_id` is set before database queries
+- ✅ **ALWAYS** use RLS policies for tenant-scoped tables
+- ✅ **ALWAYS** set tenant context per request: `SET LOCAL app.tenant_id = <tenant_id>`
+- ✅ **ALWAYS** use `SET LOCAL ROLE verofield_app` for application queries
+- ✅ **ALWAYS** verify tenant isolation is maintained in all queries
+- ✅ **ALWAYS** use Prisma with RLS-aware queries (never bypass RLS)
+
+**NEVER:**
+- ❌ **NEVER** bypass tenant isolation
+- ❌ **NEVER** expose tenant data across boundaries
+- ❌ **NEVER** query without tenant_id filter
+- ❌ **NEVER** use superuser roles in application requests
+- ❌ **NEVER** disable RLS policies
+- ❌ **NEVER** trust client-provided tenant_id
+
+### API Operations
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** verify tenant context in requests
+- ✅ **ALWAYS** use tenant middleware to set context
+- ✅ **ALWAYS** extract tenant_id from authenticated JWT (never from request body/params)
+- ✅ **ALWAYS** validate tenant_id matches authenticated user's tenant
+- ✅ **ALWAYS** enforce tenant isolation at controller/service layer
+
+**NEVER:**
+- ❌ **NEVER** trust client-provided tenant_id
+- ❌ **NEVER** skip authentication checks
+- ❌ **NEVER** allow cross-tenant data access
+- ❌ **NEVER** expose tenant_id in error messages
+
+---
+
+## PRIORITY: CRITICAL - Authentication & Authorization
+
+### JWT Authentication
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** validate JWT tokens on every request
+- ✅ **ALWAYS** verify token signature and expiration
+- ✅ **ALWAYS** extract tenant_id and roles from validated JWT
+- ✅ **ALWAYS** use strong JWT secrets (minimum 32 characters, randomly generated)
+- ✅ **ALWAYS** set appropriate token expiration (24h for access, 7d for refresh)
+- ✅ **ALWAYS** store tokens securely (httpOnly cookies or secure storage)
+- ✅ **ALWAYS** require HTTPS in production
+
+**NEVER:**
+- ❌ **NEVER** hardcode JWT secrets
+- ❌ **NEVER** use weak JWT secrets
+- ❌ **NEVER** skip token validation
+- ❌ **NEVER** expose JWT secrets in logs or error messages
+- ❌ **NEVER** use same secrets for dev/staging/prod
+
+### Role-Based Access Control (RBAC)
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** check permissions at controller/service layer
+- ✅ **ALWAYS** use tenant-scoped permissions
+- ✅ **ALWAYS** implement resource-level authorization
+- ✅ **ALWAYS** verify user roles before allowing actions
+- ✅ **ALWAYS** maintain audit trail for permission changes
+
+**NEVER:**
+- ❌ **NEVER** skip permission checks
+- ❌ **NEVER** trust client-provided roles
+- ❌ **NEVER** allow privilege escalation
+- ❌ **NEVER** expose permission logic to client
+
+---
+
+## PRIORITY: CRITICAL - Secrets Management
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** use environment variables for all secrets
+- ✅ **ALWAYS** exclude `.env` files from version control (`.gitignore` verified)
+- ✅ **ALWAYS** create `env.example` template files
+- ✅ **ALWAYS** validate required environment variables at startup
+- ✅ **ALWAYS** use different secrets for dev/staging/prod
+- ✅ **ALWAYS** use secret management services in production
+
+**NEVER:**
+- ❌ **NEVER** commit `.env` files
+- ❌ **NEVER** hardcode secrets in source code
+- ❌ **NEVER** use production keys in development
+- ❌ **NEVER** share secrets in chat/email
+- ❌ **NEVER** use weak secrets
+- ❌ **NEVER** expose secrets in error messages
+- ❌ **NEVER** log secrets
+
+---
+
+## PRIORITY: CRITICAL - Input Validation & XSS Prevention
+
+### Input Validation
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** validate all user inputs on the backend
+- ✅ **ALWAYS** use shared validation constants consistently
+- ✅ **ALWAYS** enforce input size limits
+- ✅ **ALWAYS** validate file uploads (type, size, content)
+- ✅ **ALWAYS** use parameterized queries (Prisma handles this)
+- ✅ **ALWAYS** validate against schemas (DTOs, JSON Schema)
+
+**NEVER:**
+- ❌ **NEVER** trust client input
+- ❌ **NEVER** skip input validation
+- ❌ **NEVER** use SQL concatenation
+- ❌ **NEVER** allow arbitrary file uploads
+- ❌ **NEVER** expose validation errors with sensitive details
+
+### XSS Prevention
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** sanitize HTML content before storage
+- ✅ **ALWAYS** sanitize config objects recursively
+- ✅ **ALWAYS** validate for XSS vectors (script tags, javascript: protocol, event handlers, eval())
+- ✅ **ALWAYS** use React's built-in XSS protection (don't use `dangerouslySetInnerHTML` unless necessary)
+- ✅ **ALWAYS** sanitize widget configs before storage
+
+**NEVER:**
+- ❌ **NEVER** use `dangerouslySetInnerHTML` without sanitization
+- ❌ **NEVER** allow `eval()` or `Function()` constructors
+- ❌ **NEVER** trust widget configs without validation
+- ❌ **NEVER** skip sanitization for user-generated content
+
+---
+
+## Security Checklist (Quick Reference)
+
+### Before Any Database Operation:
+- [ ] Verify tenant_id is set
+- [ ] Verify RLS policies are enabled
+- [ ] Verify tenant context is set
+- [ ] Verify no cross-tenant access possible
+
+### Before Any API Endpoint:
+- [ ] Verify authentication is required
+- [ ] Verify authorization is checked
+- [ ] Verify tenant isolation is enforced
+- [ ] Verify input validation is implemented
+- [ ] Verify XSS prevention is in place
+
+### Before Any Code Change:
+- [ ] Verify no secrets are hardcoded
+- [ ] Verify environment variables are used
+- [ ] Verify `.env` files are gitignored
+- [ ] Verify security headers are configured
+- [ ] Verify audit logging is implemented
+
+---
+
+**Last Updated:** 2025-11-21  
+**Maintained By:** Security Team  
+**Review Frequency:** Quarterly or when security requirements change
