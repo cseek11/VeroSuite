@@ -1,17 +1,27 @@
 {
   "tracked_files": {
-    "cursor/.session_id": {
+    ".cursor/scripts/monitor_changes.py": {
       "status": "M",
-      "lines_changed": 0,
-      "last_modified": "2025-11-21T14:46:15.407745Z"
+      "lines_changed": 30,
+      "last_modified": "2025-11-21T22:41:22.648448+00:00"
     },
-    "docs/planning/VEROFORGE_DEVELOPMENT_PLAN.md": {
+    "docs/metrics/auto_pr_sessions.json": {
+      "status": "M",
+      "lines_changed": 28,
+      "last_modified": "2025-11-21T22:41:22.770041+00:00"
+    },
+    "AUTO_PR_DAEMON_INVESTIGATION.md": {
       "status": "??",
       "lines_changed": 0,
-      "last_modified": "2025-11-21T14:46:18.073717Z"
+      "last_modified": "2025-11-21T22:41:22.957529+00:00"
+    },
+    "AUTO_PR_ROOT_CAUSE_ANALYSIS.md": {
+      "status": "??",
+      "lines_changed": 0,
+      "last_modified": "2025-11-21T22:41:23.061186+00:00"
     }
   },
-  "last_change_time": "2025-11-21T14:46:18.073717Z",
-  "first_change_time": "2025-11-21T13:35:34.038881Z",
+  "last_change_time": "2025-11-21T22:41:23.061186+00:00",
+  "first_change_time": "2025-11-21T22:40:45.871843Z",
   "batches": []
 }
