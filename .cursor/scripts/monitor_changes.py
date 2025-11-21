@@ -681,9 +681,10 @@ def create_auto_pr(files: Dict[str, Dict], config: Dict, repo_path: pathlib.Path
                         operation="create_auto_pr",
                         pr_number=pr_number
                     )
+                    # Workflow expects inputs.pr_number format
                     workflow_result = subprocess.run(
                         [gh_path, "workflow", "run", "swarm_compute_reward_score.yml",
-                         "--ref", branch_name, "--field", f"pr_number={pr_number}"],
+                         "--ref", branch_name, "--field", f"inputs.pr_number={pr_number}"],
                         cwd=repo_path,
                         capture_output=True,
                         text=True,
