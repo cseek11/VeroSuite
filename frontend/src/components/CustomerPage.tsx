@@ -78,20 +78,18 @@ const CustomerPage: React.FC<CustomerPageProps> = ({ customerId: propCustomerId 
   
   const customerId = propCustomerId || params.customerId;
   const [activeTab, setActiveTab] = useState('overview');
-  const [isEditing, setIsEditing] = useState(false);
-  const [showQuickActions, setShowQuickActions] = useState(false);
+  // const [isEditing, setIsEditing] = useState(false); // Unused - kept for potential future use
+  // const [showQuickActions, setShowQuickActions] = useState(false); // Unused - kept for potential future use
 
   // Handle tab changes
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
 
-  const handleNavigateToNote = (noteId: string) => {
-    setActiveTab('notes');
-    // You can add additional logic here to scroll to the specific note
-    // For example, you could pass the noteId to the CustomerNotesHistory component
-    logger.debug('Navigating to note', { noteId }, 'CustomerPage');
-  };
+  // const handleNavigateToNote = (noteId: string) => { // Unused - kept for potential future use
+  //   setActiveTab('notes');
+  //   logger.debug('Navigating to note', { noteId }, 'CustomerPage');
+  // };
 
   // Fetch customer data
   const { data: customer, isLoading: customerLoading, error: customerError } = useQuery({
@@ -101,31 +99,32 @@ const CustomerPage: React.FC<CustomerPageProps> = ({ customerId: propCustomerId 
   });
 
   // Update customer mutation with comprehensive cache invalidation
-  const updateCustomerMutation = useMutation({
-    mutationFn: (updates: Partial<Customer>) => enhancedApi.customers.update(customerId!, updates),
-    onSuccess: (data) => {
-      logger.debug('Customer updated successfully', { customerName: data.name, customerId }, 'CustomerPage');
-      
-      // Invalidate all customer-related queries
-      queryClient.invalidateQueries({ queryKey: ['customer', customerId] });
-      queryClient.invalidateQueries({ queryKey: ['crm', 'customer', customerId] });
-      queryClient.invalidateQueries({ queryKey: ['enhanced-customer', customerId] });
-      queryClient.invalidateQueries({ queryKey: ['customers'] });
-      queryClient.invalidateQueries({ queryKey: ['secure-customers'] });
-      queryClient.invalidateQueries({ queryKey: ['search'] });
-      queryClient.invalidateQueries({ queryKey: ['unified-search'] });
-      
-      setIsEditing(false);
-      
-      // Dispatch custom event for real-time updates
-      window.dispatchEvent(new CustomEvent('customerUpdated', {
-        detail: { customerId, customer: data }
-      }));
-    },
-    onError: (error) => {
-      logger.error('Customer update failed', error, 'CustomerPage');
-    }
-  });
+  // Note: Currently unused but kept for potential future use
+  // const updateCustomerMutation = useMutation({
+  //   mutationFn: (updates: Partial<Account>) => enhancedApi.customers.update(customerId!, updates),
+  //   onSuccess: (data) => {
+  //     logger.debug('Customer updated successfully', { customerName: data.name, customerId }, 'CustomerPage');
+  //     
+  //     // Invalidate all customer-related queries
+  //     queryClient.invalidateQueries({ queryKey: ['customer', customerId] });
+  //     queryClient.invalidateQueries({ queryKey: ['crm', 'customer', customerId] });
+  //     queryClient.invalidateQueries({ queryKey: ['enhanced-customer', customerId] });
+  //     queryClient.invalidateQueries({ queryKey: ['customers'] });
+  //     queryClient.invalidateQueries({ queryKey: ['secure-customers'] });
+  //     queryClient.invalidateQueries({ queryKey: ['search'] });
+  //     queryClient.invalidateQueries({ queryKey: ['unified-search'] });
+  //     
+  //     // setIsEditing(false); // Commented out - setIsEditing is unused
+  //     
+  //     // Dispatch custom event for real-time updates
+  //     window.dispatchEvent(new CustomEvent('customerUpdated', {
+  //       detail: { customerId, customer: data }
+  //     }));
+  //   },
+  //   onError: (error) => {
+  //     logger.error('Customer update failed', error, 'CustomerPage');
+  //   }
+  // });
 
   // Delete customer mutation with automatic redirection
   const deleteCustomerMutation = useMutation({
@@ -301,7 +300,7 @@ const CustomerPage: React.FC<CustomerPageProps> = ({ customerId: propCustomerId 
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="text-2xl font-bold text-gray-900 truncate">{customer.name}</h1>
                 <Badge 
-                  variant={customer.status === 'active' ? 'default' : customer.status === 'prospect' ? 'secondary' : 'destructive'}
+                  variant={customer.status === 'active' ? 'default' : customer.status === 'inactive' ? 'secondary' : 'destructive'}
                   className="text-xs px-2 py-1"
                 >
                   {customer.status}
