@@ -86,7 +86,6 @@ const SearchSuggestion: React.FC<SearchSuggestionProps> = ({ account, isSelected
             )}
           </div>
         </div>
-        </div>
       </div>
     </div>
   );
