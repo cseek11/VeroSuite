@@ -1,0 +1,663 @@
+#!/usr/bin/env python3
+"""
+Complete Auto-PR Session Management System
+Handles micro-PR batching, session tracking, and completion triggers.
+
+File Structure:
+.cursor/
+├── scripts/
+│   ├── auto_pr_session_manager.py (this file)
+│   ├── compute_reward_score.py (modified)
+│   └── session_completion_handler.py (new)
+├── config/
+│   └── session_config.yaml (new)
+└── data/
+    └── auto_pr_sessions.json (generated)
+
+Usage:
+    # Check if PR should be batched
+    python auto_pr_session_manager.py check --pr-number 326 --title "auto-pr: add tests"
+    
+    # Complete a session manually
+    python auto_pr_session_manager.py complete --session-id user1-20251119-1430
+    
+    # Check for orphaned sessions (cron job)
+    python auto_pr_session_manager.py cleanup
+    
+    # Get session status
+    python auto_pr_session_manager.py status
+"""
+
+import json
+import re
+import os
+import sys
+import argparse
+from typing import Dict, List, Optional, Tuple
+from datetime import datetime, timedelta
+from pathlib import Path
+from dataclasses import dataclass, asdict
+import yaml
+
+# Configuration
+CONFIG_FILE = Path(".cursor/config/session_config.yaml")
+SESSION_DATA_FILE = Path("docs/metrics/auto_pr_sessions.json")
+REWARD_HISTORY_FILE = Path("docs/metrics/reward_scores.json")
+
+
+@dataclass
+class SessionConfig:
+    """Configuration for session management."""
+    timeout_minutes: int = 30
+    idle_warning_minutes: int = 15
+    auto_pr_patterns: List[str] = None
+    completion_markers: List[str] = None
+    min_files_for_manual: int = 5
+    enable_timeout_completion: bool = True
+    enable_heuristic_completion: bool = True
+    
+    def __post_init__(self):
+        if self.auto_pr_patterns is None:
+            self.auto_pr_patterns = [
+                r"^auto-pr:",
+                r"^wip:",
+                r"^\[auto\]",
+                r"^checkpoint:",
+                r"^cursor-session",
+                r"^🤖",  # Robot emoji for auto-commits
+            ]
+        
+        if self.completion_markers is None:
+            self.completion_markers = [
+                "ready for review",
+                "ready to review",
+                "complete",
+                "final pr",
+                "[session-complete]",
+                "[ready]",
+                "done with session",
+                "finished",
+                "✅",  # Checkmark emoji
+            ]
+
+
+@dataclass
+class Session:
+    """Represents a cursor session with multiple PRs."""
+    session_id: str
+    author: str
+    started: str
+    last_activity: str
+    prs: List[str]
+    total_files_changed: int
+    test_files_added: int
+    docs_updated: bool = False
+    status: str = "active"  # active, idle, warning, completed
+    completion_trigger: Optional[str] = None
+    metadata: Dict = None
+    
+    def __post_init__(self):
+        if self.metadata is None:
+            self.metadata = {}
+
+
+class AutoPRSessionManager:
+    """Manages batching of auto-PR micro-commits into scorable units."""
+    
+    def __init__(self, config_path: Optional[Path] = None):
+        self.config = self.load_config(config_path or CONFIG_FILE)
+        self.sessions = self.load_sessions()
+    
+    def load_config(self, path: Path) -> SessionConfig:
+        """Load configuration from YAML file."""
+        if path.exists():
+            with open(path, 'r') as f:
+                data = yaml.safe_load(f)
+                return SessionConfig(**data)
+        else:
+            # Create default config
+            config = SessionConfig()
+            self.save_config(config, path)
+            return config
+    
+    def save_config(self, config: SessionConfig, path: Path):
+        """Save configuration to YAML file."""
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, 'w') as f:
+            yaml.dump(asdict(config), f, default_flow_style=False)
+    
+    def load_sessions(self) -> Dict:
+        """Load existing session data."""
+        if SESSION_DATA_FILE.exists():
+            with open(SESSION_DATA_FILE, 'r') as f:
+                return json.load(f)
+        return {
+            "version": "1.0",
+            "last_updated": datetime.now().isoformat(),
+            "active_sessions": {},
+            "completed_sessions": []
+        }
+    
+    def save_sessions(self):
+        """Persist session data."""
+        self.sessions["last_updated"] = datetime.now().isoformat()
+        SESSION_DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(SESSION_DATA_FILE, 'w') as f:
+            json.dump(self.sessions, f, indent=2)
+    
+    def is_auto_pr(
+        self, 
+        pr_title: str, 
+        pr_body: str, 
+        commit_messages: List[str],
+        files_changed: int = 0
+    ) -> bool:
+        """
+        Determine if this is an auto-PR micro-commit.
+        
+        Detection logic:
+        1. PR title matches auto-PR pattern
+        2. Commit messages match pattern
+        3. Cursor session metadata in PR body
+        4. Very small PR (< 5 files) with no tests (heuristic)
+        """
+        # Check PR title
+        for pattern in self.config.auto_pr_patterns:
+            if re.search(pattern, pr_title, re.IGNORECASE):
+                return True
+        
+        # Check commit messages
+        for msg in commit_messages:
+            for pattern in self.config.auto_pr_patterns:
+                if re.search(pattern, msg, re.IGNORECASE):
+                    return True
+        
+        # Check for cursor session metadata
+        if re.search(r'\[cursor-session:\s*[\w-]+\]', pr_body, re.IGNORECASE):
+            return True
+        
+        # Heuristic: Very small PR with no explicit markers
+        # (conservative - only if < 5 files)
+        if files_changed < self.config.min_files_for_manual:
+            if not any(keyword in pr_body.lower() for keyword in ["test", "fix", "feature", "doc"]):
+                return True
+        
+        return False
+    
+    def extract_session_id(
+        self, 
+        pr_title: str, 
+        pr_body: str,
+        author: str,
+        timestamp: datetime
+    ) -> Optional[str]:
+        """
+        Extract or generate cursor session ID.
+        
+        Priority:
+        1. Explicit [cursor-session: ID] in PR body
+        2. Session-ID: field in PR body
+        3. Generated from timestamp + author
+        """
+        # Check PR body for explicit session ID
+        session_match = re.search(
+            r'\[cursor-session:\s*([\w-]+)\]', 
+            pr_body, 
+            re.IGNORECASE
+        )
+        if session_match:
+            return session_match.group(1)
+        
+        session_match = re.search(
+            r'Session-ID:\s*([\w-]+)', 
+            pr_body, 
+            re.IGNORECASE
+        )
+        if session_match:
+            return session_match.group(1)
+        
+        # Look for active session from same author
+        active_session = self._find_active_session(author, timestamp)
+        if active_session:
+            return active_session
+        
+        # Generate new session ID
+        return f"{author}-{timestamp.strftime('%Y%m%d-%H%M')}"
+    
+    def _find_active_session(self, author: str, timestamp: datetime) -> Optional[str]:
+        """Find active session for author within timeout window."""
+        timeout = timedelta(minutes=self.config.timeout_minutes)
+        
+        for session_id, session_data in self.sessions["active_sessions"].items():
+            if session_data["author"] != author:
+                continue
+            
+            last_activity = datetime.fromisoformat(session_data["last_activity"])
+            if timestamp - last_activity <= timeout:
+                return session_id
+        
+        return None
+    
+    def add_to_session(
+        self, 
+        pr_number: str,
+        pr_data: Dict,
+        session_id: Optional[str] = None
+    ) -> Tuple[bool, str, Dict]:
+        """
+        Add a PR to an active session or create new session.
+        
+        Returns:
+            (should_skip_scoring, session_id, session_data)
+        """
+        timestamp = datetime.fromisoformat(
+            pr_data.get("timestamp", datetime.now().isoformat())
+        )
+        author = pr_data.get("author", "unknown")
+        
+        # Extract or generate session ID
+        if not session_id:
+            session_id = self.extract_session_id(
+                pr_data.get("pr_title", ""),
+                pr_data.get("pr_body", ""),
+                author,
+                timestamp
+            )
+        
+        # Create or update session
+        if session_id not in self.sessions["active_sessions"]:
+            self.sessions["active_sessions"][session_id] = {
+                "session_id": session_id,
+                "author": author,
+                "started": timestamp.isoformat(),
+                "last_activity": timestamp.isoformat(),
+                "prs": [],
+                "total_files_changed": 0,
+                "test_files_added": 0,
+                "docs_updated": False,
+                "status": "active",
+                "metadata": {}
+            }
+        
+        # Update session
+        session = self.sessions["active_sessions"][session_id]
+        session["prs"].append(pr_number)
+        session["last_activity"] = timestamp.isoformat()
+        session["total_files_changed"] += pr_data.get("files_changed", 0)
+        
+        if pr_data.get("test_files_added", False):
+            session["test_files_added"] += 1
+        
+        if pr_data.get("docs_updated", False):
+            session["docs_updated"] = True
+        
+        # Update status
+        session["status"] = self._calculate_session_status(session)
+        
+        self.save_sessions()
+        
+        return True, session_id, session
+    
+    def _calculate_session_status(self, session: Dict) -> str:
+        """Calculate current status of session."""
+        last_activity = datetime.fromisoformat(session["last_activity"])
+        now = datetime.now()
+        minutes_idle = (now - last_activity).total_seconds() / 60
+        
+        if minutes_idle > self.config.timeout_minutes:
+            return "idle"
+        elif minutes_idle > self.config.idle_warning_minutes:
+            return "warning"
+        else:
+            return "active"
+    
+    def should_complete_session(
+        self,
+        session_id: str,
+        pr_data: Dict
+    ) -> Tuple[bool, Optional[str]]:
+        """
+        Determine if session should be completed and scored.
+        
+        Completion triggers:
+        1. Explicit marker in PR title/body
+        2. Session timeout exceeded
+        3. Tests + docs heuristic
+        
+        Returns:
+            (should_complete, trigger_reason)
+        """
+        session = self.sessions["active_sessions"].get(session_id)
+        if not session:
+            return False, None
+        
+        pr_title = pr_data.get("pr_title", "").lower()
+        pr_body = pr_data.get("pr_body", "").lower()
+        
+        # Check explicit completion markers
+        for marker in self.config.completion_markers:
+            if marker.lower() in pr_title or marker.lower() in pr_body:
+                return True, f"explicit_marker: {marker}"
+        
+        # Check timeout
+        if self.config.enable_timeout_completion:
+            last_activity = datetime.fromisoformat(session["last_activity"])
+            timestamp = datetime.fromisoformat(
+                pr_data.get("timestamp", datetime.now().isoformat())
+            )
+            
+            if timestamp - last_activity > timedelta(minutes=self.config.timeout_minutes):
+                return True, "timeout"
+        
+        # Check heuristic (tests + docs)
+        if self.config.enable_heuristic_completion:
+            if session["test_files_added"] > 0 and session["docs_updated"]:
+                return True, "heuristic_tests_docs"
+        
+        return False, None
+    
+    def complete_session(
+        self, 
+        session_id: str,
+        trigger: str = "manual"
+    ) -> Dict:
+        """
+        Complete a session and prepare it for scoring.
+        
+        Returns:
+            Aggregated PR data for scoring
+        """
+        if session_id not in self.sessions["active_sessions"]:
+            raise ValueError(f"Session {session_id} not found in active sessions")
+        
+        session = self.sessions["active_sessions"].pop(session_id)
+        
+        # Add completion metadata
+        session["completed"] = datetime.now().isoformat()
+        session["completion_trigger"] = trigger
+        session["status"] = "completed"
+        
+        # Calculate duration
+        started = datetime.fromisoformat(session["started"])
+        completed = datetime.fromisoformat(session["completed"])
+        session["duration_minutes"] = int((completed - started).total_seconds() / 60)
+        
+        # Move to completed sessions
+        self.sessions["completed_sessions"].append(session)
+        self.save_sessions()
+        
+        return session
+    
+    def cleanup_orphaned_sessions(self, max_age_hours: int = 24) -> List[str]:
+        """
+        Find and complete orphaned sessions (stale for > max_age_hours).
+        
+        Returns:
+            List of completed session IDs
+        """
+        completed = []
+        now = datetime.now()
+        max_age = timedelta(hours=max_age_hours)
+        
+        for session_id, session in list(self.sessions["active_sessions"].items()):
+            last_activity = datetime.fromisoformat(session["last_activity"])
+            
+            if now - last_activity > max_age:
+                print(f"⚠️  Orphaned session detected: {session_id} (idle {(now - last_activity).total_seconds() / 3600:.1f}h)")
+                self.complete_session(session_id, trigger="orphaned_cleanup")
+                completed.append(session_id)
+        
+        return completed
+    
+    def get_session_status(self, session_id: Optional[str] = None) -> Dict:
+        """Get status of session(s)."""
+        if session_id:
+            if session_id in self.sessions["active_sessions"]:
+                return self.sessions["active_sessions"][session_id]
+            else:
+                # Search completed
+                for session in self.sessions["completed_sessions"]:
+                    if session["session_id"] == session_id:
+                        return session
+                return None
+        else:
+            # Return all sessions
+            return {
+                "active": len(self.sessions["active_sessions"]),
+                "completed": len(self.sessions["completed_sessions"]),
+                "active_sessions": self.sessions["active_sessions"],
+                "recent_completed": self.sessions["completed_sessions"][-10:]
+            }
+    
+    def generate_session_metadata(self, session_id: str) -> str:
+        """Generate metadata string to include in PR body."""
+        return f"\n\n---\n[cursor-session: {session_id}]\n<!-- Auto-PR Session Tracking -->"
+
+
+def compute_reward_score_with_batching(
+    pr_data: Dict,
+    manager: AutoPRSessionManager
+) -> Optional[Dict]:
+    """
+    Modified reward score computation that handles auto-PR batching.
+    
+    Integration point with existing compute_reward_score.py
+    
+    Args:
+        pr_data: PR metadata from GitHub
+        manager: AutoPRSessionManager instance
+    
+    Returns:
+        Reward score dict or None if PR should be skipped
+    """
+    pr_number = pr_data.get("pr_number")
+    pr_title = pr_data.get("pr_title", "")
+    pr_body = pr_data.get("pr_body", "")
+    commit_messages = pr_data.get("commit_messages", [])
+    files_changed = pr_data.get("files_changed", 0)
+    
+    # Check if this is an auto-PR
+    if manager.is_auto_pr(pr_title, pr_body, commit_messages, files_changed):
+        print(f"📦 Detected auto-PR: #{pr_number}")
+        
+        # Add to session
+        should_skip, session_id, session = manager.add_to_session(
+            pr_number,
+            pr_data
+        )
+        
+        print(f"   → Added to session: {session_id}")
+        print(f"   → Session now has {len(session['prs'])} PRs")
+        
+        # Check if session should be completed
+        should_complete, trigger = manager.should_complete_session(session_id, pr_data)
+        
+        if should_complete:
+            print(f"✅ Completing session {session_id} (trigger: {trigger})")
+            completed_session = manager.complete_session(session_id, trigger)
+            
+            # Score the entire session
+            return compute_session_score(completed_session, pr_data, manager)
+        else:
+            # Skip scoring for this micro-PR
+            print(f"⏭️  Skipping score (session incomplete)")
+            return None
+    
+    # Regular PR - score normally
+    print(f"📊 Regular PR detected: #{pr_number} - scoring normally")
+    return compute_normal_score(pr_data)
+
+
+def compute_session_score(
+    session: Dict,
+    latest_pr_data: Dict,
+    manager: AutoPRSessionManager
+) -> Dict:
+    """
+    Compute reward score for completed session.
+    
+    Aggregates all PRs in the session and scores as a single unit.
+    """
+    # Create aggregated PR data
+    aggregated_data = latest_pr_data.copy()
+    
+    # Override with session aggregates
+    aggregated_data["pr_numbers"] = session["prs"]
+    aggregated_data["session_id"] = session["session_id"]
+    aggregated_data["files_changed"] = session["total_files_changed"]
+    aggregated_data["test_files_added"] = session["test_files_added"] > 0
+    aggregated_data["docs_updated"] = session["docs_updated"]
+    aggregated_data["is_session_batch"] = True
+    aggregated_data["session_duration_minutes"] = session.get("duration_minutes", 0)
+    aggregated_data["completion_trigger"] = session.get("completion_trigger", "unknown")
+    
+    # Add batch notes
+    notes = (
+        f"🔄 Batched session {session['session_id']} "
+        f"({len(session['prs'])} PRs, "
+        f"{session['duration_minutes']}min duration, "
+        f"trigger: {session['completion_trigger']})"
+    )
+    aggregated_data["batch_notes"] = notes
+    
+    print(f"\n{notes}")
+    print(f"   PRs: {', '.join(session['prs'])}")
+    print(f"   Files changed: {session['total_files_changed']}")
+    print(f"   Tests added: {session['test_files_added']}")
+    print(f"   Docs updated: {session['docs_updated']}")
+    
+    # Compute score with regular logic
+    # This calls your existing compute_reward_score logic
+    return compute_normal_score(aggregated_data)
+
+
+def compute_normal_score(pr_data: Dict) -> Dict:
+    """
+    Regular scoring logic - delegates to your existing compute_reward_score.py
+    
+    This is a placeholder - in production, this would import and call
+    your existing reward score computation function.
+    """
+    # Import your existing scoring function
+    # from .compute_reward_score import calculate_reward_score
+    # return calculate_reward_score(pr_data)
+    
+    # Placeholder for demonstration
+    return {
+        "pr_number": pr_data.get("pr_number"),
+        "score": 0,
+        "breakdown": {},
+        "notes": "Score computation delegated to existing system",
+        "is_session_batch": pr_data.get("is_session_batch", False)
+    }
+
+
+# CLI Interface
+def main():
+    """CLI interface for session management."""
+    parser = argparse.ArgumentParser(
+        description="Auto-PR Session Manager",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Check if PR should be batched
+  python auto_pr_session_manager.py check --pr-number 326 --title "auto-pr: add tests"
+  
+  # Complete session manually
+  python auto_pr_session_manager.py complete --session-id user1-20251119-1430
+  
+  # Check for orphaned sessions
+  python auto_pr_session_manager.py cleanup
+  
+  # Get session status
+  python auto_pr_session_manager.py status
+        """
+    )
+    
+    subparsers = parser.add_subparsers(dest='command', help='Commands')
+    
+    # Check command
+    check_parser = subparsers.add_parser('check', help='Check if PR should be batched')
+    check_parser.add_argument('--pr-number', required=True, help='PR number')
+    check_parser.add_argument('--title', required=True, help='PR title')
+    check_parser.add_argument('--body', default='', help='PR body')
+    check_parser.add_argument('--author', required=True, help='PR author')
+    check_parser.add_argument('--files', type=int, default=0, help='Files changed')
+    
+    # Complete command
+    complete_parser = subparsers.add_parser('complete', help='Complete a session')
+    complete_parser.add_argument('--session-id', required=True, help='Session ID')
+    
+    # Cleanup command
+    cleanup_parser = subparsers.add_parser('cleanup', help='Cleanup orphaned sessions')
+    cleanup_parser.add_argument('--max-age', type=int, default=24, help='Max age in hours')
+    
+    # Status command
+    status_parser = subparsers.add_parser('status', help='Get session status')
+    status_parser.add_argument('--session-id', help='Specific session ID (optional)')
+    
+    args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        return
+    
+    # Initialize manager
+    manager = AutoPRSessionManager()
+    
+    # Execute command
+    if args.command == 'check':
+        pr_data = {
+            "pr_number": args.pr_number,
+            "pr_title": args.title,
+            "pr_body": args.body,
+            "author": args.author,
+            "files_changed": args.files,
+            "timestamp": datetime.now().isoformat(),
+            "commit_messages": [args.title]  # Simplified
+        }
+        
+        is_auto = manager.is_auto_pr(
+            args.title,
+            args.body,
+            [args.title],
+            args.files
+        )
+        
+        print(f"Is Auto-PR: {is_auto}")
+        
+        if is_auto:
+            session_id = manager.extract_session_id(
+                args.title,
+                args.body,
+                args.author,
+                datetime.now()
+            )
+            print(f"Session ID: {session_id}")
+            print(f"\nAdd to PR body:\n{manager.generate_session_metadata(session_id)}")
+    
+    elif args.command == 'complete':
+        try:
+            session = manager.complete_session(args.session_id, trigger="manual_cli")
+            print(f"✅ Session {args.session_id} completed")
+            print(json.dumps(session, indent=2))
+        except ValueError as e:
+            print(f"❌ Error: {e}")
+            sys.exit(1)
+    
+    elif args.command == 'cleanup':
+        completed = manager.cleanup_orphaned_sessions(args.max_age)
+        if completed:
+            print(f"✅ Completed {len(completed)} orphaned sessions:")
+            for session_id in completed:
+                print(f"   - {session_id}")
+        else:
+            print("✅ No orphaned sessions found")
+    
+    elif args.command == 'status':
+        status = manager.get_session_status(args.session_id if hasattr(args, 'session_id') else None)
+        print(json.dumps(status, indent=2))
+
+
+if __name__ == "__main__":
+    main()

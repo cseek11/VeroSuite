@@ -47,22 +47,19 @@ jobs:
             const fs = require('fs');
             const report = JSON.parse(fs.readFileSync('health_report.json', 'utf8'));
             
-            const title = `⚠️ Session Health Alert - ${new Date().toISOString().split('T')[0]}`;
-            const body = `## Session Health Report
-            
-**Status:** ${report.status.toUpperCase()}
-**Timestamp:** ${report.timestamp}
-
-### Metrics
-${Object.entries(report.metrics || {}).map(([k, v]) => `- ${k}: ${v}`).join('\n')}
-
-### Alerts
-${report.alerts.map(a => `- ⚠️ ${a}`).join('\n')}
-
-${report.orphaned_session_ids && report.orphaned_session_ids.length > 0 ? `
-### Orphaned Sessions (first 10)
-${report.orphaned_session_ids.map(id => `- ${id}`).join('\n')}
-` : ''}
+            const dateStr = new Date().toISOString().split('T')[0];
+            const title = '⚠️ Session Health Alert - ' + dateStr;
+            const statusUpper = report.status.toUpperCase();
+            const metricsStr = Object.entries(report.metrics || {}).map(([k, v]) => '- ' + k + ': ' + v).join('\n');
+            const alertsStr = report.alerts.map(a => '- ⚠️ ' + a).join('\n');
+            const orphanedStr = report.orphaned_session_ids && report.orphaned_session_ids.length > 0 
+                ? '\n### Orphaned Sessions (first 10)\n' + report.orphaned_session_ids.map(id => '- ' + id).join('\n')
+                : '';
+            const body = '## Session Health Report\n\n' +
+                '**Status:** ' + statusUpper + '\n' +
+                '**Timestamp:** ' + report.timestamp + '\n\n' +
+                '### Metrics\n' + metricsStr + '\n\n' +
+                '### Alerts\n' + alertsStr + orphanedStr;
 
 ---
 *This is an automated health check. Please review and take action if needed.*`;

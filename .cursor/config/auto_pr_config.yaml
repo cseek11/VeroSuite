@@ -1,0 +1,37 @@
+# Auto-PR Configuration
+# Last Updated: 2025-11-21
+
+time_based:
+  enabled: true
+  inactivity_hours: 4
+  max_work_hours: 8
+
+change_threshold:
+  enabled: true
+  min_files: 5
+  min_lines: 200
+  require_test_file: false
+
+logical_grouping:
+  enabled: true
+  group_by_directory: true
+  group_by_file_type: true
+  max_group_size: 10
+
+pr_settings:
+  base_branch: main
+  auto_title: true
+  auto_body: true
+  include_file_list: true
+
+excluded_paths:
+  - ".git/"
+  - "node_modules/"
+  - ".venv/"
+  - "__pycache__/"
+  - ".cursor/cache/"
+  - "*.log"
+  - "*.tmp"
+  - ".cursor/__pycache__/"
+
+

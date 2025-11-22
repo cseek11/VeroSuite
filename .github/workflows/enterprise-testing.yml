@@ -30,12 +30,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd backend && npm ci
+          cd apps/api && npm ci
           cd ../frontend && npm ci
 
       - name: Lint backend code
         run: |
-          cd backend
+          cd apps/api
           npm run lint
 
       - name: Lint frontend code
@@ -45,7 +45,7 @@ jobs:
 
       - name: Type check backend
         run: |
-          cd backend
+          cd apps/api
           npm run typecheck
 
       - name: Type check frontend
@@ -55,7 +55,7 @@ jobs:
 
       - name: Security audit
         run: |
-          cd backend && npm audit --audit-level=moderate
+          cd apps/api && npm audit --audit-level=moderate
           cd ../frontend && npm audit --audit-level=moderate
 
       - name: Dependency vulnerability scan
@@ -85,13 +85,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd backend && npm ci
+          cd apps/api && npm ci
           cd ../frontend && npm ci
 
       - name: Run backend unit tests
         if: matrix.test-suite == 'backend-unit'
         run: |
-          cd backend
+          cd apps/api
           npm run test:unit -- --coverage --maxWorkers=4
 
       - name: Run frontend unit tests
@@ -103,7 +103,7 @@ jobs:
       - name: Run backend component tests
         if: matrix.test-suite == 'backend-component'
         run: |
-          cd backend
+          cd apps/api
           npm run test:component -- --coverage
 
       - name: Run frontend component tests
@@ -115,7 +115,7 @@ jobs:
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
         with:
-          files: ./backend/coverage/lcov.info,./frontend/coverage/lcov.info
+          files: ./apps/api/coverage/lcov.info,./frontend/coverage/lcov.info
           flags: ${{ matrix.test-suite }}
           name: ${{ matrix.test-suite }}-coverage
 
@@ -126,7 +126,7 @@ jobs:
     needs: unit-tests
     services:
       postgres:
-        image: postgres:${{ env.POSTGRES_VERSION }}
+        image: postgres:15
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: verosuite_test
@@ -139,7 +139,7 @@ jobs:
           - 5432:5432
 
       redis:
-        image: redis:${{ env.REDIS_VERSION }}
+        image: redis:7
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -160,23 +160,23 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd backend && npm ci
+          cd apps/api && npm ci
           cd ../frontend && npm ci
 
       - name: Setup test database
         run: |
-          cd backend
+          cd apps/api
           npm run db:generate
           npm run db:push
 
       - name: Run integration tests
         run: |
-          cd backend
+          cd apps/api
           npm run test:integration -- --maxWorkers=2
 
       - name: Run workflow tests
         run: |
-          cd backend
+          cd apps/api
           npm run test:workflow -- --maxWorkers=2
 
   # Security Tests
@@ -196,12 +196,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd backend && npm ci
+          cd apps/api && npm ci
           cd ../frontend && npm ci
 
       - name: Run OWASP security tests
         run: |
-          cd backend
+          cd apps/api
           npm run test:security
 
       - name: Run SAST scan
@@ -240,7 +240,7 @@ jobs:
     needs: security-tests
     services:
       postgres:
-        image: postgres:${{ env.POSTGRES_VERSION }}
+        image: postgres:15
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: verosuite_test
@@ -253,7 +253,7 @@ jobs:
           - 5432:5432
 
       redis:
-        image: redis:${{ env.REDIS_VERSION }}
+        image: redis:7
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -274,34 +274,34 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd backend && npm ci
+          cd apps/api && npm ci
           cd ../frontend && npm ci
 
       - name: Setup test database
         run: |
-          cd backend
+          cd apps/api
           npm run db:generate
           npm run db:push
 
       - name: Start application
         run: |
-          cd backend
+          cd apps/api
           npm run start:test &
           sleep 30
 
       - name: Run load tests
         run: |
-          cd backend/test/performance
+          cd apps/api/test/performance
           k6 run load-testing.js
 
       - name: Run stress tests
         run: |
-          cd backend/test/performance
+          cd apps/api/test/performance
           k6 run stress-testing.js
 
       - name: Run performance regression tests
         run: |
-          cd backend
+          cd apps/api
           npm run test:performance
 
   # End-to-End Tests
@@ -325,7 +325,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd backend && npm ci
+          cd apps/api && npm ci
           cd ../frontend && npm ci
 
       - name: Install Playwright
@@ -335,13 +335,13 @@ jobs:
 
       - name: Setup test database
         run: |
-          cd backend
+          cd apps/api
           npm run db:generate
           npm run db:push
 
       - name: Start application
         run: |
-          cd backend
+          cd apps/api
           npm run start:test &
           cd ../frontend
           npm run build
@@ -419,36 +419,36 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd backend && npm ci
+          cd apps/api && npm ci
           cd ../frontend && npm ci
 
       - name: Check test coverage
         run: |
-          cd backend
+          cd apps/api
           npm run test:coverage
           cd ../frontend
           npm run test:coverage
 
       - name: Check performance thresholds
         run: |
-          cd backend
+          cd apps/api
           npm run test:performance:thresholds
 
       - name: Check security score
         run: |
-          cd backend
+          cd apps/api
           npm run test:security:score
 
       - name: Generate quality report
         run: |
-          cd backend
+          cd apps/api
           npm run test:quality:report
 
       - name: Upload quality report
         uses: actions/upload-artifact@v3
         with:
           name: quality-report
-          path: backend/quality-report/
+          path: apps/api/quality-report/
           retention-days: 30
 
   # Deployment

@@ -2,7 +2,193 @@
 
 **Purpose:** This file serves as a living knowledge base of engineering decisions, trade-offs, alternatives considered, and lessons learned. Every significant architectural or design decision should be documented here.
 
-**Last Updated:** 2025-11-17
+**Last Updated:** 2025-11-22
+
+---
+
+## Backend Migration to Monorepo Structure - 2025-11-22
+
+### Decision
+Migrated backend codebase from `backend/` directory to monorepo structure (`apps/api/` and `libs/common/`) to comply with VeroField Hybrid Rule System v2.0 architectural requirements.
+
+### Context
+- **Problem:** Codebase used legacy `backend/` structure, violating monorepo architecture rules
+- **Constraints:** 
+  - Must maintain all existing functionality
+  - Must preserve all tests and configurations
+  - Must update all import paths
+  - Must update CI/CD workflows
+- **Requirements:**
+  - Follow monorepo structure: `apps/api/` for API, `libs/common/` for shared code
+  - Update all 400+ files to new paths
+  - Ensure zero downtime migration
+  - Maintain backward compatibility during transition
+
+### Trade-offs
+**Pros:**
+- ✅ Complies with architectural rules
+- ✅ Enables better code organization
+- ✅ Supports future microservices expansion
+- ✅ Improves shared code reusability
+- ✅ Better separation of concerns
+
+**Cons:**
+- ⚠️ Large migration effort (400+ files)
+- ⚠️ Requires updating all import paths
+- ⚠️ CI/CD workflows need updates
+- ⚠️ Documentation needs updates
+- ⚠️ Risk of breaking changes if not careful
+
+### Alternatives Considered
+**Alternative 1: Keep backend/ structure**
+- Description: Maintain current structure, update rules to allow it
+- Why rejected: Violates architectural standards, limits future scalability
+
+**Alternative 2: Gradual migration**
+- Description: Migrate module by module over time
+- Why rejected: Creates confusion with mixed paths, harder to maintain
+
+**Alternative 3: Big bang migration**
+- Description: Migrate everything at once (chosen approach)
+- Why chosen: Clean break, easier to verify, less confusion
+
+### Rationale
+- Monorepo structure is industry standard for large codebases
+- Enables better code sharing via `libs/common/`
+- Supports future microservices architecture
+- Aligns with VeroField Hybrid Rule System requirements
+- Provides clear separation between apps and shared libraries
+
+### Impact
+**Short-term:**
+- All files moved to new locations
+- All import paths updated
+- CI/CD workflows updated
+- Build configurations updated
+- Some temporary confusion during transition
+
+**Long-term:**
+- Better code organization
+- Easier to add new services
+- Improved shared code reusability
+- Better alignment with architectural standards
+- Reduced technical debt
+
+**Affected Areas:**
+- All backend source code (200+ files)
+- All test files (168 files)
+- All scripts (20+ files)
+- CI/CD workflows (6 workflows)
+- Documentation (1000+ references)
+
+### Lessons Learned
+**What Worked Well:**
+- Comprehensive migration plan before execution
+- Dry-run testing to verify file moves
+- Backup branch created before migration
+- Incremental fixes (start script, JWT_SECRET loading)
+- Thorough documentation of changes
+
+**What Didn't Work:**
+- Initial assumption that build output would be `dist/main.js` (monorepo preserves structure)
+- Checking `process.env` at module load time (ConfigModule not loaded yet)
+- Some workflow YAML syntax issues with multi-line strings
+
+**What Would Be Done Differently:**
+- Test build output paths earlier in process
+- Use `registerAsync()` pattern from start for environment variables
+- Validate workflow YAML syntax before committing
+
+### Related Decisions
+- JWT Module Async Registration Pattern (same session)
+- Monorepo Build Output Path Handling (same session)
+- Structured Logging Implementation (ongoing)
+
+---
+
+## JWT Module Async Registration Pattern - 2025-11-22
+
+### Decision
+Changed JWT module registration from synchronous `JwtModule.register()` to asynchronous `JwtModule.registerAsync()` with ConfigService to properly load environment variables.
+
+### Context
+- **Problem:** `auth.module.ts` was checking `process.env.JWT_SECRET` at module load time (line 14), which happens before NestJS ConfigModule loads the `.env` file
+- **Constraints:**
+  - Must work with ConfigModule
+  - Must maintain error handling
+  - Must support trace propagation
+- **Requirements:**
+  - Environment variables must be available when JWT module initializes
+  - Error messages must include trace context
+  - Must fail fast with clear error messages
+
+### Trade-offs
+**Pros:**
+- ✅ Environment variables loaded before module initialization
+- ✅ Proper error handling with trace context
+- ✅ Type-safe with ConfigService
+- ✅ Works with `.env` files
+
+**Cons:**
+- ⚠️ Slightly more complex than synchronous registration
+- ⚠️ Requires ConfigModule to be imported
+
+### Alternatives Considered
+**Alternative 1: Keep synchronous registration**
+- Description: Use `JwtModule.register()` with `process.env`
+- Why rejected: Fails because ConfigModule hasn't loaded `.env` yet
+
+**Alternative 2: Load .env manually**
+- Description: Use `dotenv` to load `.env` before module loads
+- Why rejected: Bypasses NestJS ConfigModule, inconsistent with architecture
+
+**Alternative 3: Async registration with ConfigService (chosen)**
+- Description: Use `JwtModule.registerAsync()` with factory function
+- Why chosen: Proper NestJS pattern, works with ConfigModule, type-safe
+
+### Rationale
+- NestJS best practice for environment-dependent module initialization
+- Ensures ConfigModule has loaded environment variables
+- Provides proper error handling and trace context
+- Maintains type safety with ConfigService
+
+### Impact
+**Short-term:**
+- Fixed "JWT_SECRET environment variable is required" error
+- API server can now start successfully
+- Error messages include traceId for debugging
+
+**Long-term:**
+- Pattern can be reused for other environment-dependent modules
+- Better error tracking with trace context
+- More maintainable code
+
+**Affected Areas:**
+- `apps/api/src/auth/auth.module.ts`
+- Environment variable loading
+- Error handling and logging
+
+### Lessons Learned
+**What Worked Well:**
+- Using `registerAsync()` pattern
+- Adding traceId to error messages
+- Proper error handling
+
+**What Didn't Work:**
+- Checking `process.env` at module load time
+- Synchronous module registration with environment variables
+
+**What Would Be Done Differently:**
+- Use async registration pattern from the start
+- Always use ConfigService for environment variables
+
+### Related Decisions
+- Backend Migration to Monorepo Structure (same session)
+- Structured Logging Implementation (ongoing)
+
+---
+
+**Last Updated:** 2025-11-22
 
 ---
 
@@ -104,6 +290,115 @@ Why was this approach chosen?
 ---
 
 ## Engineering Decisions
+
+## Comprehensive Codebase Compliance Audit - 2025-11-22
+
+### Decision
+Conducted a comprehensive codebase compliance audit using the VeroField Hybrid Rule System v2.0 to identify structural violations, security issues, and compliance gaps before continued development.
+
+### Context
+**Problem:** Newly implemented Cursor rules system (v2.0) requires specific monorepo structure and compliance standards. The codebase had not been audited for compliance with these new rules, creating risk of:
+- Structural violations preventing rule enforcement
+- Security vulnerabilities (exposed secrets)
+- Architectural drift
+- Inability to enforce service boundaries
+
+**Constraints:**
+- Rules were newly added and structural issues suspected
+- Need to identify all violations before continued development
+- Must provide actionable remediation plan
+- Must prioritize by severity
+
+**Requirements:**
+- Complete audit of all rule files (00-14 .mdc files)
+- Identify critical, high, medium, and low severity violations
+- Provide specific file paths and line numbers
+- Create phased remediation plan
+- Document findings in compliance report
+
+### Trade-offs
+**Pros:**
+- Identifies all violations before they compound
+- Provides clear remediation path
+- Prevents continued development on non-compliant structure
+- Documents security risks immediately
+- Enables prioritization of fixes
+
+**Cons:**
+- Requires significant remediation effort (6+ weeks)
+- May delay new feature development
+- Reveals extensive technical debt
+- Requires immediate action on critical issues
+
+### Alternatives Considered
+**Alternative 1: Incremental Audit**
+- Description: Audit violations as they are encountered during development
+- Why rejected: Would allow violations to compound, making fixes more difficult. Structural violations prevent rule enforcement.
+
+**Alternative 2: Selective Audit**
+- Description: Only audit high-risk areas (security, structure)
+- Why rejected: Need complete picture to prioritize properly. Medium/low violations may indicate systemic issues.
+
+**Alternative 3: Defer Audit**
+- Description: Continue development and audit later
+- Why rejected: Rules are newly added and structural issues suspected. Deferring would allow violations to compound.
+
+### Rationale
+- Rules were newly added and structural issues suspected
+- Need baseline compliance before continued development
+- Critical security violations (exposed secrets) require immediate attention
+- Structural violations prevent enforcement of architectural rules
+- Comprehensive audit provides actionable remediation plan
+
+### Impact
+**Short-term:**
+- Immediate: Must remove secrets from git and rotate credentials
+- Week 1: Create monorepo structure, begin migration planning
+- Week 2-3: Migrate backend/ to apps/api/, update imports
+- Week 4-5: Fix medium priority violations
+- Week 6+: Cleanup and final audit
+
+**Long-term:**
+- Enables enforcement of architectural rules
+- Prevents cross-service import violations
+- Establishes proper monorepo structure
+- Improves observability with structured logging
+- Reduces technical debt
+
+**Affected Areas:**
+- Entire codebase structure (backend/ → apps/api/)
+- All imports and references (124+ files)
+- Logging infrastructure (287 files)
+- Security configuration (secrets rotation)
+- Documentation (date updates, naming)
+
+### Lessons Learned
+**What Worked Well:**
+- Systematic approach using 5-step enforcement pipeline
+- Severity-based prioritization
+- Specific file paths and line numbers
+- Phased remediation plan
+
+**What Didn't Work:**
+- N/A - First comprehensive audit
+
+**What Would Be Done Differently:**
+- Consider automated compliance checking in CI/CD
+- Set up regular compliance audits (quarterly)
+- Add pre-commit hooks for common violations
+
+### Related Decisions
+- Monorepo structure decision (04-architecture.mdc)
+- Security rules implementation (03-security.mdc)
+- Observability standards (07-observability.mdc)
+
+### Implementation Pattern
+- Follow 5-step enforcement pipeline (01-enforcement.mdc)
+- Use severity-based prioritization
+- Document findings in compliance reports
+- Track remediation in phased plan
+
+---
 
 ### Example Decision: Structured Logging Format - 2025-01-27
 

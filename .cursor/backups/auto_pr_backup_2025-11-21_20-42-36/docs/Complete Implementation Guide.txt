@@ -1,0 +1,575 @@
+# Auto-PR Session Management - Complete Implementation Guide
+
+## 📋 Table of Contents
+1. [Quick Start](#quick-start)
+2. [Installation](#installation)
+3. [File Structure](#file-structure)
+4. [Usage Guide](#usage-guide)
+5. [Configuration](#configuration)
+6. [Testing](#testing)
+7. [Rollout Plan](#rollout-plan)
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# 1. Run setup script
+bash .cursor/scripts/setup_session_management.sh
+
+# 2. Start a session
+python .cursor/scripts/session_cli.py start
+
+# 3. Make your commits (auto-tracked)
+git commit -m "auto-pr: add feature"
+
+# 4. Complete when ready
+python .cursor/scripts/session_cli.py complete
+```
+
+---
+
+## 📦 Installation
+
+### Step 1: Create Directory Structure
+
+```bash
+mkdir -p .cursor/scripts
+mkdir -p .cursor/config
+mkdir -p .cursor/data
+mkdir -p docs/metrics
+mkdir -p docs/metrics/analytics
+mkdir -p .github/workflows
+```
+
+### Step 2: Copy Files
+
+Copy all files from the artifacts above into your repository:
+
+**Core System:**
+- `.cursor/scripts/auto_pr_session_manager.py` (main system)
+- `.cursor/scripts/cursor_session_hook.py` (cursor integration)
+- `.cursor/scripts/session_cli.py` (CLI tool)
+- `.cursor/scripts/session_analytics.py` (analytics)
+- `.cursor/scripts/setup_session_management.sh` (setup script)
+
+**Configuration:**
+- `.cursor/config/session_config.yaml`
+
+**GitHub Workflows:**
+- `.github/workflows/auto_pr_session_manager.yml` (new)
+- `.github/workflows/swarm_compute_reward_score.yml` (modified)
+
+**Documentation:**
+- `README_SESSION_MANAGEMENT.md`
+
+### Step 3: Install Dependencies
+
+```bash
+pip install pyyaml
+```
+
+### Step 4: Modify Existing Files
+
+#### A. Update `compute_reward_score.py`
+
+Add this at the top:
+```python
+from auto_pr_session_manager import (
+    AutoPRSessionManager,
+    compute_reward_score_with_batching
+)
+```
+
+Wrap main logic:
+```python
+def main():
+    # Initialize session manager
+    manager = AutoPRSessionManager()
+    
+    # Load PR data
+    pr_data = load_pr_data()
+    
+    # Compute score with batching
+    result = compute_reward_score_with_batching(pr_data, manager)
+    
+    if result:
+        # Score was computed
+        save_score(result)
+        post_comment(result)
+    else:
+        # PR was batched, skip scoring
+        print("PR added to batch, skipping score")
+```
+
+#### B. Update `auto_pr_daemon.py`
+
+Add imports:
+```python
+from cursor_session_hook import (
+    get_or_create_session_id,
+    format_session_metadata,
+    clear_session
+)
+```
+
+Modify PR creation:
+```python
+# Replace create_pull_request() with:
+def create_pull_request(repo, title, body, head, base, author=None):
+    session_id = get_or_create_session_id(author)
+    updated_title, metadata = format_session_metadata(session_id, title)
+    updated_body = body + metadata
+    
+    pr = repo.create_pull(
+        title=updated_title,
+        body=updated_body,
+        head=head,
+        base=base
+    )
+    
+    try:
+        pr.add_to_labels("auto-pr")
+    except:
+        pass
+    
+    return pr
+```
+
+---
+
+## 📁 File Structure
+
+```
+.cursor/
+├── scripts/
+│   ├── auto_pr_session_manager.py    # Core session management
+│   ├── cursor_session_hook.py        # Cursor integration
+│   ├── session_cli.py                # CLI tool
+│   ├── session_analytics.py          # Analytics generator
+│   ├── compute_reward_score.py       # Modified to handle batching
+│   ├── auto_pr_daemon.py             # Modified with session hooks
+│   └── setup_session_management.sh   # Setup script
+├── config/
+│   └── session_config.yaml           # Configuration
+└── data/
+    └── .session_id                   # Active session marker (auto-generated)
+
+.github/
+└── workflows/
+    ├── auto_pr_session_manager.yml   # Session workflow (NEW)
+    └── swarm_compute_reward_score.yml # Modified with session check
+
+docs/
+└── metrics/
+    ├── auto_pr_sessions.json         # Session data (auto-generated)
+    └── analytics/
+        └── session_analytics_*.md    # Analytics reports (auto-generated)
+```
+
+---
+
+## 📖 Usage Guide
+
+### For Developers (Cursor)
+
+#### Starting Work
+
+```bash
+# Option 1: Automatic (recommended)
+# Just start committing - session auto-creates on first auto-PR
+
+# Option 2: Explicit
+python .cursor/scripts/session_cli.py start
+```
+
+#### During Development
+
+Make commits as normal. Auto-PR will detect and batch them:
+```bash
+git commit -m "auto-pr: implement feature X"
+git commit -m "auto-pr: add tests"
+git commit -m "auto-pr: update docs"
+```
+
+Each creates a micro-PR that's added to your session.
+
+#### Checking Status
+
+```bash
+# CLI
+python .cursor/scripts/session_cli.py status
+
+# Or check PR comments (GitHub will show session info)
+```
+
+#### Completing Work
+
+**Option 1: Explicit Marker (Recommended)**
+```bash
+# Add to your final PR title or description:
+git commit -m "auto-pr: final changes [ready]"
+```
+
+**Option 2: Manual CLI**
+```bash
+python .cursor/scripts/session_cli.py complete
+```
+
+**Option 3: GitHub Comment**
+```
+Comment on PR: /complete-session
+```
+
+**Option 4: Wait for Timeout**
+- After 30 minutes of inactivity, session auto-completes
+
+### For Reviewers (GitHub)
+
+Sessions are transparent - you'll see:
+- 🤖 emoji on auto-PR titles
+- Session metadata in PR body
+- Session summary in comments
+
+Complete a session by commenting: `/complete-session`
+
+---
+
+## ⚙️ Configuration
+
+Edit `.cursor/config/session_config.yaml`:
+
+```yaml
+# Session timeout (minutes of inactivity before auto-complete)
+timeout_minutes: 30
+
+# Idle warning threshold
+idle_warning_minutes: 15
+
+# Auto-PR detection patterns (regex)
+auto_pr_patterns:
+  - "^auto-pr:"      # Matches "auto-pr: foo"
+  - "^wip:"          # Matches "wip: bar"
+  - "^\\[auto\\]"    # Matches "[auto] baz"
+  - "^checkpoint:"   # Matches "checkpoint: qux"
+  - "^🤖"            # Matches emoji prefix
+
+# Completion trigger keywords
+completion_markers:
+  - "ready for review"
+  - "[ready]"
+  - "[session-complete]"
+  - "complete"
+  - "✅"
+
+# Minimum files to require explicit session (heuristic)
+min_files_for_manual: 5
+
+# Enable automatic completion triggers
+enable_timeout_completion: true
+enable_heuristic_completion: true  # Complete when tests + docs present
+```
+
+### Tuning Recommendations
+
+**Aggressive (Fast Completions):**
+```yaml
+timeout_minutes: 15
+enable_heuristic_completion: true
+```
+
+**Conservative (Longer Sessions):**
+```yaml
+timeout_minutes: 60
+enable_heuristic_completion: false
+```
+
+**Team-Based:**
+```yaml
+# Different timeout per team
+timeout_minutes: 30  # Default
+# Override in workflow per author
+```
+
+---
+
+## 🧪 Testing
+
+### Test 1: Basic Session Flow
+
+```bash
+# 1. Start session
+python .cursor/scripts/session_cli.py start
+
+# 2. Check status
+python .cursor/scripts/session_cli.py status
+# Expected: Shows active session
+
+# 3. Simulate auto-PR check
+python .cursor/scripts/auto_pr_session_manager.py check \
+  --pr-number 999 \
+  --title "auto-pr: test" \
+  --body "Test PR" \
+  --author "testuser" \
+  --files 3
+
+# Expected: Shows "Is Auto-PR: True"
+
+# 4. Complete session
+python .cursor/scripts/session_cli.py complete
+
+# Expected: Session completed successfully
+```
+
+### Test 2: GitHub Workflow (Local)
+
+```bash
+# Set environment variables
+export PR_NUMBER=999
+export PR_TITLE="auto-pr: test feature"
+export PR_BODY="Test description"
+export PR_AUTHOR="testuser"
+export FILES_CHANGED=3
+
+# Run workflow check
+bash -c '
+  python .cursor/scripts/auto_pr_session_manager.py check \
+    --pr-number "$PR_NUMBER" \
+    --title "$PR_TITLE" \
+    --body "$PR_BODY" \
+    --author "$PR_AUTHOR" \
+    --files "$FILES_CHANGED"
+'
+```
+
+### Test 3: Completion Triggers
+
+```bash
+# Test explicit marker
+echo "Testing: ready for review" | grep -q "ready for review" && echo "✅ Marker detected"
+
+# Test timeout (set to 1 minute for testing)
+# Edit session_config.yaml: timeout_minutes: 1
+# Wait 1 minute, run cleanup
+python .cursor/scripts/auto_pr_session_manager.py cleanup --max-age 0
+
+# Test heuristic
+# Create PR with tests + docs, check if auto-completes
+```
+
+### Test 4: Analytics
+
+```bash
+# Generate analytics report
+python .cursor/scripts/session_analytics.py
+
+# Check output
+cat docs/metrics/analytics/session_analytics_*.md
+```
+
+---
+
+## 📅 Rollout Plan
+
+### Phase 1: Pilot (Week 1)
+- [ ] Install system on staging/dev branch
+- [ ] Test with 2-3 developers
+- [ ] Monitor session data quality
+- [ ] Adjust configuration based on feedback
+
+**Success Criteria:**
+- All auto-PRs correctly detected
+- Sessions complete without manual intervention 80% of time
+- No false positives (regular PRs batched incorrectly)
+
+### Phase 2: Team Rollout (Week 2)
+- [ ] Deploy to main branch
+- [ ] Enable GitHub workflows
+- [ ] Train team on usage
+- [ ] Set up monitoring dashboard
+
+**Success Criteria:**
+- 90% of micro-PRs batched correctly
+- Average session duration < 60 minutes
+- Positive developer feedback
+
+### Phase 3: Optimization (Week 3)
+- [ ] Analyze completion trigger distribution
+- [ ] Tune timeout based on actual usage
+- [ ] Add custom patterns per team
+- [ ] Implement auto-suggestions
+
+**Success Criteria:**
+- 95% auto-completion rate
+- Zero orphaned sessions
+- Analytics dashboard used regularly
+
+### Phase 4: Scale (Week 4+)
+- [ ] Add advanced features
+  - Session templates
+  - Team-based rules
+  - Smart suggestions
+- [ ] Integration with other tools
+- [ ] Documentation updates
+
+---
+
+## 🔍 Monitoring
+
+### Key Metrics to Track
+
+**Session Health:**
+- Active sessions count (should be low)
+- Orphaned sessions (should be zero)
+- Average session duration
+- Completion trigger distribution
+
+**Developer Experience:**
+- Manual completion rate (target: <20%)
+- Sessions per developer per week
+- Average PRs per session
+
+**System Performance:**
+- False positive rate (regular PRs batched)
+- False negative rate (auto-PRs missed)
+- Timeout completion rate
+
+### Dashboard Views
+
+**Daily Check:**
+```bash
+python .cursor/scripts/session_cli.py status
+```
+
+**Weekly Review:**
+```bash
+python .cursor/scripts/session_analytics.py
+```
+
+**Monthly Analysis:**
+Review `docs/metrics/analytics/` for trends
+
+---
+
+## 🐛 Troubleshooting
+
+### Issue: Sessions Not Creating
+
+**Symptoms:** PRs not being detected as auto-PRs
+
+**Solutions:**
+1. Check PR title matches patterns in config
+2. Verify `auto_pr_patterns` in `session_config.yaml`
+3. Test detection: `session check --title "your-pr-title"`
+
+### Issue: Sessions Not Completing
+
+**Symptoms:** Sessions stay active indefinitely
+
+**Solutions:**
+1. Check timeout: `grep timeout_minutes .cursor/config/session_config.yaml`
+2. Manually complete: `session complete`
+3. Force cleanup: `auto_pr_session_manager.py cleanup --max-age 0`
+
+### Issue: Regular PRs Being Batched
+
+**Symptoms:** Non-auto-PRs incorrectly detected
+
+**Solutions:**
+1. Review `auto_pr_patterns` - make them more specific
+2. Increase `min_files_for_manual` threshold
+3. Add exclusion patterns for feature branches
+
+### Issue: Workflow Failures
+
+**Symptoms:** GitHub Actions failing
+
+**Solutions:**
+1. Check Python dependencies installed
+2. Verify file permissions: `chmod +x .cursor/scripts/*.py`
+3. Check workflow logs for specific errors
+4. Test locally first: `python .cursor/scripts/auto_pr_session_manager.py status`
+
+---
+
+## 📞 Support
+
+### Getting Help
+
+**Check Logs:**
+```bash
+# Workflow logs
+gh run list --workflow=auto_pr_session_manager.yml
+
+# Session data
+cat docs/metrics/auto_pr_sessions.json | jq
+```
+
+**Debug Mode:**
+```bash
+# Enable verbose output
+export DEBUG=1
+python .cursor/scripts/auto_pr_session_manager.py status
+```
+
+**Common Commands:**
+```bash
+# Status check
+session status
+
+# Force complete all active sessions
+for session in $(jq -r '.active_sessions | keys[]' docs/metrics/auto_pr_sessions.json); do
+  python .cursor/scripts/auto_pr_session_manager.py complete --session-id "$session"
+done
+
+# Clear everything (nuclear option)
+echo '{"version":"1.0","active_sessions":{},"completed_sessions":[]}' > docs/metrics/auto_pr_sessions.json
+```
+
+---
+
+## 🎯 Success Checklist
+
+- [ ] All files copied to correct locations
+- [ ] Dependencies installed (`pyyaml`)
+- [ ] Configuration file created and reviewed
+- [ ] Setup script runs successfully
+- [ ] Test session completes end-to-end
+- [ ] GitHub workflows committed and pushed
+- [ ] Team trained on usage
+- [ ] Monitoring dashboard accessible
+- [ ] Documentation shared with team
+- [ ] First production session completed successfully
+
+---
+
+## 📚 Additional Resources
+
+- **Session Analytics:** `docs/metrics/analytics/`
+- **Configuration Reference:** `.cursor/config/session_config.yaml`
+- **Workflow Logs:** GitHub Actions → auto_pr_session_manager.yml
+- **Raw Data:** `docs/metrics/auto_pr_sessions.json`
+
+---
+
+## 🔄 Next Steps
+
+After implementation:
+
+1. **Week 1:** Monitor closely, adjust thresholds
+2. **Week 2:** Gather developer feedback
+3. **Week 3:** Analyze metrics, optimize
+4. **Week 4:** Document lessons learned
+5. **Week 5+:** Consider advanced features
+
+**Advanced Features to Consider:**
+- Session templates for common workflows
+- AI-powered completion predictions
+- Integration with IDE plugins
+- Multi-repo session support
+- Session branching/merging
+- Performance-based auto-tuning
+
+---
+
+**Ready to implement? Start with the Quick Start section and follow the rollout plan!**

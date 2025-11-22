@@ -109,20 +109,17 @@ jobs:
               pass
 
           # Generate feedback comment
-          comment = f"""# Reward Score Feedback Analysis
-
-**Generated:** {datetime.utcnow().isoformat()}Z
-**PR:** #{pathlib.Path().cwd().name}{session_context}
-
-## Historical Performance Analysis
-
-{analysis}
-
-## Action Required for Next PR
-
-Cursor: These areas need improvement before next PR:
-
-"""
+          generated_time = datetime.utcnow().isoformat()
+          pr_name = pathlib.Path().cwd().name
+          comment = (
+              f"# Reward Score Feedback Analysis\n\n"
+              f"**Generated:** {generated_time}Z\n"
+              f"**PR:** #{pr_name}{session_context}\n\n"
+              f"## Historical Performance Analysis\n\n"
+              f"{analysis}\n\n"
+              f"## Action Required for Next PR\n\n"
+              f"Cursor: These areas need improvement before next PR:\n"
+          )
           
           # Extract recommendations from analysis
           in_recommendations = False
@@ -142,16 +139,14 @@ Cursor: These areas need improvement before next PR:
           else:
               comment += "- Review the trend analysis above and address weak categories\n"
           
-          comment += """
-## Integration
-
-This feedback is automatically generated from historical Reward Scores. Cursor will:
-1. Read this comment before making changes
-2. Apply improvements based on recurring issues
-3. Use `.cursor/prompts/reward_feedback.md` for detailed guidance
-
-See `.cursor/rules.md` - REWARD SCORE IMPROVEMENT RULE for enforcement details.
-"""
+          comment += (
+              "\n## Integration\n\n"
+              "This feedback is automatically generated from historical Reward Scores. Cursor will:\n"
+              "1. Read this comment before making changes\n"
+              "2. Apply improvements based on recurring issues\n"
+              "3. Use `.cursor/prompts/reward_feedback.md` for detailed guidance\n\n"
+              "See `.cursor/rules.md` - REWARD SCORE IMPROVEMENT RULE for enforcement details.\n"
+          )
           
           pathlib.Path("feedback/comment.md").write_text(comment)
           print(f"Generated feedback comment with {len(recommendations)} recommendations")

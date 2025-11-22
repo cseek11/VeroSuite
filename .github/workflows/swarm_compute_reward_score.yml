@@ -201,12 +201,12 @@ jobs:
           fi
           
           # Check for backend coverage (prioritize artifacts from CI workflow)
-          if [ -f "artifacts/backend/coverage-summary.json" ]; then
-            BACKEND_COV="artifacts/backend/coverage-summary.json"
+          if [ -f "artifacts/apps/api/coverage-summary.json" ]; then
+            BACKEND_COV="artifacts/apps/api/coverage-summary.json"
             echo "Found backend coverage in artifacts"
-          elif [ -f "backend/coverage/coverage-summary.json" ]; then
-            BACKEND_COV="backend/coverage/coverage-summary.json"
-            echo "Found backend coverage in backend directory"
+          elif [ -f "apps/api/coverage/coverage-summary.json" ]; then
+            BACKEND_COV="apps/api/coverage/coverage-summary.json"
+            echo "Found backend coverage in apps/api directory"
           else
             echo "No backend coverage found"
           fi

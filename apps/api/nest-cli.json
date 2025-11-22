@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "entryFile": "main",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "watchAssets": false,
+    "assets": [],
+    "tsConfigPath": "tsconfig.json"
+  },
+  "watchModeOptions": {
+    "watchAssets": false,
+    "ignore": [
+      "node_modules/**/*",
+      "dist/**/*",
+      "coverage/**/*",
+      "test/**/*",
+      "*.log",
+      "*.tmp"
+    ]
+  }
+}
+

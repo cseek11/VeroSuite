@@ -90,13 +90,13 @@ jobs:
               exit(0)
           
           # Generate markdown report
-          report = f"""# Anti-Pattern Detection Report (PR #{data.get('metadata', {}).get('pr', 'unknown')})
-          
-**REWARD_SCORE:** {data.get('metadata', {}).get('score', 'unknown')} (triggered anti-pattern detection)
-          
-## Detected Violations ({len(violations)})
-          
-"""
+          pr_num = data.get('metadata', {}).get('pr', 'unknown')
+          score = data.get('metadata', {}).get('score', 'unknown')
+          report = (
+              f"# Anti-Pattern Detection Report (PR #{pr_num})\n\n"
+              f"**REWARD_SCORE:** {score} (triggered anti-pattern detection)\n\n"
+              f"## Detected Violations ({len(violations)})\n\n"
+          )
           
           # Group by type
           by_type = {}
@@ -107,33 +107,28 @@ jobs:
               by_type[v_type].append(v)
           
           for v_type, v_list in by_type.items():
-              report += f"""### {v_type.replace('_', ' ').title()} ({len(v_list)})
-          
-"""
+              v_type_title = v_type.replace('_', ' ').title()
+              report += f"\n### {v_type_title} ({len(v_list)})\n\n"
               for v in v_list:
-                  report += f"""- **{v.get('severity', 'unknown')}:** {v.get('description', 'N/A')}
-  - Pattern: `{v.get('pattern', 'N/A')[:100]}`
-  - Line: {v.get('line', 'N/A')}
-  
-"""
+                  severity = v.get('severity', 'unknown')
+                  description = v.get('description', 'N/A')
+                  pattern = v.get('pattern', 'N/A')[:100]
+                  line = v.get('line', 'N/A')
+                  report += f"- **{severity}:** {description}\n  - Pattern: `{pattern}`\n  - Line: {line}\n\n"
           
-          report += """
-## Suggested Actions
-
-1. Review each violation above
-2. Fix empty catch blocks by adding proper error handling
-3. Add missing await keywords for async operations
-4. Add try/catch blocks around error-prone operations
-5. Remove hardcoded secrets and use environment variables
-6. Add tests for new or modified code
-7. Ensure consistent logging patterns with traceId
-
-## Next Steps
-
-This report will be appended to `.cursor/anti_patterns.md` and `.cursor/BUG_LOG.md` after human review.
-
-**Note:** Anti-pattern entries require human review before being committed.
-"""
+          report += (
+              "\n## Suggested Actions\n\n"
+              "1. Review each violation above\n"
+              "2. Fix empty catch blocks by adding proper error handling\n"
+              "3. Add missing await keywords for async operations\n"
+              "4. Add try/catch blocks around error-prone operations\n"
+              "5. Remove hardcoded secrets and use environment variables\n"
+              "6. Add tests for new or modified code\n"
+              "7. Ensure consistent logging patterns with traceId\n\n"
+              "## Next Steps\n\n"
+              "This report will be appended to `.cursor/anti_patterns.md` and `.cursor/BUG_LOG.md` after human review.\n\n"
+              "**Note:** Anti-pattern entries require human review before being committed.\n"
+          )
           
           pathlib.Path("anti-patterns/REPORT.md").write_text(report)
           print(f"Generated report with {len(violations)} violations")

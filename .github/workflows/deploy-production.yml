@@ -31,22 +31,22 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
+          cache-dependency-path: apps/api/package-lock.json
       
       - name: Install dependencies
-        working-directory: ./backend
+        working-directory: ./apps/api
         run: npm ci
       
       - name: Run linter
-        working-directory: ./backend
+        working-directory: ./apps/api
         run: npm run lint
       
       - name: Run unit tests
-        working-directory: ./backend
+        working-directory: ./apps/api
         run: npm test -- --passWithNoTests
       
       - name: Run integration tests
-        working-directory: ./backend
+        working-directory: ./apps/api
         run: npm run test:integration -- --passWithNoTests
         env:
           DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
@@ -66,14 +66,14 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
+          cache-dependency-path: apps/api/package-lock.json
       
       - name: Install dependencies
-        working-directory: ./backend
+        working-directory: ./apps/api
         run: npm ci
       
       - name: Build backend
-        working-directory: ./backend
+        working-directory: ./apps/api
         run: npm run build
         env:
           NODE_ENV: production
@@ -94,7 +94,7 @@ jobs:
         with:
           name: build-artifacts
           path: |
-            backend/dist
+            apps/api/dist
             frontend/dist
           retention-days: 7
 
@@ -111,11 +111,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       
       - name: Install dependencies
-        working-directory: ./backend
+        working-directory: ./apps/api
         run: npm ci
       
       - name: Validate environment variables
-        working-directory: ./backend
+        working-directory: ./apps/api
         run: npx ts-node scripts/validate-production-env.ts
         env:
           NODE_ENV: production
@@ -132,7 +132,6 @@ jobs:
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
     environment:
       name: ${{ github.event.inputs.environment || 'production' }}
-      url: ${{ secrets.DEPLOYMENT_URL }}
     steps:
       - uses: actions/checkout@v4
       
@@ -145,7 +144,7 @@ jobs:
         run: |
           echo "🚀 Deployment would happen here"
           echo "Configure your deployment platform (Vercel, AWS, etc.)"
-          echo "Backend build: backend/dist"
+          echo "Backend build: apps/api/dist"
           echo "Frontend build: frontend/dist"
       
       - name: Health check
