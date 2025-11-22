@@ -15,7 +15,6 @@ const KeyboardNavigationProvider: React.FC<KeyboardNavigationProviderProps> = ({
   const [lastShortcut, setLastShortcut] = useState<string | null>(null);
 
   // Helper function for shortcut handling (currently unused, kept for potential future use)
-  // @ts-expect-error - Intentionally unused, kept for future use
   const _handleShortcut = useCallback((shortcut: string) => {
     setLastShortcut(shortcut);
     // Clear the shortcut after 2 seconds

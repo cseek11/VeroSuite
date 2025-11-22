@@ -42,7 +42,6 @@ export default function JobsScheduler() {
   };
 
   // Helper function for date formatting (currently unused, kept for potential future use)
-  // @ts-expect-error - Intentionally unused, kept for future use
   const _formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', { 
       month: 'short', 

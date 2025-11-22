@@ -14,6 +14,7 @@ export interface ServiceAgreement {
   terms?: string;
   pricing?: number;
   billing_frequency: 'monthly' | 'quarterly' | 'annually' | 'one_time';
+  auto_renewal?: boolean;
   created_at: string;
   updated_at: string;
   created_by?: string;

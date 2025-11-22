@@ -195,7 +195,7 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
       <Card className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <User className="h-5 w-5 text-gray-600" />
-          <Heading level={5} className="text-gray-900">
+          <Heading level={4} className="text-gray-900">
             Customer Information
           </Heading>
         </div>
@@ -225,7 +225,7 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
       <Card className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <Settings className="h-5 w-5 text-gray-600" />
-          <Heading level={5} className="text-gray-900">
+          <Heading level={4} className="text-gray-900">
             Service Information
           </Heading>
         </div>
@@ -254,7 +254,7 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
       <Card className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <DollarSign className="h-5 w-5 text-gray-600" />
-          <Heading level={5} className="text-gray-900">
+          <Heading level={4} className="text-gray-900">
             Financial Information
           </Heading>
         </div>
@@ -294,7 +294,7 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
       <Card className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <Calendar className="h-5 w-5 text-gray-600" />
-          <Heading level={5} className="text-gray-900">
+          <Heading level={4} className="text-gray-900">
             Agreement Dates
           </Heading>
         </div>

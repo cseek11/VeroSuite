@@ -24,7 +24,6 @@ export function Login() {
   }
 
   // Logout helper (can be used in other components) - currently unused, kept for potential future use
-  // @ts-expect-error - Intentionally unused, kept for future use
   function _handleLogout(): void {
     localStorage.removeItem('jwt');
     localStorage.removeItem('user');
