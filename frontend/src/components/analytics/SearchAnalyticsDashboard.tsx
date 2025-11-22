@@ -3,7 +3,7 @@ import { useSearchAnalytics } from '../../lib/search-analytics-service';
 import { logger } from '@/utils/logger';
 
 export const SearchAnalyticsDashboard: React.FC = () => {
-  const [selectedTimeRange, setSelectedTimeRange] = useState(30);
+  const [selectedTimeRange, _setSelectedTimeRange] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
   const [performanceData, setPerformanceData] = useState<any>(null);
   const [trendingSearches, setTrendingSearches] = useState<any[]>([]);
@@ -11,8 +11,10 @@ export const SearchAnalyticsDashboard: React.FC = () => {
   const {
     getSearchPerformanceSummary,
     getTrendingSearches,
-    getSearchErrorSummary,
-    getUserSearchInsights
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getSearchErrorSummary: _getSearchErrorSummary,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getUserSearchInsights: _getUserSearchInsights
   } = useSearchAnalytics();
 
   const loadAnalyticsData = async () => {

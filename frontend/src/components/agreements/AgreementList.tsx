@@ -356,8 +356,7 @@ export function AgreementList({ customerId }: AgreementListProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={(e: React.MouseEvent) => {
-                        e.stopPropagation();
+                      onClick={() => {
                         setSelectedAgreement(agreement);
                         setShowAgreementModal(true);
                       }}
@@ -368,8 +367,7 @@ export function AgreementList({ customerId }: AgreementListProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={(e: React.MouseEvent) => {
-                        e.stopPropagation();
+                      onClick={() => {
                         setSelectedAgreement(agreement);
                         setShowEditModal(true);
                       }}

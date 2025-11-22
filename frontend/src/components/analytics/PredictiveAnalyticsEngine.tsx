@@ -14,7 +14,8 @@ import {
   Thermometer,
   Cloud,
   Droplets,
-  Sun
+  Sun,
+  Settings
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -26,7 +27,7 @@ import {
 import { cn } from '@/lib/utils';
 
 // PredictionData interface (currently unused, kept for potential future use)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-object-type
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface _PredictionData {
   value: number;
   confidence: number;
