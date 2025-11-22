@@ -538,7 +538,7 @@ export default function ARManagement() {
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="font-semibold">{formatCurrency(invoice.balanceDue)}</div>
+                              <div className="font-semibold">{formatCurrency(invoice.total_amount)}</div>
                               <div className="text-xs text-gray-600">
                                 of {formatCurrency(Number(invoice.total_amount))}
                               </div>
