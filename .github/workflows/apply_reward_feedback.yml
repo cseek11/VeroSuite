@@ -109,18 +109,17 @@ jobs:
               pass
 
           # Generate feedback comment
-          comment = f"""# Reward Score Feedback Analysis
-
-**Generated:** {datetime.utcnow().isoformat()}Z
-**PR:** #{pathlib.Path().cwd().name}{session_context}
-
-## Historical Performance Analysis
-
-{analysis}
-
-## Action Required for Next PR
-
-Cursor: These areas need improvement before next PR:
+          generated_time = datetime.utcnow().isoformat()
+          pr_name = pathlib.Path().cwd().name
+          comment = (
+              f"# Reward Score Feedback Analysis\n\n"
+              f"**Generated:** {generated_time}Z\n"
+              f"**PR:** #{pr_name}{session_context}\n\n"
+              f"## Historical Performance Analysis\n\n"
+              f"{analysis}\n\n"
+              f"## Action Required for Next PR\n\n"
+              f"Cursor: These areas need improvement before next PR:\n"
+          )
 
 """
           

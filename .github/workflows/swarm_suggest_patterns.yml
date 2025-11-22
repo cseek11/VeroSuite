@@ -93,26 +93,22 @@ jobs:
           
           # Generate markdown summary
           pr_name = pathlib.Path().cwd().name
-          summary = f"""# Pattern Extraction Suggestions (PR #{pr_name})
-          
-**REWARD_SCORE:** {pr_name} (triggered pattern extraction)
-          
-## Candidate Patterns ({len(candidates)})
-          
-"""
+          summary = (
+              f"# Pattern Extraction Suggestions (PR #{pr_name})\n\n"
+              f"**REWARD_SCORE:** {pr_name} (triggered pattern extraction)\n\n"
+              f"## Candidate Patterns ({len(candidates)})\n\n"
+          )
           
           for i, pattern in enumerate(candidates, 1):
-              summary += f"""### {i}. {pattern.get('pattern', 'Unknown Pattern')}
-          
-**When:** {pattern.get('when', 'N/A')}
-          
-**Do:**
-"""
+              summary += (
+                  f"### {i}. {pattern.get('pattern', 'Unknown Pattern')}\n\n"
+                  f"**When:** {pattern.get('when', 'N/A')}\n\n"
+                  f"**Do:**\n"
+              )
               for step in pattern.get('do', []):
                   summary += f"- {step}\n"
           
-              summary += f"""
-**Why:** {pattern.get('why', 'N/A')}
+              summary += f"\n**Why:** {pattern.get('why', 'N/A')}\n\n"
           
 **Example:** `{pattern.get('example', 'N/A')}`
           

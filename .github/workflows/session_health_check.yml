@@ -47,14 +47,17 @@ jobs:
             const fs = require('fs');
             const report = JSON.parse(fs.readFileSync('health_report.json', 'utf8'));
             
-            const title = `⚠️ Session Health Alert - ${new Date().toISOString().split('T')[0]}`;
+            const dateStr = new Date().toISOString().split('T')[0];
+            const title = `⚠️ Session Health Alert - ${dateStr}`;
+            const statusUpper = report.status.toUpperCase();
+            const metricsStr = Object.entries(report.metrics || {}).map(([k, v]) => `- ${k}: ${v}`).join('\n');
             const body = `## Session Health Report
             
-**Status:** ${report.status.toUpperCase()}
+**Status:** ${statusUpper}
 **Timestamp:** ${report.timestamp}
 
 ### Metrics
-${Object.entries(report.metrics || {}).map(([k, v]) => `- ${k}: ${v}`).join('\n')}
+${metricsStr}
 
 ### Alerts
 ${report.alerts.map(a => `- ⚠️ ${a}`).join('\n')}
