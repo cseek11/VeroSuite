@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -18,11 +18,9 @@ import {
   Download,
   ArrowUpDown,
   X,
-  Loader2,
   CreditCard,
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
-import { Payment } from '@/types/enhanced-types';
 import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
 import { PaymentHistorySkeleton } from './BillingSkeletons';
@@ -49,14 +47,10 @@ export default function CustomerPaymentHistory({
   const [showFilters, setShowFilters] = useState(false);
 
   // Fetch all payments for customer
-  const { data: payments = [], isLoading, error } = useQuery({
+  const { data: payments = [], isLoading, error } = useQuery<Payment[]>({
     queryKey: ['billing', 'payments', customerId],
     queryFn: () => billing.getPayments(),
     enabled: !!customerId,
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch payment history', error, 'CustomerPaymentHistory');
-      toast.error('Failed to load payment history. Please try again.');
-    },
   });
 
   // Filter and sort payments

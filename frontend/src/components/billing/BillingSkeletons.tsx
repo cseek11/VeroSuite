@@ -1,4 +1,4 @@
-import React from 'react';
+// React import removed - not needed with React 17+
 import Card from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/CRMComponents';
 
