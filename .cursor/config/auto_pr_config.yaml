@@ -34,3 +34,4 @@ excluded_paths:
   - "*.tmp"
   - ".cursor/__pycache__/"
 
+

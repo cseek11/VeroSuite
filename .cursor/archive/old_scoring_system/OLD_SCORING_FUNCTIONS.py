@@ -22,3 +22,4 @@ New system uses:
 ARCHIVED_DATE = "2025-11-21"
 REPLACED_BY = "New rubric system in .cursor/reward_rubric.yaml"
 
+

@@ -229,3 +229,4 @@ if (user?.social_security_number) {
 
 **⚠️ CRITICAL:** Do NOT update ENCRYPTION_KEY in .env until migration script completes successfully!
 
+

@@ -388,3 +388,4 @@ import { PrismaService } from '@verofield/common/prisma';
 **Status:** 🟡 IN PROGRESS - Planning phase  
 **Next:** Create migration scripts
 
+
