@@ -107,15 +107,14 @@ jobs:
               by_type[v_type].append(v)
           
           for v_type, v_list in by_type.items():
-              report += f"""### {v_type.replace('_', ' ').title()} ({len(v_list)})
-          
-"""
+              v_type_title = v_type.replace('_', ' ').title()
+              report += f"\n### {v_type_title} ({len(v_list)})\n\n"
               for v in v_list:
-                  report += f"""- **{v.get('severity', 'unknown')}:** {v.get('description', 'N/A')}
-  - Pattern: `{v.get('pattern', 'N/A')[:100]}`
-  - Line: {v.get('line', 'N/A')}
-  
-"""
+                  severity = v.get('severity', 'unknown')
+                  description = v.get('description', 'N/A')
+                  pattern = v.get('pattern', 'N/A')[:100]
+                  line = v.get('line', 'N/A')
+                  report += f"- **{severity}:** {description}\n  - Pattern: `{pattern}`\n  - Line: {line}\n\n"
           
           report += """
 ## Suggested Actions

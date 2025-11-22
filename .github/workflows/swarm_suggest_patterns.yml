@@ -124,16 +124,14 @@ jobs:
                   f"---\n\n"
               )
           
-          summary += """
-## Next Steps
-
-1. Review each candidate pattern above
-2. If approved, create pattern file in `.cursor/patterns/` with naming: `NNN_domain_short-name.md`
-3. Update pattern metadata with human reviewer approval
-4. Merge pattern file to make it available for future use
-
-**Note:** Patterns require human review before being added to the pattern library.
-"""
+          summary += (
+              "\n## Next Steps\n\n"
+              "1. Review each candidate pattern above\n"
+              "2. If approved, create pattern file in `.cursor/patterns/` with naming: `NNN_domain_short-name.md`\n"
+              "3. Update pattern metadata with human reviewer approval\n"
+              "4. Merge pattern file to make it available for future use\n\n"
+              "**Note:** Patterns require human review before being added to the pattern library.\n"
+          )
           
           pathlib.Path("suggestions/README.md").write_text(summary)
           print(f"Generated summary with {len(candidates)} patterns")
