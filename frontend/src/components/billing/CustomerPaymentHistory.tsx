@@ -21,6 +21,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
+import type { Payment } from '@/types/enhanced-types';
 import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
 import { PaymentHistorySkeleton } from './BillingSkeletons';
@@ -142,7 +143,9 @@ export default function CustomerPaymentHistory({
     }).format(amount);
   };
 
-  const formatDate = (dateString: string) => {
+  // Helper function for date formatting (currently unused, kept for potential future use)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',

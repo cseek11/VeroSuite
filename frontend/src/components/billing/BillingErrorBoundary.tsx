@@ -29,7 +29,7 @@ interface State {
  * Last Updated: 2025-11-16
  */
 export class BillingErrorBoundary extends Component<Props, State> {
-  public state: State = {
+  public override state: State = {
     hasError: false,
   };
 

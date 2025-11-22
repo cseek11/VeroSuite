@@ -51,11 +51,6 @@ export default function CustomerPaymentPortal({ customerId, onClose }: CustomerP
     enabled: !!customerId,
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    onError: (error: unknown) => {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load invoices';
-      logger.error('Failed to fetch customer invoices', error, 'CustomerPaymentPortal');
-      toast.error(`Unable to load invoices. ${errorMessage}. Please try again or contact support.`);
-    },
   });
 
   // Fetch payment methods
