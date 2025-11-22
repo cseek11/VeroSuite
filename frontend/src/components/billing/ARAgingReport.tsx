@@ -246,26 +246,26 @@ export default function ARAgingReport() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {arSummary.agingBuckets.map((bucket) => (
               <div
-                key={bucket}
+                key={bucket.bucket}
                 className={`border-2 rounded-lg p-4 ${
-                  bucket === '0-30'
+                  bucket.bucket === '0-30'
                     ? 'bg-green-50 border-green-200 text-green-800'
-                    : bucket === '31-60'
+                    : bucket.bucket === '31-60'
                     ? 'bg-yellow-50 border-yellow-200 text-yellow-800'
-                    : bucket === '61-90'
+                    : bucket.bucket === '61-90'
                     ? 'bg-orange-50 border-orange-200 text-orange-800'
                     : 'bg-red-50 border-red-200 text-red-800'
                 }`}
               >
                 <div className="text-sm font-medium mb-1">
-                  {bucket === '90+' ? '90+ Days' : `${bucket} Days`}
+                  {bucket.bucket === '90+' ? '90+ Days' : `${bucket.bucket} Days`}
                 </div>
                 <div className="text-2xl font-bold">
-                  {formatCurrency(Number(amount))}
+                  {formatCurrency(bucket.amount)}
                 </div>
                 <div className="text-xs mt-1 opacity-75">
                   {arSummary.totalAR > 0
-                    ? `${(((amount as number) / arSummary.totalAR) * 100).toFixed(1)}%`
+                    ? `${((bucket.amount / arSummary.totalAR) * 100).toFixed(1)}%`
                     : '0%'} of total AR
                 </div>
               </div>
