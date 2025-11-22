@@ -1,9 +1,18 @@
 import { useState } from 'react';
 import { toast } from '@/utils/toast';
 
+interface Job {
+  id: string;
+  title: string;
+  start: string | Date;
+  end: string | Date;
+  color: string;
+  technician?: string;
+}
+
 export default function JobsScheduler() {
-  const [jobs, setJobs] = useState([]);
-  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date(2025, 7, 1));
 
   const getDaysInMonth = (date: Date) => {
@@ -32,7 +41,9 @@ export default function JobsScheduler() {
     });
   };
 
-  const formatDate = (date: Date) => {
+  // Helper function for date formatting (currently unused, kept for potential future use)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric' 
