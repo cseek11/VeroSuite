@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -24,47 +24,9 @@ import {
   Search,
   Eye,
 } from 'lucide-react';
-import { agreementsApi } from '@/lib/agreements-api';
+import { agreementsApi, ServiceAgreement } from '@/lib/agreements-api';
 import { AgreementForm } from './AgreementForm';
 import { AgreementDetail } from './AgreementDetail';
-
-export interface ServiceAgreement {
-  id: string;
-  tenant_id: string;
-  account_id: string;
-  service_type_id: string;
-  agreement_number: string;
-  title: string;
-  start_date: string;
-  end_date?: string;
-  status: 'active' | 'inactive' | 'expired' | 'cancelled' | 'pending';
-  terms?: string;
-  pricing?: number;
-  billing_frequency: 'weekly' | 'monthly' | 'quarterly' | 'annually' | 'one_time';
-  auto_renewal?: boolean;
-  created_at: string;
-  updated_at: string;
-  created_by?: string;
-  updated_by?: string;
-  accounts: {
-    id: string;
-    name: string;
-    email?: string;
-    phone?: string;
-  };
-  service_types: {
-    id: string;
-    name: string;
-    description?: string;
-  };
-  Invoice?: Array<{
-    id: string;
-    invoice_number: string;
-    status: string;
-    total_amount: number;
-    due_date: string;
-  }>;
-}
 
 interface AgreementListProps {
   customerId?: string;
@@ -85,12 +47,13 @@ export function AgreementList({ customerId }: AgreementListProps) {
     queryFn: () => agreementsApi.getAgreements({
       page,
       limit,
-      status: statusFilter as any,
-      customerId,
+      status: statusFilter ? (statusFilter as 'active' | 'inactive' | 'expired' | 'cancelled') : undefined,
+      customerId: customerId || undefined,
     }),
   });
 
-  const getStatusColor = (status: string) => {
+  // Helper function for status color (currently unused, kept for potential future use)
+  const _getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'active': return 'green';
       case 'expired': return 'red';
@@ -100,8 +63,10 @@ export function AgreementList({ customerId }: AgreementListProps) {
       default: return 'gray';
     }
   };
+  void _getStatusColor; // Suppress unused warning
 
-  const getBillingFrequencyColor = (frequency: string) => {
+  // Helper function for billing frequency color (currently unused, kept for potential future use)
+  const _getBillingFrequencyColor = (frequency: string) => {
     switch (frequency.toLowerCase()) {
       case 'weekly': return 'blue';
       case 'monthly': return 'purple';
@@ -268,7 +233,7 @@ export function AgreementList({ customerId }: AgreementListProps) {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <FileText className="h-5 w-5 text-blue-600" />
-                      <Heading level={5} className="text-gray-900 truncate">
+                      <Heading level={4} className="text-gray-900 truncate">
                         {agreement.title}
                       </Heading>
                     </div>
@@ -479,7 +444,7 @@ export function AgreementList({ customerId }: AgreementListProps) {
           </DialogHeader>
         {selectedAgreement && (
           <AgreementForm
-            agreement={selectedAgreement}
+            agreement={selectedAgreement as ServiceAgreement}
             onSuccess={() => {
               setShowEditModal(false);
             }}

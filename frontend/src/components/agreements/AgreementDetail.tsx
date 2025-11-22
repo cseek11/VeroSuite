@@ -331,7 +331,7 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
       {/* Terms and Conditions */}
       {agreement.terms && (
         <Card className="p-4">
-          <Heading level={5} className="text-gray-900 mb-3">
+          <Heading level={4} className="text-gray-900 mb-3">
             Terms and Conditions
           </Heading>
           <Text variant="body" className="text-gray-700 whitespace-pre-wrap">
@@ -343,7 +343,7 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
       {/* Related Invoices */}
       {agreement.Invoice && agreement.Invoice.length > 0 && (
         <Card className="p-4">
-          <Heading level={5} className="text-gray-900 mb-3">
+          <Heading level={4} className="text-gray-900 mb-3">
             Related Invoices
           </Heading>
           <div className="space-y-2">
