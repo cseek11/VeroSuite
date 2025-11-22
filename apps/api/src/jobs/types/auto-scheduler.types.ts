@@ -15,7 +15,7 @@ export type JobWithWorkOrder = Prisma.JobGetPayload<{
       include: {
         location: true;
         account: true;
-        serviceType: true;
+        // Note: WorkOrder has service_type as string field, not a relation
       };
     };
   };

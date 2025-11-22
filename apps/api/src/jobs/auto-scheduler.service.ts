@@ -249,7 +249,7 @@ export class AutoSchedulerService {
           include: {
             location: true,
             account: true,
-            serviceType: true,
+            // Note: WorkOrder has service_type as string, not a relation
           },
         },
       },
@@ -313,8 +313,9 @@ export class AutoSchedulerService {
 
       // Determine required skills from service type
       const requiredSkills: string[] = [];
-      if (job.workOrder?.serviceType?.service_name) {
-        requiredSkills.push(job.workOrder.serviceType.service_name.toLowerCase());
+      // WorkOrder has service_type as a string field, not a relation
+      if (job.workOrder?.service_type) {
+        requiredSkills.push(job.workOrder.service_type.toLowerCase());
       }
 
       // Calculate service duration from work order or default
@@ -370,8 +371,9 @@ export class AutoSchedulerService {
       };
 
       return {
-        id: tech.id || tech.user_id,
-        name: tech.name || `${tech.first_name || ''} ${tech.last_name || ''}`.trim() || 'Unknown',
+        id: tech.id || (tech as AvailableTechnician).user_id || '',
+        name: tech.name || 
+          (`${(tech as AvailableTechnician).first_name || ''} ${(tech as AvailableTechnician).last_name || ''}`.trim() || 'Unknown'),
         skills,
         shiftStartMinutes: defaultShiftStart,
         shiftEndMinutes: defaultShiftEnd,
