@@ -1,5 +1,0 @@
-[33m6050cbf[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mphase2-backend-migration[m[33m)[m Add script to fetch workflow annotations and annotation check results
-[33m4d939f1[m[33m ([m[1;31morigin/phase2-backend-migration[m[33m)[m Fix YAML syntax error: Extract variable before f-string to avoid brace parsing issues
-[33mb621abd[m Fix workflow: Replace env variables with hardcoded values in services section
-[33m3e58cd8[m Add workflow status update after path fixes
-[33m979a661[m Fix remaining backend/ paths in enterprise-testing workflow
