@@ -17,6 +17,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { secureApiClient } from '@/lib/secure-api-client';
 import { Account } from '@/types/enhanced-types';
 import { useSearchIntegration } from '@/lib/search-integration';
+import type { SearchResult } from '@/lib/unified-search-service';
 import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
 
@@ -113,6 +114,14 @@ export default function CustomersPage() {
     setSelectedCustomer(account);
     setShowSearchResults(false);
     setSearchTerm('');
+  };
+
+  // Wrapper for SearchBar's onResultSelect which passes SearchResult
+  const handleSearchBarResultSelect = (result: SearchResult) => {
+    // Extract first account from SearchResult data array
+    if (result.data && result.data.length > 0) {
+      handleSearchResultSelect(result.data[0]);
+    }
   };
 
   const handleViewCustomer = (account: Account) => {
@@ -242,7 +251,7 @@ export default function CustomersPage() {
             <SearchBar
               placeholder="Search customers by name, email, phone, or address..."
               onSearchChange={handleSearch}
-              onResultSelect={handleSearchResultSelect}
+              onResultSelect={handleSearchBarResultSelect}
               showHistory={true}
               showRecentSearches={true}
               maxResults={10}
@@ -365,7 +374,7 @@ export default function CustomersPage() {
             logger.debug('View customer details requested', { customerId: customer.id }, 'CustomersPage');
             // TODO: Implement view details functionality
           }}
-          onSelectionChange={setSelectedCustomers}
+          // onSelectionChange={setSelectedCustomers} // Commented out - selectedCustomers is unused
           isLoading={isLoading}
           error={error}
         />
