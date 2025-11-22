@@ -119,7 +119,7 @@ export default function CustomersPage() {
   // Wrapper for SearchBar's onResultSelect which passes SearchResult
   const handleSearchBarResultSelect = (result: SearchResult) => {
     // Extract first account from SearchResult data array
-    if (result.data && result.data.length > 0) {
+    if (result.data && result.data.length > 0 && result.data[0]) {
       handleSearchResultSelect(result.data[0]);
     }
   };

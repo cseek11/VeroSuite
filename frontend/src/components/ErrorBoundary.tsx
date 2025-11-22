@@ -17,7 +17,7 @@ export class ErrorBoundary extends Component<Props, State> {
     hasError: false,
   };
 
-  public static override getDerivedStateFromError(error: Error): State {
+  public static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
@@ -26,7 +26,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleRetry = () => {
-    this.setState({ hasError: false, error: undefined as Error | undefined });
+    this.setState({ hasError: false });
   };
 
   private handleGoHome = () => {

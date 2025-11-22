@@ -4,10 +4,11 @@
 // This component provides a modern, accessible search interface that integrates
 // with the unified search service and provides real-time search capabilities
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Search, X, Clock, TrendingUp, Loader2 } from 'lucide-react';
 import { useSearchIntegration } from '@/lib/search-integration';
 import type { SearchResult } from '@/lib/unified-search-service';
+import type { Account } from '@/types/enhanced-types';
 
 // ============================================================================
 // TYPES AND INTERFACES
@@ -26,7 +27,7 @@ interface SearchBarProps {
 }
 
 interface SearchSuggestionProps {
-  result: SearchResult;
+  account: Account;
   isSelected: boolean;
   onClick: () => void;
 }
@@ -35,7 +36,7 @@ interface SearchSuggestionProps {
 // SEARCH SUGGESTION COMPONENT
 // ============================================================================
 
-const SearchSuggestion: React.FC<SearchSuggestionProps> = ({ result, isSelected, onClick }) => {
+const SearchSuggestion: React.FC<SearchSuggestionProps> = ({ account, isSelected, onClick }) => {
   return (
     <div
       className={`px-4 py-3 cursor-pointer transition-colors duration-150 ${
@@ -49,55 +50,42 @@ const SearchSuggestion: React.FC<SearchSuggestionProps> = ({ result, isSelected,
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-medium text-gray-900 truncate">
-              {result.name}
+              {account.name}
             </h4>
             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-              result.type === 'commercial' 
+              account.account_type === 'commercial' 
                 ? 'bg-blue-100 text-blue-800' 
                 : 'bg-green-100 text-green-800'
             }`}>
-              {result.type}
+              {account.account_type}
             </span>
             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-              result.status === 'active' 
+              account.status === 'active' 
                 ? 'bg-green-100 text-green-800' 
                 : 'bg-gray-100 text-gray-800'
             }`}>
-              {result.status}
+              {account.status}
             </span>
           </div>
           
           <div className="mt-1 space-y-1">
-            {result.email && (
+            {account.email && (
               <p className="text-xs text-gray-600 truncate">
-                📧 {result.email}
+                📧 {account.email}
               </p>
             )}
-            {result.phone && (
+            {account.phone && (
               <p className="text-xs text-gray-600 truncate">
-                📞 {result.phone}
+                📞 {account.phone}
               </p>
             )}
-            {result.address && (
+            {account.address && (
               <p className="text-xs text-gray-600 truncate">
-                📍 {result.address}
+                📍 {account.address}
               </p>
             )}
           </div>
-          
-          {result.matchedFields && result.matchedFields.length > 0 && (
-            <div className="mt-2">
-              <p className="text-xs text-indigo-600">
-                Matched: {result.matchedFields.join(', ')}
-              </p>
-            </div>
-          )}
         </div>
-        
-        <div className="ml-4 flex-shrink-0">
-          <div className="text-xs text-gray-500">
-            {Math.round(result.score * 100)}% match
-          </div>
         </div>
       </div>
     </div>
@@ -169,6 +157,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     clearSearchHistory
   } = useSearchIntegration({ debounceMs });
 
+  // Flatten SearchResult[] to Account[] for display
+  const flattenedAccounts = useMemo(() => {
+    return results.flatMap(result => result.data || []);
+  }, [results]);
+
   // ============================================================================
   // EFFECTS
   // ============================================================================
@@ -221,7 +214,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!isOpen) return;
 
-    const totalItems = results.length + (showHistory ? searchHistory.length : 0) + (showRecentSearches ? recentSearches.length : 0);
+    const totalItems = flattenedAccounts.length + (showHistory ? searchHistory.length : 0) + (showRecentSearches ? recentSearches.length : 0);
 
     switch (e.key) {
       case 'ArrowDown':
@@ -252,12 +245,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     let currentIndex = 0;
 
     // Check if it's a search result
-    if (index < results.length) {
-      const result = results[index];
-      handleResultSelect(result);
+    if (index < flattenedAccounts.length) {
+      const account = flattenedAccounts[index];
+      handleAccountSelect(account);
       return;
     }
-    currentIndex += results.length;
+    currentIndex += flattenedAccounts.length;
 
     // Check if it's a search history item
     if (showHistory && index < currentIndex + searchHistory.length) {
@@ -273,19 +266,29 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     if (showRecentSearches && index < currentIndex + recentSearches.length) {
       const recentIndex = index - currentIndex;
       const result = recentSearches[recentIndex];
-      handleResultSelect(result);
+      // Extract first account from SearchResult for display
+      if (result.data && result.data.length > 0) {
+        handleAccountSelect(result.data[0]);
+      }
       return;
     }
   };
 
-  const handleResultSelect = (result: SearchResult) => {
-    addToRecentSearches(result);
+  const handleAccountSelect = (account: Account) => {
+    // Create a SearchResult wrapper for the callback
+    const searchResult: SearchResult = {
+      data: [account],
+      totalCount: 1,
+      executionTimeMs: 0,
+      searchMethod: 'enhanced'
+    };
+    addToRecentSearches(searchResult);
     setInputValue('');
     setIsOpen(false);
     setSelectedIndex(-1);
     
     if (onResultSelect) {
-      onResultSelect(result);
+      onResultSelect(searchResult);
     }
   };
 
@@ -344,7 +347,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       );
     }
 
-    if (results.length === 0 && inputValue.trim()) {
+    if (flattenedAccounts.length === 0 && inputValue.trim()) {
       return (
         <div className="px-4 py-8 text-center">
           <Search className="h-8 w-8 mx-auto text-gray-400" />
@@ -354,12 +357,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       );
     }
 
-    return results.slice(0, maxResults).map((result, index) => (
+    return flattenedAccounts.slice(0, maxResults).map((account, index) => (
       <SearchSuggestion
-        key={result.id}
-        result={result}
+        key={account.id}
+        account={account}
         isSelected={selectedIndex === index}
-        onClick={() => handleResultSelect(result)}
+        onClick={() => handleAccountSelect(account)}
       />
     ));
   };
@@ -407,12 +410,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             </h3>
           </div>
         </div>
-        {recentSearches.slice(0, 3).map((result, index) => (
+        {recentSearches.slice(0, 3).flatMap(result => result.data || []).slice(0, 3).map((account, index) => (
           <SearchSuggestion
-            key={result.id}
-            result={result}
-            isSelected={selectedIndex === results.length + (showHistory ? searchHistory.length : 0) + index}
-            onClick={() => handleResultSelect(result)}
+            key={account.id}
+            account={account}
+            isSelected={selectedIndex === flattenedAccounts.length + (showHistory ? searchHistory.length : 0) + index}
+            onClick={() => handleAccountSelect(account)}
           />
         ))}
       </div>
@@ -477,3 +480,4 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 };
 
 export default SearchBar;
+
