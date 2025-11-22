@@ -70,9 +70,9 @@ export default function ARAgingReport() {
     doc.text('AGING BUCKETS', margin, yPos);
     yPos += 8;
     doc.setFontSize(10);
-    Object.entries(arSummary.agingBuckets).forEach(([bucket, amount]) => {
+    arSummary.agingBuckets.forEach((bucket) => {
       doc.text(
-        `${bucket === '90+' ? '90+' : bucket} Days: ${formatCurrency(Number(amount))}`,
+        `${bucket.bucket === '90+' ? '90+' : bucket.bucket} Days: ${formatCurrency(bucket.amount)}`,
         margin + 5,
         yPos
       );
@@ -115,9 +115,9 @@ export default function ARAgingReport() {
       [],
       ['Aging Buckets'],
       ['Bucket', 'Amount'],
-      ...Object.entries(arSummary.agingBuckets).map(([bucket, amount]) => [
-        bucket === '90+' ? '90+' : `${bucket} Days`,
-        Number(amount).toFixed(2)
+      ...arSummary.agingBuckets.map((bucket) => [
+        bucket.bucket === '90+' ? '90+' : `${bucket.bucket} Days`,
+        bucket.amount.toFixed(2)
       ]),
       [],
       ['Customer AR Breakdown'],
@@ -244,7 +244,7 @@ export default function ARAgingReport() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {Object.entries(arSummary.agingBuckets).map(([bucket, amount]) => (
+            {arSummary.agingBuckets.map((bucket) => (
               <div
                 key={bucket}
                 className={`border-2 rounded-lg p-4 ${
