@@ -92,9 +92,10 @@ jobs:
               exit(0)
           
           # Generate markdown summary
-          summary = f"""# Pattern Extraction Suggestions (PR #{pathlib.Path().cwd().name})
+          pr_name = pathlib.Path().cwd().name
+          summary = f"""# Pattern Extraction Suggestions (PR #{pr_name})
           
-**REWARD_SCORE:** {pathlib.Path().cwd().name} (triggered pattern extraction)
+**REWARD_SCORE:** {pr_name} (triggered pattern extraction)
           
 ## Candidate Patterns ({len(candidates)})
           
