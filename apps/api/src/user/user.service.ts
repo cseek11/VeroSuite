@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
 import { DatabaseService } from '../common/services/database.service';
 import { EncryptionService } from '../common/services/encryption.service';
@@ -8,12 +9,13 @@ export class UserService {
   private supabase;
 
   constructor(
+    private readonly configService: ConfigService,
     private db: DatabaseService,
     private encryptionService: EncryptionService,
   ) {
     // Initialize Supabase client for auth operations
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SECRET_KEY;
+    const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
+    const supabaseKey = this.configService.get<string>('SUPABASE_SECRET_KEY');
     
     if (!supabaseUrl || !supabaseKey) {
       throw new Error('Missing required environment variables: SUPABASE_URL and SUPABASE_SECRET_KEY');

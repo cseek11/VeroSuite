@@ -1,19 +1,20 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class DatabaseService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-  constructor() {
-    // Add connection pool parameters to DATABASE_URL (merge safely with existing params)
-    const databaseUrl = process.env.DATABASE_URL || 'postgresql://localhost:5432/verofield';
+  constructor(private readonly configService: ConfigService) {
+    // Get database URL and add connection pool parameters
+    const databaseUrl = configService.get<string>('DATABASE_URL') || 'postgresql://localhost:5432/verofield';
     let urlWithPooling = databaseUrl;
     try {
       const url = new URL(databaseUrl);
       const searchParams = url.searchParams;
       // Defaults; allow overrides via env
-      const defaultConnectionLimit = process.env.DB_CONNECTION_LIMIT || '10';
-      const defaultPoolTimeout = process.env.DB_POOL_TIMEOUT || '60';
-      const defaultConnectTimeout = process.env.DB_CONNECT_TIMEOUT || '60';
+      const defaultConnectionLimit = configService.get<string>('DB_CONNECTION_LIMIT') || '10';
+      const defaultPoolTimeout = configService.get<string>('DB_POOL_TIMEOUT') || '60';
+      const defaultConnectTimeout = configService.get<string>('DB_CONNECT_TIMEOUT') || '60';
       if (!searchParams.has('connection_limit')) {
         searchParams.set('connection_limit', defaultConnectionLimit);
       }
@@ -29,8 +30,10 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
       urlWithPooling = databaseUrl;
     }
     
+    // Call super() with configuration - must be first statement
+    const nodeEnv = configService.get<string>('NODE_ENV') || 'development';
     super({
-      log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['warn', 'error'],
+      log: nodeEnv === 'development' ? ['query', 'info', 'warn', 'error'] : ['warn', 'error'],
       datasources: { 
         db: { 
           url: urlWithPooling
@@ -41,6 +44,8 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
 
   async onModuleInit() {
     await this.$connect();
+    // Note: Using console.log here is acceptable for module initialization
+    // Could be converted to structured logging in future if needed
     // eslint-disable-next-line no-console
     console.log('Database connected');
   }
@@ -72,7 +77,11 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
       processedSql = processedSql.replace(placeholder, value);
     });
     
-    console.log('DatabaseService - Processed SQL:', processedSql);
+    // Debug logging - could be converted to structured logging in future
+    // eslint-disable-next-line no-console
+    if (this.configService.get<string>('NODE_ENV') === 'development') {
+      console.log('DatabaseService - Processed SQL:', processedSql);
+    }
     return this.$queryRawUnsafe(processedSql);
   }
 
@@ -96,6 +105,8 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
       const result = await this.query(`SELECT current_setting('app.tenant_id', true) as tenant_id`) as any[];
       return result[0]?.tenant_id || null;
     } catch (error) {
+      // Error logging - could be converted to structured logging in future
+      // eslint-disable-next-line no-console
       console.error('Failed to get current tenant ID:', error);
       return null;
     }

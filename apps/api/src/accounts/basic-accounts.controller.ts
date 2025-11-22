@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, Req } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
 import { Request } from 'express';
 
@@ -6,10 +7,10 @@ import { Request } from 'express';
 export class BasicAccountsController {
   private supabase;
 
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     // Use new Supabase API key system - secret key bypasses RLS
-    const supabaseUrl = process.env.SUPABASE_URL || '';
-    const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY || '';
+    const supabaseUrl = this.configService.get<string>('SUPABASE_URL') || '';
+    const supabaseSecretKey = this.configService.get<string>('SUPABASE_SECRET_KEY') || '';
     
     this.supabase = createClient(supabaseUrl, supabaseSecretKey, {
       auth: {

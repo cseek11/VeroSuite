@@ -65,7 +65,12 @@ async function bootstrap() {
         const constraints = err.constraints ? Object.values(err.constraints).join(', ') : '';
         return `${err.property}: ${constraints}`;
       });
-      console.error('Validation errors:', messages);
+      logger.error('Validation errors detected', {
+        traceId: startupTraceId,
+        spanId: 'validation',
+        operation: 'request-validation',
+        errors: messages,
+      });
       return new BadRequestException({
         statusCode: 400,
         message: 'Validation failed',
@@ -84,8 +89,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
+  const allowedOrigins = configService.get<string>('ALLOWED_ORIGINS')?.split(',') || 
+    configService.get<string>('CORS_ORIGIN')?.split(',') || 
+    ['http://localhost:3000', 'http://localhost:5173'];
   app.enableCors({
-    origin: (process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:5173']),
+    origin: allowedOrigins,
     credentials: true,
   });
 
@@ -99,9 +107,15 @@ async function bootstrap() {
     prefix: 'v'
   });
 
-  const port = process.env.PORT || 3001;
+  const port = configService.get<string>('PORT') || '3001';
   await app.listen(port);
-  console.log(`🚀 Backend server is running on port ${port}`);
+  logger.log('Backend server started successfully', {
+    traceId: startupTraceId,
+    spanId: 'server-startup',
+    operation: 'bootstrap',
+    port: parseInt(port, 10),
+    environment: configService.get<string>('NODE_ENV') || 'development',
+  });
 }
 
 bootstrap();

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { DatabaseService } from '../common/services/database.service';
 import { createClient } from '@supabase/supabase-js';
 
@@ -17,9 +18,12 @@ export interface ActiveSession {
 export class SessionService {
   private supabase;
 
-  constructor(private db: DatabaseService) {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SECRET_KEY;
+  constructor(
+    private readonly configService: ConfigService,
+    private db: DatabaseService,
+  ) {
+    const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
+    const supabaseKey = this.configService.get<string>('SUPABASE_SECRET_KEY');
     
     if (supabaseUrl && supabaseKey) {
       this.supabase = createClient(supabaseUrl, supabaseKey);

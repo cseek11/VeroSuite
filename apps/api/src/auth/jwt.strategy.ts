@@ -1,6 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { randomUUID } from 'crypto';
 
 export interface JwtPayload {
   sub: string; // user_id
@@ -14,29 +16,38 @@ export interface JwtPayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  private readonly logger = new Logger(JwtStrategy.name);
+
+  constructor(private readonly configService: ConfigService) {
+    const jwtSecret = configService.get<string>('JWT_SECRET');
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
+    
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET,
+      secretOrKey: jwtSecret,
     });
   }
 
   async validate(payload: JwtPayload) {
-    console.log('=== JWT STRATEGY VALIDATION ===');
-    console.log('JWT Payload received:', JSON.stringify(payload, null, 2));
-    console.log('Payload sub (user ID):', payload.sub);
-    console.log('Payload tenant_id:', payload.tenant_id);
-    console.log('Payload roles:', payload.roles);
-    console.log('Payload permissions:', payload.permissions);
-    console.log('Payload permissions type:', Array.isArray(payload.permissions) ? 'array' : typeof payload.permissions);
-    console.log('Payload permissions length:', Array.isArray(payload.permissions) ? payload.permissions.length : 'N/A');
-    console.log('================================');
+    const traceId = randomUUID();
+    
+    this.logger.debug('JWT validation started', {
+      operation: 'jwt-validate',
+      traceId,
+      userId: payload.sub,
+      tenantId: payload.tenant_id,
+    });
 
     if (!payload.sub || !payload.tenant_id) {
-      console.error('JWT validation failed - missing required fields');
-      console.error('sub:', payload.sub);
-      console.error('tenant_id:', payload.tenant_id);
+      this.logger.error('JWT validation failed - missing required fields', {
+        operation: 'jwt-validate',
+        traceId,
+        sub: payload.sub,
+        tenantId: payload.tenant_id,
+      });
       throw new UnauthorizedException('Invalid token payload');
     }
 
@@ -48,10 +59,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       permissions: payload.permissions || [],
     };
 
-    console.log('User context created:', JSON.stringify(userContext, null, 2));
-    console.log('User context permissions:', userContext.permissions);
-    console.log('User context permissions length:', userContext.permissions.length);
-    console.log('================================');
+    this.logger.debug('JWT validation successful', {
+      operation: 'jwt-validate',
+      traceId,
+      userId: userContext.userId,
+      tenantId: userContext.tenantId,
+      rolesCount: userContext.roles.length,
+      permissionsCount: userContext.permissions.length,
+    });
 
     return userContext;
   }

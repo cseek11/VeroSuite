@@ -1,29 +1,36 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { createClient } from '@supabase/supabase-js';
+import { randomUUID } from 'crypto';
 import { DatabaseService } from '../common/services/database.service';
 import { PermissionsService } from '../common/services/permissions.service';
 
 @Injectable()
 export class AuthService {
   private supabase;
+  private readonly logger = new Logger(AuthService.name);
 
   constructor(
+    private readonly configService: ConfigService,
     private jwtService: JwtService,
     private db: DatabaseService,
     private permissionsService: PermissionsService,
   ) {
     // Initialize Supabase client for auth operations
-    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
     // Use the new Supabase secret key (server-side only)
-    const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
+    const supabaseSecretKey = this.configService.get<string>('SUPABASE_SECRET_KEY');
     
     if (!supabaseUrl || !supabaseSecretKey) {
       throw new Error('Missing required environment variables: SUPABASE_URL and SUPABASE_SECRET_KEY');
     }
     
-    console.log('Auth Service - Initializing Supabase client with URL:', supabaseUrl);
-    console.log('Auth Service - Using secret key type:', supabaseSecretKey.startsWith('sb_secret_') ? 'New Secret Key' : 'Legacy Key');
+    this.logger.log('Initializing Supabase client', {
+      operation: 'auth-service-init',
+      url: supabaseUrl,
+      keyType: supabaseSecretKey.startsWith('sb_secret_') ? 'New Secret Key' : 'Legacy Key',
+    });
     
     this.supabase = createClient(supabaseUrl, supabaseSecretKey);
   }
@@ -86,24 +93,25 @@ export class AuthService {
         }
       }
       
-      console.log('Login - Custom permissions from DB:', {
+      const traceId = randomUUID();
+      this.logger.debug('Custom permissions from DB', {
+        operation: 'login',
+        traceId,
         userId: dbUser.id,
         email: dbUser.email,
-        customPermissions,
-        customPermissionsType: Array.isArray(customPermissions) ? 'array' : typeof customPermissions,
-        customPermissionsLength: Array.isArray(customPermissions) ? customPermissions.length : 'N/A'
+        customPermissionsCount: Array.isArray(customPermissions) ? customPermissions.length : 0,
       });
 
       // Combine role-based permissions with custom permissions
       const permissions = this.permissionsService.getCombinedPermissions(roles, customPermissions);
       
-      console.log('Login - Combined permissions:', {
+      this.logger.debug('Combined permissions calculated', {
+        operation: 'login',
+        traceId,
         userId: dbUser.id,
-        email: dbUser.email,
-        roles,
+        rolesCount: roles.length,
         customPermissionsCount: customPermissions.length,
         combinedPermissionsCount: permissions.length,
-        combinedPermissions: permissions
       });
 
       // Create JWT payload for our backend
@@ -115,7 +123,14 @@ export class AuthService {
         permissions: permissions,
       };
 
-      console.log('JWT Payload:', JSON.stringify(payload, null, 2));
+      this.logger.debug('JWT payload created', {
+        operation: 'login',
+        traceId,
+        userId: payload.sub,
+        tenantId: payload.tenant_id,
+        rolesCount: payload.roles.length,
+        permissionsCount: payload.permissions.length,
+      });
 
       // Generate our own JWT token for backend API access
       const access_token = this.jwtService.sign(payload);
@@ -133,7 +148,13 @@ export class AuthService {
         },
       };
     } catch (error) {
-      console.error('Login error:', error);
+      const traceId = randomUUID();
+      this.logger.error('Login failed', {
+        operation: 'login',
+        traceId,
+        error: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+      });
       throw new UnauthorizedException('Invalid credentials');
     }
   }
@@ -192,7 +213,13 @@ export class AuthService {
         permissions: permissions,
       };
 
-      console.log('JWT Payload:', JSON.stringify(payload, null, 2));
+      const traceId = randomUUID();
+      this.logger.debug('JWT payload created for token exchange', {
+        operation: 'exchange-supabase-token',
+        traceId,
+        userId: payload.sub,
+        tenantId: payload.tenant_id,
+      });
 
       // Generate our own JWT token for backend API access
       const access_token = this.jwtService.sign(payload);
@@ -210,7 +237,13 @@ export class AuthService {
         },
       };
     } catch (error) {
-      console.error('Token exchange error:', error);
+      const traceId = randomUUID();
+      this.logger.error('Token exchange failed', {
+        operation: 'exchange-supabase-token',
+        traceId,
+        error: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+      });
       throw new UnauthorizedException('Token exchange failed');
     }
   }
@@ -246,26 +279,32 @@ export class AuthService {
             ? JSON.parse(customPermissions) 
             : [];
         } catch (e) {
-          console.warn('Failed to parse custom_permissions, using empty array:', e);
+          this.logger.warn('Failed to parse custom_permissions, using empty array', {
+            operation: 'get-current-user',
+            userId: dbUser.id,
+            error: e instanceof Error ? e.message : String(e),
+          });
           customPermissions = [];
         }
       }
       
-      console.log('getCurrentUser - Custom permissions from DB:', {
+      const traceId = randomUUID();
+      this.logger.debug('Custom permissions from DB', {
+        operation: 'get-current-user',
+        traceId,
         userId: dbUser.id,
-        customPermissions,
-        customPermissionsType: Array.isArray(customPermissions) ? 'array' : typeof customPermissions,
-        customPermissionsLength: Array.isArray(customPermissions) ? customPermissions.length : 'N/A'
+        customPermissionsCount: Array.isArray(customPermissions) ? customPermissions.length : 0,
       });
       
       const combinedPermissions = this.permissionsService.getCombinedPermissions(roles, customPermissions);
       
-      console.log('getCurrentUser - Combined permissions:', {
+      this.logger.debug('Combined permissions calculated', {
+        operation: 'get-current-user',
+        traceId,
         userId: dbUser.id,
-        roles,
+        rolesCount: roles.length,
         customPermissionsCount: customPermissions.length,
         combinedPermissionsCount: combinedPermissions.length,
-        combinedPermissions: combinedPermissions
       });
 
       return {
@@ -281,7 +320,14 @@ export class AuthService {
         },
       };
     } catch (error) {
-      console.error('Error getting current user:', error);
+      const traceId = randomUUID();
+      this.logger.error('Failed to get user profile', {
+        operation: 'get-current-user',
+        traceId,
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+      });
       throw new UnauthorizedException('Failed to get user profile');
     }
   }
