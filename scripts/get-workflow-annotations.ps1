@@ -7,14 +7,20 @@ param(
 )
 
 if ([string]::IsNullOrEmpty($CommitSha)) {
-    $CommitSha = git rev-parse HEAD
+    $CommitSha = git --no-pager rev-parse HEAD
     Write-Host "Using current HEAD: $CommitSha"
 }
 
 Write-Host "Fetching check runs for commit: $CommitSha" -ForegroundColor Cyan
 
 # Get all check runs for the commit
-$checkRunsResponse = gh api repos/cseek11/VeroSuite/commits/$CommitSha/check-runs --paginate
+Write-Host "Fetching check runs..." -ForegroundColor Gray
+$checkRunsResponse = gh api repos/cseek11/VeroSuite/commits/$CommitSha/check-runs --paginate 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Error fetching check runs. Commit may not be on remote yet." -ForegroundColor Yellow
+    Write-Host "Response: $checkRunsResponse" -ForegroundColor Gray
+    exit 0
+}
 $checkRunsJson = $checkRunsResponse | ConvertFrom-Json
 $checkRuns = $checkRunsJson.check_runs
 
@@ -36,7 +42,11 @@ foreach ($run in $failedRuns) {
     Write-Host "`nProcessing: $($run.name) (ID: $($run.id))" -ForegroundColor Cyan
     
     try {
-        $annotationsResponse = gh api repos/cseek11/VeroSuite/check-runs/$($run.id)/annotations --paginate
+        $annotationsResponse = gh api repos/cseek11/VeroSuite/check-runs/$($run.id)/annotations --paginate 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "  Error fetching annotations: $annotationsResponse" -ForegroundColor Yellow
+            continue
+        }
         $annotations = $annotationsResponse | ConvertFrom-Json
         
         $failures = $annotations | Where-Object {$_.annotation_level -eq "failure"}
