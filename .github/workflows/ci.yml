@@ -80,7 +80,7 @@ jobs:
           --health-retries 5
     defaults:
       run:
-        working-directory: backend
+        working-directory: apps/api
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -91,16 +91,16 @@ jobs:
           node-version: 20
           cache: 'npm'
           cache-dependency-path: |
-            backend/package-lock.json
+            apps/api/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
       - name: Generate Prisma Client
-        run: npx prisma generate
+        run: npx prisma generate --schema=../../libs/common/prisma/schema.prisma
 
       - name: Apply database schema
-        run: npx prisma db push
+        run: npx prisma db push --schema=../../libs/common/prisma/schema.prisma
 
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
@@ -128,6 +128,6 @@ jobs:
         if: always()
         with:
           name: backend-coverage
-          path: backend/coverage/coverage-summary.json
+          path: apps/api/coverage/coverage-summary.json
           retention-days: 7
         continue-on-error: true
