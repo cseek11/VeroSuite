@@ -22,6 +22,7 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 
 // Load environment variables
+// Path is now apps/api/.env (was backend/.env)
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const prisma = new PrismaClient();

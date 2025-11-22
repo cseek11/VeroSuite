@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { CreateDashboardRegionDto, UpdateDashboardRegionDto } from '../dto/dashboard-region.dto';
 import { SupabaseService } from '../../common/services/supabase.service';
-import { validateGridBounds, regionsOverlap, VALIDATION_MESSAGES } from '../../../../shared/validation/region-constants';
+import { validateGridBounds, regionsOverlap, VALIDATION_MESSAGES } from '../../../../../shared/validation/region-constants';
 
 /**
  * Interface for region position data

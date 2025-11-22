@@ -33,7 +33,7 @@
     "db:generate": "prisma generate --schema=../../libs/common/prisma/schema.prisma",
     "db:push": "prisma db push --schema=../../libs/common/prisma/schema.prisma",
     "db:migrate": "prisma migrate dev --schema=../../libs/common/prisma/schema.prisma",
-    "db:seed": "ts-node prisma/seed.ts"
+    "db:seed": "ts-node ../../libs/common/prisma/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -50,7 +50,7 @@
     "@prisma/client": "^5.0.0",
     "@stripe/stripe-js": "^7.9.0",
     "@supabase/supabase-js": "^2.38.0",
-    "@verofield/common": "workspace:*",
+    "@verofield/common": "file:../../libs/common",
     "@types/multer": "^2.0.0",
     "@types/redis": "^4.0.10",
     "@types/socket.io": "^3.0.1",

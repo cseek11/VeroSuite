@@ -23,11 +23,8 @@ module.exports = {
   testEnvironment: 'node',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    '^@verofield/common$': '<rootDir>/../../libs/common/src',
-    '^@verofield/common/(.*)$': '<rootDir>/../../libs/common/src/$1',
   },
   setupFilesAfterEnv: ['<rootDir>/test/setup.js'],
   testTimeout: 30000,
   verbose: true,
 };
-
