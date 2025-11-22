@@ -19,33 +19,33 @@ import {
   AlertCircle,
   Clock
 } from 'lucide-react';
-import type { SearchResult } from '@/lib/unified-search-service';
+import type { Account } from '@/types/enhanced-types';
 
 // ============================================================================
 // TYPES AND INTERFACES
 // ============================================================================
 
 interface CustomerSearchResultsProps {
-  results: SearchResult[];
+  results: Account[];
   loading?: boolean;
   error?: string | null;
-  onView?: (result: SearchResult) => void;
-  onEdit?: (result: SearchResult) => void;
-  onDelete?: (result: SearchResult) => void;
-  onCall?: (result: SearchResult) => void;
-  onEmail?: (result: SearchResult) => void;
+  onView?: (result: Account) => void;
+  onEdit?: (result: Account) => void;
+  onDelete?: (result: Account) => void;
+  onCall?: (result: Account) => void;
+  onEmail?: (result: Account) => void;
   className?: string;
   showActions?: boolean;
   compact?: boolean;
 }
 
 interface CustomerResultCardProps {
-  result: SearchResult;
-  onView?: (result: SearchResult) => void;
-  onEdit?: (result: SearchResult) => void;
-  onDelete?: (result: SearchResult) => void;
-  onCall?: (result: SearchResult) => void;
-  onEmail?: (result: SearchResult) => void;
+  result: Account;
+  onView?: (result: Account) => void;
+  onEdit?: (result: Account) => void;
+  onDelete?: (result: Account) => void;
+  onCall?: (result: Account) => void;
+  onEmail?: (result: Account) => void;
   showActions?: boolean;
   compact?: boolean;
 }
@@ -67,9 +67,12 @@ const getStatusIcon = (status: string) => {
   }
 };
 
-const getTypeIcon = (type: string) => {
-  switch (type?.toLowerCase()) {
+const getTypeIcon = (accountType?: string) => {
+  switch (accountType?.toLowerCase()) {
     case 'commercial':
+    case 'industrial':
+    case 'healthcare':
+    case 'property_management':
       return <Building className="h-4 w-4 text-blue-500" />;
     case 'residential':
       return <User className="h-4 w-4 text-green-500" />;
@@ -78,9 +81,7 @@ const getTypeIcon = (type: string) => {
   }
 };
 
-const formatScore = (score: number) => {
-  return Math.round(score * 100);
-};
+// formatScore removed - Account type doesn't have score property
 
 // ============================================================================
 // CUSTOMER RESULT CARD COMPONENT
@@ -98,7 +99,7 @@ const CustomerResultCard: React.FC<CustomerResultCardProps> = ({
 }) => {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
 
-  const handleAction = (action: (result: SearchResult) => void) => {
+  const handleAction = (action: (result: Account) => void) => {
     action(result);
     setShowActionsMenu(false);
   };
@@ -109,7 +110,7 @@ const CustomerResultCard: React.FC<CustomerResultCardProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex-shrink-0">
-              {getTypeIcon(result.type)}
+              {getTypeIcon(result.account_type)}
             </div>
             
             <div className="flex-1 min-w-0">
@@ -119,11 +120,11 @@ const CustomerResultCard: React.FC<CustomerResultCardProps> = ({
                 </h3>
                 {getStatusIcon(result.status)}
                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                  result.type === 'commercial' 
+                  result.account_type === 'commercial' || result.account_type === 'industrial' || result.account_type === 'healthcare' || result.account_type === 'property_management'
                     ? 'bg-blue-100 text-blue-800' 
                     : 'bg-green-100 text-green-800'
                 }`}>
-                  {result.type}
+                  {result.account_type}
                 </span>
               </div>
               
@@ -145,9 +146,7 @@ const CustomerResultCard: React.FC<CustomerResultCardProps> = ({
           </div>
           
           <div className="flex items-center gap-2">
-            <div className="text-xs text-gray-500">
-              {formatScore(result.score)}% match
-            </div>
+            {/* Score removed - Account type doesn't have score property */}
             
             {showActions && (
               <div className="relative">
@@ -223,7 +222,7 @@ const CustomerResultCard: React.FC<CustomerResultCardProps> = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex-shrink-0">
-              {getTypeIcon(result.type)}
+              {getTypeIcon(result.account_type)}
             </div>
             
             <div className="flex-1 min-w-0">
@@ -236,11 +235,11 @@ const CustomerResultCard: React.FC<CustomerResultCardProps> = ({
               
               <div className="flex items-center gap-2 mb-2">
                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                  result.type === 'commercial' 
+                  result.account_type === 'commercial' || result.account_type === 'industrial' || result.account_type === 'healthcare' || result.account_type === 'property_management'
                     ? 'bg-blue-100 text-blue-800' 
                     : 'bg-green-100 text-green-800'
                 }`}>
-                  {result.type}
+                  {result.account_type}
                 </span>
                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                   result.status === 'active' 
@@ -271,32 +270,16 @@ const CustomerResultCard: React.FC<CustomerResultCardProps> = ({
             {result.address && (
               <div className="flex items-start gap-2 text-sm text-gray-600 md:col-span-2">
                 <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                <span className="truncate">{result.address}</span>
+                <span className="truncate">{result.address}{result.city ? `, ${result.city}` : ''}{result.state ? `, ${result.state}` : ''}{result.zip_code ? ` ${result.zip_code}` : ''}</span>
               </div>
             )}
           </div>
           
-          {result.matchedFields && result.matchedFields.length > 0 && (
-            <div className="mb-4">
-              <p className="text-xs text-gray-500 mb-1">Matched fields:</p>
-              <div className="flex flex-wrap gap-1">
-                {result.matchedFields.map((field, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800"
-                  >
-                    {field}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Matched fields removed - Account type doesn't have matchedFields property */}
         </div>
         
         <div className="flex flex-col items-end gap-2 ml-4">
-          <div className="text-sm text-gray-500">
-            {formatScore(result.score)}% match
-          </div>
+          {/* Score removed - Account type doesn't have score property */}
           
           {showActions && (
             <div className="flex items-center gap-2">

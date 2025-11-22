@@ -35,6 +35,7 @@ const CommandHelpModal: React.FC<CommandHelpModalProps> = ({ isOpen, onClose }) 
       document.addEventListener('keydown', handleEscape);
       return () => document.removeEventListener('keydown', handleEscape);
     }
+    return undefined;
   }, [isOpen, onClose]);
 
   // Prevent body scroll when modal is open

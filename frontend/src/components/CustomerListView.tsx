@@ -58,7 +58,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
   customers,
   onViewHistory,
   onEdit,
-  onViewDetails,
+  onViewDetails: _onViewDetails,
   onSelectionChange,
   isLoading = false,
   error = null
@@ -250,8 +250,8 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
   const allSelected = filteredCustomers.length > 0 && 
     filteredCustomers.every(customer => selectedCustomers.has(customer.id));
   
-  // Check if some filtered customers are selected
-  const someSelected = filteredCustomers.some(customer => selectedCustomers.has(customer.id));
+  // Check if some filtered customers are selected (unused but kept for potential future use)
+  // const someSelected = filteredCustomers.some(customer => selectedCustomers.has(customer.id));
 
 
 
@@ -279,7 +279,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
         <Card className="p-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-            <Heading level={6} className="text-gray-900 mb-2">
+            <Heading level={4} className="text-gray-900 mb-2">
               Loading Customers...
             </Heading>
             <Text variant="small" className="text-gray-600">
@@ -298,7 +298,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
         <Card className="p-8">
           <div className="text-center">
             <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <Heading level={6} className="text-gray-900 mb-2">
+            <Heading level={4} className="text-gray-900 mb-2">
               Error Loading Customers
             </Heading>
             <Text variant="small" className="text-gray-600 mb-4">
@@ -325,7 +325,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
         <Card className="p-0 sticky-tabs">
           <div className="border-b border-gray-200">
             <div className="flex items-center justify-between px-4 py-3 bg-gray-50">
-              <Heading level={6} className="text-gray-900">
+              <Heading level={4} className="text-gray-900">
                 {selectedCustomers.size} Customer{selectedCustomers.size !== 1 ? 's' : ''} Selected
               </Heading>
               <Button
@@ -370,7 +370,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
            <div className="tab-content">
              {activeTab === 'overview' && (
                <div className="space-y-4">
-                 <Heading level={6} className="text-gray-900">
+                 <Heading level={4} className="text-gray-900">
                    Selected Customers Overview
                  </Heading>
                  <div className="overview-grid">
@@ -420,7 +420,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
             {activeTab === 'jobs' && (
               <div className="text-center py-8">
                 <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <Heading level={6} className="text-gray-900 mb-2">
+                <Heading level={4} className="text-gray-900 mb-2">
                   Jobs & Service History
                 </Heading>
                 <Text variant="small" className="text-gray-600">
@@ -432,7 +432,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
             {activeTab === 'billing' && (
               <div className="text-center py-8">
                 <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <Heading level={6} className="text-gray-900 mb-2">
+                <Heading level={4} className="text-gray-900 mb-2">
                   Billing & AR Information
                 </Heading>
                 <Text variant="small" className="text-gray-600">
@@ -444,7 +444,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
             {activeTab === 'notes' && (
               <div className="text-center py-8">
                 <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <Heading level={6} className="text-gray-900 mb-2">
+                <Heading level={4} className="text-gray-900 mb-2">
                   Notes & Communications
                 </Heading>
                 <Text variant="small" className="text-gray-600">
@@ -456,7 +456,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
             {activeTab === 'documents' && (
               <div className="text-center py-8">
                 <FolderOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <Heading level={6} className="text-gray-900 mb-2">
+                <Heading level={4} className="text-gray-900 mb-2">
                   Documents
                 </Heading>
                 <Text variant="small" className="text-gray-600">
@@ -700,7 +700,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
                                           <Marker position={getCustomerCoordinates(mapPopupCustomer)}>
                                             <Popup>
                                               <div className="p-2">
-                                                <Heading level={6} className="text-gray-900 mb-1">
+                                                <Heading level={4} className="text-gray-900 mb-1">
                                                   {mapPopupCustomer.name}
                                                 </Heading>
                                                 <div className="text-sm text-gray-600">
@@ -731,7 +731,7 @@ const CustomerListView: React.FC<CustomerListViewProps> = ({
         {filteredCustomers.length === 0 && (
           <div className="text-center py-8">
             <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <Heading level={6} className="text-gray-900 mb-2">
+            <Heading level={4} className="text-gray-900 mb-2">
               No Customers Found
             </Heading>
             <Text variant="small" className="text-gray-600">

@@ -15,17 +15,6 @@ import CustomerAnalytics from './customer/CustomerAnalytics';
 import CustomerSettings from './customer/CustomerSettings';
 import CustomerNotesHistory from './customer/CustomerNotesHistory';
 
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address?: string;
-  city: string;
-  state: string;
-  zip_code?: string;
-}
-
 interface CustomerPagePopupProps {
   customerId: string;
   isOpen: boolean;
@@ -128,6 +117,7 @@ const CustomerPagePopup: React.FC<CustomerPagePopupProps> = ({
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
+    return undefined;
   }, [isDragging, isResizing, dragOffset, resizeStart, size.width, size.height]);
 
   // Reset position when popup opens
