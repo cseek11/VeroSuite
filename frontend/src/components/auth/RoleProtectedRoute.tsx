@@ -1,4 +1,4 @@
-import React from 'react';
+// React import removed - not needed with React 17+
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth';
 import { logger } from '@/utils/logger';

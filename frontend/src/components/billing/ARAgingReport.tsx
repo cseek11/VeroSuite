@@ -1,4 +1,4 @@
-import React from 'react';
+// React import removed - not needed with React 17+
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -72,7 +72,7 @@ export default function ARAgingReport() {
     doc.setFontSize(10);
     Object.entries(arSummary.agingBuckets).forEach(([bucket, amount]) => {
       doc.text(
-        `${bucket === '90+' ? '90+' : bucket} Days: ${formatCurrency(amount as number)}`,
+        `${bucket === '90+' ? '90+' : bucket} Days: ${formatCurrency(Number(amount))}`,
         margin + 5,
         yPos
       );
@@ -117,7 +117,7 @@ export default function ARAgingReport() {
       ['Bucket', 'Amount'],
       ...Object.entries(arSummary.agingBuckets).map(([bucket, amount]) => [
         bucket === '90+' ? '90+' : `${bucket} Days`,
-        (amount as number).toFixed(2)
+        Number(amount).toFixed(2)
       ]),
       [],
       ['Customer AR Breakdown'],
@@ -261,7 +261,7 @@ export default function ARAgingReport() {
                   {bucket === '90+' ? '90+ Days' : `${bucket} Days`}
                 </div>
                 <div className="text-2xl font-bold">
-                  {formatCurrency(amount as number)}
+                  {formatCurrency(Number(amount))}
                 </div>
                 <div className="text-xs mt-1 opacity-75">
                   {arSummary.totalAR > 0
