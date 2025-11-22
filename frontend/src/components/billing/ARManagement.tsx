@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -24,7 +24,7 @@ import {
 import { billing } from '@/lib/enhanced-api';
 import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
-import type { ARSummary, CustomerAR, ARInvoice } from '@/types/enhanced-types';
+import type { ARSummary, ARInvoice } from '@/types/enhanced-types';
 
 type SortField = 'customerName' | 'totalAR' | 'invoiceCount' | 'oldestDays';
 type SortDirection = 'asc' | 'desc';
