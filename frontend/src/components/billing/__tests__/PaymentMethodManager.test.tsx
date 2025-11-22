@@ -240,7 +240,7 @@ describe('PaymentMethodManager', () => {
     it('should format card number correctly', async () => {
       renderComponent();
       await waitFor(() => {
-        expect(screen.getByText(/**** **** **** 1234/)).toBeInTheDocument();
+        expect(screen.getByText(/\*\*\*\* \*\*\*\* \*\*\*\* 1234/)).toBeInTheDocument();
       });
     });
     it('should call onPaymentMethodSelected when use button clicked', async () => {
@@ -254,4 +254,3 @@ describe('PaymentMethodManager', () => {
     });
   });
 });
-
