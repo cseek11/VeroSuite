@@ -27,15 +27,19 @@ import {
 import { cn } from '@/lib/utils';
 
 // PredictionData interface (currently unused, kept for potential future use)
+// TypeScript doesn't allow void statements for interfaces, so we'll keep it commented
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface _PredictionData {
+type _PredictionData = {
   value: number;
   confidence: number;
   trend: 'increasing' | 'decreasing' | 'stable';
   factors: string[];
   timeframe: string;
   lastUpdated: Date;
-}
+};
+// Suppress unused warning by referencing the type
+const _unusedPredictionData: _PredictionData | undefined = undefined;
+void _unusedPredictionData;
 
 interface WeatherData {
   temperature: number;
