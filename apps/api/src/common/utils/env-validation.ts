@@ -4,6 +4,7 @@
  */
 
 import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
 
 export interface RequiredEnvVars {
   SUPABASE_URL: string;
@@ -26,8 +27,13 @@ export interface OptionalEnvVars {
 /**
  * Validates required environment variables at startup
  * Throws an error if any required variables are missing
+ * @param configService - ConfigService instance
+ * @param traceId - Optional trace ID for logging
  */
-export function validateEnvironmentVariables(configService: ConfigService): RequiredEnvVars {
+export function validateEnvironmentVariables(
+  configService: ConfigService,
+  traceId?: string,
+): RequiredEnvVars {
   const requiredVars: (keyof RequiredEnvVars)[] = [
     'SUPABASE_URL',
     'SUPABASE_SECRET_KEY', 
@@ -48,11 +54,10 @@ export function validateEnvironmentVariables(configService: ConfigService): Requ
   }
 
   if (missing.length > 0) {
-    throw new Error(
-      `Missing required environment variables: ${missing.join(', ')}\n` +
+    const errorMessage = `Missing required environment variables: ${missing.join(', ')}\n` +
       `Please check your .env file and ensure all required variables are set.\n` +
-      `See apps/api/env.example for reference.`
-    );
+      `See apps/api/env.example for reference.${traceId ? ` [traceId: ${traceId}]` : ''}`;
+    throw new Error(errorMessage);
   }
 
   // Validate key formats
@@ -94,29 +99,43 @@ function validateKeyFormats(envVars: RequiredEnvVars): void {
 
 /**
  * Logs environment variable status (without exposing values)
+ * Uses structured logging with trace context
+ * @param envVars - Required environment variables
+ * @param optionalVars - Optional environment variables
+ * @param traceId - Optional trace ID for request tracking
  */
-export function logEnvironmentStatus(envVars: RequiredEnvVars, optionalVars: OptionalEnvVars): void {
-  console.log('🔧 Environment Variables Status:');
-  console.log(`✅ SUPABASE_URL: ${envVars.SUPABASE_URL}`);
-  console.log(`✅ SUPABASE_SECRET_KEY: ${maskSecret(envVars.SUPABASE_SECRET_KEY)}`);
-  console.log(`✅ JWT_SECRET: ${maskSecret(envVars.JWT_SECRET)}`);
-  console.log(`✅ DATABASE_URL: ${maskDatabaseUrl(envVars.DATABASE_URL)}`);
-  
-  if (optionalVars.SUPABASE_PUBLISHABLE_KEY) {
-    console.log(`✅ SUPABASE_PUBLISHABLE_KEY: ${maskSecret(optionalVars.SUPABASE_PUBLISHABLE_KEY)}`);
-  }
-  
-  if (optionalVars.STRIPE_SECRET_KEY) {
-    console.log(`✅ STRIPE_SECRET_KEY: ${maskSecret(optionalVars.STRIPE_SECRET_KEY)}`);
-  } else {
-    console.log('ℹ️  STRIPE_SECRET_KEY: Not set (payment features will use mock mode)');
-  }
+export function logEnvironmentStatus(
+  envVars: RequiredEnvVars,
+  optionalVars: OptionalEnvVars,
+  traceId?: string,
+): void {
+  const logger = new Logger('EnvValidation');
+  const logContext: Record<string, any> = {
+    operation: 'environment_validation',
+    traceId: traceId || 'startup',
+    spanId: 'env-status',
+  };
 
-  if (optionalVars.REDIS_URL) {
-    console.log(`✅ REDIS_URL: ${maskDatabaseUrl(optionalVars.REDIS_URL)}`);
-  } else {
-    console.log('ℹ️  REDIS_URL: Not set (caching disabled)');
-  }
+  logger.log('Environment Variables Status', {
+    ...logContext,
+    required: {
+      SUPABASE_URL: envVars.SUPABASE_URL,
+      SUPABASE_SECRET_KEY: maskSecret(envVars.SUPABASE_SECRET_KEY),
+      JWT_SECRET: maskSecret(envVars.JWT_SECRET),
+      DATABASE_URL: maskDatabaseUrl(envVars.DATABASE_URL),
+    },
+    optional: {
+      SUPABASE_PUBLISHABLE_KEY: optionalVars.SUPABASE_PUBLISHABLE_KEY
+        ? maskSecret(optionalVars.SUPABASE_PUBLISHABLE_KEY)
+        : 'not set',
+      STRIPE_SECRET_KEY: optionalVars.STRIPE_SECRET_KEY
+        ? maskSecret(optionalVars.STRIPE_SECRET_KEY)
+        : 'not set (mock mode)',
+      REDIS_URL: optionalVars.REDIS_URL
+        ? maskDatabaseUrl(optionalVars.REDIS_URL)
+        : 'not set (caching disabled)',
+    },
+  });
 }
 
 /**

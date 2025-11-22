@@ -1,13 +1,17 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, BadRequestException, VersioningType } from '@nestjs/common';
+import { ValidationPipe, BadRequestException, VersioningType, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'crypto';
 import { AppModule } from './app.module';
 import { validateEnvironmentVariables, logEnvironmentStatus } from './common/utils/env-validation';
 
 // Increase Node.js memory limit
 process.env.NODE_OPTIONS = '--max-old-space-size=4096';
+
+// Generate trace ID for startup
+const startupTraceId = randomUUID();
 
 async function bootstrap() {
   // Configure raw body parsing for Stripe webhooks
@@ -17,8 +21,9 @@ async function bootstrap() {
   
   // Validate environment variables at startup
   const configService = app.get(ConfigService);
+  const logger = new Logger('Bootstrap');
   try {
-    const requiredEnvVars = validateEnvironmentVariables(configService);
+    const requiredEnvVars = validateEnvironmentVariables(configService, startupTraceId);
     const optionalEnvVars = {
       SUPABASE_PUBLISHABLE_KEY: configService.get<string>('SUPABASE_PUBLISHABLE_KEY'),
       JWT_EXPIRES_IN: configService.get<string>('JWT_EXPIRES_IN'),
@@ -30,11 +35,21 @@ async function bootstrap() {
       REDIS_URL: configService.get<string>('REDIS_URL'),
     };
     
-    logEnvironmentStatus(requiredEnvVars, optionalEnvVars);
-    console.log('✅ Environment validation passed');
+    logEnvironmentStatus(requiredEnvVars, optionalEnvVars, startupTraceId);
+    logger.log('Environment validation passed', {
+      traceId: startupTraceId,
+      spanId: 'env-validation',
+      operation: 'bootstrap',
+    });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    console.error('❌ Environment validation failed:', errorMessage);
+    logger.error('Environment validation failed', {
+      traceId: startupTraceId,
+      spanId: 'env-validation',
+      operation: 'bootstrap',
+      error: errorMessage,
+      errorStack: error instanceof Error ? error.stack : undefined,
+    });
     process.exit(1);
   }
 
