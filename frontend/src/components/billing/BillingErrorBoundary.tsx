@@ -33,7 +33,7 @@ export class BillingErrorBoundary extends Component<Props, State> {
     hasError: false,
   };
 
-  public static getDerivedStateFromError(error: Error): State {
+  public static override getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
@@ -62,7 +62,7 @@ export class BillingErrorBoundary extends Component<Props, State> {
     if (this.props.onRetry) {
       this.props.onRetry();
     }
-    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
+    this.setState({ hasError: false });
   };
 
   private handleBack = () => {
