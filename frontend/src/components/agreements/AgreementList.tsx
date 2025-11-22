@@ -44,12 +44,19 @@ export function AgreementList({ customerId }: AgreementListProps) {
 
   const { data: agreementsData, isLoading, error } = useQuery({
     queryKey: ['agreements', { page, limit, status: statusFilter, customerId }],
-    queryFn: () => agreementsApi.getAgreements({
-      page,
-      limit,
-      status: statusFilter ? (statusFilter as 'active' | 'inactive' | 'expired' | 'cancelled') : undefined,
-      customerId: customerId || undefined,
-    }),
+    queryFn: () => {
+      const params: { page: number; limit: number; status?: 'active' | 'inactive' | 'expired' | 'cancelled'; customerId?: string } = {
+        page,
+        limit,
+      };
+      if (statusFilter) {
+        params.status = statusFilter as 'active' | 'inactive' | 'expired' | 'cancelled';
+      }
+      if (customerId) {
+        params.customerId = customerId;
+      }
+      return agreementsApi.getAgreements(params);
+    },
   });
 
   // Helper function for status color (currently unused, kept for potential future use)
@@ -76,6 +83,7 @@ export function AgreementList({ customerId }: AgreementListProps) {
       default: return 'gray';
     }
   };
+  void _getBillingFrequencyColor; // Suppress unused warning
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -422,7 +430,7 @@ export function AgreementList({ customerId }: AgreementListProps) {
       </Dialog>
 
       {/* New Agreement Dialog */}
-      <Dialog open={showNewAgreementModal} onOpenChange={(open) => !open && setShowNewAgreementModal(false)}>
+      <Dialog open={showNewAgreementModal} onOpenChange={(open: boolean) => !open && setShowNewAgreementModal(false)}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>Create New Agreement</DialogTitle>
@@ -437,7 +445,7 @@ export function AgreementList({ customerId }: AgreementListProps) {
       </Dialog>
 
       {/* Edit Agreement Dialog */}
-      <Dialog open={showEditModal} onOpenChange={(open) => !open && setShowEditModal(false)}>
+      <Dialog open={showEditModal} onOpenChange={(open: boolean) => !open && setShowEditModal(false)}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>Edit Agreement</DialogTitle>

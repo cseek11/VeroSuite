@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   TrendingUp,
   TrendingDown,
@@ -25,7 +25,9 @@ import {
 } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
-interface PredictionData {
+// PredictionData interface (currently unused, kept for potential future use)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface _PredictionData {
   value: number;
   confidence: number;
   trend: 'increasing' | 'decreasing' | 'stable';
@@ -73,13 +75,14 @@ interface PredictiveAnalyticsEngineProps {
 }
 
 export default function PredictiveAnalyticsEngine({ 
-  customerId, 
+  customerId: _customerId, 
   showAdvanced = false,
   onPredictionSelect 
 }: PredictiveAnalyticsEngineProps) {
   const [selectedTimeframe, setSelectedTimeframe] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
   const [selectedPrediction, setSelectedPrediction] = useState<MLPrediction | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_isLoading, _setIsLoading] = useState(false);
 
   // Mock ML predictions with realistic data
   const mlPredictions: MLPrediction[] = useMemo(() => [
@@ -278,7 +281,7 @@ export default function PredictiveAnalyticsEngine({
   };
 
   const filteredPredictions = useMemo(() => {
-    return mlPredictions.filter(prediction => {
+    return mlPredictions.filter(_prediction => {
       // Filter by timeframe if needed
       return true;
     });
@@ -347,21 +350,29 @@ export default function PredictiveAnalyticsEngine({
       {/* ML Predictions Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPredictions.map((prediction) => (
-          <Card
+          <div
             key={prediction.id}
+            onClick={() => handlePredictionClick(prediction)}
             className={cn(
-              "p-6 cursor-pointer transition-all duration-200 hover:shadow-lg",
+              "cursor-pointer",
               selectedPrediction?.id === prediction.id
                 ? "ring-2 ring-purple-500 bg-purple-50"
-                : "hover:bg-gray-50"
+                : ""
             )}
-            onClick={() => handlePredictionClick(prediction)}
           >
+            <Card
+              className={cn(
+                "p-6 transition-all duration-200 hover:shadow-lg",
+                selectedPrediction?.id === prediction.id
+                  ? ""
+                  : "hover:bg-gray-50"
+              )}
+            >
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 {getPredictionIcon(prediction.type)}
                 <div>
-                  <Heading level={6} className="text-gray-900 mb-1">
+                  <Heading level={4} className="text-gray-900 mb-1">
                     {prediction.title}
                   </Heading>
                   <Text variant="small" className="text-gray-600">
@@ -384,7 +395,7 @@ export default function PredictiveAnalyticsEngine({
               <div className="flex items-center justify-between">
                 <div>
                   <Text variant="small" className="text-gray-600">Current</Text>
-                  <Heading level={5} className="font-bold text-gray-900">
+                  <Heading level={4} className="font-bold text-gray-900">
                     {formatValue(prediction.currentValue, prediction.type)}
                   </Heading>
                 </div>
@@ -433,6 +444,7 @@ export default function PredictiveAnalyticsEngine({
               </div>
             </div>
           </Card>
+          </div>
         ))}
       </div>
 
