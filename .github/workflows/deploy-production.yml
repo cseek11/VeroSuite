@@ -132,7 +132,6 @@ jobs:
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
     environment:
       name: ${{ github.event.inputs.environment || 'production' }}
-      url: ${{ secrets.DEPLOYMENT_URL || '' }}
     steps:
       - uses: actions/checkout@v4
       

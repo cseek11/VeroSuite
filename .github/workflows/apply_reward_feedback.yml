@@ -120,8 +120,6 @@ jobs:
               f"## Action Required for Next PR\n\n"
               f"Cursor: These areas need improvement before next PR:\n"
           )
-
-"""
           
           # Extract recommendations from analysis
           in_recommendations = False

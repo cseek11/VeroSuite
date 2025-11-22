@@ -108,18 +108,21 @@ jobs:
               for step in pattern.get('do', []):
                   summary += f"- {step}\n"
           
-              summary += f"\n**Why:** {pattern.get('why', 'N/A')}\n\n"
-          
-**Example:** `{pattern.get('example', 'N/A')}`
-          
-**Metadata:**
-- Domain: {pattern.get('metadata', {}).get('domain', 'unknown')}
-- Complexity: {pattern.get('metadata', {}).get('complexity', 'unknown')}
-- Source PR: #{pattern.get('metadata', {}).get('source_pr', 'unknown')}
-          
----
-          
-"""
+              example = pattern.get('example', 'N/A')
+              metadata = pattern.get('metadata', {})
+              domain = metadata.get('domain', 'unknown')
+              complexity = metadata.get('complexity', 'unknown')
+              source_pr = metadata.get('source_pr', 'unknown')
+              
+              summary += (
+                  f"\n**Why:** {pattern.get('why', 'N/A')}\n\n"
+                  f"**Example:** `{example}`\n\n"
+                  f"**Metadata:**\n"
+                  f"- Domain: {domain}\n"
+                  f"- Complexity: {complexity}\n"
+                  f"- Source PR: #{source_pr}\n\n"
+                  f"---\n\n"
+              )
           
           summary += """
 ## Next Steps

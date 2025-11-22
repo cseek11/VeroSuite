@@ -90,13 +90,13 @@ jobs:
               exit(0)
           
           # Generate markdown report
-          report = f"""# Anti-Pattern Detection Report (PR #{data.get('metadata', {}).get('pr', 'unknown')})
-          
-**REWARD_SCORE:** {data.get('metadata', {}).get('score', 'unknown')} (triggered anti-pattern detection)
-          
-## Detected Violations ({len(violations)})
-          
-"""
+          pr_num = data.get('metadata', {}).get('pr', 'unknown')
+          score = data.get('metadata', {}).get('score', 'unknown')
+          report = (
+              f"# Anti-Pattern Detection Report (PR #{pr_num})\n\n"
+              f"**REWARD_SCORE:** {score} (triggered anti-pattern detection)\n\n"
+              f"## Detected Violations ({len(violations)})\n\n"
+          )
           
           # Group by type
           by_type = {}
