@@ -201,7 +201,7 @@ jobs:
 
       - name: Run OWASP security tests
         run: |
-          cd backend
+          cd apps/api
           npm run test:security
 
       - name: Run SAST scan
@@ -301,7 +301,7 @@ jobs:
 
       - name: Run performance regression tests
         run: |
-          cd backend
+          cd apps/api
           npm run test:performance
 
   # End-to-End Tests
