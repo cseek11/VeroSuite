@@ -31,7 +31,7 @@ const routingApi = {
 export default function DispatcherDashboard() {
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [jobs, setJobs] = useState<any[]>([]);
-  const [accounts, setAccounts] = useState<any[]>([]);
+  const [_accounts, setAccounts] = useState<any[]>([]);
   const [routes, setRoutes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [_assignJobId, setAssignJobId] = useState<string>('');
@@ -65,7 +65,7 @@ export default function DispatcherDashboard() {
         const [jobsData, accountsData, routesData] = await Promise.all([
           jobsApi.today(),
           crmApi.accounts(),
-          routingApi.optimize(new Date().toISOString().split('T')[0]),
+          routingApi.optimize(new Date().toISOString().split('T')[0] || ''),
         ]);
         setJobs(jobsData || []);
         setAccounts(accountsData || []);
@@ -87,8 +87,9 @@ export default function DispatcherDashboard() {
     }, 1000);
   }
 
-  // Helper function for chart data
-  function getJobsPerDayData(jobs: any[]) {
+  // Helper function for chart data (currently unused, kept for potential future use)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  function _getJobsPerDayData(jobs: any[]) {
     // Group jobs by scheduled_date
     const counts: Record<string, number> = {};
     jobs.forEach(job => {
@@ -129,7 +130,10 @@ export default function DispatcherDashboard() {
               <>
                 <div className="mt-8">
                   <h2 className="text-xl font-semibold mb-2">User Management</h2>
-                  <UserManagementForm />
+                  <UserManagementForm 
+                    onSave={() => {}} 
+                    onCancel={() => {}} 
+                  />
                 </div>
                 <div className="mt-8">
                   <h2 className="text-xl font-semibold mb-2">Audit Logs</h2>

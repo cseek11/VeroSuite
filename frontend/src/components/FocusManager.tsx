@@ -53,6 +53,8 @@ const FocusManager: React.FC<FocusManagerProps> = ({
       const firstElement = focusableElements[0];
       const lastElement = focusableElements[focusableElements.length - 1];
 
+      if (!firstElement || !lastElement) return;
+
       if (event.shiftKey) {
         // Shift + Tab: move backwards
         if (document.activeElement === firstElement) {
@@ -78,7 +80,7 @@ const FocusManager: React.FC<FocusManagerProps> = ({
 
     const timer = setTimeout(() => {
       const focusableElements = getFocusableElements();
-      if (focusableElements.length > 0) {
+      if (focusableElements.length > 0 && focusableElements[0]) {
         focusableElements[0].focus();
       }
     }, 100);
