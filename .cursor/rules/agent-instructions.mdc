@@ -1,0 +1,462 @@
+---
+alwaysApply: true
+---
+## GLOBAL BEHAVIOR (ALWAYS ACTIVE)
+
+You ALWAYS operate using:
+
+- **00-master.mdc** — master law, CI/RewardScore, pattern system, precedence  
+- **01-enforcement.mdc** — mandatory 5-step workflow  
+- **02-core.mdc** — tech stack, dates, foundation rules  
+- **03-security.mdc** — security dominance (RLS, tenant isolation, validation)  
+- **04–14 domain rules** — selected by file path + globs (see ROUTING section below)
+- **Pattern system** — golden patterns, anti-patterns, bug log  
+- **Multi-agent logic** — agents.json routing
+- **Reward Score discipline** — CI-driven scoring
+- **Strict monorepo directory rules** — architecture boundaries
+
+**You MUST refuse or stop any action that violates ANY `.mdc` rule.**
+
+---
+
+## ENFORCEMENT WORKFLOW (MANDATORY)
+
+For EVERY engineering action (refactor, fix, feature, test, doc, review) you MUST execute and output the following 5-step pipeline:
+
+### Step 1: Search & Discovery (MANDATORY)
+
+- [ ] **MUST** search for existing components: `codebase_search("How does [feature] work?")`
+- [ ] **MUST** check component library: `read_file("docs/reference/COMPONENT_LIBRARY_CATALOG.md")`
+- [ ] **MUST** find 2-3 similar implementations using `grep` and `codebase_search`
+- [ ] **MUST** verify file location using `list_dir` and `glob_file_search`
+- [ ] **MUST** read relevant documentation files
+- [ ] **MUST** search `docs/error-patterns.md` for similar past issues
+- [ ] **MUST** search `docs/engineering-decisions.md` for relevant decisions
+- [ ] **MUST** identify all error-prone operations (external I/O, async/await, user input, parsing, cross-service, auth, caching, events, concurrency)
+- [ ] **MUST** search for existing logging patterns in similar code
+- [ ] **MUST** search for trace propagation implementations
+- [ ] **MUST** search for state machine documentation (if stateful component)
+- [ ] **MUST** search for contract definitions (if schema changes)
+- [ ] **MUST** check for existing dependencies (if adding new dependency)
+- [ ] **MUST** verify transaction requirements (if multi-step DB operations)
+- [ ] **MUST** check layer synchronization needs (if touching any layer)
+- [ ] **MUST** check for old naming (VeroSuite, @verosuite/*) in affected files
+
+**STOP if you haven't completed all searches above.**
+
+### Step 2: Pattern Analysis (MANDATORY)
+
+- [ ] **MUST** identify the pattern to follow from similar implementations
+- [ ] **MUST** verify correct file path (check `.cursor/rules/04-architecture.mdc` for structure)
+- [ ] **MUST** check if component should be in `ui/` (reusable) or feature-specific
+- [ ] **MUST** verify import patterns match existing code
+- [ ] **MUST** analyze identified risks from Step 1
+- [ ] **MUST** check for known error patterns from `docs/error-patterns.md`
+- [ ] **MUST** verify error handling patterns match existing codebase
+- [ ] **MUST** check trace propagation patterns
+- [ ] **MUST** evaluate whether similar risks exist and plan guardrails
+- [ ] **MUST** verify state machine pattern matches existing implementations (if stateful)
+- [ ] **MUST** verify contract patterns match existing implementations (if schema changes)
+- [ ] **MUST** verify dependency patterns match existing code (if adding dependency)
+- [ ] **MUST** verify transaction patterns match existing code (if multi-step DB operations)
+- [ ] **MUST** verify layer synchronization patterns (if touching any layer)
+
+**STOP if pattern is unclear - ask for clarification.**
+
+### Step 3: Rule Compliance Check (MANDATORY)
+
+- [ ] **MUST** verify tenant isolation if touching database
+- [ ] **MUST** check if using correct file paths (see `.cursor/rules/04-architecture.mdc`)
+- [ ] **MUST** verify using shared libraries from `libs/common/` if applicable
+- [ ] **MUST** use current system date (check device date) - NEVER hardcode dates ⭐ **CRITICAL**
+- [ ] **MUST** verify structured logging requirements met
+- [ ] **MUST** verify trace ID propagation present
+- [ ] **MUST** verify error handling blocks present for all error-prone operations
+- [ ] **MUST** check for silent failures (empty catch blocks, swallowed promises, missing awaits)
+- [ ] **MUST** verify security event logging (if applicable)
+- [ ] **MUST** verify no architecture changes without permission
+- [ ] **MUST** verify no old naming (VeroSuite, @verosuite/*) introduced
+- [ ] **MUST** verify performance characteristics analyzed
+- [ ] **MUST** verify event schemas validated (if producing/consuming events)
+- [ ] **MUST** verify cross-platform compatibility (if applicable)
+- [ ] **MUST** verify accessibility requirements met (if UI component)
+- [ ] **MUST** verify tooling compliance (lint/format, TypeScript)
+- [ ] **MUST** verify refactor integrity (if refactoring)
+- [ ] **MUST** verify UX consistency (if UI component)
+- [ ] **MUST** verify file ownership respected
+- [ ] **MUST** verify tech debt logged (if applicable)
+- [ ] **MUST** verify file organization compliance
+- [ ] **MUST** verify workflow triggers are properly configured (if modifying workflows)
+
+**STOP if any rule violation detected.**
+
+### Step 4: Implementation Plan (MANDATORY)
+
+- [ ] **MUST** create todo list for complex features (>3 steps)
+- [ ] **MUST** explain what you found in searches
+- [ ] **MUST** describe the pattern you'll follow
+- [ ] **MUST** list files you'll create/modify
+
+**STOP if plan is not clear.**
+
+### Step 5: Post-Implementation Audit (MANDATORY) ⭐ **CRITICAL**
+
+- [ ] **MUST** audit ALL files touched for code compliance
+- [ ] **MUST** verify file paths are correct (monorepo structure)
+- [ ] **MUST** verify imports use correct paths (`@verofield/common/*`)
+- [ ] **MUST** verify no old naming (VeroSuite, @verosuite/*) remains
+- [ ] **MUST** verify tenant isolation (if database queries)
+- [ ] **MUST** verify file organization compliance
+- [ ] **MUST** verify date compliance (current system date, not hardcoded)
+- [ ] **MUST** verify following established patterns
+- [ ] **MUST** verify no duplicate components created
+- [ ] **MUST** verify TypeScript types are correct (no `any`)
+- [ ] **MUST** verify security boundaries maintained
+- [ ] **MUST** verify documentation updated with current date
+- [ ] **MUST** verify all error paths have tests
+- [ ] **MUST** verify logging meets structured logging policy
+- [ ] **MUST** verify no silent failures remain
+- [ ] **MUST** verify observability hooks present (trace IDs, structured logs)
+- [ ] **MUST** verify tests pass (regression + preventative)
+- [ ] **MUST** verify cross-layer traceability intact (traceId, spanId, requestId propagated)
+- [ ] **MUST** verify workflow triggers validated (if workflows modified)
+
+**STOP if any compliance violation found - fix before proceeding.**
+
+### Output Deliverables (After Pipeline)
+
+After completing the 5-step pipeline, provide:
+
+1. **Code implementation**
+2. **Tests** (unit, integration, regression as applicable)
+3. **Documentation changes**
+4. **DRAFT Reward Score** (if no CI RS available)
+
+**If ANY step cannot be completed → HARD STOP.**
+
+---
+
+## ROUTING & MODE SELECTION (FILE PATH-BASED)
+
+Automatically route and load rules based on file paths/globs. Routing is **additive** (multiple rules can apply simultaneously).
+
+### Always Include (Universal)
+
+- General patterns (`.cursor/patterns/*`)
+- Security rules (`.cursor/prompts/security_review.md`)
+- Testing rules (`.cursor/prompts/tester.md`) if code changed
+
+### Path-Based Routing
+
+#### Backend Files
+**Paths:** `apps/*/src/**/*.ts`, `libs/common/**/*.ts`, `backend/`, `src/api/`, `src/services/`, `*.ts`, `*.py`, `*.go`
+
+**Load Rules:**
+- `08-backend.mdc` (NestJS, Prisma patterns)
+- `06-error-resilience.mdc` (Error handling)
+- `07-observability.mdc` (Logging, tracing)
+
+**Load Prompt:** `.cursor/prompts/backend_reviewer.md`
+
+#### Frontend Files
+**Paths:** `frontend/**/*.{ts,tsx}`, `VeroFieldMobile/**/*.{ts,tsx}`, `src/components/`, `*.tsx`, `*.jsx`
+
+**Load Rules:**
+- `09-frontend.mdc` (React/React Native architecture)
+- `13-ux-consistency.mdc` (UI/UX coherence)
+
+**Load Prompt:** `.cursor/prompts/frontend_reviewer.md`
+
+#### Infrastructure Files
+**Paths:** `infra/`, `deploy/`, `k8s/`, `*.tf`, `.github/workflows/**`
+
+**Load Rules:**
+- `11-operations.mdc` (CI/CD, workflows)
+
+**Load Prompt:** `.cursor/prompts/infra_reviewer.md`
+
+#### Data/Contracts Files
+**Paths:** `pipelines/`, `*.sql`, `airflow/`, analytics folders
+
+**Load Rules:**
+- `05-data.mdc` (Contracts, state machines, layer sync)
+
+**Load Prompt:** `.cursor/prompts/distill_data.md` (if exists)
+
+#### Test Files
+**Paths:** `**/*.test.ts`, `**/*.spec.ts`
+
+**Load Rules:**
+- `10-quality.mdc` (Testing, coverage, performance)
+- `14-verification.mdc` (Verification & testing standards)
+
+### Default Routing
+
+- If multiple areas match, load all relevant prompts (routing is additive)
+- If no path matches, default to `@lead` prompt (`.cursor/prompts/lead_review.md`)
+
+---
+
+## ABSOLUTE SECURITY DOMINANCE
+
+You MUST STOP if requested to:
+
+- Bypass RLS
+- Use tenantId from client
+- Skip validation
+- Hardcode secrets
+- Query without tenant context
+- Expose PII or stack traces
+- Use raw SQL with string interpolation
+- Remove auth or authorization
+
+**These violations END execution immediately.**
+
+**Security Rules (03-security.mdc) override all other rules if conflict occurs.**
+
+---
+
+## STRICT PROHIBITIONS (NEVER ALLOWED)
+
+Never:
+
+- Create new microservices (requires explicit human approval)
+- Break monorepo structure
+- Add dependencies without analysis
+- Write JavaScript in source code (TypeScript only)
+- Hardcode dates (MUST check current system date)
+- Introduce silent errors
+- Use console.log (use structured logging)
+- Duplicate components
+- Modify package.json without review
+- Skip required tests
+- Let UX drift from design system
+- Create files in deprecated paths (`backend/src/` → use `apps/api/src/`)
+- Use cross-service relative imports
+- Bypass tenant isolation
+
+---
+
+## PATTERN SYSTEM (FILE STRUCTURE)
+
+You MUST reference these specific files:
+
+### Golden Patterns
+
+- **`.cursor/patterns/`** — Golden pattern implementations (primary source)
+- **`.cursor/golden_patterns.md`** — Pattern index + metadata
+- **Pattern naming:** `NNN_domain_short-name.md` (e.g., `001_backend_circuit_breaker.md`)
+
+### Anti-Patterns & Bug Log
+
+- **`.cursor/anti_patterns.md`** — Known bad patterns (must avoid)
+- **`.cursor/BUG_LOG.md`** — Historical bug patterns (prevent regressions)
+
+### Pattern Rules
+
+- Always reuse golden patterns from `.cursor/patterns/` before inventing new logic
+- Detect and avoid anti-patterns from `.cursor/anti_patterns.md`
+- Suggest pattern candidates via @coach mode (never auto-adopt)
+- Patterns are authoritative only after human reviewer merges via PR
+- Each pattern must include metadata (`created_at`, `author`, `source_pr`, `domain`, `complexity`)
+
+### Pattern Extraction Triggers
+
+- **High-score PR** (CI REWARD_SCORE ≥ 6) → eligible for pattern extraction
+- **Low-score PR** (CI REWARD_SCORE ≤ 0) → generate anti-pattern suggestions
+- **Manual invocation** via @coach mode
+
+---
+
+## REWARD SCORE SYSTEM
+
+### Format (from 00-master.mdc)
+
+```
+REWARD_SCORE: X/10 (source: CI | DRAFT)
+Breakdown:
+tests: +3
+bug_fix: +2
+docs: +1
+penalties: -2
+
+Assessment:
+<2–4 sentences>
+
+Actionable Feedback:
+- ...
+- ...
+
+Decision:
+APPROVE / REQUEST_CHANGES / BLOCK
+```
+
+### Thresholds & Actions
+
+- **Score < -3** + failing tests/security issues → **BLOCK** and request changes
+- **Score -3..3** → Require explicit `@lead` human review tag for merge
+- **Score ≥ 6** → Eligible for pattern extraction (@coach mode)
+- **Score ≤ 0** → Generate anti-pattern suggestions
+
+### Source Priority
+
+1. **CI-supplied REWARD_SCORE** (authoritative)
+2. **Local analysis labeled `DRAFT`** (if CI not available)
+3. **Use `.cursor/reward_rubric.yaml`** for scoring weights
+
+**When reviewing or generating changes, compute DRAFT score if CI not available.**
+
+---
+
+## MULTI-AGENT MODEL (agents.json)
+
+You route your reasoning through specialized agents based on context.
+
+### Available Agents (from `.cursor/agents.json`)
+
+- **Lead Review Agent** — Full PR-grade review, all rules
+- **Security Auditor** — RLS, auth, secrets enforcement
+- **Backend Reviewer** — NestJS, Prisma, DTOs, RLS
+- **Frontend Reviewer** — React/RN, design system, UX consistency
+- **Tester** — Regression/unit/integration/E2E test generation
+- **Coach** — Pattern extraction, explanations, best practices
+- **CI Workflow Auditor** — GitHub Actions, Reward Score pipelines
+- **Monorepo Navigator** — File structure, service boundaries
+- **Architecture Advisor** — High-level architectural correctness
+- **Tech Debt Agent** — Modernization, cleanup, anti-pattern removal
+
+### Routing Logic
+
+- Automatically select agents based on file paths (see ROUTING section)
+- Multiple agents can be active simultaneously (additive routing)
+- Each agent loads its specific rule subset from 00-14 .mdc files
+
+---
+
+## ALWAYS SHOW WHAT RULES APPLY
+
+When generating code, tests, or review output:
+
+1. **Determine** which `.mdc` rules apply (based on file paths/globs)
+2. **List** the specific rule files that informed your decision
+3. **Highlight** any conflicts and obey highest precedence:
+   - **00-master.mdc** (supreme precedence)
+   - **01-enforcement.mdc** (mandatory pipeline)
+   - **03-security.mdc** (security dominance)
+4. **Reference** specific rule file sections when applicable
+
+### Example Output
+
+```
+Rules Applied:
+- 00-master.mdc (CI/RewardScore, pattern system)
+- 01-enforcement.mdc (5-step pipeline)
+- 03-security.mdc (tenant isolation, RLS)
+- 08-backend.mdc (NestJS patterns) [via glob: apps/api/src/**/*.ts]
+- 10-quality.mdc (testing requirements)
+```
+
+---
+
+## EMERGENCY OVERRIDE
+
+You ONLY bypass a rule if the user explicitly issues:
+
+```
+@emergency_override:<rule-id>:<YYYY-MM-DD>
+```
+
+### Rules
+
+- Overrides expire automatically (max 7 days)
+- Must be logged in `docs/architecture/cursor_rules_upgrade.md`
+- Requires approval from Rules Champion
+- Cannot exceed 7 days expiration
+
+### Example
+
+```
+@emergency_override:04-architecture:2025-11-28
+```
+
+This pauses `04-architecture.mdc` until 2025-11-28.
+
+---
+
+## YOU MUST
+
+- Enforce the entire Hybrid Rule System on EVERY action
+- Stay within safe transformations unless user gives explicit scope
+- NEVER perform destructive/structural operations unless explicitly asked
+- Follow the 5-step enforcement pipeline for ALL code changes
+- Show which rules apply for every output
+- Use file path-based routing to load appropriate domain rules
+- Reference specific pattern files (`.cursor/patterns/`, `.cursor/golden_patterns.md`, etc.)
+- Compute DRAFT Reward Score if CI not available
+- Apply REWARD_SCORE thresholds correctly (BLOCK < -3, REVIEW -3..3, etc.)
+- Stop immediately on security violations
+- Never hardcode dates (always check current system date)
+- Never create silent failures
+- Never bypass tenant isolation or RLS
+
+---
+
+## YOU MUST NOT
+
+- Skip any step in the enforcement pipeline
+- Create new microservices without explicit approval
+- Use deprecated file paths (`backend/src/` → `apps/api/src/`)
+- Hardcode dates, secrets, or tenant IDs
+- Bypass security rules for convenience
+- Auto-adopt patterns without human review
+- Ignore REWARD_SCORE thresholds
+- Create cross-service relative imports
+- Use console.log instead of structured logging
+
+---
+
+## QUICK REFERENCE
+
+### Rule File Precedence
+
+1. **00-master.mdc** — Supreme precedence
+2. **01-enforcement.mdc** — Mandatory pipeline
+3. **03-security.mdc** — Security dominance
+4. **04-14 domain rules** — Context-specific
+
+### Enforcement Pipeline
+
+1. Search & Discovery
+2. Pattern Analysis
+3. Rule Compliance Check
+4. Implementation Plan
+5. Post-Implementation Audit
+
+### Reward Score Thresholds
+
+- **< -3** → BLOCK
+- **-3 to 3** → REVIEW REQUIRED
+- **≥ 6** → Pattern extraction eligible
+- **≤ 0** → Anti-pattern generation
+
+### Security Hard Stops
+
+- RLS bypass
+- Client tenantId
+- Missing validation
+- Hardcoded secrets
+- No tenant context
+- PII/stack trace exposure
+- Raw SQL interpolation
+- Auth removal
+
+---
+
+**Last Updated:** 2025-11-21  
+**Maintained By:** VeroField Engineering Team  
+**Reference:** `.cursor/rules/*.mdc`, `.cursor/agents.json`, `.cursor/README.md`
+
+
+---
+alwaysApply: true
+---

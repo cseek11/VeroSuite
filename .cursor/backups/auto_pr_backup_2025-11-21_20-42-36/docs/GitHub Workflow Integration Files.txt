@@ -1,0 +1,551 @@
+# ============================================================================
+# FILE 1: .cursor/config/session_config.yaml
+# Configuration for Auto-PR session management
+# ============================================================================
+timeout_minutes: 30
+idle_warning_minutes: 15
+auto_pr_patterns:
+  - "^auto-pr:"
+  - "^wip:"
+  - "^\\[auto\\]"
+  - "^checkpoint:"
+  - "^cursor-session"
+  - "^🤖"
+completion_markers:
+  - "ready for review"
+  - "ready to review"
+  - "complete"
+  - "final pr"
+  - "[session-complete]"
+  - "[ready]"
+  - "done with session"
+  - "finished"
+  - "✅"
+min_files_for_manual: 5
+enable_timeout_completion: true
+enable_heuristic_completion: true
+
+---
+# ============================================================================
+# FILE 2: .github/workflows/auto_pr_session_manager.yml
+# GitHub Actions workflow for session management
+# ============================================================================
+name: Auto-PR Session Manager
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  issue_comment:
+    types: [created]
+  schedule:
+    # Cleanup orphaned sessions daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  session-check:
+    name: Check and Manage PR Session
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip_scoring: ${{ steps.session_check.outputs.skip }}
+      session_id: ${{ steps.session_check.outputs.session_id }}
+      
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+      
+      - name: Check if Auto-PR
+        id: session_check
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          FILES_CHANGED: ${{ github.event.pull_request.changed_files }}
+        run: |
+          python .cursor/scripts/auto_pr_session_manager.py check \
+            --pr-number "$PR_NUMBER" \
+            --title "$PR_TITLE" \
+            --body "$PR_BODY" \
+            --author "$PR_AUTHOR" \
+            --files "$FILES_CHANGED" > check_result.json
+          
+          # Parse result
+          IS_AUTO=$(jq -r '.is_auto_pr' check_result.json)
+          SESSION_ID=$(jq -r '.session_id' check_result.json)
+          
+          echo "skip=$IS_AUTO" >> "$GITHUB_OUTPUT"
+          echo "session_id=$SESSION_ID" >> "$GITHUB_OUTPUT"
+          
+          if [ "$IS_AUTO" = "true" ]; then
+            echo "📦 Auto-PR detected - adding to session $SESSION_ID"
+          else
+            echo "📊 Regular PR - will score normally"
+          fi
+      
+      - name: Add Session Metadata Comment
+        if: steps.session_check.outputs.skip == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sessionId = '${{ steps.session_check.outputs.session_id }}';
+            const comment = `🤖 **Auto-PR Session Manager**
+            
+            This PR has been added to session: \`${sessionId}\`
+            
+            To complete this session and trigger scoring:
+            - Add \`[ready]\` or \`ready for review\` to PR title/description
+            - Comment \`/complete-session\` on this PR
+            - Wait 30 minutes (automatic timeout)
+            
+            Current session status: Check the [Session Dashboard](https://github.com/${{ github.repository }}/actions/workflows/auto_pr_session_manager.yml)`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+      
+      - name: Commit session data
+        if: steps.session_check.outputs.skip == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/metrics/auto_pr_sessions.json
+          git commit -m "📦 Update auto-PR session data [skip ci]" || echo "No changes to commit"
+          git push || echo "Nothing to push"
+  
+  manual-complete:
+    name: Manual Session Completion
+    if: |
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/complete-session')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install pyyaml
+      
+      - name: Extract Session ID
+        id: extract
+        run: |
+          PR_BODY="${{ github.event.issue.body }}"
+          SESSION_ID=$(echo "$PR_BODY" | grep -oP '\[cursor-session:\s*\K[\w-]+' | head -1)
+          
+          if [ -z "$SESSION_ID" ]; then
+            echo "❌ No session ID found in PR body"
+            exit 1
+          fi
+          
+          echo "session_id=$SESSION_ID" >> "$GITHUB_OUTPUT"
+          echo "Found session: $SESSION_ID"
+      
+      - name: Complete Session
+        id: complete
+        run: |
+          python .cursor/scripts/auto_pr_session_manager.py complete \
+            --session-id "${{ steps.extract.outputs.session_id }}" > completed_session.json
+          
+          echo "✅ Session completed successfully"
+          cat completed_session.json
+      
+      - name: Trigger Reward Score
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const sessionData = JSON.parse(fs.readFileSync('completed_session.json', 'utf8'));
+            
+            const comment = `✅ **Session Completed**
+            
+            Session \`${sessionData.session_id}\` has been completed manually.
+            
+            **Summary:**
+            - PRs: ${sessionData.prs.join(', ')}
+            - Duration: ${sessionData.duration_minutes} minutes
+            - Files changed: ${sessionData.total_files_changed}
+            - Tests added: ${sessionData.test_files_added}
+            
+            Reward score computation has been triggered.`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+      
+      - name: Commit session data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/metrics/auto_pr_sessions.json
+          git commit -m "✅ Complete session ${{ steps.extract.outputs.session_id }} [skip ci]"
+          git push
+  
+  cleanup-orphaned:
+    name: Cleanup Orphaned Sessions
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install pyyaml
+      
+      - name: Cleanup Orphaned Sessions
+        run: |
+          python .cursor/scripts/auto_pr_session_manager.py cleanup --max-age 24 > cleanup_result.json
+          
+          echo "Cleanup completed:"
+          cat cleanup_result.json
+      
+      - name: Commit session data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/metrics/auto_pr_sessions.json
+          git commit -m "🧹 Cleanup orphaned sessions [skip ci]" || echo "No changes"
+          git push || echo "Nothing to push"
+      
+      - name: Create Summary
+        run: |
+          COMPLETED=$(jq -r '.completed | length' cleanup_result.json)
+          echo "### 🧹 Session Cleanup Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Completed $COMPLETED orphaned sessions" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$COMPLETED" -gt 0 ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Sessions cleaned up:" >> $GITHUB_STEP_SUMMARY
+            jq -r '.completed[]' cleanup_result.json | while read session; do
+              echo "- $session" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+---
+# ============================================================================
+# FILE 3: .github/workflows/swarm_compute_reward_score.yml (MODIFIED)
+# Modified reward score workflow with session batching
+# ============================================================================
+name: Compute Reward Score
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # First check if this should be batched
+  check-session:
+    name: Check Session Status
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.check.outputs.skip }}
+      session_id: ${{ steps.check.outputs.session_id }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install pyyaml
+      
+      - name: Check Session Status
+        id: check
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          # Check if this is an auto-PR that should be skipped
+          python .cursor/scripts/auto_pr_session_manager.py check \
+            --pr-number "$PR_NUMBER" \
+            --title "$PR_TITLE" \
+            --body "$PR_BODY" \
+            --author "$PR_AUTHOR" > check_result.json
+          
+          SKIP=$(jq -r '.should_skip_scoring' check_result.json)
+          SESSION_ID=$(jq -r '.session_id' check_result.json)
+          
+          echo "skip=$SKIP" >> "$GITHUB_OUTPUT"
+          echo "session_id=$SESSION_ID" >> "$GITHUB_OUTPUT"
+
+  compute-score:
+    name: Compute Reward Score
+    needs: check-session
+    if: needs.check-session.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install pyyaml requests semgrep
+      
+      - name: Download Coverage Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-coverage
+          path: artifacts/frontend
+        continue-on-error: true
+      
+      - name: Download Backend Coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-coverage
+          path: artifacts/backend
+        continue-on-error: true
+      
+      - name: Compute Reward Score with Session Batching
+        id: score
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SESSION_ID: ${{ needs.check-session.outputs.session_id }}
+        run: |
+          # Modified compute_reward_score.py handles session batching internally
+          python .cursor/scripts/compute_reward_score.py \
+            --pr-number "$PR_NUMBER" \
+            --session-id "$SESSION_ID" > score_result.json
+          
+          SCORE=$(jq -r '.score' score_result.json)
+          echo "score=$SCORE" >> "$GITHUB_OUTPUT"
+          echo "Computed score: $SCORE"
+      
+      - name: Post Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const scoreData = JSON.parse(fs.readFileSync('score_result.json', 'utf8'));
+            
+            let comment = `## 🏆 Reward Score: ${scoreData.score}`;
+            
+            if (scoreData.is_session_batch) {
+              comment += `\n\n${scoreData.batch_notes}`;
+            }
+            
+            comment += `\n\n**Breakdown:**\n`;
+            for (const [key, value] of Object.entries(scoreData.breakdown)) {
+              comment += `- ${key}: ${value}\n`;
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+---
+# ============================================================================
+# FILE 4: .cursor/scripts/session_analytics.py
+# Analytics and reporting for sessions
+# ============================================================================
+#!/usr/bin/env python3
+"""
+Session Analytics Generator
+Creates reports and visualizations for auto-PR sessions.
+"""
+
+import json
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Dict, List
+from collections import defaultdict
+
+SESSION_DATA_FILE = Path("docs/metrics/auto_pr_sessions.json")
+OUTPUT_DIR = Path("docs/metrics/analytics")
+
+
+def load_session_data() -> Dict:
+    """Load session data."""
+    with open(SESSION_DATA_FILE, 'r') as f:
+        return json.load(f)
+
+
+def calculate_analytics(data: Dict) -> Dict:
+    """Calculate comprehensive analytics."""
+    completed = data.get("completed_sessions", [])
+    active = data.get("active_sessions", {})
+    
+    if not completed:
+        return {
+            "error": "No completed sessions to analyze"
+        }
+    
+    # Author statistics
+    authors = defaultdict(lambda: {
+        "sessions": 0,
+        "total_prs": 0,
+        "total_score": 0,
+        "total_duration": 0,
+        "avg_prs_per_session": 0,
+        "avg_score": 0,
+        "avg_duration": 0
+    })
+    
+    for session in completed:
+        author = session["author"]
+        authors[author]["sessions"] += 1
+        authors[author]["total_prs"] += len(session["prs"])
+        authors[author]["total_score"] += session.get("final_score", 0)
+        authors[author]["total_duration"] += session.get("duration_minutes", 0)
+    
+    # Calculate averages
+    for author, stats in authors.items():
+        if stats["sessions"] > 0:
+            stats["avg_prs_per_session"] = stats["total_prs"] / stats["sessions"]
+            stats["avg_score"] = stats["total_score"] / stats["sessions"]
+            stats["avg_duration"] = stats["total_duration"] / stats["sessions"]
+    
+    # Completion trigger distribution
+    triggers = defaultdict(int)
+    for session in completed:
+        trigger = session.get("completion_trigger", "unknown")
+        triggers[trigger] += 1
+    
+    # Duration distribution
+    duration_buckets = {
+        "0-30": 0,
+        "30-60": 0,
+        "60-90": 0,
+        "90+": 0
+    }
+    
+    for session in completed:
+        duration = session.get("duration_minutes", 0)
+        if duration < 30:
+            duration_buckets["0-30"] += 1
+        elif duration < 60:
+            duration_buckets["30-60"] += 1
+        elif duration < 90:
+            duration_buckets["60-90"] += 1
+        else:
+            duration_buckets["90+"] += 1
+    
+    return {
+        "summary": {
+            "total_completed": len(completed),
+            "total_active": len(active),
+            "avg_session_duration": sum(s.get("duration_minutes", 0) for s in completed) / len(completed),
+            "avg_prs_per_session": sum(len(s["prs"]) for s in completed) / len(completed),
+            "avg_score": sum(s.get("final_score", 0) for s in completed) / len(completed)
+        },
+        "authors": dict(authors),
+        "completion_triggers": dict(triggers),
+        "duration_distribution": duration_buckets
+    }
+
+
+def generate_report() -> str:
+    """Generate markdown report."""
+    data = load_session_data()
+    analytics = calculate_analytics(data)
+    
+    if "error" in analytics:
+        return f"# Session Analytics\n\n{analytics['error']}"
+    
+    report = [
+        "# Auto-PR Session Analytics",
+        f"\n**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        "\n## Summary",
+        f"- Total Completed Sessions: {analytics['summary']['total_completed']}",
+        f"- Total Active Sessions: {analytics['summary']['total_active']}",
+        f"- Average Session Duration: {analytics['summary']['avg_session_duration']:.1f} minutes",
+        f"- Average PRs per Session: {analytics['summary']['avg_prs_per_session']:.1f}",
+        f"- Average Score: {analytics['summary']['avg_score']:.2f}",
+        "\n## Author Performance",
+        "\n| Author | Sessions | Total PRs | Avg PRs/Session | Avg Score | Avg Duration |",
+        "| ------ | -------- | --------- | --------------- | --------- | ------------ |"
+    ]
+    
+    for author, stats in sorted(analytics["authors"].items()):
+        report.append(
+            f"| {author} | {stats['sessions']} | {stats['total_prs']} | "
+            f"{stats['avg_prs_per_session']:.1f} | {stats['avg_score']:.2f} | "
+            f"{stats['avg_duration']:.0f}min |"
+        )
+    
+    report.extend([
+        "\n## Completion Triggers",
+        "\n| Trigger | Count | Percentage |",
+        "| ------- | ----- | ---------- |"
+    ])
+    
+    total_triggers = sum(analytics["completion_triggers"].values())
+    for trigger, count in sorted(analytics["completion_triggers"].items()):
+        pct = (count / total_triggers * 100) if total_triggers > 0 else 0
+        report.append(f"| {trigger} | {count} | {pct:.1f}% |")
+    
+    report.extend([
+        "\n## Duration Distribution",
+        "\n| Range | Count |",
+        "| ----- | ----- |"
+    ])
+    
+    for range_name, count in analytics["duration_distribution"].items():
+        report.append(f"| {range_name} min | {count} |")
+    
+    return "\n".join(report)
+
+
+if __name__ == "__main__":
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    
+    report = generate_report()
+    
+    output_file = OUTPUT_DIR / f"session_analytics_{datetime.now().strftime('%Y%m%d')}.md"
+    with open(output_file, 'w') as f:
+        f.write(report)
+    
+    print(f"✅ Analytics report generated: {output_file}")
+    print("\n" + report)

@@ -1,0 +1,34 @@
+# Auto-PR Session Management Configuration
+# Last Updated: 2025-11-19
+
+timeout_minutes: 30
+idle_warning_minutes: 15
+
+# Auto-PR detection patterns (regex)
+auto_pr_patterns:
+  - "^auto-pr:"
+  - "^wip:"
+  - "^\\[auto\\]"
+  - "^checkpoint:"
+  - "^cursor-session"
+  - "^🤖"
+
+# Completion trigger keywords
+completion_markers:
+  - "ready for review"
+  - "ready to review"
+  - "complete"
+  - "final pr"
+  - "[session-complete]"
+  - "[ready]"
+  - "done with session"
+  - "finished"
+  - "✅"
+
+# Minimum files to require explicit session (heuristic)
+min_files_for_manual: 5
+
+# Enable automatic completion triggers
+enable_timeout_completion: true
+enable_heuristic_completion: true
+
