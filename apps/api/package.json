@@ -5,10 +5,10 @@
   "description": "VeroField Backend API - NestJS multi-tenant with RLS",
   "license": "MIT",
   "scripts": {
-    "start": "node dist/apps/api/src/main",
+    "start": "node dist/apps/api/src/main.js",
     "start:dev": "nest start --watch --preserveWatchOutput",
     "start:dev:fast": "nest start --watch --preserveWatchOutput --watchAssets false",
-    "start:prod": "node dist/apps/api/src/main",
+    "start:prod": "node dist/apps/api/src/main.js",
     "start:test": "NODE_ENV=test nest start",
     "build": "nest build",
     "test": "jest",
