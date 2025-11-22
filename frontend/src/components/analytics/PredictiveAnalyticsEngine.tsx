@@ -26,7 +26,7 @@ import {
 import { cn } from '@/lib/utils';
 
 // PredictionData interface (currently unused, kept for potential future use)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-object-type
 interface _PredictionData {
   value: number;
   confidence: number;
@@ -474,7 +474,7 @@ export default function PredictiveAnalyticsEngine({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Heading level={6} className="text-gray-900 mb-4">
+                  <Heading level={4} className="text-gray-900 mb-4">
                 Prediction Details
               </Heading>
               <div className="space-y-3">
@@ -507,7 +507,7 @@ export default function PredictiveAnalyticsEngine({
             </div>
 
             <div>
-              <Heading level={6} className="text-gray-900 mb-4">
+                  <Heading level={4} className="text-gray-900 mb-4">
                 AI Recommendations
               </Heading>
               <div className="space-y-2">
@@ -524,7 +524,7 @@ export default function PredictiveAnalyticsEngine({
           </div>
 
           <div className="mt-6">
-            <Heading level={6} className="text-gray-900 mb-4">
+                  <Heading level={4} className="text-gray-900 mb-4">
               Influencing Factors
             </Heading>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -550,7 +550,7 @@ export default function PredictiveAnalyticsEngine({
       {/* Advanced ML Controls */}
       {showAdvanced && (
         <Card className="p-6 bg-gradient-to-br from-gray-50 to-blue-50 border-gray-200">
-          <Heading level={6} className="text-gray-900 mb-4">
+                  <Heading level={4} className="text-gray-900 mb-4">
             Advanced ML Controls
           </Heading>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
