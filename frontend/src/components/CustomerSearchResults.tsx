@@ -41,13 +41,13 @@ interface CustomerSearchResultsProps {
 
 interface CustomerResultCardProps {
   result: Account;
-  onView?: (result: Account) => void;
-  onEdit?: (result: Account) => void;
-  onDelete?: (result: Account) => void;
-  onCall?: (result: Account) => void;
-  onEmail?: (result: Account) => void;
-  showActions?: boolean;
-  compact?: boolean;
+  onView?: ((result: Account) => void) | undefined;
+  onEdit?: ((result: Account) => void) | undefined;
+  onDelete?: ((result: Account) => void) | undefined;
+  onCall?: ((result: Account) => void) | undefined;
+  onEmail?: ((result: Account) => void) | undefined;
+  showActions?: boolean | undefined;
+  compact?: boolean | undefined;
 }
 
 // ============================================================================

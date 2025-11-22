@@ -40,33 +40,6 @@ import CustomerSettings from './customer/CustomerSettings';
 import CustomerNotesHistory from './customer/CustomerNotesHistory';
 import CustomerInfoPanel from './customer/CustomerInfoPanel';
 
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  city: string;
-  state: string;
-  account_type: 'commercial' | 'residential';
-  ar_balance: number;
-  address?: string;
-  zip_code?: string;
-  company_name?: string;
-  contact_person?: string;
-  notes?: string;
-  status: 'active' | 'prospect' | 'inactive';
-  property_type?: string;
-  property_size?: string;
-  access_instructions?: string;
-  emergency_contact?: string;
-  preferred_contact_method?: string;
-  billing_address?: any;
-  payment_method?: string;
-  billing_cycle?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
 interface CustomerPageProps {
   customerId?: string;
 }

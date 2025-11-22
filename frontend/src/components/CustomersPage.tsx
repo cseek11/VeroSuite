@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import 'leaflet/dist/leaflet.css';
 import CustomerListView from './CustomerListView';
 import SearchBar from './SearchBar';
@@ -17,7 +17,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { secureApiClient } from '@/lib/secure-api-client';
 import { Account } from '@/types/enhanced-types';
 import { useSearchIntegration } from '@/lib/search-integration';
-import type { SearchResult } from '@/lib/unified-search-service';
 import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
 
@@ -26,7 +25,7 @@ export default function CustomersPage() {
   const [showHistory, setShowHistory] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'commercial' | 'residential'>('all');
-  const [selectedCustomers, setSelectedCustomers] = useState<Set<string>>(new Set());
+  // const [selectedCustomers, setSelectedCustomers] = useState<Set<string>>(new Set()); // Unused - kept for potential future use
   const [viewMode, setViewMode] = useState<'list' | 'grid' | 'map'>('list');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -68,14 +67,14 @@ export default function CustomersPage() {
       }
     };
     
-    const handleCustomerCreate = (event: CustomEvent) => {
+    const handleCustomerCreate = (_event: CustomEvent) => {
       logger.debug('Real-time customer creation received', {}, 'CustomersPage');
       queryClient.invalidateQueries({ queryKey: ['secure-customers'] });
       queryClient.invalidateQueries({ queryKey: ['search'] });
       queryClient.invalidateQueries({ queryKey: ['unified-search'] });
     };
     
-    const handleCustomerDelete = (event: CustomEvent) => {
+    const handleCustomerDelete = (_event: CustomEvent) => {
       logger.debug('Real-time customer deletion received', {}, 'CustomersPage');
       queryClient.invalidateQueries({ queryKey: ['secure-customers'] });
       queryClient.invalidateQueries({ queryKey: ['search'] });
@@ -110,56 +109,36 @@ export default function CustomersPage() {
     }
   };
 
-  const handleSearchResultSelect = (result: SearchResult) => {
-    // Convert SearchResult to Account format for compatibility
-    const account: Account = {
-      id: result.id,
-      name: result.name,
-      email: result.email || '',
-      phone: result.phone || '',
-      address: result.address || '',
-      city: '',
-      state: '',
-      zip_code: '',
-      country: 'USA',
-      status: result.status,
-      account_type: result.type,
-      tenant_id: '7193113e-ece2-4f7b-ae8c-176df4367e28',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      created_by: null,
-      updated_by: null
-    };
-    
+  const handleSearchResultSelect = (account: Account) => {
     setSelectedCustomer(account);
     setShowSearchResults(false);
     setSearchTerm('');
   };
 
-  const handleViewCustomer = (result: SearchResult) => {
-    handleSearchResultSelect(result);
+  const handleViewCustomer = (account: Account) => {
+    handleSearchResultSelect(account);
   };
 
-  const handleEditCustomer = (result: SearchResult) => {
-    handleSearchResultSelect(result);
+  const handleEditCustomer = (account: Account) => {
+    handleSearchResultSelect(account);
     // TODO: Open edit modal or navigate to edit page
   };
 
-  const handleDeleteCustomer = async (result: SearchResult) => {
-    if (confirm(`Are you sure you want to delete ${result.name}?`)) {
+  const handleDeleteCustomer = async (account: Account) => {
+    if (confirm(`Are you sure you want to delete ${account.name}?`)) {
       try {
-        await secureApiClient.deleteAccount(result.id);
+        await secureApiClient.deleteAccount(account.id);
         queryClient.invalidateQueries({ queryKey: ['secure-customers'] });
         setShowSearchResults(false);
         setSearchTerm('');
         
         // Dispatch custom event for real-time updates
         window.dispatchEvent(new CustomEvent('customerDeleted', {
-          detail: { customerId: result.id }
+          detail: { customerId: account.id }
         }));
         
         // Show success message
-        logger.debug('Customer deleted successfully', { customerName: result.name }, 'CustomersPage');
+        logger.debug('Customer deleted successfully', { customerName: account.name }, 'CustomersPage');
       } catch (error) {
         logger.error('Failed to delete customer', error, 'CustomersPage');
         toast.error('Failed to delete customer. Please try again.');
@@ -167,15 +146,15 @@ export default function CustomersPage() {
     }
   };
 
-  const handleCallCustomer = (result: SearchResult) => {
-    if (result.phone) {
-      window.open(`tel:${result.phone}`, '_self');
+  const handleCallCustomer = (account: Account) => {
+    if (account.phone) {
+      window.open(`tel:${account.phone}`, '_self');
     }
   };
 
-  const handleEmailCustomer = (result: SearchResult) => {
-    if (result.email) {
-      window.open(`mailto:${result.email}`, '_self');
+  const handleEmailCustomer = (account: Account) => {
+    if (account.email) {
+      window.open(`mailto:${account.email}`, '_self');
     }
   };
 
@@ -194,6 +173,14 @@ export default function CustomersPage() {
     setSelectedCustomer(customer);
     setShowHistory(true);
   };
+
+  // Extract accounts from SearchResult[] - flatten all result.data arrays
+  const searchAccounts = useMemo(() => {
+    if (!Array.isArray(searchResults)) {
+      return [];
+    }
+    return searchResults.flatMap(result => result.data || []);
+  }, [searchResults]);
 
   const filteredCustomers = useMemo(() => {
     if (!Array.isArray(customers)) {
@@ -330,9 +317,9 @@ export default function CustomersPage() {
           <div className="flex items-center justify-between mb-3 flex-shrink-0">
             <h3 className="text-lg font-semibold text-gray-900">
               Search Results
-              {searchResults.length > 0 && (
+              {searchAccounts.length > 0 && (
                 <span className="ml-2 text-sm font-normal text-gray-500">
-                  ({searchResults.length} found)
+                  ({searchAccounts.length} found)
                 </span>
               )}
             </h3>
@@ -350,7 +337,7 @@ export default function CustomersPage() {
           
           <div className="flex-1 overflow-y-auto min-h-0">
             <CustomerSearchResults
-              results={searchResults}
+              results={searchAccounts}
               loading={searchLoading}
               error={searchError}
               onView={handleViewCustomer}
