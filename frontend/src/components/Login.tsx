@@ -25,7 +25,7 @@ export function Login() {
 
   // Logout helper (can be used in other components) - currently unused, kept for potential future use
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  function _handleLogout() {
+  function _handleLogout(): void {
     localStorage.removeItem('jwt');
     localStorage.removeItem('user');
     window.location.href = '/login';

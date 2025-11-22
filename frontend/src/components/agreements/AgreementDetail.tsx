@@ -1,4 +1,4 @@
-import React from 'react';
+// React import removed - not needed with React 17+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -41,7 +41,9 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
     },
   });
 
-  const getStatusColor = (status: string) => {
+  // Helper function for status color (currently unused, kept for potential future use)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'active': return 'green';
       case 'expired': return 'red';

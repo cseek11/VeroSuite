@@ -246,7 +246,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     // Check if it's a search result
     if (index < flattenedAccounts.length) {
       const account = flattenedAccounts[index];
-      handleAccountSelect(account);
+      if (account) {
+        handleAccountSelect(account);
+      }
       return;
     }
     currentIndex += flattenedAccounts.length;
@@ -255,8 +257,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     if (showHistory && index < currentIndex + searchHistory.length) {
       const historyIndex = index - currentIndex;
       const term = searchHistory[historyIndex];
-      setInputValue(term);
-      handleSearch(term);
+      if (term) {
+        setInputValue(term);
+        handleSearch(term);
+      }
       return;
     }
     currentIndex += searchHistory.length;
@@ -266,7 +270,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       const recentIndex = index - currentIndex;
       const result = recentSearches[recentIndex];
       // Extract first account from SearchResult for display
-      if (result.data && result.data.length > 0) {
+      if (result && result.data && result.data.length > 0 && result.data[0]) {
         handleAccountSelect(result.data[0]);
       }
       return;
@@ -310,7 +314,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     inputRef.current?.focus();
   };
 
-  const handleRemoveHistoryItem = (term: string) => {
+  const handleRemoveHistoryItem = (_term: string) => {
     // This would need to be implemented in the search integration
     // For now, we'll just clear all history
     clearSearchHistory();
@@ -384,7 +388,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             </button>
           </div>
         </div>
-        {searchHistory.slice(0, 5).map((term, index) => (
+        {searchHistory.slice(0, 5).map((term) => (
           <SearchHistoryItem
             key={term}
             term={term}

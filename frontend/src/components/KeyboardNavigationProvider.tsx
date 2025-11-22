@@ -16,7 +16,7 @@ const KeyboardNavigationProvider: React.FC<KeyboardNavigationProviderProps> = ({
 
   // Helper function for shortcut handling (currently unused, kept for potential future use)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _handleShortcut = useCallback((shortcut: string) => {
+  const _handleShortcut = useCallback((_shortcut: string) => {
     setLastShortcut(shortcut);
     // Clear the shortcut after 2 seconds
     setTimeout(() => setLastShortcut(null), 2000);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -278,13 +278,13 @@ export function UserManagementForm({ user, onSave, onCancel }: UserManagementFor
       
       // If the updated user is the currently logged-in user, refresh their auth data and token
       const currentUser = useAuthStore.getState().user;
-      if (currentUser && currentUser.id === user.id) {
+      if (currentUser && user && currentUser.id === user.id) {
         try {
           await useAuthStore.getState().refreshUser();
           // Get the updated user data after refresh
           const refreshedUser = useAuthStore.getState().user;
           logger.debug('Refreshed current user data and token after update', { 
-            userId: user.id,
+            userId: user?.id,
             roles: refreshedUser?.roles,
             permissionsCount: refreshedUser?.permissions?.length || 0,
             permissions: refreshedUser?.permissions 

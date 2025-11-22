@@ -43,7 +43,7 @@ export default function JobsScheduler() {
 
   // Helper function for date formatting (currently unused, kept for potential future use)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _formatDate = (date: Date) => {
+  const _formatDate = (_date: Date) => {
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric' 
