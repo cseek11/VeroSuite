@@ -341,19 +341,19 @@ export default function ARManagement() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {Object.entries(agingBuckets).map(([bucket, amount]) => (
+            {agingBuckets.map((bucket) => (
               <div
-                key={bucket}
-                className={`border-2 rounded-lg p-4 ${getAgingColor(bucket)}`}
+                key={bucket.bucket}
+                className={`border-2 rounded-lg p-4 ${getAgingColor(bucket.bucket)}`}
               >
                 <div className="text-sm font-medium mb-1">
-                  {bucket === '90+' ? '90+ Days' : `${bucket} Days`}
+                  {bucket.bucket === '90+' ? '90+ Days' : `${bucket.bucket} Days`}
                 </div>
                 <div className="text-2xl font-bold">
-                  {formatCurrency(amount)}
+                  {formatCurrency(bucket.amount)}
                 </div>
                 <div className="text-xs mt-1 opacity-75">
-                  {totalAR > 0 ? `${((amount / totalAR) * 100).toFixed(1)}%` : '0%'} of total AR
+                  {totalAR > 0 ? `${((bucket.amount / totalAR) * 100).toFixed(1)}%` : '0%'} of total AR
                 </div>
               </div>
             ))}
