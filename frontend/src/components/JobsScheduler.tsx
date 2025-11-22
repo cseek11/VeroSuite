@@ -42,13 +42,14 @@ export default function JobsScheduler() {
   };
 
   // Helper function for date formatting (currently unused, kept for potential future use)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _formatDate = (_date: Date) => {
+  // @ts-expect-error - Intentionally unused, kept for future use
+  const _formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric' 
     });
   };
+  void _formatDate; // Suppress unused warning
 
   const navigateMonth = (direction: number) => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + direction, 1));

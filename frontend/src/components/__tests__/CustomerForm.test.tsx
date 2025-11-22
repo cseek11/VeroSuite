@@ -64,7 +64,8 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 describe('CustomerForm', () => {
-  const mockSupabaseClient = vi.mocked(supabase);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _mockSupabaseClient = vi.mocked(supabase);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -133,7 +134,9 @@ describe('CustomerForm', () => {
 
       // Fill required fields first (except email)
       const nameInputs = screen.getAllByLabelText(/^name/i);
-      fireEvent.change(nameInputs[0], { target: { value: 'John Doe' } });
+      if (nameInputs[0]) {
+        fireEvent.change(nameInputs[0], { target: { value: 'John Doe' } });
+      }
       fireEvent.change(screen.getByLabelText(/phone/i), { target: { value: '555-123-4567' } });
       fireEvent.change(screen.getByLabelText(/address/i), { target: { value: '123 Main St' } });
       fireEvent.change(screen.getByLabelText(/city/i), { target: { value: 'Anytown' } });
@@ -189,7 +192,9 @@ describe('CustomerForm', () => {
       // Fill out the form
       // Use getAllByLabelText and get the first one (the main name field, not business_name)
       const nameInputs = screen.getAllByLabelText(/^name/i);
-      fireEvent.change(nameInputs[0], { target: { value: 'John Doe' } });
+      if (nameInputs[0]) {
+        fireEvent.change(nameInputs[0], { target: { value: 'John Doe' } });
+      }
       fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'john@example.com' } });
       fireEvent.change(screen.getByLabelText(/phone/i), { target: { value: '555-123-4567' } });
       fireEvent.change(screen.getByLabelText(/address/i), { target: { value: '123 Main St' } });
@@ -224,7 +229,9 @@ describe('CustomerForm', () => {
       // Fill out the form
       // Use getAllByLabelText and get the first one (the main name field, not business_name)
       const nameInputs = screen.getAllByLabelText(/^name/i);
-      fireEvent.change(nameInputs[0], { target: { value: 'John Doe' } });
+      if (nameInputs[0]) {
+        fireEvent.change(nameInputs[0], { target: { value: 'John Doe' } });
+      }
       fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'john@example.com' } });
       fireEvent.change(screen.getByLabelText(/phone/i), { target: { value: '555-123-4567' } });
       fireEvent.change(screen.getByLabelText(/address/i), { target: { value: '123 Main St' } });
@@ -256,7 +263,9 @@ describe('CustomerForm', () => {
 
       const nameInputs = screen.getAllByLabelText(/^name/i);
       const nameInput = nameInputs[0];
-      fireEvent.change(nameInput, { target: { value: 'John Doe' } });
+      if (nameInput) {
+        fireEvent.change(nameInput, { target: { value: 'John Doe' } });
+      }
 
       const cancelButton = screen.getByRole('button', { name: /cancel/i });
       fireEvent.click(cancelButton);
@@ -281,7 +290,9 @@ describe('CustomerForm', () => {
       // Fill out the form
       // Use getAllByLabelText and get the first one (the main name field, not business_name)
       const nameInputs = screen.getAllByLabelText(/^name/i);
-      fireEvent.change(nameInputs[0], { target: { value: 'John Doe' } });
+      if (nameInputs[0]) {
+        fireEvent.change(nameInputs[0], { target: { value: 'John Doe' } });
+      }
       fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'john@example.com' } });
       fireEvent.change(screen.getByLabelText(/phone/i), { target: { value: '555-123-4567' } });
       fireEvent.change(screen.getByLabelText(/address/i), { target: { value: '123 Main St' } });

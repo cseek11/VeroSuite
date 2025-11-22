@@ -15,12 +15,13 @@ const KeyboardNavigationProvider: React.FC<KeyboardNavigationProviderProps> = ({
   const [lastShortcut, setLastShortcut] = useState<string | null>(null);
 
   // Helper function for shortcut handling (currently unused, kept for potential future use)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _handleShortcut = useCallback((_shortcut: string) => {
+  // @ts-expect-error - Intentionally unused, kept for future use
+  const _handleShortcut = useCallback((shortcut: string) => {
     setLastShortcut(shortcut);
     // Clear the shortcut after 2 seconds
     setTimeout(() => setLastShortcut(null), 2000);
   }, []);
+  void _handleShortcut; // Suppress unused warning
 
   // Note: This provider is for global keyboard shortcuts, not card navigation
   // Card navigation is handled directly in VeroCardsV3 component

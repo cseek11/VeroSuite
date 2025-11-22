@@ -42,7 +42,6 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
   });
 
   // Helper function for status color (currently unused, kept for potential future use)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'active': return 'green';
@@ -54,7 +53,8 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
     }
   };
 
-  const getBillingFrequencyColor = (frequency: string) => {
+  // Helper function for billing frequency color (currently unused, kept for potential future use)
+  const _getBillingFrequencyColor = (frequency: string) => {
     switch (frequency.toLowerCase()) {
       case 'weekly': return 'blue';
       case 'monthly': return 'purple';
@@ -64,6 +64,8 @@ export function AgreementDetail({ agreement, onEdit, onClose }: AgreementDetailP
       default: return 'gray';
     }
   };
+  void _getStatusColor; // Suppress unused warning
+  void _getBillingFrequencyColor; // Suppress unused warning
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

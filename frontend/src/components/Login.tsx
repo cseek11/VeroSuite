@@ -24,12 +24,13 @@ export function Login() {
   }
 
   // Logout helper (can be used in other components) - currently unused, kept for potential future use
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-expect-error - Intentionally unused, kept for future use
   function _handleLogout(): void {
     localStorage.removeItem('jwt');
     localStorage.removeItem('user');
     window.location.href = '/login';
   }
+  void _handleLogout; // Suppress unused warning
 
   return (
     <form onSubmit={handleLogin}>

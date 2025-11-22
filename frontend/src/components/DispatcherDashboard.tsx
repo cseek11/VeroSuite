@@ -88,10 +88,7 @@ export default function DispatcherDashboard() {
   }
 
   // Helper function for chart data (currently unused, kept for potential future use)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  function _getJobsPerDayData(_jobs: any[]) {
-    // Implementation kept for future use
-    return [];
+  function _getJobsPerDayData(jobs: any[]) {
     // Group jobs by scheduled_date
     const counts: Record<string, number> = {};
     jobs.forEach(job => {
@@ -100,6 +97,7 @@ export default function DispatcherDashboard() {
     });
     return Object.entries(counts).map(([date, count]) => ({ date, count }));
   }
+  void _getJobsPerDayData; // Suppress unused warning
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
