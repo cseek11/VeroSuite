@@ -122,6 +122,11 @@ jobs:
             echo "This may occur if the parent workflow did not produce reward artifacts"
             echo "Skipping metrics update (non-blocking)"
             echo "found=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "reward_files<<EOF"
+              echo ""
+              echo "EOF"
+            } >> $GITHUB_OUTPUT
             exit 0
           fi
           
