@@ -401,7 +401,7 @@ export default function PredictiveAnalyticsEngine({
                 </div>
                 <div className="text-right">
                   <Text variant="small" className="text-gray-600">Predicted</Text>
-                  <Heading level={5} className="font-bold text-purple-600">
+                  <Heading level={4} className="font-bold text-purple-600">
                     {formatValue(prediction.predictedValue, prediction.type)}
                   </Heading>
                 </div>
@@ -455,7 +455,7 @@ export default function PredictiveAnalyticsEngine({
             <div className="flex items-center gap-3">
               {getPredictionIcon(selectedPrediction.type)}
               <div>
-                <Heading level={5} className="text-gray-900">
+                <Heading level={4} className="text-gray-900">
                   {selectedPrediction.title}
                 </Heading>
                 <Text variant="small" className="text-gray-600">
