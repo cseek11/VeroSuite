@@ -51,7 +51,7 @@ export function validateEnvironmentVariables(configService: ConfigService): Requ
     throw new Error(
       `Missing required environment variables: ${missing.join(', ')}\n` +
       `Please check your .env file and ensure all required variables are set.\n` +
-      `See backend/env.example for reference.`
+      `See apps/api/env.example for reference.`
     );
   }
 
