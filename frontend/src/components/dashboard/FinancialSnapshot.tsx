@@ -30,7 +30,7 @@ const FinancialSnapshot: React.FC = () => {
       expenses: 0,
       profit: 0
     }
-  }, isLoading } = useQuery({
+  }, isLoading: _isLoading } = useQuery({
     queryKey: ['financial', 'snapshot'],
     queryFn: () => enhancedApi.financial.getSnapshot(),
   });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { enhancedApi } from '@/lib/enhanced-api';
 import { 
@@ -74,7 +74,7 @@ export default function CustomerProfileCard({
   });
 
   // Update customer profile mutation
-  const updateProfile = useMutation({
+  const _updateProfile = useMutation({
     mutationFn: (data: Partial<CustomerProfile>) => enhancedApi.customers.update(customer.id, {}, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customer-profile', customer.id] });
@@ -105,7 +105,7 @@ export default function CustomerProfileCard({
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const _getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'active': return 'green';
       case 'inactive': return 'gray';
@@ -117,7 +117,7 @@ export default function CustomerProfileCard({
     }
   };
 
-  const getChurnRiskColor = (risk: string) => {
+  const _getChurnRiskColor = (risk: string) => {
     switch (risk.toLowerCase()) {
       case 'low': return 'green';
       case 'medium': return 'yellow';

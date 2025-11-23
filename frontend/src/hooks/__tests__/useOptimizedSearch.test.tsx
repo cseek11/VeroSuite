@@ -66,7 +66,7 @@ describe('useOptimizedSearch', () => {
 
   it('should perform search', async () => {
     const { optimizedSearch } = await import('@/lib/optimized-search-service');
-    optimizedSearch.search.mockResolvedValueOnce({
+    (optimizedSearch.search as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       results: [{ id: '1', name: 'Result 1' }],
       metrics: { totalTime: 100, resultCount: 1, cacheHit: false, searchStrategy: 'local' },
       suggestion: null,

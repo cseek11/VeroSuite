@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -7,7 +7,6 @@ import { Heading, Text } from '@/components/ui';
 import {
   DollarSign,
   TrendingUp,
-  TrendingDown,
   CheckCircle,
   AlertCircle,
   Loader2,
@@ -18,7 +17,7 @@ import {
   PieChart
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
-import { LineChart, Line, BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, BarChart, Bar, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface PaymentAnalyticsProps {
   startDate?: Date;
@@ -254,7 +253,7 @@ export default function PaymentAnalytics({
                   fill="#8884d8"
                   dataKey="count"
                 >
-                  {paymentMethodBreakdown.map((entry: any, index: number) => (
+                  {paymentMethodBreakdown.map((_entry: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

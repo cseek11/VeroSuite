@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import {
   Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
   Typography,
   Heading,
   Text,
@@ -17,7 +20,7 @@ import {
   Settings
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
-import { Invoice } from '@/types/enhanced-types';
+import { Invoice, PaymentMethod } from '@/types/enhanced-types';
 import { trackPaymentInitiated } from '@/lib/billing-analytics';
 import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
@@ -54,18 +57,20 @@ export default function CustomerPaymentPortal({ customerId, onClose }: CustomerP
   });
 
   // Fetch payment methods
-  const { data: paymentMethods = [], error: paymentMethodsError, isLoading: paymentMethodsLoading } = useQuery({
+  const { data: paymentMethods = [], error: paymentMethodsError, isLoading: paymentMethodsLoading } = useQuery<PaymentMethod[]>({
     queryKey: ['billing', 'payment-methods', customerId],
     queryFn: () => billing.getPaymentMethods(customerId),
     enabled: !!customerId,
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    onError: (error: unknown) => {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load payment methods';
-      logger.error('Failed to fetch payment methods', error, 'CustomerPaymentPortal');
-      toast.error(`Unable to load payment methods. ${errorMessage}. Please try again or contact support.`);
-    },
   });
+
+  // Handle payment methods error
+  if (paymentMethodsError) {
+    const errorMessage = paymentMethodsError instanceof Error ? paymentMethodsError.message : 'Failed to load payment methods';
+    logger.error('Failed to fetch payment methods', paymentMethodsError, 'CustomerPaymentPortal');
+    toast.error(`Unable to load payment methods. ${errorMessage}. Please try again or contact support.`);
+  }
 
   // Calculate outstanding balance
   const outstandingInvoices = invoices.filter(invoice => 
@@ -82,11 +87,6 @@ export default function CustomerPaymentPortal({ customerId, onClose }: CustomerP
   });
 
 
-  const handlePayInvoice = (invoice: Invoice) => {
-    setSelectedInvoice(invoice);
-    setShowPaymentForm(true);
-    setActiveTab('payment');
-  };
 
   const handlePaymentSuccess = () => {
     setShowPaymentForm(false);
@@ -294,7 +294,7 @@ export default function CustomerPaymentPortal({ customerId, onClose }: CustomerP
           ) : (
             <PaymentMethodManager
               customerId={customerId}
-              onPaymentMethodSelected={(method) => {
+              onPaymentMethodSelected={() => {
                 // When a payment method is selected, switch to payment tab
                 setActiveTab('payment');
               }}
@@ -310,7 +310,7 @@ export default function CustomerPaymentPortal({ customerId, onClose }: CustomerP
     return (
       <BillingErrorBoundary
         context="CustomerPaymentPortal"
-        onBack={onClose}
+        {...(onClose ? { onBack: onClose } : {})}
       >
         <div className="w-full">
           {onClose && (
@@ -339,7 +339,7 @@ export default function CustomerPaymentPortal({ customerId, onClose }: CustomerP
   return (
     <BillingErrorBoundary
       context="CustomerPaymentPortal"
-      onBack={onClose}
+      {...(onClose ? { onBack: onClose } : {})}
     >
       <div className="w-full">
         {onClose && (
@@ -357,14 +357,22 @@ export default function CustomerPaymentPortal({ customerId, onClose }: CustomerP
 
         <Tabs
           value={activeTab}
-          onValueChange={(value) => setActiveTab(value as TabType)}                                        
-          tabs={tabs}
-        />
-
-        {/* Render active tab content */}
-        <div className="mt-6">
-          {tabs.find(tab => tab.id === activeTab)?.component}
-        </div>
+          onValueChange={(value) => setActiveTab(value as TabType)}
+        >
+          <TabsList>
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.id} value={tab.id}>
+                {tab.icon && <tab.icon className="w-4 h-4 mr-2" />}
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {tabs.map((tab) => (
+            <TabsContent key={tab.id} value={tab.id}>
+              {tab.component}
+            </TabsContent>
+          ))}
+        </Tabs>
 
       {/* Invoice Detail Modal */}
       {showInvoiceDetail && selectedInvoice && (

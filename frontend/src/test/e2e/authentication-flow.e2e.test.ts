@@ -4,7 +4,7 @@
  * End-to-end tests for login, logout, session management, token refresh
  */
 
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.describe('Authentication Flow E2E', () => {
   test('should login successfully', async ({ page }) => {

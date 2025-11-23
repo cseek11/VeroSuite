@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -80,7 +80,7 @@ const invoiceFormSchema = z.object({
 });
 
 type InvoiceFormData = z.infer<typeof invoiceFormSchema>;
-type InvoiceItem = z.infer<typeof invoiceItemSchema>;
+// InvoiceItem type removed - not used, can be inferred from invoiceItemSchema when needed
 
 // Helper functions for customer display
 const getCustomerTypeColor = (type: string) => {
@@ -104,14 +104,14 @@ const formatAddress = (customer: Account | null) => {
 };
 
 // UUID validation helper - more lenient to accept mock UUIDs
-const isValidUUID = (uuid: string) => {
+const _isValidUUID = (uuid: string) => {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   return uuidRegex.test(uuid);
 };
 
 export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initialData }: InvoiceFormProps) {
-  const [selectedCustomer, setSelectedCustomer] = React.useState<Account | null>(null);
-  const [submitError, setSubmitError] = React.useState<string>('');
+  const [selectedCustomer, setSelectedCustomer] = useState<Account | null>(null);
+  const [submitError, setSubmitError] = useState<string>('');
 
   const {
     control,

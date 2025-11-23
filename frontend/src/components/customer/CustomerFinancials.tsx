@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { DollarSign, CreditCard, FileText, AlertCircle, CheckCircle, Clock, Download } from 'lucide-react';
 import { Button, Typography, Badge } from '@/components/ui';
 
@@ -6,7 +6,7 @@ interface CustomerFinancialsProps {
   customerId: string;
 }
 
-const CustomerFinancials: React.FC<CustomerFinancialsProps> = ({ customerId }) => {
+const CustomerFinancials: React.FC<CustomerFinancialsProps> = ({ customerId: _customerId }) => {
   const [activeTab, setActiveTab] = useState('overview');
 
   const billingOverview = {

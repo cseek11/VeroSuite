@@ -77,6 +77,8 @@ describe('Technicians API Debug', () => {
     
     // Check the URL
     const fetchCall = mockFetch.mock.calls[0];
+    expect(fetchCall).toBeDefined();
+    if (!fetchCall) return;
     const url = fetchCall[0];
     
     expect(url).toMatch(/\/api\/v2\/technicians$/);

@@ -101,6 +101,9 @@ alwaysApply: true
 - [ ] **MUST** verify tests pass (regression + preventative)
 - [ ] **MUST** verify cross-layer traceability intact (traceId, spanId, requestId propagated)
 - [ ] **MUST** verify workflow triggers validated (if workflows modified)
+- [ ] **MUST** verify bug logged in `.cursor/BUG_LOG.md` (if bug was fixed) ⭐ **CRITICAL**
+- [ ] **MUST** verify error pattern documented in `docs/error-patterns.md` (if bug was fixed) ⭐ **CRITICAL**
+- [ ] **MUST** verify anti-pattern logged in `.cursor/anti_patterns.md` (if REWARD_SCORE ≤ 0) ⭐ **CRITICAL**
 
 **STOP if any compliance violation found - fix before proceeding.**
 

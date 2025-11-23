@@ -44,13 +44,13 @@ vi.mock('@/utils/toast', () => ({
   },
 }));
 
-const mockBilling = billing as {
+const mockBilling = billing as unknown as {
   getPaymentMethods: ReturnType<typeof vi.fn>;
   createPaymentMethod: ReturnType<typeof vi.fn>;
   deletePaymentMethod: ReturnType<typeof vi.fn>;
 };
-const mockLogger = logger as { error: ReturnType<typeof vi.fn> };
-const mockToast = toast as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
+const mockLogger = logger as unknown as { error: ReturnType<typeof vi.fn> };
+const mockToast = toast as unknown as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
 
 describe('SavedPaymentMethods', () => {
   let queryClient: QueryClient;
@@ -250,7 +250,9 @@ describe('SavedPaymentMethods', () => {
       });
 
       const deleteButtons = screen.getAllByText(/delete/i);
-      fireEvent.click(deleteButtons[0]);
+      if (deleteButtons[0]) {
+        fireEvent.click(deleteButtons[0]);
+      }
 
       // Confirm deletion
       await waitFor(() => {
@@ -275,7 +277,9 @@ describe('SavedPaymentMethods', () => {
       });
 
       const deleteButtons = screen.getAllByText(/delete/i);
-      fireEvent.click(deleteButtons[0]);
+      if (deleteButtons[0]) {
+        fireEvent.click(deleteButtons[0]);
+      }
 
       // Confirm deletion
       await waitFor(() => {

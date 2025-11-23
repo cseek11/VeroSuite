@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -25,7 +25,7 @@ export default function PLReport() {
     new Date().toISOString().split('T')[0]
   );
 
-  const { data: billingAnalytics, isLoading: analyticsLoading } = useQuery({
+  const { data: _billingAnalytics, isLoading: analyticsLoading } = useQuery({
     queryKey: ['billing', 'analytics'],
     queryFn: () => billing.getBillingAnalytics(),
   });
@@ -47,7 +47,7 @@ export default function PLReport() {
   const handleExportPDF = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
+    const _pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
     let yPos = margin;
 

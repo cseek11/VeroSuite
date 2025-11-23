@@ -7,7 +7,6 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { authService } from '../auth-service';
-import { logger } from '@/utils/logger';
 
 // Mock fetch globally
 global.fetch = vi.fn();

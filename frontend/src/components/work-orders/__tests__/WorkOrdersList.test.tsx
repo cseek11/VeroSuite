@@ -113,7 +113,7 @@ describe('WorkOrdersList', () => {
 
     it('should show loading state', async () => {
       const { useWorkOrders } = await import('@/hooks/useWorkOrders');
-      useWorkOrders.mockReturnValue({
+      (useWorkOrders as ReturnType<typeof vi.fn>).mockReturnValue({
         data: null,
         isLoading: true,
         error: null,
@@ -131,7 +131,7 @@ describe('WorkOrdersList', () => {
 
     it('should show error state', async () => {
       const { useWorkOrders } = await import('@/hooks/useWorkOrders');
-      useWorkOrders.mockReturnValue({
+      (useWorkOrders as ReturnType<typeof vi.fn>).mockReturnValue({
         data: null,
         isLoading: false,
         error: new Error('Failed to load'),
@@ -152,7 +152,7 @@ describe('WorkOrdersList', () => {
 
     it('should show empty state when no work orders', async () => {
       const { useWorkOrders } = await import('@/hooks/useWorkOrders');
-      useWorkOrders.mockReturnValue({
+      (useWorkOrders as ReturnType<typeof vi.fn>).mockReturnValue({
         data: {
           data: [],
           pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
@@ -267,7 +267,7 @@ describe('WorkOrdersList', () => {
       });
 
       const viewButtons = screen.getAllByRole('button', { name: /view|eye/i });
-      if (viewButtons.length > 0) {
+      if (viewButtons.length > 0 && viewButtons[0]) {
         fireEvent.click(viewButtons[0]);
         expect(mockOnView).toHaveBeenCalled();
       }

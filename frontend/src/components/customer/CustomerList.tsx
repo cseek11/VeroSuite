@@ -44,10 +44,10 @@ export const CustomerList: React.FC<CustomerListProps> = ({
     startSearchLog,
     completeSearchLog,
     logSearchClick,
-    getSearchSuggestions,
-    getSuggestedCorrection,
-    recentSearches,
-    popularSearches
+    getSearchSuggestions: _getSearchSuggestions,
+    getSuggestedCorrection: _getSuggestedCorrection,
+    recentSearches: _recentSearches,
+    popularSearches: _popularSearches
   } = useSearchLogging({
     enableLogging: true,
     enableAnalytics: true,

@@ -46,9 +46,11 @@ vi.mock('@/utils/toast', () => ({
 }));
 
 // Type assertions for mocked functions
-const mockBilling = billing as { getRevenueAnalytics: ReturnType<typeof vi.fn> };
-const mockLogger = logger as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
-const mockToast = toast as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
+// Type assertions - kept for type safety
+// @ts-expect-error - Type assertion for mocking
+const _mockBilling = billing as unknown as { getRevenueAnalytics: ReturnType<typeof vi.fn> };
+const mockLogger = logger as unknown as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
+const mockToast = toast as unknown as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
 
 describe('RevenueAnalytics', () => {
   let queryClient: QueryClient;
@@ -280,7 +282,7 @@ describe('RevenueAnalytics', () => {
 
       // Test view switching buttons if they exist
       const viewButtons = screen.queryAllByRole('button', { name: /overview|trends|breakdown/i });
-      if (viewButtons.length > 0) {
+      if (viewButtons.length > 0 && viewButtons[0]) {
         fireEvent.click(viewButtons[0]);
         // Verify view changed (implementation specific)
       }

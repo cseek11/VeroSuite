@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -14,13 +14,7 @@ import { Heading, Text } from '@/components/ui';
 import {
   FileText,
   Download,
-  Calendar,
   Loader2,
-  AlertCircle,
-  CheckCircle,
-  Filter,
-  Printer,
-  Mail,
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
 import { logger } from '@/utils/logger';
@@ -90,7 +84,7 @@ export default function FinancialReports({ onReportGenerated }: FinancialReports
     }).format(amount);
   };
 
-  const formatDate = (date: string) => {
+  const _formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',

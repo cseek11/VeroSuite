@@ -103,7 +103,7 @@ describe('Select', () => {
     it('should disable options marked as disabled', () => {
       render(<Select options={mockOptions} onChange={mockOnChange} />);
 
-      const select = screen.getByRole('combobox');
+      screen.getByRole('combobox');
       const option3 = screen.getByText('Option 3').closest('option');
       expect(option3).toBeDisabled();
     });

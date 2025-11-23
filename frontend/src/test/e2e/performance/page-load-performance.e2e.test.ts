@@ -41,8 +41,13 @@ test.describe('Page Load Performance E2E', () => {
 
     await page.waitForLoadState('networkidle');
     
-    const response = await responsePromise;
-    const responseTime = response.timing().responseEnd - response.timing().requestStart;
+    // Get timing from performance API instead
+    await responsePromise; // Wait for response but don't need the object
+    const timing = await page.evaluate(() => {
+      const perf = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      return perf ? perf.responseEnd - perf.requestStart : 0;
+    });
+    const responseTime = timing;
     
     // API should respond within 1 second
     expect(responseTime).toBeLessThan(1000);

@@ -296,7 +296,7 @@ describe('InvoiceDetail', () => {
     });
 
     it('should handle invoices without notes', () => {
-      const invoiceWithoutNotes = { ...mockInvoice, notes: undefined };
+      const { notes, ...invoiceWithoutNotes } = mockInvoice;
       render(<QueryClientProvider client={queryClient}>
         <InvoiceDetail invoice={invoiceWithoutNotes} />
       </QueryClientProvider>);

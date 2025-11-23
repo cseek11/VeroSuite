@@ -37,7 +37,7 @@ interface ConflictResolutionDialogProps {
 export const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
   open,
   conflicts,
-  canProceed,
+  canProceed: _canProceed,
   onProceed,
   onCancel,
   technicianName

@@ -3,7 +3,7 @@
  * Helps verify logs were emitted, trace IDs are present, etc.
  */
 
-import { Logger, LogLevel } from '../lib/logger';
+import { LogLevel } from '../lib/logger';
 
 export interface LogAssertion {
   message?: string | RegExp;

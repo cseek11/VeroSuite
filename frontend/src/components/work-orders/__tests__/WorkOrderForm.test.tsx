@@ -16,7 +16,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import WorkOrderForm from '../WorkOrderForm';
 import { enhancedApi } from '@/lib/enhanced-api';
-import { createMockAccount, createMockTechnician } from '@/test/utils/testHelpers';
+import { createMockTechnician } from '@/test/utils/testHelpers';
 import { WorkOrderStatus, WorkOrderPriority } from '@/types/work-orders';
 
 // Mock enhancedApi
@@ -31,7 +31,7 @@ vi.mock('@/lib/enhanced-api', () => ({
 // Mock CustomerSearchSelector
 vi.mock('@/components/ui/CustomerSearchSelector', () => ({
   default: ({ value, onChange, label, required, error, placeholder }: any) => {
-    const handleChange = (e: any) => {
+    const handleChange = (_e: any) => {
       const mockCustomer = {
         id: '00000000-0000-0000-0000-000000000001',
         name: 'Test Customer',
@@ -265,17 +265,24 @@ describe('WorkOrderForm', () => {
     });
 
     it('should auto-select technician when only one is available', async () => {
-      const singleTechnician = [mockTechnicians[0]];
+      const firstTechnician = mockTechnicians[0];
+      if (!firstTechnician) {
+        throw new Error('mockTechnicians[0] is undefined');
+      }
+      const singleTechnician = [firstTechnician];
       (enhancedApi.technicians.list as ReturnType<typeof vi.fn>).mockResolvedValue(
-        singleTechnician.map((tech) => ({
-          id: tech.id,
-          user_id: tech.user_id,
-          email: tech.user?.email,
-          first_name: tech.user?.first_name,
-          last_name: tech.user?.last_name,
-          phone: tech.user?.phone,
-          status: 'active',
-        }))
+        singleTechnician.map((tech) => {
+          const user = tech.user;
+          return {
+            id: tech.id,
+            user_id: tech.user_id,
+            email: user?.email,
+            first_name: user?.first_name,
+            last_name: user?.last_name,
+            phone: user?.phone,
+            status: 'active',
+          };
+        })
       );
 
       render(
@@ -550,11 +557,11 @@ describe('WorkOrderForm', () => {
       fireEvent.change(prioritySelect, { target: { value: WorkOrderPriority.HIGH } });
       fireEvent.blur(prioritySelect);
 
-      const technicianSelect = screen.getByLabelText(/assigned technician/i) as HTMLSelectElement;
       // assigned_to is optional, but if we set it, it must be a valid UUID
       // The mock technicians have IDs like 'tech-1', but the schema requires UUID
       // So we'll leave it empty or use a valid UUID format
       // For this test, we'll skip setting assigned_to since it's optional
+      // const technicianSelect = screen.getByLabelText(/assigned technician/i) as HTMLSelectElement;
       // fireEvent.change(technicianSelect, { target: { value: 'tech-1' } });
       // fireEvent.blur(technicianSelect);
 
@@ -654,7 +661,10 @@ describe('WorkOrderForm', () => {
       // There are multiple cancel buttons - get the one in the form footer
       const cancelButtons = screen.getAllByRole('button', { name: /cancel/i });
       // Click the last one (form footer button)
-      fireEvent.click(cancelButtons[cancelButtons.length - 1]);
+      const lastButton = cancelButtons[cancelButtons.length - 1];
+      if (lastButton) {
+        fireEvent.click(lastButton);
+      }
 
       expect(mockOnCancel).toHaveBeenCalled();
     });

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRealtimeCollaboration } from '../useRealtimeCollaboration';
 
@@ -72,7 +72,7 @@ describe('useRealtimeCollaboration', () => {
 
     (global.WebSocket as any).mockImplementation(() => mockWebSocket);
 
-    const { result } = renderHook(
+    renderHook(
       () => useRealtimeCollaboration('dashboard-1', mockUser),
       { wrapper: createWrapper() }
     );

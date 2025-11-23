@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AlertTriangle, X, ChevronDown, ChevronUp, Clock, User, MapPin } from 'lucide-react';
 
 export interface Alert {

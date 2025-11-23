@@ -9,7 +9,7 @@ interface Props {
   children: ReactNode;
   fallback?: ReactNode;
   onRetry?: () => void;
-  onBack?: () => void;
+  onBack?: (() => void) | undefined;
   context?: string;
 }
 

@@ -144,7 +144,7 @@ export default function CustomerPaymentHistory({
   };
 
   // Helper function for date formatting (currently unused, kept for potential future use)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   const _formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',

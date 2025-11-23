@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Calendar, Clock, MapPin, User, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
+import { Clock, MapPin, User, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
 import { enhancedApi } from '@/lib/enhanced-api';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ErrorBoundary } from '@/components/ErrorBoundary';

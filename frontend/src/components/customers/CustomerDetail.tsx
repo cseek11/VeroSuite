@@ -1,4 +1,4 @@
-import React from 'react';
+// React import removed (not needed with new JSX transform)
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
 import { Customer } from '@/types/customer';

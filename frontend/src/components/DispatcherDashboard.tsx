@@ -51,7 +51,7 @@ export default function DispatcherDashboard() {
           const logs = await res.json();
           setAuditLogs(logs);
         }
-      } catch (err) {
+      } catch (_err) {
         // handle error
       }
     }
@@ -70,7 +70,7 @@ export default function DispatcherDashboard() {
         setJobs(jobsData || []);
         setAccounts(accountsData || []);
         setRoutes(Array.isArray(routesData) ? routesData : []);
-      } catch (err) {
+      } catch (_err) {
         // handle error
       }
       setLoading(false);

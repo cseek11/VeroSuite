@@ -125,10 +125,10 @@ describe('API Response Structure Handling', () => {
       mockEnhancedApiCall.mockResolvedValue(responseData);
 
       // This would be used by any endpoint that follows the same pattern
-      const response = responseData;
+      const response = responseData as { data?: any[] | { data?: any[]; technicians?: any[] }; technicians?: any[] };
       let extractedData: any[] = [];
 
-      if (response?.data?.data && Array.isArray(response.data.data)) {
+      if (response?.data && typeof response.data === 'object' && 'data' in response.data && Array.isArray(response.data.data)) {
         extractedData = response.data.data;
       } else if (response?.data && Array.isArray(response.data)) {
         extractedData = response.data;
@@ -157,10 +157,10 @@ describe('API Response Structure Handling', () => {
       const responseData = await mockResponse.json();
       mockEnhancedApiCall.mockResolvedValue(responseData);
 
-      const response = responseData;
+      const response = responseData as { data?: any[] | { data?: any[]; technicians?: any[] }; technicians?: any[] };
       let extractedData: any[] = [];
 
-      if (response?.data?.data && Array.isArray(response.data.data)) {
+      if (response?.data && typeof response.data === 'object' && 'data' in response.data && Array.isArray(response.data.data)) {
         extractedData = response.data.data;
       } else if (response?.data && Array.isArray(response.data)) {
         extractedData = response.data;
@@ -187,12 +187,12 @@ describe('API Response Structure Handling', () => {
       const responseData = await mockResponse.json();
       mockEnhancedApiCall.mockResolvedValue(responseData);
 
-      const response = responseData;
+      const response = responseData as { data?: any[] | { data?: any[]; technicians?: any[] }; technicians?: any[] };
       let extractedData: any[] = [];
 
-      if (response?.data?.data && Array.isArray(response.data.data)) {
+      if (response?.data && typeof response.data === 'object' && 'data' in response.data && Array.isArray(response.data.data)) {
         extractedData = response.data.data;
-      } else if (response?.data?.technicians && Array.isArray(response.data.technicians)) {
+      } else if (response?.data && typeof response.data === 'object' && 'technicians' in response.data && Array.isArray(response.data.technicians)) {
         extractedData = response.data.technicians;
       } else if (response?.data && Array.isArray(response.data)) {
         extractedData = response.data;
@@ -217,7 +217,7 @@ describe('API Response Structure Handling', () => {
       const responseData = await mockResponse.json();
       mockEnhancedApiCall.mockResolvedValue(responseData);
 
-      const response = responseData;
+      const response: any = responseData;
       let extractedData: any[] = [];
 
       if (Array.isArray(response)) {
@@ -320,7 +320,7 @@ describe('API Response Structure Handling', () => {
         meta: {},
       };
 
-      const isSingleNested = response?.data && Array.isArray(response.data) && !response.data.data;
+      const isSingleNested = response?.data && Array.isArray(response.data) && !(response.data as any).data;
       expect(isSingleNested).toBe(true);
     });
 

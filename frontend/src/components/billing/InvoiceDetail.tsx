@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -10,7 +10,6 @@ import {
   Download,
   CreditCard,
   Calendar,
-  DollarSign,
   FileText,
   Building,
   Mail,
@@ -20,13 +19,11 @@ import {
   AlertCircle,
   Clock,
   History,
-  ArrowRight,
   Loader2,
 } from 'lucide-react';
-import { Invoice } from '@/types/enhanced-types';
+import { Invoice, Payment } from '@/types/enhanced-types';
 import { billing, company } from '@/lib/enhanced-api';
 import { logger } from '@/utils/logger';
-import { toast } from '@/utils/toast';
 import { trackInvoiceView, trackInvoiceDownload } from '@/lib/billing-analytics';
 import { InvoiceDetailSkeleton } from './BillingSkeletons';
 
@@ -121,7 +118,7 @@ export default function InvoiceDetail({
     (invoice.status === 'sent' && new Date(invoice.due_date) < new Date());
 
   // Calculate total paid
-  const totalPaid = payments.reduce((sum, payment) => sum + Number(payment.amount), 0);
+  const totalPaid = payments.reduce((sum: number, payment: Payment) => sum + Number(payment.amount), 0);
   const remainingBalance = Number(invoice.total_amount) - totalPaid;
 
   return (
@@ -366,7 +363,7 @@ export default function InvoiceDetail({
               </div>
             ) : (
               <div className="space-y-3">
-                {payments.map((payment) => (
+                {payments.map((payment: Payment) => (
                   <div
                     key={payment.id}
                     className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200"

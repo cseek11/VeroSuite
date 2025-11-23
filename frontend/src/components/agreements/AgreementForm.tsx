@@ -187,7 +187,7 @@ export function AgreementForm({ agreement, onSuccess, onCancel }: AgreementFormP
       } else {
         await createMutation.mutateAsync(data);
       }
-    } catch (error) {
+    } catch (_error) {
       // Error is displayed in the form
     } finally {
       setIsSubmitting(false);

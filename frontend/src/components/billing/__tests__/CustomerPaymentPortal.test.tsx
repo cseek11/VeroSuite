@@ -58,7 +58,11 @@ describe('CustomerPaymentPortal', () => {
   const renderComponent = (customerId: string, onClose?: () => void) => {
     return render(
       <QueryClientProvider client={queryClient}>
-        <CustomerPaymentPortal customerId={customerId} onClose={onClose} />
+        {onClose ? (
+          <CustomerPaymentPortal customerId={customerId} onClose={onClose} />
+        ) : (
+          <CustomerPaymentPortal customerId={customerId} />
+        )}
       </QueryClientProvider>
     );
   };

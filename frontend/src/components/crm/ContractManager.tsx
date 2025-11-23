@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -46,8 +46,8 @@ export default function ContractManager({ contracts, customerId, isLoading }: Co
   const [showNewContractModal, setShowNewContractModal] = useState(false);
   const queryClient = useQueryClient();
 
-  const updateContract = useMutation({
-    mutationFn: (data: Partial<Contract>) => {
+  const _updateContract = useMutation({
+    mutationFn: (_data: Partial<Contract>) => {
       // Mock API call
       return Promise.resolve({ success: true });
     },

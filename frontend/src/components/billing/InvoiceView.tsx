@@ -2,32 +2,23 @@
  * Invoice View Component
  * Comprehensive invoice viewing interface with list, detail, and actions
  * 
- * Last Updated: 2025-11-18
+ * Last Updated: 2025-11-22
  */
 
-import React, { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/Dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/Dialog';
 import { Heading, Text } from '@/components/ui';
 import {
   Search,
-  Download,
-  Eye,
   ArrowLeft,
-  FileText,
-  CheckCircle,
   AlertCircle,
-  Clock,
-  Filter,
-  X,
-  Loader2,
-  CreditCard,
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
-import { Invoice, InvoiceStatus } from '@/types/enhanced-types';
+import { Invoice } from '@/types/enhanced-types';
 import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
 import InvoiceList from './InvoiceList';
@@ -72,7 +63,7 @@ export default function InvoiceView({
   });
 
   // Set initial invoice if provided
-  React.useEffect(() => {
+  useEffect(() => {
     if (initialInvoiceId && invoices.length > 0 && !selectedInvoice) {
       const invoice = invoices.find((inv: Invoice) => inv.id === initialInvoiceId);
       if (invoice) {
@@ -113,7 +104,7 @@ export default function InvoiceView({
     setViewMode('detail');
   };
 
-  const handleViewInvoice = (invoice: Invoice) => {
+  const _handleViewInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setViewMode('viewer');
   };

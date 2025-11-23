@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FileText, Upload, Download, Eye, Trash2, FolderOpen, Image, File } from 'lucide-react';
 import { Button, Typography } from '@/components/ui';
 
@@ -6,7 +6,7 @@ interface CustomerDocumentsProps {
   customerId: string;
 }
 
-const CustomerDocuments: React.FC<CustomerDocumentsProps> = ({ customerId }) => {
+const CustomerDocuments: React.FC<CustomerDocumentsProps> = ({ customerId: _customerId }) => {
   const [activeTab, setActiveTab] = useState('documents');
 
   const documents = [

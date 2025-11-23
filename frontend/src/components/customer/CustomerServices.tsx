@@ -11,13 +11,13 @@ interface CustomerServicesProps {
 const CustomerServices: React.FC<CustomerServicesProps> = ({ customerId }) => {
   const [activeTab, setActiveTab] = useState('upcoming');
 
-  const { data: jobs = [], isLoading: jobsLoading } = useQuery({
+  const { data: jobs = [], isLoading: _jobsLoading } = useQuery({
     queryKey: ['customer-jobs', customerId],
     queryFn: () => enhancedApi.jobs.getByCustomerId(customerId),
     enabled: !!customerId,
   });
 
-  const { data: workOrders = [], isLoading: workOrdersLoading } = useQuery({
+  const { data: workOrders = [], isLoading: _workOrdersLoading } = useQuery({
     queryKey: ['customer-work-orders', customerId],
     queryFn: () => enhancedApi.workOrders.getByCustomerId(customerId),
     enabled: !!customerId,

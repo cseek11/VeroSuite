@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -9,12 +9,10 @@ import {
   TrendingUp,
   TrendingDown,
   BarChart3,
-  PieChart,
   Download,
   Filter,
   Loader2,
   AlertCircle,
-  Calendar,
   ArrowUp,
   ArrowDown,
 } from 'lucide-react';
@@ -29,9 +27,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
 } from 'recharts';
 import { billing } from '@/lib/enhanced-api';
 import { logger } from '@/utils/logger';
@@ -43,7 +38,7 @@ interface RevenueAnalyticsProps {
   endDate?: string;
 }
 
-const COLORS = ['#7c3aed', '#a855f7', '#10b981', '#f59e0b', '#ef4444', '#3b82f6'];
+const _COLORS = ['#7c3aed', '#a855f7', '#10b981', '#f59e0b', '#ef4444', '#3b82f6'];
 
 export default function RevenueAnalytics({
   startDate: propStartDate,
@@ -56,7 +51,7 @@ export default function RevenueAnalytics({
   const [endDate, setEndDate] = useState<string>(
     propEndDate || new Date().toISOString().split('T')[0]!
   );
-  const [activeView, setActiveView] = useState<'overview' | 'trends' | 'breakdown'>('overview');
+  const [_activeView, _setActiveView] = useState<'overview' | 'trends' | 'breakdown'>('overview');
 
   const { data: revenueData, isLoading, error, refetch } = useQuery<RevenueAnalyticsType>({
     queryKey: ['billing', 'revenue-analytics', startDate, endDate],

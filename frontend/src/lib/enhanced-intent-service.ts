@@ -303,7 +303,7 @@ class EnhancedIntentClassificationService {
       entities.phone = this.entityValidators.phone.format(phoneMatch[1].trim());
     }
     
-    // eslint-disable-next-line no-useless-escape
+     
     const emailMatch = query.match(/email.*?(?:to|is|=)\s*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i);
     if (emailMatch && emailMatch[1]) {
       entities.email = emailMatch[1].trim();

@@ -65,7 +65,7 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => {
 
 describe('CustomerForm', () => {
   // Mock Supabase client (currently unused in tests, kept for potential future use)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   const _mockSupabaseClient = vi.mocked(supabase);
   void _mockSupabaseClient; // Suppress unused warning
 

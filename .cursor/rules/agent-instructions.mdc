@@ -250,7 +250,23 @@ You MUST reference these specific files:
 ### Anti-Patterns & Bug Log
 
 - **`.cursor/anti_patterns.md`** — Known bad patterns (must avoid)
+  - Log anti-patterns from low-score PRs (REWARD_SCORE ≤ 0)
+  - Include: Date, PR, description, impact, follow-up
+  
 - **`.cursor/BUG_LOG.md`** — Historical bug patterns (prevent regressions)
+  - **MANDATORY:** Log ALL bug fixes (concise tracking)
+  - Include: Date, area, description, status, owner, notes
+  - Must link to error-patterns.md entry
+  
+- **`docs/error-patterns.md`** — Detailed pattern knowledge base
+  - **MANDATORY:** Document ALL bug fixes (detailed learning)
+  - Include: Root cause, triggers, fixes, prevention, code examples
+  - Must be cross-referenced from BUG_LOG.md
+
+**Dual Requirement:** When fixing a bug, you MUST:
+1. Log concise entry in `.cursor/BUG_LOG.md`
+2. Document detailed pattern in `docs/error-patterns.md`
+3. Cross-reference both files
 
 ### Pattern Rules
 

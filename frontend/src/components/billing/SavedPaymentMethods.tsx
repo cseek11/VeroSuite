@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,8 +24,6 @@ import {
   Shield,
   Loader2,
   AlertCircle,
-  CheckCircle,
-  X,
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
 import { PaymentMethod } from '@/types/enhanced-types';
@@ -58,7 +56,7 @@ export default function SavedPaymentMethods({
 }: SavedPaymentMethodsProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null);
-  const [deletingMethod, setDeletingMethod] = useState<PaymentMethod | null>(null);
+  const [_deletingMethod, setDeletingMethod] = useState<PaymentMethod | null>(null);
   const queryClient = useQueryClient();
 
   // Fetch payment methods

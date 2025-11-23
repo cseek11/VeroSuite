@@ -5,7 +5,7 @@
  * Supports drag-and-drop interactions with other cards.
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, User, MapPin, Phone, Mail } from 'lucide-react';
 import { secureApiClient } from '@/lib/secure-api-client';

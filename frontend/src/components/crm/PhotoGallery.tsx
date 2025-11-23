@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import {
@@ -47,7 +47,7 @@ interface PhotoGalleryProps {
   isLoading: boolean;
 }
 
-export default function PhotoGallery({ photos, customerId, isLoading }: PhotoGalleryProps) {
+export default function PhotoGallery({ photos, customerId: _customerId, isLoading }: PhotoGalleryProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<CustomerPhoto | null>(null);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');

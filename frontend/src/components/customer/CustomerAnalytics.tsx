@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { BarChart3, TrendingUp, TrendingDown, DollarSign, Calendar, AlertCircle } from 'lucide-react';
 import { Button, Typography } from '@/components/ui';
 
@@ -6,8 +6,8 @@ interface CustomerAnalyticsProps {
   customerId: string;
 }
 
-const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({ customerId }) => {
-  const [timeRange, setTimeRange] = useState('1year');
+const CustomerAnalytics: React.FC<CustomerAnalyticsProps> = ({ customerId: _customerId }) => {
+  const [_timeRange, _setTimeRange] = useState('1year');
 
   const analytics = {
     lifetimeValue: 8500.00,

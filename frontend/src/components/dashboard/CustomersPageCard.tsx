@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import CustomersPageWrapper from '@/components/dashboard/CustomersPageWrapper';
 import PageCardManager from '@/components/dashboard/PageCardManager';
 import { LoadingSpinner } from '@/components/LoadingSpinner';

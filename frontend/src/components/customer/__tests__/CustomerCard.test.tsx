@@ -55,7 +55,7 @@ describe('CustomerCard', () => {
             customer={mockCustomer}
             onClick={mockOnClick}
             isSelected={false}
-            densityMode="normal"
+            densityMode="standard"
           />
         </TestWrapper>
       );
@@ -70,7 +70,7 @@ describe('CustomerCard', () => {
             customer={mockCustomer}
             onClick={mockOnClick}
             isSelected={false}
-            densityMode="normal"
+            densityMode="standard"
           />
         </TestWrapper>
       );
@@ -85,7 +85,7 @@ describe('CustomerCard', () => {
             customer={mockCustomer}
             onClick={mockOnClick}
             isSelected={false}
-            densityMode="normal"
+            densityMode="standard"
           />
         </TestWrapper>
       );
@@ -102,7 +102,7 @@ describe('CustomerCard', () => {
             customer={mockCustomer}
             onClick={mockOnClick}
             isSelected={false}
-            densityMode="normal"
+            densityMode="standard"
           />
         </TestWrapper>
       );

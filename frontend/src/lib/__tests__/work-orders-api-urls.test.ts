@@ -7,6 +7,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { workOrdersApi } from '../work-orders-api';
+import { WorkOrderStatus, WorkOrderPriority } from '@/types/work-orders';
 
 // Mock fetch globally
 global.fetch = vi.fn() as any;
@@ -91,8 +92,8 @@ describe('WorkOrdersApi - URL Construction', () => {
       await workOrdersApi.getWorkOrders({
         page: 1,
         limit: 20,
-        status: 'pending',
-        priority: 'high',
+        status: WorkOrderStatus.PENDING,
+        priority: WorkOrderPriority.HIGH,
       });
 
       const fetchCall = (global.fetch as any).mock.calls[0];

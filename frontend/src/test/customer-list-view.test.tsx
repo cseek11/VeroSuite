@@ -15,7 +15,7 @@ vi.mock('@/components/ui/EnhancedUI', () => ({
   Card: ({ children, className }: any) => (
     <div className={`card ${className}`}>{children}</div>
   ),
-  Input: ({ placeholder, value, onChange, icon, className }: any) => (
+  Input: ({ placeholder, value, onChange, className }: any) => (
     <input
       placeholder={placeholder}
       value={value}
@@ -61,25 +61,33 @@ vi.mock('lucide-react', () => ({
 const mockCustomers = [
   {
     id: '1',
+    tenant_id: 'tenant-1',
     name: 'Test Customer 1',
     email: 'test1@example.com',
     phone: '555-1234',
     city: 'Pittsburgh',
     state: 'PA',
     account_type: 'commercial' as const,
-    ar_balance: 0
+    ar_balance: 0,
+    status: 'active' as const,
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
   },
   {
     id: '2',
+    tenant_id: 'tenant-1',
     name: 'Test Customer 2',
     email: 'test2@example.com',
     phone: '555-5678',
     city: 'Monroeville',
     state: 'PA',
     account_type: 'residential' as const,
-    ar_balance: 150.50
+    ar_balance: 150.50,
+    status: 'active' as const,
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
   }
-];
+] as any[];
 
 const mockProps = {
   customers: mockCustomers,
@@ -120,7 +128,9 @@ describe('CustomerListView', () => {
     const checkboxes = screen.getAllByRole('checkbox');
     
     // Select first customer
-    fireEvent.click(checkboxes[1]); // First customer checkbox (index 0 is select all)
+    if (checkboxes[1]) {
+      fireEvent.click(checkboxes[1]); // First customer checkbox (index 0 is select all)
+    }
     
     // Should show tabbed navigation
     expect(screen.getByText('1 Customer Selected')).toBeInTheDocument();
@@ -136,7 +146,9 @@ describe('CustomerListView', () => {
     
     // Select a customer
     const checkboxes = screen.getAllByRole('checkbox');
-    fireEvent.click(checkboxes[1]);
+    if (checkboxes[1]) {
+      fireEvent.click(checkboxes[1]);
+    }
     
     // Wait for tab content to appear
     await waitFor(() => {
@@ -156,7 +168,9 @@ describe('CustomerListView', () => {
     const expandButtons = screen.getAllByTestId('chevrondown-icon');
     
     // Click first expand button
-    fireEvent.click(expandButtons[0]);
+    if (expandButtons[0]) {
+      fireEvent.click(expandButtons[0]);
+    }
     
     // Should show expanded content
     expect(screen.getByText('Quick Actions')).toBeInTheDocument();
@@ -171,7 +185,9 @@ describe('CustomerListView', () => {
     const historyButtons = screen.getAllByText('History');
     
     // Click first history button
-    fireEvent.click(historyButtons[0]);
+    if (historyButtons[0]) {
+      fireEvent.click(historyButtons[0]);
+    }
     
     // Should call the callback
     expect(mockProps.onViewHistory).toHaveBeenCalledWith(mockCustomers[0]);
@@ -184,7 +200,9 @@ describe('CustomerListView', () => {
     const editButtons = screen.getAllByText('Edit');
     
     // Click first edit button
-    fireEvent.click(editButtons[0]);
+    if (editButtons[0]) {
+      fireEvent.click(editButtons[0]);
+    }
     
     // Should call the callback
     expect(mockProps.onEdit).toHaveBeenCalledWith(mockCustomers[0]);
@@ -215,7 +233,9 @@ describe('CustomerListView', () => {
     
     // Select a customer
     const checkboxes = screen.getAllByRole('checkbox');
-    fireEvent.click(checkboxes[1]);
+    if (checkboxes[1]) {
+      fireEvent.click(checkboxes[1]);
+    }
     
     // Should show tabbed navigation
     expect(screen.getByText('1 Customer Selected')).toBeInTheDocument();

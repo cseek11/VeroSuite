@@ -35,7 +35,7 @@ test.describe('Work Orders E2E', () => {
       await page.waitForSelector('form', { timeout: 5000 });
 
       // Search for customer
-      const customerSearch = page.getByPlaceholderText(/search customers/i);
+      const customerSearch = page.getByPlaceholder(/search customers/i);
       await customerSearch.fill('Test Customer');
       
       // Wait for dropdown to appear
@@ -72,7 +72,7 @@ test.describe('Work Orders E2E', () => {
       await page.waitForSelector('form', { timeout: 5000 });
 
       // Select customer
-      const customerSearch = page.getByPlaceholderText(/search customers/i);
+      const customerSearch = page.getByPlaceholder(/search customers/i);
       await customerSearch.fill('Test Customer');
       await page.waitForTimeout(1000); // Wait for search results
 
@@ -137,7 +137,7 @@ test.describe('Work Orders E2E', () => {
       await page.waitForSelector('form', { timeout: 5000 });
 
       // Search for customer
-      const customerSearch = page.getByPlaceholderText(/search customers/i);
+      const customerSearch = page.getByPlaceholder(/search customers/i);
       await customerSearch.fill('John');
 
       // Wait for search results dropdown
@@ -195,7 +195,7 @@ test.describe('Work Orders E2E', () => {
       await page.waitForSelector('form', { timeout: 5000 });
 
       // Select customer
-      const customerSearch = page.getByPlaceholderText(/search customers/i);
+      const customerSearch = page.getByPlaceholder(/search customers/i);
       await customerSearch.fill('Test Customer');
       await page.waitForTimeout(1000);
 
@@ -234,7 +234,7 @@ test.describe('Work Orders E2E', () => {
       await page.waitForSelector('form', { timeout: 5000 });
 
       // Form should still render even if technicians fail to load
-      const customerSearch = page.getByPlaceholderText(/search customers/i);
+      const customerSearch = page.getByPlaceholder(/search customers/i);
       await expect(customerSearch).toBeVisible();
     });
 
@@ -262,7 +262,7 @@ test.describe('Work Orders E2E', () => {
       await page.waitForSelector('form', { timeout: 5000 });
 
       // Fill form
-      const customerSearch = page.getByPlaceholderText(/search customers/i);
+      const customerSearch = page.getByPlaceholder(/search customers/i);
       await customerSearch.fill('Test Customer');
       await page.waitForTimeout(1000);
 
@@ -294,7 +294,7 @@ test.describe('Work Orders E2E', () => {
       await page.waitForSelector('form', { timeout: 5000 });
 
       // Step 3: Select customer
-      const customerSearch = page.getByPlaceholderText(/search customers/i);
+      const customerSearch = page.getByPlaceholder(/search customers/i);
       await customerSearch.fill('Test Customer');
       await page.waitForTimeout(1000);
 
@@ -346,7 +346,7 @@ test.describe('Work Orders E2E', () => {
       await page.waitForSelector('form', { timeout: 5000 });
 
       // Fill some data
-      const customerSearch = page.getByPlaceholderText(/search customers/i);
+      const customerSearch = page.getByPlaceholder(/search customers/i);
       await customerSearch.fill('Test Customer');
 
       // Click cancel

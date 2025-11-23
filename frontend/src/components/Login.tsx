@@ -18,7 +18,7 @@ export function Login() {
       } else {
         setError('Login failed: No token received');
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Login failed');
     }
   }

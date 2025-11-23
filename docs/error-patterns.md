@@ -424,6 +424,92 @@ if (invoicesTab) {
 
 ---
 
+## START_SCRIPT_PATH_MISMATCH - 2025-11-22
+
+### Summary
+Start script in `package.json` was looking for `dist/main.js` but NestJS build outputs to `dist/apps/api/src/main.js` due to monorepo structure preservation. This caused the API server to fail to start with "Cannot find module" error.
+
+### Root Cause
+- NestJS/TypeScript build preserves the full monorepo directory structure in output
+- Build output path is `dist/apps/api/src/main.js` (not `dist/main.js`)
+- Start script assumed non-monorepo build output structure
+- TypeScript compiler preserves full path from workspace root
+- No verification step to ensure start script path matches actual build output
+
+### Triggering Conditions
+- Building in a monorepo structure (`apps/api/`)
+- Using NestJS build command (`nest build`)
+- Start script uses hardcoded path that doesn't match build output
+- Build output structure not verified before setting start script
+- Dockerfile or deployment scripts may have different paths
+
+### Relevant Code/Modules
+- `apps/api/package.json` - `start` and `start:prod` scripts (fixed)
+- `apps/api/nest-cli.json` - NestJS build configuration
+- `apps/api/tsconfig.json` - TypeScript compiler configuration
+- `apps/api/Dockerfile` - May need path verification (line 75 uses `dist/main.js`)
+- Any monorepo build configuration
+
+### How It Was Fixed
+1. **Verified actual build output:** Checked `dist/` directory structure after build
+2. **Updated start script paths:** Changed from `node dist/main.js` to `node dist/apps/api/src/main.js`
+3. **Updated production script:** Changed `start:prod` to use same path
+4. **Documented build structure:** Created `API_START_SCRIPT_FIX.md` with explanation
+
+**Example Fixes:**
+```json
+// ❌ WRONG: Assumes non-monorepo build output
+{
+  "scripts": {
+    "start": "node dist/main.js",
+    "start:prod": "node dist/main.js"
+  }
+}
+```
+
+```json
+// ✅ CORRECT: Uses actual monorepo build output path
+{
+  "scripts": {
+    "start": "node dist/apps/api/src/main.js",
+    "start:prod": "node dist/apps/api/src/main.js"
+  }
+}
+```
+
+**Build Output Structure:**
+```
+dist/
+  apps/
+    api/
+      src/
+        main.js  ← Actual entry point
+```
+
+### How to Prevent It in the Future
+- **ALWAYS** verify build output structure before setting start script paths
+- **ALWAYS** check `dist/` directory after first build to see actual structure
+- **ALWAYS** test `npm start` after build to catch path mismatches early
+- **USE** `nest start:dev` for development (handles paths automatically)
+- **VERIFY** Dockerfile paths match build output if using Docker
+- **DOCUMENT** build output structure in README or setup guides
+- **ADD** build verification step in CI/CD to catch path mismatches
+- **CONSIDER** using relative paths or environment variables for flexibility
+- **TEST** production build and start process before deployment
+
+### Similar Historical Issues
+- MONOREPO_BUILD_PATH_ASSUMPTION - Similar pattern documented in anti-patterns
+- Dockerfile path mismatches in monorepo structures
+- Build output path assumptions in CI/CD workflows
+
+### Related Documentation
+- `docs/compliance-reports/API_START_SCRIPT_FIX.md` - Detailed fix documentation
+- `docs/engineering-decisions.md` - Monorepo Build Output Path Handling decision
+- `.cursor/BUG_LOG.md` - Bug log entry (line 16)
+- `.cursor/anti_patterns.md` - Anti-pattern entry (line 7)
+
+---
+
 ## Pattern Categories
 
 ### API & Network Errors
@@ -757,4 +843,238 @@ it('should handle job update errors gracefully', async () => {
 
 ---
 
-**Last Updated:** 2025-11-17
+## TYPESCRIPT_ERROR_CLEANUP - TypeScript Compilation Error Cleanup Patterns
+
+**Date:** 2025-11-22  
+**Category:** Frontend/TypeScript  
+**Severity:** Medium  
+**Status:** Fixed
+
+### Description
+Systematic cleanup of TypeScript compilation errors in frontend codebase. Fixed 276 errors across 124 component files, reducing total errors from 2143 to 1867.
+
+### Error Categories Fixed
+
+#### 1. Unused React Imports (60+ errors)
+**Error Code:** `TS6133: 'React' is declared but its value is never read.`
+
+**Root Cause:**
+- React 17+ introduced new JSX transform that doesn't require explicit `React` import
+- Old code still had `import React from 'react'` statements
+- TypeScript correctly flagged these as unused
+
+**Triggering Conditions:**
+- Files using new JSX transform (default in modern React)
+- Components that don't use `React.FC`, `React.Fragment`, `React.useState`, etc.
+- Files that only use named imports like `{ useState, useEffect }`
+
+**Fix Implementation:**
+```typescript
+// Before
+import React, { useState } from 'react';
+
+// After
+import { useState } from 'react';
+```
+
+**Prevention Strategies:**
+- Use new JSX transform (default in React 17+)
+- Only import what you need: `import { useState, useEffect } from 'react'`
+- Remove explicit React imports unless using `React.FC`, `React.Fragment`, etc.
+- Configure ESLint to auto-remove unused imports
+
+**Code Examples:**
+```typescript
+// ✅ Correct - Named imports only
+import { useState, useEffect, useMemo } from 'react';
+
+// ✅ Correct - Using React types
+import { useState, type FC, type DragEvent } from 'react';
+
+// ❌ Incorrect - Unused React import
+import React, { useState } from 'react';
+```
+
+---
+
+#### 2. Implicit Any Types (18 errors)
+**Error Code:** `TS7006: Parameter 'x' implicitly has an 'any' type.`
+
+**Root Cause:**
+- Callback functions in array methods (map, filter, reduce) without explicit types
+- Event handlers without type annotations
+- Generic function parameters without type constraints
+
+**Triggering Conditions:**
+- Using `.map()`, `.filter()`, `.reduce()` without type annotations
+- Event handlers: `onClick={(e) => ...}` without `e: React.MouseEvent`
+- Generic callbacks without type parameters
+
+**Fix Implementation:**
+```typescript
+// Before
+invoices.filter(inv => inv.status === 'draft')
+payments.reduce((sum, payment) => sum + payment.amount, 0)
+onTabChange={(tabId) => setActiveTab(tabId)}
+
+// After
+invoices.filter((inv: Invoice) => inv.status === 'draft')
+payments.reduce((sum: number, payment: Payment) => sum + payment.amount, 0)
+onTabChange={(tabId: TabType) => setActiveTab(tabId)}
+```
+
+**Prevention Strategies:**
+- Always type callback parameters explicitly
+- Use TypeScript's type inference where possible, but be explicit for callbacks
+- Enable `noImplicitAny` in tsconfig.json (already enabled)
+- Use proper type imports from `@/types/enhanced-types`
+
+**Code Examples:**
+```typescript
+// ✅ Correct - Explicit types
+const filtered = items.filter((item: Item) => item.active);
+const total = items.reduce((sum: number, item: Item) => sum + item.price, 0);
+onClick={(e: React.MouseEvent) => handleClick(e)}
+
+// ❌ Incorrect - Implicit any
+const filtered = items.filter(item => item.active);
+const total = items.reduce((sum, item) => sum + item.price, 0);
+onClick={(e) => handleClick(e)}
+```
+
+---
+
+#### 3. React UMD Global Errors (5 errors)
+**Error Code:** `TS2686: 'React' refers to a UMD global, but the current file is a module.`
+
+**Root Cause:**
+- Using `React.useState`, `React.useEffect`, `React.FC`, `React.Fragment` without importing React
+- TypeScript sees `React` as UMD global instead of module import
+- Files are ES modules but trying to use global React
+
+**Triggering Conditions:**
+- Using `React.*` syntax without importing React
+- Files with `import`/`export` statements (ES modules)
+- TypeScript strict mode enabled
+
+**Fix Implementation:**
+```typescript
+// Before
+const [state, setState] = React.useState(null);
+const Component: React.FC<Props> = () => { ... };
+<React.Fragment>...</React.Fragment>
+
+// After
+import { useState, type FC, Fragment } from 'react';
+const [state, setState] = useState(null);
+const Component: FC<Props> = () => { ... };
+<Fragment>...</Fragment>
+```
+
+**Prevention Strategies:**
+- Always import React hooks/types directly: `import { useState, useEffect, type FC } from 'react'`
+- Use `Fragment` instead of `React.Fragment`
+- Use `FC` type instead of `React.FC`
+- Import event types: `import { type DragEvent } from 'react'`
+
+**Code Examples:**
+```typescript
+// ✅ Correct - Direct imports
+import { useState, useEffect, Fragment, type FC, type DragEvent } from 'react';
+const [state, setState] = useState(null);
+const Component: FC<Props> = () => { ... };
+<Fragment>...</Fragment>
+const handleDrag = (e: DragEvent) => { ... };
+
+// ❌ Incorrect - React.* syntax
+const [state, setState] = React.useState(null);
+const Component: React.FC<Props> = () => { ... };
+<React.Fragment>...</React.Fragment>
+```
+
+---
+
+#### 4. Unused Variables (150+ errors)
+**Error Code:** `TS6133: 'variable' is declared but its value is never read.`
+
+**Root Cause:**
+- Variables declared but never used
+- Function parameters not used
+- Helper functions kept for future use
+- Catch block error variables not used
+
+**Triggering Conditions:**
+- Variables assigned but never referenced
+- Function parameters in callbacks not used
+- Helper functions defined but not called
+- Error variables in catch blocks not logged
+
+**Fix Implementation:**
+```typescript
+// Before
+const formatDate = (date: string) => { ... }; // Never used
+catch (error) { ... } // Error not used
+
+// After - Prefix with underscore for intentionally unused
+const _formatDate = (date: string) => { ... }; // Intentionally unused
+catch (_error) { ... } // Error intentionally unused
+```
+
+**Prevention Strategies:**
+- Prefix intentionally unused variables with `_`: `_error`, `_formatDate`
+- Remove truly unused code
+- Use ESLint rule: `@typescript-eslint/no-unused-vars` with `varsIgnorePattern: '^_'`
+- Document why variables are kept (e.g., "kept for future use")
+
+**Code Examples:**
+```typescript
+// ✅ Correct - Intentionally unused with _ prefix
+const _formatDate = (date: string) => { ... }; // Kept for future use
+catch (_error) { 
+  // Error intentionally not used - operation will retry
+}
+const [_unusedState, setState] = useState(null);
+
+// ❌ Incorrect - Unused without prefix
+const formatDate = (date: string) => { ... }; // TS6133 error
+catch (error) { ... } // TS6133 error if error not used
+```
+
+---
+
+### Impact
+- **Before:** 2143 TypeScript compilation errors
+- **After:** 1867 TypeScript compilation errors
+- **Fixed:** 276 errors (12.9% reduction)
+- **Files Modified:** 124 component files
+
+### Related Files
+- `frontend/src/components/billing/*` - 42 files
+- `frontend/src/components/scheduling/*` - 9 files
+- `frontend/src/components/dashboard/*` - 16 files
+- `frontend/src/components/customer/*` - Multiple files
+- `frontend/src/components/crm/*` - Multiple files
+
+### Test Coverage
+- Existing tests continue to pass
+- No new regression tests needed (cleanup session, not bug fix)
+- TypeScript errors were compilation issues, not runtime bugs
+
+### Prevention Checklist
+- [ ] Use new JSX transform (default in React 17+)
+- [ ] Remove unused React imports
+- [ ] Type all callback parameters explicitly
+- [ ] Import React types directly, not via `React.*`
+- [ ] Prefix intentionally unused variables with `_`
+- [ ] Enable ESLint auto-fix for unused imports
+- [ ] Run `npm run typecheck` before committing
+
+### Related Documentation
+- `.cursor/BUG_LOG.md` - Bug log entry
+- `docs/compliance-reports/TYPESCRIPT_ERROR_FIX_AUDIT_2025-11-22.md` - Full audit report
+- `frontend/TYPESCRIPT_ERROR_FIX_PLAN.md` - Cleanup plan
+- `frontend/TYPESCRIPT_ERROR_FIX_QUICK_REFERENCE.md` - Quick reference guide
+
+---
+
+**Last Updated:** 2025-11-22

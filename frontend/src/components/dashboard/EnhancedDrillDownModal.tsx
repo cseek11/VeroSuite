@@ -47,7 +47,7 @@ const EnhancedDrillDownModal: React.FC<EnhancedDrillDownModalProps> = ({
   const [showFilters, setShowFilters] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [_refreshKey, setRefreshKey] = useState(0);
 
   const drillDown = useDrillDown({
     initialData: data,
@@ -115,7 +115,7 @@ const EnhancedDrillDownModal: React.FC<EnhancedDrillDownModalProps> = ({
     }
   };
 
-  const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
+  const _getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
       case 'up':
         return <TrendingUp className="w-4 h-4 text-green-500" />;

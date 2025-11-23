@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -10,7 +10,6 @@ import {
 } from '@/components/ui';
 import {
   Search,
-  Download,
   Eye,
   Calendar,
   DollarSign,
@@ -21,7 +20,6 @@ import {
   ArrowUpDown,
   Filter,
   X,
-  Loader2,
   MapPin,
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
@@ -90,7 +88,7 @@ export default function InvoiceList({
         invoice.invoice_number.toLowerCase().includes(searchLower) ||
         invoice.accounts?.name?.toLowerCase().includes(searchLower) ||
         invoice.total_amount.toString().includes(searchTerm) ||
-        invoice.InvoiceItem?.some(item => 
+        invoice.InvoiceItem?.some((item: { description?: string }) => 
           item.description?.toLowerCase().includes(searchLower)
         ) ||
         (invoice.notes && invoice.notes.toLowerCase().includes(searchLower))
@@ -205,14 +203,14 @@ export default function InvoiceList({
   // Calculate statistics
   const stats = useMemo(() => {
     const total = invoices.length;
-    const draft = invoices.filter(inv => inv.status === 'draft').length;
-    const sent = invoices.filter(inv => inv.status === 'sent').length;
-    const paid = invoices.filter(inv => inv.status === 'paid').length;
-    const overdue = invoices.filter(inv => inv.status === 'overdue').length;
-    const totalAmount = invoices.reduce((sum, inv) => sum + Number(inv.total_amount), 0);
-    const paidAmount = invoices.filter(inv => inv.status === 'paid')
-      .reduce((sum, inv) => sum + Number(inv.total_amount), 0);
-    const outstandingAmount = invoices.filter(inv => 
+    const draft = invoices.filter((inv: Invoice) => inv.status === 'draft').length;
+    const sent = invoices.filter((inv: Invoice) => inv.status === 'sent').length;
+    const paid = invoices.filter((inv: Invoice) => inv.status === 'paid').length;
+    const overdue = invoices.filter((inv: Invoice) => inv.status === 'overdue').length;
+    const totalAmount = invoices.reduce((sum: number, inv: Invoice) => sum + Number(inv.total_amount), 0);
+    const paidAmount = invoices.filter((inv: Invoice) => inv.status === 'paid')
+      .reduce((sum: number, inv: Invoice) => sum + Number(inv.total_amount), 0);
+    const outstandingAmount = invoices.filter((inv: Invoice) => 
       inv.status === 'sent' || inv.status === 'overdue'
     ).reduce((sum, inv) => sum + Number(inv.total_amount), 0);
 

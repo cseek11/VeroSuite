@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -42,7 +42,7 @@ interface CommunicationLog {
   follow_up_date?: string;
 }
 
-export default function CommunicationHub({ customerId }: CommunicationHubProps) {
+export default function CommunicationHub({ customerId: _customerId }: CommunicationHubProps) {
   const [selectedCommunicationType, setSelectedCommunicationType] = useState<string>('');
   const [message, setMessage] = useState('');
   const [subject, setSubject] = useState('');
@@ -93,7 +93,7 @@ export default function CommunicationHub({ customerId }: CommunicationHubProps) 
     }
   };
 
-  const getDirectionColor = (direction: string) => {
+  const _getDirectionColor = (direction: string) => {
     return direction === 'inbound' ? 'blue' : 'green';
   };
 

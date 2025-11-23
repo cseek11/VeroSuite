@@ -136,7 +136,7 @@ describe('WorkOrderDetail', () => {
 
     it('should show loading state', async () => {
       const { useWorkOrder } = await import('@/hooks/useWorkOrders');
-      useWorkOrder.mockReturnValue({
+      (useWorkOrder as ReturnType<typeof vi.fn>).mockReturnValue({
         data: null,
         isLoading: true,
         error: null,
@@ -154,7 +154,7 @@ describe('WorkOrderDetail', () => {
 
     it('should show error state', async () => {
       const { useWorkOrder } = await import('@/hooks/useWorkOrders');
-      useWorkOrder.mockReturnValue({
+      (useWorkOrder as ReturnType<typeof vi.fn>).mockReturnValue({
         data: null,
         isLoading: false,
         error: new Error('Failed to load'),

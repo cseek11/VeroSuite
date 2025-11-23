@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -102,7 +102,7 @@ export default function SmartScheduler({ customerId }: SmartSchedulerProps) {
 
   // Schedule service mutation
   const scheduleService = useMutation({
-    mutationFn: (data: {
+    mutationFn: (_data: {
       customerId: string;
       serviceTypeId: string;
       technicianId: string;
@@ -143,7 +143,7 @@ export default function SmartScheduler({ customerId }: SmartSchedulerProps) {
     return stars;
   };
 
-  const getSkillColor = (skill: string) => {
+  const _getSkillColor = (skill: string) => {
     switch (skill.toLowerCase()) {
       case 'termite': return 'red';
       case 'rodent': return 'brown';

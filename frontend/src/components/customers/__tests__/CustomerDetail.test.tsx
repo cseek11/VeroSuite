@@ -12,7 +12,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import CustomerDetail from '../CustomerDetail';
-import { createMockAccount } from '@/test/utils/testHelpers';
 
 // Mock Supabase
 vi.mock('@/lib/supabase-client', () => ({

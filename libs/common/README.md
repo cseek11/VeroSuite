@@ -105,3 +105,5 @@ Add to `tsconfig.json`:
 **Reference:** `.cursor/rules/04-architecture.mdc`, `.cursor/rules/05-data.mdc`
 
 
+
+

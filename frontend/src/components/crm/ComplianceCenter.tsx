@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import {
@@ -43,7 +43,7 @@ interface ComplianceRecord {
   safety_measures?: string[];
 }
 
-export default function ComplianceCenter({ customerId }: ComplianceCenterProps) {
+export default function ComplianceCenter({ customerId: _customerId }: ComplianceCenterProps) {
   const [selectedRecord, setSelectedRecord] = useState<ComplianceRecord | null>(null);
   const [showRecordModal, setShowRecordModal] = useState(false);
 

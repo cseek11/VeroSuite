@@ -13,6 +13,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useJobs, useCreateJob, useUpdateJob, useDeleteJob } from '../useJobs';
+import { JobStatus } from '@/types/jobs';
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -85,7 +86,7 @@ describe('useJobs', () => {
         json: async () => mockJobs,
       });
 
-      const { result } = renderHook(() => useJobs({ technician_id: 'tech-1' }), {
+      renderHook(() => useJobs({ technician_id: 'tech-1' }), {
         wrapper: createWrapper(),
       });
 
@@ -147,7 +148,7 @@ describe('useJobs', () => {
       await waitFor(async () => {
         await result.current.mutateAsync({
           id: 'job-1',
-          data: { status: 'in-progress' },
+          data: { status: JobStatus.IN_PROGRESS },
         });
       });
 

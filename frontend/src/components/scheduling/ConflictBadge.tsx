@@ -1,4 +1,4 @@
-import React from 'react';
+// React import removed (not needed with new JSX transform)
 import { AlertTriangle, Clock, User, MapPin } from 'lucide-react';
 
 interface ConflictBadgeProps {

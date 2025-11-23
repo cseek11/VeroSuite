@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import CustomersPage from '@/components/CustomersPage';
 import { logger } from '@/utils/logger';
 

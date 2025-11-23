@@ -11,12 +11,11 @@
  * - Template categories/tags
  */
 
-import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import Textarea from '@/components/ui/Textarea';
 import { Heading, Text } from '@/components/ui';
 import {
   FileText,
@@ -25,15 +24,12 @@ import {
   Trash2,
   Search,
   Copy,
-  Save,
-  X,
   Loader2,
   AlertCircle,
   Tag,
 } from 'lucide-react';
 import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
-import InvoiceForm from './InvoiceForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/Dialog';
 
 interface InvoiceTemplateItem {

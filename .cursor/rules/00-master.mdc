@@ -172,10 +172,77 @@ Distillation is prompt-driven (no model fine-tuning). Additions to these files i
 
 ---
 
+## DOCUMENTATION FILE PURPOSES
+
+### Error Pattern Documentation (`docs/error-patterns.md`)
+- **Purpose:** Detailed knowledge base for learning and prevention
+- **When:** Document every bug fix with full analysis
+- **Content:** Root cause, triggers, fixes, prevention strategies, code examples
+- **Audience:** Developers learning from past mistakes
+
+### Bug Log (`.cursor/BUG_LOG.md`)
+- **Purpose:** Concise tracking log for compliance and history
+- **When:** Log every bug fix (mandatory)
+- **Content:** Date, area, description, status, owner, notes, link to error-patterns.md
+- **Audience:** Compliance tracking, quick reference, historical record
+
+### Anti-Patterns Log (`.cursor/anti_patterns.md`)
+- **Purpose:** Known bad patterns to avoid
+- **When:** Log anti-patterns from low-score PRs (REWARD_SCORE ≤ 0)
+- **Content:** Date, PR, description, impact, follow-up, prevention pattern
+- **Audience:** AI agents and developers to prevent regressions
+
+### Relationship
+- Bug fixes require BOTH error-patterns.md (detailed) AND BUG_LOG.md (concise)
+- Anti-patterns from low-score PRs go in anti_patterns.md AND BUG_LOG.md
+- All entries should cross-reference each other
+
+---
+
+## BUG FIX DOCUMENTATION REQUIREMENTS
+
+**MANDATORY:** When fixing a bug, you MUST:
+
+1. **Document the error pattern** in `docs/error-patterns.md`:
+   - Detailed root cause analysis
+   - Triggering conditions
+   - Fix implementation
+   - Prevention strategies
+   - Code examples
+
+2. **Log the bug** in `.cursor/BUG_LOG.md`:
+   - Concise entry with date, area, description, status, owner, notes
+   - Link to error-patterns.md entry
+   - Track bug history and compliance
+
+3. **Cross-reference both files:**
+   - BUG_LOG.md entry must link to error-patterns.md (e.g., `Related: docs/error-patterns.md#BUG_NAME`)
+   - error-patterns.md entry should reference BUG_LOG.md date
+
+**Enforcement:**
+- Step 5 (Post-Implementation Audit) MUST verify both entries exist
+- Missing entries = compliance violation (HARD STOP)
+
+---
+
 ## ANTI-PATTERN & BUG LOGGING
-- Low-score PRs (CI REWARD_SCORE ≤ 0) produce anti-pattern suggestions.
-- CI or reviewers append entries to `.cursor/anti_patterns.md` and `.cursor/BUG_LOG.md`.
-- Every entry includes detection context, remediation guidance, and follow-up owner.
+
+### Bug Fixes (ALL Bugs)
+- **MANDATORY:** When fixing ANY bug, you MUST:
+  1. Log entry in `.cursor/BUG_LOG.md` (concise tracking)
+  2. Document pattern in `docs/error-patterns.md` (detailed learning)
+  3. Cross-reference both files
+
+### Low-Score PRs (REWARD_SCORE ≤ 0)
+- **MANDATORY:** When PR has REWARD_SCORE ≤ 0, you MUST:
+  1. Log anti-pattern in `.cursor/anti_patterns.md`
+  2. Log associated bug in `.cursor/BUG_LOG.md` (if bug was fixed)
+  3. Document error pattern in `docs/error-patterns.md` (if applicable)
+
+### Entry Requirements
+- Every entry includes: detection context, remediation guidance, and follow-up owner
+- BUG_LOG.md entries must link to error-patterns.md
+- Anti-pattern entries must reference source PR/issue
 
 ---
 

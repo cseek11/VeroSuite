@@ -43,12 +43,14 @@ vi.mock('@/utils/toast', () => ({
 }));
 
 // Type assertions
-const mockBilling = billing as { 
+const mockBilling = billing as unknown as { 
   getOverdueInvoices: ReturnType<typeof vi.fn>;
   sendInvoiceReminder: ReturnType<typeof vi.fn>;
 };
-const mockLogger = logger as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
-const mockToast = toast as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
+// @ts-expect-error - Type assertion for mocking, kept for type safety
+const _mockLogger = logger as unknown as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
+// @ts-expect-error - Type assertion for mocking, kept for type safety
+const _mockToast = toast as unknown as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
 
 describe('InvoiceReminders', () => {
   let queryClient: QueryClient;
@@ -149,7 +151,7 @@ describe('InvoiceReminders', () => {
 
       // Find checkboxes
       const checkboxes = screen.getAllByRole('checkbox');
-      if (checkboxes.length > 0) {
+      if (checkboxes.length > 0 && checkboxes[0]) {
         fireEvent.click(checkboxes[0]);
 
         // Bulk button should appear
@@ -201,11 +203,11 @@ describe('InvoiceReminders', () => {
       // Try to find button by role first, then by text
       let sendButton: HTMLElement | null = null;
       const sendButtonsByRole = screen.queryAllByRole('button', { name: /send reminder/i });
-      if (sendButtonsByRole.length > 0) {
+      if (sendButtonsByRole.length > 0 && sendButtonsByRole[0]) {
         sendButton = sendButtonsByRole[0];
       } else {
         const sendButtonsByText = screen.queryAllByText(/send reminder/i);
-        if (sendButtonsByText.length > 0) {
+        if (sendButtonsByText.length > 0 && sendButtonsByText[0]) {
           sendButton = sendButtonsByText[0];
         }
       }
@@ -299,7 +301,10 @@ describe('InvoiceReminders', () => {
       expect(confirmButton.length).toBeGreaterThan(0);
       // Click the last one (should be the dialog confirm button)
       if (confirmButton.length > 0) {
-        fireEvent.click(confirmButton[confirmButton.length - 1]);
+        const lastButton = confirmButton[confirmButton.length - 1];
+        if (lastButton) {
+          fireEvent.click(lastButton);
+        }
       }
 
       // Wait for the async operation to complete
@@ -333,11 +338,11 @@ describe('InvoiceReminders', () => {
       // Try to find button by role first, then by text
       let sendButton: HTMLElement | null = null;
       const sendButtonsByRole = screen.queryAllByRole('button', { name: /send reminder/i });
-      if (sendButtonsByRole.length > 0) {
+      if (sendButtonsByRole.length > 0 && sendButtonsByRole[0]) {
         sendButton = sendButtonsByRole[0];
       } else {
         const sendButtonsByText = screen.queryAllByText(/send reminder/i);
-        if (sendButtonsByText.length > 0) {
+        if (sendButtonsByText.length > 0 && sendButtonsByText[0]) {
           sendButton = sendButtonsByText[0];
         }
       }
@@ -417,11 +422,11 @@ describe('InvoiceReminders', () => {
       // Try to find button by role first, then by text
       let sendButton: HTMLElement | null = null;
       const sendButtonsByRole = screen.queryAllByRole('button', { name: /send reminder/i });
-      if (sendButtonsByRole.length > 0) {
+      if (sendButtonsByRole.length > 0 && sendButtonsByRole[0]) {
         sendButton = sendButtonsByRole[0];
       } else {
         const sendButtonsByText = screen.queryAllByText(/send reminder/i);
-        if (sendButtonsByText.length > 0) {
+        if (sendButtonsByText.length > 0 && sendButtonsByText[0]) {
           sendButton = sendButtonsByText[0];
         }
       }

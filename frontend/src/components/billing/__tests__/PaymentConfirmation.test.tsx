@@ -34,22 +34,31 @@ vi.mock('@/utils/toast', () => ({
   },
 }));
 
-const mockLogger = logger as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn> };
-const mockToast = toast as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
+const mockLogger = logger as unknown as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn> };
+const mockToast = toast as unknown as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
 
 describe('PaymentConfirmation', () => {
   const mockInvoice = {
     id: 'inv-1',
+    tenant_id: 'tenant-1',
+    account_id: 'acc-1',
     invoice_number: 'INV-001',
-    total_amount: '1000.00',
+    total_amount: 1000.00,
+    subtotal: 900.00,
+    tax_amount: 100.00,
+    status: 'paid' as const,
+    issue_date: '2025-01-01',
+    due_date: '2025-01-31',
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
+    created_by: 'user-1',
+    updated_by: 'user-1',
+    InvoiceItem: [],
     accounts: {
       id: 'acc-1',
       name: 'Test Customer',
       email: 'test@example.com',
     },
-    status: 'paid',
-    issue_date: '2025-01-01',
-    due_date: '2025-01-31',
   };
 
   const mockPaymentIntent = {
@@ -91,13 +100,36 @@ describe('PaymentConfirmation', () => {
     });
   });
 
-  const renderComponent = (props = {}) => {
-    const defaultProps = {
-      invoice: mockInvoice,
-      paymentIntent: mockPaymentIntent,
-      paymentMethod: mockPaymentMethod,
-      ...props,
+  const renderComponent = (props: Partial<{
+    invoice: typeof mockInvoice;
+    paymentIntent: typeof mockPaymentIntent | null;
+    paymentMethod: typeof mockPaymentMethod | null;
+    onDownloadReceipt: () => void;
+    onClose: () => void;
+  }> = {}) => {
+    const defaultProps: any = {
+      invoice: props.invoice ?? mockInvoice,
     };
+    
+    if (props.paymentIntent !== undefined) {
+      defaultProps.paymentIntent = props.paymentIntent;
+    } else {
+      defaultProps.paymentIntent = mockPaymentIntent;
+    }
+    
+    if (props.paymentMethod !== undefined) {
+      defaultProps.paymentMethod = props.paymentMethod;
+    } else {
+      defaultProps.paymentMethod = mockPaymentMethod;
+    }
+    
+    if (props.onDownloadReceipt !== undefined) {
+      defaultProps.onDownloadReceipt = props.onDownloadReceipt;
+    }
+    
+    if (props.onClose !== undefined) {
+      defaultProps.onClose = props.onClose;
+    }
 
     return render(<PaymentConfirmation {...defaultProps} />);
   };
@@ -245,7 +277,7 @@ describe('PaymentConfirmation', () => {
     });
 
     it('should not show close button when onClose not provided', () => {
-      renderComponent({ onClose: undefined });
+      renderComponent();
 
       expect(screen.queryByText(/close/i)).not.toBeInTheDocument();
     });
@@ -272,7 +304,7 @@ describe('PaymentConfirmation', () => {
           ...mockInvoice,
           accounts: {
             ...mockInvoice.accounts,
-            email: undefined,
+            email: '',
           },
         },
       });
@@ -284,7 +316,9 @@ describe('PaymentConfirmation', () => {
       renderComponent({
         paymentIntent: {
           id: 'pi_test_123',
-          charges: undefined,
+          charges: {
+            data: [],
+          },
         },
       });
 

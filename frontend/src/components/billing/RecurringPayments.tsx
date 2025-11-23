@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -8,12 +8,9 @@ import {
   CreditCard,
   Plus,
   Trash2,
-  Calendar,
-  DollarSign,
   AlertCircle,
   CheckCircle,
   Loader2,
-  RefreshCw,
   X,
   Info
 } from 'lucide-react';
@@ -47,7 +44,7 @@ interface CreateRecurringPaymentForm {
 
 export default function RecurringPayments() {
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>('');
+  const [_selectedInvoiceId, setSelectedInvoiceId] = useState<string>('');
   const [formData, setFormData] = useState<CreateRecurringPaymentForm>({
     invoice_id: '',
     interval: 'monthly',

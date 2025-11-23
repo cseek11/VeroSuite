@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -17,12 +17,8 @@ import {
   CreditCard,
   Plus,
   Trash2,
-  Edit,
-  CheckCircle,
-  AlertCircle,
   Loader2,
   Shield,
-  X,
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
 import { PaymentMethod } from '@/types/enhanced-types';
@@ -74,7 +70,7 @@ export default function PaymentMethodManager({
       account_id: customerId,
       ...data,
     }),
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       queryClient.invalidateQueries({ queryKey: ['billing', 'payment-methods'] });
       setShowAddModal(false);
       resetForm();

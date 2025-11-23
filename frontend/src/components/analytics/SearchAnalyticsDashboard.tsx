@@ -11,9 +11,9 @@ export const SearchAnalyticsDashboard: React.FC = () => {
   const {
     getSearchPerformanceSummary,
     getTrendingSearches,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     getSearchErrorSummary: _getSearchErrorSummary,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     getUserSearchInsights: _getUserSearchInsights
   } = useSearchAnalytics();
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Card from '@/components/ui/Card';
 import { Heading, Text } from '@/components/ui';
 import { Tabs } from '@/components/ui';
@@ -10,7 +10,6 @@ import {
   BarChart3,
   CreditCard,
   Download,
-  Settings,
 } from 'lucide-react';
 import ARManagement from './ARManagement';
 import RevenueAnalytics from './RevenueAnalytics';
@@ -241,7 +240,7 @@ export default function FinancialDashboard({ defaultTab = 'overview' }: Financia
       <Tabs
         tabs={tabs}
         active={activeTab}
-        onTabChange={(tabId) => setActiveTab(tabId as TabType)}
+        onTabChange={(tabId: TabType) => setActiveTab(tabId)}
         variant="pills"
         size="lg"
         className="mb-8"

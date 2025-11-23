@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Textarea from '@/components/ui/Textarea';
@@ -50,7 +50,7 @@ interface DualNotesSystemProps {
   isLoading: boolean;
 }
 
-export default function DualNotesSystem({ notes, customerId, isLoading }: DualNotesSystemProps) {
+export default function DualNotesSystem({ notes, customerId: _customerId, isLoading }: DualNotesSystemProps) {
   const [activeTab, setActiveTab] = useState('internal');
   const [showNewNoteModal, setShowNewNoteModal] = useState(false);
   const [selectedNote, setSelectedNote] = useState<CustomerNote | null>(null);
@@ -63,7 +63,7 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
     is_internal: true
   });
 
-  const getNoteTypeColor = (type: string) => {
+  const _getNoteTypeColor = (type: string) => {
     switch (type.toLowerCase()) {
       case 'internal': return 'slate';
       case 'technician': return 'blue';
@@ -84,7 +84,7 @@ export default function DualNotesSystem({ notes, customerId, isLoading }: DualNo
     }
   };
 
-  const getPriorityColor = (priority: string) => {
+  const _getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {
       case 'high': return 'red';
       case 'medium': return 'yellow';

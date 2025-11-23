@@ -18,7 +18,7 @@ const InventoryCompliancePanel: React.FC = () => {
     expiringSoon: 0,
     complianceRate: 0,
     safetyScore: 0
-  }, isLoading } = useQuery({
+  }, isLoading: _isLoading } = useQuery({
     queryKey: ['inventory', 'compliance'],
     queryFn: () => enhancedApi.inventory.getComplianceData(),
   });

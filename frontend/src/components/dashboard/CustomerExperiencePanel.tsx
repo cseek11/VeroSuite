@@ -18,7 +18,7 @@ const CustomerExperiencePanel: React.FC = () => {
     retentionRate: 0,
     complaints: 0,
     testimonials: 0
-  }, isLoading } = useQuery({
+  }, isLoading: _isLoading } = useQuery({
     queryKey: ['customer', 'experience-metrics'],
     queryFn: () => enhancedApi.customers.getExperienceMetrics(),
   });

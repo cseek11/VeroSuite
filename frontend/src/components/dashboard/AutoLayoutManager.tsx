@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Brain,
   Zap,
@@ -45,7 +45,7 @@ export default function AutoLayoutManager({
   const [selectedSuggestion, setSelectedSuggestion] = useState<LayoutSuggestion | null>(null);
 
   const {
-    usagePatterns,
+    usagePatterns: _usagePatterns,
     cardRelationships,
     layoutSuggestions,
     optimizations,

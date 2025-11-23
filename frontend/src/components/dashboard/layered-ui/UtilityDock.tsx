@@ -7,7 +7,7 @@ interface UtilityDockProps {
   onToggle?: () => void;
 }
 
-export const UtilityDock: React.FC<UtilityDockProps> = ({ isVisible, onToggle }) => {
+export const UtilityDock: React.FC<UtilityDockProps> = ({ isVisible, onToggle: _onToggle }) => {
   if (!isVisible) return null;
 
   return (

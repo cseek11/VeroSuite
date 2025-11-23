@@ -7,8 +7,7 @@ import {
   Building,
   Mail,
   Phone,
-  MapPin,
-  Loader2
+  MapPin
 } from 'lucide-react';
 import { ErrorMessage } from './ErrorMessage';
 import { LoadingSpinner } from '@/components/LoadingSpinner';

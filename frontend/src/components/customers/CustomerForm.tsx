@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -72,7 +72,7 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-    watch,
+    watch: _watch,
   } = useForm<FormData>({
     resolver: zodResolver(customerFormSchema),
     defaultValues: {

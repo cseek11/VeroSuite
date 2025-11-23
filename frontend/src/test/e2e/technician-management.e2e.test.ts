@@ -41,7 +41,7 @@ test.describe('Technician Management E2E', () => {
     await page.goto('/technicians');
     await page.waitForLoadState('networkidle');
 
-    const searchInput = page.getByPlaceholderText(/search/i);
+    const searchInput = page.getByPlaceholder(/search/i);
     if (await searchInput.isVisible()) {
       await searchInput.fill('John');
       await page.waitForTimeout(1000);

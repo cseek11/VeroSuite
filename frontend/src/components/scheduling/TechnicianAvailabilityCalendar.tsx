@@ -5,7 +5,7 @@
  * Shows a weekly view with time slots for each day.
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, Clock, Save, X, CheckCircle, AlertCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { enhancedApi } from '@/lib/enhanced-api';

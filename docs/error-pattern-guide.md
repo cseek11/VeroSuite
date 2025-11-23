@@ -26,6 +26,30 @@ Document an error pattern when:
 3. **Discovering a recurring issue** - When the same error appears multiple times
 4. **Learning from production incidents** - When analyzing production errors
 
+### Dual Documentation Requirement ⚠️ **MANDATORY**
+
+**When fixing a bug, you MUST document it in TWO places:**
+
+1. **`docs/error-patterns.md`** (detailed pattern documentation)
+   - Full root cause analysis
+   - Triggering conditions
+   - Fix implementation details
+   - Prevention strategies
+   - Code examples
+
+2. **`.cursor/BUG_LOG.md`** (concise bug tracking)
+   - Date, area, description, status, owner, notes
+   - Link to error-patterns.md entry
+   - Format: `| Date | Area | Description | Status | Owner | Notes |`
+
+**Cross-Reference:**
+- BUG_LOG.md entry must link to error-patterns.md: `Related: docs/error-patterns.md#PATTERN_NAME`
+- error-patterns.md entry should reference BUG_LOG.md date
+
+**Enforcement:**
+- Step 5 (Post-Implementation Audit) verifies both entries exist
+- Missing entries = compliance violation
+
 ### Entry Template
 
 Use this template when adding a new pattern:

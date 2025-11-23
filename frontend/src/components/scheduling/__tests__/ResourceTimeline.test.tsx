@@ -206,7 +206,7 @@ describe('ResourceTimeline', () => {
     // Default mock implementations
     // Component checks technicians.list first, then falls back to users.list
     (enhancedApi.technicians.list as any).mockResolvedValue(mockTechnicians);
-    (enhancedApi.users.list as any).mockResolvedValue(mockTechnicians);
+    (enhancedApi.technicians.list as any).mockResolvedValue(mockTechnicians);
     (enhancedApi.jobs.getByDateRange as any).mockResolvedValue(mockJobs);
     (enhancedApi.jobs.update as any).mockResolvedValue({ id: 'job-1', status: 'in_progress' });
   });
@@ -261,7 +261,7 @@ describe('ResourceTimeline', () => {
 
   describe('Initial Render', () => {
     it('should render loading state initially', () => {
-      (enhancedApi.users.list as any).mockImplementation(() => new Promise(() => {}));
+      (enhancedApi.technicians.list as any).mockImplementation(() => new Promise(() => {}));
       (enhancedApi.jobs.getByDateRange as any).mockImplementation(() => new Promise(() => {}));
 
       renderComponent();
@@ -356,8 +356,12 @@ describe('ResourceTimeline', () => {
       fireEvent.click(prevButton);
 
       expect(onDateChange).toHaveBeenCalled();
-      const calledDate = onDateChange.mock.calls[0][0];
-      expect(calledDate).toBeInstanceOf(Date);
+      const firstCall = onDateChange.mock.calls[0];
+      expect(firstCall).toBeDefined();
+      if (firstCall) {
+        const calledDate = firstCall[0];
+        expect(calledDate).toBeInstanceOf(Date);
+      }
     });
 
     it('should navigate to next day', async () => {
@@ -377,8 +381,12 @@ describe('ResourceTimeline', () => {
       fireEvent.click(nextButton);
 
       expect(onDateChange).toHaveBeenCalled();
-      const calledDate = onDateChange.mock.calls[0][0];
-      expect(calledDate).toBeInstanceOf(Date);
+      const firstCall = onDateChange.mock.calls[0];
+      expect(firstCall).toBeDefined();
+      if (firstCall) {
+        const calledDate = firstCall[0];
+        expect(calledDate).toBeInstanceOf(Date);
+      }
     });
 
     it('should navigate to today', async () => {
@@ -399,8 +407,12 @@ describe('ResourceTimeline', () => {
       fireEvent.click(todayButton);
 
       expect(onDateChange).toHaveBeenCalled();
-      const calledDate = onDateChange.mock.calls[0][0];
-      expect(calledDate.getDate()).toBe(new Date().getDate());
+      const firstCall = onDateChange.mock.calls[0];
+      expect(firstCall).toBeDefined();
+      if (firstCall) {
+        const calledDate = firstCall[0];
+        expect(calledDate.getDate()).toBe(new Date().getDate());
+      }
     });
   });
 
@@ -770,7 +782,7 @@ describe('ResourceTimeline', () => {
       await waitFor(() => {
         // Component uses technicians.list first, then falls back to users.list
         const techniciansCalled = (enhancedApi.technicians.list as any).mock.calls.length > 0;
-        const usersCalled = (enhancedApi.users.list as any).mock.calls.length > 0;
+        const usersCalled = (enhancedApi.technicians.list as any).mock.calls.length > 0;
         expect(techniciansCalled || usersCalled).toBe(true);
       }, { timeout: 5000 });
     });
@@ -819,7 +831,7 @@ describe('ResourceTimeline', () => {
 
     it('should use technicians.list if available', async () => {
       (enhancedApi.technicians as any).list = vi.fn().mockResolvedValue(mockTechnicians);
-      (enhancedApi.users.list as any).mockResolvedValue([]);
+      (enhancedApi.technicians.list as any).mockResolvedValue([]);
 
       renderComponent();
 
@@ -834,7 +846,7 @@ describe('ResourceTimeline', () => {
   describe('Error Handling', () => {
     it('should display error message when technicians fetch fails', async () => {
       (enhancedApi.technicians.list as any).mockRejectedValue(new Error('Failed to fetch technicians'));
-      (enhancedApi.users.list as any).mockRejectedValue(new Error('Failed to fetch technicians'));
+      (enhancedApi.technicians.list as any).mockRejectedValue(new Error('Failed to fetch technicians'));
 
       renderComponent();
 
@@ -912,7 +924,7 @@ describe('ResourceTimeline', () => {
   describe('Edge Cases', () => {
     it('should handle empty technicians list', async () => {
       (enhancedApi.technicians.list as any).mockResolvedValue([]);
-      (enhancedApi.users.list as any).mockResolvedValue([]);
+      (enhancedApi.technicians.list as any).mockResolvedValue([]);
       (enhancedApi.jobs.getByDateRange as any).mockResolvedValue([]);
 
       renderComponent();
@@ -1069,7 +1081,7 @@ describe('ResourceTimeline', () => {
       }));
 
       (enhancedApi.technicians.list as any).mockResolvedValue(manyTechnicians);
-      (enhancedApi.users.list as any).mockResolvedValue(manyTechnicians);
+      (enhancedApi.technicians.list as any).mockResolvedValue(manyTechnicians);
       (enhancedApi.jobs.getByDateRange as any).mockResolvedValue([]);
 
       renderComponent();

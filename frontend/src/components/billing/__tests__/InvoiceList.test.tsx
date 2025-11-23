@@ -288,7 +288,10 @@ describe('InvoiceList', () => {
       });
 
       const viewButtons = screen.getAllByText('View');
-      fireEvent.click(viewButtons[0]);
+      const firstViewButton = viewButtons[0];
+      if (firstViewButton) {
+        fireEvent.click(firstViewButton);
+      }
 
       expect(onInvoiceSelect).toHaveBeenCalledWith(mockInvoices[0]);
     });
@@ -302,7 +305,10 @@ describe('InvoiceList', () => {
       });
 
       const payButtons = screen.getAllByText('Pay');
-      fireEvent.click(payButtons[0]);
+      const firstPayButton = payButtons[0];
+      if (firstPayButton) {
+        fireEvent.click(firstPayButton);
+      }
 
       expect(onInvoicePay).toHaveBeenCalledWith(mockInvoices[0]);
     });

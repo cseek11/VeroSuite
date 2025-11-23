@@ -289,9 +289,13 @@ describe('Billing Components Integration', () => {
       const viewButton = screen.getByText('View');
       fireEvent.click(viewButton);
 
-      const selectedInvoice = onInvoiceSelect.mock.calls[0][0];
-      expect(selectedInvoice.invoice_number).toBe('INV-001');
-      expect(selectedInvoice.total_amount).toBe(110);
+      const firstCall = onInvoiceSelect.mock.calls[0];
+      expect(firstCall).toBeDefined();
+      if (firstCall) {
+        const selectedInvoice = firstCall[0];
+        expect(selectedInvoice.invoice_number).toBe('INV-001');
+        expect(selectedInvoice.total_amount).toBe(110);
+      }
     });
 
     it('should sync payment data between components', async () => {

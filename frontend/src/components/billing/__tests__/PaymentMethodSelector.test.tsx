@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PaymentMethodSelector from '../PaymentMethodSelector';
 import { billing } from '@/lib/enhanced-api';
@@ -33,8 +33,11 @@ vi.mock('@/utils/logger', () => ({
   },
 }));
 
-const mockBilling = billing as { getPaymentMethods: ReturnType<typeof vi.fn> };
-const mockLogger = logger as { error: ReturnType<typeof vi.fn> };
+// Type assertions - kept for type safety even if not directly used
+// @ts-expect-error - Type assertion for mocking
+const _mockBilling = billing as unknown as { getPaymentMethods: ReturnType<typeof vi.fn> };
+// @ts-expect-error - Type assertion for mocking
+const _mockLogger = logger as unknown as { error: ReturnType<typeof vi.fn> };
 
 describe('PaymentMethodSelector', () => {
   let queryClient: QueryClient;
@@ -60,7 +63,7 @@ describe('PaymentMethodSelector', () => {
   const mockProps = {
     accountId: 'acc-1',
     paymentMethods: mockPaymentMethods,
-    onSelect: vi.fn(),
+    onChange: vi.fn(),
     onAddNew: vi.fn(),
     selectedMethodId: null,
   };
@@ -111,14 +114,14 @@ describe('PaymentMethodSelector', () => {
   });
 
   describe('Payment Method Selection', () => {
-    it('should call onSelect when payment method clicked', () => {
-      const onSelect = vi.fn();
-      renderComponent({ onSelect });
+    it('should call onChange when payment method clicked', () => {
+      const onChange = vi.fn();
+      renderComponent({ onChange });
 
       const visaMethod = screen.getByText(/visa.*ending.*1234/i);
       fireEvent.click(visaMethod);
 
-      expect(onSelect).toHaveBeenCalledWith(mockPaymentMethods[0]);
+      expect(onChange).toHaveBeenCalledWith(mockPaymentMethods[0]);
     });
 
     it('should highlight selected payment method', () => {
@@ -193,8 +196,8 @@ describe('PaymentMethodSelector', () => {
       expect(screen.getByText(/card/i)).toBeInTheDocument();
     });
 
-    it('should handle null onSelect callback', () => {
-      renderComponent({ onSelect: null as any });
+    it('should handle null onChange callback', () => {
+      renderComponent({ onChange: null as any });
 
       const visaMethod = screen.getByText(/visa.*ending.*1234/i);
       

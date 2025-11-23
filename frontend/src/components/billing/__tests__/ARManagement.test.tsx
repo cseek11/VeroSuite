@@ -13,6 +13,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ARManagement from '../ARManagement';
 import { billing } from '@/lib/enhanced-api';
+import type { ARSummary } from '@/types/enhanced-types';
 
 // Mock the billing API
 vi.mock('@/lib/enhanced-api', () => ({
@@ -66,19 +67,19 @@ describe('ARManagement', () => {
     totalAR: 100000,
     totalCustomers: 10,
     totalInvoices: 25,
-    agingBuckets: {
-      '0-30': 50000,
-      '31-60': 30000,
-      '61-90': 15000,
-      '90+': 5000,
-    },
+    agingBuckets: [
+      { bucket: '0-30', amount: 50000, invoiceCount: 10 },
+      { bucket: '31-60', amount: 30000, invoiceCount: 8 },
+      { bucket: '61-90', amount: 15000, invoiceCount: 5 },
+      { bucket: '90+', amount: 5000, invoiceCount: 2 },
+    ],
     customerAR: [
       {
         customerId: 'cust-1',
         customerName: 'Customer 1',
         totalAR: 50000,
         invoices: [
-          { invoiceId: 'inv-1', daysPastDue: 15, balanceDue: 50000 },
+          { id: 'inv-1', daysPastDue: 15, total_amount: 50000, status: 'overdue', due_date: '2025-01-15' },
         ],
       },
     ],
@@ -103,7 +104,7 @@ describe('ARManagement', () => {
       expect(screen.getByText(/loading ar data/i)).toBeInTheDocument();
 
       // Now simulate data loading
-      vi.mocked(billing.getARSummary).mockResolvedValue(mockARSummary);
+      vi.mocked(billing.getARSummary).mockResolvedValue(mockARSummary as ARSummary);
 
       // Force re-render with new data
       rerender(
@@ -139,7 +140,7 @@ describe('ARManagement', () => {
       });
 
       // Now simulate successful data load
-      vi.mocked(billing.getARSummary).mockResolvedValue(mockARSummary);
+      vi.mocked(billing.getARSummary).mockResolvedValue(mockARSummary as ARSummary);
 
       // Force re-render
       rerender(
@@ -217,7 +218,7 @@ describe('ARManagement', () => {
     });
 
     it('should render AR summary data', async () => {
-      vi.mocked(billing.getARSummary).mockResolvedValue(mockARSummary);
+      vi.mocked(billing.getARSummary).mockResolvedValue(mockARSummary as ARSummary);
 
       renderComponent();
 

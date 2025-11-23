@@ -62,3 +62,5 @@ import { Account } from '@verofield/common/types';
 **Reference:** `.cursor/rules/04-architecture.mdc`
 
 
+
+

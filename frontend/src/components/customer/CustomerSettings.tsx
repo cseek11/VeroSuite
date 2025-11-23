@@ -6,7 +6,7 @@ interface CustomerSettingsProps {
   customerId: string;
 }
 
-const CustomerSettings: React.FC<CustomerSettingsProps> = ({ customerId }) => {
+const CustomerSettings: React.FC<CustomerSettingsProps> = ({ customerId: _customerId }) => {
   const [settings, setSettings] = useState({
     emailNotifications: true,
     smsNotifications: false,

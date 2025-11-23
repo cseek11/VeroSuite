@@ -248,8 +248,10 @@ describe('CustomerPaymentHistory', () => {
 
       await waitFor(() => {
         const invoiceLinks = screen.getAllByText(/Invoice INV-/);
-        fireEvent.click(invoiceLinks[0]);
-        expect(onInvoiceClick).toHaveBeenCalledWith('inv-1');
+        if (invoiceLinks[0]) {
+          fireEvent.click(invoiceLinks[0]);
+          expect(onInvoiceClick).toHaveBeenCalledWith('inv-1');
+        }
       });
     });
 

@@ -68,16 +68,16 @@ interface OpenPopup {
 }
 
 const CustomerOverview: React.FC<CustomerOverviewProps> = ({
-  customerId,
-  onNavigateToNote
+  customerId: _customerId,
+  onNavigateToNote: _onNavigateToNote
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedCustomer, setEditedCustomer] = useState<Customer | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [newTag, setNewTag] = useState('');
-  const [customerTags, setCustomerTags] = useState<string[]>(['VIP', 'Quarterly Service', 'High Priority']);
-  const [selectedNote, setSelectedNote] = useState<NoteData | null>(null);
-  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
+  const [_newTag, _setNewTag] = useState('');
+  const [customerTags, _setCustomerTags] = useState<string[]>(['VIP', 'Quarterly Service', 'High Priority']);
+  const [_selectedNote, _setSelectedNote] = useState<NoteData | null>(null);
+  const [_popupPosition, _setPopupPosition] = useState({ x: 0, y: 0 });
   const [openPopups, setOpenPopups] = useState<OpenPopup[]>([]);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [newNoteContent, setNewNoteContent] = useState('');
@@ -126,7 +126,7 @@ const CustomerOverview: React.FC<CustomerOverviewProps> = ({
   };
 
   // Analytics calculations
-  const analytics = useMemo(() => {
+  const _analytics = useMemo(() => {
     if (!customer) return {
       totalServices: 0,
       totalSpend: 0,

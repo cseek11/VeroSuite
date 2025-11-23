@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Phone, Mail, User, Edit2, Plus, Trash2 } from 'lucide-react';
 import { Button, Input, Typography } from '@/components/ui';
 
@@ -6,7 +6,7 @@ interface CustomerContactProps {
   customerId: string;
 }
 
-const CustomerContact: React.FC<CustomerContactProps> = ({ customerId }) => {
+const CustomerContact: React.FC<CustomerContactProps> = ({ customerId: _customerId }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [contacts, setContacts] = useState([
     {

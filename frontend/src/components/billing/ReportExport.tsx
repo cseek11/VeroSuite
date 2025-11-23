@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -16,8 +16,6 @@ import {
   FileText,
   Loader2,
   AlertCircle,
-  Calendar,
-  Filter,
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
 import { logger } from '@/utils/logger';

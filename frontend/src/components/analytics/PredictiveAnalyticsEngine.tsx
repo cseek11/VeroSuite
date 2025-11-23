@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 
 // PredictionData interface (currently unused, kept for potential future use)
 // TypeScript doesn't allow void statements for interfaces, so we'll keep it commented
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 type _PredictionData = {
   value: number;
   confidence: number;
@@ -86,7 +86,7 @@ export default function PredictiveAnalyticsEngine({
 }: PredictiveAnalyticsEngineProps) {
   const [selectedTimeframe, setSelectedTimeframe] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
   const [selectedPrediction, setSelectedPrediction] = useState<MLPrediction | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   const [_isLoading, _setIsLoading] = useState(false);
 
   // Mock ML predictions with realistic data

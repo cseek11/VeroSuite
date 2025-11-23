@@ -12,8 +12,8 @@
  * - Reminder history
  */
 
-import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -25,10 +25,8 @@ import {
   Filter,
   Calendar,
   CheckCircle,
-  AlertCircle,
   Loader2,
   Clock,
-  Users,
   FileText,
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';

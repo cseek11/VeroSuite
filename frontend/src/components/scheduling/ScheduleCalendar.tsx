@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Fragment, type DragEvent, type FC } from 'react';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -115,7 +115,7 @@ interface ScheduleCalendarProps {
   showTechnicianMetrics?: boolean;
 }
 
-export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
+export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
   selectedDate = new Date(),
   onDateChange,
   onJobSelect,
@@ -174,7 +174,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
   const queryClient = useQueryClient();
 
   // Debug: Log when search props change
-  React.useEffect(() => {
+  useEffect(() => {
     if (searchQuery || filterStatus !== 'all' || filterPriority !== 'all') {
       logger.debug('ScheduleCalendar filters changed', { searchQuery, filterStatus, filterPriority }, 'ScheduleCalendar');
     }
@@ -202,7 +202,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
   });
 
   // Filter jobs based on search and filters
-  const filteredJobs = React.useMemo(() => {
+  const filteredJobs = useMemo(() => {
     if (!jobs || jobs.length === 0) {
       return [];
     }
@@ -552,13 +552,13 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
   };
 
   // Handle job drag start
-  const handleDragStart = (event: React.DragEvent, job: Job) => {
+  const handleDragStart = (event: DragEvent, job: Job) => {
     setDraggedJob(job);
     event.dataTransfer.effectAllowed = 'move';
   };
 
   // Handle job drop with conflict checking
-  const handleDrop = async (event: React.DragEvent, targetDate: Date, targetTime: string) => {
+  const handleDrop = async (event: DragEvent, targetDate: Date, targetTime: string) => {
     event.preventDefault();
     
     if (!draggedJob) return;
@@ -749,7 +749,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
         {Array.from({ length: 14 }, (_, hourIndex) => {
           const hour = hourIndex + 6;
           return (
-            <React.Fragment key={hour}>
+            <Fragment key={hour}>
               <div className="bg-gray-50 p-2 text-xs text-gray-500">
                 {hour.toString().padStart(2, '0')}:00
               </div>
@@ -810,7 +810,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
                   }
                 </div>
               ))}
-            </React.Fragment>
+            </Fragment>
           );
         })}
       </div>
@@ -1443,7 +1443,7 @@ interface JobCreateDialogProps {
   onJobCreated: () => void;
 }
 
-const JobCreateDialog: React.FC<JobCreateDialogProps> = ({
+const JobCreateDialog: FC<JobCreateDialogProps> = ({
   open,
   onClose,
   selectedDate,

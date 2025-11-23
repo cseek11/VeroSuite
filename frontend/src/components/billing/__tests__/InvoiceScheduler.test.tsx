@@ -35,8 +35,8 @@ vi.mock('@/utils/toast', () => ({
 }));
 
 // Type assertions
-const mockLogger = logger as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
-const mockToast = toast as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
+const mockLogger = logger as unknown as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
+const mockToast = toast as unknown as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
 
 describe('InvoiceScheduler', () => {
   let queryClient: QueryClient;
@@ -118,7 +118,7 @@ describe('InvoiceScheduler', () => {
       }, { timeout: 3000 });
 
       const statusSelects = screen.queryAllByDisplayValue(/all/i);
-      if (statusSelects.length > 0) {
+      if (statusSelects.length > 0 && statusSelects[0]) {
         fireEvent.change(statusSelects[0], { target: { value: 'active' } });
 
         await waitFor(() => {
@@ -175,7 +175,7 @@ describe('InvoiceScheduler', () => {
 
       // Find pause/activate button
       const toggleButtons = screen.queryAllByText(/pause|activate/i);
-      if (toggleButtons.length > 0) {
+      if (toggleButtons.length > 0 && toggleButtons[0]) {
         fireEvent.click(toggleButtons[0]);
 
         await waitFor(() => {

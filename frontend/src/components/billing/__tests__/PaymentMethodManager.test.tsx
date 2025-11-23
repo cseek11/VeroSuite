@@ -176,7 +176,9 @@ describe('PaymentMethodManager', () => {
         expect(screen.getByText('Visa ending in 1234')).toBeInTheDocument();
       });
       const deleteButtons = screen.getAllByText('Delete');
-      fireEvent.click(deleteButtons[0]);
+      if (deleteButtons[0]) {
+        fireEvent.click(deleteButtons[0]);
+      }
       expect(window.confirm).toHaveBeenCalled();
     });
     it('should delete payment method when confirmed', async () => {
@@ -184,7 +186,9 @@ describe('PaymentMethodManager', () => {
       renderComponent();
       await waitFor(() => {
         const deleteButtons = screen.getAllByText('Delete');
+        if (deleteButtons[0]) {
         fireEvent.click(deleteButtons[0]);
+      }
       });
       await waitFor(() => {
         expect(billing.deletePaymentMethod).toHaveBeenCalledWith('pm-1');
@@ -195,7 +199,9 @@ describe('PaymentMethodManager', () => {
       renderComponent();
       await waitFor(() => {
         const deleteButtons = screen.getAllByText('Delete');
+        if (deleteButtons[0]) {
         fireEvent.click(deleteButtons[0]);
+      }
       });
       expect(billing.deletePaymentMethod).not.toHaveBeenCalled();
     });
@@ -248,8 +254,11 @@ describe('PaymentMethodManager', () => {
       renderComponent({ onPaymentMethodSelected });
       await waitFor(() => {
         const useButtons = screen.getAllByText('Use');
-        fireEvent.click(useButtons[0]);
-        expect(onPaymentMethodSelected).toHaveBeenCalledWith(mockPaymentMethods[0]);
+        const firstUseButton = useButtons[0];
+        if (firstUseButton) {
+          fireEvent.click(firstUseButton);
+          expect(onPaymentMethodSelected).toHaveBeenCalledWith(mockPaymentMethods[0]);
+        }
       });
     });
   });

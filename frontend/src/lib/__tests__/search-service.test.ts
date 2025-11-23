@@ -159,7 +159,7 @@ describe('SearchService', () => {
         limit: vi.fn().mockResolvedValue({ data: mockResults.jobs, error: null }),
       };
 
-      mockSupabaseClient.from
+      mockFrom
         .mockReturnValueOnce(mockCustomerQuery)
         .mockReturnValueOnce(mockWorkOrderQuery)
         .mockReturnValueOnce(mockJobQuery);
@@ -200,7 +200,7 @@ describe('SearchService', () => {
         limit: vi.fn().mockResolvedValue({ data: [], error: null }),
       };
 
-      mockSupabaseClient.from
+      mockFrom
         .mockReturnValueOnce(mockCustomerQuery)
         .mockReturnValueOnce(mockWorkOrderQuery)
         .mockReturnValueOnce(mockJobQuery);
@@ -227,6 +227,7 @@ describe('SearchService', () => {
         },
       };
 
+      // @ts-expect-error - Mock query kept for type safety
       const mockQuery = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),

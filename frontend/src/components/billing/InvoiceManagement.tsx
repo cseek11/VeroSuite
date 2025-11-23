@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -26,9 +26,7 @@ import {
   Loader2,
   MoreVertical,
   MapPin,
-  ArrowUpDown,
-  Filter,
-  X
+  ArrowUpDown
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
 import { Invoice, InvoiceStatus } from '@/types/enhanced-types';
@@ -84,7 +82,7 @@ export default function InvoiceManagement() {
   // Filter and sort invoices
   const filteredAndSortedInvoices = useMemo(() => {
     // Filter by tab and search
-    let filtered = invoices.filter((invoice) => {
+    const filtered = invoices.filter((invoice) => {
       const matchesSearch = 
         invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
         invoice.accounts?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -11,8 +11,8 @@
  * - View scheduled invoices
  */
 
-import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -20,7 +20,6 @@ import Select from '@/components/ui/Select';
 import { Heading, Text } from '@/components/ui';
 import {
   Calendar,
-  Clock,
   Plus,
   Edit,
   Trash2,
@@ -34,7 +33,6 @@ import {
 } from 'lucide-react';
 import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
-import CustomerSearchSelector from '@/components/ui/CustomerSearchSelector';
 import type { Account } from '@/types/enhanced-types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/Dialog';
 
@@ -59,12 +57,12 @@ interface InvoiceSchedulerProps {
   onScheduleCreated?: () => void;
 }
 
-export default function InvoiceScheduler({ onScheduleCreated }: InvoiceSchedulerProps) {
+export default function InvoiceScheduler({ onScheduleCreated: _onScheduleCreated }: InvoiceSchedulerProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<ScheduledInvoice | null>(null);
-  const [selectedCustomer, setSelectedCustomer] = useState<Account | null>(null);
+  const [_selectedCustomer, setSelectedCustomer] = useState<Account | null>(null);
 
   const queryClient = useQueryClient();
 

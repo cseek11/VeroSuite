@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   ChevronUp, 
   ChevronDown, 
@@ -58,7 +58,7 @@ interface Address {
 }
 
 // Utility functions
-const formatPhoneNumber = (phone: string): string => {
+const _formatPhoneNumber = (phone: string): string => {
   const cleaned = phone.replace(/\D/g, '');
   const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
   if (match) {
@@ -67,7 +67,7 @@ const formatPhoneNumber = (phone: string): string => {
   return phone;
 };
 
-const validateEmail = (email: string): boolean => {
+const _validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
@@ -83,7 +83,7 @@ const getStatusColor = (status: string): string => {
   }
 };
 
-const getPaymentStatusColor = (status: string): string => {
+const _getPaymentStatusColor = (status: string): string => {
   switch (status) {
     case 'current': return 'text-green-600 bg-green-50 border-green-200';
     case 'past_due': return 'text-orange-600 bg-orange-50 border-orange-200';
@@ -93,7 +93,7 @@ const getPaymentStatusColor = (status: string): string => {
   }
 };
 
-const getServiceStatusColor = (status: string): string => {
+const _getServiceStatusColor = (status: string): string => {
   switch (status) {
     case 'scheduled': return 'text-blue-600 bg-blue-50 border-blue-200';
     case 'in_progress': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
@@ -201,7 +201,7 @@ const CustomerInfoPanel: React.FC<CustomerInfoPanelProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   type TabType = 'overview' | 'business' | 'billing' | 'service' | 'communication' | 'history';
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [_activeTab, setActiveTab] = useState<TabType>('overview');
   
   // Enhanced API queries
   const queryClient = useQueryClient();
@@ -227,7 +227,7 @@ const CustomerInfoPanel: React.FC<CustomerInfoPanelProps> = ({
   });
   
   // Fetch customer segments
-  const { data: customerSegments } = useQuery({
+  const { data: _customerSegments } = useQuery({
     queryKey: ['customer-segments'],
     queryFn: () => enhancedApi.customerSegments.getAll()
   });
@@ -251,7 +251,7 @@ const CustomerInfoPanel: React.FC<CustomerInfoPanelProps> = ({
   });
   
   // Update customer profile mutation
-  const updateProfileMutation = useMutation({
+  const _updateProfileMutation = useMutation({
     mutationFn: async (updates: Partial<CustomerProfile>) => {
       return enhancedApi.customers.update(customer.id, {}, updates);
     },
@@ -261,7 +261,7 @@ const CustomerInfoPanel: React.FC<CustomerInfoPanelProps> = ({
   });
   
   // Create/update contact mutation
-  const updateContactMutation = useMutation({
+  const _updateContactMutation = useMutation({
     mutationFn: async (contactData: Partial<CustomerContact>) => {
       if (contactData.id) {
         return enhancedApi.contacts.update(contactData.id, contactData);
@@ -396,7 +396,7 @@ const CustomerInfoPanel: React.FC<CustomerInfoPanelProps> = ({
   // Update contacts when API data is loaded
   useEffect(() => {
     if (customerContacts && customerContacts.length > 0) {
-      const primaryContact = customerContacts.find(contact => contact.is_primary);
+      const _primaryContact = customerContacts.find(contact => contact.is_primary);
       const secondaryContact = customerContacts.find(contact => !contact.is_primary);
       
       setPanelData(prev => ({

@@ -1,22 +1,17 @@
-import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { Heading, Text } from '@/components/ui';
 import {
-  DollarSign,
   Search,
-  Filter,
   Download,
-  Upload,
   CheckCircle,
   XCircle,
   AlertCircle,
   Loader2,
   FileText,
-  Calendar,
-  CreditCard,
   RefreshCw
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { MessageSquare, Phone, Mail, Send, Plus, Clock, CheckCircle } from 'lucide-react';
 import { Button, Typography, Input, Textarea } from '@/components/ui';
 import { logger } from '@/utils/logger';
@@ -7,7 +7,7 @@ interface CustomerCommunicationsProps {
   customerId: string;
 }
 
-const CustomerCommunications: React.FC<CustomerCommunicationsProps> = ({ customerId }) => {
+const CustomerCommunications: React.FC<CustomerCommunicationsProps> = ({ customerId: _customerId }) => {
   const [activeTab, setActiveTab] = useState('messages');
   const [newMessage, setNewMessage] = useState('');
 

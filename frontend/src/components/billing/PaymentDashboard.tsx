@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -7,8 +7,6 @@ import { Heading, Text } from '@/components/ui';
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
@@ -22,7 +20,6 @@ import {
 import {
   DollarSign,
   TrendingUp,
-  TrendingDown,
   CreditCard,
   Download,
   Filter,
@@ -30,9 +27,7 @@ import {
   BarChart3,
   Receipt,
   CheckCircle,
-  AlertCircle,
-  Calendar,
-  Users
+  AlertCircle
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
 import { logger } from '@/utils/logger';
@@ -389,7 +384,7 @@ export default function PaymentDashboard() {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {paymentMethodData.map((entry, index) => (
+                      {paymentMethodData.map((_entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>

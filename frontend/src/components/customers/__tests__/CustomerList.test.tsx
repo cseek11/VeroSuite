@@ -188,7 +188,7 @@ describe('CustomerList', () => {
       });
 
       const viewButtons = screen.getAllByRole('button', { name: /view|eye/i });
-      if (viewButtons.length > 0) {
+      if (viewButtons.length > 0 && viewButtons[0]) {
         fireEvent.click(viewButtons[0]);
         expect(mockOnViewCustomer).toHaveBeenCalled();
       }

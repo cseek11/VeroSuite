@@ -397,3 +397,5 @@ console.log(`✅ SUPABASE_URL: ${envVars.SUPABASE_URL}`);
 **Next Audit:** After fixes are applied  
 **Auditor:** AI Agent
 
+
+

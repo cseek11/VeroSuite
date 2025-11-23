@@ -11,7 +11,7 @@
  * - Support for multiple work orders
  */
 
-import React, { useState, useMemo } from 'react';
+// React import removed (not needed with new JSX transform), { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -21,16 +21,13 @@ import {
   FileText,
   Search,
   CheckCircle,
-  X,
   Loader2,
   AlertCircle,
   Plus,
   Calendar,
   User,
-  MapPin,
 } from 'lucide-react';
 import { workOrders } from '@/lib/enhanced-api';
-import { billing } from '@/lib/enhanced-api';
 import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
 import type { WorkOrder, Account } from '@/types/enhanced-types';
@@ -77,7 +74,7 @@ export default function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
     // Apply search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(wo =>
+      filtered = filtered.filter((wo: WorkOrder) =>
         wo.description?.toLowerCase().includes(searchLower) ||
         wo.id.toLowerCase().includes(searchLower)
       );
@@ -97,7 +94,7 @@ export default function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
   };
 
   const handleGenerateInvoice = async (workOrderId: string) => {
-    const workOrder = workOrdersList?.find(wo => wo.id === workOrderId);
+    const workOrder = workOrdersList?.find((wo: WorkOrder) => wo.id === workOrderId);
     if (!workOrder) {
       logger.error('Work order not found', { workOrderId }, 'InvoiceGenerator');
       toast.error('Work order not found');
@@ -310,7 +307,7 @@ export default function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
                   </div>
 
                   <div className="space-y-3">
-                    {filteredWorkOrders.map((workOrder) => {
+                    {filteredWorkOrders.map((workOrder: WorkOrder) => {
                       const isSelected = selectedWorkOrders.has(workOrder.id);
                       return (
                         <Card

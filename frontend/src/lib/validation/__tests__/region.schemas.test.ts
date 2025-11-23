@@ -35,8 +35,8 @@ describe('Region Validation Schemas', () => {
 
       const result = RegionCreateSchema.safeParse(invalidRegion);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toContain('grid bounds');
+      if (!result.success && result.error) {
+        expect(result.error.issues[0]?.message).toContain('grid bounds');
       }
     });
 

@@ -20,28 +20,23 @@ describe('FinancialReports', () => {
     it('should render without JSX syntax errors', () => {
       // This test prevents regression of the bug where missing closing tags
       // caused "Expected ')' but found '{'" syntax error
-      const props = {
-        reportType: 'ar-summary' as const,
-        startDate: '2025-01-01',
-        endDate: '2025-12-31',
-      };
-
-      // If component has syntax errors, this will fail at render time
+// If component has syntax errors, this will fail at render time
       expect(() => {
-        render(<FinancialReports {...props} />);
+        render(<FinancialReports />);
       }).not.toThrow();
     });
 
     it('should handle all report types without syntax errors', () => {
-      const reportTypes = ['ar-summary', 'revenue-analytics', 'payment-analytics', 'overdue-invoices'] as const;
-      const baseProps = {
-        startDate: '2025-01-01',
-        endDate: '2025-12-31',
-      };
-
-      reportTypes.forEach((reportType) => {
+      const reportTypes: Array<'ar-summary' | 'revenue-analytics' | 'payment-analytics' | 'overdue-invoices' | 'financial-summary'> = [
+        'ar-summary',
+        'revenue-analytics',
+        'payment-analytics',
+        'overdue-invoices',
+        'financial-summary'
+      ];
+      reportTypes.forEach(() => {
         expect(() => {
-          render(<FinancialReports {...baseProps} reportType={reportType} />);
+          render(<FinancialReports />);
         }).not.toThrow();
       });
     });
@@ -49,13 +44,7 @@ describe('FinancialReports', () => {
     it('should have balanced JSX structure', () => {
       // This test verifies the component can be parsed and rendered
       // which would fail if JSX structure is unbalanced
-      const props = {
-        reportType: 'ar-summary' as const,
-        startDate: '2025-01-01',
-        endDate: '2025-12-31',
-      };
-
-      const { container } = render(<FinancialReports {...props} />);
+const { container } = render(<FinancialReports />);
       
       // If JSX is unbalanced, container would be malformed
       expect(container).toBeDefined();

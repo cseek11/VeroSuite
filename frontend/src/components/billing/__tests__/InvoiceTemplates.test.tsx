@@ -34,9 +34,11 @@ vi.mock('@/utils/toast', () => ({
   },
 }));
 
-// Type assertions
-const mockLogger = logger as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
-const mockToast = toast as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
+// Type assertions - kept for type safety
+// @ts-expect-error - Type assertion for mocking
+const _mockLogger = logger as unknown as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
+// @ts-expect-error - Type assertion for mocking
+const _mockToast = toast as unknown as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
 
 describe('InvoiceTemplates', () => {
   let queryClient: QueryClient;
@@ -182,7 +184,7 @@ describe('InvoiceTemplates', () => {
 
       // Find apply button
       const applyButtons = screen.getAllByText(/apply/i);
-      if (applyButtons.length > 0) {
+      if (applyButtons.length > 0 && applyButtons[0]) {
         fireEvent.click(applyButtons[0]);
 
         await waitFor(() => {
@@ -193,12 +195,15 @@ describe('InvoiceTemplates', () => {
         // Confirm application - use getAllByText since there may be multiple "Apply Template" elements
         const confirmButtons = screen.getAllByRole('button', { name: /apply template/i });
         if (confirmButtons.length > 0) {
-          fireEvent.click(confirmButtons[confirmButtons.length - 1]); // Click the dialog button
+          const lastButton = confirmButtons[confirmButtons.length - 1];
+          if (lastButton) {
+            fireEvent.click(lastButton); // Click the dialog button
+          }
         }
 
         await waitFor(() => {
           expect(onApplyTemplate).toHaveBeenCalled();
-          expect(mockToast.success).toHaveBeenCalled();
+          expect(toast.success).toHaveBeenCalled();
         });
       }
     });

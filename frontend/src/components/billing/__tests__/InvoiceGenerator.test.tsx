@@ -19,6 +19,7 @@ import InvoiceGenerator from '../InvoiceGenerator';
 import { workOrders } from '@/lib/enhanced-api';
 import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
+import type { WorkOrder } from '@/types/enhanced-types';
 
 // Mock dependencies
 vi.mock('@/lib/enhanced-api', () => ({
@@ -85,9 +86,9 @@ vi.mock('@/components/ui/CustomerSearchSelector', () => ({
 }));
 
 // Type assertions
-const mockWorkOrders = workOrders as { getByCustomerId: ReturnType<typeof vi.fn> };
-const mockLogger = logger as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
-const mockToast = toast as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
+// mockWorkOrders removed - unused
+const mockLogger = logger as unknown as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
+const mockToast = toast as unknown as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
 
 describe('InvoiceGenerator', () => {
   let queryClient: QueryClient;
@@ -109,7 +110,7 @@ describe('InvoiceGenerator', () => {
     );
   };
 
-  const mockWorkOrdersList = [
+  const mockWorkOrdersList: WorkOrder[] = [
     {
       id: 'wo-1',
       customer_id: 'cust-1',
@@ -119,6 +120,8 @@ describe('InvoiceGenerator', () => {
       completion_date: '2025-01-15',
       priority: 'medium',
       tenant_id: 'tenant-1',
+      created_at: '2025-01-01T00:00:00Z',
+      updated_at: '2025-01-15T00:00:00Z',
     },
     {
       id: 'wo-2',
@@ -129,6 +132,8 @@ describe('InvoiceGenerator', () => {
       completion_date: '2025-01-20',
       priority: 'high',
       tenant_id: 'tenant-1',
+      created_at: '2025-01-01T00:00:00Z',
+      updated_at: '2025-01-20T00:00:00Z',
     },
     {
       id: 'wo-3',
@@ -138,6 +143,8 @@ describe('InvoiceGenerator', () => {
       scheduled_date: '2025-01-25',
       priority: 'low',
       tenant_id: 'tenant-1',
+      created_at: '2025-01-01T00:00:00Z',
+      updated_at: '2025-01-25T00:00:00Z',
     },
   ];
 
@@ -260,8 +267,9 @@ describe('InvoiceGenerator', () => {
 
       // Find and click a work order card to select it
       const workOrderCards = screen.getAllByText(/work order/i);
-      if (workOrderCards.length > 0) {
-        fireEvent.click(workOrderCards[0]);
+      const firstCard = workOrderCards[0];
+      if (firstCard) {
+        fireEvent.click(firstCard);
         // Selection should be reflected in UI
       }
     });
@@ -304,10 +312,14 @@ describe('InvoiceGenerator', () => {
         // Try finding by text
         const textButtons = screen.queryAllByText(/generate invoice/i);
         if (textButtons.length > 0) {
-          fireEvent.click(textButtons[0]);
+          if (textButtons[0]) {
+            fireEvent.click(textButtons[0]);
+          }
         }
       } else {
-        fireEvent.click(generateButtons[0]);
+        if (generateButtons[0]) {
+          if (generateButtons[0]) { fireEvent.click(generateButtons[0]); }
+        }
       }
 
       await waitFor(() => {
@@ -336,10 +348,14 @@ describe('InvoiceGenerator', () => {
       if (generateButtons.length === 0) {
         const textButtons = screen.queryAllByText(/generate invoice/i);
         if (textButtons.length > 0) {
-          fireEvent.click(textButtons[0]);
+          if (textButtons[0]) {
+            fireEvent.click(textButtons[0]);
+          }
         }
       } else {
-        fireEvent.click(generateButtons[0]);
+        if (generateButtons[0]) {
+          if (generateButtons[0]) { fireEvent.click(generateButtons[0]); }
+        }
       }
 
       await waitFor(() => {
@@ -369,10 +385,14 @@ describe('InvoiceGenerator', () => {
       if (generateButtons.length === 0) {
         const textButtons = screen.queryAllByText(/generate invoice/i);
         if (textButtons.length > 0) {
-          fireEvent.click(textButtons[0]);
+          if (textButtons[0]) {
+            fireEvent.click(textButtons[0]);
+          }
         }
       } else {
-        fireEvent.click(generateButtons[0]);
+        if (generateButtons[0]) {
+          if (generateButtons[0]) { fireEvent.click(generateButtons[0]); }
+        }
       }
 
       await waitFor(() => {
@@ -418,7 +438,7 @@ describe('InvoiceGenerator', () => {
 
       // Try to generate invoice without selecting customer
       // Component should show error
-      const generateButtons = screen.queryAllByText(/generate invoice/i);
+      screen.queryAllByText(/generate invoice/i);
       // Implementation may vary, but error should be handled
     });
   });
@@ -426,8 +446,8 @@ describe('InvoiceGenerator', () => {
   describe('Hook Order Compliance', () => {
     it('should not crash when transitioning from loading to data state', async () => {
       // Start with loading state
-      let resolvePromise: (value: any) => void;
-      const loadingPromise = new Promise((resolve) => {
+      let resolvePromise: (value: WorkOrder[]) => void;
+      const loadingPromise = new Promise<WorkOrder[]>((resolve) => {
         resolvePromise = resolve;
       });
       vi.mocked(workOrders.getByCustomerId).mockImplementation(() => loadingPromise);

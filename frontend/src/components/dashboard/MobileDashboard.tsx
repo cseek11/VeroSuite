@@ -40,10 +40,10 @@ export function MobileDashboard({
   const [showGrid, setShowGrid] = useState(false);
   const [isPanning, setIsPanning] = useState(false);
   
-  const { densityMode, toggleDensity, isMobile, isTablet } = useDensityMode();
+  const { densityMode, toggleDensity, isMobile, isTablet: _isTablet } = useDensityMode();
 
   // Touch gesture handling
-  const handlePan = useCallback((deltaX: number, deltaY: number, velocity: { x: number; y: number }) => {
+  const handlePan = useCallback((deltaX: number, deltaY: number, _velocity: { x: number; y: number }) => {
     if (onPan) {
       onPan(deltaX, deltaY);
     }

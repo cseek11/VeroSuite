@@ -45,14 +45,14 @@ vi.mock('@/utils/toast', () => ({
 }));
 
 // Type assertions for mocked functions
-const mockBilling = billing as { getPaymentTracking: ReturnType<typeof vi.fn> };
-const mockLogger = logger as {
+const mockBilling = billing as unknown as { getPaymentTracking: ReturnType<typeof vi.fn> };
+const mockLogger = logger as unknown as {
   error: ReturnType<typeof vi.fn>;
   debug: ReturnType<typeof vi.fn>;
   info: ReturnType<typeof vi.fn>;
   warn: ReturnType<typeof vi.fn>;
 };
-const mockToast = toast as {
+const mockToast = toast as unknown as {
   success: ReturnType<typeof vi.fn>;
   error: ReturnType<typeof vi.fn>;
   info: ReturnType<typeof vi.fn>;

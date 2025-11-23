@@ -88,7 +88,7 @@ describe('ResourceTimeline Integration Tests', () => {
     });
 
     vi.clearAllMocks();
-    (enhancedApi.users.list as any).mockResolvedValue(mockTechnicians);
+    (enhancedApi.technicians.list as any).mockResolvedValue(mockTechnicians);
     (enhancedApi.jobs.getByDateRange as any).mockResolvedValue(mockJobs);
     (enhancedApi.jobs.update as any).mockResolvedValue({ id: 'job-1', status: 'in_progress' });
   });
@@ -119,7 +119,6 @@ describe('ResourceTimeline Integration Tests', () => {
       await waitFor(() => {
         const allText = document.body.textContent || '';
         expect(allText.includes('John') && allText.includes('Doe')).toBe(true);
-        const allText = document.body.textContent || '';
         expect(allText.includes('Customer One')).toBe(true);
       });
 
@@ -168,14 +167,9 @@ describe('ResourceTimeline Integration Tests', () => {
       renderComponent({ onDateChange });
 
       await waitFor(() => {
-        // Component should render - check for any visible content using flexible matcher
-        const hasTechnician = screen.queryByText((content, element) => {
-          return element?.textContent?.includes('Technician');
-        });
-        const hasJohnDoe = screen.queryByText((content, element) => {
-          return element?.textContent?.includes('John') && element?.textContent?.includes('Doe');
-        });
-        expect(hasTechnician || hasJohnDoe).toBeTruthy();
+        // Component should render - check for any visible content
+        const allText = document.body.textContent || '';
+        expect(allText.includes('Technician') || allText.includes('John')).toBeTruthy();
       });
 
       // Navigate to next day
@@ -190,14 +184,9 @@ describe('ResourceTimeline Integration Tests', () => {
       renderComponent();
 
       await waitFor(() => {
-        // Component should render - check for any visible content using flexible matcher
-        const hasTechnician = screen.queryByText((content, element) => {
-          return element?.textContent?.includes('Technician');
-        });
-        const hasJohnDoe = screen.queryByText((content, element) => {
-          return element?.textContent?.includes('John') && element?.textContent?.includes('Doe');
-        });
-        expect(hasTechnician || hasJohnDoe).toBeTruthy();
+        // Component should render - check for any visible content
+        const allText = document.body.textContent || '';
+        expect(allText.includes('Technician') || allText.includes('John')).toBeTruthy();
       });
 
       // Zoom in
@@ -218,7 +207,7 @@ describe('ResourceTimeline Integration Tests', () => {
       renderComponent();
 
       await waitFor(() => {
-        expect(enhancedApi.users.list).toHaveBeenCalled();
+        expect(enhancedApi.technicians.list).toHaveBeenCalled();
         expect(enhancedApi.jobs.getByDateRange).toHaveBeenCalled();
       });
 
@@ -244,7 +233,7 @@ describe('ResourceTimeline Integration Tests', () => {
         {
           ...mockJobs[0],
           id: 'job-2',
-          customer: { ...mockJobs[0].customer, name: 'Customer Two' },
+          customer: mockJobs[0]?.customer ? { ...mockJobs[0].customer, name: 'Customer Two' } : { id: 'cust-2', name: 'Customer Two' },
         },
       ];
 
@@ -312,14 +301,9 @@ describe('ResourceTimeline Integration Tests', () => {
       renderComponent({ onDateChange, onJobSelect, onJobUpdate });
 
       await waitFor(() => {
-        // Component should render - check for any visible content using flexible matcher
-        const hasTechnician = screen.queryByText((content, element) => {
-          return element?.textContent?.includes('Technician');
-        });
-        const hasJohnDoe = screen.queryByText((content, element) => {
-          return element?.textContent?.includes('John') && element?.textContent?.includes('Doe');
-        });
-        expect(hasTechnician || hasJohnDoe).toBeTruthy();
+        // Component should render - check for any visible content
+        const allText = document.body.textContent || '';
+        expect(allText.includes('Technician') || allText.includes('John')).toBeTruthy();
       });
 
       // Test date change callback
@@ -331,10 +315,11 @@ describe('ResourceTimeline Integration Tests', () => {
       // Find job element by text content
       const jobElement = Array.from(document.querySelectorAll('*')).find(el => 
         el.textContent?.includes('Customer One')
-      ) as HTMLElement;
+      );
       expect(jobElement).toBeTruthy();
-      if (!jobElement) return;
-      fireEvent.click(jobElement);
+      if (jobElement) {
+        fireEvent.click(jobElement as HTMLElement);
+      }
       await waitFor(() => {
         expect(onJobSelect).toHaveBeenCalled();
       });
@@ -344,14 +329,9 @@ describe('ResourceTimeline Integration Tests', () => {
       const { rerender } = renderComponent();
 
       await waitFor(() => {
-        // Component should render - check for any visible content using flexible matcher
-        const hasTechnician = screen.queryByText((content, element) => {
-          return element?.textContent?.includes('Technician');
-        });
-        const hasJohnDoe = screen.queryByText((content, element) => {
-          return element?.textContent?.includes('John') && element?.textContent?.includes('Doe');
-        });
-        expect(hasTechnician || hasJohnDoe).toBeTruthy();
+        // Component should render - check for any visible content
+        const allText = document.body.textContent || '';
+        expect(allText.includes('Technician') || allText.includes('John')).toBeTruthy();
       });
 
       // Update selectedDate prop

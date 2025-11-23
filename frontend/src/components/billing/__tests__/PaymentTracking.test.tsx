@@ -45,9 +45,12 @@ vi.mock('@/utils/toast', () => ({
 }));
 
 // Type assertions for mocked functions
-const mockBilling = billing as { getPaymentTracking: ReturnType<typeof vi.fn> };
-const mockLogger = logger as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
-const mockToast = toast as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
+// Type assertions - kept for type safety
+// @ts-expect-error - Type assertion for mocking
+const _mockBilling = billing as unknown as { getPaymentTracking: ReturnType<typeof vi.fn> };
+const mockLogger = logger as unknown as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const mockToast = toast as unknown as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
 
 describe('PaymentTracking', () => {
   let queryClient: QueryClient;

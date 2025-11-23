@@ -10,7 +10,7 @@
  * Last Updated: 2025-11-16
  */
 
-import React from 'react';
+// React import removed (not needed with new JSX transform)
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { Heading, Text } from '@/components/ui';

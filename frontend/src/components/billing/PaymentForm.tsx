@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { loadStripe, StripeCardElement, StripePaymentIntent } from '@stripe/stripe-js';
 import {
@@ -15,12 +15,9 @@ import {
   CreditCard,
   Shield,
   Lock,
-  CheckCircle,
   AlertCircle,
   ArrowLeft,
-  Download,
   RefreshCw,
-  XCircle,
   Info,
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
@@ -45,7 +42,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 
 // Inner component that uses Stripe hooks
 function PaymentFormInner({ 
   invoice, 
-  paymentMethods, 
+  paymentMethods: _paymentMethods, 
   onSuccess, 
   onCancel,
   clientSecret 
@@ -62,7 +59,7 @@ function PaymentFormInner({
   const [retryCount, setRetryCount] = useState(0);
   const [lastError, setLastError] = useState<Error | null>(null);
   const [showRetry, setShowRetry] = useState(false);
-  const cardElementRef = useRef<StripeCardElement | null>(null);
+  const _cardElementRef = useRef<StripeCardElement | null>(null);
 
   const queryClient = useQueryClient();
 

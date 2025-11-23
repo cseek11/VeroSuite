@@ -317,7 +317,7 @@ export function UserManagementForm({ user, onSave, onCancel }: UserManagementFor
       } else {
         await createUserMutation.mutateAsync(data);
       }
-    } catch (error) {
+    } catch (_error) {
       // Error handling is done in mutation callbacks
     }
   };

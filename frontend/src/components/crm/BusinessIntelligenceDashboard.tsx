@@ -1,4 +1,4 @@
-import React from 'react';
+// React import removed (not needed with new JSX transform)
 import Card from '@/components/ui/Card';
 import {
   Badge,
@@ -21,7 +21,7 @@ interface BusinessIntelligenceDashboardProps {
   customerId: string;
 }
 
-export default function BusinessIntelligenceDashboard({ customerId }: BusinessIntelligenceDashboardProps) {
+export default function BusinessIntelligenceDashboard({ customerId: _customerId }: BusinessIntelligenceDashboardProps) {
   // Mock business intelligence data
   const biData = {
     churnRisk: {

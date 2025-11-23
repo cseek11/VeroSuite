@@ -13,10 +13,6 @@ import {
 import {
   BarChart,
   Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
   Cell,
   XAxis,
   YAxis,

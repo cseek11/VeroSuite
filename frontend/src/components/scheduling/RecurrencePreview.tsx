@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Calendar, Clock } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import { RecurrencePattern } from './RecurrencePatternSelector';
