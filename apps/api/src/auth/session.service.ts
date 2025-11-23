@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'crypto';
 import { DatabaseService } from '../common/services/database.service';
 import { createClient } from '@supabase/supabase-js';
 
@@ -17,6 +18,7 @@ export interface ActiveSession {
 @Injectable()
 export class SessionService {
   private supabase;
+  private readonly logger = new Logger(SessionService.name);
 
   constructor(
     private readonly configService: ConfigService,
@@ -31,9 +33,15 @@ export class SessionService {
   }
 
   async getActiveSessions(_tenantId: string, userId: string): Promise<ActiveSession[]> {
+    const traceId = randomUUID();
     try {
       if (!this.supabase) {
-        console.warn('Supabase client not initialized');
+        this.logger.warn('Supabase client not initialized', {
+          operation: 'getActiveSessions',
+          traceId,
+          userId,
+          errorCode: 'SUPABASE_NOT_INITIALIZED',
+        });
         return [];
       }
 
@@ -79,12 +87,20 @@ export class SessionService {
         return sessionData;
       });
     } catch (error) {
-      console.error('Error in getActiveSessions:', error);
+      this.logger.error('Error in getActiveSessions', {
+        operation: 'getActiveSessions',
+        traceId,
+        userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'GET_ACTIVE_SESSIONS_ERROR',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       return [];
     }
   }
 
   async revokeSession(_tenantId: string, _userId: string, sessionId: string) {
+    const traceId = randomUUID();
     try {
       if (!this.supabase) {
         throw new Error('Supabase client not initialized');
@@ -95,18 +111,32 @@ export class SessionService {
       const { error } = await this.supabase.auth.admin.signOut(sessionId, 'global');
       
       if (error) {
-        console.error('Error revoking session:', error);
+        this.logger.error('Error revoking session', {
+          operation: 'revokeSession',
+          traceId,
+          sessionId,
+          error: error.message,
+          errorCode: 'REVOKE_SESSION_ERROR',
+        });
         throw new Error(`Failed to revoke session: ${error.message}`);
       }
 
       return { success: true, message: 'Session revoked successfully' };
     } catch (error) {
-      console.error('Error in revokeSession:', error);
+      this.logger.error('Error in revokeSession', {
+        operation: 'revokeSession',
+        traceId,
+        sessionId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'REVOKE_SESSION_ERROR',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       throw error;
     }
   }
 
   async revokeAllSessions(tenantId: string, userId: string) {
+    const traceId = randomUUID();
     try {
       // Get all sessions first
       const sessions = await this.getActiveSessions(tenantId, userId);
@@ -126,12 +156,21 @@ export class SessionService {
         failed,
       };
     } catch (error) {
-      console.error('Error in revokeAllSessions:', error);
+      this.logger.error('Error in revokeAllSessions', {
+        operation: 'revokeAllSessions',
+        traceId,
+        tenantId,
+        userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'REVOKE_ALL_SESSIONS_ERROR',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       throw error;
     }
   }
 
   async getSessionHistory(tenantId: string, userId: string, limit: number = 50) {
+    const traceId = randomUUID();
     try {
       // Get session history from audit logs
       const sessions = await this.db.auditLog.findMany({
@@ -163,7 +202,16 @@ export class SessionService {
         user_agent: session.user_agent,
       }));
     } catch (error) {
-      console.error('Error in getSessionHistory:', error);
+      this.logger.error('Error in getSessionHistory', {
+        operation: 'getSessionHistory',
+        traceId,
+        tenantId,
+        userId,
+        limit,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'GET_SESSION_HISTORY_ERROR',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       throw error;
     }
   }

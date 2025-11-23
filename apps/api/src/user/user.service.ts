@@ -1,12 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
+import { randomUUID } from 'crypto';
 import { DatabaseService } from '../common/services/database.service';
 import { EncryptionService } from '../common/services/encryption.service';
 
 @Injectable()
 export class UserService {
   private supabase;
+  private readonly logger = new Logger(UserService.name);
 
   constructor(
     private readonly configService: ConfigService,
@@ -25,12 +27,18 @@ export class UserService {
   }
 
   async findByEmail(email: string) {
+    const traceId = randomUUID();
     try {
       // Get user from Supabase auth
       const { data: { users }, error } = await this.supabase.auth.admin.listUsers();
       
       if (error) {
-        console.error('Error fetching users:', error);
+        this.logger.error('Error fetching users from Supabase Auth', {
+          operation: 'findByEmail',
+          traceId,
+          error: error.message,
+          errorCode: 'SUPABASE_AUTH_ERROR',
+        });
         return null;
       }
 
@@ -54,12 +62,19 @@ export class UserService {
         updated_at: user.updated_at
       };
     } catch (error) {
-      console.error('Error in findByEmail:', error);
+      this.logger.error('Error in findByEmail', {
+        operation: 'findByEmail',
+        traceId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'FIND_USER_ERROR',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       return null;
     }
   }
 
   async getUsers(tenantId: string) {
+    const traceId = randomUUID();
     try {
       const users = await this.db.user.findMany({
         where: {
@@ -147,12 +162,20 @@ export class UserService {
         })),
       };
     } catch (error) {
-      console.error('Error fetching users:', error);
+      this.logger.error('Error fetching users', {
+        operation: 'getUsers',
+        traceId,
+        tenantId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'FETCH_USERS_ERROR',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       throw error;
     }
   }
 
   async getUserHierarchy(tenantId: string, userId: string) {
+    const traceId = randomUUID();
     try {
       const user = await this.db.user.findUnique({
         where: { id: userId },
@@ -214,12 +237,21 @@ export class UserService {
         directReports,
       };
     } catch (error) {
-      console.error('Error fetching user hierarchy:', error);
+      this.logger.error('Error fetching user hierarchy', {
+        operation: 'getUserHierarchy',
+        traceId,
+        tenantId,
+        userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'FETCH_HIERARCHY_ERROR',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       throw error;
     }
   }
 
   async getUserActivity(tenantId: string, userId: string, limit: number = 50) {
+    const traceId = randomUUID();
     try {
       const activities = await this.db.auditLog.findMany({
         where: {
@@ -251,12 +283,22 @@ export class UserService {
         user_agent: activity.user_agent,
       }));
     } catch (error) {
-      console.error('Error fetching user activity:', error);
+      this.logger.error('Error fetching user activity', {
+        operation: 'getUserActivity',
+        traceId,
+        tenantId,
+        userId,
+        limit,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'FETCH_ACTIVITY_ERROR',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       throw error;
     }
   }
 
   async createUser(tenantId: string, createUserDto: any) {
+    const traceId = randomUUID();
     try {
       const { 
         email, 
@@ -324,7 +366,14 @@ export class UserService {
       });
 
       if (authError) {
-        console.error('Error creating user in Supabase Auth:', authError);
+        this.logger.error('Error creating user in Supabase Auth', {
+          operation: 'createUser',
+          traceId,
+          tenantId,
+          email,
+          error: authError.message,
+          errorCode: 'SUPABASE_AUTH_CREATE_ERROR',
+        });
         throw new Error(`Failed to create user in authentication system: ${authError.message}`);
       }
 
@@ -337,7 +386,14 @@ export class UserService {
         try {
           finalEmployeeId = await this.generateEmployeeId(tenantId, primaryRole);
         } catch (error) {
-          console.error('Error generating employee ID:', error);
+          this.logger.warn('Error generating employee ID', {
+            operation: 'createUser',
+            traceId,
+            tenantId,
+            primaryRole,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            errorCode: 'EMPLOYEE_ID_GENERATION_ERROR',
+          });
           // Continue without employee ID - it can be generated later
         }
       }
@@ -434,7 +490,15 @@ export class UserService {
         message: 'User created successfully in both authentication system and database',
       };
     } catch (error) {
-      console.error('Error creating user:', error);
+      this.logger.error('Error creating user', {
+        operation: 'createUser',
+        traceId,
+        tenantId,
+        email: createUserDto.email,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'CREATE_USER_ERROR',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       throw error;
     }
   }
@@ -494,12 +558,19 @@ export class UserService {
   }
 
   async syncAuthUsersToDatabase(tenantId: string) {
+    const traceId = randomUUID();
     try {
       // Get all users from Supabase Auth
       const { data: { users }, error } = await this.supabase.auth.admin.listUsers();
       
       if (error) {
-        console.error('Error fetching users from Supabase Auth:', error);
+        this.logger.error('Error fetching users from Supabase Auth', {
+          operation: 'syncAuthUsersToDatabase',
+          traceId,
+          tenantId,
+          error: error.message,
+          errorCode: 'SUPABASE_AUTH_SYNC_ERROR',
+        });
         throw error;
       }
 
@@ -552,12 +623,20 @@ export class UserService {
         message: `Synced ${syncedUsers.length} users from authentication system`,
       };
     } catch (error) {
-      console.error('Error syncing auth users to database:', error);
+      this.logger.error('Error syncing auth users to database', {
+        operation: 'syncAuthUsersToDatabase',
+        traceId,
+        tenantId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'SYNC_AUTH_USERS_ERROR',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       throw error;
     }
   }
 
   async deactivateUser(tenantId: string, userId: string, reassignToUserId?: string, _reason?: string) {
+    const traceId = randomUUID();
     try {
       // Get user's open jobs and work orders
       const openJobs = await this.db.job.findMany({
@@ -661,12 +740,22 @@ export class UserService {
         message: `User deactivated successfully. ${reassignToUserId ? `Reassigned ${openJobs.length} jobs and ${openWorkOrders.length} work orders.` : `Unassigned ${openJobs.length} jobs and ${openWorkOrders.length} work orders.`}`,
       };
     } catch (error) {
-      console.error('Error deactivating user:', error);
+      this.logger.error('Error deactivating user', {
+        operation: 'deactivateUser',
+        traceId,
+        tenantId,
+        userId,
+        reassignToUserId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'DEACTIVATE_USER_ERROR',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       throw error;
     }
   }
 
   async updateUser(tenantId: string, userId: string, updateUserDto: any) {
+    const traceId = randomUUID();
     try {
       // Verify user belongs to tenant
       const existingUser = await this.db.user.findFirst({
@@ -775,7 +864,14 @@ export class UserService {
             },
           });
         } catch (error) {
-          console.warn('Failed to update Supabase Auth metadata:', error);
+          this.logger.warn('Failed to update Supabase Auth metadata', {
+            operation: 'updateUser',
+            traceId,
+            tenantId,
+            userId,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            errorCode: 'SUPABASE_AUTH_UPDATE_WARNING',
+          });
           // Continue - local database update was successful
         }
       }
@@ -793,7 +889,15 @@ export class UserService {
         message: 'User updated successfully',
       };
     } catch (error) {
-      console.error('Error updating user:', error);
+      this.logger.error('Error updating user', {
+        operation: 'updateUser',
+        traceId,
+        tenantId,
+        userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'UPDATE_USER_ERROR',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       throw error;
     }
   }
@@ -810,7 +914,11 @@ export class UserService {
       try {
         decrypted.social_security_number = this.encryptionService.decrypt(user.social_security_number);
       } catch (error) {
-        console.warn('Failed to decrypt SSN:', error);
+        this.logger.warn('Failed to decrypt SSN', {
+          operation: 'decryptSensitiveFields',
+          error: error instanceof Error ? error.message : 'Unknown error',
+          errorCode: 'DECRYPT_SSN_WARNING',
+        });
         decrypted.social_security_number = null;
       }
     }
@@ -819,7 +927,11 @@ export class UserService {
       try {
         decrypted.driver_license_number = this.encryptionService.decrypt(user.driver_license_number);
       } catch (error) {
-        console.warn('Failed to decrypt driver license:', error);
+        this.logger.warn('Failed to decrypt driver license', {
+          operation: 'decryptSensitiveFields',
+          error: error instanceof Error ? error.message : 'Unknown error',
+          errorCode: 'DECRYPT_LICENSE_WARNING',
+        });
         decrypted.driver_license_number = null;
       }
     }

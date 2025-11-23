@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { JobPriority } from '../jobs/dto';
 import { DatabaseService } from '../common/services/database.service';
 import { AuditService } from '../common/services/audit.service';
@@ -6,19 +7,27 @@ import { CreateWorkOrderDto, UpdateWorkOrderDto, WorkOrderFiltersDto, WorkOrderS
 
 @Injectable()
 export class WorkOrdersService {
+  private readonly logger = new Logger(WorkOrdersService.name);
+
   constructor(
     private db: DatabaseService,
     private audit: AuditService,
   ) {}
 
   async createWorkOrder(data: CreateWorkOrderDto, tenantId: string, userId?: string) {
-    console.log('Creating work order with data:', { data, tenantId, userId });
+    const traceId = randomUUID();
+    this.logger.debug('Creating work order', {
+      operation: 'createWorkOrder',
+      traceId,
+      tenantId,
+      userId,
+      customerId: data.customer_id,
+    });
     
     // Validate that customer exists and belongs to tenant
     const customer = await this.db.account.findFirst({
       where: { id: data.customer_id, tenant_id: tenantId },
     });
-    console.log('Customer lookup result:', customer);
     if (!customer) {
       throw new NotFoundException(`Customer not found: ${data.customer_id} for tenant: ${tenantId}`);
     }
@@ -143,7 +152,13 @@ export class WorkOrdersService {
             });
           } else {
             // No viable location - skip job creation silently
-            console.warn('Auto-schedule skipped: no location available for account', wo.account_id);
+            this.logger.warn('Auto-schedule skipped: no location available for account', {
+              operation: 'createWorkOrder',
+              traceId,
+              tenantId,
+              accountId: wo.account_id,
+              errorCode: 'NO_LOCATION_FOR_JOB',
+            });
           }
         }
 
@@ -151,9 +166,23 @@ export class WorkOrdersService {
       });
 
       workOrder = result;
-      console.log('Work order created successfully:', workOrder);
+      this.logger.log('Work order created successfully', {
+        operation: 'createWorkOrder',
+        traceId,
+        tenantId,
+        workOrderId: workOrder.id,
+        customerId: workOrder.customer_id,
+      });
     } catch (error) {
-      console.error('Error creating work order:', error);
+      this.logger.error('Error creating work order', {
+        operation: 'createWorkOrder',
+        traceId,
+        tenantId,
+        userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'CREATE_WORK_ORDER_ERROR',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       throw error;
     }
 
@@ -174,7 +203,14 @@ export class WorkOrdersService {
         },
       });
     } catch (auditError) {
-      console.error('Error logging audit:', auditError);
+      this.logger.error('Error logging audit', {
+        operation: 'createWorkOrder',
+        traceId,
+        tenantId,
+        workOrderId: workOrder.id,
+        error: auditError instanceof Error ? auditError.message : 'Unknown error',
+        errorCode: 'AUDIT_LOG_ERROR',
+      });
       // Don't fail the work order creation if audit logging fails
     }
 

@@ -88,7 +88,13 @@ export class AuthService {
             ? JSON.parse(customPermissions) 
             : [];
         } catch (e) {
-          console.warn('Failed to parse custom_permissions, using empty array:', e);
+          this.logger.warn('Failed to parse custom_permissions, using empty array', {
+            operation: 'login',
+            traceId,
+            userId: dbUser.id,
+            error: e instanceof Error ? e.message : 'Unknown error',
+            errorCode: 'PARSE_PERMISSIONS_WARNING',
+          });
           customPermissions = [];
         }
       }

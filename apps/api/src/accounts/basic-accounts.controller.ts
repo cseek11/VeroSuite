@@ -1,11 +1,13 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, Req } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, Req, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
+import { randomUUID } from 'crypto';
 import { Request } from 'express';
 
 @Controller('accounts')
 export class BasicAccountsController {
   private supabase;
+  private readonly logger = new Logger(BasicAccountsController.name);
 
   constructor(private readonly configService: ConfigService) {
     // Use new Supabase API key system - secret key bypasses RLS
@@ -25,6 +27,7 @@ export class BasicAccountsController {
 
   @Get()
   async getAccounts(@Req() req: Request) {
+    const traceId = randomUUID();
     try {
       // Extract JWT token from Authorization header for tenant validation
       const authHeader = req.headers.authorization;
@@ -46,15 +49,28 @@ export class BasicAccountsController {
         tenantId = payload.tenant_id;
         
         if (!tenantId) {
-          console.error('No tenant ID found in token payload');
+          this.logger.error('No tenant ID found in token payload', {
+            operation: 'getAccounts',
+            traceId,
+            errorCode: 'MISSING_TENANT_ID',
+          });
           return { error: 'No tenant ID found in token' };
         }
       } catch (error) {
-        console.error('Error decoding token:', error);
+        this.logger.error('Error decoding token', {
+          operation: 'getAccounts',
+          traceId,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          errorCode: 'TOKEN_DECODE_ERROR',
+        });
         return { error: 'Invalid token format' };
       }
 
-      console.log('Fetching accounts for tenant:', tenantId);
+      this.logger.debug('Fetching accounts for tenant', {
+        operation: 'getAccounts',
+        traceId,
+        tenantId,
+      });
 
       // Test: Try to access a simple table first to see if service role works
       const { error: testError } = await this.supabase
@@ -63,11 +79,21 @@ export class BasicAccountsController {
         .limit(1);
 
       if (testError) {
-        console.error('Service role test failed:', testError);
+        this.logger.error('Service role test failed', {
+          operation: 'getAccounts',
+          traceId,
+          tenantId,
+          error: testError.message,
+          errorCode: 'SERVICE_ROLE_TEST_FAILED',
+        });
         return { error: `Service role access failed: ${testError.message}` };
       }
 
-      console.log('Service role test passed, fetching accounts...');
+      this.logger.debug('Service role test passed, fetching accounts', {
+        operation: 'getAccounts',
+        traceId,
+        tenantId,
+      });
 
       // Use service role to fetch accounts with tenant filtering
       // Note: Service role should bypass RLS policies
@@ -78,19 +104,32 @@ export class BasicAccountsController {
         .limit(100);
 
       if (error) {
-        console.error('Error fetching accounts:', error);
+        this.logger.error('Error fetching accounts', {
+          operation: 'getAccounts',
+          traceId,
+          tenantId,
+          error: error.message,
+          errorCode: 'FETCH_ACCOUNTS_ERROR',
+        });
         return { error: error.message };
       }
 
       return data || [];
     } catch (error) {
-      console.error('Exception in getAccounts:', error);
+      this.logger.error('Exception in getAccounts', {
+        operation: 'getAccounts',
+        traceId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'GET_ACCOUNTS_EXCEPTION',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       return { error: 'Internal server error' };
     }
   }
 
   @Get('search')
   async searchAccounts(@Query('q') searchTerm: string) {
+    const traceId = randomUUID();
     try {
       const { data, error } = await this.supabase
         .from('accounts')
@@ -99,19 +138,33 @@ export class BasicAccountsController {
         .limit(50);
 
       if (error) {
-        console.error('Error searching accounts:', error);
+        this.logger.error('Error searching accounts', {
+          operation: 'searchAccounts',
+          traceId,
+          searchTerm,
+          error: error.message,
+          errorCode: 'SEARCH_ACCOUNTS_ERROR',
+        });
         return { error: error.message };
       }
 
       return data;
     } catch (error) {
-      console.error('Exception in searchAccounts:', error);
+      this.logger.error('Exception in searchAccounts', {
+        operation: 'searchAccounts',
+        traceId,
+        searchTerm,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'SEARCH_ACCOUNTS_EXCEPTION',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       return { error: 'Internal server error' };
     }
   }
 
   @Post()
   async createAccount(@Body() accountData: any) {
+    const traceId = randomUUID();
     try {
       // Add tenant_id if not present
       const dataWithTenant = {
@@ -126,19 +179,32 @@ export class BasicAccountsController {
         .single();
 
       if (error) {
-        console.error('Error creating account:', error);
+        this.logger.error('Error creating account', {
+          operation: 'createAccount',
+          traceId,
+          tenantId: accountData.tenant_id,
+          error: error.message,
+          errorCode: 'CREATE_ACCOUNT_ERROR',
+        });
         return { error: error.message };
       }
 
       return data;
     } catch (error) {
-      console.error('Exception in createAccount:', error);
+      this.logger.error('Exception in createAccount', {
+        operation: 'createAccount',
+        traceId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'CREATE_ACCOUNT_EXCEPTION',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       return { error: 'Internal server error' };
     }
   }
 
   @Put(':id')
   async updateAccount(@Param('id') accountId: string, @Body() updates: any) {
+    const traceId = randomUUID();
     try {
       const { data, error } = await this.supabase
         .from('accounts')
@@ -148,19 +214,33 @@ export class BasicAccountsController {
         .single();
 
       if (error) {
-        console.error('Error updating account:', error);
+        this.logger.error('Error updating account', {
+          operation: 'updateAccount',
+          traceId,
+          accountId,
+          error: error.message,
+          errorCode: 'UPDATE_ACCOUNT_ERROR',
+        });
         return { error: error.message };
       }
 
       return data;
     } catch (error) {
-      console.error('Exception in updateAccount:', error);
+      this.logger.error('Exception in updateAccount', {
+        operation: 'updateAccount',
+        traceId,
+        accountId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'UPDATE_ACCOUNT_EXCEPTION',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       return { error: 'Internal server error' };
     }
   }
 
   @Delete(':id')
   async deleteAccount(@Param('id') accountId: string, @Req() req: Request) {
+    const traceId = randomUUID();
     try {
       // Extract JWT token from Authorization header for tenant validation
       const authHeader = req.headers.authorization;
@@ -182,15 +262,31 @@ export class BasicAccountsController {
         tenantId = payload.tenant_id;
         
         if (!tenantId) {
-          console.error('No tenant ID found in token payload');
+          this.logger.error('No tenant ID found in token payload', {
+            operation: 'deleteAccount',
+            traceId,
+            accountId,
+            errorCode: 'MISSING_TENANT_ID',
+          });
           return { error: 'No tenant ID found in token' };
         }
       } catch (error) {
-        console.error('Error decoding token:', error);
+        this.logger.error('Error decoding token', {
+          operation: 'deleteAccount',
+          traceId,
+          accountId,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          errorCode: 'TOKEN_DECODE_ERROR',
+        });
         return { error: 'Invalid token format' };
       }
 
-      console.log('Deleting account:', accountId, 'for tenant:', tenantId);
+      this.logger.debug('Deleting account', {
+        operation: 'deleteAccount',
+        traceId,
+        accountId,
+        tenantId,
+      });
 
       // First, verify the account belongs to the tenant
       const { data: existingAccount, error: fetchError } = await this.supabase
@@ -201,7 +297,14 @@ export class BasicAccountsController {
         .single();
 
       if (fetchError || !existingAccount) {
-        console.error('Account not found or access denied:', fetchError);
+        this.logger.error('Account not found or access denied', {
+          operation: 'deleteAccount',
+          traceId,
+          accountId,
+          tenantId,
+          error: fetchError?.message,
+          errorCode: 'ACCOUNT_NOT_FOUND_OR_DENIED',
+        });
         return { error: 'Account not found or access denied' };
       }
 
@@ -213,18 +316,38 @@ export class BasicAccountsController {
         .eq('tenant_id', tenantId);
 
       if (error) {
-        console.error('Error deleting account:', error);
+        this.logger.error('Error deleting account', {
+          operation: 'deleteAccount',
+          traceId,
+          accountId,
+          tenantId,
+          error: error.message,
+          errorCode: 'DELETE_ACCOUNT_ERROR',
+        });
         return { error: error.message };
       }
 
-      console.log('Account deleted successfully:', existingAccount.name);
+      this.logger.log('Account deleted successfully', {
+        operation: 'deleteAccount',
+        traceId,
+        accountId,
+        tenantId,
+        accountName: existingAccount.name,
+      });
       return { 
         success: true, 
         message: `Account "${existingAccount.name}" deleted successfully`,
         deletedAccount: existingAccount
       };
     } catch (error) {
-      console.error('Exception in deleteAccount:', error);
+      this.logger.error('Exception in deleteAccount', {
+        operation: 'deleteAccount',
+        traceId,
+        accountId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'DELETE_ACCOUNT_EXCEPTION',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       return { error: 'Internal server error' };
     }
   }

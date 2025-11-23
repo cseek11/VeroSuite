@@ -400,3 +400,4 @@ Add to `.cursor/rules/00-master.mdc`:
 **Status:** ⚠️ **AWAITING APPROVAL FOR RULE UPDATES**
 
 
+

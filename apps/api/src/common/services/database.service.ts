@@ -1,9 +1,11 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class DatabaseService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(DatabaseService.name);
+
   constructor(private readonly configService: ConfigService) {
     // Get database URL and add connection pool parameters
     const databaseUrl = configService.get<string>('DATABASE_URL') || 'postgresql://localhost:5432/verofield';
@@ -44,10 +46,9 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
 
   async onModuleInit() {
     await this.$connect();
-    // Note: Using console.log here is acceptable for module initialization
-    // Could be converted to structured logging in future if needed
-    // eslint-disable-next-line no-console
-    console.log('Database connected');
+    this.logger.log('Database connected', {
+      operation: 'onModuleInit',
+    });
   }
 
   async onModuleDestroy() {
@@ -77,10 +78,12 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
       processedSql = processedSql.replace(placeholder, value);
     });
     
-    // Debug logging - could be converted to structured logging in future
-    // eslint-disable-next-line no-console
+    // Debug logging in development mode
     if (this.configService.get<string>('NODE_ENV') === 'development') {
-      console.log('DatabaseService - Processed SQL:', processedSql);
+      this.logger.debug('DatabaseService - Processed SQL', {
+        operation: 'query',
+        sql: processedSql,
+      });
     }
     return this.$queryRawUnsafe(processedSql);
   }
@@ -105,9 +108,12 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
       const result = await this.query(`SELECT current_setting('app.tenant_id', true) as tenant_id`) as any[];
       return result[0]?.tenant_id || null;
     } catch (error) {
-      // Error logging - could be converted to structured logging in future
-      // eslint-disable-next-line no-console
-      console.error('Failed to get current tenant ID:', error);
+      this.logger.error('Failed to get current tenant ID', {
+        operation: 'getCurrentTenantId',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: 'GET_TENANT_ID_ERROR',
+        rootCause: error instanceof Error ? error.stack : undefined,
+      });
       return null;
     }
   }
