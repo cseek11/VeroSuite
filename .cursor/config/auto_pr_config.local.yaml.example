@@ -1,0 +1,28 @@
+# ============================================================================
+# VeroScore V3 - Auto-PR Local Configuration (Example)
+# ============================================================================
+# Copy this file to auto_pr_config.local.yaml and customize for your needs
+# This file is gitignored and will override team defaults
+# ============================================================================
+
+# Example: Disable VeroScore V3 for this developer
+# veroscore:
+#   enabled: false
+
+# Example: Lower thresholds for faster PR creation
+# thresholds:
+#   min_files: 1
+#   min_lines: 10
+#   max_wait_seconds: 60
+
+# Example: Add personal exclusions
+# exclusions:
+#   patterns:
+#     - "personal-notes/**"
+#     - "*.backup"
+
+# Example: Custom author name
+# author:
+#   auto_detect: false
+#   fallback: "your-name-here"
+

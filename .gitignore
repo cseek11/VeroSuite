@@ -157,3 +157,9 @@ vite.config.ts.timestamp-*
 *--workflow=*
 *--limit*
 *--json*
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so

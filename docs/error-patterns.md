@@ -1817,4 +1817,101 @@ test_component_wrong_location if {
 
 ---
 
-**Last Updated:** 2025-11-23
+---
+
+## SUPABASE_SCHEMA_ACCESS_OVERENGINEERING - 2025-11-24
+
+### Summary
+When accessing tables in a non-default schema (e.g., `veroscore` instead of `public`), we attempted complex PostgREST configuration, RPC functions, and Accept-Profile headers before discovering that the Supabase Python client has a native `.schema()` method that works immediately without any configuration.
+
+### Root Cause
+- **Over-engineering before checking native capabilities:** Assumed complex configuration was needed without first checking if the client library had built-in support
+- **Missing documentation review:** Didn't check Supabase Python client documentation for schema support
+- **Premature optimization:** Jumped to complex solutions (RPC functions, PostgREST configuration) before trying simple approaches
+- **Assumption of limitation:** Assumed PostgREST configuration was required without verifying client library capabilities
+
+### Triggering Conditions
+- Need to access tables in non-default schema (not `public`)
+- Client library defaults to `public` schema
+- Error message suggests schema not found: `"Could not find the table 'public.sessions' in the schema cache"`
+- Complex solutions seem necessary (RPC functions, PostgREST configuration)
+
+### Relevant Code/Modules
+- `.cursor/scripts/veroscore_v3/supabase_schema_helper.py` - Initially tried PostgREST client with Accept-Profile headers
+- `.cursor/scripts/veroscore_v3/session_manager.py` - Direct table access without schema specification
+- `libs/common/prisma/migrations/20251124160359_veroscore_v3_schema/rpc_functions.sql` - Created RPC functions as workaround
+- Any code accessing Supabase tables in custom schemas
+
+### How It Was Fixed
+1. **Discovered native `.schema()` method:** User suggested trying `supabase.schema("veroscore").table("sessions")`
+2. **Updated all code to use `.schema()` method:** Changed from PostgREST client to native Supabase client method
+3. **Removed complex workarounds:** No longer need RPC functions or PostgREST configuration
+4. **Simplified implementation:** Direct table access with schema specification
+
+**Example Fixes:**
+```python
+# ❌ WRONG: Complex PostgREST configuration
+from postgrest import SyncPostgrestClient
+
+postgrest_client = SyncPostgrestClient(
+    base_url=f"{supabase_url}/rest/v1",
+    headers={
+        "apikey": supabase_key,
+        "Authorization": f"Bearer {supabase_key}",
+        "Accept-Profile": "veroscore",  # Complex configuration
+        "Content-Profile": "veroscore"
+    }
+)
+result = postgrest_client.from_("sessions").select("*").execute()
+
+# ❌ WRONG: RPC functions as workaround
+result = supabase.rpc("get_session", {"p_session_id": session_id}).execute()
+
+# ✅ CORRECT: Native client method
+result = supabase.schema("veroscore").table("sessions").select("*").execute()
+```
+
+```python
+# ❌ WRONG: Direct table access (defaults to public schema)
+result = supabase.table("sessions").select("*").execute()
+# Error: Could not find the table 'public.sessions'
+
+# ✅ CORRECT: Specify schema explicitly
+result = supabase.schema("veroscore").table("sessions").select("*").execute()
+```
+
+### How to Prevent It in the Future
+- **ALWAYS check native client capabilities first** before implementing complex workarounds
+- **READ client library documentation** for schema support and built-in methods
+- **TRY simple solutions first** (native methods, standard APIs) before complex solutions
+- **SEARCH for existing solutions** in client library documentation or examples
+- **ASK for help early** if troubleshooting takes >30 minutes
+- **DOCUMENT native capabilities** when discovered to prevent future over-engineering
+- **VERIFY assumptions** about client limitations before implementing workarounds
+
+### Prevention Checklist
+1. **Before implementing complex solution:**
+   - [ ] Check client library documentation for native support
+   - [ ] Search for examples of similar use cases
+   - [ ] Try simplest possible approach first
+   - [ ] Verify if client library has built-in methods
+
+2. **When troubleshooting:**
+   - [ ] Start with native client methods
+   - [ ] Check for schema support in client library
+   - [ ] Try schema-qualified table names (`schema.table`)
+   - [ ] Only then consider complex workarounds
+
+3. **Code review checklist:**
+   - [ ] Verify native client methods were tried first
+   - [ ] Confirm complex solutions are necessary
+   - [ ] Document why workaround is needed (if applicable)
+
+### Similar Historical Issues
+- **TENANT_CONTEXT_NOT_FOUND** - Similar pattern of trying complex solutions before checking simpler approaches
+- **Over-engineering solutions** before checking native capabilities
+- **Missing documentation review** before implementation
+
+---
+
+**Last Updated:** 2025-11-24

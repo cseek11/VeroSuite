@@ -6,7 +6,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["auth", "compliance", "public"]
+  schemas  = ["auth", "compliance", "public", "veroscore"]
 }
 
 model Tenant {
@@ -2562,6 +2562,179 @@ model WriteQueue {
   @@index([status, created_at], map: "idx_write_queue_status")
   @@map("write_queue")
   @@schema("compliance")
+}
+
+// VeroScore V3 Schema Models (Phase 1)
+model VeroScoreSession {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  session_id            String    @unique
+  author                String
+  branch_name           String?
+  started               DateTime  @default(now()) @db.Timestamptz(6)
+  last_activity         DateTime  @default(now()) @db.Timestamptz(6)
+  completed_at          DateTime? @db.Timestamptz(6)
+  total_files           Int       @default(0)
+  total_lines_added     Int       @default(0)
+  total_lines_removed   Int       @default(0)
+  prs                   Json      @default("[]")
+  status                String    @default("active") @db.VarChar(20)
+  reward_score_eligible Boolean   @default(false)
+  last_reward_score     Decimal?  @db.Decimal(5, 2)
+  reward_scored_at      DateTime? @db.Timestamptz(6)
+  config                Json      @default("{}")
+  metadata              Json      @default("{}")
+  created_at            DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  changesQueue          VeroScoreChangesQueue[]
+  prScores              VeroScorePrScore[]
+
+  @@index([author], map: "idx_veroscore_sessions_author")
+  @@index([status], map: "idx_veroscore_sessions_status")
+  @@index([last_activity], map: "idx_veroscore_sessions_last_activity")
+  @@index([reward_score_eligible], map: "idx_veroscore_sessions_reward_eligible")
+  @@map("sessions")
+  @@schema("veroscore")
+}
+
+model VeroScoreChangesQueue {
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  session_id  String
+  file_path   String
+  change_type String          @db.VarChar(20)
+  old_path    String?
+  lines_added Int             @default(0)
+  lines_removed Int           @default(0)
+  commit_hash String?
+  processed   Boolean         @default(false)
+  processed_at DateTime?      @db.Timestamptz(6)
+  metadata    Json            @default("{}")
+  timestamp   DateTime        @default(now()) @db.Timestamptz(6)
+
+  session     VeroScoreSession @relation(fields: [session_id], references: [session_id], onDelete: Cascade)
+
+  @@index([session_id], map: "idx_veroscore_changes_session")
+  @@index([processed], map: "idx_veroscore_changes_processed")
+  @@index([timestamp(sort: Desc)], map: "idx_veroscore_changes_timestamp")
+  @@map("changes_queue")
+  @@schema("veroscore")
+}
+
+model VeroScorePrScore {
+  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pr_number               Int
+  repository              String
+  session_id              String?
+  author                  String
+  code_quality            Decimal   @default(0) @db.Decimal(4, 2)
+  test_coverage           Decimal   @default(0) @db.Decimal(4, 2)
+  documentation           Decimal   @default(0) @db.Decimal(4, 2)
+  architecture            Decimal   @default(0) @db.Decimal(4, 2)
+  security                Decimal   @default(0) @db.Decimal(4, 2)
+  rule_compliance         Decimal   @default(0) @db.Decimal(5, 2)
+  code_quality_weighted   Decimal?  @db.Decimal(5, 2)
+  test_coverage_weighted  Decimal?  @db.Decimal(5, 2)
+  documentation_weighted  Decimal?  @db.Decimal(5, 2)
+  architecture_weighted  Decimal?  @db.Decimal(5, 2)
+  security_weighted       Decimal?  @db.Decimal(5, 2)
+  rule_compliance_weighted Decimal? @db.Decimal(5, 2)
+  raw_score               Decimal   @db.Decimal(6, 2)
+  stabilized_score        Decimal   @db.Decimal(5, 2)
+  violations              Json      @default("[]")
+  warnings                Json      @default("[]")
+  pipeline_complete       Boolean   @default(false)
+  pipeline_bonus          Decimal   @default(0) @db.Decimal(3, 2)
+  decision                String?   @db.VarChar(20)
+  decision_reason         String?
+  reward_score            Decimal?  @db.Decimal(5, 2)
+  reward_score_timestamp  DateTime? @db.Timestamptz(6)
+  scan_duration_ms        Int?
+  detector_versions       Json      @default("{}")
+  created_at              DateTime  @default(now()) @db.Timestamptz(6)
+
+  session                 VeroScoreSession? @relation(fields: [session_id], references: [session_id])
+  detectionResults        VeroScoreDetectionResult[]
+
+  @@unique([pr_number, repository, created_at], map: "veroscore_pr_scores_pr_number_repository_created_at_key")
+  @@index([pr_number, repository], map: "idx_veroscore_pr_scores_pr")
+  @@index([session_id], map: "idx_veroscore_pr_scores_session")
+  @@index([decision], map: "idx_veroscore_pr_scores_decision")
+  @@index([created_at(sort: Desc)], map: "idx_veroscore_pr_scores_created")
+  @@map("pr_scores")
+  @@schema("veroscore")
+}
+
+model VeroScoreDetectionResult {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pr_score_id     String            @db.Uuid
+  detector_name   String
+  detector_version String?
+  severity        String            @db.VarChar(20)
+  rule_id         String?
+  message         String
+  file_path       String?
+  line_number     Int?
+  code_snippet    String?
+  suggested_fix   String?
+  penalty_applied Decimal           @default(0) @db.Decimal(5, 2)
+  metadata        Json              @default("{}")
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+
+  prScore         VeroScorePrScore  @relation(fields: [pr_score_id], references: [id], onDelete: Cascade)
+
+  @@index([pr_score_id], map: "idx_veroscore_detection_pr_score")
+  @@index([severity], map: "idx_veroscore_detection_severity")
+  @@index([detector_name], map: "idx_veroscore_detection_detector")
+  @@map("detection_results")
+  @@schema("veroscore")
+}
+
+model VeroScoreIdempotencyKey {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key           String    @unique
+  operation_type String
+  status        String    @db.VarChar(20)
+  result        Json      @default("{}")
+  expires_at    DateTime  @db.Timestamptz(6)
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([key], map: "idx_veroscore_idempotency_key")
+  @@index([expires_at], map: "idx_veroscore_idempotency_expires")
+  @@map("idempotency_keys")
+  @@schema("veroscore")
+}
+
+model VeroScoreSystemMetric {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  metric_name  String
+  metric_value Decimal   @db.Decimal
+  metric_type  String    @db.VarChar(20)
+  labels       Json      @default("{}")
+  timestamp    DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([metric_name], map: "idx_veroscore_metrics_name")
+  @@index([timestamp(sort: Desc)], map: "idx_veroscore_metrics_timestamp")
+  @@map("system_metrics")
+  @@schema("veroscore")
+}
+
+model VeroScoreAuditLog {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_type  String
+  event_action String
+  actor       String
+  session_id  String?
+  pr_number   Int?
+  old_state   Json?
+  new_state   Json?
+  metadata    Json      @default("{}")
+  timestamp    DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([event_type], map: "idx_veroscore_audit_type")
+  @@index([actor], map: "idx_veroscore_audit_actor")
+  @@index([timestamp(sort: Desc)], map: "idx_veroscore_audit_timestamp")
+  @@map("audit_log")
+  @@schema("veroscore")
 }
 
 enum ServiceAgreementStatus {

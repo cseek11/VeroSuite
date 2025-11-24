@@ -218,11 +218,11 @@ All questions have been answered and decisions documented. See `V3_QUESTIONS.md`
 
 ### 2. Supabase Configuration
 
-**✅ Decision 2.1:** Create new dedicated Supabase project for veroscore
-- **CRITICAL:** Separate from CRM database for isolation
-- Project name: `{company}-veroscore`
-- Region: us-east-1 (or closest to team)
-- Plan: Free tier initially, upgrade to Pro if >500MB
+**✅ Decision 2.1:** Use same database as OPA Compliance, separate `veroscore` schema
+- **UPDATED:** Same Supabase database as OPA Compliance (consistency)
+- **Schema:** `veroscore` schema (similar to `compliance` schema)
+- **Rationale:** Future integration with OPA, operational simplicity, cost efficiency
+- **Pattern:** Matches existing multi-schema architecture (`auth`, `compliance`, `public`, `veroscore`)
 
 **✅ Decision 2.2:** Tiered RLS policies with service role bypass
 - Developers: Read access to own sessions
