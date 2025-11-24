@@ -79,14 +79,29 @@ async function bootstrap() {
     }
   }));
 
+  // Set API prefix (must be before Swagger document creation)
+  app.setGlobalPrefix('api');
+
+  // Enable API versioning (must be before Swagger document creation)
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+    prefix: 'v'
+  });
+
   const config = new DocumentBuilder()
     .setTitle('VeroField API')
-    .setDescription('Multi-tenant Pest Control Operations Platform')
+    .setDescription('Multi-tenant Field Operations Platform')
     .setVersion('1.0')
+    .addServer('http://localhost:3001', 'Development Server')
+    .addServer('http://localhost:3001/api/v1', 'API v1', { description: 'Version 1 (some endpoints deprecated)' })
+    .addServer('http://localhost:3001/api/v2', 'API v2', { description: 'Version 2 (recommended)' })
     .addBearerAuth()
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, config, {
+    operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
+  });
   SwaggerModule.setup('api/docs', app, document);
 
   const allowedOrigins = configService.get<string>('ALLOWED_ORIGINS')?.split(',') || 
@@ -95,16 +110,6 @@ async function bootstrap() {
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,
-  });
-
-  // Set API prefix
-  app.setGlobalPrefix('api');
-
-  // Enable API versioning
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '1',
-    prefix: 'v'
   });
 
   const port = configService.get<string>('PORT') || '3001';

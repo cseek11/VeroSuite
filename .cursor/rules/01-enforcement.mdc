@@ -50,24 +50,53 @@ alwaysApply: true
 ### Step 3: Rule Compliance Check (MANDATORY)
 - [ ] **MUST** verify tenant isolation if touching database
 - [ ] **MUST** check if using correct file paths (see `.cursor/rules/04-architecture.mdc`)
-- [ ] **MUST** verify using shared libraries from `libs/common/` if applicable
+- [ ] **MUST** verify using shared libraries from `libs/common/` when:
+  - Code is reusable across ≥2 apps/services within `apps/`
+  - Logic is domain-agnostic (auth, validation, types, utilities)
+  - Pattern already exists in `libs/common/` for similar functionality
+  - NOT applicable for: app-specific business logic, UI components, one-off features
+  - **Decision aid:** If you're copying code between apps, it belongs in shared libs
 - [ ] **MUST** use current system date (check device date) - NEVER hardcode dates ⭐ **CRITICAL**
 - [ ] **MUST** verify structured logging requirements met
 - [ ] **MUST** verify trace ID propagation present
 - [ ] **MUST** verify error handling blocks present for all error-prone operations
 - [ ] **MUST** check for silent failures (empty catch blocks, swallowed promises, missing awaits)
-- [ ] **MUST** verify security event logging (if applicable)
+- [ ] **MUST** verify security event logging when:
+  - Authentication or authorization logic changed
+  - PII or sensitive data modified (always log)
+  - PII or sensitive data accessed in privileged contexts (admin, security diagnostics)
+  - Security policies (RLS, permissions, roles) changed
+  - Admin actions performed (impersonation, privilege escalation)
+  - Financial transactions processed
+  - NOT applicable for: anonymous public endpoints, static asset serving
+  - **Critical:** Log metadata only, never raw PII values (SOC2/privacy compliance)
 - [ ] **MUST** verify no architecture changes without permission
 - [ ] **MUST** verify no old naming (VeroSuite, @verosuite/*) introduced
 - [ ] **MUST** verify performance characteristics analyzed
 - [ ] **MUST** verify event schemas validated (if producing/consuming events)
-- [ ] **MUST** verify cross-platform compatibility (if applicable)
+- [ ] **MUST** verify cross-platform compatibility when:
+  - Code touches mobile app (`VeroFieldMobile/`)
+  - Shared code used by web + mobile
+  - File system operations (path separators, case sensitivity)
+  - Date/time handling (timezone, locale, formatting)
+  - Network requests (connectivity checks, offline handling, API retries)
+  - Platform-specific APIs used (localStorage vs AsyncStorage)
+  - Third-party library usage that may not have platform parity
+  - Push notification logic (mobile-only features)
+  - Feature flags used by both platforms
+  - NOT applicable for: web-only features, backend-only code, platform-abstracted code
 - [ ] **MUST** verify accessibility requirements met (if UI component)
 - [ ] **MUST** verify tooling compliance (lint/format, TypeScript)
 - [ ] **MUST** verify refactor integrity (if refactoring)
 - [ ] **MUST** verify UX consistency (if UI component)
 - [ ] **MUST** verify file ownership respected
-- [ ] **MUST** verify tech debt logged (if applicable)
+- [ ] **MUST** verify tech debt logged when:
+  - TODO/FIXME comments representing deferred work or technical shortcuts
+  - Workarounds or temporary solutions implemented
+  - Known limitations introduced that affect users
+  - Performance optimizations deferred (with measurable impact)
+  - **Triage rule:** If removing the TODO would require >2 hours OR create risk if forgotten, log it
+  - NOT applicable for: Trivial cleanup TODOs, refactoring notes, completed work markers
 - [ ] **MUST** verify file organization compliance
 - [ ] **MUST** verify workflow triggers are properly configured (if modifying workflows)
 

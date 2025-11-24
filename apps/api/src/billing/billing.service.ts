@@ -99,7 +99,7 @@ export class BillingService {
         },
         include: {
           InvoiceItem: true,
-          accounts: {
+          account: {
             select: {
               id: true,
               name: true,
@@ -191,7 +191,7 @@ export class BillingService {
         where,
         include: {
           InvoiceItem: true,
-          accounts: {
+          account: {
             select: {
               id: true,
               name: true,
@@ -241,7 +241,7 @@ export class BillingService {
         },
         include: {
           InvoiceItem: true,
-          accounts: {
+          account: {
             select: {
               id: true,
               name: true,
@@ -319,7 +319,7 @@ export class BillingService {
         data: updateData,
         include: {
           InvoiceItem: true,
-          accounts: {
+          account: {
             select: {
               id: true,
               name: true,
@@ -1369,7 +1369,7 @@ export class BillingService {
           status: { in: [InvoiceStatus.SENT, InvoiceStatus.OVERDUE] }
         },
         include: {
-          accounts: {
+          account: {
             select: {
               id: true,
               name: true,
@@ -1419,7 +1419,7 @@ export class BillingService {
         if (!customerAR[customerId]) {
           customerAR[customerId] = {
             customerId,
-            customerName: invoice.accounts?.name || 'Unknown',
+            customerName: invoice.account?.name || 'Unknown',
             totalAR: 0,
             invoices: []
           };
@@ -1462,7 +1462,7 @@ export class BillingService {
           due_date: { lt: now }
         },
         include: {
-          accounts: {
+          account: {
             select: {
               id: true,
               name: true,
@@ -1517,7 +1517,7 @@ export class BillingService {
         include: {
           Invoice: {
             include: {
-              accounts: {
+              account: {
                 select: {
                   name: true,
                 }
@@ -1579,7 +1579,7 @@ export class BillingService {
             tenant_id: tenantId
           },
           include: {
-            accounts: {
+            account: {
               select: {
                 id: true,
                 name: true,
@@ -1612,8 +1612,8 @@ export class BillingService {
         }
 
         // Check if customer has email
-        if (!invoice.accounts?.email) {
-          this.logger.warn(`Customer ${invoice.accounts?.id} has no email address for invoice ${invoiceId}`);
+        if (!invoice.account?.email) {
+          this.logger.warn(`Customer ${invoice.account?.id} has no email address for invoice ${invoiceId}`);
           results.push({
             invoice_id: invoiceId,
             success: false,
@@ -1629,31 +1629,31 @@ export class BillingService {
 
         // Generate email content
         const emailContent = this.emailService.generateInvoiceReminderEmail({
-          customerName: invoice.accounts.name,
+          customerName: invoice.account.name,
           invoiceNumber: invoice.invoice_number,
           amount: Number(invoice.total_amount),
           dueDate: dueDate,
           daysOverdue: daysOverdue > 0 ? daysOverdue : undefined,
           customMessage: customMessage,
           // TODO: Add payment link when customer portal is implemented
-          // paymentLink: `${process.env.FRONTEND_URL}/billing/${invoice.accounts.id}/pay/${invoice.id}`
+          // paymentLink: `${process.env.FRONTEND_URL}/billing/${invoice.account.id}/pay/${invoice.id}`
         });
 
         // Send email
         const emailResult = await this.emailService.sendEmail({
-          to: invoice.accounts.email,
-          toName: invoice.accounts.name,
+          to: invoice.account.email,
+          toName: invoice.account.name,
           subject: `Payment Reminder - Invoice ${invoice.invoice_number}`,
           htmlContent: emailContent,
           replyTo: this.configService.get<string>('EMAIL_REPLY_TO') || undefined
         });
 
         if (emailResult.success) {
-          this.logger.log(`Reminder sent successfully to ${invoice.accounts.email} for invoice ${invoice.invoice_number}`, {
+          this.logger.log(`Reminder sent successfully to ${invoice.account.email} for invoice ${invoice.invoice_number}`, {
             invoiceId: invoice.id,
             invoiceNumber: invoice.invoice_number,
-            customerEmail: invoice.accounts.email,
-            customerName: invoice.accounts.name,
+            customerEmail: invoice.account.email,
+            customerName: invoice.account.name,
             messageId: emailResult.messageId
           });
 
@@ -1698,13 +1698,13 @@ export class BillingService {
           results.push({
             invoice_id: invoiceId,
             invoice_number: invoice.invoice_number,
-            customer_email: invoice.accounts.email,
+            customer_email: invoice.account.email,
             success: true,
             message: 'Reminder sent successfully',
             messageId: emailResult.messageId
           });
         } else {
-          this.logger.error(`Failed to send reminder email to ${invoice.accounts.email}`, {
+          this.logger.error(`Failed to send reminder email to ${invoice.account.email}`, {
             invoiceId: invoice.id,
             invoiceNumber: invoice.invoice_number,
             error: emailResult.error
@@ -1713,7 +1713,7 @@ export class BillingService {
           results.push({
             invoice_id: invoiceId,
             invoice_number: invoice.invoice_number,
-            customer_email: invoice.accounts.email,
+            customer_email: invoice.account.email,
             success: false,
             error: emailResult.error || 'Failed to send email'
           });

@@ -1,0 +1,12 @@
+{
+  "changed_files": [
+    {
+      "path": "apps/api/src/work-orders/work-orders.service.ts",
+      "diff": "export class WorkOrderService {}"
+    }
+  ],
+  "pr_body": "Refactor: Extract validation logic"
+}
+
+
+

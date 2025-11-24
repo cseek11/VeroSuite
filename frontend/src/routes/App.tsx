@@ -21,6 +21,7 @@ import BillingPage from './Billing';
 import KnowledgePage from './Knowledge';
 import SchedulerPage from './Scheduler';
 import JobsPage from './Jobs';
+import ComplianceDashboard from './compliance';
 import CustomersPage from '@/components/CustomersPage';
 import RoutingPage from './Routing';
 import ReportsPage from './Reports';
@@ -617,6 +618,20 @@ export default function App() {
                     <V4Layout>
                       <Suspense fallback={<DashboardFallback />}>
                         <BillingPage />
+                      </Suspense>
+                    </V4Layout>
+                  </RoleProtectedRoute>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/compliance"
+              element={
+                <PrivateRoute>
+                  <RoleProtectedRoute allowedRoles={['admin', 'owner']} requiredPermissions={['compliance:view']}>
+                    <V4Layout>
+                      <Suspense fallback={<DashboardFallback />}>
+                        <ComplianceDashboard />
                       </Suspense>
                     </V4Layout>
                   </RoleProtectedRoute>

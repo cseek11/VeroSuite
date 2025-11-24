@@ -1,0 +1,16 @@
+{
+  "changed_files": [
+    {
+      "path": "apps/api/src/work-orders/work-orders.service.ts",
+      "diff": "export class WorkOrderService { async createWorkOrder() {} }"
+    },
+    {
+      "path": "apps/api/src/work-orders/work-orders.service.spec.ts",
+      "diff": "describe('WorkOrderService - Current Behavior', () => { it('should create work order', () => {}); });"
+    }
+  ],
+  "pr_body": "Refactor: Extract validation logic from WorkOrderService. ⚠️ REFACTOR RISK SURFACE: Files Affected: work-orders.service.ts. Dependencies: work-orders-api.ts. Breaking Changes: None. Rollback Plan: git revert."
+}
+
+
+

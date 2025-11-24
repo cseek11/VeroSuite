@@ -1,0 +1,226 @@
+{
+  "total_files": 16,
+  "files_with_step5": 2,
+  "average_completeness": 0.025,
+  "results": [
+    {
+      "file": "00-master.mdc",
+      "rule_name": "00 Master",
+      "has_step5": false,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "Missing Step 5 verification section"
+      ]
+    },
+    {
+      "file": "01-enforcement.mdc",
+      "rule_name": "01 Enforcement",
+      "has_step5": true,
+      "mandatory_checks": [
+        "audit ALL files touched for code compliance",
+        "verify file paths are correct (monorepo structure)",
+        "verify imports use correct paths (`@verofield/common/*`)",
+        "verify no old naming (VeroSuite, @verosuite/*) remains",
+        "verify tenant isolation (if database queries)",
+        "verify file organization compliance",
+        "verify date compliance (current system date, not hardcoded)",
+        "verify following established patterns",
+        "verify no duplicate components created",
+        "verify TypeScript types are correct (no `any`)",
+        "verify security boundaries maintained",
+        "verify documentation updated with current date",
+        "verify all error paths have tests",
+        "verify logging meets structured logging policy",
+        "verify no silent failures remain",
+        "verify observability hooks present (trace IDs, structured logs)",
+        "verify tests pass (regression + preventative)",
+        "verify cross-layer traceability intact (traceId, spanId, requestId propagated)",
+        "verify workflow triggers validated (if workflows modified)",
+        "verify bug logged in `.cursor/BUG_LOG.md` (if bug was fixed) \u2b50 **CRITICAL**",
+        "verify error pattern documented in `docs/error-patterns.md` (if bug was fixed) \u2b50 **CRITICAL**",
+        "verify anti-pattern logged in `.cursor/anti_patterns.md` (if REWARD_SCORE \u2264 0) \u2b50 **CRITICAL**"
+      ],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.4,
+      "issues": [
+        "No SHOULD/RECOMMENDED checks defined",
+        "No consequences defined",
+        "3 checks may be too vague"
+      ]
+    },
+    {
+      "file": "02-core.mdc",
+      "rule_name": "02 Core",
+      "has_step5": false,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "Missing Step 5 verification section"
+      ]
+    },
+    {
+      "file": "03-security.mdc",
+      "rule_name": "03 Security",
+      "has_step5": false,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "Missing Step 5 verification section"
+      ]
+    },
+    {
+      "file": "04-architecture.mdc",
+      "rule_name": "04 Architecture",
+      "has_step5": false,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "Missing Step 5 verification section"
+      ]
+    },
+    {
+      "file": "05-data.mdc",
+      "rule_name": "05 Data",
+      "has_step5": false,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "Missing Step 5 verification section"
+      ]
+    },
+    {
+      "file": "06-error-resilience.mdc",
+      "rule_name": "06 Error Resilience",
+      "has_step5": false,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "Missing Step 5 verification section"
+      ]
+    },
+    {
+      "file": "07-observability.mdc",
+      "rule_name": "07 Observability",
+      "has_step5": false,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "Missing Step 5 verification section"
+      ]
+    },
+    {
+      "file": "08-backend.mdc",
+      "rule_name": "08 Backend",
+      "has_step5": false,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "Missing Step 5 verification section"
+      ]
+    },
+    {
+      "file": "09-frontend.mdc",
+      "rule_name": "09 Frontend",
+      "has_step5": false,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "Missing Step 5 verification section"
+      ]
+    },
+    {
+      "file": "10-quality.mdc",
+      "rule_name": "10 Quality",
+      "has_step5": false,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "Missing Step 5 verification section"
+      ]
+    },
+    {
+      "file": "11-operations.mdc",
+      "rule_name": "11 Operations",
+      "has_step5": false,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "Missing Step 5 verification section"
+      ]
+    },
+    {
+      "file": "12-tech-debt.mdc",
+      "rule_name": "12 Tech Debt",
+      "has_step5": false,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "Missing Step 5 verification section"
+      ]
+    },
+    {
+      "file": "13-ux-consistency.mdc",
+      "rule_name": "13 Ux Consistency",
+      "has_step5": false,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "Missing Step 5 verification section"
+      ]
+    },
+    {
+      "file": "14-verification.mdc",
+      "rule_name": "14 Verification",
+      "has_step5": false,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "Missing Step 5 verification section"
+      ]
+    },
+    {
+      "file": "agent-instructions.mdc",
+      "rule_name": "Agent Instructions",
+      "has_step5": true,
+      "mandatory_checks": [],
+      "should_checks": [],
+      "consequences": [],
+      "completeness_score": 0.0,
+      "issues": [
+        "No MANDATORY checks defined",
+        "No SHOULD/RECOMMENDED checks defined",
+        "No consequences defined"
+      ]
+    }
+  ]
+}

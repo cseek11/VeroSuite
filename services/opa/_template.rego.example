@@ -1,0 +1,186 @@
+# OPA Policy Template
+# 
+# This template provides the standard structure for VeroField compliance policies.
+# Copy this file and customize for your specific rule domain.
+#
+# Created: 2025-11-23
+# Version: 1.0.0
+
+package compliance.DOMAIN_NAME
+
+import future.keywords.contains
+import future.keywords.if
+
+# =============================================================================
+# METADATA
+# =============================================================================
+
+# Policy metadata
+metadata := {
+    "name": "POLICY_NAME",
+    "domain": "DOMAIN_NAME",
+    "tier": "1|2|3",  # 1=BLOCK, 2=OVERRIDE, 3=WARNING
+    "version": "1.0.0",
+    "created": "2025-11-23",
+    "description": "Brief description of what this policy enforces"
+}
+
+# =============================================================================
+# TIER 1 MAD: HARD STOP (BLOCK)
+# =============================================================================
+# Use for: Security, tenant isolation, architecture boundaries
+# Effect: CI blocks merge, requires fix
+
+deny contains msg if {
+    # Condition that triggers violation
+    some file in input.changed_files
+    is_violation(file)
+    
+    # Clear, actionable message
+    msg := sprintf(
+        "HARD STOP [%s]: %s in file %s",
+        [metadata.domain, "Violation description", file.path]
+    )
+}
+
+# =============================================================================
+# TIER 2 MAD: OVERRIDE REQUIRED
+# =============================================================================
+# Use for: Breaking changes, state transitions, layer sync
+# Effect: Requires explicit override with justification
+
+override contains msg if {
+    # Condition that requires override
+    some file in input.changed_files
+    requires_override(file)
+    not has_override_justification(input.pr_body)
+    
+    msg := sprintf(
+        "OVERRIDE REQUIRED [%s]: %s in file %s. Add override justification to PR description.",
+        [metadata.domain, "Override reason", file.path]
+    )
+}
+
+# =============================================================================
+# TIER 3 MAD: WARNING
+# =============================================================================
+# Use for: Tech debt, TODO additions, style violations
+# Effect: Logged but doesn't block merge
+
+warn contains msg if {
+    # Condition that triggers warning
+    some file in input.changed_files
+    is_warning(file)
+    
+    msg := sprintf(
+        "WARNING [%s]: %s in file %s",
+        [metadata.domain, "Warning description", file.path]
+    )
+}
+
+# =============================================================================
+# HELPER FUNCTIONS
+# =============================================================================
+# Keep helpers simple and focused
+# Max 5 helpers per policy
+# Max 3 levels of nesting
+
+# Check if file violates rule
+is_violation(file) if {
+    # Implementation
+    # Use early exit for performance
+    false  # Replace with actual logic
+}
+
+# Check if override is required
+requires_override(file) if {
+    # Implementation
+    false  # Replace with actual logic
+}
+
+# Check if override justification exists
+has_override_justification(pr_body) if {
+    # Look for override marker in PR description
+    contains(pr_body, "@override:")
+    contains(pr_body, metadata.domain)
+}
+
+# Check if warning condition exists
+is_warning(file) if {
+    # Implementation
+    false  # Replace with actual logic
+}
+
+# =============================================================================
+# EXEMPTIONS
+# =============================================================================
+# Load exemptions from data files
+
+# Check if file is exempted
+is_exempted(file_path) if {
+    some exempted_file in data.exemptions.files
+    file_path == exempted_file
+}
+
+# Check if author is exempted
+is_exempted_author(author) if {
+    some exempted_author in data.exemptions.authors
+    author == exempted_author
+}
+
+# =============================================================================
+# PERFORMANCE OPTIMIZATION
+# =============================================================================
+# - Use early exit conditions
+# - Implement lazy evaluation
+# - Cache expensive operations
+# - Consolidate similar checks
+# - Extract shared logic to _shared.rego
+
+# =============================================================================
+# TESTING
+# =============================================================================
+# Create corresponding test file: tests/DOMAIN_NAME_test.rego
+# Test cases:
+# - Happy path (no violations)
+# - Violation detected
+# - Override with justification
+# - Warning triggered
+# - Exemptions work correctly
+# - Performance within budget (<200ms)
+
+# =============================================================================
+# USAGE EXAMPLE
+# =============================================================================
+# 
+# Input JSON structure:
+# {
+#   "changed_files": [
+#     {
+#       "path": "apps/api/src/module/file.ts",
+#       "diff": "... file diff ...",
+#       "additions": 10,
+#       "deletions": 5
+#     }
+#   ],
+#   "pr_title": "Fix: Update tenant isolation",
+#   "pr_body": "Description...",
+#   "pr_number": 123,
+#   "author": "developer"
+# }
+#
+# Evaluation command:
+# ./services/opa/bin/opa eval \
+#   --data services/opa/policies/ \
+#   --data services/opa/data/ \
+#   --input input.json \
+#   --format pretty \
+#   'data.compliance.DOMAIN_NAME'
+#
+# Expected output:
+# {
+#   "deny": ["HARD STOP [DOMAIN]: ..."],
+#   "override": ["OVERRIDE REQUIRED [DOMAIN]: ..."],
+#   "warn": ["WARNING [DOMAIN]: ..."]
+# }
+

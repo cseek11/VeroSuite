@@ -1,26 +1,25 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["public", "auth"]
+  schemas  = ["auth", "compliance", "public"]
 }
 
 model Tenant {
-  id                      String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                    String                   @db.VarChar(255)
-  domain                  String?                  @unique @db.VarChar(100)
-  status                  String                   @default("active") @db.VarChar(20)
-  subscription_tier       String                   @default("basic") @db.VarChar(20)
-  created_at              DateTime                 @default(now()) @db.Timestamptz(6)
-  updated_at              DateTime                 @default(now()) @updatedAt @db.Timestamptz(6)
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                    String                    @db.VarChar(255)
+  domain                  String?                   @unique @db.VarChar(100)
+  status                  String                    @default("active") @db.VarChar(20)
+  subscription_tier       String                    @default("basic") @db.VarChar(20)
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                  @default(now()) @updatedAt @db.Timestamptz(6)
   Invoice                 Invoice[]
   Payment                 Payment[]
   ServiceAgreement        ServiceAgreement[]
-  accounts                Account[]
   auditLogs               AuditLog[]
   automatedCommunications AutomatedCommunication[]
   communicationTemplates  CommunicationTemplate[]
@@ -31,92 +30,111 @@ model Tenant {
   customerProfiles        CustomerProfile[]
   customerSegments        CustomerSegment[]
   jobs                    Job[]
+  kpiTemplateUsage        KpiTemplateUsage[]
+  kpiTemplates            KpiTemplate[]
   paymentMethods          PaymentMethod[]
   pricingTiers            PricingTier[]
+  recurring_job_instances recurring_job_instances[]
+  recurring_job_templates recurring_job_templates[]
+  search_user_behavior    search_user_behavior[]
   serviceAnalytics        ServiceAnalytics[]
   serviceAreas            ServiceArea[]
   serviceCategories       ServiceCategory[]
   servicePricing          ServicePricing[]
   serviceTypes            ServiceType[]
-  technicianSkills        TechnicianSkill[]
-  technicianProfiles      TechnicianProfile[]
-  technicianPayroll       TechnicianPayroll[]
+  technician_availability technician_availability[]
   technicianDocuments     TechnicianDocument[]
+  technicianPayroll       TechnicianPayroll[]
   technicianPerformance   TechnicianPerformance[]
+  technicianProfiles      TechnicianProfile[]
+  technician_schedules    technician_schedules[]
+  technicianSkills        TechnicianSkill[]
   tenantBranding          TenantBranding?
+  time_off_requests       time_off_requests[]
+  userKpis                UserKpi[]
   users                   User[]
   workOrders              WorkOrder[]
-  kpiTemplates            KpiTemplate[]
-  userKpis                UserKpi[]
-  kpiTemplateUsage        KpiTemplateUsage[]
+  complianceChecks        ComplianceCheck[]
+  complianceTrends         ComplianceTrend[]
 
   @@map("tenants")
   @@schema("public")
 }
 
 model User {
-  id                                                  String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id                                           String             @db.Uuid
-  email                                               String             @unique @db.VarChar(255)
-  password_hash                                       String             @db.VarChar(255)
-  first_name                                          String             @db.VarChar(100)
-  last_name                                           String             @db.VarChar(100)
-  phone                                               String?            @db.VarChar(20)
-  employee_id                                         String?            @unique @db.VarChar(20)
-  roles                                               String[]           @default([])
-  status                                              String             @default("active") @db.VarChar(20)
-  technician_number                                   String?            @db.VarChar(20)
-  pesticide_license_number                            String?            @db.VarChar(50)
-  license_expiration_date                             DateTime?          @db.Date
-  hire_date                                           DateTime?          @db.Date
-  position                                            String?            @db.VarChar(100)
-  department                                          String?            @db.VarChar(100)
-  employment_type                                     String?            @default("full_time") @db.VarChar(20)
-  emergency_contact_name                              String?            @db.VarChar(100)
-  emergency_contact_phone                             String?            @db.VarChar(20)
-  emergency_contact_relationship                      String?            @db.VarChar(50)
-  address_line1                                       String?            @db.VarChar(255)
-  address_line2                                       String?            @db.VarChar(255)
-  city                                                String?            @db.VarChar(100)
-  state                                               String?            @db.VarChar(2)
-  postal_code                                         String?            @db.VarChar(20)
-  country                                             String?            @default("US") @db.VarChar(100)
-  date_of_birth                                       DateTime?          @db.Date
-  social_security_number                              String?            @db.VarChar(255)
-  driver_license_number                               String?            @db.VarChar(255)
-  driver_license_state                                String?            @db.VarChar(2)
-  driver_license_expiry                               DateTime?          @db.Date
-  qualifications                                      String[]           @default([])
-  custom_permissions                                  String[]           @default([])
-  manager_id                                          String?            @db.Uuid
-  avatar_url                                          String?            @db.VarChar(500)
-  tags                                                String[]           @default([])
-  created_at                                          DateTime           @default(now()) @db.Timestamptz(6)
-  updated_at                                          DateTime           @default(now()) @updatedAt @db.Timestamptz(6)
-  Invoice_Invoice_created_byTousers                   Invoice[]          @relation("Invoice_created_byTousers")
-  Invoice_Invoice_updated_byTousers                   Invoice[]          @relation("Invoice_updated_byTousers")
-  Payment                                             Payment[]
-  ServiceAgreement_ServiceAgreement_created_byTousers ServiceAgreement[] @relation("ServiceAgreement_created_byTousers")
-  ServiceAgreement_ServiceAgreement_updated_byTousers ServiceAgreement[] @relation("ServiceAgreement_updated_byTousers")
-  complianceRecords                                   ComplianceRecord[]
-  serviceAnalytics                                    ServiceAnalytics[]
-  technicianSkills                                    TechnicianSkill[]
-  technicianProfiles                                  TechnicianProfile[]
-  technicianPayrolls                                  TechnicianPayroll[]
-  technicianDocuments                                 TechnicianDocument[]
-  technicianPerformance                               TechnicianPerformance[]
-  uploadedDocuments                                   TechnicianDocument[] @relation("DocumentUploader")
-  verifiedDocuments                                   TechnicianDocument[] @relation("DocumentVerifier")
-  tenant                                              Tenant             @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  assignedWorkOrders                                  WorkOrder[]        @relation("WorkOrderAssignedTo")
-  createdKpiTemplates                                 KpiTemplate[]      @relation("KpiTemplateCreator")
-  approvedKpiTemplates                                KpiTemplate[]      @relation("KpiTemplateApprover")
-  userKpis                                            UserKpi[]
-  kpiTemplateUsage                                    KpiTemplateUsage[]
-  manager                                             User?              @relation("UserHierarchy", fields: [manager_id], references: [id], onDelete: SetNull)
-  directReports                                       User[]             @relation("UserHierarchy")
+  id                                                       String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id                                                String                    @db.Uuid
+  email                                                    String                    @unique @db.VarChar(255)
+  password_hash                                            String                    @db.VarChar(255)
+  first_name                                               String                    @db.VarChar(100)
+  last_name                                                String                    @db.VarChar(100)
+  phone                                                    String?                   @db.VarChar(20)
+  roles                                                    String[]                  @default([])
+  status                                                   String                    @default("active") @db.VarChar(20)
+  created_at                                               DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at                                               DateTime                  @default(now()) @updatedAt @db.Timestamptz(6)
+  technician_number                                        String?                   @db.VarChar(20)
+  pesticide_license_number                                 String?                   @db.VarChar(50)
+  license_expiration_date                                  DateTime?                 @db.Date
+  hire_date                                                DateTime?                 @db.Date
+  position                                                 String?                   @db.VarChar(100)
+  department                                               String?                   @db.VarChar(100)
+  employment_type                                          String?                   @default("full_time") @db.VarChar(20)
+  emergency_contact_name                                   String?                   @db.VarChar(100)
+  emergency_contact_phone                                  String?                   @db.VarChar(20)
+  employee_id                                              String?                   @unique @db.VarChar(20)
+  emergency_contact_relationship                           String?                   @db.VarChar(50)
+  address_line1                                            String?                   @db.VarChar(255)
+  address_line2                                            String?                   @db.VarChar(255)
+  city                                                     String?                   @db.VarChar(100)
+  state                                                    String?                   @db.VarChar(2)
+  postal_code                                              String?                   @db.VarChar(20)
+  country                                                  String?                   @default("US") @db.VarChar(100)
+  date_of_birth                                            DateTime?                 @db.Date
+  social_security_number                                   String?                   @db.VarChar(255)
+  driver_license_number                                    String?                   @db.VarChar(255)
+  driver_license_state                                     String?                   @db.VarChar(2)
+  driver_license_expiry                                    DateTime?                 @db.Date
+  qualifications                                           String[]                  @default([])
+  custom_permissions                                       String[]                  @default([])
+  manager_id                                               String?                   @db.Uuid
+  avatar_url                                               String?                   @db.VarChar(500)
+  tags                                                     String[]                  @default([])
+  Invoice_Invoice_created_byTousers                        Invoice[]                 @relation("Invoice_created_byTousers")
+  Invoice_Invoice_updated_byTousers                        Invoice[]                 @relation("Invoice_updated_byTousers")
+  Payment                                                  Payment[]
+  ServiceAgreement_ServiceAgreement_created_byTousers      ServiceAgreement[]        @relation("ServiceAgreement_created_byTousers")
+  ServiceAgreement_ServiceAgreement_updated_byTousers      ServiceAgreement[]        @relation("ServiceAgreement_updated_byTousers")
+  complianceRecords                                        ComplianceRecord[]
+  kpiTemplateUsage                                         KpiTemplateUsage[]
+  approvedKpiTemplates                                     KpiTemplate[]             @relation("KpiTemplateApprover")
+  createdKpiTemplates                                      KpiTemplate[]             @relation("KpiTemplateCreator")
+  recurring_job_templates                                  recurring_job_templates[]
+  serviceAnalytics                                         ServiceAnalytics[]
+  technician_availability                                  technician_availability[]
+  technicianDocuments                                      TechnicianDocument[]
+  uploadedDocuments                                        TechnicianDocument[]      @relation("DocumentUploader")
+  verifiedDocuments                                        TechnicianDocument[]      @relation("DocumentVerifier")
+  technicianPayrolls                                       TechnicianPayroll[]
+  technicianPerformance                                    TechnicianPerformance[]
+  technicianProfiles                                       TechnicianProfile[]
+  technician_schedules                                     technician_schedules[]
+  technicianSkills                                         TechnicianSkill[]
+  time_off_requests_time_off_requests_approved_byTousers   time_off_requests[]       @relation("time_off_requests_approved_byTousers")
+  time_off_requests_time_off_requests_requested_byTousers  time_off_requests[]       @relation("time_off_requests_requested_byTousers")
+  time_off_requests_time_off_requests_technician_idTousers time_off_requests[]       @relation("time_off_requests_technician_idTousers")
+  userKpis                                                 UserKpi[]
+  manager                                                  User?                     @relation("UserHierarchy", fields: [manager_id], references: [id], onUpdate: NoAction)
+  directReports                                            User[]                    @relation("UserHierarchy")
+  tenant                                                   Tenant                    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  assignedWorkOrders                                       WorkOrder[]               @relation("WorkOrderAssignedTo")
 
-  @@index([manager_id])
+  @@index([city], map: "idx_users_city")
+  @@index([employment_type], map: "idx_users_employment_type")
+  @@index([manager_id], map: "idx_users_manager_id")
+  @@index([postal_code], map: "idx_users_postal_code")
+  @@index([state], map: "idx_users_state")
+  @@index([tags], map: "idx_users_tags", type: Gin)
   @@map("users")
   @@schema("public")
 }
@@ -192,50 +210,39 @@ model ServiceType {
 
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model Account {
-  id                       String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id                String                   @db.Uuid
-  name                     String
-  account_type             String                   @default("commercial")
-  status                   String                   @default("active")
-  phone                    String?
-  email                    String?
-  address                  String?
-  city                     String?
-  state                    String?
-  zip_code                 String?
-  property_type            String?
-  property_size            String?
-  ar_balance               Decimal                  @default(0.00) @db.Decimal(10, 2)
-  billing_address          Json?
-  stripe_customer_id       String?                  @db.VarChar(255)
-  created_at               DateTime                 @default(now()) @db.Timestamptz(6)
-  updated_at               DateTime                 @default(now()) @updatedAt @db.Timestamptz(6)
-  created_by               String?                  @db.Uuid
-  updated_by               String?                  @db.Uuid
-  Invoice                  Invoice[]
-  ServiceAgreement         ServiceAgreement[]
-  tenant                   Tenant                   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  automatedCommunications  AutomatedCommunication[]
-  businessAnalytics        BusinessAnalytics[]
-  chemicalUsage            ChemicalUsageLog[]
-  communicationLogs        CommunicationLog[]
-  complianceRecords        ComplianceRecord[]
-  complianceTracking       ComplianceTracking[]
-  contracts                ContractsSubscription[]
-  customerAnalytics        CustomerAnalytics[]
-  customerContacts         CustomerContact[]
-  customerDocuments        CustomerDocument[]
-  customerNotes            CustomerNote[]
-  customerPhotos           CustomerPhoto[]
-  customerProfile          CustomerProfile?
-  locations                Location[]
-  paymentMethods           PaymentMethod[]
-  pestActivity             PestActivityTracking[]
-  serviceHistory           ServiceHistory[]
-  workOrders               WorkOrder[]
-  jobs                     Job[]
+  id                 String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tenant_id          String    @db.Uuid
+  name               String
+  email              String?
+  phone              String?
+  address            String?
+  city               String?
+  state              String?
+  zip_code           String?
+  country            String?   @default("USA")
+  status             String?   @default("active")
+  account_type       String?   @default("residential")
+  notes              String?
+  created_at         DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime? @default(now()) @updatedAt @db.Timestamptz(6)
+  created_by         String?   @db.Uuid
+  updated_by         String?   @db.Uuid
+  billing_address    Json?
+  property_type      String?   @db.VarChar(100)
+  property_size      String?   @db.VarChar(100)
+  ar_balance         Decimal?  @default(0.00) @db.Decimal(10, 2)
+  stripe_customer_id String?   @db.VarChar(255)
+  Invoice            Invoice[]
+  PaymentMethod      PaymentMethod[]
+  ServiceAgreement   ServiceAgreement[]
+  WorkOrder          WorkOrder[]
+  Job                Job[]
 
-  @@unique([tenant_id, id])
+  @@index([address(ops: raw("gin_trgm_ops"))], map: "idx_accounts_address", type: Gin)
+  @@index([email], map: "idx_accounts_email")
+  @@index([name(ops: raw("gin_trgm_ops"))], map: "idx_accounts_name", type: Gin)
+  @@index([phone], map: "idx_accounts_phone")
+  @@index([tenant_id], map: "idx_accounts_tenant_id")
   @@map("accounts")
   @@schema("public")
 }
@@ -274,7 +281,6 @@ model CustomerProfile {
   created_at            DateTime         @default(now()) @db.Timestamptz(6)
   updated_at            DateTime         @updatedAt @db.Timestamptz(6)
   segment               CustomerSegment? @relation(fields: [segment_id], references: [id])
-  account               Account          @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
   tenant                Tenant           @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@unique([tenant_id, account_id])
@@ -299,7 +305,6 @@ model CustomerContact {
   notes                    String?
   created_at               DateTime                 @default(now()) @db.Timestamptz(6)
   automatedCommunications  AutomatedCommunication[]
-  account                  Account                  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
   tenant                   Tenant                   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@unique([tenant_id, account_id, contact_type])
@@ -308,24 +313,23 @@ model CustomerContact {
 }
 
 model Location {
-  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id       String   @db.Uuid
-  account_id      String   @db.Uuid
-  name            String   @db.VarChar(255)
-  address_line1   String   @db.VarChar(255)
-  address_line2   String?  @db.VarChar(255)
-  city            String   @db.VarChar(100)
-  state           String   @db.VarChar(20)
-  postal_code     String   @db.VarChar(20)
-  country         String   @default("US") @db.VarChar(10)
-  latitude        Decimal? @db.Decimal(10, 8)
-  longitude       Decimal? @db.Decimal(11, 8)
-  service_area_id String?  @db.Uuid
-  created_at      DateTime @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-  account         Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
-  workOrders      WorkOrder[]
+  id              String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id       String      @db.Uuid
+  account_id      String      @db.Uuid
+  name            String      @db.VarChar(255)
+  address_line1   String      @db.VarChar(255)
+  address_line2   String?     @db.VarChar(255)
+  city            String      @db.VarChar(100)
+  state           String      @db.VarChar(20)
+  postal_code     String      @db.VarChar(20)
+  country         String      @default("US") @db.VarChar(10)
+  latitude        Decimal?    @db.Decimal(10, 8)
+  longitude       Decimal?    @db.Decimal(11, 8)
+  service_area_id String?     @db.Uuid
+  created_at      DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime    @default(now()) @updatedAt @db.Timestamptz(6)
   jobs            Job[]
+  workOrders      WorkOrder[]
 
   @@unique([tenant_id, id])
   @@map("locations")
@@ -333,31 +337,32 @@ model Location {
 }
 
 model WorkOrder {
-  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id            String    @db.Uuid
-  customer_id          String    @db.Uuid
-  assigned_to          String?   @db.Uuid
-  status               String    @default("pending") @db.VarChar(20)
-  priority             String    @default("medium") @db.VarChar(20)
-  scheduled_date       DateTime? @db.Timestamptz(6)
-  completion_date      DateTime? @db.Timestamptz(6)
-  description          String
-  notes                String?
-  created_at           DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
-  account_id           String?   @db.Uuid
-  location_id          String?   @db.Uuid
-  service_type         String?   @db.VarChar(100)
-  recurrence_rule      String?   @db.VarChar(255)
-  estimated_duration   Int?      @default(60)
-  service_price        Decimal?  @db.Decimal(8, 2)
-  special_instructions String?
-  Invoice              Invoice[]
-  jobs                 Job[]
-  assignedTechnician   User?     @relation("WorkOrderAssignedTo", fields: [assigned_to], references: [id])
-  tenant               Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  account              Account?  @relation(fields: [account_id], references: [id])
-  location             Location? @relation(fields: [location_id], references: [id])
+  id                                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id                            String    @db.Uuid
+  customer_id                          String    @db.Uuid
+  assigned_to                          String?   @db.Uuid
+  status                               String    @default("pending") @db.VarChar(20)
+  priority                             String    @default("medium") @db.VarChar(20)
+  scheduled_date                       DateTime? @db.Timestamptz(6)
+  completion_date                      DateTime? @db.Timestamptz(6)
+  description                          String
+  notes                                String?
+  created_at                           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                           DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  account_id                           String?   @db.Uuid
+  location_id                          String?   @db.Uuid
+  service_type                         String?   @db.VarChar(100)
+  recurrence_rule                      String?   @db.VarChar(255)
+  estimated_duration                   Int?      @default(60)
+  service_price                        Decimal?  @db.Decimal(8, 2)
+  special_instructions                 String?
+  Invoice                              Invoice[]
+  jobs_jobs_work_order_idTowork_orders Job[]     @relation("jobs_work_order_idTowork_orders")
+  jobs                                 Job[]
+  location                             Location? @relation(fields: [location_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_work_orders_location_id")
+  assignedTechnician                   User?     @relation("WorkOrderAssignedTo", fields: [assigned_to], references: [id])
+  tenant                               Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  account                              Account?  @relation(fields: [account_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
 
   @@unique([tenant_id, id])
   @@index([tenant_id, status], map: "idx_work_orders_tenant_status")
@@ -366,30 +371,38 @@ model WorkOrder {
 }
 
 model Job {
-  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id            String    @db.Uuid
-  work_order_id        String    @db.Uuid
-  account_id           String    @db.Uuid
-  location_id          String    @db.Uuid
-  technician_id        String?   @db.Uuid
-  status               String    @default("unassigned") @db.VarChar(20)
-  priority             String    @default("medium") @db.VarChar(20)
-  scheduled_date       DateTime  @db.Date
-  scheduled_start_time String?   @db.VarChar(8)
-  scheduled_end_time   String?   @db.VarChar(8)
-  actual_start_time    DateTime? @db.Timestamptz(6)
-  actual_end_time      DateTime? @db.Timestamptz(6)
-  completion_notes     String?
-  customer_signature   String?   @db.VarChar(500)
-  photos               String[]  @default([])
-  chemicals_used       Json[]    @default([])
-  created_at           DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
-  Invoice              Invoice[]
-  tenant               Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  workOrder            WorkOrder @relation(fields: [tenant_id, work_order_id], references: [tenant_id, id])
-  account              Account   @relation(fields: [account_id], references: [id])
-  location             Location  @relation(fields: [location_id], references: [id])
+  id                                          String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id                                   String                    @db.Uuid
+  work_order_id                               String                    @db.Uuid
+  account_id                                  String                    @db.Uuid
+  location_id                                 String                    @db.Uuid
+  technician_id                               String?                   @db.Uuid
+  status                                      String                    @default("unassigned") @db.VarChar(20)
+  priority                                    String                    @default("medium") @db.VarChar(20)
+  scheduled_date                              DateTime                  @db.Date
+  scheduled_start_time                        String?                   @db.VarChar(8)
+  scheduled_end_time                          String?                   @db.VarChar(8)
+  actual_start_time                           DateTime?                 @db.Timestamptz(6)
+  actual_end_time                             DateTime?                 @db.Timestamptz(6)
+  completion_notes                            String?
+  customer_signature                          String?                   @db.VarChar(500)
+  photos                                      String[]                  @default([])
+  chemicals_used                              Json[]                    @default([])
+  created_at                                  DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at                                  DateTime                  @default(now()) @updatedAt @db.Timestamptz(6)
+  parent_job_id                               String?                   @db.Uuid
+  is_recurring                                Boolean?                  @default(false)
+  recurring_template_id                       String?                   @db.Uuid
+  Invoice                                     Invoice[]
+  location                                    Location                  @relation(fields: [location_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_jobs_location_id")
+  work_orders_jobs_work_order_idTowork_orders WorkOrder                 @relation("jobs_work_order_idTowork_orders", fields: [work_order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_jobs_work_order_id")
+  jobs                                        Job?                      @relation("jobsTojobs", fields: [parent_job_id], references: [id], onUpdate: NoAction)
+  other_jobs                                  Job[]                     @relation("jobsTojobs")
+  recurring_job_templates                     recurring_job_templates?  @relation(fields: [recurring_template_id], references: [id], onUpdate: NoAction)
+  tenant                                      Tenant                    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  workOrder                                   WorkOrder                 @relation(fields: [tenant_id, work_order_id], references: [tenant_id, id])
+  account                                     Account                   @relation(fields: [account_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  recurring_job_instances                     recurring_job_instances[]
 
   @@unique([tenant_id, id])
   @@index([tenant_id, technician_id, scheduled_date])
@@ -499,8 +512,8 @@ model PaymentMethod {
   is_active      Boolean   @default(true)
   created_at     DateTime  @default(now()) @db.Timestamptz(6)
   Payment        Payment[]
-  account        Account   @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
   tenant         Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  account        Account   @relation(fields: [account_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([tenant_id, account_id, payment_type])
   @@map("payment_methods")
@@ -516,7 +529,6 @@ model CustomerAnalytics {
   metric_value    Decimal  @db.Decimal(15, 4)
   metric_metadata Json?
   calculated_at   DateTime @default(now()) @db.Timestamptz(6)
-  account         Account  @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
   tenant          Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@unique([tenant_id, account_id, metric_date, metric_type])
@@ -576,7 +588,6 @@ model AutomatedCommunication {
   created_at           DateTime               @default(now()) @db.Timestamptz(6)
   recipientContact     CustomerContact?       @relation(fields: [recipient_contact_id], references: [id])
   template             CommunicationTemplate? @relation(fields: [template_id], references: [id])
-  account              Account                @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
   tenant               Tenant                 @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@map("automated_communications")
@@ -618,7 +629,6 @@ model ComplianceRecord {
   created_at        DateTime              @default(now()) @db.Timestamptz(6)
   completedByUser   User?                 @relation(fields: [completed_by], references: [id])
   requirement       ComplianceRequirement @relation(fields: [requirement_id], references: [id])
-  account           Account               @relation(fields: [tenant_id, account_id], references: [tenant_id, id], onDelete: Cascade)
   tenant            Tenant                @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@map("compliance_records")
@@ -639,7 +649,6 @@ model ServiceHistory {
   cost               Decimal  @db.Decimal(10, 2)
   status             String   @default("completed") @db.VarChar(20)
   created_at         DateTime @default(now()) @db.Timestamptz(6)
-  account            Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
   @@map("service_history")
@@ -661,7 +670,6 @@ model ContractsSubscription {
   signed_date       DateTime? @db.Date
   status            String    @default("active") @db.VarChar(20)
   created_at        DateTime  @default(now()) @db.Timestamptz(6)
-  account           Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
   @@map("contracts_subscriptions")
@@ -680,7 +688,6 @@ model CommunicationLog {
   timestamp          DateTime  @default(now()) @db.Timestamptz(6)
   follow_up_required Boolean   @default(false)
   follow_up_date     DateTime? @db.Date
-  account            Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
   @@map("communication_logs")
@@ -702,7 +709,6 @@ model CustomerNote {
   technician_id   String?  @db.Uuid
   work_order_id   String?  @db.Uuid
   location_coords String?  @db.VarChar(100)
-  account         Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
   @@map("customer_notes")
@@ -726,7 +732,6 @@ model PestActivityTracking {
   recorded_at          DateTime @default(now()) @db.Timestamptz(6)
   gps_coordinates      String?  @db.VarChar(100)
   photo_evidence_ids   Json?
-  account              Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
   @@map("pest_activity_tracking")
@@ -745,7 +750,6 @@ model ComplianceTracking {
   assigned_to       String?   @db.VarChar(100)
   notes             String?
   documentation_url String?   @db.VarChar(500)
-  account           Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
   @@map("compliance_tracking")
@@ -784,7 +788,6 @@ model ChemicalUsageLog {
   application_date   DateTime @default(now()) @db.Timestamptz(6)
   weather_conditions String?  @db.VarChar(100)
   safety_precautions String?
-  account            Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
   @@map("chemical_usage_log")
@@ -809,7 +812,6 @@ model CustomerPhoto {
   is_customer_facing Boolean  @default(true)
   pest_type          String?  @db.VarChar(100)
   treatment_area     String?  @db.VarChar(255)
-  account            Account  @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
   @@map("customer_photos")
@@ -826,7 +828,6 @@ model BusinessAnalytics {
   factors               Json?
   prediction_confidence Decimal?  @db.Decimal(5, 4)
   next_review_date      DateTime? @db.Date
-  account               Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
   @@map("business_analytics")
@@ -845,7 +846,6 @@ model CustomerDocument {
   uploaded_by   String?   @db.VarChar(100)
   uploaded_at   DateTime  @default(now()) @db.Timestamptz(6)
   document_date DateTime? @db.Date
-  account       Account   @relation(fields: [tenant_id, customer_id], references: [tenant_id, id], onDelete: Cascade)
 
   @@unique([tenant_id, id])
   @@map("customer_documents")
@@ -853,27 +853,28 @@ model CustomerDocument {
 }
 
 model TenantBranding {
-  id           String   @id @default(uuid()) @db.Uuid
-  tenant_id    String   @unique @db.Uuid
-  company_name String?  @db.VarChar(255)
-  address      String?  @db.Text
-  city         String?  @db.VarChar(100)
-  state        String?  @db.VarChar(50)
-  zip_code     String?  @db.VarChar(20)
-  country      String?  @default("USA") @db.VarChar(50)
-  phone        String?  @db.VarChar(20)
-  email        String?  @db.VarChar(255)
-  website      String?  @db.VarChar(255)
-  theme_json   Json     @default("{}")
+  id               String   @id @default(uuid()) @db.Uuid
+  tenant_id        String   @unique @db.Uuid
+  theme_json       Json     @default("{}")
   logo_url         String?  @db.VarChar(500)
-  header_logo_url  String?  @db.Text
-  invoice_logo_url String?  @db.Text
   version          String   @default("1.0.0") @db.VarChar(20)
-  status       String   @default("published") @db.VarChar(20)
-  created_at   DateTime @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime @updatedAt @db.Timestamptz(6)
-  tenant       Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  status           String   @default("published") @db.VarChar(20)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime @updatedAt @db.Timestamptz(6)
+  company_name     String?  @db.VarChar(255)
+  address          String?
+  city             String?  @db.VarChar(100)
+  state            String?  @db.VarChar(50)
+  zip_code         String?  @db.VarChar(20)
+  country          String?  @default("USA") @db.VarChar(50)
+  phone            String?  @db.VarChar(20)
+  email            String?  @db.VarChar(255)
+  website          String?  @db.VarChar(255)
+  header_logo_url  String?
+  invoice_logo_url String?
+  tenant           Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
+  @@index([tenant_id, header_logo_url, invoice_logo_url], map: "idx_tenant_branding_logos")
   @@map("tenant_branding")
   @@schema("public")
 }
@@ -918,7 +919,6 @@ model Invoice {
   updated_at                      DateTime
   created_by                      String            @db.Uuid
   updated_by                      String            @db.Uuid
-  accounts                        Account           @relation(fields: [account_id], references: [id])
   users_Invoice_created_byTousers User              @relation("Invoice_created_byTousers", fields: [created_by], references: [id])
   jobs                            Job?              @relation(fields: [job_id], references: [id])
   ServiceAgreement                ServiceAgreement? @relation(fields: [service_agreement_id], references: [id])
@@ -927,6 +927,7 @@ model Invoice {
   work_orders                     WorkOrder?        @relation(fields: [work_order_id], references: [id])
   InvoiceItem                     InvoiceItem[]
   Payment                         Payment[]
+  account                         Account           @relation(fields: [account_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([invoice_number, tenant_id])
   @@index([account_id])
@@ -996,11 +997,11 @@ model ServiceAgreement {
   created_by                               String                 @db.Uuid
   updated_by                               String                 @db.Uuid
   Invoice                                  Invoice[]
-  account                                  Account                @relation(fields: [account_id], references: [id])
   users_ServiceAgreement_created_byTousers User                   @relation("ServiceAgreement_created_byTousers", fields: [created_by], references: [id])
   service_types                            ServiceType            @relation(fields: [service_type_id], references: [id])
   tenants                                  Tenant                 @relation(fields: [tenant_id], references: [id])
   users_ServiceAgreement_updated_byTousers User                   @relation("ServiceAgreement_updated_byTousers", fields: [updated_by], references: [id])
+  account                                  Account                @relation(fields: [account_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([agreement_number, tenant_id])
   @@index([account_id])
@@ -1034,6 +1035,7 @@ model knowledge_articles {
   content      String
   featured     Boolean?  @default(false)
   created_at   DateTime? @default(now()) @db.Timestamptz(6)
+
   @@schema("public")
 }
 
@@ -1044,6 +1046,7 @@ model knowledge_categories {
   description String?
   icon        String?
   created_at  DateTime? @default(now()) @db.Timestamptz(6)
+
   @@schema("public")
 }
 
@@ -1193,86 +1196,60 @@ model search_typo_corrections {
   @@schema("public")
 }
 
-enum BillingFrequency {
-  monthly
-  quarterly
-  annually
-  one_time
-  @@schema("public")
-}
-
-enum InvoiceStatus {
-  draft
-  sent
-  paid
-  overdue
-  cancelled
-  @@schema("public")
-}
-
-enum ServiceAgreementStatus {
-  active
-  inactive
-  expired
-  cancelled
-  @@schema("public")
-}
-
-// ===== TECHNICIAN MANAGEMENT MODELS =====
-
 model TechnicianProfile {
-  id                              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id                       String   @db.Uuid
-  user_id                         String   @db.Uuid
-  employee_id                     String?  @unique @db.VarChar(20)
-  hire_date                       DateTime @db.Date
-  position                        String?  @db.VarChar(100)
-  department                      String?  @db.VarChar(100)
-  employment_type                 String   @default("full_time") @db.VarChar(20)
-  status                          String   @default("active") @db.VarChar(20)
-  emergency_contact_name          String?  @db.VarChar(100)
-  emergency_contact_phone         String?  @db.VarChar(20)
-  emergency_contact_relationship  String?  @db.VarChar(50)
-  address_line1                   String?  @db.VarChar(255)
-  address_line2                   String?  @db.VarChar(255)
-  city                            String?  @db.VarChar(100)
-  state                           String?  @db.VarChar(20)
-  postal_code                     String?  @db.VarChar(20)
-  country                         String   @default("US") @db.VarChar(10)
-  date_of_birth                   DateTime? @db.Date
-  social_security_number          String?  @db.VarChar(11)
-  driver_license_number           String?  @db.VarChar(50)
-  driver_license_state            String?  @db.VarChar(20)
-  driver_license_expiry           DateTime? @db.Date
-  created_at                      DateTime @default(now()) @db.Timestamptz(6)
-  updated_at                      DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-
-  tenant                          Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  user                            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id                             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id                      String    @db.Uuid
+  user_id                        String    @db.Uuid
+  employee_id                    String?   @db.VarChar(20)
+  hire_date                      DateTime  @db.Date
+  position                       String?   @db.VarChar(100)
+  department                     String?   @db.VarChar(100)
+  employment_type                String    @default("full_time") @db.VarChar(20)
+  status                         String    @default("active") @db.VarChar(20)
+  emergency_contact_name         String?   @db.VarChar(100)
+  emergency_contact_phone        String?   @db.VarChar(20)
+  emergency_contact_relationship String?   @db.VarChar(50)
+  address_line1                  String?   @db.VarChar(255)
+  address_line2                  String?   @db.VarChar(255)
+  city                           String?   @db.VarChar(100)
+  state                          String?   @db.VarChar(20)
+  postal_code                    String?   @db.VarChar(20)
+  country                        String    @default("US") @db.VarChar(10)
+  date_of_birth                  DateTime? @db.Date
+  social_security_number         String?   @db.VarChar(11)
+  driver_license_number          String?   @db.VarChar(50)
+  driver_license_state           String?   @db.VarChar(20)
+  driver_license_expiry          DateTime? @db.Date
+  created_at                     DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                     DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  tenant                         Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user                           User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([tenant_id, user_id])
+  @@index([tenant_id, department])
+  @@index([tenant_id, position])
+  @@index([tenant_id, status])
   @@map("technician_profiles")
   @@schema("public")
 }
 
 model TechnicianPayroll {
-  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id             String    @db.Uuid
-  technician_id         String    @db.Uuid
-  employment_type       String    @default("hourly") @db.VarChar(20)
-  pay_rate              Decimal?  @db.Decimal(10, 2)
-  overtime_rate         Decimal?  @db.Decimal(10, 2)
-  benefits_enrolled     Json?
-  direct_deposit_info   Json?
-  tax_withholding       Json?
-  start_date            DateTime? @db.Date
-  end_date              DateTime? @db.Date
-  is_active             Boolean   @default(true)
-  created_at            DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
-
-  tenant                Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  technician            User      @relation(fields: [technician_id], references: [id], onDelete: Cascade)
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id           String    @db.Uuid
+  technician_id       String    @db.Uuid
+  employment_type     String    @default("hourly") @db.VarChar(20)
+  pay_rate            Decimal?  @db.Decimal(10, 2)
+  overtime_rate       Decimal?  @db.Decimal(10, 2)
+  benefits_enrolled   Json?
+  direct_deposit_info Json?
+  tax_withholding     Json?
+  start_date          DateTime? @db.Date
+  end_date            DateTime? @db.Date
+  is_active           Boolean   @default(true)
+  created_at          DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  technician          User      @relation(fields: [technician_id], references: [id], onDelete: Cascade)
+  tenant              Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@unique([tenant_id, technician_id])
   @@map("technician_payroll")
@@ -1295,333 +1272,1373 @@ model TechnicianDocument {
   verified_by     String?   @db.Uuid
   verified_at     DateTime? @db.Timestamptz(6)
   notes           String?
-
-  tenant          Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
   technician      User      @relation(fields: [technician_id], references: [id], onDelete: Cascade)
-  uploader        User?     @relation("DocumentUploader", fields: [uploaded_by], references: [id], onDelete: SetNull)
-  verifier        User?     @relation("DocumentVerifier", fields: [verified_by], references: [id], onDelete: SetNull)
+  tenant          Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  uploader        User?     @relation("DocumentUploader", fields: [uploaded_by], references: [id])
+  verifier        User?     @relation("DocumentVerifier", fields: [verified_by], references: [id])
 
+  @@index([expiration_date])
+  @@index([tenant_id, document_type])
+  @@index([tenant_id, technician_id])
   @@map("technician_documents")
   @@schema("public")
 }
 
 model TechnicianPerformance {
-  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id               String    @db.Uuid
-  technician_id           String    @db.Uuid
-  period_start            DateTime  @db.Date
-  period_end              DateTime  @db.Date
-  jobs_completed          Int       @default(0)
-  jobs_cancelled          Int       @default(0)
-  total_revenue           Decimal   @default(0) @db.Decimal(10, 2)
-  average_rating          Decimal?  @db.Decimal(3, 2)
-  customer_feedback_count Int       @default(0)
-  on_time_percentage      Decimal?  @db.Decimal(5, 2)
-  completion_rate         Decimal?  @db.Decimal(5, 2)
-  created_at              DateTime  @default(now()) @db.Timestamptz(6)
+  id                      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id               String   @db.Uuid
+  technician_id           String   @db.Uuid
+  period_start            DateTime @db.Date
+  period_end              DateTime @db.Date
+  jobs_completed          Int      @default(0)
+  jobs_cancelled          Int      @default(0)
+  total_revenue           Decimal  @default(0) @db.Decimal(10, 2)
+  average_rating          Decimal? @db.Decimal(3, 2)
+  customer_feedback_count Int      @default(0)
+  on_time_percentage      Decimal? @db.Decimal(5, 2)
+  completion_rate         Decimal? @db.Decimal(5, 2)
+  created_at              DateTime @default(now()) @db.Timestamptz(6)
+  technician              User     @relation(fields: [technician_id], references: [id], onDelete: Cascade)
+  tenant                  Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
-  tenant                  Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  technician              User      @relation(fields: [technician_id], references: [id], onDelete: Cascade)
-
-  @@unique([tenant_id, technician_id, period_start, period_end])
+  @@unique([tenant_id, technician_id, period_start, period_end], map: "technician_performance_tenant_id_technician_id_period_start_per")
+  @@index([period_start, period_end])
+  @@index([tenant_id, technician_id])
   @@map("technician_performance")
   @@schema("public")
 }
 
-// KPI Templates System
 model KpiTemplate {
-  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id            String    @db.Uuid
-  name                 String    @db.VarChar(255)
-  description          String?
-  category             String    @default("user") @db.VarChar(50) // 'financial' | 'operational' | 'customer' | 'compliance'
-  template_type        String    @default("user") @db.VarChar(50) // 'system' | 'user' | 'shared'
-  formula_expression   String
-  formula_fields       Json      @default("[]")
-  threshold_config     Json      @default("{}")
-  chart_config         Json      @default("{}")
-  data_source_config   Json      @default("{}")
-  tags                 String[]  @default([])
-  is_public            Boolean   @default(false)
-  is_featured          Boolean   @default(false)
-  usage_count          Int       @default(0)
-  version              String    @default("1.0.0") @db.VarChar(20)
-  status               String    @default("published") @db.VarChar(20) // 'draft' | 'published' | 'archived'
-  created_by           String?   @db.Uuid
-  approved_by          String?   @db.Uuid
-  created_at           DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id          String             @db.Uuid
+  name               String             @db.VarChar(255)
+  description        String?
+  category           String?            @default("user") @db.VarChar(50)
+  template_type      String?            @default("user") @db.VarChar(50)
+  formula_expression String
+  formula_fields     Json?              @default("[]")
+  threshold_config   Json?              @default("{}")
+  chart_config       Json?              @default("{}")
+  data_source_config Json?              @default("{}")
+  tags               String[]           @default([])
+  is_public          Boolean?           @default(false)
+  is_featured        Boolean?           @default(false)
+  usage_count        Int?               @default(0)
+  version            String?            @default("1.0.0") @db.VarChar(20)
+  status             String?            @default("published") @db.VarChar(20)
+  created_by         String?            @db.Uuid
+  approved_by        String?            @db.Uuid
+  created_at         DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?          @default(now()) @updatedAt @db.Timestamptz(6)
+  dashboard_cards    dashboard_cards[]
+  templateFields     KpiTemplateField[]
+  templateUsage      KpiTemplateUsage[]
+  approver           User?              @relation("KpiTemplateApprover", fields: [approved_by], references: [id], onUpdate: NoAction)
+  creator            User?              @relation("KpiTemplateCreator", fields: [created_by], references: [id], onUpdate: NoAction)
+  tenant             Tenant             @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  userKpis           UserKpi[]
 
-  // Relations
-  tenant               Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  creator              User?     @relation("KpiTemplateCreator", fields: [created_by], references: [id], onDelete: SetNull)
-  approver             User?     @relation("KpiTemplateApprover", fields: [approved_by], references: [id], onDelete: SetNull)
-  templateFields       KpiTemplateField[]
-  userKpis             UserKpi[]
-  templateUsage        KpiTemplateUsage[]
-
-  @@index([tenant_id])
-  @@index([template_type])
-  @@index([category])
-  @@index([is_public])
-  @@index([usage_count(sort: Desc)])
+  @@index([category], map: "idx_kpi_templates_category")
+  @@index([created_at(sort: Desc)], map: "idx_kpi_templates_created_at_desc")
+  @@index([is_public], map: "idx_kpi_templates_is_public")
+  @@index([template_type], map: "idx_kpi_templates_template_type")
+  @@index([tenant_id], map: "idx_kpi_templates_tenant_id")
+  @@index([usage_count(sort: Desc)], map: "idx_kpi_templates_usage_count_desc")
   @@map("kpi_templates")
   @@schema("public")
 }
 
 model KpiTemplateField {
-  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  template_id       String     @db.Uuid
-  field_name        String     @db.VarChar(255)
-  field_type        String     @db.VarChar(50) // 'number' | 'text' | 'date' | 'boolean'
-  table_name        String     @db.VarChar(255)
-  column_name       String     @db.VarChar(255)
-  aggregation_type  String?    @db.VarChar(50) // 'sum' | 'count' | 'avg' | 'min' | 'max'
-  display_name      String     @db.VarChar(255)
-  description       String?
-  is_required       Boolean    @default(false)
-  sort_order        Int        @default(0)
+  id               String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  template_id      String      @db.Uuid
+  field_name       String      @db.VarChar(255)
+  field_type       String      @db.VarChar(50)
+  table_name       String      @db.VarChar(255)
+  column_name      String      @db.VarChar(255)
+  aggregation_type String?     @db.VarChar(50)
+  display_name     String      @db.VarChar(255)
+  description      String?
+  is_required      Boolean?    @default(false)
+  sort_order       Int?        @default(0)
+  template         KpiTemplate @relation(fields: [template_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  // Relations
-  template          KpiTemplate @relation(fields: [template_id], references: [id], onDelete: Cascade)
-
+  @@index([sort_order], map: "idx_kpi_template_fields_sort_order")
+  @@index([template_id], map: "idx_kpi_template_fields_template_id")
   @@map("kpi_template_fields")
   @@schema("public")
 }
 
 model UserKpi {
-  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id            String    @db.Uuid
-  user_id              String    @db.Uuid
-  template_id          String?   @db.Uuid
-  name                 String    @db.VarChar(255)
-  description          String?
-  formula_expression   String
-  formula_fields       Json      @default("[]")
-  threshold_config     Json      @default("{}")
-  chart_config         Json      @default("{}")
-  data_source_config   Json      @default("{}")
-  is_active            Boolean   @default(true)
-  last_calculated      DateTime? @db.Timestamptz(6)
-  last_value           Decimal?  @db.Decimal(15, 4)
-  created_at           DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id          String            @db.Uuid
+  user_id            String            @db.Uuid
+  template_id        String?           @db.Uuid
+  name               String            @db.VarChar(255)
+  description        String?
+  formula_expression String
+  formula_fields     Json?             @default("[]")
+  threshold_config   Json?             @default("{}")
+  chart_config       Json?             @default("{}")
+  data_source_config Json?             @default("{}")
+  is_active          Boolean?          @default(true)
+  last_calculated    DateTime?         @db.Timestamptz(6)
+  last_value         Decimal?          @db.Decimal(15, 4)
+  created_at         DateTime?         @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?         @default(now()) @updatedAt @db.Timestamptz(6)
+  dashboard_cards    dashboard_cards[]
+  template           KpiTemplate?      @relation(fields: [template_id], references: [id], onUpdate: NoAction)
+  tenant             Tenant            @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user               User              @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  // Relations
-  tenant               Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  user                 User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  template             KpiTemplate? @relation(fields: [template_id], references: [id], onDelete: SetNull)
-
-  @@index([tenant_id, user_id])
+  @@index([is_active], map: "idx_user_kpis_is_active")
+  @@index([template_id], map: "idx_user_kpis_template_id")
+  @@index([tenant_id, user_id], map: "idx_user_kpis_tenant_user")
   @@map("user_kpis")
   @@schema("public")
 }
 
 model KpiTemplateUsage {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  template_id String   @db.Uuid
-  user_id     String   @db.Uuid
-  tenant_id   String   @db.Uuid
-  action      String   @db.VarChar(50) // 'viewed' | 'used' | 'favorited' | 'shared'
-  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  template_id String      @db.Uuid
+  user_id     String      @db.Uuid
+  tenant_id   String      @db.Uuid
+  action      String      @db.VarChar(50)
+  created_at  DateTime?   @default(now()) @db.Timestamptz(6)
+  template    KpiTemplate @relation(fields: [template_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tenant      Tenant      @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user        User        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  // Relations
-  template    KpiTemplate @relation(fields: [template_id], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  tenant      Tenant      @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-
-  @@index([template_id])
-  @@index([user_id])
-  @@index([tenant_id])
-  // Prevent duplicate favorites per user/tenant/template
-  @@unique([tenant_id, user_id, template_id, action], map: "kpi_template_usage_unique_action_per_user")
+  @@index([action], map: "idx_kpi_template_usage_action")
+  @@index([created_at(sort: Desc)], map: "idx_kpi_template_usage_created_at_desc")
+  @@index([template_id], map: "idx_kpi_template_usage_template_id")
+  @@index([tenant_id], map: "idx_kpi_template_usage_tenant_id")
+  @@index([user_id], map: "idx_kpi_template_usage_user_id")
   @@map("kpi_template_usage")
   @@schema("public")
 }
 
-// ============================================================================
-// Dashboard Models
-// ============================================================================
-
 model DashboardLayout {
-  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id               String                    @db.Uuid
-  user_id                 String                    @db.Uuid
-  name                    String                    @db.VarChar(255)
-  is_default              Boolean                   @default(false)
-  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
-  updated_at              DateTime                  @default(now()) @updatedAt @db.Timestamptz(6)
-  
-  regions                 DashboardRegion[]
-  versions                DashboardLayoutVersion[]
-  migrationLogs           DashboardMigrationLog[]
-  auditLogs               DashboardLayoutAudit[]
+  id              String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id       String                   @db.Uuid
+  user_id         String?                  @db.Uuid
+  name            String
+  is_default      Boolean                  @default(false)
+  created_at      DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime                 @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at      DateTime?                @db.Timestamptz(6)
+  dashboard_cards dashboard_cards[]
+  versions        DashboardLayoutVersion[]
+  regions         DashboardRegion[]
 
-  @@index([tenant_id])
-  @@index([user_id])
-  @@index([tenant_id, user_id])
+  @@index([tenant_id], map: "idx_dashboard_layouts_tenant")
+  @@index([user_id], map: "idx_dashboard_layouts_user")
   @@map("dashboard_layouts")
   @@schema("public")
 }
 
 model DashboardRegion {
-  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  layout_id               String                    @db.Uuid
-  tenant_id               String                    @db.Uuid
-  user_id                 String                    @db.Uuid
-  region_type             String                    @db.VarChar(50)
-  grid_row                Int                       @default(0)
-  grid_col                Int                       @default(0)
-  row_span                Int                       @default(1)
-  col_span                Int                       @default(1)
-  min_width               Int?                      @default(200)
-  min_height              Int?                      @default(150)
-  is_collapsed            Boolean                   @default(false)
-  is_locked               Boolean                   @default(false)
-  is_hidden_mobile        Boolean                   @default(false)
-  config                  Json                      @default("{}")
-  widget_type             String?                   @db.VarChar(100)
-  widget_config           Json                      @default("{}")
-  display_order           Int                       @default(0)
-  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
-  updated_at              DateTime                  @default(now()) @updatedAt @db.Timestamptz(6)
-  deleted_at              DateTime?                 @db.Timestamptz(6)
-  
-  layout                  DashboardLayout           @relation(fields: [layout_id], references: [id], onDelete: Cascade)
-  acls                    DashboardRegionAcl[]
-  presences               DashboardRegionPresence[]
+  id               String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  layout_id        String                    @db.Uuid
+  tenant_id        String                    @db.Uuid
+  user_id          String                    @db.Uuid
+  region_type      String                    @db.VarChar(50)
+  grid_row         Int                       @default(0)
+  grid_col         Int                       @default(0)
+  row_span         Int                       @default(1)
+  col_span         Int                       @default(1)
+  min_width        Int?                      @default(200)
+  min_height       Int?                      @default(150)
+  is_collapsed     Boolean?                  @default(false)
+  is_locked        Boolean?                  @default(false)
+  is_hidden_mobile Boolean?                  @default(false)
+  config           Json?                     @default("{}")
+  widget_type      String?                   @db.VarChar(100)
+  widget_config    Json?                     @default("{}")
+  display_order    Int?                      @default(0)
+  created_at       DateTime?                 @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?                 @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at       DateTime?                 @db.Timestamptz(6)
+  version          Int                       @default(1)
+  acls             DashboardRegionAcl[]
+  presences        DashboardRegionPresence[]
+  layout           DashboardLayout           @relation(fields: [layout_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([layout_id])
-  @@index([tenant_id])
-  @@index([user_id])
-  @@index([layout_id, tenant_id, user_id])
-  @@index([display_order])
-  @@index([grid_row, grid_col])
-  @@index([deleted_at])
+  @@index([config], map: "idx_dashboard_regions_config", type: Gin)
+  @@index([display_order], map: "idx_dashboard_regions_display_order")
+  @@index([grid_row, grid_col], map: "idx_dashboard_regions_grid_position")
+  @@index([layout_id], map: "idx_dashboard_regions_layout_id")
+  @@index([layout_id, tenant_id, user_id], map: "idx_dashboard_regions_layout_tenant_user")
+  @@index([tenant_id], map: "idx_dashboard_regions_tenant_id")
+  @@index([user_id], map: "idx_dashboard_regions_user_id")
+  @@index([id, version], map: "idx_dashboard_regions_version")
+  @@index([widget_config], map: "idx_dashboard_regions_widget_config", type: Gin)
   @@map("dashboard_regions")
   @@schema("public")
 }
 
 model DashboardLayoutVersion {
-  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  layout_id               String                    @db.Uuid
-  version_number          Int
-  status                  String                    @db.VarChar(20)
-  created_by              String                    @db.Uuid
-  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
-  payload                 Json
-  diff                    Json?
-  notes                   String?
-  tenant_id               String                    @db.Uuid
-  
-  layout                  DashboardLayout           @relation(fields: [layout_id], references: [id], onDelete: Cascade)
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  layout_id      String          @db.Uuid
+  version_number Int
+  status         String          @db.VarChar(20)
+  created_by     String          @db.Uuid
+  created_at     DateTime?       @default(now()) @db.Timestamptz(6)
+  payload        Json
+  diff           Json?
+  notes          String?
+  tenant_id      String          @db.Uuid
+  layout         DashboardLayout @relation(fields: [layout_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([layout_id, version_number])
-  @@index([layout_id])
-  @@index([tenant_id])
-  @@index([status])
-  @@index([created_at(sort: Desc)])
+  @@index([created_at(sort: Desc)], map: "idx_layout_versions_created_at")
+  @@index([diff], map: "idx_layout_versions_diff", type: Gin)
+  @@index([layout_id], map: "idx_layout_versions_layout_id")
+  @@index([payload], map: "idx_layout_versions_payload", type: Gin)
+  @@index([status], map: "idx_layout_versions_status")
+  @@index([tenant_id], map: "idx_layout_versions_tenant_id")
   @@map("dashboard_layout_versions")
   @@schema("public")
 }
 
 model DashboardRegionAcl {
-  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  region_id               String                    @db.Uuid
-  principal_type          String                    @db.VarChar(20)
-  principal_id            String                    @db.Uuid
-  permission_set          Json                      @default("{\"read\": true, \"edit\": false, \"share\": false}")
-  tenant_id               String                    @db.Uuid
-  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
-  
-  region                  DashboardRegion           @relation(fields: [region_id], references: [id], onDelete: Cascade)
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  region_id      String          @db.Uuid
+  principal_type String          @db.VarChar(20)
+  principal_id   String          @db.Uuid
+  permission_set Json            @default("{\"edit\": false, \"read\": true, \"share\": false}")
+  tenant_id      String          @db.Uuid
+  created_at     DateTime?       @default(now()) @db.Timestamptz(6)
+  region         DashboardRegion @relation(fields: [region_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([region_id, principal_type, principal_id])
-  @@index([region_id])
-  @@index([tenant_id])
-  @@index([principal_type, principal_id])
+  @@index([permission_set], map: "idx_region_acls_permission_set", type: Gin)
+  @@index([principal_type, principal_id], map: "idx_region_acls_principal")
+  @@index([region_id], map: "idx_region_acls_region_id")
+  @@index([tenant_id], map: "idx_region_acls_tenant_id")
   @@map("dashboard_region_acls")
   @@schema("public")
 }
 
 model DashboardWidgetRegistry {
-  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  widget_id               String                    @unique @db.VarChar(100)
-  manifest                Json
-  signature               String?
-  allowed_tenants         String[]                  @db.Uuid
-  is_public               Boolean                   @default(false)
-  is_approved             Boolean                   @default(false)
-  created_by              String?                   @db.Uuid
-  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
-  updated_at              DateTime                  @default(now()) @updatedAt @db.Timestamptz(6)
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  widget_id       String    @unique @db.VarChar(100)
+  manifest        Json
+  signature       String?
+  allowed_tenants String[]  @db.Uuid
+  is_public       Boolean?  @default(false)
+  is_approved     Boolean?  @default(false)
+  created_by      String?   @db.Uuid
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime? @default(now()) @updatedAt @db.Timestamptz(6)
 
-  @@index([widget_id])
-  @@index([is_approved])
-  @@index([is_public])
+  @@index([allowed_tenants], map: "idx_widget_registry_allowed_tenants", type: Gin)
+  @@index([manifest], map: "idx_widget_registry_manifest", type: Gin)
+  @@index([widget_id], map: "idx_widget_registry_widget_id")
   @@map("dashboard_widget_registry")
   @@schema("public")
 }
 
 model DashboardMigrationLog {
-  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id                 String                    @db.Uuid
-  layout_id               String                    @db.Uuid
-  migration_payload       Json
-  status                  String                    @db.VarChar(20)
-  errors                  Json?
-  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
-  tenant_id               String                    @db.Uuid
-  
-  layout                  DashboardLayout           @relation(fields: [layout_id], references: [id], onDelete: Cascade)
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id           String    @db.Uuid
+  layout_id         String    @db.Uuid
+  migration_payload Json
+  status            String    @db.VarChar(20)
+  errors            Json?
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  tenant_id         String    @db.Uuid
 
-  @@index([user_id])
-  @@index([layout_id])
-  @@index([tenant_id])
-  @@index([status])
-  @@index([created_at(sort: Desc)])
+  @@index([created_at(sort: Desc)], map: "idx_migration_logs_created_at")
+  @@index([layout_id], map: "idx_migration_logs_layout_id")
+  @@index([migration_payload], map: "idx_migration_logs_payload", type: Gin)
+  @@index([status], map: "idx_migration_logs_status")
+  @@index([tenant_id], map: "idx_migration_logs_tenant_id")
+  @@index([user_id], map: "idx_migration_logs_user_id")
   @@map("dashboard_migration_logs")
   @@schema("public")
 }
 
 model DashboardRegionPresence {
-  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  region_id               String                    @db.Uuid
-  user_id                 String                    @db.Uuid
-  session_id              String                    @db.VarChar(255)
-  is_editing              Boolean                   @default(false)
-  last_seen               DateTime                  @default(now()) @db.Timestamptz(6)
-  tenant_id               String                    @db.Uuid
-  
-  region                  DashboardRegion           @relation(fields: [region_id], references: [id], onDelete: Cascade)
+  id         String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  region_id  String          @db.Uuid
+  user_id    String          @db.Uuid
+  session_id String          @db.VarChar(255)
+  is_editing Boolean?        @default(false)
+  last_seen  DateTime?       @default(now()) @db.Timestamptz(6)
+  tenant_id  String          @db.Uuid
+  region     DashboardRegion @relation(fields: [region_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([region_id, user_id, session_id])
-  @@index([region_id])
-  @@index([tenant_id])
-  @@index([user_id])
-  @@index([last_seen])
-  @@index([is_editing])
+  @@index([last_seen], map: "idx_region_presence_last_seen")
+  @@index([region_id], map: "idx_region_presence_region_id")
+  @@index([tenant_id], map: "idx_region_presence_tenant_id")
+  @@index([user_id], map: "idx_region_presence_user_id")
   @@map("dashboard_region_presence")
   @@schema("public")
 }
 
 model DashboardLayoutAudit {
-  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  layout_id               String                    @db.Uuid
-  user_id                 String                    @db.Uuid
-  action                  String                    @db.VarChar(50)
-  changes                 Json?
-  metadata                Json?
-  tenant_id               String                    @db.Uuid
-  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
-  
-  layout                  DashboardLayout           @relation(fields: [layout_id], references: [id], onDelete: Cascade)
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  layout_id  String    @db.Uuid
+  user_id    String    @db.Uuid
+  action     String    @db.VarChar(50)
+  changes    Json?
+  metadata   Json?
+  tenant_id  String    @db.Uuid
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
 
-  @@index([layout_id])
-  @@index([user_id])
-  @@index([tenant_id])
-  @@index([action])
-  @@index([created_at(sort: Desc)])
+  @@index([action], map: "idx_layout_audit_action")
+  @@index([changes], map: "idx_layout_audit_changes", type: Gin)
+  @@index([created_at(sort: Desc)], map: "idx_layout_audit_created_at")
+  @@index([layout_id], map: "idx_layout_audit_layout_id")
+  @@index([metadata], map: "idx_layout_audit_metadata", type: Gin)
+  @@index([tenant_id], map: "idx_layout_audit_tenant_id")
+  @@index([user_id], map: "idx_layout_audit_user_id")
   @@map("dashboard_layout_audit")
   @@schema("public")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model audit_log_entries {
+  instance_id String?   @db.Uuid
+  id          String    @id @db.Uuid
+  payload     Json?     @db.Json
+  created_at  DateTime? @db.Timestamptz(6)
+  ip_address  String    @default("") @db.VarChar(64)
+
+  @@index([instance_id], map: "audit_logs_instance_id_idx")
+  @@schema("auth")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model flow_state {
+  id                     String                @id @db.Uuid
+  user_id                String?               @db.Uuid
+  auth_code              String
+  code_challenge_method  code_challenge_method
+  code_challenge         String
+  provider_type          String
+  provider_access_token  String?
+  provider_refresh_token String?
+  created_at             DateTime?             @db.Timestamptz(6)
+  updated_at             DateTime?             @db.Timestamptz(6)
+  authentication_method  String
+  auth_code_issued_at    DateTime?             @db.Timestamptz(6)
+  saml_relay_states      saml_relay_states[]
+
+  @@index([created_at(sort: Desc)])
+  @@index([auth_code], map: "idx_auth_code")
+  @@index([user_id, authentication_method], map: "idx_user_id_auth_method")
+  @@schema("auth")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model identities {
+  provider_id     String
+  user_id         String    @db.Uuid
+  identity_data   Json
+  provider        String
+  last_sign_in_at DateTime? @db.Timestamptz(6)
+  created_at      DateTime? @db.Timestamptz(6)
+  updated_at      DateTime? @db.Timestamptz(6)
+  email           String?   @default(dbgenerated("lower((identity_data ->> 'email'::text))"))
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  users           users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([provider_id, provider], map: "identities_provider_id_provider_unique")
+  @@index([email])
+  @@index([user_id])
+  @@schema("auth")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model instances {
+  id              String    @id @db.Uuid
+  uuid            String?   @db.Uuid
+  raw_base_config String?
+  created_at      DateTime? @db.Timestamptz(6)
+  updated_at      DateTime? @db.Timestamptz(6)
+
+  @@schema("auth")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model mfa_amr_claims {
+  session_id            String   @db.Uuid
+  created_at            DateTime @db.Timestamptz(6)
+  updated_at            DateTime @db.Timestamptz(6)
+  authentication_method String
+  id                    String   @id(map: "amr_id_pk") @db.Uuid
+  sessions              sessions @relation(fields: [session_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([session_id, authentication_method], map: "mfa_amr_claims_session_id_authentication_method_pkey")
+  @@schema("auth")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model mfa_challenges {
+  id                     String      @id @db.Uuid
+  factor_id              String      @db.Uuid
+  created_at             DateTime    @db.Timestamptz(6)
+  verified_at            DateTime?   @db.Timestamptz(6)
+  ip_address             String      @db.Inet
+  otp_code               String?
+  web_authn_session_data Json?
+  mfa_factors            mfa_factors @relation(fields: [factor_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "mfa_challenges_auth_factor_id_fkey")
+
+  @@index([created_at(sort: Desc)], map: "mfa_challenge_created_at_idx")
+  @@schema("auth")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model mfa_factors {
+  id                           String           @id @db.Uuid
+  user_id                      String           @db.Uuid
+  friendly_name                String?
+  factor_type                  factor_type
+  status                       factor_status
+  created_at                   DateTime         @db.Timestamptz(6)
+  updated_at                   DateTime         @db.Timestamptz(6)
+  secret                       String?
+  phone                        String?
+  last_challenged_at           DateTime?        @unique @db.Timestamptz(6)
+  web_authn_credential         Json?
+  web_authn_aaguid             String?          @db.Uuid
+  last_webauthn_challenge_data Json?
+  mfa_challenges               mfa_challenges[]
+  users                        users            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, phone], map: "unique_phone_factor_per_user")
+  @@index([user_id, created_at], map: "factor_id_created_at_idx")
+  @@index([user_id])
+  @@schema("auth")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model oauth_authorizations {
+  id                    String                     @id @db.Uuid
+  authorization_id      String                     @unique
+  client_id             String                     @db.Uuid
+  user_id               String?                    @db.Uuid
+  redirect_uri          String
+  scope                 String
+  state                 String?
+  resource              String?
+  code_challenge        String?
+  code_challenge_method code_challenge_method?
+  response_type         oauth_response_type        @default(code)
+  status                oauth_authorization_status @default(pending)
+  authorization_code    String?                    @unique
+  created_at            DateTime                   @default(now()) @db.Timestamptz(6)
+  expires_at            DateTime                   @default(dbgenerated("(now() + '00:03:00'::interval)")) @db.Timestamptz(6)
+  approved_at           DateTime?                  @db.Timestamptz(6)
+  oauth_clients         oauth_clients              @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                 users?                     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("auth")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model oauth_clients {
+  id                   String                  @id @db.Uuid
+  client_secret_hash   String?
+  registration_type    oauth_registration_type
+  redirect_uris        String
+  grant_types          String
+  client_name          String?
+  client_uri           String?
+  logo_uri             String?
+  created_at           DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime                @default(now()) @db.Timestamptz(6)
+  deleted_at           DateTime?               @db.Timestamptz(6)
+  client_type          oauth_client_type       @default(confidential)
+  oauth_authorizations oauth_authorizations[]
+  oauth_consents       oauth_consents[]
+  sessions             sessions[]
+
+  @@index([deleted_at])
+  @@schema("auth")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model oauth_consents {
+  id            String        @id @db.Uuid
+  user_id       String        @db.Uuid
+  client_id     String        @db.Uuid
+  scopes        String
+  granted_at    DateTime      @default(now()) @db.Timestamptz(6)
+  revoked_at    DateTime?     @db.Timestamptz(6)
+  oauth_clients oauth_clients @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users         users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, client_id], map: "oauth_consents_user_client_unique")
+  @@index([user_id, granted_at(sort: Desc)], map: "oauth_consents_user_order_idx")
+  @@schema("auth")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model one_time_tokens {
+  id         String              @id @db.Uuid
+  user_id    String              @db.Uuid
+  token_type one_time_token_type
+  token_hash String
+  relates_to String
+  created_at DateTime            @default(now()) @db.Timestamp(6)
+  updated_at DateTime            @default(now()) @db.Timestamp(6)
+  users      users               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, token_type])
+  @@index([relates_to], map: "one_time_tokens_relates_to_hash_idx", type: Hash)
+  @@index([token_hash], map: "one_time_tokens_token_hash_hash_idx", type: Hash)
+  @@schema("auth")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model refresh_tokens {
+  instance_id String?   @db.Uuid
+  id          BigInt    @id @default(autoincrement())
+  token       String?   @unique(map: "refresh_tokens_token_unique") @db.VarChar(255)
+  user_id     String?   @db.VarChar(255)
+  revoked     Boolean?
+  created_at  DateTime? @db.Timestamptz(6)
+  updated_at  DateTime? @db.Timestamptz(6)
+  parent      String?   @db.VarChar(255)
+  session_id  String?   @db.Uuid
+  sessions    sessions? @relation(fields: [session_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([instance_id])
+  @@index([instance_id, user_id])
+  @@index([parent])
+  @@index([session_id, revoked])
+  @@index([updated_at(sort: Desc)])
+  @@schema("auth")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model saml_providers {
+  id                String        @id @db.Uuid
+  sso_provider_id   String        @db.Uuid
+  entity_id         String        @unique
+  metadata_xml      String
+  metadata_url      String?
+  attribute_mapping Json?
+  created_at        DateTime?     @db.Timestamptz(6)
+  updated_at        DateTime?     @db.Timestamptz(6)
+  name_id_format    String?
+  sso_providers     sso_providers @relation(fields: [sso_provider_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([sso_provider_id])
+  @@schema("auth")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model saml_relay_states {
+  id              String        @id @db.Uuid
+  sso_provider_id String        @db.Uuid
+  request_id      String
+  for_email       String?
+  redirect_to     String?
+  created_at      DateTime?     @db.Timestamptz(6)
+  updated_at      DateTime?     @db.Timestamptz(6)
+  flow_state_id   String?       @db.Uuid
+  flow_state      flow_state?   @relation(fields: [flow_state_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  sso_providers   sso_providers @relation(fields: [sso_provider_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([created_at(sort: Desc)])
+  @@index([for_email])
+  @@index([sso_provider_id])
+  @@schema("auth")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model schema_migrations {
+  version String @id @db.VarChar(255)
+
+  @@schema("auth")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model sessions {
+  id                     String           @id @db.Uuid
+  user_id                String           @db.Uuid
+  created_at             DateTime?        @db.Timestamptz(6)
+  updated_at             DateTime?        @db.Timestamptz(6)
+  factor_id              String?          @db.Uuid
+  aal                    aal_level?
+  not_after              DateTime?        @db.Timestamptz(6)
+  refreshed_at           DateTime?        @db.Timestamp(6)
+  user_agent             String?
+  ip                     String?          @db.Inet
+  tag                    String?
+  oauth_client_id        String?          @db.Uuid
+  refresh_token_hmac_key String?
+  refresh_token_counter  BigInt?
+  mfa_amr_claims         mfa_amr_claims[]
+  refresh_tokens         refresh_tokens[]
+  oauth_clients          oauth_clients?   @relation(fields: [oauth_client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                  users            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([not_after(sort: Desc)])
+  @@index([oauth_client_id])
+  @@index([user_id])
+  @@index([user_id, created_at], map: "user_id_created_at_idx")
+  @@schema("auth")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model sso_domains {
+  id              String        @id @db.Uuid
+  sso_provider_id String        @db.Uuid
+  domain          String
+  created_at      DateTime?     @db.Timestamptz(6)
+  updated_at      DateTime?     @db.Timestamptz(6)
+  sso_providers   sso_providers @relation(fields: [sso_provider_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([sso_provider_id])
+  @@schema("auth")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model sso_providers {
+  id                String              @id @db.Uuid
+  resource_id       String?
+  created_at        DateTime?           @db.Timestamptz(6)
+  updated_at        DateTime?           @db.Timestamptz(6)
+  disabled          Boolean?
+  saml_providers    saml_providers[]
+  saml_relay_states saml_relay_states[]
+  sso_domains       sso_domains[]
+
+  @@index([resource_id], map: "sso_providers_resource_id_pattern_idx")
+  @@schema("auth")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model users {
+  instance_id                 String?                @db.Uuid
+  id                          String                 @id @db.Uuid
+  aud                         String?                @db.VarChar(255)
+  role                        String?                @db.VarChar(255)
+  email                       String?                @db.VarChar(255)
+  encrypted_password          String?                @db.VarChar(255)
+  email_confirmed_at          DateTime?              @db.Timestamptz(6)
+  invited_at                  DateTime?              @db.Timestamptz(6)
+  confirmation_token          String?                @db.VarChar(255)
+  confirmation_sent_at        DateTime?              @db.Timestamptz(6)
+  recovery_token              String?                @db.VarChar(255)
+  recovery_sent_at            DateTime?              @db.Timestamptz(6)
+  email_change_token_new      String?                @db.VarChar(255)
+  email_change                String?                @db.VarChar(255)
+  email_change_sent_at        DateTime?              @db.Timestamptz(6)
+  last_sign_in_at             DateTime?              @db.Timestamptz(6)
+  raw_app_meta_data           Json?
+  raw_user_meta_data          Json?
+  is_super_admin              Boolean?
+  created_at                  DateTime?              @db.Timestamptz(6)
+  updated_at                  DateTime?              @db.Timestamptz(6)
+  phone                       String?                @unique
+  phone_confirmed_at          DateTime?              @db.Timestamptz(6)
+  phone_change                String?                @default("")
+  phone_change_token          String?                @default("") @db.VarChar(255)
+  phone_change_sent_at        DateTime?              @db.Timestamptz(6)
+  confirmed_at                DateTime?              @default(dbgenerated("LEAST(email_confirmed_at, phone_confirmed_at)")) @db.Timestamptz(6)
+  email_change_token_current  String?                @default("") @db.VarChar(255)
+  email_change_confirm_status Int?                   @default(0) @db.SmallInt
+  banned_until                DateTime?              @db.Timestamptz(6)
+  reauthentication_token      String?                @default("") @db.VarChar(255)
+  reauthentication_sent_at    DateTime?              @db.Timestamptz(6)
+  is_sso_user                 Boolean                @default(false)
+  deleted_at                  DateTime?              @db.Timestamptz(6)
+  is_anonymous                Boolean                @default(false)
+  identities                  identities[]
+  mfa_factors                 mfa_factors[]
+  oauth_authorizations        oauth_authorizations[]
+  oauth_consents              oauth_consents[]
+  one_time_tokens             one_time_tokens[]
+  sessions                    sessions[]
+  saved_layouts               saved_layouts[]
+  search_user_behavior        search_user_behavior[]
+
+  @@index([instance_id])
+  @@index([is_anonymous])
+  @@schema("auth")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model customers {
+  id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tenant_id    String    @db.Uuid
+  first_name   String
+  last_name    String
+  email        String?
+  phone        String?
+  address      String?
+  city         String?
+  state        String?
+  zip_code     String?
+  country      String?   @default("USA")
+  status       String?   @default("active")
+  account_type String?   @default("residential")
+  notes        String?
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+  created_by   String?   @db.Uuid
+  updated_by   String?   @db.Uuid
+
+  @@index([address(ops: raw("gin_trgm_ops"))], map: "idx_customers_address", type: Gin)
+  @@index([email], map: "idx_customers_email")
+  @@index([phone], map: "idx_customers_phone")
+  @@index([tenant_id], map: "idx_customers_tenant_id")
+  @@index([tenant_id, first_name, last_name, email, phone, address], map: "idx_customers_tenant_search")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dashboard_cards {
+  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id         String          @db.Uuid
+  user_id           String?         @db.Uuid
+  layout_id         String          @db.Uuid
+  card_uid          String
+  type              String
+  x                 Int             @default(0)
+  y                 Int             @default(0)
+  width             Int             @default(300)
+  height            Int             @default(200)
+  config            Json            @default("{}")
+  user_kpi_id       String?         @db.Uuid
+  template_id       String?         @db.Uuid
+  is_active         Boolean         @default(true)
+  created_at        DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime        @default(now()) @db.Timestamptz(6)
+  deleted_at        DateTime?       @db.Timestamptz(6)
+  dashboard_layouts DashboardLayout @relation(fields: [layout_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  kpi_templates     KpiTemplate?    @relation(fields: [template_id], references: [id], onUpdate: NoAction)
+  user_kpis         UserKpi?        @relation(fields: [user_kpi_id], references: [id], onUpdate: NoAction)
+
+  @@index([layout_id], map: "idx_dashboard_cards_layout")
+  @@index([template_id], map: "idx_dashboard_cards_template")
+  @@index([tenant_id], map: "idx_dashboard_cards_tenant")
+  @@index([type], map: "idx_dashboard_cards_type")
+  @@index([user_id], map: "idx_dashboard_cards_user")
+  @@index([user_kpi_id], map: "idx_dashboard_cards_user_kpi")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dashboard_events {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_type  String   @db.VarChar(100)
+  entity_type String   @db.VarChar(50)
+  entity_id   String   @db.Uuid
+  tenant_id   String   @db.Uuid
+  user_id     String   @db.Uuid
+  payload     Json     @default("{}")
+  metadata    Json?    @default("{}")
+  timestamp   DateTime @default(now()) @db.Timestamptz(6)
+  version     Int?     @default(1)
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([entity_type, entity_id, tenant_id], map: "idx_dashboard_events_entity")
+  @@index([tenant_id, timestamp(sort: Desc)], map: "idx_dashboard_events_tenant")
+  @@index([timestamp(sort: Desc)], map: "idx_dashboard_events_timestamp")
+  @@index([event_type, timestamp(sort: Desc)], map: "idx_dashboard_events_type")
+  @@index([user_id, tenant_id, timestamp(sort: Desc)], map: "idx_dashboard_events_user")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model dashboard_templates {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String    @db.VarChar(255)
+  description String?
+  thumbnail   String?
+  tenant_id   String    @db.Uuid
+  user_id     String    @db.Uuid
+  is_system   Boolean?  @default(false)
+  is_public   Boolean?  @default(false)
+  regions     Json      @default("[]")
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime? @default(now()) @db.Timestamptz(6)
+  deleted_at  DateTime? @db.Timestamptz(6)
+
+  @@index([created_at(sort: Desc)], map: "idx_dashboard_templates_created_at")
+  @@index([tenant_id], map: "idx_dashboard_templates_tenant_id")
+  @@index([user_id], map: "idx_dashboard_templates_user_id")
+  @@schema("public")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model idempotency_keys {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  idempotency_key String   @db.VarChar(255)
+  user_id         String   @db.Uuid
+  tenant_id       String   @db.Uuid
+  response_data   Json
+  status_code     Int      @default(200)
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([idempotency_key, user_id, tenant_id], map: "idempotency_keys_unique")
+  @@index([created_at], map: "idx_idempotency_keys_created_at")
+  @@index([idempotency_key, user_id, tenant_id], map: "idx_idempotency_keys_lookup")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model kpi_configs {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String     @db.VarChar(255)
+  description String?
+  category    String     @db.VarChar(50)
+  threshold   Json
+  drill_down  Json?
+  real_time   Boolean?   @default(false)
+  enabled     Boolean?   @default(true)
+  tags        String[]   @default([])
+  tenant_id   String     @db.Uuid
+  user_id     String     @db.Uuid
+  created_at  DateTime?  @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime?  @default(now()) @db.Timestamptz(6)
+  kpi_data    kpi_data[]
+
+  @@index([category], map: "idx_kpi_configs_category")
+  @@index([created_at], map: "idx_kpi_configs_created_at")
+  @@index([enabled], map: "idx_kpi_configs_enabled")
+  @@index([tenant_id], map: "idx_kpi_configs_tenant_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model kpi_data {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  kpi_id      String?      @db.Uuid
+  metric      String       @db.VarChar(255)
+  value       Decimal      @db.Decimal(15, 4)
+  timestamp   DateTime?    @default(now()) @db.Timestamptz(6)
+  metadata    Json?
+  tenant_id   String       @db.Uuid
+  created_at  DateTime?    @default(now()) @db.Timestamptz(6)
+  kpi_configs kpi_configs? @relation(fields: [kpi_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([kpi_id], map: "idx_kpi_data_kpi_id")
+  @@index([metric], map: "idx_kpi_data_metric")
+  @@index([metric, timestamp], map: "idx_kpi_data_metric_timestamp")
+  @@index([tenant_id], map: "idx_kpi_data_tenant_id")
+  @@index([timestamp], map: "idx_kpi_data_timestamp")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model leads {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  first_name     String
+  last_name      String
+  email          String
+  phone          String?
+  company        String?
+  message        String?
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime? @default(now()) @db.Timestamptz(6)
+  user_timezone  String?
+  user_timestamp DateTime? @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model recurring_job_instances {
+  id                      String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id               String                  @db.Uuid
+  recurring_template_id   String                  @db.Uuid
+  job_id                  String                  @db.Uuid
+  scheduled_date          DateTime                @db.Date
+  occurrence_number       Int
+  is_exception            Boolean?                @default(false)
+  exception_type          String?                 @db.VarChar(50)
+  exception_notes         String?
+  created_at              DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                @default(now()) @db.Timestamptz(6)
+  jobs                    Job                     @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  recurring_job_templates recurring_job_templates @relation(fields: [recurring_template_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tenants                 Tenant                  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([tenant_id, job_id])
+  @@unique([tenant_id, recurring_template_id, scheduled_date])
+  @@index([scheduled_date], map: "idx_recurring_instances_date")
+  @@index([tenant_id, job_id], map: "idx_recurring_instances_job")
+  @@index([tenant_id, recurring_template_id], map: "idx_recurring_instances_template")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model recurring_job_templates {
+  id                          String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id                   String                    @db.Uuid
+  name                        String                    @db.VarChar(255)
+  description                 String?
+  recurrence_type             String                    @db.VarChar(50)
+  recurrence_interval         Int?                      @default(1)
+  recurrence_days_of_week     Int[]
+  recurrence_day_of_month     Int?
+  recurrence_weekday_of_month String?                   @db.VarChar(20)
+  start_time                  DateTime                  @db.Time(6)
+  end_time                    DateTime?                 @db.Time(6)
+  estimated_duration          Int?
+  start_date                  DateTime                  @db.Date
+  end_date                    DateTime?                 @db.Date
+  max_occurrences             Int?
+  job_template                Json
+  is_active                   Boolean?                  @default(true)
+  last_generated_date         DateTime?                 @db.Date
+  created_at                  DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at                  DateTime                  @default(now()) @db.Timestamptz(6)
+  created_by                  String?                   @db.Uuid
+  jobs                        Job[]
+  recurring_job_instances     recurring_job_instances[]
+  users                       User?                     @relation(fields: [created_by], references: [id], onUpdate: NoAction)
+  tenants                     Tenant                    @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model saved_layouts {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String    @db.VarChar(255)
+  description  String?
+  storage_path String
+  file_size    BigInt?
+  user_id      String    @db.Uuid
+  tenant_id    String    @db.Uuid
+  is_public    Boolean?  @default(false)
+  tags         String[]  @default([])
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+  users        users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([created_at], map: "idx_saved_layouts_created_at")
+  @@index([is_public], map: "idx_saved_layouts_is_public")
+  @@index([storage_path], map: "idx_saved_layouts_storage_path")
+  @@index([tags], map: "idx_saved_layouts_tags", type: Gin)
+  @@index([tenant_id], map: "idx_saved_layouts_tenant_id")
+  @@index([updated_at], map: "idx_saved_layouts_updated_at")
+  @@index([user_id], map: "idx_saved_layouts_user_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model search_errors {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tenant_id     String?   @db.Uuid
+  user_id       String?   @db.Uuid
+  error_type    String
+  error_message String
+  error_stack   String?
+  query_text    String?
+  user_agent    String?
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  is_resolved   Boolean?  @default(false)
+  resolved_at   DateTime? @db.Timestamptz(6)
+  operation     String?
+  severity      String?
+  context       Json?
+  updated_at    DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at], map: "idx_search_errors_created_at")
+  @@index([tenant_id], map: "idx_search_errors_tenant_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model search_logs {
+  id               String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tenant_id        String    @db.Uuid
+  user_id          String?   @db.Uuid
+  query_text       String
+  result_count     Int?      @default(0)
+  response_time_ms Int?
+  search_type      String?
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at], map: "idx_search_logs_created_at")
+  @@index([tenant_id], map: "idx_search_logs_tenant_id")
+  @@schema("public")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model search_user_behavior {
+  id                         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tenant_id                  String    @db.Uuid
+  user_id                    String    @db.Uuid
+  preferred_search_mode      String?   @db.VarChar(50)
+  preferred_result_count     Int?
+  avg_session_searches       Decimal   @default(0) @db.Decimal(5, 2)
+  most_common_queries        String[]
+  search_time_preferences    Int[]
+  avg_query_length           Decimal   @default(0) @db.Decimal(5, 2)
+  total_searches             Int       @default(0)
+  successful_searches        Int       @default(0)
+  avg_time_to_click_ms       Decimal   @default(0) @db.Decimal(10, 2)
+  click_through_rate         Decimal   @default(0.0) @db.Decimal(5, 4)
+  accepts_suggestions        Boolean   @default(false)
+  suggestion_acceptance_rate Decimal   @default(0.0) @db.Decimal(5, 4)
+  learns_from_corrections    Boolean   @default(false)
+  avg_search_success_rate    Decimal   @default(1.0) @db.Decimal(5, 4)
+  last_search_at             DateTime? @db.Timestamptz(6)
+  created_at                 DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime? @default(now()) @db.Timestamptz(6)
+  tenants                    Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_search_user_behavior_tenant")
+  users                      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_search_user_behavior_user")
+
+  @@unique([tenant_id, user_id])
+  @@index([tenant_id], map: "idx_search_user_behavior_tenant")
+  @@index([tenant_id, user_id], map: "idx_search_user_behavior_user")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model technician_availability {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id     String   @db.Uuid
+  technician_id String   @db.Uuid
+  day_of_week   Int
+  start_time    DateTime @db.Time(6)
+  end_time      DateTime @db.Time(6)
+  is_active     Boolean? @default(true)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+  users         User     @relation(fields: [technician_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tenants       Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([tenant_id, technician_id, day_of_week])
+  @@index([tenant_id, technician_id], map: "idx_technician_availability_tenant_tech")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model technician_schedules {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id     String    @db.Uuid
+  technician_id String    @db.Uuid
+  schedule_date DateTime  @db.Date
+  start_time    DateTime? @db.Time(6)
+  end_time      DateTime? @db.Time(6)
+  is_available  Boolean?  @default(true)
+  notes         String?
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime  @default(now()) @db.Timestamptz(6)
+  users         User      @relation(fields: [technician_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tenants       Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([tenant_id, technician_id, schedule_date])
+  @@index([tenant_id, technician_id, schedule_date], map: "idx_technician_schedules_tenant_tech_date")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model time_off_requests {
+  id                                           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id                                    String    @db.Uuid
+  technician_id                                String    @db.Uuid
+  start_date                                   DateTime  @db.Date
+  end_date                                     DateTime  @db.Date
+  request_type                                 String    @default("pto") @db.VarChar(50)
+  status                                       String    @default("pending") @db.VarChar(20)
+  reason                                       String?
+  requested_by                                 String?   @db.Uuid
+  approved_by                                  String?   @db.Uuid
+  approved_at                                  DateTime? @db.Timestamptz(6)
+  created_at                                   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                                   DateTime  @default(now()) @db.Timestamptz(6)
+  users_time_off_requests_approved_byTousers   User?     @relation("time_off_requests_approved_byTousers", fields: [approved_by], references: [id], onUpdate: NoAction)
+  users_time_off_requests_requested_byTousers  User?     @relation("time_off_requests_requested_byTousers", fields: [requested_by], references: [id], onUpdate: NoAction)
+  users_time_off_requests_technician_idTousers User      @relation("time_off_requests_technician_idTousers", fields: [technician_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tenants                                      Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([tenant_id, status], map: "idx_time_off_requests_status")
+  @@index([tenant_id, technician_id], map: "idx_time_off_requests_tenant_tech")
+  @@schema("public")
+}
+
+enum BillingFrequency {
+  monthly
+  quarterly
+  annually
+  one_time
+
+  @@schema("public")
+}
+
+enum InvoiceStatus {
+  draft
+  sent
+  paid
+  overdue
+  cancelled
+
+  @@schema("public")
+}
+
+// Compliance Schema Models (Phase 3)
+model RuleDefinition {
+  id          String   @id @db.VarChar(10)
+  name        String   @db.VarChar(255)
+  description String?
+  tier        String   @db.VarChar(20)
+  category    String?  @db.VarChar(100)
+  file_path   String?  @db.VarChar(500)
+  opa_policy  String?  @db.VarChar(255)
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  complianceChecks ComplianceCheck[]
+  complianceTrends ComplianceTrend[]
+
+  @@map("rule_definitions")
+  @@schema("compliance")
+}
+
+model ComplianceCheck {
+  id                  String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id           String          @db.Uuid
+  pr_number           Int
+  commit_sha          String          @db.VarChar(40)
+  rule_id             String          @db.VarChar(10)
+  status              String          @db.VarChar(20)
+  severity            String          @db.VarChar(20)
+  file_path           String?         @db.VarChar(500)
+  line_number         Int?
+  violation_message   String?
+  context             Json?
+  created_at          DateTime        @default(now()) @db.Timestamptz(6)
+  resolved_at        DateTime?       @db.Timestamptz(6)
+  resolved_by         String?         @db.Uuid
+  override_reason     String?
+  override_approved_by String?        @db.Uuid
+
+  rule                RuleDefinition @relation(fields: [rule_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  tenant              Tenant          @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  overrideRequests    OverrideRequest[]
+  alertHistory        AlertHistory[]
+
+  @@index([tenant_id])
+  @@index([pr_number])
+  @@index([rule_id])
+  @@index([status])
+  @@index([severity])
+  @@index([created_at(sort: Desc)])
+  @@index([tenant_id, pr_number])
+  @@index([tenant_id, rule_id])
+  @@index([tenant_id, status])
+  // Note: Partial indexes (idx_checks_unresolved, idx_checks_tenant_unresolved) 
+  // are created in migration SQL but not supported in Prisma schema
+  @@map("compliance_checks")
+  @@schema("compliance")
+}
+
+model ComplianceTrend {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id       String          @db.Uuid
+  date            DateTime        @db.Date
+  rule_id         String?         @db.VarChar(10)
+  violation_count Int             @default(0)
+  compliance_rate Decimal?        @db.Decimal(5, 2)
+  created_at      DateTime        @default(now()) @db.Timestamptz(6)
+
+  rule            RuleDefinition? @relation(fields: [rule_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  tenant          Tenant          @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([tenant_id, date, rule_id], map: "compliance_trends_tenant_id_date_rule_id_key")
+  @@index([tenant_id, date(sort: Desc)], map: "idx_trends_tenant_date")
+  @@index([rule_id], map: "idx_trends_rule")
+  @@map("compliance_trends")
+  @@schema("compliance")
+}
+
+model OverrideRequest {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id       String          @db.Uuid
+  violation_id    String          @db.Uuid
+  requested_by    String          @db.Uuid
+  requested_at    DateTime        @default(now()) @db.Timestamptz(6)
+  reason          String
+  status          String          @db.VarChar(20)
+  approved_by     String?         @db.Uuid
+  approved_at     DateTime?       @db.Timestamptz(6)
+  rejection_reason String?
+
+  violation       ComplianceCheck @relation(fields: [violation_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, status], map: "idx_override_tenant_status")
+  @@index([violation_id], map: "idx_override_violation")
+  @@map("override_requests")
+  @@schema("compliance")
+}
+
+model AlertHistory {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id       String          @db.Uuid
+  violation_id    String          @db.Uuid
+  alert_type      String          @db.VarChar(50)
+  sent_at         DateTime        @default(now()) @db.Timestamptz(6)
+  acknowledged_at DateTime?       @db.Timestamptz(6)
+  acknowledged_by String?         @db.Uuid
+  status          String          @db.VarChar(20)
+  delivery_error  String?
+
+  violation       ComplianceCheck @relation(fields: [violation_id], references: [id], onDelete: Cascade)
+
+  @@index([violation_id], map: "idx_alert_violation")
+  @@index([status], map: "idx_alert_status")
+  // Note: Partial index filter is created in migration SQL but not supported in Prisma schema
+  @@map("alert_history")
+  @@schema("compliance")
+}
+
+model ComplianceAuditLog {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id     String   @db.Uuid
+  user_id       String   @db.Uuid
+  action        String   @db.VarChar(100)
+  resource_type String?  @db.VarChar(50)
+  resource_id   String?  @db.Uuid
+  before_state  Json?
+  after_state   Json?
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id], map: "idx_audit_tenant")
+  @@index([user_id], map: "idx_audit_user")
+  @@index([created_at(sort: Desc)], map: "idx_audit_created")
+  @@map("audit_log")
+  @@schema("compliance")
+}
+
+model WriteQueue {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  job_type      String   @db.VarChar(50)
+  job_data      Json
+  status        String   @default("pending") @db.VarChar(20)
+  attempts      Int      @default(0)
+  max_attempts  Int      @default(3)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  processed_at  DateTime? @db.Timestamptz(6)
+  error_message String?
+
+  @@index([status, created_at], map: "idx_write_queue_status")
+  @@map("write_queue")
+  @@schema("compliance")
+}
+
+enum ServiceAgreementStatus {
+  active
+  inactive
+  expired
+  cancelled
+
+  @@schema("public")
+}
+
+enum aal_level {
+  aal1
+  aal2
+  aal3
+
+  @@schema("auth")
+}
+
+enum code_challenge_method {
+  s256
+  plain
+
+  @@schema("auth")
+}
+
+enum factor_status {
+  unverified
+  verified
+
+  @@schema("auth")
+}
+
+enum factor_type {
+  totp
+  webauthn
+  phone
+
+  @@schema("auth")
+}
+
+enum oauth_authorization_status {
+  pending
+  approved
+  denied
+  expired
+
+  @@schema("auth")
+}
+
+enum oauth_client_type {
+  public
+  confidential
+
+  @@schema("auth")
+}
+
+enum oauth_registration_type {
+  dynamic
+  manual
+
+  @@schema("auth")
+}
+
+enum oauth_response_type {
+  code
+
+  @@schema("auth")
+}
+
+enum one_time_token_type {
+  confirmation_token
+  reauthentication_token
+  recovery_token
+  email_change_token_new
+  email_change_token_current
+  phone_change_token
+
+  @@schema("auth")
 }

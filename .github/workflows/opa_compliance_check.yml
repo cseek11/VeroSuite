@@ -1,0 +1,318 @@
+name: OPA Compliance Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, master, develop]
+  push:
+    branches: [main, master, develop]
+
+env:
+  OPA_VERSION: '1.10.1'
+
+jobs:
+  opa-compliance:
+    name: OPA Policy Evaluation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for diff analysis
+      
+      - name: Setup OPA
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/v${{ env.OPA_VERSION }}/opa_linux_amd64
+          chmod +x opa
+          sudo mv opa /usr/local/bin/
+          opa version
+      
+      - name: Get changed files
+        id: changed-files
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          else
+            BASE_SHA="${{ github.event.before }}"
+            HEAD_SHA="${{ github.sha }}"
+          fi
+          
+          # Get list of changed files with diffs
+          git diff --name-only $BASE_SHA $HEAD_SHA > changed_files.txt
+          
+          # Build JSON array of changed files with diffs
+          echo '{"changed_files":[' > changed_files.json
+          first=true
+          while IFS= read -r file; do
+            if [ -f "$file" ]; then
+              if [ "$first" = false ]; then
+                echo ',' >> changed_files.json
+              fi
+              first=false
+              
+              # Get diff for this file
+              diff=$(git diff $BASE_SHA $HEAD_SHA -- "$file" | sed 's/"/\\"/g' | awk '{printf "%s\\n", $0}')
+              additions=$(git diff --numstat $BASE_SHA $HEAD_SHA -- "$file" | awk '{print $1}')
+              deletions=$(git diff --numstat $BASE_SHA $HEAD_SHA -- "$file" | awk '{print $2}')
+              
+              cat >> changed_files.json <<EOF
+          {
+            "path": "$file",
+            "diff": "$diff",
+            "additions": ${additions:-0},
+            "deletions": ${deletions:-0}
+          }
+          EOF
+            fi
+          done < changed_files.txt
+          echo ']}' >> changed_files.json
+          
+          echo "Changed files JSON created"
+          cat changed_files.json | jq '.' || echo "Warning: Invalid JSON"
+      
+      - name: Build OPA input
+        id: build-input
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title || github.event.head_commit.message }}"
+          PR_BODY="${{ github.event.pull_request.body || '' }}"
+          PR_NUMBER="${{ github.event.pull_request.number || 0 }}"
+          AUTHOR="${{ github.event.pull_request.user.login || github.actor }}"
+          
+          # Merge changed files with PR metadata
+          jq --arg title "$PR_TITLE" \
+             --arg body "$PR_BODY" \
+             --argjson number "$PR_NUMBER" \
+             --arg author "$AUTHOR" \
+             '. + {
+               "pr_title": $title,
+               "pr_body": $body,
+               "pr_number": $number,
+               "author": $author
+             }' changed_files.json > opa-input.json
+          
+          echo "OPA input created:"
+          cat opa-input.json | jq '.'
+      
+      - name: Run OPA policies
+        id: opa-eval
+        run: |
+          # Evaluate all compliance policies
+          opa eval \
+            --data services/opa/policies/ \
+            --data services/opa/data/ \
+            --input opa-input.json \
+            --format pretty \
+            'data.compliance' > opa-results.json
+          
+          echo "OPA evaluation complete"
+          cat opa-results.json | jq '.'
+      
+      - name: Parse OPA results
+        id: parse-results
+        run: |
+          # Count violations by severity
+          DENY_COUNT=$(jq '[.. | .deny? | select(. != null)] | flatten | length' opa-results.json)
+          OVERRIDE_COUNT=$(jq '[.. | .override? | select(. != null)] | flatten | length' opa-results.json)
+          WARN_COUNT=$(jq '[.. | .warn? | select(. != null)] | flatten | length' opa-results.json)
+          
+          echo "deny_count=$DENY_COUNT" >> $GITHUB_OUTPUT
+          echo "override_count=$OVERRIDE_COUNT" >> $GITHUB_OUTPUT
+          echo "warn_count=$WARN_COUNT" >> $GITHUB_OUTPUT
+          
+          # Extract violation messages
+          jq -r '[.. | .deny? | select(. != null)] | flatten | .[]' opa-results.json > deny_messages.txt || echo "" > deny_messages.txt
+          jq -r '[.. | .override? | select(. != null)] | flatten | .[]' opa-results.json > override_messages.txt || echo "" > override_messages.txt
+          jq -r '[.. | .warn? | select(. != null)] | flatten | .[]' opa-results.json > warn_messages.txt || echo "" > warn_messages.txt
+          
+          echo "Violations parsed:"
+          echo "DENY: $DENY_COUNT"
+          echo "OVERRIDE: $OVERRIDE_COUNT"
+          echo "WARN: $WARN_COUNT"
+      
+      - name: Generate compliance report
+        id: report
+        run: |
+          cat > compliance-report.md <<'EOF'
+          ## 📋 OPA Compliance Check Report
+          
+          **Status:** ${{ steps.parse-results.outputs.deny_count == '0' && '✅ PASSED' || '❌ FAILED' }}
+          
+          ### Violations Summary
+          - 🚫 **HARD STOP:** ${{ steps.parse-results.outputs.deny_count }}
+          - ⚠️  **OVERRIDE REQUIRED:** ${{ steps.parse-results.outputs.override_count }}
+          - 💡 **WARNINGS:** ${{ steps.parse-results.outputs.warn_count }}
+          
+          EOF
+          
+          # Add HARD STOP violations
+          if [ "${{ steps.parse-results.outputs.deny_count }}" -gt 0 ]; then
+            echo "### 🚫 HARD STOP Violations" >> compliance-report.md
+            echo "" >> compliance-report.md
+            echo "These violations MUST be fixed before merge:" >> compliance-report.md
+            echo "" >> compliance-report.md
+            while IFS= read -r line; do
+              echo "- $line" >> compliance-report.md
+            done < deny_messages.txt
+            echo "" >> compliance-report.md
+          fi
+          
+          # Add OVERRIDE REQUIRED violations
+          if [ "${{ steps.parse-results.outputs.override_count }}" -gt 0 ]; then
+            echo "### ⚠️ OVERRIDE REQUIRED" >> compliance-report.md
+            echo "" >> compliance-report.md
+            echo "These require explicit override justification in PR description:" >> compliance-report.md
+            echo "" >> compliance-report.md
+            while IFS= read -r line; do
+              echo "- $line" >> compliance-report.md
+            done < override_messages.txt
+            echo "" >> compliance-report.md
+          fi
+          
+          # Add WARNINGS
+          if [ "${{ steps.parse-results.outputs.warn_count }}" -gt 0 ]; then
+            echo "### 💡 Warnings" >> compliance-report.md
+            echo "" >> compliance-report.md
+            echo "These are logged but don't block merge:" >> compliance-report.md
+            echo "" >> compliance-report.md
+            while IFS= read -r line; do
+              echo "- $line" >> compliance-report.md
+            done < warn_messages.txt
+            echo "" >> compliance-report.md
+          fi
+          
+          # Add footer
+          cat >> compliance-report.md <<'EOF'
+          
+          ---
+          
+          **OPA Version:** ${{ env.OPA_VERSION }}  
+          **Evaluated Policies:** All policies in `services/opa/policies/`  
+          **Evaluation Time:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          
+          For more information, see [OPA Documentation](services/opa/README.md)
+          EOF
+          
+          echo "Compliance report generated"
+          cat compliance-report.md
+      
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('compliance-report.md', 'utf8');
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('OPA Compliance Check Report')
+            );
+            
+            // Create or update comment
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: report
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: report
+              });
+            }
+      
+      - name: Upload OPA results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: opa-compliance-results
+          path: |
+            opa-input.json
+            opa-results.json
+            compliance-report.md
+          retention-days: 30
+      
+      - name: Check for HARD STOP violations
+        if: steps.parse-results.outputs.deny_count != '0'
+        run: |
+          echo "❌ HARD STOP: ${{ steps.parse-results.outputs.deny_count }} violations found"
+          echo "These violations MUST be fixed before merge."
+          echo ""
+          cat deny_messages.txt
+          exit 1
+      
+      - name: Check for OVERRIDE violations
+        if: steps.parse-results.outputs.override_count != '0'
+        run: |
+          echo "⚠️ OVERRIDE REQUIRED: ${{ steps.parse-results.outputs.override_count }} violations found"
+          echo "Add override justification to PR description to proceed."
+          echo ""
+          cat override_messages.txt
+          # Don't fail - just warn
+          exit 0
+      
+      - name: Send results to Compliance API
+        if: always()
+        env:
+          API_URL: ${{ secrets.COMPLIANCE_API_URL || 'http://localhost:3001/api/v1' }}
+          API_TOKEN: ${{ secrets.COMPLIANCE_API_TOKEN }}
+        run: |
+          # Only send if API token is configured
+          if [ -z "$API_TOKEN" ]; then
+            echo "⚠️ COMPLIANCE_API_TOKEN not configured - skipping API integration"
+            exit 0
+          fi
+          
+          # Extract PR number and commit SHA
+          PR_NUMBER="${{ github.event.pull_request.number || github.event.number }}"
+          COMMIT_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          
+          if [ -z "$PR_NUMBER" ] || [ "$PR_NUMBER" == "null" ]; then
+            echo "⚠️ No PR number found - skipping API integration"
+            exit 0
+          fi
+          
+          # Parse OPA results and send to API
+          echo "Sending compliance results to API for PR #$PR_NUMBER..."
+          
+          # Create compliance checks from OPA results
+          # This is a simplified version - in production, parse opa-results.json more thoroughly
+          jq -r '[.. | .deny? | select(. != null)] | flatten | .[]' opa-results.json | while read -r violation; do
+            curl -X POST "$API_URL/compliance/checks" \
+              -H "Authorization: Bearer $API_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"pr_number\": $PR_NUMBER,
+                \"commit_sha\": \"$COMMIT_SHA\",
+                \"rule_id\": \"R01\",
+                \"status\": \"VIOLATION\",
+                \"severity\": \"BLOCK\",
+                \"violation_message\": \"$violation\"
+              }" || echo "Failed to send violation: $violation"
+          done
+          
+          echo "✅ Compliance results sent to API"
+      
+      - name: Success
+        if: steps.parse-results.outputs.deny_count == '0'
+        run: |
+          echo "✅ All OPA compliance checks passed!"
+          if [ "${{ steps.parse-results.outputs.warn_count }}" -gt 0 ]; then
+            echo "💡 ${{ steps.parse-results.outputs.warn_count }} warnings logged (non-blocking)"
+          fi
+
+
+

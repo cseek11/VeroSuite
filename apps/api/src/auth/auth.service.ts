@@ -88,6 +88,7 @@ export class AuthService {
             ? JSON.parse(customPermissions) 
             : [];
         } catch (e) {
+          const traceId = randomUUID();
           this.logger.warn('Failed to parse custom_permissions, using empty array', {
             operation: 'login',
             traceId,

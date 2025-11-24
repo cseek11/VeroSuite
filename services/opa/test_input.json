@@ -1,0 +1,14 @@
+﻿{
+  "api_endpoints": [
+    {
+      "path": "/api/users",
+      "status": "modified"
+    }
+  ],
+  "performance_baseline": {
+    "/api/users": {"p50": 150, "p95": 250, "p99": 300}
+  },
+  "performance_current": {
+    "/api/users": {"p50": 180, "p95": 300, "p99": 400}
+  }
+}

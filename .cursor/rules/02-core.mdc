@@ -92,6 +92,135 @@ alwaysApply: true
 
 ---
 
+## R23: Naming Conventions — Step 5 Audit Procedures
+
+**For code changes affecting file names, component names, function names, constant names, directory names, or import paths:**
+
+### Component Naming Compliance
+
+- [ ] **MANDATORY:** Verify components use PascalCase (e.g., `CustomerSearchSelector.tsx`, `WorkOrderForm.tsx`)
+- [ ] **MANDATORY:** Verify component file names match component name exactly (case-sensitive)
+- [ ] **MANDATORY:** Verify component files use `.tsx` extension (React components)
+- [ ] **MANDATORY:** Verify component names are descriptive and follow established patterns
+- [ ] **RECOMMENDED:** Verify component names don't use abbreviations (unless established pattern)
+
+### Function Naming Compliance
+
+- [ ] **MANDATORY:** Verify functions use camelCase (e.g., `getUserById`, `processWorkOrder`)
+- [ ] **MANDATORY:** Verify function names are descriptive and indicate purpose
+- [ ] **MANDATORY:** Verify function names follow established patterns (check similar functions)
+- [ ] **RECOMMENDED:** Verify function names use verb-noun pattern (e.g., `createUser`, `updateOrder`)
+
+### Constant Naming Compliance
+
+- [ ] **MANDATORY:** Verify constants use UPPER_SNAKE_CASE (e.g., `MAX_FILE_SIZE`, `DEFAULT_TIMEOUT`)
+- [ ] **MANDATORY:** Verify constant names are descriptive and indicate purpose
+- [ ] **MANDATORY:** Verify constants are truly constant (not reassigned)
+- [ ] **RECOMMENDED:** Verify constant names follow established patterns (check similar constants)
+
+### Type/Interface Naming Compliance
+
+- [ ] **MANDATORY:** Verify types and interfaces use PascalCase (e.g., `User`, `WorkOrderStatus`, `CreateUserDto`)
+- [ ] **MANDATORY:** Verify type names are descriptive and indicate purpose
+- [ ] **MANDATORY:** Verify type names follow established patterns (DTOs end with `Dto`, enums end with enum type)
+- [ ] **RECOMMENDED:** Verify type names use established suffixes (e.g., `Dto`, `Response`, `Request`)
+
+### File Naming Compliance
+
+- [ ] **MANDATORY:** Verify file names follow conventions:
+  - PascalCase for components (`.tsx` files)
+  - camelCase for utilities (`.ts` files, not `.types.ts`, not `.spec.ts`, not `.test.ts`)
+  - kebab-case for configs (`.json`, `.yaml`, `.config.ts`)
+- [ ] **MANDATORY:** Verify file extensions are correct (`.ts` for TypeScript, `.tsx` for React, `.mdc` for rules)
+- [ ] **MANDATORY:** Verify file names match their content (component files match component name)
+- [ ] **RECOMMENDED:** Verify file names are descriptive and follow established patterns
+
+### Directory Naming Compliance
+
+- [ ] **MANDATORY:** Verify directory names use lowercase or kebab-case (e.g., `work-orders`, `user-management`)
+- [ ] **MANDATORY:** Verify directory names are descriptive and indicate purpose
+- [ ] **MANDATORY:** Verify directory names follow monorepo structure (feature-based or layer-based)
+- [ ] **RECOMMENDED:** Verify directory names match established patterns (check similar features)
+
+### Old Naming Detection
+
+- [ ] **MANDATORY:** Verify no old naming (VeroSuite, @verosuite/*) in new code
+- [ ] **MANDATORY:** Verify no old naming (VeroSuite, @verosuite/*) in modified code
+- [ ] **MANDATORY:** Verify imports use correct naming (@verofield/*, not @verosuite/*)
+- [ ] **MANDATORY:** Verify package.json files use correct naming (@verofield/* scope)
+- [ ] **RECOMMENDED:** Verify documentation references use correct naming (VeroField, not VeroSuite)
+
+### Naming Consistency
+
+- [ ] **MANDATORY:** Verify naming is consistent across similar files (check comparable files)
+- [ ] **MANDATORY:** Verify naming follows established patterns (check component library, similar features)
+- [ ] **MANDATORY:** Verify naming doesn't conflict with existing names (no duplicates)
+- [ ] **RECOMMENDED:** Verify naming is self-documenting (clear purpose from name)
+
+### Automated Checks
+
+```bash
+# Run naming conventions checker
+python .cursor/scripts/check-naming-conventions.py --file <file_path>
+
+# Check all changed files
+python .cursor/scripts/check-naming-conventions.py --pr <PR_NUMBER>
+
+# Check for old naming
+python .cursor/scripts/check-naming-conventions.py --old-naming
+
+# Expected: Warnings for naming violations (does not block)
+```
+
+### OPA Policy
+
+- **Policy:** `services/opa/policies/documentation.rego` (R23 section)
+- **Enforcement:** WARNING (Tier 3 MAD) - Logged but doesn't block PRs
+- **Tests:** `services/opa/tests/documentation_r23_test.rego`
+
+### Manual Verification (When Needed)
+
+1. **Review Naming Patterns** - Verify all names follow conventions (PascalCase, camelCase, UPPER_SNAKE_CASE)
+2. **Check Old Naming** - Search for VeroSuite, @verosuite/* patterns
+3. **Validate Consistency** - Compare with similar files for consistency
+4. **Verify File-Content Match** - Ensure file names match component/function names
+
+**Example Component Naming (✅):**
+
+```typescript
+// ✅ CORRECT: PascalCase component name
+// frontend/src/components/ui/CustomerSearchSelector.tsx
+export const CustomerSearchSelector = () => { ... };
+
+// ✅ CORRECT: File name matches component name
+// frontend/src/components/work-orders/WorkOrderForm.tsx
+export const WorkOrderForm = () => { ... };
+```
+
+**Example Function Naming (✅):**
+
+```typescript
+// ✅ CORRECT: camelCase function name
+async function getUserById(userId: string) { ... }
+
+// ✅ CORRECT: Verb-noun pattern
+async function createWorkOrder(data: CreateWorkOrderDto) { ... }
+```
+
+**Example Old Naming Violation (❌):**
+
+```typescript
+// ❌ VIOLATION: Old naming (VeroSuite)
+import { TenantContextService } from '@verosuite/common/auth';
+// Should be: @verofield/common/auth
+
+// ❌ VIOLATION: Old naming in code
+const VeroSuiteConfig = { ... };
+// Should be: VeroFieldConfig
+```
+
+---
+
 ## PRIORITY: HIGH - Prohibited Actions
 
 ### ❌ DO NOT (HARD STOPS - VIOLATION = STOP):

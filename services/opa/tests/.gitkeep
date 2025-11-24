@@ -1,0 +1,5 @@
+# This file ensures the tests directory is tracked by git
+# Policy test files (*_test.rego) will be added during Phase 1-2 implementation
+
+
+

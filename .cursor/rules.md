@@ -265,7 +265,7 @@ This section provides proven prompt templates that ensure Cursor follows all rul
 **Before any task, use this prompt:**
 
 ```
-"Please follow .cursor/rules/enforcement.md completely:
+"Please follow .cursor/rules/01-enforcement.mdc completely:
 1. Step 1: Complete mandatory search phase (show results)
 2. Step 2: Pattern analysis (identify pattern)
 3. Step 3: Rule compliance check
@@ -282,73 +282,72 @@ Show me each step as you complete it."
 **After any code changes, ask:**
 
 ```
-"Please perform a post-implementation audit:
+"Please perform Step 5 post-implementation audit per .cursor/rules/01-enforcement.mdc:
 1. Audit ALL files touched for code compliance
-2. Verify error handling compliance
-3. Verify pattern learning compliance (error patterns documented?)
-4. Verify regression tests created (if bug fix)
-5. Verify structured logging used (not console.log)
-6. Verify no silent failures (empty catch blocks)
-7. Verify date compliance (current system date, not hardcoded)
-8. Verify bug logging compliance (bugs logged in .cursor/BUG_LOG.md?)
-9. Verify engineering decisions documented (if significant feature in docs/engineering-decisions.md?)
-10. Verify trace propagation (traceId/spanId/requestId in logger calls?)
-11. Show me the audit results"
+2. Verify file paths correct (monorepo structure: apps/, libs/)
+3. Verify imports use correct paths (@verofield/common/*)
+4. Verify no old naming (VeroSuite, @verosuite/*)
+5. Verify tenant isolation (if database queries)
+6. Verify date compliance (current system date, not hardcoded)
+7. Verify structured logging used (not console.log)
+8. Verify no silent failures (empty catch blocks, swallowed promises)
+9. Verify trace propagation (traceId/spanId/requestId in all logger calls)
+10. Verify bug logged in .cursor/BUG_LOG.md (if bug fix)
+11. Verify error pattern documented in docs/error-patterns.md (if bug fix)
+12. Verify anti-pattern logged in .cursor/anti_patterns.md (if REWARD_SCORE ≤ 0)
+13. Show me the complete audit results"
 ```
 
-**Why this works:** Catches compliance issues after implementation. **CRITICAL:** The initial audit in this session missed bug logging, engineering decisions, and trace propagation - always verify ALL Step 5 requirements from `.cursor/rules/enforcement.md`.
+**Why this works:** Catches compliance issues after implementation. **CRITICAL:** Always verify ALL Step 5 requirements from `.cursor/rules/01-enforcement.mdc`.
 
 ### 3. REWARD_SCORE CI Automation Compliance
 
 **Before submitting a PR, verify REWARD_SCORE compliance:**
 
 ```
-"Please verify REWARD_SCORE compliance:
+"Please verify REWARD_SCORE compliance per .cursor/rules/11-operations.mdc:
 - Will this PR get a good REWARD_SCORE? (Check rubric: .cursor/reward_rubric.yaml)
 - Are tests added/updated? (Required for positive score)
 - Is documentation updated? (Required for positive score)
 - Are there any security issues? (Will cause negative score)
-- Are workflow triggers correct? (Run .cursor/scripts/validate_workflow_triggers.py)
+- Are workflow triggers correct? (on: section with proper types)
 - Are artifact names consistent? (reward, frontend-coverage, backend-coverage)
-- Will metrics be collected? (Verify collect_metrics.py will run)
+- Will metrics be collected?
 - Show me the expected score breakdown"
 ```
 
 **For CI workflow changes, always ask:**
 
 ```
-"Please verify CI workflow compliance:
+"Please verify CI workflow compliance per .cursor/rules/11-operations.mdc:
 - Are workflow triggers correct? (on: section with proper types)
 - Do workflow_run triggers match exact workflow names? (case-sensitive)
 - Are artifact names consistent? (standard names: reward, frontend-coverage, backend-coverage)
 - Does workflow verify parent completed successfully? (conclusion == 'success')
 - Are conditional logic thresholds correct? (score ≥ 6 for patterns, ≤ 0 for anti-patterns)
-- Run .cursor/scripts/validate_workflow_triggers.py and show me results
 - Show me the workflow trigger configuration"
 ```
 
-**For metrics collection verification:**
+**For OPA policy evaluation (v2.1):**
 
 ```
-"Please verify metrics collection:
-- Will collect_metrics.py run after PR scoring?
-- Is reward.json artifact uploaded?
-- Will metrics be saved to docs/metrics/reward_scores.json?
-- Are aggregates calculated correctly? (total_prs, average_score, distribution, trends)
-- Will dashboard update automatically?
-- Show me the metrics collection workflow"
+"Please verify OPA policy compliance:
+- Are all relevant policies evaluated? (security, architecture, data-integrity, etc.)
+- Is policy evaluation time <200ms per policy?
+- Is total OPA time <2s?
+- Are policies consolidated appropriately?
+- Show me the OPA evaluation results"
 ```
 
-**For dashboard compliance:**
+**For compliance dashboard (v2.1):**
 
 ```
-"Please verify dashboard compliance:
-- Does dashboard.html load reward_scores.json correctly?
-- Are filters working? (date range, author, category, score range)
-- Are charts rendering? (distribution, trends, category performance)
-- Is anti-patterns table populated?
-- Are trace IDs included in any server-side logging? (if applicable)
-- Show me the dashboard functionality"
+"Please verify compliance dashboard will update:
+- Will violation data be collected?
+- Are rule IDs correctly mapped?
+- Will severity levels be recorded?
+- Will trends be calculated?
+- Show me the compliance data structure"
 ```
 
 ### 4. Use Specific Verification Prompts
@@ -356,81 +355,94 @@ Show me each step as you complete it."
 **For bug fixes, always ask:**
 
 ```
-"Please verify:
+"Please verify bug fix compliance per .cursor/rules/01-enforcement.mdc Step 5:
 - Is this error pattern documented in docs/error-patterns.md?
-- Is this bug logged in .cursor/BUG_LOG.md?
+- Is this bug logged in .cursor/BUG_LOG.md with all required fields?
 - Are regression tests created for this bug fix?
 - Is structured logging used (logger.error, not console.error)?
 - Are trace IDs propagated (traceId/spanId/requestId in logger calls)?
-- Are there any silent failures (empty catch blocks)?
+- Are there any silent failures (empty catch blocks, swallowed promises)?
 - Show me the pattern documentation, bug log entry, and tests"
 ```
 
-**For significant new features/components, always ask:**
+**For database operations, always ask:**
 
 ```
-"Please verify:
-- Is this engineering decision documented in docs/engineering-decisions.md?
-- Are trace IDs propagated in all logger calls (traceId/spanId/requestId)?
-- Is structured logging used throughout?
-- Show me the engineering decision entry and trace propagation implementation"
+"Please verify security compliance per .cursor/rules/03-security.mdc:
+- Are all database queries including tenantId filter?
+- Is RLS context set correctly?
+- Are tenant isolation checks present?
+- Show me the database query code with tenant filtering"
 ```
 
 **For trace propagation compliance:**
 
 ```
-"Please verify trace propagation:
+"Please verify trace propagation per .cursor/rules/07-observability.mdc:
 - Are all logger calls including traceId, spanId, and requestId?
-- Is getOrCreateTraceContext() imported and used?
-- Are trace IDs propagated across all error and info logs?
+- Are trace IDs propagated across service boundaries?
+- Are trace IDs propagated in error and info logs?
 - Show me all logger calls with trace context"
 ```
 
 **For date compliance:**
 
 ```
-"Please verify date compliance:
+"Please verify date compliance per .cursor/rules/02-core.mdc:
 - Are all dates using current system date (not hardcoded)?
 - Is 'Last Updated' field using current date?
+- Format: ISO 8601 (YYYY-MM-DD)?
 - Show me all date usages in the code"
 ```
 
 **For error handling:**
 
 ```
-"Please verify error handling compliance:
+"Please verify error handling compliance per .cursor/rules/06-error-resilience.mdc:
 - Are all error-prone operations wrapped in try/catch?
 - Are errors logged with structured logging (logger.error)?
 - Are error messages contextual and actionable?
-- Are there any silent failures (empty catch blocks)?
+- Are there any silent failures (empty catch blocks, swallowed promises)?
 - Show me the error handling code"
+```
+
+**For file paths and imports:**
+
+```
+"Please verify file organization per .cursor/rules/04-architecture.mdc:
+- Are files in correct monorepo paths (apps/, libs/, not backend/)?
+- Are imports using correct paths (@verofield/common/*)?
+- Is there any old naming (VeroSuite, @verosuite/*)?
+- Show me the file paths and import statements"
 ```
 
 ### 5. Watch for Red Flags
 
 **Stop and intervene if you see:**
 
-- ❌ Code written without search phase shown
-- ❌ Bug fixed but no pattern documentation
-- ❌ Bug fixed but no bug log entry in `.cursor/BUG_LOG.md`
+- ❌ Code written without search phase shown (Step 1 violation)
+- ❌ Wrong file paths (backend/src/ instead of apps/api/src/)
+- ❌ Old naming (VeroSuite, @verosuite/*)
+- ❌ Bug fixed but no pattern documentation (docs/error-patterns.md)
+- ❌ Bug fixed but no bug log entry (.cursor/BUG_LOG.md)
 - ❌ Bug fixed but no regression tests
-- ❌ Significant feature but no engineering decision in `docs/engineering-decisions.md`
 - ❌ Logger calls without traceId/spanId/requestId (trace propagation missing)
-- ❌ `console.log` instead of `logger`
+- ❌ `console.log` instead of structured logger
 - ❌ Empty catch blocks (silent failures)
+- ❌ Swallowed promises (.catch(() => {}))
 - ❌ Hardcoded dates instead of current system date
+- ❌ Database queries without tenantId filter
 - ❌ No post-implementation audit performed
-- ❌ Post-implementation audit that doesn't check ALL Step 5 requirements from `.cursor/rules/enforcement.md`
-- ❌ CI workflow changes without trigger validation (`.cursor/scripts/validate_workflow_triggers.py`)
-- ❌ Workflow artifacts with inconsistent naming (not using standard names: reward, frontend-coverage, backend-coverage)
+- ❌ Post-implementation audit that doesn't check ALL Step 5 requirements from `.cursor/rules/01-enforcement.mdc`
+- ❌ CI workflow changes without trigger validation
+- ❌ Workflow artifacts with inconsistent naming
 - ❌ PR changes that will result in negative REWARD_SCORE without addressing issues
-- ❌ Metrics collection not configured for new workflows
 
 **When you see a red flag, ask:**
 
 ```
 "Please stop. I detected a rule violation: [describe violation].
-This violates: [rule file and section].
+This violates: [rule file and section, e.g., .cursor/rules/03-security.mdc].
 Please fix this violation and re-audit the file.
 Show me the corrected code and compliance verification."
 ```
@@ -440,68 +452,61 @@ Show me the corrected code and compliance verification."
 **After implementation, use this standard verification checklist:**
 
 ```
-"Please verify compliance with the following:
+"Please verify Step 5 compliance per .cursor/rules/01-enforcement.mdc:
 
-✅ Error Handling:
+✅ File Structure & Organization:
+- [ ] File paths correct (apps/api/src/, libs/common/, not backend/)
+- [ ] Imports use correct paths (@verofield/common/*)
+- [ ] No old naming (VeroSuite, @verosuite/*)
+- [ ] File organization compliance verified
+- [ ] No duplicate components created
+
+✅ Security (03-security.mdc):
+- [ ] Tenant isolation maintained (if database queries)
+- [ ] No secrets hardcoded
+- [ ] Input validation present
+- [ ] Security boundaries maintained
+
+✅ Error Handling (06-error-resilience.mdc):
 - [ ] All error-prone operations have try/catch
 - [ ] Structured logging used (logger.error, not console.error)
 - [ ] Error messages are contextual and actionable
-- [ ] No silent failures (empty catch blocks)
+- [ ] No silent failures (empty catch blocks, swallowed promises)
 
-✅ Pattern Learning:
-- [ ] Error pattern documented in docs/error-patterns.md (if bug fix)
-- [ ] Regression tests created (if bug fix)
-- [ ] Prevention strategies applied
-
-✅ Code Quality:
-- [ ] TypeScript types are correct (no unnecessary 'any')
-- [ ] Imports follow correct order
-- [ ] File paths match monorepo structure
-- [ ] No old naming (VeroSuite, @verosuite/*)
-
-✅ Security:
-- [ ] Tenant isolation maintained (if database operations)
-- [ ] No secrets hardcoded
-- [ ] Input validation present
-
-✅ Documentation:
-- [ ] 'Last Updated' field uses current date (not hardcoded)
-- [ ] No hardcoded dates in documentation
-- [ ] Code comments reference patterns when applicable
-
-✅ Testing:
-- [ ] Regression tests created (if bug fix)
-- [ ] Error paths have tests
-- [ ] Tests prevent pattern regressions
-
-✅ Observability:
+✅ Observability (07-observability.mdc):
 - [ ] Structured logging with required fields (message, context, traceId, operation, severity)
 - [ ] Trace IDs propagated in ALL logger calls (traceId, spanId, requestId)
-- [ ] getOrCreateTraceContext() imported and used where needed
 - [ ] Trace IDs propagated across service boundaries
 - [ ] Critical path instrumentation present
 
-✅ Bug Logging (if bug fix):
-- [ ] Bug logged in `.cursor/BUG_LOG.md` with date, area, description, status, owner, notes
-- [ ] Bug status marked as 'fixed' if resolved
-- [ ] Notes include fix details and related documentation
+✅ Code Quality:
+- [ ] TypeScript types are correct (no unnecessary 'any')
+- [ ] Following established patterns
+- [ ] Tests pass (regression + preventative)
+- [ ] All error paths have tests
 
-✅ Engineering Decisions (if significant feature):
-- [ ] Decision documented in `docs/engineering-decisions.md`
-- [ ] Includes context, trade-offs, alternatives considered, rationale
-- [ ] Includes implementation pattern and lessons learned
-- [ ] 'Last Updated' field uses current date
+✅ Documentation & Dates:
+- [ ] Documentation updated with current date
+- [ ] 'Last Updated' field uses current system date (not hardcoded)
+- [ ] No hardcoded dates anywhere
 
-✅ REWARD_SCORE CI Automation (if applicable):
-- [ ] Workflow triggers validated (`.cursor/scripts/validate_workflow_triggers.py` passes)
+✅ Bug Fixes (if applicable):
+- [ ] Bug logged in .cursor/BUG_LOG.md (date, area, description, status, owner, notes)
+- [ ] Error pattern documented in docs/error-patterns.md
+- [ ] Regression tests created
+- [ ] Prevention strategies applied
+
+✅ Anti-Patterns (if REWARD_SCORE ≤ 0):
+- [ ] Anti-pattern logged in .cursor/anti_patterns.md
+- [ ] Root cause documented
+- [ ] Prevention pattern identified
+
+✅ CI/CD (if workflow changes):
+- [ ] Workflow triggers validated
 - [ ] Artifact names consistent (reward, frontend-coverage, backend-coverage)
-- [ ] Workflow_run dependencies verified (parent workflow names match exactly)
-- [ ] Conditional logic implemented (score thresholds for patterns/anti-patterns)
-- [ ] Metrics collection configured (collect_metrics.py will run)
-- [ ] Expected REWARD_SCORE calculated (check rubric: `.cursor/reward_rubric.yaml`)
-- [ ] Dashboard will update (if metrics changed)
+- [ ] Conditional logic correct (score thresholds)
 
-Show me the compliance report."
+Show me the complete compliance report."
 ```
 
 ### 7. Quick Start Prompt
@@ -509,24 +514,24 @@ Show me the compliance report."
 **For your next task, try this:**
 
 ```
-"Please follow .cursor/rules/enforcement.md completely and show me each step as you complete it. After implementation, please perform a post-implementation audit and show me the results."
+"Please follow .cursor/rules/01-enforcement.mdc completely and show me each step as you complete it. After implementation, please perform Step 5 post-implementation audit and show me the results."
 ```
 
 **This ensures:**
-- All mandatory searches are completed
-- Patterns are identified
-- Rules are checked
-- Implementation is planned
-- Files are audited
+- All mandatory searches are completed (Step 1)
+- Patterns are identified (Step 2)
+- Rules are checked (Step 3)
+- Implementation is planned (Step 4)
+- Files are audited (Step 5)
 - Compliance is verified
 
 ### 8. Recommended Workflow
 
 **For every task:**
 
-1. **Start with:** "Please follow .cursor/rules/enforcement.md completely and show me each step"
+1. **Start with:** "Please follow .cursor/rules/01-enforcement.mdc completely and show me each step"
 2. **During Implementation:** Monitor for red flags
-3. **After Implementation:** "Please perform post-implementation audit and show me the results"
+3. **After Implementation:** "Please perform Step 5 post-implementation audit and show me the results"
 4. **Before Accepting:** "Please provide compliance report"
 
 **For bug fixes specifically:**
@@ -536,59 +541,71 @@ Show me the compliance report."
    - "Please document this error pattern in docs/error-patterns.md"
    - "Please log this bug in .cursor/BUG_LOG.md with all required fields"
    - "Please create regression tests for this bug fix"
-   - "Please verify error handling compliance"
-   - "Please verify trace propagation (traceId/spanId/requestId in logger calls)"
+   - "Please verify error handling compliance (06-error-resilience.mdc)"
+   - "Please verify trace propagation (traceId/spanId/requestId in logger calls per 07-observability.mdc)"
 3. **Verification:** "Please show me the pattern documentation, bug log entry, and regression tests"
 
 **For significant new features/components:**
 
 1. **After Implementation:**
-   - "Please document this engineering decision in docs/engineering-decisions.md"
-   - "Please verify trace propagation in all logger calls"
-   - "Please verify all Step 5 post-implementation audit requirements from .cursor/rules/enforcement.md"
+   - "Please verify trace propagation in all logger calls (07-observability.mdc)"
+   - "Please verify all Step 5 post-implementation audit requirements from .cursor/rules/01-enforcement.mdc"
    - "Please verify REWARD_SCORE compliance (expected score, workflow triggers, metrics collection)"
-2. **Verification:** "Please show me the engineering decision entry, trace propagation implementation, and REWARD_SCORE compliance"
+2. **Verification:** "Please show me the trace propagation implementation and REWARD_SCORE compliance"
 
 **For CI workflow changes:**
 
 1. **Before Changes:**
-   - "Please run .cursor/scripts/validate_workflow_triggers.py and show me current status"
+   - "Please verify current workflow trigger configuration (11-operations.mdc)"
 2. **After Changes:**
-   - "Please run .cursor/scripts/validate_workflow_triggers.py and verify it passes"
-   - "Please verify artifact names are consistent (reward, frontend-coverage, backend-coverage)"
+   - "Please verify workflow triggers correct (on: section with proper types)"
+   - "Please verify artifact names consistent (reward, frontend-coverage, backend-coverage)"
    - "Please verify workflow_run triggers match exact workflow names"
    - "Please verify conditional logic (score thresholds)"
-3. **Verification:** "Please show me the validation results and workflow configuration"
+3. **Verification:** "Please show me the workflow trigger configuration"
 
 ### 9. Pro Tips
 
 1. **Be Explicit:** Don't assume Cursor will follow rules automatically - explicitly request compliance checks
 2. **Show, Don't Tell:** Ask Cursor to "show me" rather than just "verify" - this makes compliance visible
-3. **Use Checklists:** Copy-paste the checklists from `.cursor/rules/enforcement.md` to ensure nothing is missed
-4. **Verify After Changes:** Always request post-implementation audit after code changes
-5. **Check ALL Step 5 Requirements:** Don't accept partial audits - explicitly request verification of ALL Step 5 requirements from `.cursor/rules/enforcement.md` including:
+3. **Use Checklists:** Copy-paste the checklists from `.cursor/rules/01-enforcement.mdc` to ensure nothing is missed
+4. **Verify After Changes:** Always request Step 5 post-implementation audit after code changes
+5. **Check ALL Step 5 Requirements:** Don't accept partial audits - explicitly request verification of ALL Step 5 requirements from `.cursor/rules/01-enforcement.mdc` including:
+   - File paths (apps/, libs/, not backend/)
+   - Imports (@verofield/common/*, not @verosuite/*)
+   - Old naming detection (VeroSuite, @verosuite/*)
+   - Tenant isolation (if database operations)
    - Bug logging (`.cursor/BUG_LOG.md`)
-   - Engineering decisions (`docs/engineering-decisions.md`)
+   - Error pattern documentation (`docs/error-patterns.md`)
+   - Anti-pattern logging (`.cursor/anti_patterns.md` if REWARD_SCORE ≤ 0)
    - Trace propagation (traceId/spanId/requestId in logger calls)
 6. **Document Patterns:** For every bug fix, explicitly request pattern documentation AND bug log entry
 7. **Log Bugs:** For every bug fixed, explicitly request bug logging in `.cursor/BUG_LOG.md`
-8. **Document Decisions:** For every significant feature, explicitly request engineering decision documentation
-9. **Verify Trace Propagation:** For every component with logging, explicitly verify traceId/spanId/requestId are included
-10. **Test Everything:** For every bug fix, explicitly request regression tests
-11. **Validate Workflows:** For every CI workflow change, explicitly run `.cursor/scripts/validate_workflow_triggers.py`
-12. **Check REWARD_SCORE:** Before submitting PRs, explicitly verify expected score using `.cursor/reward_rubric.yaml`
-13. **Verify Artifacts:** For every workflow, explicitly verify artifact names match standard conventions
-14. **Check Metrics:** For every PR, explicitly verify metrics collection will work correctly
+8. **Verify Trace Propagation:** For every component with logging, explicitly verify traceId/spanId/requestId are included
+9. **Test Everything:** For every bug fix, explicitly request regression tests
+10. **Validate Workflows:** For every CI workflow change, explicitly verify workflow triggers
+11. **Check REWARD_SCORE:** Before submitting PRs, explicitly verify expected score using `.cursor/reward_rubric.yaml`
+12. **Verify Artifacts:** For every workflow, explicitly verify artifact names match standard conventions
+13. **Check Metrics:** For every PR, explicitly verify metrics collection will work correctly
 
 ### 10. Reference Documentation
 
 For detailed compliance guidance, see:
-- `.cursor/rules/enforcement.md` - Complete mandatory workflow checklist
-- `docs/ENSURING_AI_COMPLIANCE.md` - Extended compliance guide with examples
-- `docs/error-resilience.md` - Error handling requirements
-- `docs/pattern-learning.md` - Pattern documentation requirements
-- `docs/predictive-prevention.md` - Regression test requirements
-- `docs/observability.md` - Structured logging requirements
+- `.cursor/rules/01-enforcement.mdc` - Complete mandatory workflow checklist (5-step pipeline)
+- `.cursor/rules/02-core.mdc` - Core philosophy, date handling, tech stack
+- `.cursor/rules/03-security.mdc` - Security rules (tenant isolation, RLS, auth)
+- `.cursor/rules/04-architecture.mdc` - Monorepo structure, service boundaries
+- `.cursor/rules/05-data.mdc` - Data contracts, state machines, layer sync
+- `.cursor/rules/06-error-resilience.mdc` - Error handling, no silent failures
+- `.cursor/rules/07-observability.mdc` - Structured logging, tracing, metrics
+- `.cursor/rules/08-backend.mdc` - NestJS/Prisma patterns
+- `.cursor/rules/09-frontend.mdc` - React/React Native architecture
+- `.cursor/rules/10-quality.mdc` - Testing, coverage, performance
+- `.cursor/rules/11-operations.mdc` - CI/CD, workflows, reward score
+- `.cursor/rules/12-tech-debt.mdc` - Tech debt logging, TODO/FIXME
+- `.cursor/rules/13-ux-consistency.mdc` - UI/UX coherence
+- `.cursor/rules/14-verification.mdc` - Verification & testing standards
+- `docs/developer/VeroField_Rules_2.1.md` - Complete v2.1 implementation plan
 
 ---
 

@@ -1,0 +1,24 @@
+{
+  "exemptions": {
+    "files": [
+      "legacy/old-code.ts",
+      "vendor/",
+      "node_modules/"
+    ],
+    "authors": [
+      "dependabot[bot]",
+      "github-actions[bot]"
+    ],
+    "patterns": [
+      "^docs/",
+      "^README\\.md$",
+      "\\.test\\.",
+      "\\.spec\\."
+    ]
+  },
+  "version": "1.0.0",
+  "last_updated": "2025-11-23"
+}
+
+
+

@@ -1,0 +1,77 @@
+# Prometheus Configuration for VeroField Rules v2.1
+# Purpose: Monitor OPA policy performance and compliance metrics
+# Created: 2025-11-23
+# Version: 1.0.0
+
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+  external_labels:
+    cluster: 'verofield-production'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+
+# Load alert rules
+rule_files:
+  - 'alerts/critical-rollback-triggers.yml'
+  - 'alerts/manual-review-required.yml'
+  - 'alerts/monitoring-alerts.yml'
+
+# Scrape configurations
+scrape_configs:
+  # OPA Performance Metrics
+  - job_name: 'opa-performance'
+    static_configs:
+      - targets: ['localhost:8080']  # [CUSTOMIZE: Update with your OPA metrics endpoint]
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'opa_.*'
+        action: keep
+
+  # Compliance Metrics (from compliance dashboard API)
+  - job_name: 'compliance-metrics'
+    static_configs:
+      - targets: ['localhost:9090']  # [CUSTOMIZE: Update with your compliance API endpoint]
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'compliance_.*'
+        action: keep
+
+  # GitHub Actions CI Metrics (via webhook or exporter)
+  - job_name: 'github-actions'
+    static_configs:
+      - targets: ['localhost:9091']  # [CUSTOMIZE: Update with your GitHub Actions exporter]
+    metrics_path: '/metrics'
+    scrape_interval: 60s
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'github_.*'
+        action: keep
+
+# Storage configuration
+storage:
+  tsdb:
+    path: /prometheus
+    retention:
+      time: 30d
+      size: 50GB
+
+# Remote write (optional - for long-term storage)
+# remote_write:
+#   - url: "https://your-remote-storage/api/v1/write"
+#     basic_auth:
+#       username: "prometheus"
+#       password: "${REMOTE_WRITE_PASSWORD}"
+
+
+

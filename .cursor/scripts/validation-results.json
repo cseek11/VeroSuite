@@ -1,0 +1,13 @@
+[
+  {
+    "file": "services\\opa\\policies\\sample.rego",
+    "passed": true,
+    "errors": [],
+    "warnings": [],
+    "metrics": {
+      "lines": 41,
+      "helpers": 2,
+      "max_nesting": 1
+    }
+  }
+]

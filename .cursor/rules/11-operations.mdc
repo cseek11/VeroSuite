@@ -59,3 +59,163 @@ Reward Score rules are defined in `00-master.mdc` and your existing CI automatio
 - PR workflows lacking tests.
 - Reward Score not published where expected.
 - Inconsistent artifact names that break automation.
+
+---
+
+## Step 5: Post-Implementation Audit for Operations Rules
+
+### R25: CI/CD Workflow Triggers — Audit Procedures
+
+**For code changes affecting GitHub Actions workflow files (`.github/workflows/*.yml`), workflow triggers, artifact names, or workflow dependencies:**
+
+#### Workflow Trigger Configuration Compliance
+
+- [ ] **MANDATORY:** Verify all workflows have `on:` section defined
+- [ ] **MANDATORY:** Verify PR workflows include `types: [opened, synchronize, reopened]`
+- [ ] **MANDATORY:** Verify `workflow_run` triggers match exact workflow names (case-sensitive)
+- [ ] **MANDATORY:** Verify `workflow_run` triggers reference workflows that exist in `.github/workflows/`
+- [ ] **MANDATORY:** Verify `workflow_run` triggers use `types: [completed]`
+- [ ] **RECOMMENDED:** Verify conditional logic (score thresholds) is implemented for pattern extraction and anti-pattern detection
+
+#### Workflow Name Validation
+
+- [ ] **MANDATORY:** Verify workflow names in `workflow_run` triggers match `name:` field exactly (case-sensitive)
+- [ ] **MANDATORY:** Verify workflow files exist in `.github/workflows/` directory
+- [ ] **MANDATORY:** Verify no typos or case mismatches in workflow names
+- [ ] **RECOMMENDED:** Verify workflow names are consistent across all references
+
+#### Artifact Name Consistency
+
+- [ ] **MANDATORY:** Verify artifact names are consistent across workflows (every download has corresponding upload)
+- [ ] **MANDATORY:** Verify artifact upload/download names match exactly (no mismatches)
+- [ ] **MANDATORY:** Verify no artifacts are downloaded but never uploaded (functional failure)
+- [ ] **RECOMMENDED:** Verify unused artifacts are documented (uploaded but never downloaded)
+
+#### Cascading Workflow Validation
+
+- [ ] **MANDATORY:** Verify cascading workflows verify parent workflow completed successfully
+- [ ] **MANDATORY:** Verify workflow dependencies are correctly configured
+- [ ] **MANDATORY:** Verify no circular dependencies between workflows
+- [ ] **RECOMMENDED:** Verify workflow chain is documented (which workflows trigger which)
+
+#### Scheduled Workflow Compliance
+
+- [ ] **MANDATORY:** Verify scheduled workflows use correct cron format
+- [ ] **MANDATORY:** Verify scheduled workflows have appropriate timezone considerations
+- [ ] **RECOMMENDED:** Verify scheduled workflows are documented with purpose and schedule
+
+#### Manual Trigger Compliance
+
+- [ ] **MANDATORY:** Verify `workflow_dispatch:` is included if manual triggering is needed
+- [ ] **MANDATORY:** Verify manual trigger inputs are properly defined
+- [ ] **RECOMMENDED:** Verify manual trigger usage is documented
+
+#### Automated Checks
+
+```bash
+# Run workflow trigger checker
+python .cursor/scripts/check-workflow-triggers.py --file <workflow_file>
+
+# Check all workflows
+python .cursor/scripts/check-workflow-triggers.py --all
+
+# Check workflow chain dependencies
+python .cursor/scripts/check-workflow-triggers.py --chain
+
+# Expected: Warnings for workflow trigger violations (does not block)
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/operations.rego` (R25 section)
+- **Enforcement:** WARNING (Tier 3 MAD) - Logged but doesn't block PRs
+- **Tests:** `services/opa/tests/operations_r25_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review Workflow Triggers** - Verify all workflows have proper `on:` sections
+2. **Check Workflow Names** - Verify `workflow_run` triggers match workflow names exactly
+3. **Validate Artifact Names** - Verify artifact names are consistent across workflows (use check-workflow-triggers.py for full validation)
+4. **Test Workflow Chain** - Verify cascading workflows trigger correctly
+
+**Example Workflow Trigger (✅):**
+
+```yaml
+# ✅ CORRECT: PR workflow with proper triggers
+name: Validate Documentation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+```
+
+**Example Workflow Run Trigger (✅):**
+
+```yaml
+# ✅ CORRECT: Cascading workflow with exact name match
+name: Swarm - Suggest Patterns
+
+on:
+  workflow_run:
+    workflows: ["Swarm - Compute Reward Score"]  # Matches name: exactly
+    types: [completed]
+```
+
+**Example Workflow Trigger Violation (❌):**
+
+```yaml
+# ❌ VIOLATION: Missing types in PR workflow
+name: Validate Documentation
+
+on:
+  pull_request:  # Missing types: [opened, synchronize, reopened]
+```
+
+**Example Workflow Name Mismatch (❌):**
+
+```yaml
+# ❌ VIOLATION: Workflow name doesn't match (case-sensitive)
+name: Swarm - Suggest Patterns
+
+on:
+  workflow_run:
+    workflows: ["swarm - compute reward score"]  # Wrong case - should be "Swarm - Compute Reward Score"
+    types: [completed]
+```
+
+**Example Artifact Name Consistency (✅):**
+
+```yaml
+# ✅ CORRECT: Upload and download match
+# Workflow 1: Upload artifact
+- name: Upload reward
+  uses: actions/upload-artifact@v4
+  with:
+    name: reward
+
+# Workflow 2: Download artifact
+- name: Download reward
+  uses: actions/download-artifact@v4
+  with:
+    name: reward  # ✅ Matches upload name - workflow will succeed
+```
+
+**Example Artifact Name Mismatch (❌):**
+
+```yaml
+# ❌ VIOLATION: Artifact downloaded but never uploaded (functional failure)
+# Workflow 1: Upload artifact
+- name: Upload reward
+  uses: actions/upload-artifact@v4
+  with:
+    name: reward  # ✅ Uploaded
+
+# Workflow 2: Download artifact
+- name: Download reward
+  uses: actions/download-artifact@v4
+  with:
+    name: reward-score  # ❌ Downloaded but never uploaded - workflow will fail!
+
+# Option C- Result: ❌ ERROR - 'reward-score' is downloaded but never uploaded
+# This catches the actual functional bug!
+```

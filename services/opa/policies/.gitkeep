@@ -1,0 +1,5 @@
+# This file ensures the policies directory is tracked by git
+# Policy files (.rego) will be added during Phase 1-2 implementation
+
+
+

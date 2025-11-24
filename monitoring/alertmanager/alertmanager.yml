@@ -1,0 +1,206 @@
+# Alertmanager Configuration for VeroField Rules v2.1
+# Purpose: Route alerts to appropriate channels and handle escalation
+# Created: 2025-11-23
+# Version: 1.0.0
+
+global:
+  resolve_timeout: 5m
+  slack_api_url: '${SLACK_WEBHOOK_URL}'  # [CUSTOMIZE: Set via environment variable]
+
+# Templates for alert formatting
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Routing tree
+route:
+  group_by: ['alertname', 'severity', 'tier']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default'
+  
+  routes:
+    # ========================================================================
+    # CRITICAL: Auto-Rollback Triggers
+    # ========================================================================
+    - match:
+        severity: critical
+        action: auto-rollback
+      receiver: 'critical-auto-rollback'
+      group_wait: 0s
+      group_interval: 5m
+      repeat_interval: 1h
+      continue: true  # Also send to other receivers
+    
+    # ========================================================================
+    # WARNING: Manual Review Required
+    # ========================================================================
+    - match:
+        severity: warning
+        action: manual-review
+      receiver: 'manual-review'
+      group_wait: 1m
+      group_interval: 5m
+      repeat_interval: 4h
+    
+    # ========================================================================
+    # INFO: Monitoring Alerts
+    # ========================================================================
+    - match:
+        severity: info
+        action: monitoring
+      receiver: 'monitoring'
+      group_wait: 5m
+      group_interval: 10m
+      repeat_interval: 24h
+
+# Inhibition rules (suppress alerts when higher severity is active)
+inhibit_rules:
+  # Suppress manual review alerts if auto-rollback is active
+  - source_match:
+      severity: 'critical'
+      action: 'auto-rollback'
+    target_match:
+      severity: 'warning'
+      action: 'manual-review'
+    equal: ['alertname']
+  
+  # Suppress monitoring alerts if manual review is active
+  - source_match:
+      severity: 'warning'
+      action: 'manual-review'
+    target_match:
+      severity: 'info'
+      action: 'monitoring'
+    equal: ['alertname']
+
+# Receivers (notification channels)
+receivers:
+  # ========================================================================
+  # CRITICAL: Auto-Rollback Alerts
+  # ========================================================================
+  - name: 'critical-auto-rollback'
+    slack_configs:
+      - channel: '#compliance-critical'  # [CUSTOMIZE: Update channel name]
+        username: 'VeroField Compliance Bot'
+        icon_emoji: ':rotating_light:'
+        title: '🚨 CRITICAL: AUTO-ROLLBACK TRIGGERED'
+        title_link: '{{ .ExternalURL }}'
+        text: |
+          *Alert:* {{ .GroupLabels.alertname }}
+          *Severity:* {{ .CommonLabels.severity }}
+          *Action:* {{ .CommonLabels.action }}
+          
+          {{ range .Alerts }}
+          *Description:* {{ .Annotations.description }}
+          *Runbook:* {{ .Annotations.runbook }}
+          *Dashboard:* {{ .Annotations.dashboard }}
+          {{ end }}
+          
+          *Status:* Automatic rollback in progress
+          *Next Steps:* Review logs and refine policies
+        color: 'danger'
+        send_resolved: true
+    
+    # PagerDuty integration (optional)
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY}'  # [CUSTOMIZE: Set via environment variable]
+        description: '{{ .GroupLabels.alertname }}: {{ .CommonAnnotations.summary }}'
+        severity: 'critical'
+        details:
+          firing: '{{ .Alerts.Firing | len }}'
+          resolved: '{{ .Alerts.Resolved | len }}'
+          group_labels: '{{ .GroupLabels }}'
+    
+    # Email notification (optional)
+    email_configs:
+      - to: 'governance-lead@company.com'  # [CUSTOMIZE: Update email]
+        from: 'alertmanager@company.com'
+        smarthost: 'smtp.company.com:587'
+        auth_username: '${SMTP_USERNAME}'
+        auth_password: '${SMTP_PASSWORD}'
+        headers:
+          Subject: '🚨 CRITICAL: Auto-Rollback Triggered - {{ .GroupLabels.alertname }}'
+        html: |
+          <h2>AUTO-ROLLBACK TRIGGERED</h2>
+          <p><strong>Alert:</strong> {{ .GroupLabels.alertname }}</p>
+          <p><strong>Severity:</strong> {{ .CommonLabels.severity }}</p>
+          {{ range .Alerts }}
+          <p><strong>Description:</strong> {{ .Annotations.description }}</p>
+          <p><strong>Runbook:</strong> <a href="{{ .Annotations.runbook }}">{{ .Annotations.runbook }}</a></p>
+          {{ end }}
+  
+  # ========================================================================
+  # WARNING: Manual Review Required
+  # ========================================================================
+  - name: 'manual-review'
+    slack_configs:
+      - channel: '#compliance-alerts'  # [CUSTOMIZE: Update channel name]
+        username: 'VeroField Compliance Bot'
+        icon_emoji: ':warning:'
+        title: '⚠️ MANUAL REVIEW REQUIRED'
+        title_link: '{{ .ExternalURL }}'
+        text: |
+          *Alert:* {{ .GroupLabels.alertname }}
+          *Severity:* {{ .CommonLabels.severity }}
+          *Owner:* {{ .CommonLabels.owner }}
+          *Response Time:* {{ .CommonLabels.response_time }}
+          
+          {{ range .Alerts }}
+          *Description:* {{ .Annotations.description }}
+          *Runbook:* {{ .Annotations.runbook }}
+          *Dashboard:* {{ .Annotations.dashboard }}
+          *Escalation:* {{ .Annotations.escalation }}
+          {{ end }}
+          
+          *Action Required:* Governance lead review within 4 hours
+        color: 'warning'
+        send_resolved: true
+    
+    # Email notification
+    email_configs:
+      - to: 'governance-lead@company.com, rules-champions@company.com'  # [CUSTOMIZE: Update emails]
+        from: 'alertmanager@company.com'
+        smarthost: 'smtp.company.com:587'
+        auth_username: '${SMTP_USERNAME}'
+        auth_password: '${SMTP_PASSWORD}'
+        headers:
+          Subject: '⚠️ Manual Review Required - {{ .GroupLabels.alertname }}'
+  
+  # ========================================================================
+  # INFO: Monitoring Alerts
+  # ========================================================================
+  - name: 'monitoring'
+    slack_configs:
+      - channel: '#compliance-monitoring'  # [CUSTOMIZE: Update channel name]
+        username: 'VeroField Compliance Bot'
+        icon_emoji: ':chart_with_upwards_trend:'
+        title: '📊 MONITORING ALERT'
+        title_link: '{{ .ExternalURL }}'
+        text: |
+          *Alert:* {{ .GroupLabels.alertname }}
+          *Severity:* {{ .CommonLabels.severity }}
+          
+          {{ range .Alerts }}
+          *Description:* {{ .Annotations.description }}
+          *Dashboard:* {{ .Annotations.dashboard }}
+          {{ end }}
+          
+          *Action:* Investigation needed, no immediate action required
+        color: 'good'
+        send_resolved: true
+  
+  # ========================================================================
+  # DEFAULT: Catch-all
+  # ========================================================================
+  - name: 'default'
+    slack_configs:
+      - channel: '#compliance-alerts'  # [CUSTOMIZE: Update channel name]
+        username: 'VeroField Compliance Bot'
+        icon_emoji: ':bell:'
+        title: 'Alert: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+
+
+

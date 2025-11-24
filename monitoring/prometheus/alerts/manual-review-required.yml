@@ -1,0 +1,183 @@
+# Manual Review Required Alerts
+# Purpose: Alerts requiring governance lead review within 4 hours
+# Created: 2025-11-23
+# Version: 1.0.0
+# Action: Manual review by governance lead
+
+groups:
+  - name: manual_review_required
+    interval: 1m
+    rules:
+      # ========================================================================
+      # MANUAL REVIEW 1: Compliance Score Drop >15 Points
+      # ========================================================================
+      - alert: ComplianceScoreDrop
+        expr: |
+          (
+            compliance_score{time="now"} 
+            - compliance_score{time="24h_ago"}
+          ) < -15
+        for: 1h
+        labels:
+          severity: warning
+          action: manual-review
+          tier: tier2
+          owner: governance-lead
+          response_time: 4h
+        annotations:
+          summary: "Compliance score dropped by >15 points - MANUAL REVIEW REQUIRED"
+          description: |
+            Compliance score dropped significantly in last 24 hours.
+            Threshold: -15 points
+            Actual drop: {{ $value }} points
+            Previous score: {{ $labels.previous_score }}
+            Current score: {{ $labels.current_score }}
+            Action required: Investigate root cause within 4 hours.
+          runbook: "docs/operations/compliance-score-investigation.md"
+          dashboard: "https://grafana.example.com/d/compliance-score/overview"
+          escalation: "Notify governance lead within 1 hour"
+
+      # ========================================================================
+      # MANUAL REVIEW 2: Tier 1 Violations >15/Day
+      # ========================================================================
+      - alert: HighTier1Violations
+        expr: |
+          sum(increase(compliance_violations_total{tier="1"}[24h])) > 15
+        for: 1h
+        labels:
+          severity: warning
+          action: manual-review
+          tier: tier2
+          owner: rules-champions
+          response_time: 4h
+        annotations:
+          summary: "Tier 1 violations exceeded 15 per day - MANUAL REVIEW REQUIRED"
+          description: |
+            High number of Tier 1 (BLOCK) violations detected.
+            Threshold: 15 violations/day
+            Current: {{ $value }} violations in last 24 hours
+            Action required: Review policy accuracy and team training needs.
+          runbook: "docs/operations/violation-investigation.md"
+          dashboard: "https://grafana.example.com/d/violations/tier1"
+          escalation: "Emergency meeting if >20/day"
+
+      # ========================================================================
+      # MANUAL REVIEW 3: False Positive Rate >20%
+      # ========================================================================
+      - alert: ModerateFalsePositiveRate
+        expr: |
+          (
+            sum(rate(compliance_violations_false_positive_total[24h])) 
+            / 
+            sum(rate(compliance_violations_total[24h]))
+          ) > 0.20
+        for: 1h
+        labels:
+          severity: warning
+          action: manual-review
+          tier: tier2
+          owner: rules-champions
+          response_time: 4h
+        annotations:
+          summary: "False positive rate exceeded 20% - MANUAL REVIEW REQUIRED"
+          description: |
+            False positive rate is elevated but below auto-rollback threshold.
+            Threshold: 20%
+            Current: {{ $value | humanizePercentage }}
+            Auto-rollback threshold: 40%
+            Action required: Policy refinement needed within 4 hours.
+          runbook: "docs/operations/false-positive-investigation.md"
+          dashboard: "https://grafana.example.com/d/compliance/false-positives"
+          escalation: "Auto-rollback if reaches 40%"
+
+      # ========================================================================
+      # MANUAL REVIEW 4: Override Request Rate >10%
+      # ========================================================================
+      - alert: HighOverrideRequestRate
+        expr: |
+          (
+            sum(rate(compliance_override_requests_total[24h])) 
+            / 
+            sum(rate(compliance_violations_total[24h]))
+          ) > 0.10
+        for: 2h
+        labels:
+          severity: warning
+          action: manual-review
+          tier: tier2
+          owner: governance-lead
+          response_time: 4h
+        annotations:
+          summary: "Override request rate exceeded 10% - MANUAL REVIEW REQUIRED"
+          description: |
+            High number of override requests indicates policy issues.
+            Threshold: 10%
+            Current: {{ $value | humanizePercentage }}
+            Total overrides: {{ $labels.override_count }}
+            Action required: Review policies for excessive strictness.
+          runbook: "docs/operations/override-analysis.md"
+          dashboard: "https://grafana.example.com/d/compliance/overrides"
+          escalation: "Policy revision meeting if >15%"
+
+      # ========================================================================
+      # MANUAL REVIEW 5: Policy Evaluation Time Trend Increasing
+      # ========================================================================
+      - alert: OPAPerformanceDegrading
+        expr: |
+          (
+            avg(opa_evaluation_duration_seconds[1h])
+            -
+            avg(opa_evaluation_duration_seconds[1h] offset 7d)
+          ) / avg(opa_evaluation_duration_seconds[1h] offset 7d) > 0.20
+        for: 2h
+        labels:
+          severity: warning
+          action: manual-review
+          tier: tier2
+          owner: devops-lead
+          response_time: 4h
+        annotations:
+          summary: "OPA performance degrading >20% - MANUAL REVIEW REQUIRED"
+          description: |
+            OPA policy evaluation time increasing over time.
+            Threshold: +20% vs 7 days ago
+            Current increase: {{ $value | humanizePercentage }}
+            7 days ago: {{ $labels.baseline_duration }}s
+            Current: {{ $labels.current_duration }}s
+            Action required: Investigate performance regression.
+          runbook: "docs/operations/opa-performance-investigation.md"
+          dashboard: "https://grafana.example.com/d/opa-performance/trends"
+          escalation: "Auto-rollback if reaches 5s timeout"
+
+      # ========================================================================
+      # MANUAL REVIEW 6: Exemption Usage >5%
+      # ========================================================================
+      - alert: HighExemptionUsage
+        expr: |
+          (
+            sum(compliance_exemptions_active) 
+            / 
+            sum(compliance_rules_total)
+          ) > 0.05
+        for: 24h
+        labels:
+          severity: warning
+          action: manual-review
+          tier: tier2
+          owner: governance-lead
+          response_time: 4h
+        annotations:
+          summary: "Exemption usage exceeded 5% - MANUAL REVIEW REQUIRED"
+          description: |
+            High number of active exemptions indicates policy issues.
+            Threshold: 5% of rules
+            Current: {{ $value | humanizePercentage }}
+            Active exemptions: {{ $labels.exemption_count }}
+            Total rules: {{ $labels.rule_count }}
+            Action required: Review exemptions for policy gaps.
+          runbook: "docs/operations/exemption-review.md"
+          dashboard: "https://grafana.example.com/d/compliance/exemptions"
+          escalation: "Governance meeting if >10%"
+
+
+

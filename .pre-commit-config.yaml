@@ -1,0 +1,43 @@
+# Pre-commit hooks for VeroField Rules 2.1
+# 
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+#
+# Created: 2025-11-23
+# Version: 1.0.0
+
+repos:
+  # OPA Policy Validation
+  - repo: local
+    hooks:
+      - id: validate-opa-policies
+        name: Validate OPA Policies
+        entry: python .cursor/scripts/validate-opa-policy.py
+        language: system
+        files: '\.rego$'
+        args: ['services/opa/policies/']
+        pass_filenames: false
+        always_run: false
+        description: "Validates OPA policies against complexity and performance budgets"
+      
+      - id: validate-step5-checks
+        name: Validate Step 5 Checks
+        entry: python .cursor/scripts/validate-step5-checks.py
+        language: system
+        files: '\.mdc$'
+        pass_filenames: false
+        always_run: false
+        description: "Validates Step 5 verification sections in rule files"
+      
+      - id: optimize-opa-policies
+        name: Check OPA Policy Optimizations
+        entry: python .cursor/scripts/optimize-opa-policy.py
+        language: system
+        files: '\.rego$'
+        args: ['services/opa/policies/']
+        pass_filenames: false
+        always_run: false
+        description: "Checks for optimization opportunities in OPA policies (warnings only)"
+
+
+

@@ -386,7 +386,7 @@ Show me the security compliance report with file paths and line numbers"
 - [ ] Are broken authentication tests present?
 - [ ] Are XSS tests present (stored, reflected, DOM-based)?
 - [ ] Are security misconfiguration tests present?
-- [ ] Are tests in backend/test/security/owasp-security.test.ts?
+- [ ] Are tests in apps/api/test/security/owasp-security.test.ts?
 - [ ] Do tests cover all new endpoints/features?
 - [ ] Show me OWASP test coverage and results"
 ```

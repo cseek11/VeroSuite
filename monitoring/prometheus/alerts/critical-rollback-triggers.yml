@@ -1,0 +1,151 @@
+# Critical Rollback Triggers - Auto-Rollback Alerts
+# Purpose: Automatic rollback triggers for VeroField Rules v2.1
+# Created: 2025-11-23
+# Version: 1.0.0
+# Action: Immediate auto-rollback when triggered
+
+groups:
+  - name: critical_rollback_triggers
+    interval: 30s
+    rules:
+      # ========================================================================
+      # AUTO-ROLLBACK TRIGGER 1: False Positive Rate >40%
+      # ========================================================================
+      - alert: HighFalsePositiveRate
+        expr: |
+          (
+            sum(rate(compliance_violations_false_positive_total[24h])) 
+            / 
+            sum(rate(compliance_violations_total[24h]))
+          ) > 0.40
+        for: 5m
+        labels:
+          severity: critical
+          action: auto-rollback
+          tier: tier1
+          owner: governance-lead
+        annotations:
+          summary: "False positive rate exceeded 40% - AUTO-ROLLBACK TRIGGERED"
+          description: |
+            False positive rate is {{ $value | humanizePercentage }}.
+            Threshold: 40%
+            Current: {{ $value | humanizePercentage }}
+            Auto-rollback triggered automatically.
+          runbook: "docs/operations/rollback-procedures.md#false-positive-rollback"
+          dashboard: "https://grafana.example.com/d/compliance/false-positives"
+          action_required: "Immediate rollback in progress. Review policy accuracy."
+
+      # ========================================================================
+      # AUTO-ROLLBACK TRIGGER 2: OPA Evaluation Timeout >5s
+      # ========================================================================
+      - alert: OPAEvaluationTimeout
+        expr: |
+          histogram_quantile(0.99, 
+            rate(opa_evaluation_duration_seconds_bucket[1h])
+          ) > 5
+        for: 2m
+        labels:
+          severity: critical
+          action: auto-rollback
+          tier: tier1
+          owner: devops-lead
+        annotations:
+          summary: "OPA evaluation timeout exceeded 5s - AUTO-ROLLBACK TRIGGERED"
+          description: |
+            P99 OPA evaluation time exceeded performance budget.
+            Threshold: 5s
+            Current P99: {{ $value }}s
+            Auto-rollback triggered automatically.
+          runbook: "docs/operations/rollback-procedures.md#opa-timeout-rollback"
+          dashboard: "https://grafana.example.com/d/opa-performance/overview"
+          action_required: "Immediate rollback in progress. Optimize slow policies."
+
+      # ========================================================================
+      # AUTO-ROLLBACK TRIGGER 3: CI Failure Rate >90%
+      # ========================================================================
+      - alert: HighCIFailureRate
+        expr: |
+          (
+            sum(rate(ci_workflow_runs_failed_total[1h])) 
+            / 
+            sum(rate(ci_workflow_runs_total[1h]))
+          ) > 0.90
+        for: 5m
+        labels:
+          severity: critical
+          action: auto-rollback
+          tier: tier1
+          owner: devops-lead
+        annotations:
+          summary: "CI failure rate exceeded 90% - AUTO-ROLLBACK TRIGGERED"
+          description: |
+            CI workflow failure rate exceeded threshold.
+            Threshold: 90%
+            Current: {{ $value | humanizePercentage }}
+            Auto-rollback triggered automatically.
+          runbook: "docs/operations/rollback-procedures.md#ci-failure-rollback"
+          dashboard: "https://grafana.example.com/d/ci-metrics/overview"
+          action_required: "Immediate rollback in progress. Review CI logs."
+
+      # ========================================================================
+      # AUTO-ROLLBACK TRIGGER 4: OPA Policy Evaluation Errors >10%
+      # ========================================================================
+      - alert: HighOPAEvaluationErrorRate
+        expr: |
+          (
+            sum(rate(opa_evaluation_errors_total[1h])) 
+            / 
+            sum(rate(opa_evaluation_total[1h]))
+          ) > 0.10
+        for: 5m
+        labels:
+          severity: critical
+          action: auto-rollback
+          tier: tier1
+          owner: rules-champions
+        annotations:
+          summary: "OPA evaluation error rate exceeded 10% - AUTO-ROLLBACK TRIGGERED"
+          description: |
+            OPA policy evaluation errors exceeded threshold.
+            Threshold: 10%
+            Current: {{ $value | humanizePercentage }}
+            Auto-rollback triggered automatically.
+          runbook: "docs/operations/rollback-procedures.md#opa-error-rollback"
+          dashboard: "https://grafana.example.com/d/opa-errors/overview"
+          action_required: "Immediate rollback in progress. Fix policy syntax errors."
+
+      # ========================================================================
+      # AUTO-ROLLBACK TRIGGER 5: CI Time Increase >30%
+      # ========================================================================
+      - alert: CITimeIncreaseExceeded
+        expr: |
+          (
+            (
+              avg(ci_workflow_duration_seconds{workflow="Compliance Scan"}[1h])
+              -
+              avg(ci_workflow_duration_seconds{workflow="Compliance Scan"} offset 24h)
+            )
+            /
+            avg(ci_workflow_duration_seconds{workflow="Compliance Scan"} offset 24h)
+          ) > 0.30
+        for: 10m
+        labels:
+          severity: critical
+          action: auto-rollback
+          tier: tier1
+          owner: devops-lead
+        annotations:
+          summary: "CI time increase exceeded 30% - AUTO-ROLLBACK TRIGGERED"
+          description: |
+            CI workflow duration increased beyond performance budget.
+            Threshold: +30%
+            Current increase: {{ $value | humanizePercentage }}
+            Baseline: {{ $labels.baseline_duration }}s
+            Current: {{ $labels.current_duration }}s
+            Auto-rollback triggered automatically.
+          runbook: "docs/operations/rollback-procedures.md#ci-performance-rollback"
+          dashboard: "https://grafana.example.com/d/ci-performance/overview"
+          action_required: "Immediate rollback in progress. Optimize OPA policies."
+
+
+

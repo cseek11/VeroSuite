@@ -1,0 +1,184 @@
+# Monitoring Alerts - Investigation Needed
+# Purpose: Monitoring alerts for trend analysis and investigation
+# Created: 2025-11-23
+# Version: 1.0.0
+# Action: Investigation needed, no immediate rollback
+
+groups:
+  - name: monitoring_alerts
+    interval: 5m
+    rules:
+      # ========================================================================
+      # MONITORING 1: Compliance Score Drop >5 Points
+      # ========================================================================
+      - alert: ComplianceScoreDropMinor
+        expr: |
+          (
+            compliance_score{time="now"} 
+            - compliance_score{time="24h_ago"}
+          ) < -5
+        for: 4h
+        labels:
+          severity: info
+          action: monitoring
+          tier: tier3
+          owner: governance-lead
+        annotations:
+          summary: "Compliance score dropped by >5 points - MONITORING"
+          description: |
+            Minor compliance score drop detected.
+            Threshold: -5 points
+            Actual drop: {{ $value }} points
+            Previous score: {{ $labels.previous_score }}
+            Current score: {{ $labels.current_score }}
+            Action: Monitor trend, investigate if continues.
+          dashboard: "https://grafana.example.com/d/compliance-score/overview"
+
+      # ========================================================================
+      # MONITORING 2: Tier 1 Violations >5/Day
+      # ========================================================================
+      - alert: ModerateT ier1Violations
+        expr: |
+          sum(increase(compliance_violations_total{tier="1"}[24h])) > 5
+        for: 4h
+        labels:
+          severity: info
+          action: monitoring
+          tier: tier3
+          owner: rules-champions
+        annotations:
+          summary: "Tier 1 violations >5 per day - MONITORING"
+          description: |
+            Moderate number of Tier 1 violations detected.
+            Threshold: 5 violations/day
+            Current: {{ $value }} violations in last 24 hours
+            Action: Monitor trend, review if increases.
+          dashboard: "https://grafana.example.com/d/violations/tier1"
+
+      # ========================================================================
+      # MONITORING 3: False Positive Rate >10%
+      # ========================================================================
+      - alert: ElevatedFalsePositiveRate
+        expr: |
+          (
+            sum(rate(compliance_violations_false_positive_total[24h])) 
+            / 
+            sum(rate(compliance_violations_total[24h]))
+          ) > 0.10
+        for: 4h
+        labels:
+          severity: info
+          action: monitoring
+          tier: tier3
+          owner: rules-champions
+        annotations:
+          summary: "False positive rate >10% - MONITORING"
+          description: |
+            False positive rate is elevated.
+            Threshold: 10%
+            Current: {{ $value | humanizePercentage }}
+            Manual review threshold: 20%
+            Action: Monitor trend, refine policies if increases.
+          dashboard: "https://grafana.example.com/d/compliance/false-positives"
+
+      # ========================================================================
+      # MONITORING 4: OPA Evaluation Time >150ms (P99)
+      # ========================================================================
+      - alert: OPAPerformanceWarning
+        expr: |
+          histogram_quantile(0.99, 
+            rate(opa_evaluation_duration_seconds_bucket[1h])
+          ) > 0.150
+        for: 30m
+        labels:
+          severity: info
+          action: monitoring
+          tier: tier3
+          owner: devops-lead
+        annotations:
+          summary: "OPA P99 evaluation time >150ms - MONITORING"
+          description: |
+            OPA evaluation time approaching budget.
+            Threshold: 150ms (75% of 200ms budget)
+            Current P99: {{ $value | humanize Duration }}
+            Budget: 200ms per policy
+            Action: Monitor trend, optimize if approaches 200ms.
+          dashboard: "https://grafana.example.com/d/opa-performance/overview"
+
+      # ========================================================================
+      # MONITORING 5: CI Time Increase >15%
+      # ========================================================================
+      - alert: CITimeIncreaseWarning
+        expr: |
+          (
+            (
+              avg(ci_workflow_duration_seconds{workflow="Compliance Scan"}[1h])
+              -
+              avg(ci_workflow_duration_seconds{workflow="Compliance Scan"} offset 24h)
+            )
+            /
+            avg(ci_workflow_duration_seconds{workflow="Compliance Scan"} offset 24h)
+          ) > 0.15
+        for: 2h
+        labels:
+          severity: info
+          action: monitoring
+          tier: tier3
+          owner: devops-lead
+        annotations:
+          summary: "CI time increase >15% - MONITORING"
+          description: |
+            CI workflow duration increasing.
+            Threshold: +15%
+            Current increase: {{ $value | humanizePercentage }}
+            Auto-rollback threshold: +30%
+            Baseline: {{ $labels.baseline_duration }}s
+            Current: {{ $labels.current_duration }}s
+            Action: Monitor trend, optimize if approaches 30%.
+          dashboard: "https://grafana.example.com/d/ci-performance/overview"
+
+      # ========================================================================
+      # MONITORING 6: Policy Complexity Increasing
+      # ========================================================================
+      - alert: PolicyComplexityIncreasing
+        expr: |
+          avg(opa_policy_lines_of_code) > 80
+        for: 24h
+        labels:
+          severity: info
+          action: monitoring
+          tier: tier3
+          owner: rules-champions
+        annotations:
+          summary: "Average policy complexity >80 lines - MONITORING"
+          description: |
+            Policy complexity approaching refactoring threshold.
+            Threshold: 80 lines (warning)
+            Current average: {{ $value }} lines
+            Refactoring threshold: 100 lines
+            Action: Review policies for consolidation opportunities.
+          dashboard: "https://grafana.example.com/d/opa-policies/complexity"
+
+      # ========================================================================
+      # MONITORING 7: Prometheus Scrape Failures
+      # ========================================================================
+      - alert: PrometheusScrapeFailing
+        expr: |
+          up{job=~"opa-performance|compliance-metrics|github-actions"} == 0
+        for: 5m
+        labels:
+          severity: warning
+          action: monitoring
+          tier: tier3
+          owner: devops-lead
+        annotations:
+          summary: "Prometheus scrape target down - MONITORING"
+          description: |
+            Prometheus cannot scrape metrics from target.
+            Job: {{ $labels.job }}
+            Instance: {{ $labels.instance }}
+            Action: Check target health and network connectivity.
+          dashboard: "https://grafana.example.com/d/prometheus/targets"
+
+
+

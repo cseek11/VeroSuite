@@ -11,7 +11,7 @@ Table of Contents
 System Architecture Overview
 Phase 1: Foundation & Critical Fixes (Weeks 1-2)
 Phase 2: Rule Migration & OPA Integration (Weeks 3-5)
-Phase 3: Dashboard & Operations (Weeks 6-8)
+Phase 3: Dashboard & Operations (Weeks 11-14) - REVISED
 Technical Implementation Details
 Testing & Validation Strategy
 Rollout & Change Management
@@ -291,7 +291,16 @@ Every specialized rule ends with a "Step 5: Verification" section.
 - Third-party integrations
 - RLS policies
 
-**Significant Decision:** Architectural or design decision affecting:
+**MAD (Major Action/Decision):** An action or decision with high potential for risk, significant impact, or requiring human validation.
+
+Categories:
+- **Tier 1 MAD (BLOCK):** Security, tenant isolation, architecture boundaries
+- **Tier 2 MAD (OVERRIDE):** Breaking changes, state transitions, layer synchronization  
+- **Tier 3 MAD (WARNING):** Tech debt, TODO additions, style violations
+
+**See also:** Stateful Entity (many MAD triggers involve stateful entities)
+
+Architectural or design decision affecting:
 - Service boundaries
 - Database schema (multiple modules)
 - Major refactoring (>50 files)
@@ -303,11 +312,57 @@ Every specialized rule ends with a "Step 5: Verification" section.
 
 **State Machine:** Defined lifecycle with allowed transitions and states (e.g., Draft→Completed).
 
-**Stateful Entity:** Entity with:
-- Status/state field that changes over time
-- Workflow states (e.g., draft → review → approved)
-- Lifecycle states (e.g., created → active → archived)
-- Examples: WorkOrder, Invoice, Payment, User
+**Stateful Entity:** Any component that retains information about past interactions and uses that information to influence behavior. Two types:
+
+1. **Technical Stateful Entity:** Infrastructure components that store state
+   - Examples: 
+     - **Data stores:** Databases, caches, Redis, session stores
+     - **Message systems:** Message queues, event streams (Kafka topics)
+     - **Search & indexing:** Elasticsearch, search indexes
+     - **Storage systems:** File systems, blob storage (S3, Azure Blob)
+     - **External state:** Third-party APIs with state, AI agent memory
+     - **Distributed state:** Coordination services (Zookeeper, etcd)
+   - Risks: Data corruption, race conditions, inconsistency, data loss
+   - Requirements: 
+     - Transaction management for ACID operations
+     - Backup/recovery procedures documented
+     - Connection pooling and timeout handling
+     - Cache invalidation strategy (if applicable)
+     - Queue ordering guarantees (if applicable)
+   - See also: Infrastructure layer rules (03-infrastructure.mdc)
+
+2. **Business Stateful Entity:** Domain models with defined state machines
+   - Examples: WorkOrder, Invoice, Payment, User, Tenant
+   - Characteristics: Status/state field, workflow states, lifecycle transitions
+   - Requirements:
+     - State machine documented in `docs/state-machines/{entity}.md`
+     - State transition validation enforced in code
+     - Audit logs for state changes maintained
+   - See also: State machine rules (05-data.mdc)
+
+**When in doubt:** If it has a "status" or "state" field with legal transitions, it's Business. If it's infrastructure that persists data, it's Technical
+
+**Visual Comparison:**
+
+```
+Stateful Entity Comparison
+
+Technical                     Business
+┌─────────────────┐          ┌─────────────────┐
+│ Infrastructure  │          │ Domain Models   │
+│ - Databases     │          │ - WorkOrder     │
+│ - Caches        │          │ - Invoice       │
+│ - Queues        │          │ - Payment       │
+│ - Storage       │          │ - User          │
+└─────────────────┘          └─────────────────┘
+        │                              │
+        ▼                              ▼
+ [Resilience Focus]          [State Machine Focus]
+ - Transactions              - Transitions
+ - Backup/Recovery           - Lifecycle
+ - Connection Pooling        - Validation
+ - Timeout Handling          - Audit Logs
+```
 
 ### T — Z
 
@@ -1450,10 +1505,10 @@ markdown# Rule Compliance Matrix v1.1
 | # | Rule File | Section | Trigger Type | Step 5 Check | Enforcement | Status | Priority | OPA Policy | Audit Issue | Notes |
 |---|-----------|---------|--------------|--------------|-------------|--------|----------|------------|-------------|-------|
 | 0 | 00-master.mdc | Bug Fix Documentation | Bug fix | MUST verify logged in BUG_LOG.md & error-patterns.md | MANDATORY | ✅ | High | bug-doc.rego | 0 | Fully implemented |
-| 1 | 00-master.mdc | Engineering Decisions | Significant decision | MUST verify documented in docs/engineering-decisions.md | REQUIRED | ❌ | Medium | decisions.rego | 1 | Requires glossary alignment |
+| 1 | 00-master.mdc | Engineering Decisions | MAD | MUST verify documented in docs/engineering-decisions.md | REQUIRED | ❌ | Medium | decisions.rego | 1 | Requires glossary alignment |
 | 2 | 12-tech-debt.mdc | Tech Debt Logging | Meaningful debt created | MUST verify debt logged | RECOMMENDED | ⚠️ | Medium | tech-debt.rego | 2 | Replace "if applicable" |
 | 3 | 05-data.mdc | Layer Sync | Schema/DTO/API/event change | MUST verify sync complete | MANDATORY | ❌ | 🔥 Critical | layer-sync.rego | 3 | Expand scope beyond schema |
-| 4 | 05-data.mdc | State Machine Docs | Stateful entity change | MUST verify docs updated | REQUIRED | ❌ | High | state-machines.rego | 4 | Define "stateful" in glossary |
+| 4 | 05-data.mdc | State Machine Docs | Business stateful entity change | MUST verify docs updated | REQUIRED | ❌ | High | state-machines.rego | 4 | Define "stateful" in glossary |
 | 5 | 05-data.mdc | Contract Documentation | Schema/API change | MUST verify updated contracts | REQUIRED | ❌ | High | contracts.rego | 5 | Merge with layer sync |
 | 6 | 10-quality.mdc | Testing Requirements | New/changed code | MUST verify new tests & ≥80% coverage | MANDATORY | ⚠️ | 🔥 Critical | testing.rego | 6 | Requires Jest/Coverage integration |
 | 7 | 00-master.mdc | Breaking Changes | Schema/API/event change | MUST verify migration guide + version bump | MANDATORY | ❌ | 🔥 Critical | breaking-change.rego | 7 | Add version bump enforcement |
@@ -3846,7 +3901,7 @@ Performance gain not significant enough to offset ecosystem disadvantages.
 ### Decision Tree
 ```mermaid
 graph TD
-    A[Change/Decision Made] --> B{Significant Decision?}
+    A[Change/Decision Made] --> B{MAD?}
     B -->|No - Routine change| C[No documentation needed]
     B -->|Yes| D{Decision Type?}
     
@@ -3875,7 +3930,7 @@ graph TD
 
 ### Step 5 Verification (The Contract)
 
-Before finalizing code involving significant decisions, verify:
+Before finalizing code involving MADs, verify:
 
 - [ ] **MUST** verify decision meets documentation criteria (see Triggers)
 - [ ] **MUST** verify decision documented in `docs/engineering-decisions.md`
@@ -3889,7 +3944,7 @@ Before finalizing code involving significant decisions, verify:
 - [ ] **SHOULD** verify related decisions cross-referenced
 
 **Consequences:**
-- Missing documentation for significant decision = HARD STOP
+- Missing documentation for MAD = HARD STOP
 - Incomplete template (missing sections) = HARD STOP
 - Only 1 alternative considered = OVERRIDE required (must justify why others not viable)
 - Missing trade-offs = HARD STOP
@@ -4026,13 +4081,13 @@ import future.keywords.contains
 import future.keywords.if
 import future.keywords.in
 
-# HARD STOP: Significant decision without documentation
+# HARD STOP: MAD without documentation
 deny contains msg if {
     is_significant_decision(input.changed_files)
     not has_decision_documentation(input.changed_files)
     not is_minor_change(input.changed_files)
     
-    msg := "HARD STOP [Decisions]: Significant decision detected. Document in docs/engineering-decisions.md"
+    msg := "HARD STOP [Decisions]: MAD detected. Document in docs/engineering-decisions.md"
 }
 
 # HARD STOP: Decision documentation incomplete
@@ -4051,7 +4106,7 @@ override contains msg if {
     msg := "OVERRIDE REQUIRED [Decisions]: Decision should consider at least 2 alternatives. Justify if only 1 is viable."
 }
 
-# Helper: Detect significant decisions
+# Helper: Detect MADs
 is_significant_decision(files) if {
     # Major refactoring (>50 files)
     count(files) > 50
@@ -4189,7 +4244,7 @@ jobs:
             **/schema.prisma
             package.json
       
-      - name: Check if significant decision
+      - name: Check if MAD
         id: check-decision
         run: |
           CHANGED_COUNT=$(echo '${{ steps.changed-files.outputs.all_changed_files }}' | jq '. | length')
@@ -4212,7 +4267,7 @@ jobs:
         if: steps.check-decision.outputs.significant == 'true'
         run: |
           if ! git diff origin/main...HEAD -- docs/engineering-decisions.md | grep -q "## \[DEC-"; then
-            echo "❌ Significant decision detected but not documented"
+            echo "❌ MAD detected but not documented"
             echo ""
             echo "**Reason:** ${{ steps.check-decision.outputs.reason }}"
             echo ""
@@ -4318,7 +4373,7 @@ schema.prisma (Source of Truth)
     ↓ (prisma generate)
 @prisma/client types
     ↓ (manual mapping)
-DTOs (backend/src/**/*.dto.ts)
+DTOs (apps/api/src/**/*.dto.ts)
     ↓ (API exposure)
 OpenAPI/Swagger specs
     ↓ (code generation OR manual)
@@ -4519,9 +4574,10 @@ Use this checklist in your PR:
 
 - [ ] **Documentation Layer**:
   - [ ] Data dictionary updated (if significant)
-  - [ ] State machine docs updated (if stateful entity)
-  - [ ] Migration guide created (if
-
+  - [ ] State machine docs updated (if business stateful entity)
+  - [ ] Transaction handling verified (if technical stateful entity)
+  - [ ] Backup/recovery procedures documented and tested (if technical stateful entity)
+  - [ ] Connection pooling and timeout handling configured (if technical stateful entity)
   - [ ] Migration guide created (if breaking)
   - [ ] README updated (if API/setup changed)
 
@@ -5964,7 +6020,7 @@ Before finalizing code that introduces or touches tech debt, verify:
 
 Document state machines to ensure transitions are valid, side effects are clear, and illegal state changes are prevented.
 
-### What is a "Stateful Entity"?
+### What is a "Business Stateful Entity"?
 
 An entity is **stateful** if it has:
 
@@ -5990,7 +6046,7 @@ An entity is **stateful** if it has:
 
 ### Triggers (When State Machine Documentation is MANDATORY)
 
-#### New Stateful Entity:
+#### New Business Stateful Entity:
 - ✅ Creating entity with status/state field
 - ✅ Adding workflow to existing entity
 - ✅ Implementing multi-step process
@@ -6997,12 +7053,12 @@ package compliance.data.state_machines
 import future.keywords.contains
 import future.keywords.if
 
-# HARD STOP: Stateful entity without state machine docs
+# HARD STOP: Business stateful entity without state machine docs
 deny contains msg if {
     is_stateful_entity(input.changed_files)
     not has_state_machine_docs(input.changed_files)
     
-    msg := "HARD STOP [State Machines]: Stateful entity detected but no state machine documentation in docs/state-machines/"
+    msg := "HARD STOP [State Machines]: Business stateful entity detected but no state machine documentation in docs/state-machines/"
 }
 
 # Helpers
@@ -7022,6 +7078,39 @@ has_state_machine_docs(files) if {
     some file in files
     contains(file.path, "docs/state-machines/")
     endswith(file.path, "-state-machine.md")
+}
+
+# HARD STOP: Technical stateful entity without resilience measures
+technical_stateful_without_resilience contains msg if {
+    is_technical_stateful_entity(input.changed_files)
+    not has_transaction_handling(input.changed_files)
+    
+    msg := "HARD STOP [Infrastructure]: Technical stateful entity detected without transaction handling. Required: transaction management, backup procedures, timeout handling."
+}
+
+# Helpers for Technical Stateful Entity
+is_technical_stateful_entity(files) if {
+    some file in files
+    # Database/cache/queue configuration files
+    regex.match(`(database|cache|redis|queue|kafka)\.config\.(ts|js|json)`, file.path)
+}
+
+is_technical_stateful_entity(files) if {
+    some file in files
+    # Infrastructure setup files
+    contains(file.path, "infrastructure/")
+    regex.match(`\.(ts|js|yaml|yml)$`, file.path)
+}
+
+has_transaction_handling(files) if {
+    some file in files
+    contains(file.diff, "transaction")
+    contains(file.diff, "BEGIN")
+}
+
+has_transaction_handling(files) if {
+    some file in files
+    contains(file.diff, "@Transactional")
 }
 `````
 
@@ -8631,96 +8720,276 @@ Rule Compliance Matrix: 25/25 complete (100%)
 All priority levels: COMPLETE
 
 
-Phase 3: Dashboard & Operations (Weeks 6-8)
-Week 6: Compliance Dashboard Development
-Day 1-2: Backend API Implementation
-Already covered in Week 1 - implement:
+Phase 3: Dashboard & Operations (Weeks 11-14) - REVISED
 
-ComplianceController
-ComplianceService
-ComplianceService
-Database schema for compliance tracking
+**⚠️ UPDATED (2025-11-24):** Enhanced with production safeguards, integrated dashboard approach, and 4-week timeline
 
-Database Schema: prisma/schema.prisma
-prisma// Add to existing schema
+**Key Changes:**
+- Dashboard location: Changed from `apps/forge-console/` (standalone) to `frontend/src/routes/compliance/` (integrated)
+- Timeline: Extended from 3 weeks (Weeks 11-13) to 4 weeks (Weeks 11-14)
+- Database schema: Enhanced from 2 tables to 6 tables with indexes and RLS policies
+- Production safeguards: Added async write queue, separate connection pool, resource monitoring
+- Compliance score: Defined weighted scoring algorithm
+- Alert system: Enhanced with deduplication, acknowledgment, escalation
 
-model ComplianceViolation {
-  id          String   @id @default(uuid())
-  rule        String   @db.VarChar(100)
-  severity    String   @db.VarChar(20) // BLOCK, OVERRIDE, WARNING
-  file        String
-  prNumber    Int?
-  author      String
-  description String   @db.Text
-  status      String   @db.VarChar(20) // active, overridden, fixed
-  createdAt   DateTime @default(now())
-  fixedAt     DateTime?
-  tenantId    String?
-  
-  overrideRequests OverrideRequest[]
-  relatedCommits   ViolationCommit[]
-  
-  @@index([status, createdAt])
-  @@index([prNumber])
-  @@index([author])
-  @@index([rule])
-  @@map("compliance_violations")
+#### Week 11: Dashboard Foundation
+
+**Days 1-3: Database & API Setup**
+- [ ] Create enhanced compliance database schema (6 tables with indexes, RLS policies)
+- [ ] Run Prisma migrations
+- [ ] Seed rule_definitions table (R01-R25)
+- [ ] Create compliance module in `apps/api/src/compliance/`
+- [ ] Implement compliance service and controller
+- [ ] Add authentication guards and RBAC
+- [ ] Implement basic CRUD endpoints
+- [ ] **Production Safeguard:** Configure separate connection pool for compliance service
+
+**Days 4-5: Frontend Dashboard Setup**
+- [ ] Create `frontend/src/routes/compliance/` directory (integrated into existing frontend)
+- [ ] Add compliance routes to existing router
+- [ ] Set up API client for compliance endpoints
+- [ ] Create rule compliance overview component
+- [ ] Implement violation list component
+- [ ] Add filtering and search functionality
+
+**Days 6-7: Integration & Basic Features**
+- [ ] **Production Safeguard:** Implement async write queue for compliance updates (BullMQ)
+- [ ] Integrate OPA evaluation results into database (via queue)
+- [ ] Connect dashboard to API
+- [ ] Implement polling for real-time updates (5-minute intervals)
+- [ ] Add compliance score calculation (weighted scoring algorithm with edge cases)
+- [ ] Basic styling and UX polish
+
+**OPA Integration Flow (Detailed):**
+
+### Step 1: PR Created/Updated
+- GitHub webhook triggers workflow
+- Workflow: `.github/workflows/opa_compliance_check.yml`
+
+### Step 2: OPA Evaluation
+```yaml
+# .github/workflows/opa_compliance_check.yml
+- name: Evaluate OPA Policies
+  run: |
+    opa eval -d policies/ \
+      -i changed_files.json \
+      --format json \
+      data.compliance.evaluate > opa_results.json
+```
+
+### Step 3: Store Results (Async)
+```typescript
+// In workflow or separate service
+const results = JSON.parse(fs.readFileSync('opa_results.json'));
+await complianceQueueService.addViolations(results.violations);
+// Workflow continues, doesn't wait for DB write
+```
+
+### Step 4: Dashboard Queries
+```typescript
+// Dashboard polls API every 5 minutes
+const violations = await complianceService.getViolations({
+  tenantId: currentTenant,
+  prNumber: currentPR
+});
+```
+
+### Step 5: Alerts Triggered
+```typescript
+// Background job checks for new violations
+if (violation.severity === 'BLOCK') {
+  await alertService.sendAlert(violation);
 }
+```
 
-model OverrideRequest {
-  id            String              @id @default(uuid())
-  violationId   String
-  violation     ComplianceViolation @relation(fields: [violationId], references: [id])
-  requestedBy   String
-  justification String              @db.Text
-  status        String              @db.VarChar(20) // pending, approved, rejected
-  reviewedBy    String?
-  reviewedAt    DateTime?
-  expiresAt     DateTime?
-  createdAt     DateTime            @default(now())
-  
-  @@index([status, createdAt])
-  @@map("override_requests")
-}
+#### Week 12: Monitoring & Alerts
 
-model ViolationCommit {
-  id          String              @id @default(uuid())
-  violationId String
-  violation   ComplianceViolation @relation(fields: [violationId], references: [id])
-  commitSha   String
-  commitMsg   String
-  author      String
-  committedAt DateTime
-  
-  @@index([violationId])
-  @@map("violation_commits")
-}
+**Days 1-3: Monitoring Infrastructure**
+- [ ] Set up monitoring metrics collection
+- [ ] Create compliance trends tracking (daily aggregation job)
+- [ ] Implement violation aggregation
+- [ ] Add compliance rate calculations
+- [ ] Create health check endpoint
+- [ ] **Production Safeguard:** Set up resource monitoring (connection pool, query times)
 
-model ComplianceScore {
-  id              String   @id @default(uuid())
-  score           Int      // 0-100
-  violationCount  Int
-  coveragePercent Float
-  createdAt       DateTime @default(now())
-  
-  @@index([createdAt])
-  @@map("compliance_scores")
-}
+**Monitoring Thresholds & Alerts:**
 
-model ExemptionHistory {
-  id         String   @id @default(uuid())
-  date       DateTime @default(now())
-  count      Int
-  fixedCount Int
-  
-  @@index([date])
-  @@map("exemption_history")
+### Connection Pool Alerts:
+- **WARNING:** Utilization > 70% for 5+ minutes
+- **CRITICAL:** Utilization > 90% for 1+ minute
+- **Action:** Investigate slow queries, consider scaling
+
+### Query Performance Alerts:
+- **WARNING:** Average query time > 500ms
+- **CRITICAL:** Average query time > 1000ms
+- **Action:** Review EXPLAIN ANALYZE, optimize indexes
+
+### Alert Delivery Alerts:
+- **WARNING:** Delivery failure rate > 5%
+- **CRITICAL:** Delivery failure rate > 20%
+- **Action:** Check Slack/email service connectivity
+
+### Dashboard Uptime Alerts:
+- **WARNING:** Response time > 1000ms
+- **CRITICAL:** 3+ consecutive health check failures
+- **Action:** Check API/database connectivity
+
+**Days 4-5: Alert System**
+- [ ] Set up Slack integration (webhook or API)
+- [ ] Set up email notifications (use existing email service)
+- [ ] Implement alert rules (Tier 1/2/3)
+- [ ] Add alert deduplication logic (1-hour window)
+- [ ] Create alert templates
+- [ ] Implement acknowledgment tracking
+- [ ] Add escalation procedures (15 min for Tier 1, 4 hours for Tier 2)
+
+**Days 6-7: Testing & Refinement**
+- [ ] Test alert delivery (all channels)
+- [ ] Verify monitoring accuracy
+- [ ] Test deduplication and escalation
+- [ ] Refine alert thresholds
+- [ ] Document alert procedures
+
+#### Week 13: Operations & Documentation
+
+**Days 1-2: Operations Runbooks**
+- [ ] Write compliance operations runbook
+- [ ] Write dashboard operations runbook
+- [ ] Write alert response runbook
+- [ ] Create rule-specific runbooks (R01-R25) using template
+
+**Runbook Template:** See `docs/compliance-reports/PHASE3-PLANNING.md` (Week 13, Days 1-2) for complete template structure.
+
+**Days 3-4: Dashboard Enhancements**
+- [ ] Add trends and analytics views
+- [ ] Implement PR compliance status
+- [ ] Add export functionality (CSV, JSON)
+- [ ] Performance optimization (caching, query optimization)
+
+**Days 5-7: Production Readiness & Final Testing**
+
+**Pre-Deployment Checklist:**
+- [ ] Database migrations tested in staging
+- [ ] RLS policies verified
+- [ ] Indexes created and verified
+- [ ] Environment variables configured
+- [ ] Redis connection tested (for async queue)
+- [ ] Slack webhook tested
+- [ ] Email service tested
+- [ ] Load testing passed
+
+**Load Testing Plan:** See `docs/compliance-reports/PHASE3-PLANNING.md` (Week 13, Days 5-7) for detailed plan with 3 scenarios and k6 script example.
+
+**Deployment (Day 6):**
+- [ ] Run database migrations (compliance schema)
+- [ ] Deploy API changes
+- [ ] Deploy frontend changes
+- [ ] Verify health checks pass
+- [ ] Smoke test: Create test PR, verify compliance check
+- [ ] Smoke test: Trigger test alert, verify delivery
+
+**Post-Deployment (Day 7):**
+- [ ] Monitor for 24 hours
+- [ ] Check error logs
+- [ ] Verify metrics collection
+- [ ] Review alert delivery success rate
+- [ ] Team training completed (1-hour session)
+- [ ] Documentation published
+
+**Rollback Plan:** See `docs/compliance-reports/PHASE3-PLANNING.md` (Week 13, Days 5-7) for immediate, database, and partial rollback procedures.
+
+#### Week 14: Buffer & Refinement
+
+**Days 1-3: Buffer for Unexpected Issues**
+- [ ] Address any production issues discovered
+- [ ] Performance tuning based on production metrics
+- [ ] Refine alert thresholds based on real usage
+- [ ] Additional documentation as needed
+
+**Days 4-5: Final Polish**
+- [ ] Dashboard UX improvements
+- [ ] Additional monitoring dashboards (if needed)
+- [ ] Team feedback incorporation
+
+**Days 6-7: Handoff & Documentation**
+- [ ] Final documentation review
+- [ ] Team handoff session
+- [ ] Post-deployment monitoring setup
+
+**Enhanced Database Schema:**
+
+See `docs/compliance-reports/PHASE3-PLANNING.md` for complete schema with 6 tables:
+- `rule_definitions` - Rule metadata (R01-R25)
+- `compliance_checks` - Violation records
+- `compliance_trends` - Aggregated trends
+- `override_requests` - Override tracking
+- `alert_history` - Alert delivery tracking
+- `audit_log` - Audit trail
+
+All tables include:
+- Proper indexes for performance
+- RLS policies for tenant isolation
+- JSONB fields for flexible context storage
+
+**Compliance Score Algorithm:**
+
+**Base Algorithm:**
+```typescript
+compliance_score = Math.max(0, 100 - weighted_violations);
+
+weighted_violations = 
+  (BLOCK_count * 10) + 
+  (OVERRIDE_count * 3) + 
+  (WARNING_count * 1);
+```
+
+**Edge Cases:**
+1. **No Violations:** Score: 100, Status: ✅ PASS
+2. **Only Warnings:** Score: 100 - (WARNING_count * 1), Status: ✅ PASS (if score >= 70)
+3. **Any BLOCK Violations:** Score calculated, but PR is **BLOCKED** regardless (Exception: Override approved by compliance_admin)
+4. **Mixed Violations:** Score: 100 - weighted_violations, Status: Depends on score threshold (>= 70) AND no BLOCK violations
+5. **Override Approved:** Original score shown, status changes to ✅ OVERRIDE_APPROVED
+
+**Merge Rules:**
+```typescript
+function canMerge(pr: PR): boolean {
+  // Rule 1: Any BLOCK violations => cannot merge
+  if (pr.violations.some(v => v.severity === 'BLOCK')) {
+    return pr.overrideApproved && pr.overrideApprovedBy === 'compliance_admin';
+  }
+  // Rule 2: Score must be >= 70
+  return pr.complianceScore >= 70;
 }
-Migration:
-bashnpx prisma migrate dev --name add_compliance_tracking
+```
+
+**Minimum/Maximum:** 0-100
+
+**Production Safeguards:**
+
+1. **Async Write Queue** - BullMQ with Redis for non-blocking compliance writes
+2. **Separate Connection Pool** - Dedicated Prisma client (max 5 connections)
+3. **Resource Monitoring** - Connection pool metrics, query performance tracking
+4. **Query Optimization** - All queries use indexes, <100ms target
+
+See `docs/compliance-reports/PHASE3-PLANNING.md` for detailed implementation code.
+
+**Deliverables:**
+
+- ✅ MVP dashboard operational (integrated into existing frontend)
+- ✅ API endpoints functional (with production safeguards)
+- ✅ Enhanced database schema deployed (6 tables, indexes, RLS)
+- ✅ Monitoring and alerts configured (with deduplication, escalation)
+- ✅ Operations runbooks created
+- ✅ Production safeguards implemented and tested
+
+**Reference:** See `docs/compliance-reports/PHASE3-PLANNING.md` for complete implementation details, architecture diagrams, and production readiness tasks.
+
+---
+
+**Previous Implementation (for reference):**
 
 Day 3: Dashboard Components Implementation
-File: apps/forge-console/src/components/compliance/OverallScore.tsx
+File: frontend/src/routes/compliance/components/OverallScore.tsx
 typescriptimport React from 'react';
 import { Card, CardContent, Typography, Box, LinearProgress } from '@mui/material';
 import { TrendingUp, TrendingDown, TrendingFlat } from '@mui/icons-material';

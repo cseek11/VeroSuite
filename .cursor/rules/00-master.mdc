@@ -237,7 +237,14 @@ Distillation is prompt-driven (no model fine-tuning). Additions to these files i
 - **MANDATORY:** When PR has REWARD_SCORE ≤ 0, you MUST:
   1. Log anti-pattern in `.cursor/anti_patterns.md`
   2. Log associated bug in `.cursor/BUG_LOG.md` (if bug was fixed)
-  3. Document error pattern in `docs/error-patterns.md` (if applicable)
+  3. Document error pattern in `docs/error-patterns.md` when:
+     - Bug occurred in production OR affected multiple users
+     - Bug fix addresses a recurring pattern (≥2 occurrences)
+     - Root cause is non-obvious or required >1 hour to diagnose
+     - Prevention strategy can help future development
+     - **ALWAYS document:** Security bugs, data corruption, financial calculation errors, production incidents
+     - **NOT applicable for:** Typos, simple logic errors with obvious fixes, one-off edge cases
+     - **Decision aid:** If someone else could make the same mistake, document it
 
 ### Entry Requirements
 - Every entry includes: detection context, remediation guidance, and follow-up owner

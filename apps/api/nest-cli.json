@@ -7,7 +7,9 @@
     "deleteOutDir": true,
     "watchAssets": false,
     "assets": [],
-    "tsConfigPath": "tsconfig.json"
+    "tsConfigPath": "tsconfig.json",
+    "webpack": false,
+    "typeCheck": false
   },
   "watchModeOptions": {
     "watchAssets": false,
@@ -21,6 +23,8 @@
     ]
   }
 }
+
+
 
 
 

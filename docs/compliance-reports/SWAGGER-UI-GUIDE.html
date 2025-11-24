@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swagger UI Guide - VeroField Compliance API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section h3 {
+            color: #555;
+            font-size: 1.4em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        
+        .section h4 {
+            color: #666;
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .step {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            position: relative;
+            padding-left: 50px;
+        }
+        
+        .step::before {
+            content: counter(step-counter);
+            counter-increment: step-counter;
+            position: absolute;
+            left: 15px;
+            top: 20px;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .steps-container {
+            counter-reset: step-counter;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        .code-block code {
+            color: #f8f8f2;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .endpoint-card {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .endpoint-method {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+        
+        .method-get {
+            background: #61affe;
+            color: white;
+        }
+        
+        .method-post {
+            background: #49cc90;
+            color: white;
+        }
+        
+        .method-put {
+            background: #fca130;
+            color: white;
+        }
+        
+        .method-delete {
+            background: #f93e3e;
+            color: white;
+        }
+        
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .endpoint-description {
+            margin-top: 10px;
+            color: #666;
+        }
+        
+        .screenshot-placeholder {
+            background: #e9ecef;
+            border: 2px dashed #adb5bd;
+            border-radius: 6px;
+            padding: 40px;
+            text-align: center;
+            color: #6c757d;
+            margin: 15px 0;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            margin: 8px 0;
+        }
+        
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            padding: 5px 10px;
+            display: block;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .toc a:hover {
+            background: #e9ecef;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .badge-required {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .badge-optional {
+            background: #6c757d;
+            color: white;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+        }
+        
+        table th, table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        
+        table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Swagger UI Guide</h1>
+            <p>Complete Guide to Using the VeroField Compliance API Documentation</p>
+            <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">
+                API Base URL: <strong>http://localhost:3001</strong>
+            </p>
+        </header>
+        
+        <div class="content">
+            <div class="toc">
+                <h3>📑 Table of Contents</h3>
+                <ul>
+                    <li><a href="#what-is-swagger">What is Swagger UI?</a></li>
+                    <li><a href="#accessing">Accessing Swagger UI</a></li>
+                    <li><a href="#interface-overview">Interface Overview</a></li>
+                    <li><a href="#authentication">Authentication</a></li>
+                    <li><a href="#testing-endpoints">Testing Endpoints</a></li>
+                    <li><a href="#compliance-endpoints">Compliance Endpoints</a></li>
+                    <li><a href="#understanding-responses">Understanding Responses</a></li>
+                    <li><a href="#troubleshooting">Troubleshooting</a></li>
+                    <li><a href="#best-practices">Best Practices</a></li>
+                </ul>
+            </div>
+            
+            <div class="section" id="what-is-swagger">
+                <h2>🔍 What is Swagger UI?</h2>
+                <p>
+                    Swagger UI is an interactive API documentation tool that allows you to explore, test, and understand 
+                    the VeroField Compliance API without writing any code. It provides:
+                </p>
+                <ul style="margin-left: 20px; margin-top: 15px;">
+                    <li><strong>Interactive Documentation:</strong> See all available endpoints with descriptions</li>
+                    <li><strong>Live Testing:</strong> Execute API calls directly from your browser</li>
+                    <li><strong>Request/Response Examples:</strong> Understand data formats and structures</li>
+                    <li><strong>Authentication:</strong> Test authenticated endpoints easily</li>
+                    <li><strong>Schema Validation:</strong> See required fields and data types</li>
+                </ul>
+            </div>
+            
+            <div class="section" id="accessing">
+                <h2>🚀 Accessing Swagger UI</h2>
+                <div class="steps-container">
+                    <div class="step">
+                        <h4>Step 1: Ensure API Server is Running</h4>
+                        <p>Make sure the API server is running on port 3001:</p>
+                        <div class="code-block">
+cd apps/api
+npm run start:dev
+                        </div>
+                        <div class="success">
+                            <strong>✓ Success Indicator:</strong> You should see logs like:
+                            <code>[Nest] Server listening on port 3001</code>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Step 2: Open Swagger UI in Browser</h4>
+                        <p>Open your web browser and navigate to:</p>
+                        <div class="code-block">
+http://localhost:3001/api/docs
+                        </div>
+                        <div class="info">
+                            <strong>💡 Tip:</strong> Use Chrome, Firefox, Edge, or Safari. The interface works best in modern browsers.
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Step 3: Verify Page Loads</h4>
+                        <p>You should see:</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>A page titled "VeroField API" or similar</li>
+                            <li>Multiple endpoint sections (Authentication, Compliance, etc.)</li>
+                            <li>A green "Authorize" button in the top right</li>
+                            <li>Expandable endpoint cards with HTTP methods (GET, POST, etc.)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section" id="interface-overview">
+                <h2>🖥️ Interface Overview</h2>
+                
+                <h3>Main Components</h3>
+                
+                <h4>1. Top Bar</h4>
+                <ul style="margin-left: 20px;">
+                    <li><strong>API Title:</strong> "VeroField API" or similar</li>
+                    <li><strong>Authorize Button:</strong> Green button to authenticate (top right)</li>
+                    <li><strong>API Version:</strong> Shows the API version</li>
+                </ul>
+                
+                <h4>2. Endpoint Sections</h4>
+                <p>Endpoints are organized by feature/module:</p>
+                <ul style="margin-left: 20px;">
+                    <li><strong>Authentication:</strong> Login, token exchange, user info</li>
+                    <li><strong>Compliance:</strong> Rules, checks, scores, trends</li>
+                    <li><strong>Other Modules:</strong> Billing, Jobs, Work Orders, etc.</li>
+                </ul>
+                
+                <h4>3. Endpoint Cards</h4>
+                <p>Each endpoint shows:</p>
+                <ul style="margin-left: 20px;">
+                    <li><strong>HTTP Method:</strong> GET (blue), POST (green), PUT (orange), DELETE (red)</li>
+                    <li><strong>Endpoint Path:</strong> e.g., <code>/api/v1/compliance/rules</code></li>
+                    <li><strong>Description:</strong> What the endpoint does</li>
+                    <li><strong>Try it out Button:</strong> Makes the endpoint interactive</li>
+                </ul>
+                
+                <div class="screenshot-placeholder">
+                    📸 Screenshot: Swagger UI Interface
+                    <br><small>Shows the main interface with endpoint sections and authorize button</small>
+                </div>
+            </div>
+            
+            <div class="section" id="authentication">
+                <h2>🔐 Authentication</h2>
+                <p>
+                    Most compliance endpoints require authentication. You must authenticate before testing protected endpoints.
+                </p>
+                
+                <div class="steps-container">
+                    <div class="step">
+                        <h4>Step 1: Click "Authorize" Button</h4>
+                        <p>Click the green <span class="highlight">"Authorize"</span> button in the top right corner of the Swagger UI.</p>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Step 2: Enter Credentials</h4>
+                        <p>In the authorization dialog, you'll see multiple authentication schemes. For JWT authentication:</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Look for <strong>"bearerAuth"</strong> or <strong>"JWT"</strong> scheme</li>
+                            <li>If you have a token, paste it in the "Value" field</li>
+                            <li>If you need to login first, use the Authentication endpoints</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Step 3: Get a Token (If Needed)</h4>
+                        <p>If you don't have a token, use the login endpoint:</p>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>Find the <strong>"Authentication"</strong> section</li>
+                            <li>Expand <strong>"POST /api/v1/auth/login"</strong></li>
+                            <li>Click <strong>"Try it out"</strong></li>
+                            <li>Enter your credentials:
+                                <div class="code-block">
+{
+  "email": "your-email@example.com",
+  "password": "your-password"
+}
+                                </div>
+                            </li>
+                            <li>Click <strong>"Execute"</strong></li>
+                            <li>Copy the <code>access_token</code> from the response</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Step 4: Authorize with Token</h4>
+                        <p>Now authorize with your token:</p>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>Click <strong>"Authorize"</strong> button again</li>
+                            <li>Paste your token in the "Value" field</li>
+                            <li>Click <strong>"Authorize"</strong></li>
+                            <li>Click <strong>"Close"</strong></li>
+                        </ol>
+                        <div class="success">
+                            <strong>✓ Success:</strong> You'll see a lock icon 🔒 next to protected endpoints, 
+                            and your token will be included in all requests automatically.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="warning">
+                    <strong>⚠️ Important:</strong> Tokens expire after a period of time. If you get 401 Unauthorized errors, 
+                    you may need to refresh your token using the <code>GET /api/v1/auth/refresh</code> endpoint.
+                </div>
+            </div>
+            
+            <div class="section" id="testing-endpoints">
+                <h2>🧪 Testing Endpoints</h2>
+                
+                <div class="steps-container">
+                    <div class="step">
+                        <h4>Step 1: Find the Endpoint</h4>
+                        <p>Navigate to the endpoint you want to test. For compliance endpoints, look for the <strong>"Compliance"</strong> section.</p>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Step 2: Expand the Endpoint</h4>
+                        <p>Click on the endpoint card to expand it. You'll see:</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Endpoint description</li>
+                            <li>Parameters (if any)</li>
+                            <li>Request body schema</li>
+                            <li>Response examples</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Step 3: Click "Try it out"</h4>
+                        <p>Click the <span class="highlight">"Try it out"</span> button. This makes the endpoint interactive and allows you to:</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Enter parameter values</li>
+                            <li>Modify request body</li>
+                            <li>Execute the request</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Step 4: Fill in Parameters</h4>
+                        <p>For endpoints with parameters:</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li><strong>Path Parameters:</strong> Required values in the URL (e.g., <code>prNumber</code>)</li>
+                            <li><strong>Query Parameters:</strong> Optional filters (e.g., <code>status</code>, <code>ruleId</code>)</li>
+                            <li><strong>Request Body:</strong> JSON data for POST/PUT requests</li>
+                        </ul>
+                        <div class="info">
+                            <strong>💡 Tip:</strong> Required fields are marked with a red asterisk <span style="color: red;">*</span>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Step 5: Execute Request</h4>
+                        <p>Click the <span class="highlight">"Execute"</span> button at the bottom of the endpoint card.</p>
+                        <p>The request will be sent to the server, and you'll see:</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li><strong>Request URL:</strong> The full URL with parameters</li>
+                            <li><strong>cURL Command:</strong> Equivalent command-line request</li>
+                            <li><strong>Response:</strong> Server response with status code and body</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Step 6: Review Response</h4>
+                        <p>The response section shows:</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li><strong>Status Code:</strong> 200 (success), 400 (bad request), 401 (unauthorized), etc.</li>
+                            <li><strong>Response Body:</strong> JSON data returned by the server</li>
+                            <li><strong>Response Headers:</strong> Additional metadata</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section" id="compliance-endpoints">
+                <h2>📊 Compliance Endpoints</h2>
+                <p>Here's a detailed guide for each compliance endpoint:</p>
+                
+                <div class="endpoint-card">
+                    <span class="endpoint-method method-get">GET</span>
+                    <span class="endpoint-path">/api/v1/compliance/rules</span>
+                    <div class="endpoint-description">
+                        <strong>Get all rule definitions (R01-R25)</strong>
+                    </div>
+                    
+                    <h4 style="margin-top: 20px;">How to Test:</h4>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Expand the endpoint card</li>
+                        <li>Click "Try it out"</li>
+                        <li>Click "Execute" (no parameters needed)</li>
+                        <li>Review the response - should return 25 rules</li>
+                    </ol>
+                    
+                    <h4>Expected Response:</h4>
+                    <div class="code-block">
+{
+  "data": [
+    {
+      "id": "R01",
+      "name": "Tenant Isolation",
+      "description": "All database queries must include tenant_id filter",
+      "tier": "BLOCK",
+      "category": "Security",
+      "file_path": ".cursor/rules/03-security.mdc",
+      "opa_policy": "security.rego"
+    },
+    // ... 24 more rules
+  ],
+  "total": 25
+}
+                    </div>
+                </div>
+                
+                <div class="endpoint-card">
+                    <span class="endpoint-method method-get">GET</span>
+                    <span class="endpoint-path">/api/v1/compliance/checks</span>
+                    <div class="endpoint-description">
+                        <strong>Get compliance checks for the authenticated tenant</strong>
+                    </div>
+                    
+                    <h4 style="margin-top: 20px;">Parameters:</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>prNumber</code></td>
+                                <td>integer</td>
+                                <td><span class="badge badge-optional">Optional</span></td>
+                                <td>Filter by PR number</td>
+                            </tr>
+                            <tr>
+                                <td><code>ruleId</code></td>
+                                <td>string</td>
+                                <td><span class="badge badge-optional">Optional</span></td>
+                                <td>Filter by rule ID (e.g., "R01")</td>
+                            </tr>
+                            <tr>
+                                <td><code>status</code></td>
+                                <td>string</td>
+                                <td><span class="badge badge-optional">Optional</span></td>
+                                <td>Filter by status (VIOLATION, RESOLVED, etc.)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h4>How to Test:</h4>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Make sure you're authenticated</li>
+                        <li>Click "Try it out"</li>
+                        <li>Optionally enter filter parameters</li>
+                        <li>Click "Execute"</li>
+                    </ol>
+                </div>
+                
+                <div class="endpoint-card">
+                    <span class="endpoint-method method-post">POST</span>
+                    <span class="endpoint-path">/api/v1/compliance/checks</span>
+                    <div class="endpoint-description">
+                        <strong>Create a new compliance check (typically called by CI/CD)</strong>
+                    </div>
+                    
+                    <h4 style="margin-top: 20px;">Request Body Example:</h4>
+                    <div class="code-block">
+{
+  "pr_number": 1234,
+  "commit_sha": "abc123def456789",
+  "rule_id": "R01",
+  "status": "VIOLATION",
+  "severity": "WARNING",
+  "file_path": "apps/api/src/test.ts",
+  "line_number": 42,
+  "violation_message": "Missing tenant_id filter in database query"
+}
+                    </div>
+                    
+                    <h4>Required Fields:</h4>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><code>pr_number</code> <span class="badge badge-required">Required</span></li>
+                        <li><code>commit_sha</code> <span class="badge badge-required">Required</span></li>
+                        <li><code>rule_id</code> <span class="badge badge-required">Required</span></li>
+                        <li><code>status</code> <span class="badge badge-required">Required</span></li>
+                        <li><code>severity</code> <span class="badge badge-required">Required</span></li>
+                    </ul>
+                    
+                    <h4>How to Test:</h4>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Click "Try it out"</li>
+                        <li>In the "Request body" section, click the example or enter your own JSON</li>
+                        <li>Modify the values as needed</li>
+                        <li>Click "Execute"</li>
+                        <li>Check the response for the created check ID</li>
+                    </ol>
+                </div>
+                
+                <div class="endpoint-card">
+                    <span class="endpoint-method method-get">GET</span>
+                    <span class="endpoint-path">/api/v1/compliance/pr/{prNumber}/score</span>
+                    <div class="endpoint-description">
+                        <strong>Calculate compliance score for a PR</strong>
+                    </div>
+                    
+                    <h4 style="margin-top: 20px;">Path Parameter:</h4>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><code>prNumber</code> <span class="badge badge-required">Required</span> - The PR number (integer)</li>
+                    </ul>
+                    
+                    <h4>How to Test:</h4>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Click "Try it out"</li>
+                        <li>Enter a PR number (e.g., 1234) in the <code>prNumber</code> field</li>
+                        <li>Click "Execute"</li>
+                    </ol>
+                    
+                    <h4>Expected Response:</h4>
+                    <div class="code-block">
+{
+  "score": 85,
+  "max_score": 100,
+  "block_count": 0,
+  "override_count": 2,
+  "warning_count": 3,
+  "can_merge": true,
+  "pr_number": 1234
+}
+                    </div>
+                    
+                    <div class="info">
+                        <strong>💡 Score Calculation:</strong>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>BLOCK violations: -10 points each</li>
+                            <li>OVERRIDE violations: -3 points each</li>
+                            <li>WARNING violations: -1 point each</li>
+                            <li><code>can_merge</code> is <code>false</code> if any BLOCK violations exist</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="endpoint-card">
+                    <span class="endpoint-method method-get">GET</span>
+                    <span class="endpoint-path">/api/v1/compliance/trends</span>
+                    <div class="endpoint-description">
+                        <strong>Get compliance trends over time</strong>
+                    </div>
+                    
+                    <h4 style="margin-top: 20px;">Query Parameters:</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>startDate</code></td>
+                                <td>string (ISO 8601)</td>
+                                <td><span class="badge badge-optional">Optional</span></td>
+                                <td>Start date (e.g., "2025-11-01")</td>
+                            </tr>
+                            <tr>
+                                <td><code>endDate</code></td>
+                                <td>string (ISO 8601)</td>
+                                <td><span class="badge badge-optional">Optional</span></td>
+                                <td>End date (e.g., "2025-11-24")</td>
+                            </tr>
+                            <tr>
+                                <td><code>ruleId</code></td>
+                                <td>string</td>
+                                <td><span class="badge badge-optional">Optional</span></td>
+                                <td>Filter by rule ID</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="section" id="understanding-responses">
+                <h2>📥 Understanding Responses</h2>
+                
+                <h3>Success Responses (200 OK)</h3>
+                <p>Successful requests return data in JSON format:</p>
+                <div class="code-block">
+{
+  "data": [...],      // Array of items
+  "total": 25,        // Total count
+  "page": 1,          // Current page (if paginated)
+  "limit": 100        // Items per page
+}
+                </div>
+                
+                <h3>Error Responses</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Status Code</th>
+                            <th>Meaning</th>
+                            <th>Common Causes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>400</strong></td>
+                            <td>Bad Request</td>
+                            <td>Invalid parameters, missing required fields, validation errors</td>
+                        </tr>
+                        <tr>
+                            <td><strong>401</strong></td>
+                            <td>Unauthorized</td>
+                            <td>Not authenticated, missing/invalid token, expired token</td>
+                        </tr>
+                        <tr>
+                            <td><strong>403</strong></td>
+                            <td>Forbidden</td>
+                            <td>Authenticated but not authorized for this resource</td>
+                        </tr>
+                        <tr>
+                            <td><strong>404</strong></td>
+                            <td>Not Found</td>
+                            <td>Endpoint doesn't exist, resource not found</td>
+                        </tr>
+                        <tr>
+                            <td><strong>500</strong></td>
+                            <td>Internal Server Error</td>
+                            <td>Server error, database connection issues</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>Response Headers</h3>
+                <p>Important headers to check:</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><code>Content-Type: application/json</code> - Response format</li>
+                    <li><code>X-Trace-Id</code> - Request tracking ID (for debugging)</li>
+                    <li><code>X-Request-Id</code> - Unique request identifier</li>
+                </ul>
+            </div>
+            
+            <div class="section" id="troubleshooting">
+                <h2>🔧 Troubleshooting</h2>
+                
+                <h3>Common Issues and Solutions</h3>
+                
+                <h4>1. "401 Unauthorized" Error</h4>
+                <div class="warning">
+                    <strong>Problem:</strong> You're not authenticated or your token expired.
+                    <br><strong>Solution:</strong>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Click "Authorize" button</li>
+                        <li>Get a new token using the login endpoint</li>
+                        <li>Paste the token and authorize again</li>
+                    </ol>
+                </div>
+                
+                <h4>2. "404 Not Found" Error</h4>
+                <div class="warning">
+                    <strong>Problem:</strong> Endpoint doesn't exist or server isn't running.
+                    <br><strong>Solution:</strong>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Verify server is running: <code>http://localhost:3001/api/docs</code></li>
+                        <li>Check the endpoint path is correct</li>
+                        <li>Ensure you're using the right API version (v1)</li>
+                    </ol>
+                </div>
+                
+                <h4>3. "400 Bad Request" Error</h4>
+                <div class="warning">
+                    <strong>Problem:</strong> Invalid request data.
+                    <br><strong>Solution:</strong>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Check all required fields are provided</li>
+                        <li>Verify data types match (string, number, boolean)</li>
+                        <li>Check JSON syntax is valid</li>
+                        <li>Review the error message for specific validation issues</li>
+                    </ol>
+                </div>
+                
+                <h4>4. Swagger UI Won't Load</h4>
+                <div class="warning">
+                    <strong>Problem:</strong> Page doesn't load or shows errors.
+                    <br><strong>Solution:</strong>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Verify API server is running: <code>npm run start:dev</code></li>
+                        <li>Check browser console for errors (F12)</li>
+                        <li>Try a different browser</li>
+                        <li>Clear browser cache</li>
+                        <li>Check firewall/antivirus isn't blocking localhost</li>
+                    </ol>
+                </div>
+                
+                <h4>5. "CORS" Errors</h4>
+                <div class="info">
+                    <strong>Note:</strong> CORS errors are rare when accessing from the same origin (localhost).
+                    If you see CORS errors, check the server CORS configuration.
+                </div>
+                
+                <h4>6. Empty Response or No Data</h4>
+                <div class="info">
+                    <strong>Possible Reasons:</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>No data exists yet (e.g., no compliance checks created)</li>
+                        <li>Tenant isolation - you're only seeing your tenant's data</li>
+                        <li>Filters are too restrictive</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section" id="best-practices">
+                <h2>✨ Best Practices</h2>
+                
+                <h3>1. Always Authenticate First</h3>
+                <p>Before testing protected endpoints, always authenticate using the "Authorize" button.</p>
+                
+                <h3>2. Start with GET Requests</h3>
+                <p>Begin with simple GET requests to understand the data structure before creating or modifying data.</p>
+                
+                <h3>3. Use Meaningful Test Data</h3>
+                <p>When creating test records, use descriptive values that help you identify them later:</p>
+                <div class="code-block">
+{
+  "pr_number": 9999,  // Use a high number to avoid conflicts
+  "commit_sha": "test-commit-2025-11-24",
+  "violation_message": "Test violation for Swagger UI testing"
+}
+                </div>
+                
+                <h3>4. Check Response Status Codes</h3>
+                <p>Always check the status code in the response. Green (2xx) = success, Red (4xx/5xx) = error.</p>
+                
+                <h3>5. Review Request/Response Examples</h3>
+                <p>Swagger UI provides example requests and responses. Use these as templates for your own requests.</p>
+                
+                <h3>6. Use Filters Wisely</h3>
+                <p>When testing endpoints with filters, start without filters to see all data, then add filters to narrow results.</p>
+                
+                <h3>7. Keep Token Secure</h3>
+                <p>Don't share your authentication token. If you need to revoke access, use the logout endpoint or change your password.</p>
+                
+                <h3>8. Test Error Cases</h3>
+                <p>Try invalid data to see how the API handles errors. This helps you understand validation rules.</p>
+            </div>
+            
+            <div class="section">
+                <h2>📚 Additional Resources</h2>
+                <ul style="margin-left: 20px;">
+                    <li><strong>API Documentation:</strong> <a href="http://localhost:3001/api/docs" target="_blank">http://localhost:3001/api/docs</a></li>
+                    <li><strong>Swagger/OpenAPI Spec:</strong> Usually available at <code>/api/docs-json</code></li>
+                    <li><strong>Testing Guide:</strong> See <code>docs/compliance-reports/PHASE3-API-TESTING-GUIDE.md</code></li>
+                    <li><strong>Compliance Rules Matrix:</strong> See <code>docs/compliance-reports/rule-compliance-matrix.md</code></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>VeroField Compliance API Documentation</strong></p>
+            <p>Last Updated: November 24, 2025</p>
+            <p>For support, contact the development team or check the project documentation.</p>
+        </div>
+    </div>
+</body>
+</html>
+

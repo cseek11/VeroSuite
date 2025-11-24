@@ -70,3 +70,689 @@ Define testing requirements, regression expectations, and performance constraint
 - New feature with zero tests.
 - Bug fix without regression test.
 - Known N+1 queries introduced.
+
+---
+
+## Step 5: Post-Implementation Audit for Testing Coverage
+
+### R10: Testing Coverage — Audit Procedures
+
+**For code changes affecting functionality, bug fixes, or new features:**
+
+#### New Feature Testing
+
+- [ ] **MANDATORY:** Verify unit tests exist for new features
+- [ ] **MANDATORY:** Verify unit tests cover happy path
+- [ ] **MANDATORY:** Verify unit tests cover error paths
+- [ ] **MANDATORY:** Verify unit tests cover edge cases
+- [ ] **MANDATORY:** Verify new code meets 80% coverage threshold (statements, branches, functions, lines)
+- [ ] **RECOMMENDED:** Verify integration tests exist if DB/API involved
+- [ ] **RECOMMENDED:** Verify E2E tests exist for critical workflows
+
+#### Bug Fix Testing
+
+- [ ] **MANDATORY:** Verify regression test exists that reproduces the bug
+- [ ] **MANDATORY:** Verify regression test passes after fix
+- [ ] **MANDATORY:** Verify regression test fails before fix (if applicable)
+- [ ] **MANDATORY:** Verify regression test is at appropriate level (unit/integration/E2E)
+
+#### Test Quality
+
+- [ ] **MANDATORY:** Verify tests follow naming conventions (*.spec.ts, *.test.ts)
+- [ ] **MANDATORY:** Verify tests follow location conventions (__tests__/, test/)
+- [ ] **MANDATORY:** Verify tests run and pass
+- [ ] **MANDATORY:** Verify tests are not skipped (unless documented)
+- [ ] **MANDATORY:** Verify test coverage delta is positive (new code adds coverage)
+
+#### Coverage Thresholds
+
+- [ ] **MANDATORY:** Verify statements coverage ≥ 80% for new code
+- [ ] **MANDATORY:** Verify branches coverage ≥ 80% for new code
+- [ ] **MANDATORY:** Verify functions coverage ≥ 80% for new code
+- [ ] **MANDATORY:** Verify lines coverage ≥ 80% for new code
+- [ ] **MANDATORY:** Verify coverage delta is calculated (new code coverage vs existing code)
+
+#### Test Execution
+
+- [ ] **MANDATORY:** Verify unit tests run successfully
+- [ ] **MANDATORY:** Verify integration tests run successfully (if applicable)
+- [ ] **MANDATORY:** Verify E2E tests run successfully (if applicable)
+- [ ] **MANDATORY:** Verify all tests pass (no failures)
+- [ ] **MANDATORY:** Verify no test warnings (unless documented)
+
+#### Automated Checks
+
+```bash
+# Run test coverage checker
+python .cursor/scripts/check-test-coverage.py --file <file_path>
+
+# Check all changed files
+python .cursor/scripts/check-test-coverage.py --pr <PR_NUMBER>
+
+# Expected: Coverage ≥ 80% for new code, tests exist and pass
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/quality.rego` (R10 section)
+- **Enforcement:** OVERRIDE (Tier 2 MAD) - Requires justification
+- **Tests:** `services/opa/tests/quality_r10_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review Test Files** - Verify tests exist for changed code
+2. **Verify Coverage** - Check coverage reports for new code
+3. **Run Tests** - Execute test suite and verify all pass
+4. **Check Test Quality** - Verify tests follow conventions and cover all paths
+
+**Example Missing Unit Tests (VIOLATION):**
+
+```typescript
+// ❌ VIOLATION: New feature without unit tests
+// apps/api/src/users/users.service.ts
+export class UsersService {
+  async createUser(userData: CreateUserDto) {
+    // New feature - no tests
+    return this.prisma.user.create({ data: userData });
+  }
+}
+```
+
+**Example Proper Unit Tests (CORRECT):**
+
+```typescript
+// ✅ CORRECT: New feature with comprehensive unit tests
+// apps/api/src/users/users.service.spec.ts
+describe('UsersService', () => {
+  describe('createUser', () => {
+    it('should create user successfully (happy path)', async () => {
+      // Test happy path
+    });
+    
+    it('should throw error on invalid data (error path)', async () => {
+      // Test error path
+    });
+    
+    it('should handle duplicate email (edge case)', async () => {
+      // Test edge case
+    });
+  });
+});
+```
+
+**Example Missing Regression Test (VIOLATION):**
+
+```typescript
+// ❌ VIOLATION: Bug fix without regression test
+// Bug: User creation fails when email contains special characters
+// Fix: Added email validation
+// Missing: Regression test that reproduces the bug
+```
+
+**Example Proper Regression Test (CORRECT):**
+
+```typescript
+// ✅ CORRECT: Bug fix with regression test
+// apps/api/src/users/users.service.spec.ts
+describe('UsersService - Bug Fix #123', () => {
+  it('should handle email with special characters (regression)', async () => {
+    // Reproduces the bug scenario
+    const userData = { email: 'user+test@example.com' };
+    
+    // Should not throw error (bug was fixed)
+    await expect(service.createUser(userData)).resolves.toBeDefined();
+  });
+});
+```
+
+---
+
+### R16: Testing Requirements (Additional) — Audit Procedures
+
+**For code changes affecting functionality, security, state machines, observability, or multi-tenant features:**
+
+#### Error Path Testing
+
+- [ ] **MANDATORY:** Verify error path tests exist for all new features
+- [ ] **MANDATORY:** Verify error path tests cover all error scenarios (validation errors, business rule errors, system errors)
+- [ ] **MANDATORY:** Verify error path tests verify error categorization (400, 422, 500)
+- [ ] **MANDATORY:** Verify error path tests verify user-friendly error messages (no stack traces, no internal IDs)
+- [ ] **MANDATORY:** Verify error path tests verify error logging (structured logging, trace IDs)
+- [ ] **RECOMMENDED:** Verify error path tests cover edge cases (null/undefined, empty inputs, boundary conditions)
+
+#### State Machine Testing
+
+- [ ] **MANDATORY:** Verify state machine tests exist for stateful components (if applicable)
+- [ ] **MANDATORY:** Verify state machine tests cover legal transitions (all documented transitions)
+- [ ] **MANDATORY:** Verify state machine tests cover illegal transitions (explicit rejection)
+- [ ] **MANDATORY:** Verify state machine tests verify audit logging on transitions
+- [ ] **MANDATORY:** Verify state machine tests verify preconditions (e.g., technician assigned, date set)
+- [ ] **RECOMMENDED:** Verify state machine tests cover side effects (events, notifications)
+
+#### Tenant Isolation Testing
+
+- [ ] **MANDATORY:** Verify tenant isolation tests exist for multi-tenant features (if applicable)
+- [ ] **MANDATORY:** Verify tenant isolation tests verify cross-tenant data access is prevented
+- [ ] **MANDATORY:** Verify tenant isolation tests verify RLS policies are enforced
+- [ ] **MANDATORY:** Verify tenant isolation tests verify tenant context is set correctly
+- [ ] **MANDATORY:** Verify tenant isolation tests verify tenant_id is extracted from JWT (not client)
+- [ ] **RECOMMENDED:** Verify tenant isolation tests cover edge cases (tenant switching, tenant deletion)
+
+#### Observability Testing
+
+- [ ] **MANDATORY:** Verify observability tests exist for all new features
+- [ ] **MANDATORY:** Verify observability tests verify structured logging (required fields: level, message, timestamp, traceId, context, operation)
+- [ ] **MANDATORY:** Verify observability tests verify trace ID propagation (through service calls, HTTP headers, database queries)
+- [ ] **MANDATORY:** Verify observability tests verify tenant ID in logs (where applicable)
+- [ ] **MANDATORY:** Verify observability tests verify no console.log in production code
+- [ ] **RECOMMENDED:** Verify observability tests verify metrics collection (latency, error rate, etc.)
+
+#### Security Testing
+
+- [ ] **MANDATORY:** Verify security tests exist for sensitive operations (authentication, payment, PII handling)
+- [ ] **MANDATORY:** Verify security tests verify authentication (JWT validation, token expiration, tenant context)
+- [ ] **MANDATORY:** Verify security tests verify authorization (permission checks, role-based access)
+- [ ] **MANDATORY:** Verify security tests verify input validation (XSS prevention, SQL injection prevention, file upload validation)
+- [ ] **MANDATORY:** Verify security tests verify tenant isolation (cross-tenant access prevention)
+- [ ] **RECOMMENDED:** Verify security tests verify security event logging (audit logs for auth, PII access, admin actions)
+
+#### Data Migration Testing
+
+- [ ] **MANDATORY:** Verify data migration tests exist for database schema changes (if applicable)
+- [ ] **MANDATORY:** Verify data migration tests verify migration idempotency (can run multiple times)
+- [ ] **MANDATORY:** Verify data migration tests verify data integrity (no data loss, no corruption)
+- [ ] **MANDATORY:** Verify data migration tests verify rollback capability (can rollback safely)
+- [ ] **MANDATORY:** Verify data migration tests verify RLS policies maintained (if tenant-scoped tables)
+- [ ] **RECOMMENDED:** Verify data migration tests verify performance impact (migration time, downtime)
+
+#### Performance Testing (Conditional)
+
+- [ ] **CONDITIONAL:** Verify performance tests exist for performance-critical features (if applicable)
+- [ ] **CONDITIONAL:** Verify performance tests verify response time thresholds (p50, p95, p99)
+- [ ] **CONDITIONAL:** Verify performance tests verify performance budgets (backend: < 200ms simple GET, < 300ms POST/PUT)
+- [ ] **CONDITIONAL:** Verify performance tests verify no N+1 queries (if applicable)
+- [ ] **CONDITIONAL:** Verify performance tests verify no redundant API calls (if applicable)
+
+#### Accessibility Testing (Conditional)
+
+- [ ] **CONDITIONAL:** Verify accessibility tests exist for UI components (if applicable)
+- [ ] **CONDITIONAL:** Verify accessibility tests verify WCAG AA compliance (keyboard navigation, screen readers, color contrast)
+- [ ] **CONDITIONAL:** Verify accessibility tests verify ARIA labels (if applicable)
+- [ ] **CONDITIONAL:** Verify accessibility tests verify focus management (if applicable)
+
+#### Automated Checks
+
+```bash
+# Run additional testing requirements checker
+python .cursor/scripts/check-additional-testing.py --file <file_path>
+
+# Check all changed files
+python .cursor/scripts/check-additional-testing.py --all
+
+# Check specific test type
+python .cursor/scripts/check-additional-testing.py --test-type error-path
+
+# Expected: Warnings for missing additional tests (does not block)
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/quality.rego` (R16 section)
+- **Enforcement:** WARNING (Tier 3 MAD) - Logged but doesn't block
+- **Tests:** `services/opa/tests/quality_r16_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review Code Changes** - Identify what type of change (new feature, bug fix, refactor) and domain (security, state machines, observability, multi-tenant)
+2. **Verify Test Coverage** - Check that appropriate additional tests exist based on change type and domain
+3. **Check Test Quality** - Verify tests follow conventions, are organized, and are documented
+4. **Validate Test Execution** - Run tests and verify they pass
+
+**Example Missing Error Path Tests (❌):**
+
+```typescript
+// ❌ VIOLATION: New feature without error path tests
+// apps/api/src/users/users.service.spec.ts
+describe('UsersService', () => {
+  describe('createUser', () => {
+    it('should create user successfully', async () => {
+      // Only happy path tested - missing error path tests
+    });
+  });
+});
+```
+
+**Example Proper Error Path Tests (✅):**
+
+```typescript
+// ✅ CORRECT: New feature with comprehensive error path tests
+// apps/api/src/users/users.service.spec.ts
+describe('UsersService', () => {
+  describe('createUser', () => {
+    it('should create user successfully (happy path)', async () => {
+      // Happy path test
+    });
+    
+    it('should throw BadRequestException on invalid email (validation error)', async () => {
+      // Error path: validation error (400)
+    });
+    
+    it('should throw UnprocessableEntityException on duplicate email (business rule error)', async () => {
+      // Error path: business rule error (422)
+    });
+    
+    it('should throw InternalServerErrorException on database error (system error)', async () => {
+      // Error path: system error (500)
+    });
+    
+    it('should log error with traceId and tenantId', async () => {
+      // Observability test: error logging
+    });
+  });
+});
+```
+
+---
+
+### R17: Coverage Requirements — Audit Procedures
+
+**For code changes affecting test coverage, coverage trends, or coverage reporting:**
+
+#### Coverage Trends
+
+- [ ] **MANDATORY:** Verify coverage trend is tracked (coverage over time)
+- [ ] **MANDATORY:** Verify coverage trend is non-decreasing (coverage should not degrade)
+- [ ] **MANDATORY:** Verify coverage trend is documented (coverage reports, dashboards)
+- [ ] **RECOMMENDED:** Verify coverage trend is visible (CI/CD reports, PR comments)
+- [ ] **RECOMMENDED:** Verify coverage trend alerts are configured (notifications for degradation)
+
+#### Coverage Exemptions
+
+- [ ] **MANDATORY:** Verify coverage exemptions are documented (if coverage < 80%)
+- [ ] **MANDATORY:** Verify coverage exemptions include justification (why exemption is needed)
+- [ ] **MANDATORY:** Verify coverage exemptions include remediation plan (how to improve coverage)
+- [ ] **MANDATORY:** Verify coverage exemptions include expiration date (when exemption expires)
+- [ ] **RECOMMENDED:** Verify coverage exemptions are reviewed periodically (quarterly review)
+
+#### Coverage Reporting
+
+- [ ] **MANDATORY:** Verify coverage reports are generated (per-file, per-module, per-service)
+- [ ] **MANDATORY:** Verify coverage reports are accessible (CI/CD artifacts, dashboards)
+- [ ] **MANDATORY:** Verify coverage reports include all metrics (statements, branches, functions, lines)
+- [ ] **MANDATORY:** Verify coverage reports include coverage delta (new code coverage vs existing)
+- [ ] **RECOMMENDED:** Verify coverage reports include trend visualization (coverage over time)
+- [ ] **RECOMMENDED:** Verify coverage reports include gap analysis (low-coverage areas identified)
+
+#### Coverage Goals
+
+- [ ] **MANDATORY:** Verify coverage goals are set for critical code (≥ 90% for critical paths)
+- [ ] **MANDATORY:** Verify coverage goals are set for non-critical code (≥ 80% baseline)
+- [ ] **MANDATORY:** Verify coverage goals are documented (coverage policy, goals document)
+- [ ] **RECOMMENDED:** Verify coverage goals are reviewed periodically (quarterly review)
+- [ ] **RECOMMENDED:** Verify coverage goals are adjusted based on trends (increase if consistently exceeded)
+
+#### Coverage Maintenance
+
+- [ ] **MANDATORY:** Verify coverage delta is tracked (new code coverage vs existing code)
+- [ ] **MANDATORY:** Verify coverage delta is positive (new code adds coverage, doesn't reduce it)
+- [ ] **MANDATORY:** Verify coverage degradation is prevented (coverage should not decrease)
+- [ ] **MANDATORY:** Verify coverage gaps are identified (low-coverage areas documented)
+- [ ] **RECOMMENDED:** Verify coverage gaps are prioritized (critical gaps addressed first)
+- [ ] **RECOMMENDED:** Verify coverage gaps have remediation plans (how to improve coverage)
+
+#### Coverage by Code Type
+
+- [ ] **MANDATORY:** Verify critical code has higher coverage (≥ 90% for authentication, payment, PII)
+- [ ] **MANDATORY:** Verify non-critical code meets baseline (≥ 80% for utilities, helpers)
+- [ ] **MANDATORY:** Verify code type is identified (critical vs non-critical)
+- [ ] **RECOMMENDED:** Verify code type classification is documented (coverage policy)
+- [ ] **RECOMMENDED:** Verify code type classification is reviewed (when code changes)
+
+#### Coverage Visibility
+
+- [ ] **MANDATORY:** Verify coverage is visible in PRs (coverage delta in PR comments)
+- [ ] **MANDATORY:** Verify coverage is visible in CI/CD (coverage reports in artifacts)
+- [ ] **MANDATORY:** Verify coverage is visible in dashboards (coverage trends, metrics)
+- [ ] **RECOMMENDED:** Verify coverage is visible in code review (coverage badges, indicators)
+- [ ] **RECOMMENDED:** Verify coverage is visible in documentation (coverage reports linked)
+
+#### Automated Checks
+
+```bash
+# Run coverage requirements checker
+python .cursor/scripts/check-coverage-requirements.py --file <file_path>
+
+# Check coverage trends
+python .cursor/scripts/check-coverage-requirements.py --trends
+
+# Check coverage exemptions
+python .cursor/scripts/check-coverage-requirements.py --exemptions
+
+# Check coverage gaps
+python .cursor/scripts/check-coverage-requirements.py --gaps
+
+# Check all coverage requirements
+python .cursor/scripts/check-coverage-requirements.py --all
+
+# Update coverage history
+python .cursor/scripts/check-coverage-requirements.py --update-trends
+
+# Generate enhanced coverage report
+python .cursor/scripts/check-coverage-requirements.py --generate-report
+
+# Expected: Warnings for coverage issues (does not block)
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/quality.rego` (R17 section)
+- **Enforcement:** WARNING (Tier 3 MAD) - Logged but doesn't block
+- **Tests:** `services/opa/tests/quality_r17_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review Coverage Reports** - Check coverage metrics and trends
+2. **Verify Coverage Goals** - Ensure goals are set and met
+3. **Check Coverage Exemptions** - Verify exemptions are documented and justified
+4. **Identify Coverage Gaps** - Find low-coverage areas and prioritize improvements
+
+**Example Coverage Degradation (❌):**
+
+```typescript
+// ❌ VIOLATION: Coverage degraded from 85% to 75%
+// Before: users.service.ts had 85% coverage
+// After: users.service.ts has 75% coverage (degraded by 10%)
+// → Coverage trend is decreasing, should be prevented
+```
+
+**Example Coverage Trend Tracking (✅):**
+
+```markdown
+## Coverage Trends
+
+### users.service.ts
+- 2025-11-01: 80% (baseline)
+- 2025-11-15: 82% (+2%)
+- 2025-11-23: 85% (+3%)
+- **Trend:** Increasing ✅
+
+### orders.service.ts
+- 2025-11-01: 90% (baseline)
+- 2025-11-15: 88% (-2%)
+- 2025-11-23: 87% (-1%)
+- **Trend:** Decreasing ❌ (needs attention)
+```
+
+**Example Coverage Exemption (✅):**
+
+```markdown
+## Coverage Exemptions
+
+### File: legacy-migration-helper.ts
+**Coverage:** 45% (below 80% threshold)
+**Justification:** Legacy migration code, will be removed in Q2 2026
+**Remediation Plan:** Remove legacy code in Q2 2026 migration
+**Expiration Date:** 2026-06-30
+**Status:** Active
+**Review Date:** 2026-01-15
+```
+
+**Example Coverage Goals (✅):**
+
+```markdown
+## Coverage Goals
+
+### Critical Code (≥ 90%)
+- Authentication: 95% (current: 92%)
+- Payment Processing: 95% (current: 94%)
+- PII Handling: 95% (current: 91%)
+
+### Non-Critical Code (≥ 80%)
+- Utilities: 80% (current: 82%)
+- Helpers: 80% (current: 85%)
+- Legacy Code: 60% (exempted, removal planned)
+```
+
+**Example Coverage Gap Analysis (✅):**
+
+```markdown
+## Coverage Gaps
+
+### High Priority (Critical Code)
+1. **auth.service.ts** - 88% (target: 90%)
+   - Missing: Error path tests for token refresh
+   - Impact: High (authentication critical)
+   - Remediation: Add error path tests (estimated: 2 hours)
+
+2. **payment.service.ts** - 89% (target: 90%)
+   - Missing: Edge case tests for refund processing
+   - Impact: High (payment critical)
+   - Remediation: Add edge case tests (estimated: 3 hours)
+
+### Medium Priority (Non-Critical Code)
+3. **utils/date-helpers.ts** - 75% (target: 80%)
+   - Missing: Boundary condition tests
+   - Impact: Medium (utility function)
+   - Remediation: Add boundary tests (estimated: 1 hour)
+```
+
+---
+
+### R18: Performance Budgets — Audit Procedures
+
+**For code changes affecting API endpoints, frontend pages, or performance-critical operations:**
+
+#### API Response Time Budgets
+
+- [ ] **MANDATORY:** Verify API response times meet budget thresholds
+- [ ] **MANDATORY:** Verify simple GET endpoints have median response time < 200ms
+- [ ] **MANDATORY:** Verify typical POST/PUT endpoints have median response time < 300ms
+- [ ] **MANDATORY:** Verify heavy operations have median response time < 500ms with justification
+- [ ] **MANDATORY:** Verify performance budgets are measured using median (p50) metric
+- [ ] **RECOMMENDED:** Verify p95 and p99 percentiles are tracked (for outlier detection)
+- [ ] **RECOMMENDED:** Verify performance budgets are documented per endpoint
+
+#### Frontend Performance Budgets
+
+- [ ] **MANDATORY:** Verify frontend performance metrics meet budget thresholds
+- [ ] **MANDATORY:** Verify First Contentful Paint (FCP) < 1.5s for main pages
+- [ ] **MANDATORY:** Verify Largest Contentful Paint (LCP) < 2s for main pages
+- [ ] **MANDATORY:** Verify Time to Interactive (TTI) < 3s for main user flows
+- [ ] **MANDATORY:** Verify performance budgets are measured using real user metrics (RUM) or synthetic tests
+- [ ] **RECOMMENDED:** Verify Cumulative Layout Shift (CLS) < 0.1 for main pages
+- [ ] **RECOMMENDED:** Verify First Input Delay (FID) < 100ms for interactive elements
+
+#### Performance Regression Detection
+
+- [ ] **MANDATORY:** Verify performance regression detection is implemented (baseline comparison)
+- [ ] **MANDATORY:** Verify performance baseline is established (last release, last month, or custom)
+- [ ] **MANDATORY:** Verify performance regressions are detected (> 10% increase in response time)
+- [ ] **MANDATORY:** Verify performance regressions are alerted (warnings, notifications)
+- [ ] **RECOMMENDED:** Verify performance trends are tracked over time (performance history)
+- [ ] **RECOMMENDED:** Verify performance regression alerts include context (endpoint, metric, change)
+
+#### Performance Exemptions
+
+- [ ] **MANDATORY:** Verify performance exemptions are documented (if budget exceeded)
+- [ ] **MANDATORY:** Verify performance exemptions include justification (why exemption is needed)
+- [ ] **MANDATORY:** Verify performance exemptions include remediation plan (how to improve performance)
+- [ ] **MANDATORY:** Verify performance exemptions include expiration date (when exemption expires)
+- [ ] **MANDATORY:** Verify performance exemptions include current performance (actual vs budget)
+- [ ] **RECOMMENDED:** Verify performance exemptions are reviewed periodically (quarterly review)
+
+#### Performance Reporting
+
+- [ ] **MANDATORY:** Verify performance reports are generated (per-endpoint, per-page)
+- [ ] **MANDATORY:** Verify performance reports are accessible (CI/CD artifacts, dashboards)
+- [ ] **MANDATORY:** Verify performance reports include all metrics (p50, p95, p99 for API, FCP/LCP/TTI for frontend)
+- [ ] **MANDATORY:** Verify performance reports include budget comparison (actual vs budget)
+- [ ] **MANDATORY:** Verify performance reports include regression detection (performance trends)
+- [ ] **RECOMMENDED:** Verify performance reports include trend visualization (performance over time)
+- [ ] **RECOMMENDED:** Verify performance reports include health score (overall performance health)
+
+#### Performance Prioritization
+
+- [ ] **MANDATORY:** Verify performance issues are prioritized (critical endpoints first)
+- [ ] **MANDATORY:** Verify critical endpoints are identified (authentication, payment, core workflows)
+- [ ] **MANDATORY:** Verify performance issues include priority level (HIGH/MEDIUM/LOW)
+- [ ] **MANDATORY:** Verify performance issues include impact assessment (user impact, business impact)
+- [ ] **RECOMMENDED:** Verify performance issues include effort estimation (time to fix)
+- [ ] **RECOMMENDED:** Verify performance issues include quick wins identification (high-impact, low-effort)
+
+#### Performance Trend Tracking
+
+- [ ] **MANDATORY:** Verify performance trends are tracked over time (performance history)
+- [ ] **MANDATORY:** Verify performance history is stored (git-based storage in `.performance/history.json`)
+- [ ] **MANDATORY:** Verify performance history includes endpoint/page, date, metrics
+- [ ] **MANDATORY:** Verify performance trends are non-degrading (performance should not degrade)
+- [ ] **RECOMMENDED:** Verify performance history is pruned (keep last 365 days)
+- [ ] **RECOMMENDED:** Verify performance trends are visualized (trend charts, graphs)
+
+#### Performance Budget Visibility
+
+- [ ] **MANDATORY:** Verify performance budgets are visible in PRs (performance delta in PR comments)
+- [ ] **MANDATORY:** Verify performance budgets are visible in CI/CD (performance reports in artifacts)
+- [ ] **MANDATORY:** Verify performance budgets are visible in dashboards (performance trends, metrics)
+- [ ] **RECOMMENDED:** Verify performance budgets are visible in code review (performance badges, indicators)
+- [ ] **RECOMMENDED:** Verify performance budgets are visible in documentation (performance reports linked)
+
+#### Automated Checks
+
+```bash
+# Run performance budgets checker
+python .cursor/scripts/check-performance-budgets.py --file <file_path>
+
+# Check API performance budgets
+python .cursor/scripts/check-performance-budgets.py --api
+
+# Check frontend performance budgets
+python .cursor/scripts/check-performance-budgets.py --frontend
+
+# Check performance trends
+python .cursor/scripts/check-performance-budgets.py --trends
+
+# Check performance exemptions
+python .cursor/scripts/check-performance-budgets.py --exemptions
+
+# Check all performance requirements
+python .cursor/scripts/check-performance-budgets.py --all
+
+# Update performance history
+python .cursor/scripts/check-performance-budgets.py --update-trends
+
+# Generate enhanced performance report
+python .cursor/scripts/check-performance-budgets.py --generate-report
+
+# Expected: Warnings for performance issues (does not block)
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/quality.rego` (R18 section)
+- **Enforcement:** WARNING (Tier 3 MAD) - Logged but doesn't block
+- **Tests:** `services/opa/tests/quality_r18_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review Performance Metrics** - Check API response times and frontend metrics
+2. **Verify Performance Budgets** - Ensure budgets are met or exemptions documented
+3. **Check Performance Trends** - Verify performance is not degrading over time
+4. **Identify Performance Issues** - Find performance bottlenecks and prioritize improvements
+
+**Example API Performance Budget Violation (❌):**
+
+```typescript
+// ❌ VIOLATION: API endpoint exceeds performance budget
+// GET /api/users
+// Budget: < 200ms (simple GET)
+// Actual: 350ms (median)
+// → Performance budget exceeded by 75%
+
+@Get('/users')
+async getUsers() {
+  // Slow query without optimization
+  return this.prisma.user.findMany({
+    include: { orders: { include: { items: true } } }
+  });
+}
+```
+
+**Example API Performance Budget Compliance (✅):**
+
+```typescript
+// ✅ CORRECT: API endpoint meets performance budget
+// GET /api/users
+// Budget: < 200ms (simple GET)
+// Actual: 150ms (median)
+// → Performance budget met
+
+@Get('/users')
+async getUsers() {
+  // Optimized query with selective fields
+  return this.prisma.user.findMany({
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true
+    }
+  });
+}
+```
+
+**Example Frontend Performance Budget Violation (❌):**
+
+```typescript
+// ❌ VIOLATION: Frontend page exceeds performance budget
+// Page: /dashboard
+// Budget: FCP < 1.5s, LCP < 2s, TTI < 3s
+// Actual: FCP 2.1s, LCP 3.5s, TTI 5.2s
+// → All performance budgets exceeded
+
+export default function Dashboard() {
+  // Heavy component without code splitting
+  const data = useQuery('dashboard', fetchDashboardData);
+  
+  return (
+    <div>
+      {/* Large bundle, no lazy loading */}
+      <HeavyChartComponent />
+      <HeavyTableComponent />
+      <HeavyMapComponent />
+    </div>
+  );
+}
+```
+
+**Example Frontend Performance Budget Compliance (✅):**
+
+```typescript
+// ✅ CORRECT: Frontend page meets performance budget
+// Page: /dashboard
+// Budget: FCP < 1.5s, LCP < 2s, TTI < 3s
+// Actual: FCP 1.2s, LCP 1.8s, TTI 2.5s
+// → All performance budgets met
+
+export default function Dashboard() {
+  // Code splitting and lazy loading
+  const HeavyChartComponent = lazy(() => import('./HeavyChartComponent'));
+  const HeavyTableComponent = lazy(() => import('./HeavyTableComponent'));
+  const HeavyMapComponent = lazy(() => import('./HeavyMapComponent'));
+  
+  return (
+    <div>
+      <Suspense fallback={<Loading />}>
+        <HeavyChartComponent />
+        <HeavyTableComponent />
+        <HeavyMapComponent />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+---
+
+**Last Updated:** 2025-11-23  
+**Maintained By:** QA Team  
+**Review Frequency:** Quarterly or when testing requirements change

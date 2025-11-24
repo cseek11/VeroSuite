@@ -1,0 +1,66 @@
+[
+  {
+    "type": "performance",
+    "severity": "high",
+    "description": "Nested iteration detected",
+    "file": "services\\opa\\policies\\sample.rego",
+    "line": 3,
+    "suggestion": "Consider restructuring to avoid nested loops or use indexing"
+  },
+  {
+    "type": "performance",
+    "severity": "high",
+    "description": "Nested iteration detected",
+    "file": "services\\opa\\policies\\sample.rego",
+    "line": 21,
+    "suggestion": "Consider restructuring to avoid nested loops or use indexing"
+  },
+  {
+    "type": "performance",
+    "severity": "high",
+    "description": "Nested iteration detected",
+    "file": "services\\opa\\policies\\sample.rego",
+    "line": 27,
+    "suggestion": "Consider restructuring to avoid nested loops or use indexing"
+  },
+  {
+    "type": "performance",
+    "severity": "low",
+    "description": "String operation in iteration",
+    "file": "services\\opa\\policies\\sample.rego",
+    "line": 28,
+    "suggestion": "Consider pre-computing or caching string operations"
+  },
+  {
+    "type": "performance",
+    "severity": "high",
+    "description": "Nested iteration detected",
+    "file": "services\\opa\\policies\\sample.rego",
+    "line": 39,
+    "suggestion": "Consider restructuring to avoid nested loops or use indexing"
+  },
+  {
+    "type": "performance",
+    "severity": "low",
+    "description": "String operation in iteration",
+    "file": "services\\opa\\policies\\sample.rego",
+    "line": 59,
+    "suggestion": "Consider pre-computing or caching string operations"
+  },
+  {
+    "type": "performance",
+    "severity": "low",
+    "description": "String operation in iteration",
+    "file": "services\\opa\\policies\\sample.rego",
+    "line": 64,
+    "suggestion": "Consider pre-computing or caching string operations"
+  },
+  {
+    "type": "extraction",
+    "severity": "low",
+    "description": "Repeated string matching pattern (3 times)",
+    "file": "services\\opa\\policies\\sample.rego",
+    "line": null,
+    "suggestion": "Consider extracting to shared helper in _shared.rego"
+  }
+]

@@ -61,3 +61,297 @@ Every log for a request must include the same `traceId`.
 - `console.log` in runtime code.
 - Unstructured free-text logging.
 - Missing traceId in logs for new/changed code.
+
+---
+
+## Step 5: Post-Implementation Audit for Structured Logging
+
+### R08: Structured Logging — Audit Procedures
+
+**For code changes affecting logging:**
+
+#### Structured Logging Format
+
+- [ ] **MANDATORY:** Verify all logs use structured logger (not console.log/error)
+- [ ] **MANDATORY:** Verify logs are JSON-like format (structured, not free-text)
+- [ ] **MANDATORY:** Verify logs include required fields: level, message, timestamp, traceId, context, operation, severity
+- [ ] **MANDATORY:** Verify logs include optional fields when applicable: tenantId, userId, errorCode, rootCause, additionalData
+
+#### Required Fields Verification
+
+- [ ] **MANDATORY:** Verify `level` field exists (log, error, warn, debug, verbose)
+- [ ] **MANDATORY:** Verify `message` field exists (human-readable message)
+- [ ] **MANDATORY:** Verify `timestamp` field exists (ISO 8601 format)
+- [ ] **MANDATORY:** Verify `traceId` field exists (distributed trace identifier)
+- [ ] **MANDATORY:** Verify `context` field exists (service, module, component name)
+- [ ] **MANDATORY:** Verify `operation` field exists (function, endpoint, action)
+- [ ] **MANDATORY:** Verify `severity` field exists (info, warn, error, debug, verbose)
+
+#### Console.log Detection
+
+- [ ] **MANDATORY:** Verify no console.log in production code
+- [ ] **MANDATORY:** Verify no console.error in production code
+- [ ] **MANDATORY:** Verify no console.warn in production code
+
+#### Logger Utility Usage
+
+- [ ] **MANDATORY:** Verify centralized logger utilities are used (StructuredLoggerService, Logger)
+- [ ] **MANDATORY:** Verify logger is injected/imported correctly
+- [ ] **MANDATORY:** Verify logger methods match required signature
+
+#### Trace ID Propagation
+
+- [ ] **MANDATORY:** Verify traceId is generated for each incoming request
+- [ ] **MANDATORY:** Verify traceId propagates through service calls
+- [ ] **MANDATORY:** Verify all logs for a request include the same traceId
+
+#### Automated Checks
+
+```bash
+# Run structured logging checker
+python .cursor/scripts/check-structured-logging.py --file <file_path>
+
+# Check all changed files
+python .cursor/scripts/check-structured-logging.py --pr <PR_NUMBER>
+
+# Expected: No violations found
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/observability.rego` (R08 section)
+- **Enforcement:** OVERRIDE (Tier 2 MAD) - Requires justification
+- **Tests:** `services/opa/tests/observability_r08_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review Logging Calls** - Identify all logging statements in changed code
+2. **Verify Structured Format** - Check logs use structured logger with required fields
+3. **Check Trace ID** - Verify traceId is present and propagates correctly
+4. **Validate Logger Usage** - Verify centralized logger utilities are used
+
+**Example Console.log (VIOLATION):**
+
+```typescript
+// ❌ VIOLATION: Console.log instead of structured logging
+console.log('Processing payment');
+console.error('Payment failed:', error);
+```
+
+**Example Structured Logging (CORRECT):**
+
+```typescript
+// ✅ CORRECT: Structured logging with required fields
+this.logger.info(
+  'Processing payment',
+  'PaymentService',
+  requestId,
+  'processPayment',
+  { paymentId: paymentData.id }
+);
+
+this.logger.error(
+  'Payment failed',
+  'PaymentService',
+  requestId,
+  'processPayment',
+  {
+    errorCode: 'PAYMENT_FAILED',
+    rootCause: error.message,
+    paymentId: paymentData.id
+  }
+);
+```
+
+**Example Logger Injection (CORRECT):**
+
+```typescript
+// ✅ CORRECT: Logger injection in service
+@Injectable()
+export class UserService {
+  constructor(
+    private readonly logger: StructuredLoggerService,
+    private readonly requestContext: RequestContextService
+  ) {}
+  
+  async createUser(userData: CreateUserDto) {
+    this.logger.info(
+      'Creating user',
+      'UserService',
+      this.requestContext.getRequestId(),
+      'createUser',
+      { email: userData.email }
+    );
+  }
+}
+```
+
+---
+
+### R09: Trace Propagation — Audit Procedures
+
+**For code changes affecting service boundaries, HTTP calls, or external integrations:**
+
+#### HTTP Header Propagation
+
+- [ ] **MANDATORY:** Verify traceId extracted from incoming HTTP headers (x-trace-id)
+- [ ] **MANDATORY:** Verify traceId added to outgoing HTTP headers (x-trace-id, x-span-id, x-request-id)
+- [ ] **MANDATORY:** Verify traceId propagates through HTTP client calls (fetch, axios, etc.)
+- [ ] **MANDATORY:** Verify traceId propagates through HTTP server responses (when applicable)
+
+#### Service-to-Service Propagation
+
+- [ ] **MANDATORY:** Verify traceId passed to downstream service methods
+- [ ] **MANDATORY:** Verify traceId included in service call parameters
+- [ ] **MANDATORY:** Verify traceId propagates through microservice calls
+- [ ] **MANDATORY:** Verify traceId propagates through internal API calls
+
+#### Database Layer Propagation
+
+- [ ] **MANDATORY:** Verify traceId included in database query context
+- [ ] **MANDATORY:** Verify traceId propagates to RLS context (app.trace_id)
+- [ ] **MANDATORY:** Verify traceId included in Prisma query context
+- [ ] **MANDATORY:** Verify traceId propagates to database transaction context
+
+#### External Service Propagation
+
+- [ ] **MANDATORY:** Verify traceId added to external API call headers
+- [ ] **MANDATORY:** Verify traceId propagates to third-party service calls
+- [ ] **MANDATORY:** Verify traceId included in webhook payloads (when applicable)
+- [ ] **MANDATORY:** Verify traceId propagates to external integrations
+
+#### Message Queue Propagation
+
+- [ ] **MANDATORY:** Verify traceId included in message queue message headers
+- [ ] **MANDATORY:** Verify traceId propagates to event payloads
+- [ ] **MANDATORY:** Verify traceId extracted from message queue messages
+- [ ] **MANDATORY:** Verify traceId propagates through async message processing
+
+#### Frontend-Backend Propagation
+
+- [ ] **MANDATORY:** Verify traceId extracted from API response headers
+- [ ] **MANDATORY:** Verify traceId added to API request headers
+- [ ] **MANDATORY:** Verify traceId propagates through frontend API calls
+- [ ] **MANDATORY:** Verify traceId maintained across page navigation (session storage)
+
+#### Trace Context Management
+
+- [ ] **MANDATORY:** Verify traceId generated for new requests (when not present)
+- [ ] **MANDATORY:** Verify traceId extended for new spans (when trace exists)
+- [ ] **MANDATORY:** Verify traceId stored in request context
+- [ ] **MANDATORY:** Verify traceId available throughout request lifecycle
+
+#### Automated Checks
+
+```bash
+# Run trace propagation checker
+python .cursor/scripts/check-trace-propagation.py --file <file_path>
+
+# Check all changed files
+python .cursor/scripts/check-trace-propagation.py --pr <PR_NUMBER>
+
+# Expected: No violations found
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/observability.rego` (R09 section)
+- **Enforcement:** OVERRIDE (Tier 2 MAD) - Requires justification
+- **Tests:** `services/opa/tests/observability_r09_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review Service Boundaries** - Identify all service-to-service calls
+2. **Verify HTTP Propagation** - Check traceId in HTTP headers
+3. **Check Database Propagation** - Verify traceId in query context
+4. **Validate External Calls** - Verify traceId in external API headers
+
+**Example Missing HTTP Header Propagation (VIOLATION):**
+
+```typescript
+// ❌ VIOLATION: HTTP call without traceId in headers
+const response = await fetch('https://api.example.com/data', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json'
+    // Missing x-trace-id header
+  }
+});
+```
+
+**Example Proper HTTP Header Propagation (CORRECT):**
+
+```typescript
+// ✅ CORRECT: HTTP call with traceId in headers
+const traceContext = this.requestContext.getTraceContext();
+const response = await fetch('https://api.example.com/data', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-trace-id': traceContext.traceId,
+    'x-span-id': traceContext.spanId,
+    'x-request-id': traceContext.requestId
+  }
+});
+```
+
+**Example Missing Service Propagation (VIOLATION):**
+
+```typescript
+// ❌ VIOLATION: Service call without traceId
+await this.downstreamService.process(data); // Missing traceId parameter
+```
+
+**Example Proper Service Propagation (CORRECT):**
+
+```typescript
+// ✅ CORRECT: Service call with traceId
+const traceId = this.requestContext.getTraceId();
+await this.downstreamService.process(traceId, data);
+```
+
+**Example Missing Database Propagation (VIOLATION):**
+
+```typescript
+// ❌ VIOLATION: Database query without traceId in context
+await this.prisma.user.findMany({
+  where: { tenantId }
+  // Missing traceId in query context
+});
+```
+
+**Example Proper Database Propagation (CORRECT):**
+
+```typescript
+// ✅ CORRECT: Database query with traceId in context
+const traceId = this.requestContext.getTraceId();
+await this.prisma.$executeRaw`
+  SET LOCAL app.trace_id = ${traceId};
+  SELECT * FROM users WHERE tenant_id = ${tenantId};
+`;
+```
+
+**Example Trace Context Utility Usage (CORRECT):**
+
+```typescript
+// ✅ CORRECT: Using trace propagation utilities
+import { 
+  extractTraceContextFromHeaders,
+  addTraceContextToHeaders,
+  createOrExtendTraceContext
+} from '@common/utils/trace-propagation.util';
+
+// Extract from incoming request
+const traceContext = extractTraceContextFromHeaders(req.headers) 
+  || createOrExtendTraceContext();
+
+// Add to outgoing request
+const headers = addTraceContextToHeaders({}, traceContext);
+const response = await fetch(url, { headers });
+```
+
+---
+
+**Last Updated:** 2025-11-23  
+**Maintained By:** Platform Core Team  
+**Review Frequency:** Quarterly or when observability requirements change

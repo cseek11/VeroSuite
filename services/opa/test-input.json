@@ -1,0 +1,12 @@
+{
+  "changed_files": [
+    {
+      "path": "backend/src/auth/auth.service.ts",
+      "diff": "export class AuthService {}"
+    }
+  ],
+  "pr_body": "Add auth service"
+}
+
+
+

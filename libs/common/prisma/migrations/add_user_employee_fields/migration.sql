@@ -30,6 +30,10 @@ ADD COLUMN IF NOT EXISTS "qualifications" TEXT[] DEFAULT ARRAY[]::TEXT[];
 ALTER TABLE "public"."users" 
 ADD COLUMN IF NOT EXISTS "custom_permissions" TEXT[] DEFAULT ARRAY[]::TEXT[];
 
+-- Add employment_type column (required before creating index)
+ALTER TABLE "public"."users" 
+ADD COLUMN IF NOT EXISTS "employment_type" VARCHAR(20) DEFAULT 'full_time';
+
 -- Create indexes for commonly queried fields
 CREATE INDEX IF NOT EXISTS "idx_users_state" ON "public"."users"("state");
 CREATE INDEX IF NOT EXISTS "idx_users_city" ON "public"."users"("city");

@@ -1,0 +1,17 @@
+{
+  "changed_files": [
+    {
+      "path": "apps/api/src/test.ts",
+      "diff": "+ const x = 1;\n+ const y = 2;",
+      "additions": 2,
+      "deletions": 0
+    }
+  ],
+  "pr_title": "Add test variables",
+  "pr_body": "This PR adds test variables for demonstration",
+  "pr_number": 1,
+  "author": "developer"
+}
+
+
+

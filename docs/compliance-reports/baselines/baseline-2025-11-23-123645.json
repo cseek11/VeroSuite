@@ -1,0 +1,28 @@
+{
+  "timestamp": "2025-11-23T12:36:45.987352",
+  "environment": "staging",
+  "ci_time_baseline": 180,
+  "ci_components": {
+    "test_execution_seconds": 120,
+    "linting_seconds": 30,
+    "build_seconds": 30
+  },
+  "opa_policies": [
+    {
+      "policy_name": "infrastructure.rego",
+      "evaluation_time_ms": 150,
+      "status": "dry_run"
+    },
+    {
+      "policy_name": "sample.rego",
+      "evaluation_time_ms": 150,
+      "status": "dry_run"
+    }
+  ],
+  "performance_budgets": {
+    "per_policy_ms": 200,
+    "total_tier1_ms": 600,
+    "total_all_ms": 2000,
+    "ci_increase_max_percent": 30
+  }
+}

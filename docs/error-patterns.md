@@ -1077,4 +1077,744 @@ catch (error) { ... } // TS6133 error if error not used
 
 ---
 
-**Last Updated:** 2025-11-22
+## OPA_REGO_ABS_FUNCTION_SYNTAX - 2025-11-23
+
+### Summary
+OPA Rego `abs()` function used old syntax with multiple definitions (`abs(x) := x if { x >= 0 }` and `abs(x) := -x if { x < 0 }`), causing "unexpected assign token: expected function value term" errors. Rego doesn't support multiple function definitions with conditional logic.
+
+### Root Cause
+- Rego doesn't allow multiple function definitions with the same name
+- Old syntax used `if` keyword in function definitions
+- Attempted to define same function twice with different conditions
+- Function definitions must be single, unconditional assignments
+
+### Triggering Conditions
+- Function defined multiple times with different conditions
+- Using `if` keyword in function definition (old syntax)
+- Attempting to use conditional logic in function definitions
+- Multiple function rules with same name
+
+### Relevant Code/Modules
+- `services/opa/policies/quality.rego` line 334-335 - abs() function definition
+- Any Rego file attempting to define functions with conditions
+- Files using absolute value calculations
+
+### How It Was Fixed
+1. **Removed function entirely:** Deleted `abs()` function definitions
+2. **Inlined calculation:** Replaced `abs(file.delta.statements)` with `file.delta.statements * -1`
+3. **Applied to all usages:** Fixed 2 locations (lines 192, 204) where abs() was used
+
+**Example Fixes:**
+```rego
+// ❌ WRONG: Multiple function definitions
+abs(x) := x if { x >= 0 }
+abs(x) := -x if { x < 0 }
+
+// ❌ WRONG: Using abs() function
+decrease_abs := abs(file.delta.statements)
+
+// ✅ CORRECT: Inline calculation
+decrease_abs := file.delta.statements * -1
+```
+
+### Prevention Strategies
+- **NEVER** define functions multiple times with different conditions
+- **USE** inline calculations instead of helper functions for simple operations
+- **AVOID** conditional logic in function definitions
+- **CHECK** Rego version compatibility when using function syntax
+
+### Related Patterns
+- **OPA_REGO_MISSING_IMPORT_IN** - Related import issues
+- **OPA_REGO_WARN_RULE_SYNTAX** - Related rule syntax issues
+
+---
+
+## OPA_REGO_MISSING_IMPORT_IN - 2025-11-23
+
+### Summary
+13 files (7 policy files + 6 test files) used `some x in xs` syntax without `import future.keywords.in`, causing "unexpected identifier token: expected \n or ; or }" errors. Modern Rego requires explicit import for `in` keyword.
+
+### Root Cause
+- `some x in xs` syntax requires `import future.keywords.in`
+- Files migrated to modern Rego syntax but missing imports
+- OPA 0.64.1 requires explicit imports for future keywords
+- Inconsistent import patterns across files
+
+### Triggering Conditions
+- Using `some x in xs` syntax without import
+- Migrating to modern Rego syntax without updating imports
+- Copying code from files with different import patterns
+- Missing imports when using future keywords
+
+### Relevant Code/Modules
+**Policy Files:**
+- `services/opa/policies/architecture.rego`
+- `services/opa/policies/security.rego`
+- `services/opa/policies/data-integrity.rego`
+- `services/opa/policies/tech-debt.rego`
+- `services/opa/policies/infrastructure.rego`
+- `services/opa/policies/sample.rego`
+- `services/opa/policies/_template.rego`
+
+**Test Files:**
+- `services/opa/tests/architecture_r03_test.rego`
+- `services/opa/tests/security_r01_test.rego`
+- `services/opa/tests/security_r02_test.rego`
+- `services/opa/tests/data_integrity_r04_test.rego`
+- `services/opa/tests/data_integrity_r05_test.rego`
+- `services/opa/tests/data_integrity_r06_test.rego`
+- `services/opa/tests/quality_r17_test.rego`
+
+### How It Was Fixed
+1. **Added import statement:** Added `import future.keywords.in` after existing imports
+2. **Consistent pattern:** Applied same import pattern across all files
+3. **Verified syntax:** Ensured `some x in xs` works after import
+
+**Example Fixes:**
+```rego
+// ❌ WRONG: Missing import
+package compliance.architecture
+
+import future.keywords.contains
+import future.keywords.if
+
+# Later uses: some file in input.files  # ERROR!
+
+// ✅ CORRECT: With import
+package compliance.architecture
+
+import future.keywords.contains
+import future.keywords.if
+import future.keywords.in
+
+# Now works: some file in input.files
+```
+
+### Prevention Strategies
+- **ALWAYS** add `import future.keywords.in` when using `some x in xs`
+- **CHECK** imports when copying code between files
+- **VERIFY** all future keywords are imported before using them
+- **USE** consistent import patterns across all Rego files
+
+### Related Patterns
+- **OPA_REGO_ABS_FUNCTION_SYNTAX** - Related syntax issues
+- **OPA_REGO_WARN_RULE_SYNTAX** - Related rule syntax issues
+
+---
+
+## OPA_REGO_ENDSWITH_METHOD_SYNTAX - 2025-11-23
+
+### Summary
+Used method syntax `file.path.endswith(".sql")` instead of function syntax `endswith(file.path, ".sql")`, causing "undefined function file.path.endswith" errors. Rego `endswith` is a built-in function, not a method.
+
+### Root Cause
+- Confusion between method syntax (object.method()) and function syntax (function(object))
+- Rego built-in functions use function syntax, not method syntax
+- Similar to other languages where strings have methods
+- Missing understanding of Rego function call syntax
+
+### Triggering Conditions
+- Using method syntax for built-in functions
+- Assuming Rego strings have methods like other languages
+- Copying code from languages with method syntax
+- Not checking Rego built-in function documentation
+
+### Relevant Code/Modules
+- `services/opa/policies/quality.rego` lines 421, 437, 441
+- Any Rego file using `endswith` or other built-in functions
+- Files checking file extensions or string suffixes
+
+### How It Was Fixed
+1. **Changed to function syntax:** Replaced `file.path.endswith(".sql")` with `endswith(file.path, ".sql")`
+2. **Fixed all occurrences:** Updated 3 locations in quality.rego
+3. **Verified syntax:** Confirmed function syntax works correctly
+
+**Example Fixes:**
+```rego
+// ❌ WRONG: Method syntax
+needs_data_migration_tests(file) if {
+    contains(file.path, "migration")
+    file.path.endswith(".sql")  # ERROR: undefined function
+}
+
+// ✅ CORRECT: Function syntax
+needs_data_migration_tests(file) if {
+    contains(file.path, "migration")
+    endswith(file.path, ".sql")  # Works correctly
+}
+```
+
+### Prevention Strategies
+- **ALWAYS** use function syntax for Rego built-in functions
+- **CHECK** Rego documentation for built-in function syntax
+- **AVOID** assuming Rego has method syntax like other languages
+- **VERIFY** function call syntax matches Rego conventions
+
+### Related Patterns
+- **OPA_REGO_MISSING_IMPORT_IN** - Related syntax issues
+- **OPA_REGO_WARN_RULE_SYNTAX** - Related rule syntax issues
+
+---
+
+## OPA_REGO_WARN_RULE_SYNTAX - 2025-11-23
+
+### Summary
+Multiple `warn` rules used old syntax `warn contains msg if` causing "conflicting rules" and "var cannot be used for rule name" errors. Rego requires consistent rule syntax and doesn't allow multiple rules with same name using different syntax patterns.
+
+### Root Cause
+- Old syntax `warn contains msg if` mixed with new syntax `warn[msg]`
+- Multiple rules with same name using different syntax patterns
+- Rego requires all rules with same name to use consistent syntax
+- Migration from old to new syntax incomplete
+
+### Triggering Conditions
+- Mixing old and new rule syntax in same file
+- Multiple rules with same name using different syntax
+- Incomplete migration from old Rego syntax
+- Copying rules from files with different syntax versions
+
+### Relevant Code/Modules
+- `services/opa/policies/quality.rego` lines 45, 599, 739, 926
+- Any Rego file with multiple warn/deny/violation rules
+- Files consolidating rules from multiple sources
+
+### How It Was Fixed
+1. **Standardized syntax:** Changed all `warn contains msg if` to `warn[msg]`
+2. **Consolidated rules:** Combined all 4 warn rules into single location
+3. **Removed duplicates:** Eliminated redundant warn rule definitions
+4. **Maintained functionality:** Ensured all warnings still collected correctly
+
+**Example Fixes:**
+```rego
+// ❌ WRONG: Mixed syntax
+warn contains msg if {
+    count(warnings) > 0
+    msg := sprintf("...", [...])
+}
+
+warn[msg] {
+    some warning in additional_testing_warnings
+    msg := warning
+}
+# ERROR: Conflicting rules
+
+// ✅ CORRECT: Consistent syntax
+warn[msg] {
+    count(warnings) > 0
+    warnings_str := concat("; ", warnings)
+    msg := sprintf("...", [count(warnings), warnings_str])
+}
+
+warn[msg] {
+    some warning in additional_testing_warnings
+    msg := warning
+}
+# Works correctly - all use same syntax
+```
+
+### Prevention Strategies
+- **ALWAYS** use consistent syntax for rules with same name
+- **STANDARDIZE** on modern Rego syntax (`warn[msg]` not `warn contains msg if`)
+- **CONSOLIDATE** multiple rules with same name into single location
+- **VERIFY** no syntax conflicts when adding new rules
+
+### Related Patterns
+- **OPA_REGO_MISSING_IMPORT_IN** - Related import issues
+- **OPA_REGO_SET_TO_ARRAY_CONVERSION** - Related type issues
+
+---
+
+## OPA_REGO_SET_TO_ARRAY_CONVERSION - 2025-11-23
+
+### Summary
+Violations and warnings defined as sets (`violations[msg]`) but concatenated as arrays using `array.concat()`, causing "invalid argument(s)" type errors. `array.concat()` expects arrays, not sets.
+
+### Root Cause
+- Sets (`violations[msg]`) and arrays (`violations := [...]`) are different types in Rego
+- `array.concat()` only works with arrays, not sets
+- Attempting to concatenate sets directly causes type errors
+- Missing conversion from set to array before concatenation
+
+### Triggering Conditions
+- Defining rules as sets (`rule[msg]`)
+- Attempting to concatenate sets using `array.concat()`
+- Not converting sets to arrays before concatenation
+- Mixing set and array types in same operation
+
+### Relevant Code/Modules
+- `services/opa/policies/quality.rego` lines 14-20 (violations)
+- `services/opa/policies/quality.rego` line 23 (warnings)
+- Any Rego file concatenating rule results
+
+### How It Was Fixed
+1. **Converted sets to arrays:** Used set comprehensions `[msg | some msg in violations]`
+2. **Fixed violations:** Converted all violation sets to arrays before concatenation
+3. **Fixed warnings:** Converted warning set to array using comprehension
+4. **Maintained functionality:** Ensured all violations/warnings still collected
+
+**Example Fixes:**
+```rego
+// ❌ WRONG: Concatenating sets directly
+violations := array.concat(
+    missing_unit_tests_violations,  # Set, not array
+    missing_regression_tests_violations  # Set, not array
+)
+# ERROR: invalid argument(s)
+
+warnings := incomplete_test_coverage_warnings  # Set, not array
+concat("; ", warnings)  # ERROR: invalid argument(s)
+
+// ✅ CORRECT: Convert sets to arrays first
+violations := array.concat(
+    [msg | some msg in missing_unit_tests_violations],
+    [msg | some msg in missing_regression_tests_violations]
+)
+
+warnings := [msg | incomplete_test_coverage_warnings[msg]]
+warnings_str := concat("; ", warnings)  # Works correctly
+```
+
+### Prevention Strategies
+- **ALWAYS** convert sets to arrays before using `array.concat()`
+- **USE** set comprehensions `[x | rule[x]]` to convert sets to arrays
+- **CHECK** types before concatenation (sets vs arrays)
+- **VERIFY** function signatures match argument types
+
+### Related Patterns
+- **OPA_REGO_WARN_RULE_SYNTAX** - Related rule syntax issues
+- **OPA_REGO_DEPRECATED_ANY_FUNCTION** - Related test syntax issues
+
+---
+
+## OPA_REGO_DEPRECATED_ANY_FUNCTION - 2025-11-23
+
+### Summary
+Test file used deprecated `any()` function (9 occurrences) causing "deprecated built-in function calls in expression: any" errors. `rego.v1` doesn't support `any()` function - must use alternative patterns.
+
+### Root Cause
+- `any()` function deprecated in modern Rego (rego.v1)
+- Test file imported `rego.v1` but used deprecated function
+- No direct replacement for `any()` function
+- Need to use `count()` or other patterns instead
+
+### Triggering Conditions
+- Using `any()` function in tests
+- Importing `rego.v1` but using deprecated functions
+- Copying test code from older Rego versions
+- Not checking function deprecation status
+
+### Relevant Code/Modules
+- `services/opa/tests/quality_r18_test.rego` - 9 occurrences of `any()`
+- Any test file using `any()` function
+- Files imported `rego.v1` but using deprecated syntax
+
+### How It Was Fixed
+1. **Replaced with count pattern:** Changed `not any([...])` to `count([...]) == 0`
+2. **Fixed all occurrences:** Updated 9 test cases in quality_r18_test.rego
+3. **Maintained test logic:** Ensured tests still verify same conditions
+4. **Verified functionality:** Confirmed tests work correctly with new pattern
+
+**Example Fixes:**
+```rego
+// ❌ WRONG: Using deprecated any()
+import rego.v1
+
+test_no_warnings if {
+    result := quality.warn with input as {...}
+    
+    not any([
+        warning |
+        some warning in result
+        contains(warning, "WARNING")
+    ])
+    # ERROR: deprecated built-in function
+}
+
+// ✅ CORRECT: Using count() pattern
+import rego.v1
+
+test_no_warnings if {
+    result := quality.warn with input as {...}
+    
+    count([warning | some warning in result; contains(warning, "WARNING")]) == 0
+    # Works correctly - no warnings found
+}
+```
+
+### Prevention Strategies
+- **NEVER** use `any()` function in modern Rego (rego.v1)
+- **USE** `count([...]) == 0` pattern instead of `not any([...])`
+- **CHECK** function deprecation status when using Rego built-ins
+- **VERIFY** test syntax matches Rego version requirements
+
+---
+
+## OPA_REGO_PYTHON_STYLE_CONDITIONAL - 2025-11-23
+
+### Summary
+Used Python-style conditional (`3.0 if is_large_text else 4.5`) in Rego policy file, causing "unexpected if keyword" parse errors. Rego doesn't support ternary operators or Python-style conditionals.
+
+### Root Cause
+- Rego doesn't support ternary operators (`value if condition else other_value`)
+- Rego doesn't support Python-style conditional expressions
+- Attempted to use familiar Python syntax in Rego code
+- Missing understanding of Rego's rule-based conditional logic
+
+### Triggering Conditions
+- Using `value := a if condition else b` syntax
+- Using `value := condition ? a : b` syntax (JavaScript-style)
+- Attempting inline conditional assignment
+- Copying code from Python/JavaScript into Rego
+
+### Relevant Code/Modules
+- `services/opa/policies/ux-consistency.rego` line 98 - `required_ratio := 3.0 if is_large_text else 4.5`
+- Any Rego policy file using conditional expressions
+- Files mixing Python/JavaScript syntax with Rego
+
+### How It Was Fixed
+1. **Created helper function:** Added `get_required_contrast_ratio()` function with multiple rule definitions
+2. **Used Rego pattern:** Each condition gets its own rule definition
+3. **Updated usage:** Changed from inline conditional to function call
+4. **Verified functionality:** Confirmed logic works correctly with new pattern
+
+**Example Fixes:**
+```rego
+// ❌ WRONG: Python-style conditional
+required_ratio := 3.0 if is_large_text else 4.5
+# ERROR: unexpected if keyword
+
+// ✅ CORRECT: Helper function with multiple rules
+get_required_contrast_ratio(is_large_text) := 3.0 if {
+    is_large_text
+}
+
+get_required_contrast_ratio(is_large_text) := 4.5 if {
+    not is_large_text
+}
+
+required_ratio := get_required_contrast_ratio(is_large_text)
+# Works correctly - returns 3.0 or 4.5 based on condition
+```
+
+### Prevention Strategies
+- **NEVER** use Python-style conditionals (`a if b else c`) in Rego
+- **NEVER** use JavaScript-style ternaries (`a ? b : c`) in Rego
+- **USE** helper functions with multiple rule definitions for conditionals
+- **LEARN** Rego's rule-based conditional logic pattern
+- **VERIFY** syntax before running tests
+
+---
+
+## OPA_REGO_OR_OPERATOR - 2025-11-23
+
+### Summary
+Used `||` (OR operator) in Rego policy file, causing "unexpected or token" parse errors. Rego doesn't support logical OR operators (`||`) or AND operators (`&&`) in expressions.
+
+### Root Cause
+- Rego doesn't support `||` (OR) or `&&` (AND) operators in expressions
+- Attempted to use familiar programming language syntax
+- Missing understanding of Rego's rule-based logic
+- Confusion between Rego's `or` keyword (for rule chaining) and `||` operator
+
+### Triggering Conditions
+- Using `condition1 || condition2` syntax
+- Using `condition1 && condition2` syntax
+- Attempting to combine multiple conditions in single expression
+- Copying code from other languages into Rego
+
+### Relevant Code/Modules
+- `services/opa/policies/ux-consistency.rego` line 189 - `is_critical_component(issue.component) || is_user_facing_component(issue.component)`
+- Any Rego policy file using logical operators
+- Files mixing other language syntax with Rego
+
+### How It Was Fixed
+1. **Split into separate rules:** Created two separate rule definitions instead of using `||`
+2. **Used rule chaining:** Each condition gets its own rule
+3. **Maintained logic:** Ensured both conditions are still checked
+4. **Verified functionality:** Confirmed warnings are generated for both cases
+
+**Example Fixes:**
+```rego
+// ❌ WRONG: Using OR operator
+accessibility_warnings[msg] if {
+    some issue in input.accessibility_issues
+    issue.priority == "high"
+    is_critical_component(issue.component) || is_user_facing_component(issue.component)
+    # ERROR: unexpected or token
+}
+
+// ✅ CORRECT: Separate rules
+accessibility_warnings[msg] if {
+    some issue in input.accessibility_issues
+    issue.priority == "high"
+    is_critical_component(issue.component)
+    # ... message
+}
+
+accessibility_warnings[msg] if {
+    some issue in input.accessibility_issues
+    issue.priority == "high"
+    not is_critical_component(issue.component)
+    is_user_facing_component(issue.component)
+    # ... message
+}
+```
+
+### Prevention Strategies
+- **NEVER** use `||` (OR) or `&&` (AND) operators in Rego expressions
+- **USE** separate rules for OR conditions
+- **USE** multiple conditions in same rule for AND conditions
+- **LEARN** Rego's rule-based logic pattern
+- **VERIFY** syntax before running tests
+
+---
+
+## OPA_REGO_EMPTY_STRING_DETECTION - 2025-11-23
+
+### Summary
+Policy checked `not exemption.justification` which only detects missing fields, not empty strings (`""`). In Rego, empty strings are truthy, so missing field check fails when field exists but is empty, causing test failures.
+
+### Root Cause
+- Rego's `not field` only checks if field is missing/undefined
+- Empty strings (`""`) are truthy in Rego, so `not field` doesn't catch them
+- Tests pass empty strings to verify validation logic
+- Missing explicit empty string check
+
+### Triggering Conditions
+- Using `not field` to check for missing values
+- Tests pass empty strings (`""`) as input
+- Validation needs to catch both missing fields and empty strings
+- Field exists but contains empty value
+
+### Relevant Code/Modules
+- `services/opa/policies/ux-consistency.rego` lines 164, 175 - `not exemption.justification`, `not exemption.remediation`
+- `services/opa/tests/ux_r19_test.rego` - Tests passing empty strings
+- Any Rego policy validating required fields
+- Files checking for missing or empty values
+
+### How It Was Fixed
+1. **Added separate rule for missing field:** Kept `not exemption.justification` check
+2. **Added separate rule for empty string:** Added `exemption.justification == ""` check
+3. **Applied to both fields:** Fixed both justification and remediation checks
+4. **Verified functionality:** Confirmed both missing and empty strings are detected
+
+**Example Fixes:**
+```rego
+// ❌ WRONG: Only checks missing field
+accessibility_warnings[msg] if {
+    some exemption in input.accessibility_exemptions
+    not exemption.justification
+    # MISSES: exemption.justification == ""
+    msg := sprintf("Missing justification", [exemption.component])
+}
+
+// ✅ CORRECT: Checks both missing and empty
+accessibility_warnings[msg] if {
+    some exemption in input.accessibility_exemptions
+    not exemption.justification
+    # Catches: missing field
+    msg := sprintf("Missing justification", [exemption.component])
+}
+
+accessibility_warnings[msg] if {
+    some exemption in input.accessibility_exemptions
+    exemption.justification == ""
+    # Catches: empty string
+    msg := sprintf("Missing justification", [exemption.component])
+}
+```
+
+### Prevention Strategies
+- **ALWAYS** check both `not field` (missing) and `field == ""` (empty) when validating required fields
+- **UNDERSTAND** that empty strings are truthy in Rego
+- **TEST** with both missing fields and empty strings
+- **VERIFY** validation catches both cases
+- **DOCUMENT** field validation requirements clearly
+
+### Related Patterns
+- **OPA_REGO_SET_TO_ARRAY_CONVERSION** - Related type conversion issues
+- **OPA_REGO_MISSING_IMPORT_IN** - Related import issues
+
+---
+
+## OPA_REGO_SET_ITERATION_BUG - 2025-11-23
+
+### Summary
+R21 file organization warnings were not being collected correctly in the `warn` rule. The policy used incorrect Rego syntax for iterating over set keys, causing the iteration to return `true` (the set value) instead of warning messages (the set keys). This prevented all 14 R21 warning types from being generated, causing 14 out of 19 tests to fail.
+
+### Root Cause
+- **Incorrect set iteration syntax:** Used `some warning in file_organization_warnings` which iterates over VALUES in Rego sets
+- **Set structure:** Rego sets created with `rule[key] if { ... }` have structure `{key: true}`
+- **Iteration behavior:** `some x in set` binds `x` to the VALUE (`true`), not the KEY (warning message)
+- **Result:** `warn` rule was collecting `true` values instead of warning message strings
+
+### Triggering Conditions
+- Policy defines warnings as a set: `file_organization_warnings[msg] if { ... }`
+- Rule attempts to collect warnings using `some x in set` syntax
+- Set contains multiple warning messages as keys
+- Rule needs to iterate over keys, not values
+
+### Relevant Code/Modules
+- `services/opa/policies/architecture.rego` (lines 343-345) - R21 warn rule
+- `services/opa/policies/architecture.rego` (lines 159-340) - 14 file_organization_warnings rules
+- `services/opa/tests/architecture_r21_test.rego` - All 19 R21 tests
+
+### How It Was Fixed
+
+**Before (INCORRECT):**
+```rego
+# Main warn rule - collects all R21 warnings
+warn contains msg if {
+    some warning in file_organization_warnings
+    msg := warning  # ❌ Gets 'true' instead of warning message
+}
+```
+
+**After (CORRECT):**
+```rego
+# Main warn rule - collects all R21 warnings  
+warn contains msg if {
+    file_organization_warnings[msg]  # ✅ Binds msg to each KEY in the set
+}
+```
+
+**Explanation:**
+- In Rego, `rule[key]` creates a set where keys map to `true`
+- To iterate over KEYS, use `rule[key]` syntax which binds `key` to each key in the set
+- `some x in rule` iterates over VALUES, not keys
+
+**Evidence:**
+```bash
+# Before fix:
+opa eval 'data.compliance.architecture.warn'
+# Output: [true]  ❌
+
+# After fix:
+opa eval 'data.compliance.architecture.warn'
+# Output: ["WARNING [Architecture/R21]: File in deprecated path..."]  ✅
+```
+
+### How to Prevent It in the Future
+
+1. **Use correct set iteration syntax:**
+   - ✅ **CORRECT:** `rule[key]` - iterates over keys
+   - ❌ **WRONG:** `some x in rule` - iterates over values
+
+2. **Understand Rego set structure:**
+   - `rule[key] if { ... }` creates `{key: true}`
+   - Keys are the actual data you want
+   - Values are always `true` in sets
+
+3. **Test set iteration:**
+   - Always verify that iteration returns keys, not values
+   - Use `trace()` to inspect what's being iterated
+   - Test with actual data, not just empty sets
+
+4. **Code review checklist:**
+   - [ ] Set iteration uses `rule[key]` syntax
+   - [ ] Not using `some x in rule` for key iteration
+   - [ ] Test verifies actual values, not just `true`
+
+### Similar Historical Issues
+- **OPA_REGO_SET_TO_ARRAY_CONVERSION** - Related set/array conversion issues
+- **OPA_REGO_WARN_RULE_SYNTAX** - Related rule syntax issues
+
+---
+
+## OPA_REGO_CASE_SENSITIVE_CONTAINS - 2025-11-23
+
+### Summary
+Test assertion failed due to case sensitivity mismatch between test string and warning message. The test checked for `contains(warning, "reusable component")` (lowercase) but the warning message used "Reusable component" (capital R). Rego's `contains()` function is case-sensitive, causing the test to fail even though the warning was generated correctly.
+
+### Root Cause
+- **Case-sensitive string matching:** Rego's `contains()` function performs case-sensitive substring matching
+- **Inconsistent casing:** Warning message used "Reusable" (capital R) while test expected "reusable" (lowercase)
+- **No case-insensitive option:** Rego doesn't provide a built-in case-insensitive `contains()` function
+- **Test design:** Test assertions should match warning message casing exactly
+
+### Triggering Conditions
+- Warning message uses different casing than test assertion
+- Test uses `contains()` to verify warning message content
+- Warning is generated correctly but test fails due to case mismatch
+- No case normalization applied to either string
+
+### Relevant Code/Modules
+- `services/opa/policies/architecture.rego` (line 314) - R21-W08 warning message
+- `services/opa/tests/architecture_r21_test.rego` (line 205) - test_component_wrong_location test
+- Any test using `contains()` to verify warning/error messages
+
+### How It Was Fixed
+
+**Before (INCORRECT):**
+```rego
+# Warning message (policy)
+msg := sprintf(
+    "WARNING [Architecture/R21]: Reusable component '%s' should be...",
+    [file.path]
+)
+
+# Test assertion
+test_component_wrong_location if {
+    result := architecture.warn with input as { ... }
+    contains(warning, "reusable component")  # ❌ Case mismatch
+}
+```
+
+**After (CORRECT):**
+```rego
+# Warning message (policy) - changed to lowercase
+msg := sprintf(
+    "WARNING [Architecture/R21]: reusable component '%s' should be...",
+    [file.path]
+)
+
+# Test assertion - now matches
+test_component_wrong_location if {
+    result := architecture.warn with input as { ... }
+    contains(warning, "reusable component")  # ✅ Case matches
+}
+```
+
+**Alternative Fix (if changing warning is not desired):**
+```rego
+# Could also fix test to be case-insensitive
+test_component_wrong_location if {
+    result := architecture.warn with input as { ... }
+    contains(lower(warning), "reusable component")  # ✅ Case-insensitive check
+}
+```
+
+### How to Prevent It in the Future
+
+1. **Standardize casing in warning messages:**
+   - Use lowercase for common terms (e.g., "reusable component", "deprecated path")
+   - Use title case only for proper nouns or specific terms
+   - Document casing conventions in style guide
+
+2. **Match test assertions to warning messages:**
+   - Copy exact strings from warning messages to test assertions
+   - Use case-sensitive matching by default
+   - Document when case-insensitive matching is needed
+
+3. **Use case-insensitive matching when appropriate:**
+   - Use `lower()` function: `contains(lower(warning), lower("Reusable"))`
+   - Or normalize both strings before comparison
+   - Document why case-insensitive matching is used
+
+4. **Code review checklist:**
+   - [ ] Test assertions match warning message casing
+   - [ ] Warning messages use consistent casing
+   - [ ] Case-insensitive matching documented if used
+
+5. **Testing strategy:**
+   - Test with exact string matching first
+   - Add case-insensitive tests if needed
+   - Verify both warning generation and test assertions
+
+### Similar Historical Issues
+- **TEST_SELECTOR_MISMATCH** - Related test assertion issues
+- **OPA_REGO_EMPTY_STRING_DETECTION** - Related string validation issues
+
+---
+
+**Last Updated:** 2025-11-23
