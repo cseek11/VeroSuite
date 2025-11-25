@@ -56,6 +56,12 @@ if os.getenv("DEBUG_PYTHON_PATH"):
 
 # Import directly from modules (bypass __init__.py to avoid import issues)
 # The path is set correctly, so we can import directly
+try:
+    from supabase import create_client
+except ImportError:
+    print("❌ Missing supabase-py package. Install with: pip install supabase", file=sys.stderr)
+    sys.exit(1)
+
 from veroscore_v3.scoring_engine import HybridScoringEngine
 from veroscore_v3.detection_functions import MasterDetector
 from logger_util import get_logger, get_or_create_trace_context
@@ -171,6 +177,22 @@ def main():
     detector = MasterDetector()
     detection_result = detector.detect_all(existing_files)
     
+    # Create Supabase client
+    supabase_url = os.getenv("SUPABASE_URL")
+    supabase_key = os.getenv("SUPABASE_SECRET_KEY")
+    
+    if not supabase_url or not supabase_key:
+        logger.error(
+            "Missing Supabase credentials",
+            operation="main",
+            pr_number=args.pr_number,
+            root_cause="SUPABASE_URL or SUPABASE_SECRET_KEY not set",
+            **trace_ctx
+        )
+        sys.exit(1)
+    
+    supabase = create_client(supabase_url, supabase_key)
+    
     # Run scoring
     logger.info(
         "Running scoring engine",
@@ -180,7 +202,7 @@ def main():
         **trace_ctx
     )
     
-    engine = HybridScoringEngine()
+    engine = HybridScoringEngine(supabase)
     
     # Get PR description for pipeline compliance check
     pr_description = ""
