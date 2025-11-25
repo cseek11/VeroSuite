@@ -11,34 +11,49 @@ import sys
 import argparse
 from pathlib import Path
 
-# Add scripts directory to path
-# PYTHONPATH should be set by GitHub Actions workflow
-# Fallback: Calculate from file location if PYTHONPATH not set
+# Add scripts directory to path BEFORE any imports
+# This must happen before importing veroscore_v3 modules
 import os
 
-# Check if PYTHONPATH is set and contains .cursor/scripts
-pythonpath_set = os.environ.get("PYTHONPATH", "")
-if ".cursor/scripts" not in pythonpath_set:
-    # Calculate path from file location
+# Get scripts directory from PYTHONPATH or calculate it
+scripts_dir_str = None
+if "PYTHONPATH" in os.environ:
+    # Extract .cursor/scripts path from PYTHONPATH
+    pythonpath_dirs = os.environ["PYTHONPATH"].split(os.pathsep)
+    for dir_path in pythonpath_dirs:
+        if ".cursor/scripts" in dir_path:
+            scripts_dir_str = dir_path.strip()
+            break
+
+# Fallback: Calculate from file location
+if not scripts_dir_str:
     scripts_dir = Path(__file__).parent.parent.parent / ".cursor" / "scripts"
     scripts_dir_str = str(scripts_dir.resolve() if scripts_dir.exists() else scripts_dir)
+
+# Ensure absolute path and add to sys.path
+if scripts_dir_str:
+    scripts_dir_path = Path(scripts_dir_str)
+    if not scripts_dir_path.is_absolute():
+        scripts_dir_path = scripts_dir_path.resolve()
+    scripts_dir_str = str(scripts_dir_path)
+    
+    # Add to sys.path if not already there (at the beginning)
     if scripts_dir_str not in sys.path:
         sys.path.insert(0, scripts_dir_str)
-        if os.getenv("DEBUG_PYTHON_PATH"):
-            print(f"DEBUG: Added calculated path: {scripts_dir_str}", file=sys.stderr)
 
 # Debug output
 if os.getenv("DEBUG_PYTHON_PATH"):
     print(f"DEBUG: PYTHONPATH={os.environ.get('PYTHONPATH', 'not set')}", file=sys.stderr)
+    print(f"DEBUG: scripts_dir_str={scripts_dir_str}", file=sys.stderr)
     print(f"DEBUG: sys.path[0:3]={sys.path[0:3]}", file=sys.stderr)
-    print(f"DEBUG: Checking for veroscore_v3...", file=sys.stderr)
-    import os as os_module
-    scripts_path = os_module.environ.get("PYTHONPATH", "").split(os.pathsep)[0] if os_module.environ.get("PYTHONPATH") else None
-    if scripts_path:
-        veroscore_path = os_module.path.join(scripts_path, "veroscore_v3")
-        print(f"DEBUG: veroscore_v3 path would be: {veroscore_path}", file=sys.stderr)
-        print(f"DEBUG: veroscore_v3 exists: {os_module.path.exists(veroscore_path) if scripts_path else False}", file=sys.stderr)
+    veroscore_path = Path(scripts_dir_str) / "veroscore_v3"
+    print(f"DEBUG: veroscore_v3 path={veroscore_path}", file=sys.stderr)
+    print(f"DEBUG: veroscore_v3 exists={veroscore_path.exists()}", file=sys.stderr)
+    if veroscore_path.exists():
+        init_file = veroscore_path / "__init__.py"
+        print(f"DEBUG: __init__.py exists={init_file.exists()}", file=sys.stderr)
 
+# Now import - path should be set
 from veroscore_v3.scoring_engine import HybridScoringEngine
 from veroscore_v3.detection_functions import MasterDetector
 from logger_util import get_logger, get_or_create_trace_context
