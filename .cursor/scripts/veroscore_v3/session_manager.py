@@ -284,6 +284,46 @@ class SessionManager:
                 session_id=session_id
             )
     
+    def _update_session(self, session_id: str, update_data: Dict[str, Any]):
+        """
+        Update session with arbitrary data.
+        
+        Args:
+            session_id: Session ID to update
+            update_data: Dictionary of fields to update
+        """
+        try:
+            trace_ctx = get_or_create_trace_context()
+            
+            # Add last_activity timestamp if not present
+            if "last_activity" not in update_data:
+                update_data["last_activity"] = datetime.now(timezone.utc).isoformat()
+            
+            # Use .schema() method for direct access
+            if hasattr(self.supabase, 'schema'):
+                result = self.supabase.schema("veroscore").table("sessions").update(update_data).eq("session_id", session_id).execute()
+            else:
+                result = self.supabase.table("veroscore.sessions").update(update_data).eq("session_id", session_id).execute()
+            
+            logger.info(
+                "Updated session",
+                operation="_update_session",
+                session_id=session_id,
+                update_fields=list(update_data.keys()),
+                **trace_ctx
+            )
+            
+        except Exception as e:
+            logger.error(
+                "Failed to update session",
+                operation="_update_session",
+                error_code="SESSION_UPDATE_FAILED",
+                root_cause=str(e),
+                session_id=session_id,
+                update_data=update_data
+            )
+            raise
+    
     def _get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
         """Get session by ID."""
         try:
