@@ -1914,4 +1914,223 @@ result = supabase.schema("veroscore").table("sessions").select("*").execute()
 
 ---
 
-**Last Updated:** 2025-11-24
+## PYTHON_PACKAGE_INIT_EAGER_IMPORTS - 2025-11-25
+
+### Summary
+GitHub Actions workflow failed with `ModuleNotFoundError` when importing `veroscore_v3.scoring_engine` due to eager imports in `__init__.py` executing during package initialization. The eager imports caused module resolution failures in the CI/CD environment even though files existed locally.
+
+### Root Cause
+- `veroscore_v3/__init__.py` contained eager imports (lines 13-42) that executed during package initialization
+- When `score_pr.py` imported `veroscore_v3.scoring_engine`, Python first loaded `veroscore_v3/__init__.py`
+- During `__init__.py` execution, it attempted to import all submodules eagerly
+- The import of `enforcement_pipeline_section` failed during package initialization
+- This occurred even though the file existed in the directory
+
+### Triggering Conditions
+- Package `__init__.py` contains `from .module import ...` statements
+- Module is imported directly (e.g., `from package.submodule import Class`)
+- Python must initialize package before importing submodule
+- CI/CD environment has different module resolution context than local
+- Circular dependencies exist between modules imported in `__init__.py`
+
+### Relevant Code/Modules
+- `.cursor/scripts/veroscore_v3/__init__.py` - Fixed by removing eager imports
+- `.github/scripts/score_pr.py` - Uses direct imports (correct pattern)
+- Any Python package with eager imports in `__init__.py`
+- CI/CD workflows importing Python packages
+
+### How It Was Fixed
+1. **Removed eager imports:** Removed all `from .module import ...` statements from `__init__.py`
+2. **Kept documentation:** Maintained `__all__` list for documentation purposes
+3. **Added lazy loading:** Implemented `__getattr__` for backward compatibility (optional)
+4. **Updated import strategy:** Changed consuming code to use direct imports from submodules
+
+**Example Fix:**
+```python
+# ❌ WRONG: Eager imports in __init__.py
+from .enforcement_pipeline_section import EnforcementPipelineSection
+from .detection_functions import ViolationResult, MasterDetector
+from .scoring_engine import HybridScoringEngine
+
+# ✅ CORRECT: No eager imports, use direct imports
+# __init__.py contains only:
+__version__ = "3.0.0"
+__all__ = [...]  # Documentation only
+
+# Consuming code uses direct imports:
+from veroscore_v3.scoring_engine import HybridScoringEngine
+from veroscore_v3.detection_functions import MasterDetector
+```
+
+### Prevention Strategies
+1. **Avoid eager imports in `__init__.py`:**
+   - Only import what's absolutely necessary for package initialization
+   - Use `__all__` for documentation, not for actual imports
+   - Prefer direct imports from submodules in consuming code
+
+2. **Test package imports in CI:**
+   - Add a test that imports all modules in a clean environment
+   - Verify no circular dependencies exist
+   - Ensure package initialization doesn't fail
+
+3. **Use lazy imports when needed:**
+   - Implement `__getattr__` for backward compatibility
+   - Only load modules when actually requested
+   - Avoid side effects during package initialization
+
+### Similar Historical Issues
+- **PYTHON_RELATIVE_IMPORT_FAILURE** - Similar pattern of import failures in CI/CD
+- **Package initialization issues** in CI/CD environments
+- **Circular dependency** problems with eager imports
+
+---
+
+## PYTHON_RELATIVE_IMPORT_FAILURE - 2025-11-25
+
+### Summary
+GitHub Actions workflow failed with `ModuleNotFoundError` when `scoring_engine.py` attempted to import `detection_functions.py` using relative imports. The try/except fallback pattern failed because both relative and absolute imports failed when the target file was not committed to the repository.
+
+### Root Cause
+- `scoring_engine.py` used a try/except pattern for relative imports
+- First attempted relative import: `from .detection_functions import ViolationResult`
+- Relative import failed (package context not fully established in CI/CD)
+- Fallback to absolute import also failed: `from veroscore_v3.detection_functions import ViolationResult`
+- Both imports failed because `detection_functions.py` was not committed to repository
+
+### Triggering Conditions
+- Module uses relative imports (`from .module import ...`)
+- Module is imported directly (not through package)
+- CI/CD environment has different module resolution context
+- Target module file is not committed to repository
+- Package initialization context is not fully established
+
+### Relevant Code/Modules
+- `.cursor/scripts/veroscore_v3/scoring_engine.py` - Fixed by using absolute imports only
+- `.github/scripts/score_pr.py` - Uses direct imports (correct pattern)
+- Any Python module using relative imports in CI/CD
+- Modules imported directly without package context
+
+### How It Was Fixed
+1. **Removed try/except fallback:** Removed relative import fallback pattern
+2. **Changed to absolute imports:** Use absolute imports only when `PYTHONPATH` is set correctly
+3. **Simplified import logic:** Removed complex fallback logic
+
+**Example Fix:**
+```python
+# ❌ WRONG: Relative import with fallback
+try:
+    from .detection_functions import ViolationResult
+except ImportError:
+    from veroscore_v3.detection_functions import ViolationResult
+
+# ✅ CORRECT: Absolute import only
+from veroscore_v3.detection_functions import ViolationResult
+```
+
+### Prevention Strategies
+1. **Use absolute imports when PYTHONPATH is set:**
+   - Rely on `PYTHONPATH` environment variable
+   - Avoid try/except fallback patterns for imports
+   - Ensure consistent import strategy across codebase
+
+2. **Verify files are committed:**
+   - Always check `git status` before pushing
+   - Commit all files required by workflows
+   - Verify files are tracked with `git ls-files`
+
+3. **Test imports in CI:**
+   - Add import tests that verify all modules can be imported
+   - Test in clean environment similar to CI/CD
+   - Verify no missing files in repository
+
+### Similar Historical Issues
+- **PYTHON_PACKAGE_INIT_EAGER_IMPORTS** - Similar pattern of import failures in CI/CD
+- **PYTHON_PACKAGE_MISSING_FILES_IN_REPO** - Missing files cause import failures
+- **Module resolution issues** in CI/CD environments
+
+---
+
+## PYTHON_PACKAGE_MISSING_FILES_IN_REPO - 2025-11-25
+
+### Summary
+GitHub Actions workflow failed with `ModuleNotFoundError` because critical Python modules were not committed to the repository. Files existed locally but were untracked (`??`) in git, causing imports to fail when GitHub Actions checked out only committed code.
+
+### Root Cause
+- Critical Python modules were created/modified locally but never committed
+- GitHub Actions checks out only committed code from repository
+- Import statements referenced files that didn't exist in checked-out code
+- Files existed in working directory but were untracked in git
+- `git status` showed files as untracked (`??`) or modified (`M`)
+
+### Triggering Conditions
+- Files created/modified locally but not committed
+- Import statements reference uncommitted files
+- CI/CD workflow checks out repository code
+- Files are untracked (`??`) or modified (`M`) in git
+- Workflow runs successfully locally but fails in CI/CD
+
+### Relevant Code/Modules
+- `.cursor/scripts/veroscore_v3/detection_functions.py` - Not committed (CRITICAL)
+- `.cursor/scripts/veroscore_v3/enforcement_pipeline_section.py` - Not committed
+- `.cursor/scripts/veroscore_v3/idempotency_manager.py` - Not committed
+- `.cursor/scripts/veroscore_v3/pr_creator.py` - Not committed
+- Any Python module imported by workflow scripts
+
+### How It Was Fixed
+1. **Identify uncommitted files:** Run `git status` to find untracked files
+2. **Commit all required files:** Add all files needed by workflow
+3. **Verify files are tracked:** Use `git ls-files` to confirm files are in repository
+4. **Push and test:** Push changes and monitor workflow
+
+**Example Fix:**
+```bash
+# Identify uncommitted files
+git status --short
+
+# Commit all required files
+git add .cursor/scripts/veroscore_v3/
+git add .cursor/scripts/*.py
+
+# Verify files are tracked
+git ls-files .cursor/scripts/veroscore_v3/ | grep detection_functions
+
+# Commit and push
+git commit -m "feat: Add Phase 4-6 implementation files"
+git push
+```
+
+### Prevention Strategies
+1. **Always check `git status` before pushing:**
+   - Run `git status` before every push
+   - Verify all required files are committed
+   - Use pre-commit hooks to verify required files are tracked
+
+2. **Commit all files required by workflows:**
+   - Review workflow scripts to identify imported modules
+   - Commit all Python modules referenced by imports
+   - Include test files and utilities used by workflows
+
+3. **Test workflows locally:**
+   - Use `act` or similar tools to test workflows locally
+   - Verify workflow can find all required files
+   - Test in clean environment similar to CI/CD
+
+4. **Use `.gitignore` appropriately:**
+   - Don't ignore files required by workflows
+   - Only ignore build artifacts, cache files, etc.
+   - Review `.gitignore` regularly
+
+### Detection
+- `ModuleNotFoundError` in CI/CD but works locally
+- File exists in working directory but not in repository
+- `git status` shows untracked files (`??`)
+- `git ls-files` doesn't show the file
+
+### Similar Historical Issues
+- **PYTHON_PACKAGE_INIT_EAGER_IMPORTS** - Import failures in CI/CD
+- **PYTHON_RELATIVE_IMPORT_FAILURE** - Import failures due to missing context
+- **Missing files in repository** causing CI/CD failures
+
+---
+
+**Last Updated:** 2025-11-25
