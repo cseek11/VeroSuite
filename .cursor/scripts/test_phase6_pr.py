@@ -58,8 +58,38 @@ def create_test_session():
     
     # 1. Create a well-structured TypeScript component with all best practices
     component_file = test_dir / "UserProfileCard.tsx"
-    component_content = """/**
- * UserProfileCard - Displays user profile information with proper security and validation.
+    utility_content = """/**
+ * formatCurrency - Formats a number as currency string.
+ * 
+ * This is a pure utility function with no external dependencies,
+ * no database access, and no security concerns.
+ * 
+ * @param amount - The numeric amount to format
+ * @param currency - Currency code (default: 'USD')
+ * @param locale - Locale string (default: 'en-US')
+ * @returns Formatted currency string
+ * 
+ * @example
+ * ```typescript
+ * formatCurrency(1234.56) // "$1,234.56"
+ * formatCurrency(1234.56, 'EUR', 'de-DE') // "1.234,56 €"
+ * ```
+ */
+export function formatCurrency(
+  amount: number,
+  currency: string = 'USD',
+  locale: string = 'en-US'
+): string {
+  if (typeof amount !== 'number' || isNaN(amount)) {
+    throw new Error('Amount must be a valid number');
+  }
+  
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency
+  }).format(amount);
+}
+"""
  * 
  * Features:
  * - Type-safe props with TypeScript
@@ -228,9 +258,9 @@ export default UserProfileCard;
 """
     
     # 2. Create comprehensive test file
-    test_file = test_dir / "UserProfileCard.test.tsx"
-    test_content = """/**
- * Tests for UserProfileCard component
+    utility_test_file = utils_test_dir / "formatCurrency.test.ts"
+    utility_test_content = """/**
+ * Tests for formatCurrency utility function
  * 
  * Coverage:
  * - Component rendering
@@ -240,152 +270,50 @@ export default UserProfileCard;
  * - Edge cases
  */
 
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { UserProfileCard } from './UserProfileCard';
+import { formatCurrency } from '../formatCurrency';
 
-describe('UserProfileCard', () => {
-  const defaultProps = {
-    userId: 'user-123',
-    name: 'John Doe',
-    email: 'john@example.com'
-  };
-
-  describe('Rendering', () => {
-    it('should render user information correctly', () => {
-      render(<UserProfileCard {...defaultProps} />);
-      
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.getByText('john@example.com')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /edit profile/i })).toBeInTheDocument();
+describe('formatCurrency', () => {
+  describe('Basic formatting', () => {
+    it('should format USD currency correctly', () => {
+      expect(formatCurrency(1234.56)).toBe('$1,234.56');
+      expect(formatCurrency(0)).toBe('$0.00');
+      expect(formatCurrency(1000000)).toBe('$1,000,000.00');
     });
 
-    it('should apply custom className', () => {
-      const { container } = render(
-        <UserProfileCard {...defaultProps} className="custom-class" />
-      );
-      
-      expect(container.querySelector('.user-profile-card.custom-class')).toBeInTheDocument();
+    it('should format EUR currency correctly', () => {
+      expect(formatCurrency(1234.56, 'EUR')).toBe('€1,234.56');
+    });
+
+    it('should format with different locales', () => {
+      expect(formatCurrency(1234.56, 'EUR', 'de-DE')).toBe('1.234,56 €');
+      expect(formatCurrency(1234.56, 'JPY', 'ja-JP')).toBe('¥1,235');
     });
   });
 
-  describe('Editing Mode', () => {
-    it('should switch to edit mode when Edit button is clicked', () => {
-      render(<UserProfileCard {...defaultProps} />);
-      
-      const editButton = screen.getByRole('button', { name: /edit profile/i });
-      fireEvent.click(editButton);
-      
-      expect(screen.getByLabelText(/name:/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/email:/i)).toBeInTheDocument();
+  describe('Edge cases', () => {
+    it('should handle negative numbers', () => {
+      expect(formatCurrency(-1234.56)).toBe('-$1,234.56');
     });
 
-    it('should pre-fill form fields with current values', () => {
-      render(<UserProfileCard {...defaultProps} />);
-      
-      fireEvent.click(screen.getByRole('button', { name: /edit profile/i }));
-      
-      const nameInput = screen.getByLabelText(/name:/i) as HTMLInputElement;
-      const emailInput = screen.getByLabelText(/email:/i) as HTMLInputElement;
-      
-      expect(nameInput.value).toBe('John Doe');
-      expect(emailInput.value).toBe('john@example.com');
+    it('should handle very large numbers', () => {
+      expect(formatCurrency(999999999.99)).toBe('$999,999,999.99');
+    });
+
+    it('should handle very small numbers', () => {
+      expect(formatCurrency(0.01)).toBe('$0.01');
+    });
+
+    it('should throw error for invalid input', () => {
+      expect(() => formatCurrency(NaN)).toThrow('Amount must be a valid number');
+      expect(() => formatCurrency('invalid' as any)).toThrow('Amount must be a valid number');
     });
   });
 
-  describe('Form Validation', () => {
-    it('should show error when name is empty', async () => {
-      render(<UserProfileCard {...defaultProps} onUpdate={jest.fn()} />);
-      
-      fireEvent.click(screen.getByRole('button', { name: /edit profile/i }));
-      const nameInput = screen.getByLabelText(/name:/i);
-      fireEvent.change(nameInput, { target: { value: '' } });
-      fireEvent.click(screen.getByRole('button', { name: /save/i }));
-      
-      await waitFor(() => {
-        expect(screen.getByText('Name is required')).toBeInTheDocument();
-      });
-    });
-
-    it('should show error for invalid email format', async () => {
-      render(<UserProfileCard {...defaultProps} onUpdate={jest.fn()} />);
-      
-      fireEvent.click(screen.getByRole('button', { name: /edit profile/i }));
-      const emailInput = screen.getByLabelText(/email:/i);
-      fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
-      fireEvent.click(screen.getByRole('button', { name: /save/i }));
-      
-      await waitFor(() => {
-        expect(screen.getByText('Invalid email format')).toBeInTheDocument();
-      });
-    });
-
-    it('should accept valid email formats', async () => {
-      const onUpdate = jest.fn().mockResolvedValue(undefined);
-      render(<UserProfileCard {...defaultProps} onUpdate={onUpdate} />);
-      
-      fireEvent.click(screen.getByRole('button', { name: /edit profile/i }));
-      const emailInput = screen.getByLabelText(/email:/i);
-      fireEvent.change(emailInput, { target: { value: 'newemail@example.com' } });
-      fireEvent.click(screen.getByRole('button', { name: /save/i }));
-      
-      await waitFor(() => {
-        expect(onUpdate).toHaveBeenCalledWith('user-123', {
-          name: 'John Doe',
-          email: 'newemail@example.com'
-        });
-      });
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('should display error message when update fails', async () => {
-      const errorMessage = 'Network error';
-      const onUpdate = jest.fn().mockRejectedValue(new Error(errorMessage));
-      render(<UserProfileCard {...defaultProps} onUpdate={onUpdate} />);
-      
-      fireEvent.click(screen.getByRole('button', { name: /edit profile/i }));
-      fireEvent.click(screen.getByRole('button', { name: /save/i }));
-      
-      await waitFor(() => {
-        expect(screen.getByText(errorMessage)).toBeInTheDocument();
-      });
-    });
-
-    it('should handle update without onUpdate callback', () => {
-      render(<UserProfileCard {...defaultProps} />);
-      
-      fireEvent.click(screen.getByRole('button', { name: /edit profile/i }));
-      fireEvent.click(screen.getByRole('button', { name: /save/i }));
-      
-      // Should exit edit mode without error
-      expect(screen.queryByLabelText(/name:/i)).not.toBeInTheDocument();
-    });
-  });
-
-  describe('Edge Cases', () => {
-    it('should handle very long names', () => {
-      const longName = 'A'.repeat(200);
-      render(<UserProfileCard {...defaultProps} name={longName} />);
-      
-      expect(screen.getByText(longName)).toBeInTheDocument();
-    });
-
-    it('should trim whitespace from inputs', async () => {
-      const onUpdate = jest.fn().mockResolvedValue(undefined);
-      render(<UserProfileCard {...defaultProps} onUpdate={onUpdate} />);
-      
-      fireEvent.click(screen.getByRole('button', { name: /edit profile/i }));
-      const nameInput = screen.getByLabelText(/name:/i);
-      fireEvent.change(nameInput, { target: { value: '  Trimmed Name  ' } });
-      fireEvent.click(screen.getByRole('button', { name: /save/i }));
-      
-      await waitFor(() => {
-        expect(onUpdate).toHaveBeenCalledWith('user-123', {
-          name: 'Trimmed Name',
-          email: expect.any(String)
-        });
-      });
+  describe('Currency codes', () => {
+    it('should handle various currency codes', () => {
+      expect(formatCurrency(100, 'GBP')).toContain('£');
+      expect(formatCurrency(100, 'JPY')).toContain('¥');
+      expect(formatCurrency(100, 'CNY')).toContain('¥');
     });
   });
 });
@@ -393,105 +321,107 @@ describe('UserProfileCard', () => {
     
     # 3. Create documentation file
     doc_file = test_dir / "README.md"
-    doc_content = """# UserProfileCard Component
+    doc_content = """# formatCurrency Utility
 
 **Last Updated:** 2025-11-25
 
 ## Overview
 
-The `UserProfileCard` component provides a reusable, accessible, and type-safe way to display and edit user profile information in the VeroField application.
+The `formatCurrency` utility function provides a simple, pure way to format numbers as currency strings using the Intl.NumberFormat API.
 
 ## Features
 
-- ✅ **Type Safety**: Full TypeScript support with proper interfaces
-- ✅ **Input Validation**: Email format validation and required field checks
-- ✅ **Error Handling**: Comprehensive error handling with user-friendly messages
-- ✅ **Accessibility**: ARIA labels and semantic HTML
-- ✅ **Responsive Design**: Works on all screen sizes
-- ✅ **Test Coverage**: Comprehensive test suite with edge cases
+- ✅ **Pure Function**: No side effects, no external dependencies
+- ✅ **Type Safe**: Full TypeScript support
+- ✅ **Locale Support**: Supports any locale and currency code
+- ✅ **Error Handling**: Validates input and throws descriptive errors
+- ✅ **Test Coverage**: Comprehensive test suite
 
 ## Usage
 
-```tsx
-import { UserProfileCard } from '@/components/UserProfileCard';
+```typescript
+import { formatCurrency } from '@verofield/common/utils';
 
-function ProfilePage() {
-  const handleUpdate = async (userId: string, updates: ProfileUpdates) => {
-    // Update user profile via API
-    await updateUserProfile(userId, updates);
-  };
+// Basic usage
+const price = formatCurrency(1234.56); // "$1,234.56"
 
-  return (
-    <UserProfileCard
-      userId="user-123"
-      name="John Doe"
-      email="john@example.com"
-      onUpdate={handleUpdate}
-    />
-  );
-}
+// With currency
+const euro = formatCurrency(1234.56, 'EUR'); // "€1,234.56"
+
+// With locale
+const german = formatCurrency(1234.56, 'EUR', 'de-DE'); // "1.234,56 €"
 ```
 
-## Props
+## API
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `userId` | `string` | Yes | Unique user identifier |
-| `name` | `string` | Yes | User's full name |
-| `email` | `string` | Yes | User's email address |
-| `onUpdate` | `function` | No | Callback when profile is updated |
-| `className` | `string` | No | Additional CSS classes |
+### `formatCurrency(amount, currency?, locale?)`
+
+**Parameters:**
+- `amount` (number, required): The numeric amount to format
+- `currency` (string, optional): Currency code (default: 'USD')
+- `locale` (string, optional): Locale string (default: 'en-US')
+
+**Returns:** Formatted currency string
+
+**Throws:** Error if amount is not a valid number
+
+## Examples
+
+```typescript
+formatCurrency(1234.56)              // "$1,234.56"
+formatCurrency(1234.56, 'EUR')       // "€1,234.56"
+formatCurrency(1234.56, 'EUR', 'de-DE') // "1.234,56 €"
+formatCurrency(-100)                 // "-$100.00"
+formatCurrency(0)                     // "$0.00"
+```
 
 ## Testing
 
 Run tests with:
 ```bash
-npm test UserProfileCard.test.tsx
+npm test formatCurrency.test.ts
 ```
 
 Test coverage includes:
-- Component rendering
-- User interactions
-- Form validation
+- Basic formatting
+- Different currencies
+- Different locales
+- Edge cases (negative, large, small numbers)
 - Error handling
-- Edge cases
 
 ## Architecture
 
-- **Location**: `frontend/src/components/ui/UserProfileCard.tsx`
-- **Tests**: `frontend/src/components/ui/__tests__/UserProfileCard.test.tsx`
-- **Dependencies**: React, TypeScript
+- **Location**: `libs/common/src/utils/formatCurrency.ts`
+- **Tests**: `libs/common/src/utils/__tests__/formatCurrency.test.ts`
+- **Dependencies**: None (pure TypeScript)
 """
     
     # Write files and create changes
     changes = []
     
-    # Component file (in correct frontend location)
-    component_file = component_dir / "UserProfileCard.tsx"
-    component_file.write_text(component_content, encoding='utf-8')
+    # Utility file (in correct shared libs location)
+    utility_file.write_text(utility_content, encoding='utf-8')
     changes.append(FileChange(
-        path=str(component_file.relative_to(project_root)),
+        path=str(utility_file.relative_to(project_root)),
         change_type="added",
         timestamp=datetime.now(timezone.utc).isoformat(),
-        lines_added=len(component_content.split('\n')),
+        lines_added=len(utility_content.split('\n')),
         lines_removed=0
     ))
-    print(f"  ✅ Created {component_file.relative_to(project_root)}")
+    print(f"  ✅ Created {utility_file.relative_to(project_root)}")
     
     # Test file (in correct test location)
-    test_file = test_dir / "UserProfileCard.test.tsx"
-    test_file.write_text(test_content, encoding='utf-8')
+    utility_test_file.write_text(utility_test_content, encoding='utf-8')
     changes.append(FileChange(
-        path=str(test_file.relative_to(project_root)),
+        path=str(utility_test_file.relative_to(project_root)),
         change_type="added",
         timestamp=datetime.now(timezone.utc).isoformat(),
-        lines_added=len(test_content.split('\n')),
+        lines_added=len(utility_test_content.split('\n')),
         lines_removed=0
     ))
-    print(f"  ✅ Created {test_file.relative_to(project_root)}")
+    print(f"  ✅ Created {utility_test_file.relative_to(project_root)}")
     
-    # Documentation file (in component directory)
-    doc_file = component_dir / "UserProfileCard.md"
+    # Documentation file
     doc_file.write_text(doc_content, encoding='utf-8')
     changes.append(FileChange(
         path=str(doc_file.relative_to(project_root)),
