@@ -261,6 +261,7 @@ def main():
         sys.exit(1)
     
     # Persist score to Supabase
+    print("::notice::Persisting score to Supabase...", flush=True)
     logger.info(
         "Persisting score to Supabase",
         operation="main",
@@ -270,6 +271,7 @@ def main():
     
     persist_success = engine.persist_score(result)
     if not persist_success:
+        print("::warning::Failed to persist score to Supabase (continuing anyway)", flush=True)
         logger.warn(
             "Failed to persist score to Supabase (continuing anyway)",
             operation="main",
@@ -277,6 +279,7 @@ def main():
             **trace_ctx
         )
     else:
+        print(f"::notice::Score persisted successfully: {result.stabilized_score:.2f}", flush=True)
         logger.info(
             "Score persisted successfully",
             operation="main",
