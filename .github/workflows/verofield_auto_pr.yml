@@ -171,8 +171,12 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PYTHONPATH: ${{ github.workspace }}/.cursor/scripts
         run: |
+          export PYTHONPATH="${{ github.workspace }}/.cursor/scripts:$PYTHONPATH"
+          export DEBUG_PYTHON_PATH=1
+          echo "PYTHONPATH: $PYTHONPATH"
+          echo "Workspace: ${{ github.workspace }}"
+          ls -la "${{ github.workspace }}/.cursor/scripts/veroscore_v3/" || echo "Directory not found"
           python .github/scripts/score_pr.py \
             --pr-number "$PR_NUMBER" \
             --session-id "$SESSION_ID" \

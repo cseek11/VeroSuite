@@ -14,8 +14,16 @@ from pathlib import Path
 # Add scripts directory to path
 # .github/scripts/score_pr.py -> .github/scripts/ -> .github/ -> repo root -> .cursor/scripts
 scripts_dir = Path(__file__).parent.parent.parent / ".cursor" / "scripts"
-if str(scripts_dir) not in sys.path:
-    sys.path.insert(0, str(scripts_dir))
+scripts_dir_str = str(scripts_dir.resolve() if scripts_dir.exists() else scripts_dir)
+if scripts_dir_str not in sys.path:
+    sys.path.insert(0, scripts_dir_str)
+
+# Debug: Print path for troubleshooting
+import os
+if os.getenv("DEBUG_PYTHON_PATH"):
+    print(f"DEBUG: Python path: {sys.path}")
+    print(f"DEBUG: Scripts dir: {scripts_dir_str}")
+    print(f"DEBUG: Scripts dir exists: {Path(scripts_dir_str).exists()}")
 
 from veroscore_v3.scoring_engine import HybridScoringEngine
 from veroscore_v3.detection_functions import MasterDetector
