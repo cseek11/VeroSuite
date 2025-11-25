@@ -26,7 +26,14 @@ if str(scripts_dir) not in sys.path:
     sys.path.insert(0, str(scripts_dir))
 
 from logger_util import get_logger, get_or_create_trace_context
-from .detection_functions import ViolationResult
+
+# Use absolute import to avoid package context issues
+# The path should be set correctly by the caller
+try:
+    from .detection_functions import ViolationResult
+except ImportError:
+    # Fallback to absolute import if relative import fails
+    from veroscore_v3.detection_functions import ViolationResult
 
 logger = get_logger(context="ScoringEngine")
 
