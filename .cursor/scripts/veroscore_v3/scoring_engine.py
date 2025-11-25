@@ -2,6 +2,8 @@
 """
 Hybrid Scoring Engine v2.1 for VeroScore V3
 
+Test: Score persistence verification
+
 Implements comprehensive PR scoring with:
 - File-level analysis (code quality, tests, docs, architecture, security)
 - Violation detection integration (from detection_functions.py)
