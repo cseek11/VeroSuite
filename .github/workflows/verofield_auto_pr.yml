@@ -74,10 +74,27 @@ jobs:
           AUTHOR=$(jq -r '.author // "unknown"' context.json)
           BRANCH=$(jq -r '.branch // ""' context.json)
           
-          # Set outputs (escape special characters if needed)
-          echo "session_id=$SESSION_ID" >> "$GITHUB_OUTPUT"
-          echo "author=$AUTHOR" >> "$GITHUB_OUTPUT"
-          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          # Set outputs using multiline format for safety
+          {
+            echo "session_id<<EOF"
+            echo -n "$SESSION_ID"
+            echo ""
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          
+          {
+            echo "author<<EOF"
+            echo -n "$AUTHOR"
+            echo ""
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          
+          {
+            echo "branch<<EOF"
+            echo -n "$BRANCH"
+            echo ""
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
           
           # Check if this is an auto-PR (has session ID)
           if [ -n "$SESSION_ID" ] && [ "$SESSION_ID" != "null" ] && [ "$SESSION_ID" != "" ]; then
