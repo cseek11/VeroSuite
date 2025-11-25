@@ -49,7 +49,11 @@ def create_test_session():
     print(f"✅ Created session: {session_id}")
     
     # Create high-quality test files that should pass scoring
-    test_dir = project_root / ".cursor" / "scripts" / "test_veroscore_pass"
+    # Place in correct frontend location to avoid architecture violations
+    component_dir = project_root / "frontend" / "src" / "components" / "ui"
+    component_dir.mkdir(parents=True, exist_ok=True)
+    
+    test_dir = project_root / "frontend" / "src" / "components" / "ui" / "__tests__"
     test_dir.mkdir(parents=True, exist_ok=True)
     
     # 1. Create a well-structured TypeScript component with all best practices
@@ -462,7 +466,8 @@ Test coverage includes:
     # Write files and create changes
     changes = []
     
-    # Component file
+    # Component file (in correct frontend location)
+    component_file = component_dir / "UserProfileCard.tsx"
     component_file.write_text(component_content, encoding='utf-8')
     changes.append(FileChange(
         path=str(component_file.relative_to(project_root)),
@@ -473,7 +478,8 @@ Test coverage includes:
     ))
     print(f"  ✅ Created {component_file.relative_to(project_root)}")
     
-    # Test file
+    # Test file (in correct test location)
+    test_file = test_dir / "UserProfileCard.test.tsx"
     test_file.write_text(test_content, encoding='utf-8')
     changes.append(FileChange(
         path=str(test_file.relative_to(project_root)),
@@ -484,7 +490,8 @@ Test coverage includes:
     ))
     print(f"  ✅ Created {test_file.relative_to(project_root)}")
     
-    # Documentation file
+    # Documentation file (in component directory)
+    doc_file = component_dir / "UserProfileCard.md"
     doc_file.write_text(doc_content, encoding='utf-8')
     changes.append(FileChange(
         path=str(doc_file.relative_to(project_root)),
