@@ -1,0 +1,379 @@
+name: VeroField Auto-PR V3
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to process (optional)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  extract-context:
+    name: Extract Session Context
+    runs-on: ubuntu-latest
+    outputs:
+      session_id: ${{ steps.extract.outputs.session_id }}
+      author: ${{ steps.extract.outputs.author }}
+      branch: ${{ steps.extract.outputs.branch }}
+      should_process: ${{ steps.extract.outputs.should_process }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+      
+      - name: Setup GitHub CLI
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+        continue-on-error: true
+      
+      - name: Get PR number
+        id: pr
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [ -n "${{ github.event.inputs.pr_number }}" ]; then
+              echo "number=${{ github.event.inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+            else
+              PR_NUM=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '.[0].number' || echo "")
+              if [ -z "$PR_NUM" ]; then
+                echo "Error: No PR number provided" >&2
+                exit 1
+              fi
+              echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+      
+      - name: Extract context
+        id: extract
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python .github/scripts/extract_context.py --pr-number "$PR_NUMBER" > context.json
+          
+          SESSION_ID=$(jq -r '.session_id // ""' context.json)
+          AUTHOR=$(jq -r '.author // "unknown"' context.json)
+          BRANCH=$(jq -r '.branch // ""' context.json)
+          
+          # Set outputs using multiline format for safety
+          {
+            echo "session_id<<EOF"
+            echo -n "$SESSION_ID"
+            echo ""
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          
+          {
+            echo "author<<EOF"
+            echo -n "$AUTHOR"
+            echo ""
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          
+          {
+            echo "branch<<EOF"
+            echo -n "$BRANCH"
+            echo ""
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          
+          # Check if this is an auto-PR (has session ID)
+          if [ -n "$SESSION_ID" ] && [ "$SESSION_ID" != "null" ] && [ "$SESSION_ID" != "" ]; then
+            echo "should_process=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Auto-PR detected - Session: $SESSION_ID"
+          else
+            echo "should_process=false" >> "$GITHUB_OUTPUT"
+            echo "ℹ️ Regular PR - skipping VeroScore V3 processing"
+          fi
+      
+      - name: Output context
+        if: steps.extract.outputs.should_process == 'true'
+        run: |
+          echo "Session ID: ${{ steps.extract.outputs.session_id }}"
+          echo "Author: ${{ steps.extract.outputs.author }}"
+          echo "Branch: ${{ steps.extract.outputs.branch }}"
+
+  score-pr:
+    name: Score PR
+    needs: extract-context
+    if: needs.extract-context.outputs.should_process == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      veroscore: ${{ steps.score.outputs.veroscore }}
+      decision: ${{ steps.score.outputs.decision }}
+      raw_score: ${{ steps.score.outputs.raw_score }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install supabase pyyaml
+      
+      - name: Setup GitHub CLI
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+        continue-on-error: true
+      
+      - name: Get PR number
+        id: pr
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [ -n "${{ github.event.inputs.pr_number }}" ]; then
+              echo "number=${{ github.event.inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+            else
+              PR_NUM=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '.[0].number' || echo "")
+              if [ -z "$PR_NUM" ]; then
+                echo "Error: No PR number provided" >&2
+                exit 1
+              fi
+              echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+      
+      - name: Score PR
+        id: score
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          SESSION_ID: ${{ needs.extract-context.outputs.session_id }}
+          REPOSITORY: ${{ github.repository }}
+          AUTHOR: ${{ needs.extract-context.outputs.author }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export PYTHONPATH="${{ github.workspace }}/.cursor/scripts:$PYTHONPATH"
+          export DEBUG_PYTHON_PATH=1
+          echo "PYTHONPATH: $PYTHONPATH"
+          echo "Workspace: ${{ github.workspace }}"
+          ls -la "${{ github.workspace }}/.cursor/scripts/veroscore_v3/" || echo "Directory not found"
+          python .github/scripts/score_pr.py \
+            --pr-number "$PR_NUMBER" \
+            --session-id "$SESSION_ID" \
+            --repository "$REPOSITORY" \
+            --author "$AUTHOR" > score_output.txt
+          
+          VEROSCORE=$(grep "^VEROSCORE=" score_output.txt | cut -d'=' -f2)
+          DECISION=$(grep "^DECISION=" score_output.txt | cut -d'=' -f2)
+          RAW_SCORE=$(grep "^RAW_SCORE=" score_output.txt | cut -d'=' -f2)
+          
+          echo "veroscore=$VEROSCORE" >> "$GITHUB_OUTPUT"
+          echo "decision=$DECISION" >> "$GITHUB_OUTPUT"
+          echo "raw_score=$RAW_SCORE" >> "$GITHUB_OUTPUT"
+          
+          echo "VeroScore: $VEROSCORE"
+          echo "Decision: $DECISION"
+          echo "Raw Score: $RAW_SCORE"
+      
+      - name: Upload score results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: veroscore-results
+          path: score_output.txt
+          retention-days: 7
+
+  enforce-decision:
+    name: Enforce Decision
+    needs: [extract-context, score-pr]
+    if: needs.extract-context.outputs.should_process == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Setup GitHub CLI
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+        continue-on-error: true
+      
+      - name: Get PR number
+        id: pr
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [ -n "${{ github.event.inputs.pr_number }}" ]; then
+              echo "number=${{ github.event.inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+            else
+              PR_NUM=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '.[0].number' || echo "")
+              if [ -z "$PR_NUM" ]; then
+                echo "Error: No PR number provided" >&2
+                exit 1
+              fi
+              echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+      
+      - name: Download score results
+        uses: actions/download-artifact@v4
+        with:
+          name: veroscore-results
+          path: .
+      
+      - name: Enforce decision
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          DECISION: ${{ needs.score-pr.outputs.decision }}
+          VEROSCORE: ${{ needs.score-pr.outputs.veroscore }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get decision reason from score output
+          REASON=""
+          if [ -f score_output.txt ]; then
+            REASON=$(grep "^DECISION_REASON=" score_output.txt | cut -d'=' -f2- || echo "")
+          fi
+          
+          python .github/scripts/enforce_decision.py \
+            --pr-number "$PR_NUMBER" \
+            --decision "$DECISION" \
+            --reason "$REASON" \
+            --score "$VEROSCORE"
+
+  update-session:
+    name: Update Session
+    needs: [extract-context, score-pr, enforce-decision]
+    if: needs.extract-context.outputs.should_process == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install supabase pyyaml
+      
+      - name: Setup GitHub CLI
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+        continue-on-error: true
+      
+      - name: Get PR number
+        id: pr
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [ -n "${{ github.event.inputs.pr_number }}" ]; then
+              echo "number=${{ github.event.inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+            else
+              PR_NUM=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '.[0].number' || echo "")
+              if [ -z "$PR_NUM" ]; then
+                echo "Error: No PR number provided" >&2
+                exit 1
+              fi
+              echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+      
+      - name: Update session status
+        env:
+          SESSION_ID: ${{ needs.extract-context.outputs.session_id }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Update session with PR number and status
+          python .github/scripts/update_session.py \
+            --session-id "$SESSION_ID" \
+            --status "processing" \
+            --pr-number "$PR_NUMBER"
+      
+      - name: Check session completion
+        env:
+          SESSION_ID: ${{ needs.extract-context.outputs.session_id }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if session is complete and mark reward-eligible
+          python .github/scripts/update_session.py \
+            --session-id "$SESSION_ID" \
+            --status "processing" \
+            --check-completion
+
+  health-check:
+    name: Health Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install supabase pyyaml
+      
+      - name: Health check
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          # Check Supabase connectivity
+          python -c "
+          from supabase import create_client
+          import os
+          
+          supabase = create_client(
+              os.getenv('SUPABASE_URL'),
+              os.getenv('SUPABASE_SECRET_KEY')
+          )
+          
+          # Test query
+          result = supabase.schema('veroscore').table('sessions').select('session_id').limit(1).execute()
+          print('✅ Supabase connection successful')
+          "
+          
+          echo "✅ Health check passed"
+
