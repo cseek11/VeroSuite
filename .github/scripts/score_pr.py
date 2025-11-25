@@ -260,12 +260,38 @@ def main():
         )
         sys.exit(1)
     
+    # Persist score to Supabase
+    logger.info(
+        "Persisting score to Supabase",
+        operation="main",
+        pr_number=args.pr_number,
+        **trace_ctx
+    )
+    
+    persist_success = engine.persist_score(result)
+    if not persist_success:
+        logger.warn(
+            "Failed to persist score to Supabase (continuing anyway)",
+            operation="main",
+            pr_number=args.pr_number,
+            **trace_ctx
+        )
+    else:
+        logger.info(
+            "Score persisted successfully",
+            operation="main",
+            pr_number=args.pr_number,
+            stabilized_score=result.stabilized_score,
+            **trace_ctx
+        )
+    
     # Output results
     print(f"VEROSCORE={result.stabilized_score:.2f}")
     print(f"DECISION={result.decision}")
     print(f"RAW_SCORE={result.raw_score:.2f}")
     print(f"VIOLATIONS={len(detection_result.get('violations', []))}")
     print(f"WARNINGS={len(detection_result.get('warnings', []))}")
+    print(f"DECISION_REASON={result.decision_reason}")
     
     logger.info(
         "Scoring completed",
