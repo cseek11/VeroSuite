@@ -228,12 +228,11 @@ def main():
     result = engine.score_pr(
         pr_number=args.pr_number,
         repository=repository,
-        session_id=args.session_id,
-        file_paths=existing_files,
-        violations=detection_result.get("violations", []),
-        warnings=detection_result.get("warnings", []),
+        author=args.author or "unknown",
+        changed_files=existing_files,
         pr_description=pr_description,
-        author=args.author
+        session_id=args.session_id,
+        violations=detection_result.get("violations", [])
     )
     
     if not result:
