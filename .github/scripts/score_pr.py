@@ -12,18 +12,33 @@ import argparse
 from pathlib import Path
 
 # Add scripts directory to path
-# .github/scripts/score_pr.py -> .github/scripts/ -> .github/ -> repo root -> .cursor/scripts
-scripts_dir = Path(__file__).parent.parent.parent / ".cursor" / "scripts"
-scripts_dir_str = str(scripts_dir.resolve() if scripts_dir.exists() else scripts_dir)
-if scripts_dir_str not in sys.path:
+# Priority: Use PYTHONPATH if set, otherwise calculate from file location
+import os
+scripts_dir_str = None
+
+# Check PYTHONPATH first (set by GitHub Actions)
+if "PYTHONPATH" in os.environ:
+    pythonpath_dirs = os.environ["PYTHONPATH"].split(os.pathsep)
+    for dir_path in pythonpath_dirs:
+        if ".cursor/scripts" in dir_path or "veroscore_v3" in dir_path:
+            scripts_dir_str = dir_path
+            break
+
+# Fallback: Calculate from file location
+if not scripts_dir_str:
+    scripts_dir = Path(__file__).parent.parent.parent / ".cursor" / "scripts"
+    scripts_dir_str = str(scripts_dir.resolve() if scripts_dir.exists() else scripts_dir)
+
+# Add to sys.path if not already there
+if scripts_dir_str and scripts_dir_str not in sys.path:
     sys.path.insert(0, scripts_dir_str)
 
 # Debug: Print path for troubleshooting
-import os
 if os.getenv("DEBUG_PYTHON_PATH"):
-    print(f"DEBUG: Python path: {sys.path}")
+    print(f"DEBUG: Python path: {sys.path[:3]}")  # First 3 entries
     print(f"DEBUG: Scripts dir: {scripts_dir_str}")
-    print(f"DEBUG: Scripts dir exists: {Path(scripts_dir_str).exists()}")
+    print(f"DEBUG: Scripts dir exists: {Path(scripts_dir_str).exists() if scripts_dir_str else False}")
+    print(f"DEBUG: PYTHONPATH: {os.environ.get('PYTHONPATH', 'not set')}")
 
 from veroscore_v3.scoring_engine import HybridScoringEngine
 from veroscore_v3.detection_functions import MasterDetector
