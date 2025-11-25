@@ -195,8 +195,37 @@ class FileWatcher:
                     change_count=len(changes),
                     **trace_ctx
                 )
-                # TODO: Phase 3 - Trigger PR creation
-                # For now, just log that threshold was met
+                # Phase 3: Trigger PR creation
+                try:
+                    from veroscore_v3.pr_creator import PRCreator
+                    pr_creator = PRCreator(self.supabase, project_root)
+                    pr_result = pr_creator.create_pr(self.session_id)
+                    if pr_result:
+                        logger.info(
+                            "PR created successfully from file watcher",
+                            operation="_flush_changes",
+                            session_id=self.session_id,
+                            pr_number=pr_result.get('pr_number'),
+                            pr_url=pr_result.get('pr_url'),
+                            **trace_ctx
+                        )
+                    else:
+                        logger.warn(
+                            "PR creation returned None",
+                            operation="_flush_changes",
+                            session_id=self.session_id,
+                            **trace_ctx
+                        )
+                except Exception as e:
+                    logger.error(
+                        "Failed to create PR from file watcher",
+                        operation="_flush_changes",
+                        error_code="PR_CREATION_FROM_WATCHER_FAILED",
+                        root_cause=str(e),
+                        session_id=self.session_id,
+                        **trace_ctx
+                    )
+                    # Don't raise - file watcher should continue running
             else:
                 logger.debug(
                     "Changes flushed, PR threshold not met",
