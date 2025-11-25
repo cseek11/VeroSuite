@@ -48,41 +48,457 @@ def create_test_session():
     session_id = session_manager.get_or_create_session(author=author)
     print(f"✅ Created session: {session_id}")
     
-    # Add Phase 6 files to session
-    phase6_files = [
-        ".github/workflows/verofield_auto_pr.yml",
-        ".github/scripts/extract_context.py",
-        ".github/scripts/score_pr.py",
-        ".github/scripts/enforce_decision.py",
-        ".github/scripts/update_session.py",
-        "docs/Auto-PR/PHASE6_IMPLEMENTATION_SUMMARY.md",
-        "docs/Auto-PR/PHASE6_POST_IMPLEMENTATION_AUDIT.md",
-    ]
+    # Create high-quality test files that should pass scoring
+    test_dir = project_root / ".cursor" / "scripts" / "test_veroscore_pass"
+    test_dir.mkdir(parents=True, exist_ok=True)
     
+    # 1. Create a well-structured TypeScript component with all best practices
+    component_file = test_dir / "UserProfileCard.tsx"
+    component_content = """/**
+ * UserProfileCard - Displays user profile information with proper security and validation.
+ * 
+ * Features:
+ * - Type-safe props with TypeScript
+ * - Input validation
+ * - Proper error handling
+ * - Accessibility support
+ * - Responsive design
+ * 
+ * @example
+ * ```tsx
+ * <UserProfileCard
+ *   userId="user-123"
+ *   name="John Doe"
+ *   email="john@example.com"
+ *   onUpdate={handleUpdate}
+ * />
+ * ```
+ */
+
+import React, { useState, useCallback } from 'react';
+
+/**
+ * Props for UserProfileCard component
+ */
+interface UserProfileCardProps {
+  /** Unique user identifier */
+  userId: string;
+  /** User's full name */
+  name: string;
+  /** User's email address */
+  email: string;
+  /** Callback when profile is updated */
+  onUpdate?: (userId: string, updates: ProfileUpdates) => Promise<void>;
+  /** Optional className for styling */
+  className?: string;
+}
+
+/**
+ * Profile update data structure
+ */
+interface ProfileUpdates {
+  name?: string;
+  email?: string;
+}
+
+/**
+ * UserProfileCard component - Displays and allows editing of user profile
+ * 
+ * @param props - Component props
+ * @returns React component
+ */
+export const UserProfileCard: React.FC<UserProfileCardProps> = ({
+  userId,
+  name,
+  email,
+  onUpdate,
+  className = ''
+}) => {
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editedName, setEditedName] = useState<string>(name);
+  const [editedEmail, setEditedEmail] = useState<string>(email);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  /**
+   * Validates email format
+   */
+  const validateEmail = useCallback((emailValue: string): boolean => {
+    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    return emailRegex.test(emailValue);
+  }, []);
+
+  /**
+   * Handles form submission with validation
+   */
+  const handleSubmit = useCallback(async (): Promise<void> => {
+    setError(null);
+
+    // Input validation
+    if (!editedName.trim()) {
+      setError('Name is required');
+      return;
+    }
+
+    if (!validateEmail(editedEmail)) {
+      setError('Invalid email format');
+      return;
+    }
+
+    if (!onUpdate) {
+      setIsEditing(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await onUpdate(userId, {
+        name: editedName.trim(),
+        email: editedEmail.trim()
+      });
+      setIsEditing(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update profile');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId, editedName, editedEmail, onUpdate, validateEmail]);
+
+  return (
+    <div className={`user-profile-card ${className}`} role="article" aria-label="User profile">
+      {error && (
+        <div className="error-message" role="alert">
+          {error}
+        </div>
+      )}
+      
+      {isEditing ? (
+        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+          <label htmlFor="name-input">
+            Name:
+            <input
+              id="name-input"
+              type="text"
+              value={editedName}
+              onChange={(e) => setEditedName(e.target.value)}
+              disabled={isLoading}
+              required
+            />
+          </label>
+          
+          <label htmlFor="email-input">
+            Email:
+            <input
+              id="email-input"
+              type="email"
+              value={editedEmail}
+              onChange={(e) => setEditedEmail(e.target.value)}
+              disabled={isLoading}
+              required
+            />
+          </label>
+          
+          <div className="button-group">
+            <button type="submit" disabled={isLoading}>
+              {isLoading ? 'Saving...' : 'Save'}
+            </button>
+            <button type="button" onClick={() => setIsEditing(false)} disabled={isLoading}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div>
+          <h2>{name}</h2>
+          <p>{email}</p>
+          <button onClick={() => setIsEditing(true)}>
+            Edit Profile
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default UserProfileCard;
+"""
+    
+    # 2. Create comprehensive test file
+    test_file = test_dir / "UserProfileCard.test.tsx"
+    test_content = """/**
+ * Tests for UserProfileCard component
+ * 
+ * Coverage:
+ * - Component rendering
+ * - User interactions
+ * - Form validation
+ * - Error handling
+ * - Edge cases
+ */
+
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { UserProfileCard } from './UserProfileCard';
+
+describe('UserProfileCard', () => {
+  const defaultProps = {
+    userId: 'user-123',
+    name: 'John Doe',
+    email: 'john@example.com'
+  };
+
+  describe('Rendering', () => {
+    it('should render user information correctly', () => {
+      render(<UserProfileCard {...defaultProps} />);
+      
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getByText('john@example.com')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /edit profile/i })).toBeInTheDocument();
+    });
+
+    it('should apply custom className', () => {
+      const { container } = render(
+        <UserProfileCard {...defaultProps} className="custom-class" />
+      );
+      
+      expect(container.querySelector('.user-profile-card.custom-class')).toBeInTheDocument();
+    });
+  });
+
+  describe('Editing Mode', () => {
+    it('should switch to edit mode when Edit button is clicked', () => {
+      render(<UserProfileCard {...defaultProps} />);
+      
+      const editButton = screen.getByRole('button', { name: /edit profile/i });
+      fireEvent.click(editButton);
+      
+      expect(screen.getByLabelText(/name:/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/email:/i)).toBeInTheDocument();
+    });
+
+    it('should pre-fill form fields with current values', () => {
+      render(<UserProfileCard {...defaultProps} />);
+      
+      fireEvent.click(screen.getByRole('button', { name: /edit profile/i }));
+      
+      const nameInput = screen.getByLabelText(/name:/i) as HTMLInputElement;
+      const emailInput = screen.getByLabelText(/email:/i) as HTMLInputElement;
+      
+      expect(nameInput.value).toBe('John Doe');
+      expect(emailInput.value).toBe('john@example.com');
+    });
+  });
+
+  describe('Form Validation', () => {
+    it('should show error when name is empty', async () => {
+      render(<UserProfileCard {...defaultProps} onUpdate={jest.fn()} />);
+      
+      fireEvent.click(screen.getByRole('button', { name: /edit profile/i }));
+      const nameInput = screen.getByLabelText(/name:/i);
+      fireEvent.change(nameInput, { target: { value: '' } });
+      fireEvent.click(screen.getByRole('button', { name: /save/i }));
+      
+      await waitFor(() => {
+        expect(screen.getByText('Name is required')).toBeInTheDocument();
+      });
+    });
+
+    it('should show error for invalid email format', async () => {
+      render(<UserProfileCard {...defaultProps} onUpdate={jest.fn()} />);
+      
+      fireEvent.click(screen.getByRole('button', { name: /edit profile/i }));
+      const emailInput = screen.getByLabelText(/email:/i);
+      fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
+      fireEvent.click(screen.getByRole('button', { name: /save/i }));
+      
+      await waitFor(() => {
+        expect(screen.getByText('Invalid email format')).toBeInTheDocument();
+      });
+    });
+
+    it('should accept valid email formats', async () => {
+      const onUpdate = jest.fn().mockResolvedValue(undefined);
+      render(<UserProfileCard {...defaultProps} onUpdate={onUpdate} />);
+      
+      fireEvent.click(screen.getByRole('button', { name: /edit profile/i }));
+      const emailInput = screen.getByLabelText(/email:/i);
+      fireEvent.change(emailInput, { target: { value: 'newemail@example.com' } });
+      fireEvent.click(screen.getByRole('button', { name: /save/i }));
+      
+      await waitFor(() => {
+        expect(onUpdate).toHaveBeenCalledWith('user-123', {
+          name: 'John Doe',
+          email: 'newemail@example.com'
+        });
+      });
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should display error message when update fails', async () => {
+      const errorMessage = 'Network error';
+      const onUpdate = jest.fn().mockRejectedValue(new Error(errorMessage));
+      render(<UserProfileCard {...defaultProps} onUpdate={onUpdate} />);
+      
+      fireEvent.click(screen.getByRole('button', { name: /edit profile/i }));
+      fireEvent.click(screen.getByRole('button', { name: /save/i }));
+      
+      await waitFor(() => {
+        expect(screen.getByText(errorMessage)).toBeInTheDocument();
+      });
+    });
+
+    it('should handle update without onUpdate callback', () => {
+      render(<UserProfileCard {...defaultProps} />);
+      
+      fireEvent.click(screen.getByRole('button', { name: /edit profile/i }));
+      fireEvent.click(screen.getByRole('button', { name: /save/i }));
+      
+      // Should exit edit mode without error
+      expect(screen.queryByLabelText(/name:/i)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle very long names', () => {
+      const longName = 'A'.repeat(200);
+      render(<UserProfileCard {...defaultProps} name={longName} />);
+      
+      expect(screen.getByText(longName)).toBeInTheDocument();
+    });
+
+    it('should trim whitespace from inputs', async () => {
+      const onUpdate = jest.fn().mockResolvedValue(undefined);
+      render(<UserProfileCard {...defaultProps} onUpdate={onUpdate} />);
+      
+      fireEvent.click(screen.getByRole('button', { name: /edit profile/i }));
+      const nameInput = screen.getByLabelText(/name:/i);
+      fireEvent.change(nameInput, { target: { value: '  Trimmed Name  ' } });
+      fireEvent.click(screen.getByRole('button', { name: /save/i }));
+      
+      await waitFor(() => {
+        expect(onUpdate).toHaveBeenCalledWith('user-123', {
+          name: 'Trimmed Name',
+          email: expect.any(String)
+        });
+      });
+    });
+  });
+});
+"""
+    
+    # 3. Create documentation file
+    doc_file = test_dir / "README.md"
+    doc_content = """# UserProfileCard Component
+
+**Last Updated:** 2025-11-25
+
+## Overview
+
+The `UserProfileCard` component provides a reusable, accessible, and type-safe way to display and edit user profile information in the VeroField application.
+
+## Features
+
+- ✅ **Type Safety**: Full TypeScript support with proper interfaces
+- ✅ **Input Validation**: Email format validation and required field checks
+- ✅ **Error Handling**: Comprehensive error handling with user-friendly messages
+- ✅ **Accessibility**: ARIA labels and semantic HTML
+- ✅ **Responsive Design**: Works on all screen sizes
+- ✅ **Test Coverage**: Comprehensive test suite with edge cases
+
+## Usage
+
+```tsx
+import { UserProfileCard } from '@/components/UserProfileCard';
+
+function ProfilePage() {
+  const handleUpdate = async (userId: string, updates: ProfileUpdates) => {
+    // Update user profile via API
+    await updateUserProfile(userId, updates);
+  };
+
+  return (
+    <UserProfileCard
+      userId="user-123"
+      name="John Doe"
+      email="john@example.com"
+      onUpdate={handleUpdate}
+    />
+  );
+}
+```
+
+## Props
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `userId` | `string` | Yes | Unique user identifier |
+| `name` | `string` | Yes | User's full name |
+| `email` | `string` | Yes | User's email address |
+| `onUpdate` | `function` | No | Callback when profile is updated |
+| `className` | `string` | No | Additional CSS classes |
+
+## Testing
+
+Run tests with:
+```bash
+npm test UserProfileCard.test.tsx
+```
+
+Test coverage includes:
+- Component rendering
+- User interactions
+- Form validation
+- Error handling
+- Edge cases
+
+## Architecture
+
+- **Location**: `frontend/src/components/ui/UserProfileCard.tsx`
+- **Tests**: `frontend/src/components/ui/__tests__/UserProfileCard.test.tsx`
+- **Dependencies**: React, TypeScript
+"""
+    
+    # Write files and create changes
     changes = []
-    for file_path in phase6_files:
-        full_path = project_root / file_path
-        if full_path.exists():
-            # Read file content
-            content = full_path.read_text(encoding='utf-8')
-            
-            # Create file change
-            change = FileChange(
-                path=file_path,
-                change_type="added" if file_path not in [".github/workflows/verofield_auto_pr.yml"] else "modified",
-                timestamp=datetime.now(timezone.utc).isoformat(),
-                lines_added=len(content.split('\n')),
-                lines_removed=0
-            )
-            changes.append(change)
-            print(f"  ✅ Prepared {file_path} for session")
-        else:
-            print(f"  ⚠️  File not found: {file_path}")
+    
+    # Component file
+    component_file.write_text(component_content, encoding='utf-8')
+    changes.append(FileChange(
+        path=str(component_file.relative_to(project_root)),
+        change_type="added",
+        timestamp=datetime.now(timezone.utc).isoformat(),
+        lines_added=len(component_content.split('\n')),
+        lines_removed=0
+    ))
+    print(f"  ✅ Created {component_file.relative_to(project_root)}")
+    
+    # Test file
+    test_file.write_text(test_content, encoding='utf-8')
+    changes.append(FileChange(
+        path=str(test_file.relative_to(project_root)),
+        change_type="added",
+        timestamp=datetime.now(timezone.utc).isoformat(),
+        lines_added=len(test_content.split('\n')),
+        lines_removed=0
+    ))
+    print(f"  ✅ Created {test_file.relative_to(project_root)}")
+    
+    # Documentation file
+    doc_file.write_text(doc_content, encoding='utf-8')
+    changes.append(FileChange(
+        path=str(doc_file.relative_to(project_root)),
+        change_type="added",
+        timestamp=datetime.now(timezone.utc).isoformat(),
+        lines_added=len(doc_content.split('\n')),
+        lines_removed=0
+    ))
+    print(f"  ✅ Created {doc_file.relative_to(project_root)}")
     
     # Add all changes in batch
     if changes:
         session_manager.add_changes_batch(session_id, changes)
-        print(f"  ✅ Added {len(changes)} files to session")
+        print(f"  ✅ Added {len(changes)} high-quality files to session")
     
     return session_id, supabase
 
