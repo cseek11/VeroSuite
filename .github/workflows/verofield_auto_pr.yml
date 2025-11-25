@@ -74,12 +74,27 @@ jobs:
           AUTHOR=$(jq -r '.author // "unknown"' context.json)
           BRANCH=$(jq -r '.branch // ""' context.json)
           
-          echo "session_id=$SESSION_ID" >> "$GITHUB_OUTPUT"
-          echo "author=$AUTHOR" >> "$GITHUB_OUTPUT"
-          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          # Use proper GitHub Actions output format (multiline values need delimiter)
+          {
+            echo "session_id<<EOF"
+            echo "$SESSION_ID"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          
+          {
+            echo "author<<EOF"
+            echo "$AUTHOR"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          
+          {
+            echo "branch<<EOF"
+            echo "$BRANCH"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
           
           # Check if this is an auto-PR (has session ID)
-          if [ -n "$SESSION_ID" ] && [ "$SESSION_ID" != "null" ]; then
+          if [ -n "$SESSION_ID" ] && [ "$SESSION_ID" != "null" ] && [ "$SESSION_ID" != "" ]; then
             echo "should_process=true" >> "$GITHUB_OUTPUT"
             echo "✅ Auto-PR detected - Session: $SESSION_ID"
           else
