@@ -74,24 +74,10 @@ jobs:
           AUTHOR=$(jq -r '.author // "unknown"' context.json)
           BRANCH=$(jq -r '.branch // ""' context.json)
           
-          # Use proper GitHub Actions output format (multiline values need delimiter)
-          {
-            echo "session_id<<EOF"
-            echo "$SESSION_ID"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-          
-          {
-            echo "author<<EOF"
-            echo "$AUTHOR"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-          
-          {
-            echo "branch<<EOF"
-            echo "$BRANCH"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+          # Set outputs (escape special characters if needed)
+          echo "session_id=$SESSION_ID" >> "$GITHUB_OUTPUT"
+          echo "author=$AUTHOR" >> "$GITHUB_OUTPUT"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
           
           # Check if this is an auto-PR (has session ID)
           if [ -n "$SESSION_ID" ] && [ "$SESSION_ID" != "null" ] && [ "$SESSION_ID" != "" ]; then
@@ -168,6 +154,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PYTHONPATH: ${{ github.workspace }}/.cursor/scripts
         run: |
           python .github/scripts/score_pr.py \
             --pr-number "$PR_NUMBER" \

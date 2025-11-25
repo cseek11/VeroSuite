@@ -15,7 +15,8 @@ from pathlib import Path
 from typing import Optional
 
 # Add scripts directory to path
-scripts_dir = Path(__file__).parent.parent.parent / ".cursor" / "scripts"
+# .github/scripts/extract_context.py -> .github/ -> repo root -> .cursor/scripts
+scripts_dir = Path(__file__).parent.parent / ".cursor" / "scripts"
 if str(scripts_dir) not in sys.path:
     sys.path.insert(0, str(scripts_dir))
 
