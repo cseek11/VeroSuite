@@ -13,8 +13,8 @@ import subprocess
 from pathlib import Path
 
 # Add scripts directory to path
-# .github/scripts/enforce_decision.py -> .github/ -> repo root -> .cursor/scripts
-scripts_dir = Path(__file__).parent.parent / ".cursor" / "scripts"
+# .github/scripts/enforce_decision.py -> .github/scripts/ -> .github/ -> repo root -> .cursor/scripts
+scripts_dir = Path(__file__).parent.parent.parent / ".cursor" / "scripts"
 if str(scripts_dir) not in sys.path:
     sys.path.insert(0, str(scripts_dir))
 
