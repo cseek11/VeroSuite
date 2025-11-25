@@ -749,19 +749,91 @@ class HybridScoringEngine:
                 'detector_versions': {}  # TODO: Add detector version tracking
             }
             
-            # Insert into Supabase (using veroscore schema)
-            response = self.supabase.schema('veroscore').table('pr_scores').insert(insert_data).execute()
+            # Insert into Supabase (using veroscore schema with fallback methods)
+            response = None
             
-            logger.info(
-                "Score persisted to Supabase",
-                operation="persist_score",
-                pr_number=result.pr_number,
-                stabilized_score=result.stabilized_score,
-                decision=result.decision,
-                **trace_ctx
-            )
+            # Method 1: Try .schema() method
+            if hasattr(self.supabase, 'schema'):
+                try:
+                    response = self.supabase.schema('veroscore').table('pr_scores').insert(insert_data).execute()
+                    if response.data:
+                        logger.info(
+                            "Score persisted to Supabase (via .schema() method)",
+                            operation="persist_score",
+                            pr_number=result.pr_number,
+                            stabilized_score=result.stabilized_score,
+                            decision=result.decision,
+                            **trace_ctx
+                        )
+                        return True
+                except Exception as e:
+                    logger.debug(
+                        ".schema() method failed, trying fallback",
+                        operation="persist_score",
+                        root_cause=str(e),
+                        **trace_ctx
+                    )
             
-            return True
+            # Method 2: Try schema-qualified table name
+            if not response or not response.data:
+                try:
+                    response = self.supabase.table('veroscore.pr_scores').insert(insert_data).execute()
+                    if response.data:
+                        logger.info(
+                            "Score persisted to Supabase (via schema-qualified name)",
+                            operation="persist_score",
+                            pr_number=result.pr_number,
+                            stabilized_score=result.stabilized_score,
+                            decision=result.decision,
+                            **trace_ctx
+                        )
+                        return True
+                except Exception as e:
+                    logger.debug(
+                        "Schema-qualified name failed, trying PostgREST client",
+                        operation="persist_score",
+                        root_cause=str(e),
+                        **trace_ctx
+                    )
+            
+            # Method 3: Use PostgREST client with Accept-Profile header
+            if not response or not response.data:
+                try:
+                    from postgrest import SyncPostgrestClient
+                    supabase_url = os.getenv("SUPABASE_URL")
+                    supabase_key = os.getenv("SUPABASE_SECRET_KEY")
+                    
+                    if supabase_url and supabase_key:
+                        client = SyncPostgrestClient(
+                            base_url=f"{supabase_url}/rest/v1",
+                            headers={
+                                "apikey": supabase_key,
+                                "Authorization": f"Bearer {supabase_key}",
+                                "Accept-Profile": "veroscore",
+                                "Content-Profile": "veroscore"
+                            }
+                        )
+                        response = client.from_("pr_scores").insert(insert_data).execute()
+                        if response.data:
+                            logger.info(
+                                "Score persisted to Supabase (via PostgREST client)",
+                                operation="persist_score",
+                                pr_number=result.pr_number,
+                                stabilized_score=result.stabilized_score,
+                                decision=result.decision,
+                                **trace_ctx
+                            )
+                            return True
+                except Exception as e:
+                    logger.debug(
+                        "PostgREST client method failed",
+                        operation="persist_score",
+                        root_cause=str(e),
+                        **trace_ctx
+                    )
+            
+            # If all methods failed
+            raise Exception("All persistence methods failed - no data inserted")
             
         except Exception as e:
             logger.error(
