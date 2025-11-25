@@ -42,6 +42,10 @@ from .scoring_engine import (
     HybridScoringEngine
 )
 
+# Define __all__ for documentation, but don't import at module level
+# Users should import directly from submodules:
+#   from veroscore_v3.scoring_engine import HybridScoringEngine
+#   from veroscore_v3.detection_functions import MasterDetector
 __all__ = [
     'FileChange',
     'ChangeBuffer',
@@ -68,3 +72,18 @@ __all__ = [
     'PipelineComplianceDetector',
     'HybridScoringEngine',
 ]
+
+# Lazy import function for backward compatibility
+def __getattr__(name):
+    """Lazy import for backward compatibility."""
+    if name in __all__:
+        # Import only when requested
+        if name in ['FileChange']:
+            from .file_change import FileChange
+            return FileChange
+        elif name in ['ChangeBuffer']:
+            from .change_buffer import ChangeBuffer
+            return ChangeBuffer
+        # Add other lazy imports as needed
+        # For now, users should import directly from submodules
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
