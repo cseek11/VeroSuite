@@ -116,6 +116,9 @@ def main():
     
     args = parser.parse_args()
     
+    # Strip whitespace from session_id (fixes newline issues from workflow outputs)
+    args.session_id = args.session_id.strip() if args.session_id else None
+    
     trace_ctx = get_or_create_trace_context()
     
     # Initialize Supabase client
