@@ -147,13 +147,27 @@ def main():
         )
         sys.exit(1)
     
-    # Filter to only files that exist in workspace
+    # Filter to only files that exist in workspace and read their content
     workspace_root = Path.cwd()
     existing_files = []
     for file_path in changed_files:
         full_path = workspace_root / file_path
         if full_path.exists() and full_path.is_file():
-            existing_files.append(str(full_path))
+            try:
+                content = full_path.read_text(encoding='utf-8', errors='ignore')
+                existing_files.append({
+                    'path': file_path,
+                    'content': content
+                })
+            except Exception as e:
+                logger.warn(
+                    "Failed to read file",
+                    operation="main",
+                    pr_number=args.pr_number,
+                    file_path=file_path,
+                    root_cause=str(e),
+                    **trace_ctx
+                )
     
     if not existing_files:
         logger.warn(
@@ -175,7 +189,9 @@ def main():
     )
     
     detector = MasterDetector()
-    detection_result = detector.detect_all(existing_files)
+    # Convert to list of file paths for detection (detector expects paths, not dicts)
+    file_paths_for_detection = [f['path'] for f in existing_files]
+    detection_result = detector.detect_all(file_paths_for_detection)
     
     # Create Supabase client
     supabase_url = os.getenv("SUPABASE_URL")
