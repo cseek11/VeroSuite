@@ -10,6 +10,7 @@ import os
 import sys
 import argparse
 from pathlib import Path
+from typing import List
 
 # Add scripts directory to path BEFORE any imports
 # This must happen before importing veroscore_v3 modules
