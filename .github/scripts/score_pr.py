@@ -53,7 +53,9 @@ if os.getenv("DEBUG_PYTHON_PATH"):
         init_file = veroscore_path / "__init__.py"
         print(f"DEBUG: __init__.py exists={init_file.exists()}", file=sys.stderr)
 
-# Now import - path should be set
+# Now import - ensure package is loaded first to establish package context
+# This ensures __init__.py is loaded and package structure is recognized
+import veroscore_v3  # Load package first
 from veroscore_v3.scoring_engine import HybridScoringEngine
 from veroscore_v3.detection_functions import MasterDetector
 from logger_util import get_logger, get_or_create_trace_context
