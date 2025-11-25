@@ -767,9 +767,9 @@ class MasterDetector:
                         violations = detector.detect(str(full_path), content)
                         for violation in violations:
                             if violation.severity in ['critical', 'high']:
-                                all_violations.append(violation.to_dict())
+                                all_violations.append(violation)  # Keep as ViolationResult object
                             else:
-                                all_warnings.append(violation.to_dict())
+                                all_warnings.append(violation)  # Keep as ViolationResult object
                     except Exception as e:
                         logger.error(
                             f"Detector {detector.__class__.__name__} failed",
@@ -794,10 +794,10 @@ class MasterDetector:
                 continue
         
         # Calculate summary
-        total_penalty = sum(v.get('penalty', 0) for v in all_violations + all_warnings)
+        total_penalty = sum(v.penalty for v in all_violations + all_warnings)
         violations_by_detector = {}
         for v in all_violations + all_warnings:
-            detector = v.get('detector_name', 'unknown')
+            detector = v.detector_name
             violations_by_detector[detector] = violations_by_detector.get(detector, 0) + 1
         
         result = {
