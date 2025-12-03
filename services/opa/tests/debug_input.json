@@ -1,0 +1,14 @@
+{
+  "changed_files": [
+    {
+      "path": "apps/api/src/auth/auth.service.ts",
+      "status": "modified",
+      "content": "async function login() { ... }"
+    },
+    {
+      "path": "apps/api/src/auth/auth.service.spec.ts",
+      "content": "it('should verify authentication and authorization', ...)"
+    }
+  ]
+}
+

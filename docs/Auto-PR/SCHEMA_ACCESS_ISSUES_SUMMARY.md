@@ -210,3 +210,5 @@ PostgREST is still looking for tables in the `public` schema, even though:
 **Last Updated:** 2025-11-24  
 **Status:** ⚠️ **INVESTIGATING** - PostgREST schema discovery issue
 
+
+

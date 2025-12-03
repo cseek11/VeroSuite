@@ -1,0 +1,294 @@
+{
+  "summary": {
+    "total": 24,
+    "passed": 21,
+    "failed": 0,
+    "skipped": 0,
+    "warnings": 3,
+    "pass_rate": 87.5,
+    "execution_time": 0.178891
+  },
+  "results": [
+    {
+      "test_name": "rule_files_exist",
+      "status": "PASS",
+      "message": "All required rule files exist",
+      "details": {
+        "count": 18
+      },
+      "execution_time": 0.001995,
+      "timestamp": "2025-12-02T05:30:00.212960+00:00"
+    },
+    {
+      "test_name": "rule_precedence",
+      "status": "WARN",
+      "message": "Rule precedence checks: 2/3 passed",
+      "details": {
+        "mentions_precedence": true,
+        "mentions_supreme": false,
+        "mentions_override": true
+      },
+      "execution_time": 0.003962,
+      "timestamp": "2025-12-02T05:30:00.221677+00:00"
+    },
+    {
+      "test_name": "rule_loading_logic",
+      "status": "PASS",
+      "message": "Rule loading logic checks: 3/3 passed",
+      "details": {
+        "path_based_loading": true,
+        "conditional_loading": true,
+        "bible_rules": true
+      },
+      "execution_time": 0.000998,
+      "timestamp": "2025-12-02T05:30:00.224041+00:00"
+    },
+    {
+      "test_name": "bible_rules_conditional",
+      "status": "PASS",
+      "message": "Bible rules conditional loading: 3/3 passed",
+      "details": {
+        "python_bible_conditional": true,
+        "typescript_bible_conditional": true,
+        "file_type_detection": true
+      },
+      "execution_time": 0.001,
+      "timestamp": "2025-12-02T05:30:00.225041+00:00"
+    },
+    {
+      "test_name": "enforcement_pipeline_steps",
+      "status": "PASS",
+      "message": "All 8 pipeline steps found",
+      "details": {
+        "steps": [
+          "Step 0",
+          "Step 0.5",
+          "Step 1",
+          "Step 2",
+          "Step 3",
+          "Step 4",
+          "Step 4.5",
+          "Step 5"
+        ]
+      },
+      "execution_time": 0.000993,
+      "timestamp": "2025-12-02T05:30:00.227042+00:00"
+    },
+    {
+      "test_name": "auto_enforcer_exists",
+      "status": "PASS",
+      "message": "Auto-enforcer checks: 3/3 passed",
+      "details": {
+        "VeroFieldEnforcer_class": true,
+        "violation_detection": true,
+        "auto_fix": true
+      },
+      "execution_time": 0.019235,
+      "timestamp": "2025-12-02T05:30:00.246277+00:00"
+    },
+    {
+      "test_name": "status_files_exist",
+      "status": "PASS",
+      "message": "All required status files exist",
+      "details": {
+        "count": 3
+      },
+      "execution_time": 0.0,
+      "timestamp": "2025-12-02T05:30:00.254675+00:00"
+    },
+    {
+      "test_name": "violation_detection",
+      "status": "WARN",
+      "message": "Only 1/5 violation types detected",
+      "details": {
+        "found": [
+          "security"
+        ]
+      },
+      "execution_time": 0.028065,
+      "timestamp": "2025-12-02T05:30:00.286740+00:00"
+    },
+    {
+      "test_name": "context_manager_components",
+      "status": "PASS",
+      "message": "All context manager components exist",
+      "details": {
+        "count": 6
+      },
+      "execution_time": 0.001002,
+      "timestamp": "2025-12-02T05:30:00.290736+00:00"
+    },
+    {
+      "test_name": "recommendations_file",
+      "status": "PASS",
+      "message": "Recommendations file checks: 3/3 passed",
+      "details": {
+        "has_context_sections": true,
+        "has_recommendations": true,
+        "has_task_info": true
+      },
+      "execution_time": 0.039006,
+      "timestamp": "2025-12-02T05:30:00.329742+00:00"
+    },
+    {
+      "test_name": "workflow_tracking",
+      "status": "PASS",
+      "message": "Workflow tracking checks: 3/3 passed",
+      "details": {
+        "WorkflowTracker_class": true,
+        "workflow_detection": true,
+        "state_persistence": true
+      },
+      "execution_time": 0.001488,
+      "timestamp": "2025-12-02T05:30:00.336789+00:00"
+    },
+    {
+      "test_name": "prediction_engine",
+      "status": "PASS",
+      "message": "Prediction engine checks: 3/3 passed",
+      "details": {
+        "ContextPredictor_class": true,
+        "prediction_method": true,
+        "weighted_scores": true
+      },
+      "execution_time": 0.002016,
+      "timestamp": "2025-12-02T05:30:00.340015+00:00"
+    },
+    {
+      "test_name": "memory_bank_files_exist",
+      "status": "PASS",
+      "message": "All Memory Bank files exist",
+      "details": {
+        "count": 6
+      },
+      "execution_time": 0.002015,
+      "timestamp": "2025-12-02T05:30:00.342030+00:00"
+    },
+    {
+      "test_name": "memory_bank_structure",
+      "status": "PASS",
+      "message": "Memory Bank structure checks: 3/3 passed",
+      "details": {
+        "has_current_task": true,
+        "has_last_updated": true,
+        "has_recent_changes": true
+      },
+      "execution_time": 0.002017,
+      "timestamp": "2025-12-02T05:30:00.344047+00:00"
+    },
+    {
+      "test_name": "memory_bank_integration",
+      "status": "PASS",
+      "message": "Memory Bank integration checks: 3/3 passed",
+      "details": {
+        "step_0_mentions_memory_bank": true,
+        "step_5_mentions_memory_bank": true,
+        "active_context_update": true
+      },
+      "execution_time": 0.0,
+      "timestamp": "2025-12-02T05:30:00.344047+00:00"
+    },
+    {
+      "test_name": "session_file_exists",
+      "status": "PASS",
+      "message": "session.json exists",
+      "details": {},
+      "execution_time": 0.0,
+      "timestamp": "2025-12-02T05:30:00.346058+00:00"
+    },
+    {
+      "test_name": "session_structure",
+      "status": "PASS",
+      "message": "Session structure is valid",
+      "details": {
+        "fields": [
+          "session_id",
+          "start_time",
+          "last_check"
+        ]
+      },
+      "execution_time": 0.006746,
+      "timestamp": "2025-12-02T05:30:00.352804+00:00"
+    },
+    {
+      "test_name": "violation_scoping",
+      "status": "PASS",
+      "message": "Violation scoping checks: 3/3 passed",
+      "details": {
+        "current_session": true,
+        "historical": true,
+        "session_scope": true
+      },
+      "execution_time": 0.003996,
+      "timestamp": "2025-12-02T05:30:00.357797+00:00"
+    },
+    {
+      "test_name": "rule_enforcement_integration",
+      "status": "PASS",
+      "message": "Rule-enforcement integration: 3/3 passed",
+      "details": {
+        "references_rules": true,
+        "violation_detection": true,
+        "rule_references": true
+      },
+      "execution_time": 0.004927,
+      "timestamp": "2025-12-02T05:30:00.365727+00:00"
+    },
+    {
+      "test_name": "enforcement_context_integration",
+      "status": "PASS",
+      "message": "Enforcement-context integration: 3/3 passed",
+      "details": {
+        "imports_context_manager": true,
+        "task_detection": true,
+        "context_recommendations": true
+      },
+      "execution_time": 0.010001,
+      "timestamp": "2025-12-02T05:30:00.379732+00:00"
+    },
+    {
+      "test_name": "context_memory_bank_integration",
+      "status": "WARN",
+      "message": "Context-Memory Bank integration: 1/2 passed",
+      "details": {
+        "mentions_memory_bank": false,
+        "context_loading": true
+      },
+      "execution_time": 0.003032,
+      "timestamp": "2025-12-02T05:30:00.384475+00:00"
+    },
+    {
+      "test_name": "token_estimator_exists",
+      "status": "PASS",
+      "message": "token_estimator.py exists",
+      "details": {},
+      "execution_time": 0.0,
+      "timestamp": "2025-12-02T05:30:00.386453+00:00"
+    },
+    {
+      "test_name": "token_estimation_method",
+      "status": "PASS",
+      "message": "Token estimation method: 3/3 passed",
+      "details": {
+        "TokenEstimator_class": true,
+        "estimate_method": true,
+        "character_based": true
+      },
+      "execution_time": 0.001,
+      "timestamp": "2025-12-02T05:30:00.388458+00:00"
+    },
+    {
+      "test_name": "context_efficiency_metrics",
+      "status": "PASS",
+      "message": "Context efficiency metrics: 3/3 passed",
+      "details": {
+        "token_usage": true,
+        "context_files": true,
+        "efficiency": true
+      },
+      "execution_time": 0.000993,
+      "timestamp": "2025-12-02T05:30:00.389451+00:00"
+    }
+  ],
+  "timestamp": "2025-12-02T05:30:00.389856+00:00"
+}

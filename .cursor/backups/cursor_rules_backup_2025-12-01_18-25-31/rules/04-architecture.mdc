@@ -1,0 +1,508 @@
+---
+description: "Monorepo structure, service boundaries, and architectural scope limits"
+alwaysApply: true
+---
+<!-- @version: 2.0 @owner: platform-core -->
+
+# ARCHITECTURE & MONOREPO RULES
+
+## PURPOSE
+Define the canonical monorepo structure, enforce service boundaries, and strictly limit what architectural changes the AI may make.
+
+---
+
+## MONOREPO STRUCTURE (AUTHORITATIVE)
+- `apps/api/src/` – NestJS API (primary backend)
+- `apps/crm-ai/src/` – CRM AI service
+- `apps/ai-soc/src/` – SOC/alerting AI
+- `apps/feature-ingestion/src/` – ingestion/ETL
+- `apps/kpi-gate/src/` – metrics & KPIs
+- `libs/common/prisma/schema.prisma` – **single DB schema source of truth**
+- `libs/common/src/` – shared types, auth helpers, domain utilities
+- `frontend/src/` – React web app (components, hooks, pages, types)
+- `VeroFieldMobile/src/` – React Native app (if present)
+- `docs/architecture/` – architecture docs
+- `docs/state-machines/` – state machine docs
+- `docs/contracts/` – API and event contracts
+
+### ✅ Correct Example Paths
+- `apps/api/src/work-orders/work-orders.service.ts`
+- `libs/common/src/auth/tenant-context.service.ts`
+- `frontend/src/components/ui/Button.tsx`
+
+### ❌ Wrong / Legacy Paths (HARD STOP)
+- `backend/src/...` → use `apps/api/src/...`
+- `backend/prisma/...` → use `libs/common/prisma/...`
+- Root-level `src/` not under `apps/` or `libs/`
+- New top-level directories created by AI
+
+---
+
+## SERVICE BOUNDARIES
+- Each app in `apps/` is independently deployable.
+- **No cross-service relative imports.**
+- ❌ `../../crm-ai/src/...`
+- ✅ communicate via HTTP/events, and share *only* via `libs/common`.
+- Shared code **must** live in `libs/common` (or a future explicit shared-lib path).
+- Backend never imports frontend or mobile code.
+- Frontend/mobile never import backend implementation types directly; they consume contracts/types.
+
+---
+
+## ARCHITECTURE SCOPE LIMITS
+The AI **MAY NOT** without explicit human approval:
+- Create a new microservice in `apps/`.
+- Add a new database or schema file outside `libs/common/prisma/schema.prisma`.
+- Introduce a new message bus (Kafka, etc.).
+- Change authentication architecture (guards, JWT strategy, tenant context).
+- Introduce a new top-level folder.
+
+The AI **MAY**:
+- Add new endpoints to an existing service.
+- Add new NestJS modules under `apps/api/src/`.
+- Add new React components, hooks, and pages under `frontend/src/`.
+- Add new shared utilities under `libs/common/src/`.
+
+If requested to exceed scope:
+> "HARD STOP: This change modifies architecture/service boundaries and requires human approval."
+
+---
+
+## ENFORCEMENT PIPELINE INTEGRATION
+
+**Step 1 (Search):**
+- Search for similar modules in the same app (`apps/api/src/**`).
+- Search `docs/architecture/` for existing patterns.
+- Search `monorepo`/file organization docs for valid paths.
+
+**Step 3 (Compliance Check):**
+- Confirm file paths match the monorepo structure.
+- Confirm no cross-service relative imports.
+- Confirm shared logic is in `libs/common`.
+
+**Step 5 (Post-Implementation Audit):**
+- Re-scan touched files for:
+  - Wrong paths
+  - Cross-service imports
+  - New top-level directories
+
+---
+
+## VIOLATIONS (HARD STOP)
+- Creating new apps/services without permission.
+- Adding a new database/schema outside `libs/common/prisma`.
+- Cross-service relative imports.
+- Placing files in deprecated paths (e.g., `backend/src/`).
+- Creating new top-level folders not previously approved.
+
+---
+
+## Step 5: Post-Implementation Audit for Architecture Rules
+
+### R03: Architecture Boundaries — Audit Procedures
+
+**For code changes affecting monorepo structure, service boundaries, or architectural components:**
+
+#### Monorepo Structure Compliance
+- [ ] **MANDATORY:** Verify files are in correct monorepo paths (`apps/`, `libs/`, `frontend/`)
+- [ ] **MANDATORY:** Verify no files in deprecated paths (`backend/src/`, root-level `src/`)
+- [ ] **MANDATORY:** Verify no new top-level directories created without approval
+- [ ] **MANDATORY:** Verify shared code is in `libs/common/` (not duplicated across services)
+
+#### Service Boundary Enforcement
+- [ ] **MANDATORY:** Verify no cross-service relative imports (`../../other-service/`)
+- [ ] **MANDATORY:** Verify services communicate via HTTP/events (not direct imports)
+- [ ] **MANDATORY:** Verify backend doesn't import frontend code
+- [ ] **MANDATORY:** Verify frontend doesn't import backend implementation types
+
+#### Architectural Scope Limits
+- [ ] **MANDATORY:** Verify no new microservices created without human approval
+- [ ] **MANDATORY:** Verify no new database/schema files outside `libs/common/prisma/`
+
+#### Automated Checks
+```bash
+# Run architecture boundaries checker
+python .cursor/scripts/check-architecture-boundaries.py [file_or_directory]
+
+# Expected: No violations found
+```
+
+#### OPA Policy
+- **Policy:** `services/opa/policies/architecture.rego` (R03 section)
+- **Enforcement:** BLOCK (Tier 1 MAD)
+- **Tests:** `services/opa/tests/architecture_r03_test.rego`
+
+#### Manual Verification (When Needed)
+1. **Review Monorepo Structure** - Verify all files in correct paths
+2. **Verify Service Boundaries** - Trace import paths, confirm HTTP/events communication
+3. **Validate Shared Code** - Check for code duplication, verify shared code in libs/common
+4. **Review Architectural Decisions** - Check docs/architecture/ for decision records
+
+**Example Shared Code:**
+```typescript
+// ❌ VIOLATION: Duplicated validation in multiple services
+// apps/api/src/utils/email-validator.ts
+// apps/crm-ai/src/utils/email-validator.ts
+
+// ✅ CORRECT: Shared validation in libs/common
+// libs/common/src/validators/email.validator.ts
+export function validateEmail(email: string): boolean { ... }
+
+// Usage in both services:
+import { validateEmail } from '@verofield/common/validators';
+```
+
+**Example API Client Usage:**
+```typescript
+// ✅ CORRECT: Frontend uses typed API client
+// frontend/src/services/user.api.ts
+import { apiClient } from '@/lib/api-client';
+import type { User } from '@verofield/common/types';
+
+export const userApi = {
+  getUsers: () => apiClient.get<User[]>('/api/users'),
+  getUser: (id: string) => apiClient.get<User>(`/api/users/${id}`)
+};
+```
+
+---
+
+### R21: File Organization — Audit Procedures
+
+**For code changes affecting file locations, directory structure, or monorepo organization:**
+
+#### Monorepo Path Compliance
+
+- [ ] **MANDATORY:** Verify files are in correct monorepo paths (`apps/`, `libs/`, `frontend/`, `VeroFieldMobile/`)
+- [ ] **MANDATORY:** Verify backend files are in `apps/api/src/` (not `backend/src/`)
+- [ ] **MANDATORY:** Verify database schema is in `libs/common/prisma/` (not `backend/prisma/`)
+- [ ] **MANDATORY:** Verify shared code is in `libs/common/src/` (not duplicated across services)
+- [ ] **MANDATORY:** Verify frontend files are in `frontend/src/` (not root-level `src/`)
+- [ ] **RECOMMENDED:** Verify file paths follow established patterns (check similar files)
+- [ ] **RECOMMENDED:** Verify file organization matches component type (UI components in `ui/`, feature components in feature folders)
+
+#### Deprecated Path Detection
+
+- [ ] **MANDATORY:** Verify no files in deprecated paths (`backend/src/`, `backend/prisma/`, root-level `src/`)
+- [ ] **MANDATORY:** Verify no files moved to deprecated paths (check git history if file moved)
+- [ ] **MANDATORY:** Verify deprecated paths are not referenced in imports or documentation
+- [ ] **RECOMMENDED:** Verify deprecated paths are documented for migration reference
+
+#### Top-Level Directory Compliance
+
+- [ ] **MANDATORY:** Verify no new top-level directories created without approval
+- [ ] **MANDATORY:** Verify new directories are within approved monorepo structure (`apps/`, `libs/`, `frontend/`, `docs/`, `services/`)
+- [ ] **MANDATORY:** Verify new directories follow naming conventions (lowercase, kebab-case)
+- [ ] **RECOMMENDED:** Verify new directories are documented in architecture documentation
+
+#### File Naming Conventions
+
+- [ ] **MANDATORY:** Verify file names follow conventions (PascalCase for components, camelCase for utilities, kebab-case for configs)
+- [ ] **MANDATORY:** Verify file extensions are correct (`.ts` for TypeScript, `.tsx` for React components, `.mdc` for rules)
+- [ ] **MANDATORY:** Verify file names match their content (component files match component name)
+- [ ] **RECOMMENDED:** Verify file names are descriptive and follow established patterns
+
+#### Directory Structure Compliance
+
+- [ ] **MANDATORY:** Verify directory structure follows monorepo patterns (feature-based or layer-based organization)
+- [ ] **MANDATORY:** Verify nested directories don't exceed reasonable depth (typically 3-4 levels)
+- [ ] **MANDATORY:** Verify directory structure matches similar features (check comparable features)
+- [ ] **RECOMMENDED:** Verify directory structure is documented or self-explanatory
+
+#### Import Path Compliance
+
+- [ ] **MANDATORY:** Verify imports use correct monorepo paths (`@verofield/common/*` for shared code)
+- [ ] **MANDATORY:** Verify imports don't use deprecated paths (`@verosuite/*`, old relative paths)
+- [ ] **MANDATORY:** Verify imports don't cross service boundaries (no `../../other-service/`)
+- [ ] **RECOMMENDED:** Verify imports are consistent across similar files
+
+#### File Type Organization
+
+- [ ] **MANDATORY:** Verify components are in correct locations (`frontend/src/components/ui/` for reusable, feature folders for feature-specific)
+- [ ] **MANDATORY:** Verify services are in correct locations (`apps/[service]/src/` for app services, `libs/common/src/` for shared)
+- [ ] **MANDATORY:** Verify types are in correct locations (`frontend/src/types/` for frontend types, `libs/common/src/types/` for shared types)
+- [ ] **RECOMMENDED:** Verify file organization matches component library catalog
+
+#### Missing Files Detection
+
+- [ ] **MANDATORY:** Verify required files exist (`.gitkeep` for empty directories, `index.ts` for barrel exports)
+- [ ] **MANDATORY:** Verify test files are co-located or in test directories (follow project conventions)
+- [ ] **RECOMMENDED:** Verify file organization supports discoverability (easy to find related files)
+
+#### Automated Checks
+
+```bash
+# Check file organization for all files
+python .cursor/scripts/check-file-organization.py --all
+
+# Check specific directory
+python .cursor/scripts/check-file-organization.py --directory apps/api/src
+
+# Check for deprecated paths
+python .cursor/scripts/check-file-organization.py --deprecated-paths
+
+# Check for new top-level directories
+python .cursor/scripts/check-file-organization.py --top-level-dirs
+
+# Generate file organization report
+python .cursor/scripts/check-file-organization.py --generate-report
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/architecture.rego` (R21 section)
+- **Enforcement:** WARNING (Tier 3 MAD) - Logged but doesn't block PRs
+- **Tests:** `services/opa/tests/architecture_r21_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review File Locations** - Verify all files are in correct monorepo paths
+2. **Check Deprecated Paths** - Search for files in deprecated locations
+3. **Validate Directory Structure** - Verify directory organization matches patterns
+4. **Review Import Paths** - Check imports use correct monorepo paths
+
+**Example Correct File Organization (✅):**
+
+```typescript
+// ✅ CORRECT: Backend service in apps/api/src/
+// apps/api/src/work-orders/work-orders.service.ts
+@Injectable()
+export class WorkOrdersService { ... }
+
+// ✅ CORRECT: Shared utility in libs/common/src/
+// libs/common/src/auth/tenant-context.service.ts
+export class TenantContextService { ... }
+
+// ✅ CORRECT: Frontend component in frontend/src/components/ui/
+// frontend/src/components/ui/Button.tsx
+export const Button = () => { ... }
+
+// ✅ CORRECT: Database schema in libs/common/prisma/
+// libs/common/prisma/schema.prisma
+model WorkOrder { ... }
+```
+
+**Example File Organization Violation (❌):**
+
+```typescript
+// ❌ VIOLATION: Backend file in deprecated path
+// backend/src/work-orders/work-orders.service.ts
+// Should be: apps/api/src/work-orders/work-orders.service.ts
+
+// ❌ VIOLATION: Database schema in deprecated path
+// backend/prisma/schema.prisma
+// Should be: libs/common/prisma/schema.prisma
+
+// ❌ VIOLATION: Frontend file in root-level src/
+// src/components/Button.tsx
+// Should be: frontend/src/components/ui/Button.tsx
+
+// ❌ VIOLATION: New top-level directory without approval
+// new-service/src/service.ts
+// Should be: apps/new-service/src/service.ts (with approval)
+```
+
+**Example Import Path Compliance (✅):**
+
+```typescript
+// ✅ CORRECT: Using monorepo import paths
+import { TenantContextService } from '@verofield/common/auth';
+import { Button } from '@/components/ui/Button';
+import type { User } from '@verofield/common/types';
+```
+
+**Example Import Path Violation (❌):**
+
+```typescript
+// ❌ VIOLATION: Using deprecated import path
+import { TenantContextService } from '@verosuite/common/auth';
+// Should be: @verofield/common/auth
+
+// ❌ VIOLATION: Cross-service relative import
+import { CrmService } from '../../../crm-ai/src/crm.service';
+// Should use HTTP/events or shared libs
+
+// ❌ VIOLATION: Using deprecated relative path
+import { Button } from '../../backend/src/components/Button';
+// Should be: @/components/ui/Button or @verofield/common/components
+```
+
+**Example Directory Structure Compliance (✅):**
+
+```typescript
+// ✅ CORRECT: Feature-based organization
+// apps/api/src/work-orders/
+//   - work-orders.controller.ts
+//   - work-orders.service.ts
+//   - work-orders.module.ts
+//   - dto/
+//     - create-work-order.dto.ts
+//     - update-work-order.dto.ts
+
+// ✅ CORRECT: Component organization
+// frontend/src/components/
+//   - ui/ (reusable components)
+//     - Button.tsx
+//     - Input.tsx
+//   - work-orders/ (feature-specific)
+//     - WorkOrderForm.tsx
+//     - WorkOrderList.tsx
+```
+
+**Example Directory Structure Violation (❌):**
+
+```typescript
+// ❌ VIOLATION: Too deep nesting
+// apps/api/src/modules/features/work-orders/services/work-orders.service.ts
+// Should be: apps/api/src/work-orders/work-orders.service.ts
+
+// ❌ VIOLATION: Inconsistent organization
+// Some features use feature-based, others use layer-based
+// Should be consistent across all features
+
+// ❌ VIOLATION: Files in wrong location
+// frontend/src/components/Button.tsx (should be in ui/ if reusable)
+// Should be: frontend/src/components/ui/Button.tsx
+```
+
+---
+
+### R22: Refactor Integrity — Audit Procedures
+
+**For code changes affecting refactoring operations, code restructuring, or behavior-preserving changes:**
+
+#### Behavior-Diffing Requirements
+
+- [ ] **MANDATORY:** Verify behavior-diffing tests created before refactor (document current behavior)
+- [ ] **MANDATORY:** Verify behavior-diffing tests pass after refactor (verify behavior unchanged)
+- [ ] **MANDATORY:** Verify behavior tests cover happy paths, error cases, edge cases, and side effects
+- [ ] **MANDATORY:** Verify behavior changes documented explicitly (if behavior intentionally changed)
+- [ ] **RECOMMENDED:** Verify behavior tests use descriptive names (e.g., "should create work order with customer")
+
+#### Regression Test Requirements
+
+- [ ] **MANDATORY:** Verify regression tests created that match old behavior exactly
+- [ ] **MANDATORY:** Verify regression tests verify API contract unchanged (if applicable)
+- [ ] **MANDATORY:** Verify regression tests verify error messages unchanged (if applicable)
+- [ ] **MANDATORY:** Verify all behaviors preserved (happy paths, error cases, edge cases, side effects)
+- [ ] **RECOMMENDED:** Verify regression tests organized in separate test suite (e.g., "Regression Tests")
+
+#### Risk Surface Documentation
+
+- [ ] **MANDATORY:** Verify refactor risk surface documented (files affected, dependencies, breaking changes)
+- [ ] **MANDATORY:** Verify files affected listed (all files modified by refactor)
+- [ ] **MANDATORY:** Verify dependencies listed (all code depending on refactored code)
+- [ ] **MANDATORY:** Verify breaking changes documented (if any breaking changes introduced)
+- [ ] **MANDATORY:** Verify migration steps documented (if migration required)
+- [ ] **MANDATORY:** Verify rollback plan documented (how to rollback if issues occur)
+- [ ] **RECOMMENDED:** Verify risk surface documented in PR description or engineering-decisions.md
+
+#### Refactor Stability Checks
+
+- [ ] **MANDATORY:** Verify code is stable before refactoring (all tests passing, no active bugs)
+- [ ] **MANDATORY:** Verify code is not in active development (no concurrent changes)
+- [ ] **MANDATORY:** Verify dependencies are stable (no unstable dependencies)
+- [ ] **MANDATORY:** Verify no refactoring of code with failing tests
+- [ ] **MANDATORY:** Verify no refactoring of code with known bugs
+- [ ] **RECOMMENDED:** Verify refactor timing appropriate (not during critical periods)
+
+#### Breaking Change Detection
+
+- [ ] **MANDATORY:** Verify no breaking changes introduced (unless explicitly documented)
+- [ ] **MANDATORY:** Verify API contract unchanged (if refactoring API code)
+- [ ] **MANDATORY:** Verify error messages unchanged (if refactoring error handling)
+- [ ] **MANDATORY:** Verify return types unchanged (if refactoring functions)
+- [ ] **MANDATORY:** Verify function signatures unchanged (if refactoring functions)
+- [ ] **RECOMMENDED:** Verify contract tests pass (if contract tests exist)
+
+#### Refactoring Documentation
+
+- [ ] **MANDATORY:** Verify refactoring decision documented (why, what, how, risks, benefits)
+- [ ] **MANDATORY:** Verify refactoring documented in engineering-decisions.md (if significant)
+- [ ] **MANDATORY:** Verify PR description includes refactor summary
+- [ ] **RECOMMENDED:** Verify refactoring patterns documented for future reference
+
+#### Automated Checks
+
+```bash
+# Run refactor integrity checker
+python .cursor/scripts/check-refactor-integrity.py --file <file_path>
+
+# Check all changed files
+python .cursor/scripts/check-refactor-integrity.py --pr <PR_NUMBER>
+
+# Expected: No violations found
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/architecture.rego` (R22 section)
+- **Enforcement:** WARNING (Tier 3 MAD) - Logged but doesn't block
+- **Tests:** `services/opa/tests/architecture_r22_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review Refactoring Intent** - Verify PR clearly states refactoring intent
+2. **Verify Behavior Tests** - Check tests document current behavior before refactoring
+3. **Check Regression Tests** - Verify tests verify old behavior preserved
+4. **Validate Risk Surface** - Verify all affected files, dependencies, and risks documented
+5. **Check Stability** - Verify code is stable (tests passing, no bugs)
+
+**Example Refactor PR (✅):**
+
+```markdown
+## Refactor: Extract validation logic from WorkOrderService
+
+**Intent:** Improve code organization by extracting validation logic into separate validator class.
+
+**Behavior-Diffing Tests:** ✅
+- `work-orders.service.spec.ts` - Documents current behavior (all tests passing)
+- Tests cover: happy paths, error cases, edge cases, side effects
+
+**Regression Tests:** ✅
+- Verified API contract unchanged (same endpoints, same responses)
+- Verified error messages unchanged (same error codes and messages)
+- All existing tests pass (100% pass rate)
+
+**⚠️ REFACTOR RISK SURFACE:**
+
+**Files Affected:**
+- `apps/api/src/work-orders/work-orders.service.ts` (refactored)
+- `apps/api/src/work-orders/validators/work-order.validator.ts` (new)
+
+**Dependencies:**
+- `frontend/src/lib/work-orders-api.ts` (API client - no changes needed)
+- `apps/api/src/invoices/invoices.service.ts` (uses WorkOrdersService - no changes needed)
+
+**Breaking Changes:** None (backward compatible)
+
+**Migration Required:** No migration needed
+
+**Rollback Plan:** `git revert <commit>` if tests fail in production
+
+**Stability Check:** ✅
+- All tests passing (47/47)
+- No known bugs
+- No concurrent PRs modifying same files
+- Dependencies stable
+```
+
+**Example Refactor Violation (❌):**
+
+```typescript
+// ❌ VIOLATION: Refactor without behavior-diffing tests
+// PR: "Refactor: Extract validation logic"
+// Changed: work-orders.service.ts
+// Missing: No test files in PR, no risk surface documentation
+
+// ✅ CORRECT: Refactor with all requirements
+// PR: "Refactor: Extract validation logic from WorkOrderService"
+// Changed: work-orders.service.ts, work-orders.service.spec.ts
+// Includes: Behavior tests, regression tests, risk surface documentation
+```
+
+---
+
+**Last Updated:** 2025-11-23  
+**Maintained By:** Architecture Team  
+**Review Frequency:** Quarterly or when architectural requirements change

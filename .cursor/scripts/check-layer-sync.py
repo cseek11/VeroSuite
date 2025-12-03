@@ -102,8 +102,12 @@ class LayerSyncChecker:
         if not self.schema_path.exists():
             return None
         
-        with open(self.schema_path, 'r', encoding='utf-8') as f:
-            content = f.read()
+        try:
+            with open(self.schema_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+        except (OSError, IOError, UnicodeDecodeError) as e:
+            logger.warning(f"Error reading schema file {self.schema_path}: {e}")
+            return None
         
         # Find model definition
         model_match = self.model_pattern.search(content)
@@ -158,8 +162,12 @@ class LayerSyncChecker:
             return None
         
         dto_file = dto_files[0]
-        with open(dto_file, 'r', encoding='utf-8') as f:
-            content = f.read()
+        try:
+            with open(dto_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+        except (OSError, IOError, UnicodeDecodeError) as e:
+            logger.warning(f"Error reading DTO file {dto_file}: {e}")
+            return None
         
         fields = {}
         
@@ -200,8 +208,12 @@ class LayerSyncChecker:
             return None
         
         type_file = type_files[0]
-        with open(type_file, 'r', encoding='utf-8') as f:
-            content = f.read()
+        try:
+            with open(type_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+        except (OSError, IOError, UnicodeDecodeError) as e:
+            logger.warning(f"Error reading frontend type file {type_file}: {e}")
+            return None
         
         fields = {}
         
@@ -356,8 +368,12 @@ class LayerSyncChecker:
         if not self.schema_path.exists():
             return violations
         
-        with open(self.schema_path, 'r', encoding='utf-8') as f:
-            schema_content = f.read()
+        try:
+            with open(self.schema_path, 'r', encoding='utf-8') as f:
+                schema_content = f.read()
+        except (OSError, IOError, UnicodeDecodeError) as e:
+            logger.warning(f"Error reading schema file {self.schema_path}: {e}")
+            return violations
         
         # Find enums related to this entity
         for enum_match in self.enum_pattern.finditer(schema_content):
@@ -371,8 +387,12 @@ class LayerSyncChecker:
             # Check DTO enum
             dto_files = list(self.dto_base_path.rglob(f"*{entity_name.lower()}*.dto.ts"))
             if dto_files:
-                with open(dto_files[0], 'r', encoding='utf-8') as f:
-                    dto_content = f.read()
+                try:
+                    with open(dto_files[0], 'r', encoding='utf-8') as f:
+                        dto_content = f.read()
+                except (OSError, IOError, UnicodeDecodeError) as e:
+                    logger.warning(f"Error reading DTO file {dto_files[0]}: {e}")
+                    continue
                 
                 dto_enum_match = re.search(
                     rf'enum\s+{enum_name}\s*\{{([^}}]+)\}}',
@@ -395,8 +415,12 @@ class LayerSyncChecker:
             # Check frontend enum
             type_files = list(self.frontend_types_path.rglob(f"*{entity_name.lower()}*.ts"))
             if type_files:
-                with open(type_files[0], 'r', encoding='utf-8') as f:
-                    frontend_content = f.read()
+                try:
+                    with open(type_files[0], 'r', encoding='utf-8') as f:
+                        frontend_content = f.read()
+                except (OSError, IOError, UnicodeDecodeError) as e:
+                    logger.warning(f"Error reading frontend type file {type_files[0]}: {e}")
+                    continue
                 
                 frontend_enum_match = re.search(
                     rf'enum\s+{enum_name}\s*\{{([^}}]+)\}}',
@@ -515,8 +539,12 @@ def main():
     elif args.all:
         # Parse all entities from schema
         if checker.schema_path.exists():
-            with open(checker.schema_path, 'r', encoding='utf-8') as f:
-                content = f.read()
+            try:
+                with open(checker.schema_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+            except (OSError, IOError, UnicodeDecodeError) as e:
+                print(f"Error reading schema file: {e}", file=sys.stderr)
+                return
             
             for match in checker.model_pattern.finditer(content):
                 entity_name = match.group(1)
@@ -532,6 +560,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 
 
 

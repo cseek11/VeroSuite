@@ -84,3 +84,5 @@ class SecurePostgRESTClient:
         """Delete from table."""
         return self.client.from_(table_name).delete()
 
+
+

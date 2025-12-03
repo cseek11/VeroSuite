@@ -46,24 +46,29 @@ const apiRequest = async <T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> => {
-  const token = await getAuthToken();
-  
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      ...options.headers,
-    },
-  });
+  try {
+    const token = await getAuthToken();
+    
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        ...options.headers,
+      },
+    });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: response.statusText }));
-    logger.error(`API request failed: ${endpoint}`, error, 'compliance-api');
-    throw new Error(error.message || `API request failed: ${response.statusText}`);
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: response.statusText }));
+      logger.error(`API request failed: ${endpoint}`, error, 'compliance-api');
+      throw new Error(error.message || `API request failed: ${response.statusText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    logger.error(`API request error: ${endpoint}`, error, 'compliance-api');
+    throw error;
   }
-
-  return response.json();
 };
 
 /**
@@ -169,4 +174,6 @@ export const complianceApi = {
     }
   },
 };
+
+
 

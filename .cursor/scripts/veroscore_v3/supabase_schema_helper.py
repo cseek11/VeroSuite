@@ -53,7 +53,13 @@ class SupabaseSchemaHelper:
                 # Try to get from Supabase client internals
                 supabase_url = getattr(self.supabase, 'supabase_url', None) or os.getenv("SUPABASE_URL")
                 supabase_key = getattr(self.supabase, 'supabase_key', None) or os.getenv("SUPABASE_SECRET_KEY")
-            except Exception:
+            except (AttributeError, RuntimeError) as e:
+                # Fallback to environment variables if attribute access fails
+                logger.debug(
+                    "Failed to get URL/key from client, using environment",
+                    operation="_get_postgrest_client",
+                    root_cause=str(e)
+                )
                 supabase_url = os.getenv("SUPABASE_URL")
                 supabase_key = os.getenv("SUPABASE_SECRET_KEY")
             
@@ -97,7 +103,13 @@ class SupabaseSchemaHelper:
                     table_name=table_name
                 )
                 return True
-        except Exception:
+        except (AttributeError, RuntimeError, ConnectionError) as e:
+            logger.debug(
+                ".schema() method failed",
+                operation="_try_direct_access",
+                root_cause=str(e),
+                table_name=table_name
+            )
             pass
         
         # Method 2: Try schema-qualified table name (veroscore.table_name)
@@ -109,7 +121,13 @@ class SupabaseSchemaHelper:
                 table_name=table_name
             )
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.debug(
+                "Schema-qualified name method failed",
+                operation="_try_direct_access",
+                root_cause=str(e),
+                table_name=table_name
+            )
             pass
         
         # Method 3: Try standard Supabase client (if PostgREST reloaded)
@@ -121,7 +139,13 @@ class SupabaseSchemaHelper:
                 table_name=table_name
             )
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.debug(
+                "Standard client method failed",
+                operation="_try_direct_access",
+                root_cause=str(e),
+                table_name=table_name
+            )
             pass
         
         # Method 4: Use PostgREST client with Accept-Profile header
@@ -134,7 +158,7 @@ class SupabaseSchemaHelper:
                 table_name=table_name
             )
             return True
-        except Exception as e:
+        except (ConnectionError, RuntimeError, ValueError, ImportError) as e:
             logger.debug(
                 "All direct access methods failed",
                 operation="_try_direct_access",
@@ -197,7 +221,12 @@ class SupabaseSchemaHelper:
                         result = self.supabase.schema("veroscore").table("sessions").insert(session_data).execute()
                         if result.data and len(result.data) > 0:
                             return result.data[0]
-                    except Exception:
+                    except (RuntimeError, ConnectionError, ValueError) as e:
+                        logger.debug(
+                            ".schema() insert method failed, trying fallback",
+                            operation="insert_session",
+                            root_cause=str(e)
+                        )
                         pass
                 
                 # Method 2: Try schema-qualified table name
@@ -206,7 +235,12 @@ class SupabaseSchemaHelper:
                         result = self.supabase.table("veroscore.sessions").insert(session_data).execute()
                         if result.data and len(result.data) > 0:
                             return result.data[0]
-                    except Exception:
+                    except (RuntimeError, ConnectionError, ValueError) as e:
+                        logger.debug(
+                            "Schema-qualified insert method failed, trying PostgREST",
+                            operation="insert_session",
+                            root_cause=str(e)
+                        )
                         pass
                 
                 # Method 3: Use PostgREST client with Accept-Profile header
@@ -217,14 +251,22 @@ class SupabaseSchemaHelper:
                         return result.data[0]
                 
                 return None
-        except Exception as e:
+        except (ValueError, RuntimeError, ConnectionError) as e:
             logger.error(
                 "Failed to insert session",
                 operation="insert_session",
                 error_code="SESSION_INSERT_FAILED",
                 root_cause=str(e)
             )
-            raise
+            raise RuntimeError(f"Failed to insert session: {e}") from e
+        except Exception as e:
+            logger.error(
+                "Unexpected error inserting session",
+                operation="insert_session",
+                error_code="SESSION_INSERT_UNEXPECTED",
+                root_cause=str(e)
+            )
+            raise RuntimeError(f"Unexpected error inserting session: {e}") from e
     
     def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
         """
@@ -263,7 +305,13 @@ class SupabaseSchemaHelper:
                         )
                         if result.data and len(result.data) > 0:
                             return result.data[0]
-                    except Exception:
+                    except (RuntimeError, ConnectionError, ValueError) as e:
+                        logger.debug(
+                            ".schema() select method failed, trying fallback",
+                            operation="get_session",
+                            root_cause=str(e),
+                            session_id=session_id
+                        )
                         pass
                 
                 # Method 2: Try schema-qualified table name
@@ -278,7 +326,13 @@ class SupabaseSchemaHelper:
                         )
                         if result.data and len(result.data) > 0:
                             return result.data[0]
-                    except Exception:
+                    except (RuntimeError, ConnectionError, ValueError) as e:
+                        logger.debug(
+                            "Schema-qualified select method failed, trying PostgREST",
+                            operation="get_session",
+                            root_cause=str(e),
+                            session_id=session_id
+                        )
                         pass
                 
                 # Method 3: Use PostgREST client with Accept-Profile header
@@ -295,11 +349,20 @@ class SupabaseSchemaHelper:
                         return result.data[0]
                 
                 return None
-        except Exception as e:
+        except (ValueError, RuntimeError, ConnectionError) as e:
             logger.error(
                 "Failed to get session",
                 operation="get_session",
                 error_code="SESSION_GET_FAILED",
+                root_cause=str(e),
+                session_id=session_id
+            )
+            return None
+        except Exception as e:
+            logger.error(
+                "Unexpected error getting session",
+                operation="get_session",
+                error_code="SESSION_GET_UNEXPECTED",
                 root_cause=str(e),
                 session_id=session_id
             )
@@ -355,7 +418,13 @@ class SupabaseSchemaHelper:
                         result = self.supabase.schema("veroscore").table("changes_queue").insert(changes_data).execute()
                         if result.data:
                             return len(changes_data)
-                    except Exception:
+                    except (RuntimeError, ConnectionError, ValueError) as e:
+                        logger.debug(
+                            ".schema() insert changes method failed, trying fallback",
+                            operation="insert_changes",
+                            root_cause=str(e),
+                            session_id=session_id
+                        )
                         pass
                 
                 # Method 2: Try schema-qualified table name
@@ -364,7 +433,13 @@ class SupabaseSchemaHelper:
                         result = self.supabase.table("veroscore.changes_queue").insert(changes_data).execute()
                         if result.data:
                             return len(changes_data)
-                    except Exception:
+                    except (RuntimeError, ConnectionError, ValueError) as e:
+                        logger.debug(
+                            "Schema-qualified insert changes method failed, trying PostgREST",
+                            operation="insert_changes",
+                            root_cause=str(e),
+                            session_id=session_id
+                        )
                         pass
                 
                 # Method 3: Use PostgREST client with Accept-Profile header
@@ -374,7 +449,7 @@ class SupabaseSchemaHelper:
                     return len(changes_data) if result.data else 0
                 
                 return 0
-        except Exception as e:
+        except (ValueError, RuntimeError, ConnectionError) as e:
             logger.error(
                 "Failed to insert changes",
                 operation="insert_changes",
@@ -383,5 +458,15 @@ class SupabaseSchemaHelper:
                 session_id=session_id,
                 change_count=len(changes)
             )
-            raise
+            raise RuntimeError(f"Failed to insert changes: {e}") from e
+        except Exception as e:
+            logger.error(
+                "Unexpected error inserting changes",
+                operation="insert_changes",
+                error_code="CHANGES_INSERT_UNEXPECTED",
+                root_cause=str(e),
+                session_id=session_id,
+                change_count=len(changes)
+            )
+            raise RuntimeError(f"Unexpected error inserting changes: {e}") from e
 

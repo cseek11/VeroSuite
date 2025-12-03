@@ -1,8 +1,7 @@
 package compliance.data_integrity_test
 
-import future.keywords.contains
-import future.keywords.if
-import future.keywords.in
+import rego.v1
+import data.compliance.data_integrity
 
 # Test data for R06: Breaking Change Documentation
 
@@ -11,7 +10,7 @@ import future.keywords.in
 # =============================================================================
 
 test_r06_happy_path_complete_documentation if {
-    input := {
+    test_input := {
         "pr_title": "[BREAKING] Remove legacy authentication endpoints (v2.0.0)",
         "changed_files": [
             {
@@ -39,7 +38,7 @@ test_r06_happy_path_complete_documentation if {
     }
     
     # Should have no violations
-    count(data.compliance.data_integrity.deny) == 0
+    count(data.compliance.data_integrity.deny) == 0 with input as test_input
 }
 
 # =============================================================================
@@ -47,7 +46,7 @@ test_r06_happy_path_complete_documentation if {
 # =============================================================================
 
 test_r06_happy_path_api_with_docs if {
-    input := {
+    test_input := {
         "pr_title": "[BREAKING] Change error response format",
         "changed_files": [
             {
@@ -80,7 +79,7 @@ test_r06_happy_path_api_with_docs if {
     }
     
     # Should have no violations (API docs updated)
-    count(data.compliance.data_integrity.deny) == 0
+    count(data.compliance.data_integrity.deny) == 0 with input as test_input
 }
 
 # =============================================================================
@@ -88,7 +87,7 @@ test_r06_happy_path_api_with_docs if {
 # =============================================================================
 
 test_r06_happy_path_database_breaking if {
-    input := {
+    test_input := {
         "pr_title": "[BREAKING] Remove legacy_token column from users table",
         "changed_files": [
             {
@@ -116,7 +115,7 @@ test_r06_happy_path_database_breaking if {
     }
     
     # Should have no violations
-    count(data.compliance.data_integrity.deny) == 0
+    count(data.compliance.data_integrity.deny) == 0 with input as test_input
 }
 
 # =============================================================================
@@ -124,7 +123,7 @@ test_r06_happy_path_database_breaking if {
 # =============================================================================
 
 test_r06_violation_missing_breaking_tag if {
-    input := {
+    test_input := {
         "pr_title": "Remove legacy authentication endpoints",
         "changed_files": [
             {
@@ -136,7 +135,7 @@ test_r06_violation_missing_breaking_tag if {
         "pr_body": "Cleanup authentication code"
     }
     
-    violations := data.compliance.data_integrity.deny
+    violations := data.compliance.data_integrity.deny with input as test_input
     count(violations) > 0
     
     # Should contain message about missing [BREAKING] tag
@@ -150,7 +149,7 @@ test_r06_violation_missing_breaking_tag if {
 # =============================================================================
 
 test_r06_violation_missing_migration_guide if {
-    input := {
+    test_input := {
         "pr_title": "[BREAKING] Remove legacy authentication endpoints",
         "changed_files": [
             {
@@ -162,7 +161,7 @@ test_r06_violation_missing_migration_guide if {
         "pr_body": "Remove legacy auth"
     }
     
-    violations := data.compliance.data_integrity.deny
+    violations := data.compliance.data_integrity.deny with input as test_input
     count(violations) > 0
     
     # Should contain message about missing migration guide
@@ -175,7 +174,7 @@ test_r06_violation_missing_migration_guide if {
 # =============================================================================
 
 test_r06_violation_missing_version_bump if {
-    input := {
+    test_input := {
         "pr_title": "[BREAKING] Remove legacy authentication endpoints",
         "changed_files": [
             {
@@ -192,7 +191,7 @@ test_r06_violation_missing_version_bump if {
         "pr_body": "Remove legacy auth"
     }
     
-    violations := data.compliance.data_integrity.deny
+    violations := data.compliance.data_integrity.deny with input as test_input
     count(violations) > 0
     
     # Should contain message about missing version bump
@@ -205,7 +204,7 @@ test_r06_violation_missing_version_bump if {
 # =============================================================================
 
 test_r06_violation_missing_changelog if {
-    input := {
+    test_input := {
         "pr_title": "[BREAKING] Remove legacy authentication endpoints",
         "changed_files": [
             {
@@ -227,7 +226,7 @@ test_r06_violation_missing_changelog if {
         "pr_body": "Remove legacy auth"
     }
     
-    violations := data.compliance.data_integrity.deny
+    violations := data.compliance.data_integrity.deny with input as test_input
     count(violations) > 0
     
     # Should contain message about missing CHANGELOG
@@ -240,7 +239,7 @@ test_r06_violation_missing_changelog if {
 # =============================================================================
 
 test_r06_warning_api_without_docs if {
-    input := {
+    test_input := {
         "pr_title": "[BREAKING] Change API response format",
         "changed_files": [
             {
@@ -267,7 +266,7 @@ test_r06_warning_api_without_docs if {
         "pr_body": "Change API response format"
     }
     
-    warnings := data.compliance.data_integrity.warn
+    warnings := data.compliance.data_integrity.warn with input as test_input
     count(warnings) > 0
     
     # Should warn about missing API docs
@@ -281,7 +280,7 @@ test_r06_warning_api_without_docs if {
 # =============================================================================
 
 test_r06_override_with_marker if {
-    input := {
+    test_input := {
         "pr_title": "Remove legacy authentication endpoints",
         "changed_files": [
             {
@@ -294,7 +293,7 @@ test_r06_override_with_marker if {
     }
     
     # Should have no violations (override marker present)
-    count(data.compliance.data_integrity.deny) == 0
+    count(data.compliance.data_integrity.deny) == 0 with input as test_input
 }
 
 # =============================================================================
@@ -302,7 +301,7 @@ test_r06_override_with_marker if {
 # =============================================================================
 
 test_r06_edge_case_multiple_breaking_changes if {
-    input := {
+    test_input := {
         "pr_title": "[BREAKING] Major API refactor",
         "changed_files": [
             {
@@ -340,6 +339,6 @@ test_r06_edge_case_multiple_breaking_changes if {
     }
     
     # Should have no violations (all requirements met)
-    count(data.compliance.data_integrity.deny) == 0
+    count(data.compliance.data_integrity.deny) == 0 with input as test_input
 }
 

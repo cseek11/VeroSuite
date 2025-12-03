@@ -19,7 +19,7 @@ Usage:
     python check-file-organization.py --deprecated-paths
     python check-file-organization.py --generate-report
 
-Created: 2025-11-23
+Created: 2025-12-01
 Version: 1.0.0
 """
 
@@ -31,11 +31,23 @@ from pathlib import Path
 from typing import List, Dict, Set, Optional
 from collections import defaultdict
 
+# Try to import structured logging
+try:
+    from logger_util import get_logger
+    logger = get_logger(context="file_organization_checker")
+except ImportError:
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger("file_organization_checker")
+
 class FileOrganizationChecker:
     def __init__(self):
         self.violations = []
         self.warnings = []
         self.files_checked = 0
+        
+        # Get project root (assume script is in .cursor/scripts/)
+        self.project_root = Path(__file__).parent.parent.parent.resolve()
         
         # Patterns for detection
         self.deprecated_import_pattern = re.compile(r'@verosuite/')
@@ -54,6 +66,18 @@ class FileOrganizationChecker:
             'backend/prisma/': 'libs/common/prisma/',
             'src/': 'frontend/src/'  # Root-level src/
         }
+    
+    def _normalize_path(self, file_path: str) -> str:
+        """Normalize file path relative to project root for consistent checking."""
+        path_obj = Path(file_path).resolve()
+        try:
+            # Get relative path from project root
+            rel_path = path_obj.relative_to(self.project_root)
+            # Convert to forward slashes for consistent checking (works on all platforms)
+            return str(rel_path).replace('\\', '/')
+        except ValueError:
+            # Path is outside project root, return as-is but normalized
+            return str(path_obj).replace('\\', '/')
         
     def check_all(self) -> Dict:
         """Check all files in the repository."""
@@ -66,14 +90,13 @@ class FileOrganizationChecker:
         ]
         
         for directory in directories_to_check:
-            if os.path.exists(directory):
-                for root, dirs, files in os.walk(directory):
-                    for file in files:
-                        if file.endswith(('.ts', '.tsx', '.js', '.jsx', '.prisma')):
-                            file_path = os.path.join(root, file)
-                            result = self.check_file(file_path)
-                            violations.extend([v for v in result if v.get('severity') == 'CRITICAL'])
-                            warnings.extend([w for w in result if w.get('severity') == 'WARNING'])
+            dir_path = Path(directory)
+            if dir_path.exists():
+                for file_path in dir_path.rglob('*'):
+                    if file_path.is_file() and file_path.suffix in ('.ts', '.tsx', '.js', '.jsx', '.prisma'):
+                        result = self.check_file(str(file_path))
+                        violations.extend([v for v in result if v.get('severity') == 'CRITICAL'])
+                        warnings.extend([w for w in result if w.get('severity') == 'WARNING'])
         
         return {
             'violations': violations,
@@ -86,16 +109,15 @@ class FileOrganizationChecker:
         violations = []
         warnings = []
         
-        if not os.path.exists(directory):
+        dir_path = Path(directory)
+        if not dir_path.exists():
             return {'violations': [], 'warnings': [], 'files_checked': 0}
         
-        for root, dirs, files in os.walk(directory):
-            for file in files:
-                if file.endswith(('.ts', '.tsx', '.js', '.jsx', '.prisma')):
-                    file_path = os.path.join(root, file)
-                    result = self.check_file(file_path)
-                    violations.extend([v for v in result if v.get('severity') == 'CRITICAL'])
-                    warnings.extend([w for w in result if w.get('severity') == 'WARNING'])
+        for file_path in dir_path.rglob('*'):
+            if file_path.is_file() and file_path.suffix in ('.ts', '.tsx', '.js', '.jsx', '.prisma'):
+                result = self.check_file(str(file_path))
+                violations.extend([v for v in result if v.get('severity') == 'CRITICAL'])
+                warnings.extend([w for w in result if w.get('severity') == 'WARNING'])
         
         return {
             'violations': violations,
@@ -106,10 +128,11 @@ class FileOrganizationChecker:
     def check_file(self, file_path: str) -> List[Dict]:
         """Check a single file for file organization violations."""
         issues = []
+        content = None
         
         try:
-            # Normalize path
-            normalized_path = file_path.replace('\\', '/')
+            # Normalize path relative to project root
+            normalized_path = self._normalize_path(file_path)
             
             # Check file path
             issues.extend(self._check_file_path(normalized_path))
@@ -123,15 +146,21 @@ class FileOrganizationChecker:
                     issues.extend(self._check_file_naming(normalized_path, content))
                 except Exception as e:
                     # File might be binary or have encoding issues
-                    pass
+                    logger.debug(f"Could not read file content: {file_path} - {e}")
             
-            # Check directory structure
-            issues.extend(self._check_directory_structure(normalized_path))
+            # Check directory structure (pass content if available to avoid re-reading)
+            issues.extend(self._check_directory_structure(normalized_path, content))
             
             self.files_checked += 1
             
         except Exception as e:
-            print(f"⚠️  Error checking {file_path}: {e}", file=sys.stderr)
+            logger.error(
+                f"Error checking file: {file_path}",
+                operation="check_file",
+                error_code="FILE_CHECK_FAILED",
+                root_cause=str(e),
+                file_path=file_path
+            )
         
         return issues
     
@@ -245,7 +274,7 @@ class FileOrganizationChecker:
     def _check_file_naming(self, file_path: str, content: str) -> List[Dict]:
         """Check file naming conventions."""
         issues = []
-        file_name = os.path.basename(file_path)
+        file_name = Path(file_path).name
         
         # Check component files (PascalCase)
         if file_path.endswith('.tsx'):
@@ -277,7 +306,7 @@ class FileOrganizationChecker:
         
         return issues
     
-    def _check_directory_structure(self, file_path: str) -> List[Dict]:
+    def _check_directory_structure(self, file_path: str, content: Optional[str] = None) -> List[Dict]:
         """Check directory structure compliance."""
         issues = []
         parts = Path(file_path).parts
@@ -298,16 +327,27 @@ class FileOrganizationChecker:
         
         # Check component location (reusable components should be in ui/)
         if 'frontend/src/components/' in file_path and '/ui/' not in file_path:
-            if file_path.endswith('.tsx') and 'export const' in str(Path(file_path).read_text() if Path(file_path).exists() else ''):
-                issues.append({
-                    'file': file_path,
-                    'line': 0,
-                    'type': 'component_location',
-                    'severity': 'WARNING',
-                    'message': 'Reusable component should be in frontend/src/components/ui/',
-                    'suggestion': 'Move to ui/ if reusable, or keep in feature folder if feature-specific',
-                    'example': 'frontend/src/components/ui/Button.tsx for reusable'
-                })
+            if file_path.endswith('.tsx'):
+                # Use provided content if available, otherwise try to read
+                file_content = content
+                if file_content is None:
+                    try:
+                        file_path_obj = self.project_root / file_path
+                        if file_path_obj.exists():
+                            file_content = file_path_obj.read_text(encoding='utf-8')
+                    except Exception:
+                        file_content = ''
+                
+                if file_content and 'export const' in file_content:
+                    issues.append({
+                        'file': file_path,
+                        'line': 0,
+                        'type': 'component_location',
+                        'severity': 'WARNING',
+                        'message': 'Reusable component should be in frontend/src/components/ui/',
+                        'suggestion': 'Move to ui/ if reusable, or keep in feature folder if feature-specific',
+                        'example': 'frontend/src/components/ui/Button.tsx for reusable'
+                    })
         
         return issues
     
@@ -316,15 +356,16 @@ class FileOrganizationChecker:
         deprecated_files = []
         
         for deprecated_path, correct_path in self.deprecated_paths.items():
-            if os.path.exists(deprecated_path.rstrip('/')):
-                for root, dirs, files in os.walk(deprecated_path.rstrip('/')):
-                    for file in files:
-                        file_path = os.path.join(root, file).replace('\\', '/')
+            dep_path = Path(deprecated_path.rstrip('/'))
+            if dep_path.exists():
+                for file_path in dep_path.rglob('*'):
+                    if file_path.is_file():
+                        file_path_str = str(file_path).replace('\\', '/')
                         deprecated_files.append({
-                            'file': file_path,
+                            'file': file_path_str,
                             'deprecated_path': deprecated_path,
-                            'suggested_path': file_path.replace(deprecated_path, correct_path),
-                            'migration_command': f'git mv {file_path} {file_path.replace(deprecated_path, correct_path)}'
+                            'suggested_path': file_path_str.replace(deprecated_path, correct_path),
+                            'migration_command': f'git mv {file_path_str} {file_path_str.replace(deprecated_path, correct_path)}'
                         })
         
         return deprecated_files
@@ -446,6 +487,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 
 
 

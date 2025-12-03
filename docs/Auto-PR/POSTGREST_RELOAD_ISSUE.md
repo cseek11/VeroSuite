@@ -111,3 +111,5 @@ result = supabase.schema("veroscore").table("sessions").select("*").execute()
 **Last Updated:** 2025-11-24  
 **Status:** ⏳ Waiting for PostgREST to reload or investigating Python client limitations
 
+
+

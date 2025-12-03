@@ -126,6 +126,8 @@ Your compliance check was successfully queued:
 
 ---
 
-**Last Updated:** 2025-11-24  
+**Last Updated:** 2025-11-30  
 **Status:** V1 compliance endpoints working correctly, v2 not needed yet
+
+
 

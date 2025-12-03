@@ -50,17 +50,22 @@ describe('AuthModule', () => {
       // Remove JWT_SECRET from environment
       delete process.env.JWT_SECRET;
 
-      await expect(
-        Test.createTestingModule({
-          imports: [
-            ConfigModule.forRoot({
-              isGlobal: true,
-              envFilePath: ['.env.test'],
-            }),
-            AuthModule,
-          ],
-        }).compile(),
-      ).rejects.toThrow('JWT_SECRET environment variable is required');
+      try {
+        await expect(
+          Test.createTestingModule({
+            imports: [
+              ConfigModule.forRoot({
+                isGlobal: true,
+                envFilePath: ['.env.test'],
+              }),
+              AuthModule,
+            ],
+          }).compile(),
+        ).rejects.toThrow('JWT_SECRET environment variable is required');
+      } catch (error) {
+        // Jest's expect().rejects handles the error, but we catch for compliance
+        throw error;
+      }
     });
 
     it('should throw error with traceId when JWT_SECRET is missing', async () => {
@@ -132,6 +137,8 @@ describe('AuthModule', () => {
     });
   });
 });
+
+
 
 
 

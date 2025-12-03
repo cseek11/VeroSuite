@@ -1,14 +1,8 @@
 ﻿{
-  "api_endpoints": [
+  "changed_files": [
     {
-      "path": "/api/users",
-      "status": "modified"
+      "path": "test.ts",
+      "diff": "+ // TODO:\n+ function getUsers() {"
     }
-  ],
-  "performance_baseline": {
-    "/api/users": {"p50": 150, "p95": 250, "p99": 300}
-  },
-  "performance_current": {
-    "/api/users": {"p50": 180, "p95": 300, "p99": 400}
-  }
+  ]
 }

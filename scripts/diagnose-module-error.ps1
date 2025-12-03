@@ -107,3 +107,5 @@ Write-Host "  1. Regenerate Prisma client: cd libs/common/prisma && npx prisma g
 Write-Host "  2. Install dependencies: npm install" -ForegroundColor White
 Write-Host "  3. Rebuild: cd apps/api && npm run build" -ForegroundColor White
 
+
+

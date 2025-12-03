@@ -221,6 +221,8 @@ const { access_token, user } = data;
 
 ---
 
-**Last Updated:** 2025-11-24  
+**Last Updated:** 2025-11-30  
 **Status:** V2 is recommended, V1 is deprecated
+
+
 

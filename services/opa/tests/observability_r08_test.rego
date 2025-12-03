@@ -1,32 +1,25 @@
 # R08: Structured Logging Policy Tests
 # Tests for structured logging violations and warnings
 
-package verofield.observability
+package compliance.observability_test
 
-import future.keywords.if
+import rego.v1
+import data.compliance.observability
 
 # ============================================================================
 # TEST 1: Happy Path - Proper Structured Logging with All Required Fields
 # ============================================================================
 
 test_proper_structured_logging_passes if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/test/service.ts",
-            "diff_lines": [
-                "+ this.logger.info(",
-                "+   'Processing payment',",
-                "+   'PaymentService',",
-                "+   requestId,",
-                "+   'processPayment',",
-                "+   { paymentId: payment.id }",
-                "+ );"
-            ]
+            "diff": "+ this.logger.info(\n+   'Processing payment',\n+   'PaymentService',\n+   requestId,\n+   'processPayment',\n+   { paymentId: payment.id }\n+ );"
         }],
-        "pr_body_lines": []
+        "pr_body": ""
     }
     
-    count(violations) == 0
+    count(observability.violations) == 0 with input as test_input
 }
 
 # ============================================================================
@@ -34,23 +27,15 @@ test_proper_structured_logging_passes if {
 # ============================================================================
 
 test_trace_id_propagation_passes if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/test/service.ts",
-            "diff_lines": [
-                "+ const traceId = this.requestContext.getTraceId();",
-                "+ this.logger.info(",
-                "+   'Processing payment',",
-                "+   'PaymentService',",
-                "+   this.requestContext.getRequestId(),",
-                "+   'processPayment'",
-                "+ );"
-            ]
+            "diff": "+ const traceId = this.requestContext.getTraceId();\n+ this.logger.info(\n+   'Processing payment',\n+   'PaymentService',\n+   this.requestContext.getRequestId(),\n+   'processPayment'\n+ );"
         }],
-        "pr_body_lines": []
+        "pr_body": ""
     }
     
-    count(violations) == 0
+    count(observability.violations) == 0 with input as test_input
 }
 
 # ============================================================================
@@ -58,28 +43,15 @@ test_trace_id_propagation_passes if {
 # ============================================================================
 
 test_optional_fields_passes if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/test/service.ts",
-            "diff_lines": [
-                "+ this.logger.error(",
-                "+   'Payment failed',",
-                "+   'PaymentService',",
-                "+   requestId,",
-                "+   'processPayment',",
-                "+   {",
-                "+     errorCode: 'PAYMENT_FAILED',",
-                "+     rootCause: error.message,",
-                "+     tenantId: this.requestContext.getTenantId(),",
-                "+     userId: user.id",
-                "+   }",
-                "+ );"
-            ]
+            "diff": "+ this.logger.error(\n+   'Payment failed',\n+   'PaymentService',\n+   requestId,\n+   'processPayment',\n+   {\n+     errorCode: 'PAYMENT_FAILED',\n+     rootCause: error.message,\n+     tenantId: this.requestContext.getTenantId(),\n+     userId: user.id\n+   }\n+ );"
         }],
-        "pr_body_lines": []
+        "pr_body": ""
     }
     
-    count(violations) == 0
+    count(observability.violations) == 0 with input as test_input
 }
 
 # ============================================================================
@@ -87,18 +59,16 @@ test_optional_fields_passes if {
 # ============================================================================
 
 test_console_log_fails if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/test/service.ts",
-            "diff_lines": [
-                "+ console.log('Processing payment');"
-            ]
+            "diff": "+ console.log('Processing payment');"
         }],
-        "pr_body_lines": []
+        "pr_body": ""
     }
     
-    count(violations) > 0
-    count(deny) > 0
+    count(observability.violations) > 0 with input as test_input
+    count(observability.deny) > 0 with input as test_input
 }
 
 # ============================================================================
@@ -106,18 +76,16 @@ test_console_log_fails if {
 # ============================================================================
 
 test_unstructured_logging_fails if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/test/service.ts",
-            "diff_lines": [
-                "+ logger.log('Processing payment');"
-            ]
+            "diff": "+ logger.log('Processing payment');"
         }],
-        "pr_body_lines": []
+        "pr_body": ""
     }
     
-    count(violations) > 0
-    count(deny) > 0
+    count(observability.violations) > 0 with input as test_input
+    count(observability.deny) > 0 with input as test_input
 }
 
 # ============================================================================
@@ -125,18 +93,16 @@ test_unstructured_logging_fails if {
 # ============================================================================
 
 test_missing_required_fields_fails if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/test/service.ts",
-            "diff_lines": [
-                "+ this.logger.info('Processing payment', 'PaymentService');"
-            ]
+            "diff": "+ this.logger.info('Processing payment', 'PaymentService');"
         }],
-        "pr_body_lines": []
+        "pr_body": ""
     }
     
-    count(violations) > 0
-    count(deny) > 0
+    count(observability.violations) > 0 with input as test_input
+    count(observability.deny) > 0 with input as test_input
 }
 
 # ============================================================================
@@ -144,23 +110,16 @@ test_missing_required_fields_fails if {
 # ============================================================================
 
 test_missing_trace_id_fails if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/test/service.ts",
-            "diff_lines": [
-                "+ this.logger.info(",
-                "+   'Processing payment',",
-                "+   'PaymentService',",
-                "+   undefined,",
-                "+   'processPayment'",
-                "+ );"
-            ]
+            "diff": "+ this.logger.info(\n+   'Processing payment',\n+   'PaymentService',\n+   undefined,\n+   'processPayment'\n+ );"
         }],
-        "pr_body_lines": []
+        "pr_body": ""
     }
     
-    count(violations) > 0
-    count(deny) > 0
+    count(observability.violations) > 0 with input as test_input
+    count(observability.deny) > 0 with input as test_input
 }
 
 # ============================================================================
@@ -168,23 +127,16 @@ test_missing_trace_id_fails if {
 # ============================================================================
 
 test_missing_context_operation_fails if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/test/service.ts",
-            "diff_lines": [
-                "+ this.logger.info(",
-                "+   'Processing payment',",
-                "+   null,",
-                "+   requestId,",
-                "+   'processPayment'",
-                "+ );"
-            ]
+            "diff": "+ this.logger.info(\n+   'Processing payment',\n+   null,\n+   requestId,\n+   'processPayment'\n+ );"
         }],
-        "pr_body_lines": []
+        "pr_body": ""
     }
     
-    count(violations) > 0
-    count(deny) > 0
+    count(observability.violations) > 0 with input as test_input
+    count(observability.deny) > 0 with input as test_input
 }
 
 # ============================================================================
@@ -192,23 +144,16 @@ test_missing_context_operation_fails if {
 # ============================================================================
 
 test_incomplete_logging_warns if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/test/service.ts",
-            "diff_lines": [
-                "+ this.logger.error(",
-                "+   'Payment failed',",
-                "+   'PaymentService',",
-                "+   requestId,",
-                "+   'processPayment'",
-                "+ );"
-            ]
+            "diff": "+ this.logger.error(\n+   'Payment failed',\n+   'PaymentService',\n+   requestId,\n+   'processPayment'\n+ );"
         }],
-        "pr_body_lines": []
+        "pr_body": ""
     }
     
-    count(warnings) > 0
-    count(warn) > 0
+    count(observability.warnings) > 0 with input as test_input
+    count(observability.warn) > 0 with input as test_input
 }
 
 # ============================================================================
@@ -216,21 +161,16 @@ test_incomplete_logging_warns if {
 # ============================================================================
 
 test_override_allows_violation if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/test/service.ts",
-            "diff_lines": [
-                "+ console.log('Debug output');"
-            ]
+            "diff": "+ console.log('Debug output');"
         }],
-        "pr_body_lines": [
-            "@override:structured-logging",
-            "Reason: Temporary debug logging, will remove before production"
-        ]
+        "pr_body": "@override:structured-logging\nReason: Temporary debug logging, will remove before production"
     }
     
-    count(violations) > 0
-    count(deny) == 0  # Override prevents deny
+    count(observability.violations) > 0 with input as test_input
+    count(observability.deny) == 0  # Override prevents deny
 }
 
 # ============================================================================
@@ -238,18 +178,16 @@ test_override_allows_violation if {
 # ============================================================================
 
 test_console_log_in_test_passes if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/test/service.spec.ts",
-            "diff_lines": [
-                "+ console.log('Test output');"
-            ]
+            "diff": "+ console.log('Test output');"
         }],
-        "pr_body_lines": []
+        "pr_body": ""
     }
     
     # Should pass - console.log allowed in test files
-    count(violations) == 0
+    count(observability.violations) == 0 with input as test_input
 }
 
 # ============================================================================
@@ -257,18 +195,16 @@ test_console_log_in_test_passes if {
 # ============================================================================
 
 test_console_log_in_script_passes if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "scripts/migrate-data.ts",
-            "diff_lines": [
-                "+ console.log('Migration progress: 50%');"
-            ]
+            "diff": "+ console.log('Migration progress: 50%');"
         }],
-        "pr_body_lines": []
+        "pr_body": ""
     }
     
     # Should pass - console.log allowed in scripts
-    count(violations) == 0
+    count(observability.violations) == 0 with input as test_input
 }
 
 # ============================================================================
@@ -276,20 +212,16 @@ test_console_log_in_script_passes if {
 # ============================================================================
 
 test_multiple_logging_calls_checked if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/test/service.ts",
-            "diff_lines": [
-                "+ this.logger.info('Start', 'Service', requestId, 'process', {});",
-                "+ this.logger.info('Processing', 'Service', requestId, 'process', {});",
-                "+ this.logger.info('Complete', 'Service', requestId, 'process', {});"
-            ]
+            "diff": "+ this.logger.info('Start', 'Service', requestId, 'process', {});\n+ this.logger.info('Processing', 'Service', requestId, 'process', {});\n+ this.logger.info('Complete', 'Service', requestId, 'process', {});"
         }],
-        "pr_body_lines": []
+        "pr_body": ""
     }
     
     # Should pass - all calls have required fields
-    count(violations) == 0
+    count(observability.violations) == 0 with input as test_input
 }
 
 # ============================================================================
@@ -297,21 +229,16 @@ test_multiple_logging_calls_checked if {
 # ============================================================================
 
 test_nested_service_calls_checked if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/test/service.ts",
-            "diff_lines": [
-                "+ const traceId = this.requestContext.getTraceId();",
-                "+ this.logger.info('Calling downstream', 'Service', requestId, 'call');",
-                "+ await this.downstreamService.process(traceId, data);",
-                "+ this.logger.info('Downstream complete', 'Service', requestId, 'call');"
-            ]
+            "diff": "+ const traceId = this.requestContext.getTraceId();\n+ this.logger.info('Calling downstream', 'Service', requestId, 'call');\n+ await this.downstreamService.process(traceId, data);\n+ this.logger.info('Downstream complete', 'Service', requestId, 'call');"
         }],
-        "pr_body_lines": []
+        "pr_body": ""
     }
     
     # Should pass - traceId propagates correctly
-    count(violations) == 0
+    count(observability.violations) == 0 with input as test_input
 }
 
 # ============================================================================
@@ -319,29 +246,18 @@ test_nested_service_calls_checked if {
 # ============================================================================
 
 test_logger_injection_checked if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/test/service.ts",
-            "diff_lines": [
-                "+ @Injectable()",
-                "+ export class TestService {",
-                "+   constructor(",
-                "+     private readonly logger: StructuredLoggerService,",
-                "+     private readonly requestContext: RequestContextService",
-                "+   ) {}",
-                "+   ",
-                "+   async process() {",
-                "+     this.logger.info('Processing', 'TestService', this.requestContext.getRequestId(), 'process');",
-                "+   }",
-                "+ }"
-            ]
+            "diff": "+ @Injectable()\n+ export class TestService {\n+   constructor(\n+     private readonly logger: StructuredLoggerService,\n+     private readonly requestContext: RequestContextService\n+   ) {}\n+   \n+   async process() {\n+     this.logger.info('Processing', 'TestService', this.requestContext.getRequestId(), 'process');\n+   }\n+ }"
         }],
-        "pr_body_lines": []
+        "pr_body": ""
     }
     
     # Should pass - logger properly injected and used
-    count(violations) == 0
+    count(observability.violations) == 0 with input as test_input
 }
+
 
 
 

@@ -160,3 +160,5 @@ GRANT EXECUTE ON FUNCTION veroscore.update_session_stats TO service_role;
 GRANT EXECUTE ON FUNCTION veroscore.insert_changes TO service_role;
 GRANT EXECUTE ON FUNCTION veroscore.get_pending_changes_count TO service_role;
 
+
+

@@ -62,3 +62,5 @@ Write-Host "   Or check manually:" -ForegroundColor Gray
 Write-Host "     SELECT * FROM compliance.write_queue ORDER BY created_at DESC LIMIT 5;" -ForegroundColor Gray
 Write-Host "     SELECT * FROM compliance.compliance_checks ORDER BY created_at DESC LIMIT 5;" -ForegroundColor Gray
 
+
+

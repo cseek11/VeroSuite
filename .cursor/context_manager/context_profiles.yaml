@@ -1,0 +1,195 @@
+# Context Requirements Mapping
+# Defines which context files are needed for each task type
+
+context_profiles:
+  edit_code:
+    python:
+      required:
+        # MINIMAL: Only essential for enforcer to operate
+        - "@.cursor/enforcement/rules/python_bible.mdc"
+        - "@.cursor/enforcement/rules/02-core.mdc"
+      optional:
+        # SUGGESTED: Load manually if needed
+        - "@.cursor/enforcement/rules/08-backend.mdc"
+        - "@.cursor/patterns/**/*.md"
+      file_specific:
+        database:
+          # HIGH PRIORITY: Critical for database operations (security, data integrity)
+          - "@.cursor/enforcement/rules/03-security.mdc"
+          - "@.cursor/enforcement/rules/05-data.mdc"
+          - "@libs/common/prisma/schema.prisma"
+        api:
+          # HIGH PRIORITY: Critical for API operations (security, observability)
+          - "@.cursor/enforcement/rules/08-backend.mdc"
+          - "@.cursor/enforcement/rules/03-security.mdc"
+          - "@.cursor/enforcement/rules/07-observability.mdc"
+        auth:
+          # HIGH PRIORITY: Critical for auth operations (security)
+          - "@.cursor/enforcement/rules/03-security.mdc"
+          - "@.cursor/enforcement/rules/08-backend.mdc"
+        _priority:
+          # File-specific priority overrides (HIGH = auto-load, MEDIUM = suggest only)
+          # MINIMAL LOADING: Changed to MEDIUM by default - only load if >20% of files match
+          database: "MEDIUM"  # Changed from HIGH - only load if significant database files
+          api: "MEDIUM"  # Changed from HIGH - only load if significant API files
+          auth: "MEDIUM"  # Changed from HIGH - only load if significant auth files
+    
+    typescript:
+      required:
+        - "@.cursor/enforcement/rules/typescript_bible.mdc"
+        - "@.cursor/enforcement/rules/02-core.mdc"
+      optional:
+        - "@.cursor/enforcement/rules/09-frontend.mdc"
+        - "@.cursor/enforcement/rules/13-ux-consistency.mdc"
+      file_specific:
+        component:
+          # HIGH PRIORITY: Critical for component development (UX consistency, patterns)
+          - "@.cursor/enforcement/rules/09-frontend.mdc"
+          - "@.cursor/enforcement/rules/13-ux-consistency.mdc"
+          - "@docs/reference/COMPONENT_LIBRARY_CATALOG.md"
+        api_client:
+          # HIGH PRIORITY: Critical for API client development (observability)
+          - "@.cursor/enforcement/rules/08-backend.mdc"
+          - "@.cursor/enforcement/rules/07-observability.mdc"
+        _priority:
+          # File-specific priority overrides (HIGH = auto-load, MEDIUM = suggest only)
+          component: "HIGH"
+          api_client: "HIGH"
+
+  run_tests:
+    python:
+      required:
+        - "@.cursor/enforcement/rules/10-quality.mdc"
+        - "@.cursor/enforcement/rules/14-verification.mdc"
+      optional:
+        - "@.cursor/enforcement/rules/python_bible.mdc"
+        - "@.cursor/PYTHON_LEARNINGS_LOG.md"
+    
+    typescript:
+      required:
+        - "@.cursor/enforcement/rules/10-quality.mdc"
+        - "@.cursor/enforcement/rules/14-verification.mdc"
+      optional:
+        - "@.cursor/enforcement/rules/typescript_bible.mdc"
+
+  write_docs:
+    all:
+      required:
+        - "@.cursor/enforcement/rules/02-core.mdc"
+      optional:
+        - "@.cursor/enforcement/rules/12-tech-debt.mdc"
+        - "@docs/**/*.md"
+
+  fix_bug:
+    python:
+      required:
+        - "@.cursor/enforcement/rules/python_bible.mdc"
+        - "@.cursor/enforcement/rules/06-error-resilience.mdc"
+        - "@.cursor/BUG_LOG.md"
+        - "@docs/error-patterns.md"
+      optional:
+        - "@.cursor/PYTHON_LEARNINGS_LOG.md"
+        - "@.cursor/anti_patterns.md"
+    
+    typescript:
+      required:
+        - "@.cursor/enforcement/rules/typescript_bible.mdc"
+        - "@.cursor/enforcement/rules/06-error-resilience.mdc"
+        - "@.cursor/BUG_LOG.md"
+        - "@docs/error-patterns.md"
+      optional:
+        - "@.cursor/anti_patterns.md"
+
+  refactor:
+    python:
+      required:
+        - "@.cursor/enforcement/rules/python_bible.mdc"
+        - "@.cursor/enforcement/rules/04-architecture.mdc"
+      optional:
+        - "@.cursor/patterns/**/*.md"
+    
+    typescript:
+      required:
+        - "@.cursor/enforcement/rules/typescript_bible.mdc"
+        - "@.cursor/enforcement/rules/04-architecture.mdc"
+      optional:
+        - "@.cursor/patterns/**/*.md"
+
+  add_feature:
+    python:
+      required:
+        - "@.cursor/enforcement/rules/python_bible.mdc"
+        - "@.cursor/enforcement/rules/01-enforcement.mdc"
+        - "@.cursor/memory-bank/activeContext.md"
+      optional:
+        - "@.cursor/enforcement/rules/08-backend.mdc"
+        - "@.cursor/patterns/**/*.md"
+    
+    typescript:
+      required:
+        - "@.cursor/enforcement/rules/typescript_bible.mdc"
+        - "@.cursor/enforcement/rules/01-enforcement.mdc"
+        - "@.cursor/memory-bank/activeContext.md"
+      optional:
+        - "@.cursor/enforcement/rules/09-frontend.mdc"
+        - "@.cursor/patterns/**/*.md"
+
+  review_code:
+    all:
+      required:
+        - "@.cursor/enforcement/rules/00-master.mdc"
+        - "@.cursor/enforcement/rules/10-quality.mdc"
+      optional:
+        - "@.cursor/prompts/lead_review.md"
+
+  debug:
+    python:
+      required:
+        - "@.cursor/enforcement/rules/06-error-resilience.mdc"
+        - "@.cursor/enforcement/rules/07-observability.mdc"
+        - "@docs/error-patterns.md"
+      optional:
+        - "@.cursor/BUG_LOG.md"
+    
+    typescript:
+      required:
+        - "@.cursor/enforcement/rules/06-error-resilience.mdc"
+        - "@.cursor/enforcement/rules/07-observability.mdc"
+        - "@docs/error-patterns.md"
+      optional:
+        - "@.cursor/BUG_LOG.md"
+
+# Context priority levels
+priority_levels:
+  PRIMARY: "required"
+  HIGH: "required"
+  MEDIUM: "optional"
+  LOW: "optional"
+
+# Dependency graph: Maps context files to their required dependencies
+# Dependencies are automatically loaded as HIGH priority when their parent is loaded
+dependencies:
+  "@.cursor/enforcement/rules/python_bible.mdc":
+    - "@.cursor/rules/02-core.mdc"
+    - "@.cursor/rules/07-observability.mdc"
+  "@.cursor/enforcement/rules/typescript_bible.mdc":
+    - "@.cursor/rules/02-core.mdc"
+  "@.cursor/enforcement/rules/03-security.mdc":
+    - "@.cursor/rules/02-core.mdc"
+  "@.cursor/enforcement/rules/05-data.mdc":
+    - "@.cursor/rules/02-core.mdc"
+    - "@.cursor/rules/03-security.mdc"
+  "@.cursor/enforcement/rules/08-backend.mdc":
+    - "@.cursor/rules/02-core.mdc"
+    - "@.cursor/rules/03-security.mdc"
+  "@.cursor/enforcement/rules/09-frontend.mdc":
+    - "@.cursor/rules/02-core.mdc"
+    - "@.cursor/rules/13-ux-consistency.mdc"
+  "@.cursor/enforcement/rules/10-quality.mdc":
+    - "@.cursor/rules/02-core.mdc"
+  "@.cursor/enforcement/rules/14-verification.mdc":
+    - "@.cursor/rules/10-quality.mdc"
+    - "@.cursor/rules/02-core.mdc"
+
+
+

@@ -1,0 +1,502 @@
+{
+  "backup_date": "2025-12-01T18:25:31.917533",
+  "backup_location": "C:\\Users\\ashse\\Documents\\VeroField\\Training\\VeroField\\.cursor\\backups\\cursor_rules_backup_2025-12-01_18-25-31",
+  "files": [
+    {
+      "path": ".cursorrules",
+      "size": 7393
+    },
+    {
+      "path": "agents.json",
+      "size": 5611
+    },
+    {
+      "path": "anti_patterns.md",
+      "size": 2164
+    },
+    {
+      "path": "BUG_LOG.md",
+      "size": 24345
+    },
+    {
+      "path": "DEPRECATED_RULES.md",
+      "size": 748
+    },
+    {
+      "path": "golden_patterns.md",
+      "size": 352
+    },
+    {
+      "path": "PYTHON_LEARNINGS_LOG.md",
+      "size": 25292
+    },
+    {
+      "path": "README.md",
+      "size": 7577
+    },
+    {
+      "path": "reward_rubric.yaml",
+      "size": 1500
+    },
+    {
+      "path": "context_manager/AGENT_RESPONSE_CAPTURE_GUIDE.md",
+      "size": 4772
+    },
+    {
+      "path": "context_manager/analytics.py",
+      "size": 9637
+    },
+    {
+      "path": "context_manager/ARCHITECTURE_COMPARISON.md",
+      "size": 10026
+    },
+    {
+      "path": "context_manager/AUTOMATIC_PROMPT_SYSTEM.md",
+      "size": 7876
+    },
+    {
+      "path": "context_manager/AUTO_ENFORCER_INTEGRATION_REVIEW.md",
+      "size": 27645
+    },
+    {
+      "path": "context_manager/auto_tune.py",
+      "size": 6140
+    },
+    {
+      "path": "context_manager/COMPLETE_IMPLEMENTATION.md",
+      "size": 4953
+    },
+    {
+      "path": "context_manager/CONTEXT_ENFORCEMENT_IMPLEMENTATION.py",
+      "size": 20314
+    },
+    {
+      "path": "context_manager/CONTEXT_ENFORCEMENT_PLAN.md",
+      "size": 22417
+    },
+    {
+      "path": "context_manager/context_loader.py",
+      "size": 14803
+    },
+    {
+      "path": "context_manager/context_profiles.yaml",
+      "size": 6400
+    },
+    {
+      "path": "context_manager/context_state.json",
+      "size": 202
+    },
+    {
+      "path": "context_manager/CRITICAL_FIXES_IMPLEMENTED.md",
+      "size": 12026
+    },
+    {
+      "path": "context_manager/dashboard.md",
+      "size": 1433
+    },
+    {
+      "path": "context_manager/ENFORCEMENT_BLOCKING_LIMITATION.md",
+      "size": 5425
+    },
+    {
+      "path": "context_manager/ENFORCEMENT_IMPLEMENTATION_COMPLETE.md",
+      "size": 7719
+    },
+    {
+      "path": "context_manager/ENFORCEMENT_IMPLEMENTATION_SUMMARY.md",
+      "size": 7372
+    },
+    {
+      "path": "context_manager/ENFORCEMENT_INTEGRATION_GUIDE.md",
+      "size": 18743
+    },
+    {
+      "path": "context_manager/FIX_PLAN.md",
+      "size": 15728
+    },
+    {
+      "path": "context_manager/FIX_SUMMARY.md",
+      "size": 6902
+    },
+    {
+      "path": "context_manager/IMPLEMENTATION_SUMMARY.md",
+      "size": 6454
+    },
+    {
+      "path": "context_manager/metrics.py",
+      "size": 4150
+    },
+    {
+      "path": "context_manager/monitoring.py",
+      "size": 11969
+    },
+    {
+      "path": "context_manager/MONITORING_GUIDE.md",
+      "size": 5017
+    },
+    {
+      "path": "context_manager/prediction_history.json",
+      "size": 2772338
+    },
+    {
+      "path": "context_manager/predictor.py",
+      "size": 16395
+    },
+    {
+      "path": "context_manager/preloader.py",
+      "size": 16907
+    },
+    {
+      "path": "context_manager/QUICK_REFERENCE_ENFORCEMENT.md",
+      "size": 14833
+    },
+    {
+      "path": "context_manager/README.md",
+      "size": 4303
+    },
+    {
+      "path": "context_manager/README_TESTING.md",
+      "size": 4125
+    },
+    {
+      "path": "context_manager/recommendations.md",
+      "size": 5206
+    },
+    {
+      "path": "context_manager/response_parser.py",
+      "size": 4892
+    },
+    {
+      "path": "context_manager/task_detector.py",
+      "size": 7693
+    },
+    {
+      "path": "context_manager/task_types.yaml",
+      "size": 2379
+    },
+    {
+      "path": "context_manager/test_trigger.py",
+      "size": 223
+    },
+    {
+      "path": "context_manager/token_estimator.py",
+      "size": 6197
+    },
+    {
+      "path": "context_manager/workflow_patterns.py",
+      "size": 5329
+    },
+    {
+      "path": "context_manager/workflow_state.json",
+      "size": 335212
+    },
+    {
+      "path": "context_manager/workflow_tracker.py",
+      "size": 12995
+    },
+    {
+      "path": "context_manager/__init__.py",
+      "size": 183
+    },
+    {
+      "path": "context_manager/tests/test_response_parser.py",
+      "size": 4614
+    },
+    {
+      "path": "enforcement/AGENT_REMINDERS.md",
+      "size": 254
+    },
+    {
+      "path": "enforcement/agent_response.txt",
+      "size": 613
+    },
+    {
+      "path": "enforcement/AGENT_STATUS.md",
+      "size": 1122
+    },
+    {
+      "path": "enforcement/AUTO_FIXES.md",
+      "size": 220
+    },
+    {
+      "path": "enforcement/DATE_VIOLATION_FIX_PLAN.md",
+      "size": 10059
+    },
+    {
+      "path": "enforcement/DATE_VIOLATION_FIX_SUMMARY.md",
+      "size": 4596
+    },
+    {
+      "path": "enforcement/HISTORICAL_VIOLATIONS_REVIEW.md",
+      "size": 6403
+    },
+    {
+      "path": "enforcement/manual-test-scenarios.md",
+      "size": 6219
+    },
+    {
+      "path": "enforcement/OPTIMIZATION_IMPLEMENTATION_SUMMARY.md",
+      "size": 4525
+    },
+    {
+      "path": "enforcement/OPTIMIZATION_PLAN_AGENT_STATUS.md",
+      "size": 12662
+    },
+    {
+      "path": "enforcement/session.json",
+      "size": 1508
+    },
+    {
+      "path": "enforcement/session.json.backup",
+      "size": 5521
+    },
+    {
+      "path": "enforcement/test-results.json",
+      "size": 104
+    },
+    {
+      "path": "enforcement/VIOLATIONS.md",
+      "size": 487
+    },
+    {
+      "path": "memory-bank/activeContext.md",
+      "size": 7554
+    },
+    {
+      "path": "memory-bank/productContext.md",
+      "size": 2151
+    },
+    {
+      "path": "memory-bank/progress.md",
+      "size": 5455
+    },
+    {
+      "path": "memory-bank/projectbrief.md",
+      "size": 2291
+    },
+    {
+      "path": "memory-bank/README.md",
+      "size": 5900
+    },
+    {
+      "path": "memory-bank/systemPatterns.md",
+      "size": 5368
+    },
+    {
+      "path": "memory-bank/techContext.md",
+      "size": 4815
+    },
+    {
+      "path": "patterns/patterns_index.md",
+      "size": 847
+    },
+    {
+      "path": "patterns/README.md",
+      "size": 3094
+    },
+    {
+      "path": "patterns/backend/config-service-async-module-registration.md",
+      "size": 3413
+    },
+    {
+      "path": "patterns/infrastructure/monorepo-build-output-paths.md",
+      "size": 2619
+    },
+    {
+      "path": "prompts/backend_reviewer.md",
+      "size": 1139
+    },
+    {
+      "path": "prompts/coach.md",
+      "size": 825
+    },
+    {
+      "path": "prompts/frontend_reviewer.md",
+      "size": 933
+    },
+    {
+      "path": "prompts/infra_reviewer.md",
+      "size": 765
+    },
+    {
+      "path": "prompts/lead_review.md",
+      "size": 1510
+    },
+    {
+      "path": "prompts/pre-implementation-enforcement-IMPROVEMENTS.md",
+      "size": 6759
+    },
+    {
+      "path": "prompts/pre-implementation-enforcement.md",
+      "size": 9377
+    },
+    {
+      "path": "prompts/security_review.md",
+      "size": 859
+    },
+    {
+      "path": "prompts/tester.md",
+      "size": 760
+    },
+    {
+      "path": "rules/00-master.mdc",
+      "size": 23125
+    },
+    {
+      "path": "rules/01-enforcement.mdc",
+      "size": 34298
+    },
+    {
+      "path": "rules/02-core.mdc",
+      "size": 14671
+    },
+    {
+      "path": "rules/03-security-R02-DRAFT.md",
+      "size": 16455
+    },
+    {
+      "path": "rules/03-security-R12-DRAFT.md",
+      "size": 14425
+    },
+    {
+      "path": "rules/03-security-R13-DRAFT.md",
+      "size": 14217
+    },
+    {
+      "path": "rules/03-security-STEP5-DRAFT.md",
+      "size": 13983
+    },
+    {
+      "path": "rules/03-security.mdc",
+      "size": 32546
+    },
+    {
+      "path": "rules/04-architecture-R03-DRAFT.md",
+      "size": 17452
+    },
+    {
+      "path": "rules/04-architecture-R21-DRAFT.md",
+      "size": 8878
+    },
+    {
+      "path": "rules/04-architecture-R22-DRAFT.md",
+      "size": 8386
+    },
+    {
+      "path": "rules/04-architecture.mdc",
+      "size": 20662
+    },
+    {
+      "path": "rules/05-data-R04-DRAFT.md",
+      "size": 17256
+    },
+    {
+      "path": "rules/05-data-R05-DRAFT.md",
+      "size": 10219
+    },
+    {
+      "path": "rules/05-data-R06-DRAFT.md",
+      "size": 8548
+    },
+    {
+      "path": "rules/05-data.mdc",
+      "size": 13816
+    },
+    {
+      "path": "rules/06-error-resilience-R07-DRAFT.md",
+      "size": 8168
+    },
+    {
+      "path": "rules/06-error-resilience.mdc",
+      "size": 8257
+    },
+    {
+      "path": "rules/07-observability-R08-DRAFT.md",
+      "size": 7829
+    },
+    {
+      "path": "rules/07-observability-R09-DRAFT.md",
+      "size": 6857
+    },
+    {
+      "path": "rules/07-observability.mdc",
+      "size": 11080
+    },
+    {
+      "path": "rules/08-backend-R11-DRAFT.md",
+      "size": 11720
+    },
+    {
+      "path": "rules/08-backend.mdc",
+      "size": 12061
+    },
+    {
+      "path": "rules/09-frontend.mdc",
+      "size": 12147
+    },
+    {
+      "path": "rules/10-quality-R10-DRAFT.md",
+      "size": 6490
+    },
+    {
+      "path": "rules/10-quality-R16-DRAFT.md",
+      "size": 17173
+    },
+    {
+      "path": "rules/10-quality-R17-DRAFT.md",
+      "size": 8342
+    },
+    {
+      "path": "rules/10-quality-R18-DRAFT.md",
+      "size": 12231
+    },
+    {
+      "path": "rules/10-quality.mdc",
+      "size": 29790
+    },
+    {
+      "path": "rules/11-operations.mdc",
+      "size": 7216
+    },
+    {
+      "path": "rules/12-tech-debt-R15-DRAFT.md",
+      "size": 8557
+    },
+    {
+      "path": "rules/12-tech-debt.mdc",
+      "size": 14850
+    },
+    {
+      "path": "rules/13-ux-consistency-R19-DRAFT.md",
+      "size": 15157
+    },
+    {
+      "path": "rules/13-ux-consistency-R20-DRAFT.md",
+      "size": 11638
+    },
+    {
+      "path": "rules/13-ux-consistency.mdc",
+      "size": 19914
+    },
+    {
+      "path": "rules/14-verification.mdc",
+      "size": 1578
+    },
+    {
+      "path": "rules/agent-instructions.mdc",
+      "size": 26070
+    },
+    {
+      "path": "rules/context_enforcement.mdc",
+      "size": 4213
+    },
+    {
+      "path": "rules/python_bible.mdc",
+      "size": 322541
+    },
+    {
+      "path": "rules/typescript_bible.mdc",
+      "size": 94890
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 # OPA Policy Template
-# 
+#
 # This template provides the standard structure for VeroField compliance policies.
 # Copy this file and customize for your specific rule domain.
 #
@@ -8,22 +8,20 @@
 
 package compliance.DOMAIN_NAME
 
-import future.keywords.contains
-import future.keywords.if
-import future.keywords.in
+import rego.v1
 
-# =============================================================================
 # METADATA
-# =============================================================================
+# title: Policy Template
+# description: Template for creating new compliance policies
 
 # Policy metadata
 metadata := {
-    "name": "POLICY_NAME",
-    "domain": "DOMAIN_NAME",
-    "tier": "1|2|3",  # 1=BLOCK, 2=OVERRIDE, 3=WARNING
-    "version": "1.0.0",
-    "created": "2025-11-23",
-    "description": "Brief description of what this policy enforces"
+	"name": "POLICY_NAME",
+	"domain": "DOMAIN_NAME",
+	"tier": "1|2|3", # 1=BLOCK, 2=OVERRIDE, 3=WARNING
+	"version": "1.0.0",
+	"created": "2025-11-30",
+	"description": "Brief description of what this policy enforces",
 }
 
 # =============================================================================
@@ -33,15 +31,15 @@ metadata := {
 # Effect: CI blocks merge, requires fix
 
 deny contains msg if {
-    # Condition that triggers violation
-    some file in input.changed_files
-    is_violation(file)
-    
-    # Clear, actionable message
-    msg := sprintf(
-        "HARD STOP [%s]: %s in file %s",
-        [metadata.domain, "Violation description", file.path]
-    )
+	# Condition that triggers violation
+	some file in input.changed_files
+	is_violation(file)
+
+	# Clear, actionable message
+	msg := sprintf(
+		"HARD STOP [%s]: %s in file %s",
+		[metadata.domain, "Violation description", file.path],
+	)
 }
 
 # =============================================================================
@@ -51,15 +49,15 @@ deny contains msg if {
 # Effect: Requires explicit override with justification
 
 override contains msg if {
-    # Condition that requires override
-    some file in input.changed_files
-    requires_override(file)
-    not has_override_justification(input.pr_body)
-    
-    msg := sprintf(
-        "OVERRIDE REQUIRED [%s]: %s in file %s. Add override justification to PR description.",
-        [metadata.domain, "Override reason", file.path]
-    )
+	# Condition that requires override
+	some file in input.changed_files
+	requires_override(file)
+	not has_override_justification(input.pr_body)
+
+	msg := sprintf(
+		"OVERRIDE REQUIRED [%s]: %s in file %s. Add override justification to PR description.",
+		[metadata.domain, "Override reason", file.path],
+	)
 }
 
 # =============================================================================
@@ -69,14 +67,14 @@ override contains msg if {
 # Effect: Logged but doesn't block merge
 
 warn contains msg if {
-    # Condition that triggers warning
-    some file in input.changed_files
-    is_warning(file)
-    
-    msg := sprintf(
-        "WARNING [%s]: %s in file %s",
-        [metadata.domain, "Warning description", file.path]
-    )
+	# Condition that triggers warning
+	some file in input.changed_files
+	is_warning(file)
+
+	msg := sprintf(
+		"WARNING [%s]: %s in file %s",
+		[metadata.domain, "Warning description", file.path],
+	)
 }
 
 # =============================================================================
@@ -87,29 +85,29 @@ warn contains msg if {
 # Max 3 levels of nesting
 
 # Check if file violates rule
-is_violation(file) if {
-    # Implementation
-    # Use early exit for performance
-    false  # Replace with actual logic
+is_violation(_) if {
+	# Implementation
+	# Use early exit for performance
+	false # Replace with actual logic
 }
 
 # Check if override is required
-requires_override(file) if {
-    # Implementation
-    false  # Replace with actual logic
+requires_override(_) if {
+	# Implementation
+	false # Replace with actual logic
 }
 
 # Check if override justification exists
 has_override_justification(pr_body) if {
-    # Look for override marker in PR description
-    contains(pr_body, "@override:")
-    contains(pr_body, metadata.domain)
+	# Look for override marker in PR description
+	contains(pr_body, "@override:")
+	contains(pr_body, metadata.domain)
 }
 
 # Check if warning condition exists
-is_warning(file) if {
-    # Implementation
-    false  # Replace with actual logic
+is_warning(_) if {
+	# Implementation
+	false # Replace with actual logic
 }
 
 # =============================================================================
@@ -119,14 +117,14 @@ is_warning(file) if {
 
 # Check if file is exempted
 is_exempted(file_path) if {
-    some exempted_file in data.exemptions.files
-    file_path == exempted_file
+	some exempted_file in data.exemptions.files
+	file_path == exempted_file
 }
 
 # Check if author is exempted
 is_exempted_author(author) if {
-    some exempted_author in data.exemptions.authors
-    author == exempted_author
+	some exempted_author in data.exemptions.authors
+	author == exempted_author
 }
 
 # =============================================================================
@@ -137,7 +135,6 @@ is_exempted_author(author) if {
 # - Cache expensive operations
 # - Consolidate similar checks
 # - Extract shared logic to _shared.rego
-
 # =============================================================================
 # TESTING
 # =============================================================================
@@ -149,11 +146,10 @@ is_exempted_author(author) if {
 # - Warning triggered
 # - Exemptions work correctly
 # - Performance within budget (<200ms)
-
 # =============================================================================
 # USAGE EXAMPLE
 # =============================================================================
-# 
+#
 # Input JSON structure:
 # {
 #   "changed_files": [
@@ -184,4 +180,3 @@ is_exempted_author(author) if {
 #   "override": ["OVERRIDE REQUIRED [DOMAIN]: ..."],
 #   "warn": ["WARNING [DOMAIN]: ..."]
 # }
-

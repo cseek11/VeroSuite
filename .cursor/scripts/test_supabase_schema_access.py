@@ -259,8 +259,9 @@ def test_insert_and_select(supabase: Client) -> tuple[bool, str]:
                     supabase.schema("veroscore").table("sessions").delete().eq("session_id", test_session_id).execute()
                 else:
                     supabase.table("veroscore.sessions").delete().eq("session_id", test_session_id).execute()
-            except:
-                pass
+            except (ValueError, AttributeError, KeyError) as e:
+                # Cleanup failed - log but don't fail the test
+                logger.warn("Cleanup failed after select test", operation="test_insert_and_select", error_code="CLEANUP_FAILED", root_cause=str(e), session_id=test_session_id)
             return False, "Select returned no data"
         
         logger.info("Select successful", operation="test_insert_and_select", session_id=test_session_id)

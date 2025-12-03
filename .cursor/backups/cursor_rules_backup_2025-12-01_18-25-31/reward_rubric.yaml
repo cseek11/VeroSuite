@@ -1,0 +1,47 @@
+version: 1.0
+name: "VeroField CI Reward Score Rubric"
+scoring:
+  search_first:
+    description: "AI searched existing code/patterns before implementing."
+    points: 10
+  pattern_match:
+    description: "Output matched an existing golden pattern."
+    points: 10
+  security_correct:
+    description: "RLS/Auth/Secrets correct with no violations."
+    points: 20
+  architecture_compliant:
+    description: "No cross-service imports, correct file placement."
+    points: 10
+  test_quality:
+    description: "Unit + regression tests meet 10-quality + 14-verification rules."
+    points: 15
+  observability_correct:
+    description: "Logging + errors follow 06-error-resilience + 07-observability."
+    points: 10
+  docs_updated:
+    description: "Docs, patterns, and state machines kept in sync."
+    points: 5
+penalties:
+  hardcoded_values:
+    description: "Dates, secrets, tenantId, or absolute URLs hardcoded."
+    points: -20
+  rls_violation:
+    description: "Query missing tenant isolation or bypassing RLS."
+    points: -50
+  missing_tests:
+    description: "Feature/bug fix shipped with no tests."
+    points: -20
+  architecture_drift:
+    description: "Code violates boundaries, service layering, or monorepo rules."
+    points: -25
+  unstructured_logging:
+    description: "console.log or missing traceId."
+    points: -10
+  unsafe_frontend:
+    description: "XSS-vulnerable rendering or unsafe interpolation."
+    points: -15
+output:
+  min_pass_score: 40
+  warning_score: 20
+  fail_score: 0

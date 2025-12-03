@@ -541,8 +541,12 @@ class InputValidationChecker:
             print(f"Error: File not found: {file_path}", file=sys.stderr)
             return []
         
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+        except (OSError, IOError, UnicodeDecodeError) as e:
+            print(f"Error reading file {file_path}: {e}", file=sys.stderr)
+            return []
         
         violations = []
         
@@ -740,6 +744,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 
 
 

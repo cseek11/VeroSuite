@@ -11,7 +11,7 @@ from typing import Optional
 from datetime import datetime, timezone
 
 
-@dataclass
+@dataclass(slots=True)  # Python 3.10+ - reduces memory by 4-5× (Chapter 07.5.3)
 class FileChange:
     """
     Represents a single file change event.
@@ -53,4 +53,25 @@ class FileChange:
         if not isinstance(other, FileChange):
             return False
         return self.path == other.path and self.timestamp == other.timestamp
+    
+    def __hash__(self) -> int:
+        """Hash based on path and timestamp for use in sets/dicts."""
+        return hash((self.path, self.timestamp))
+    
+    @property
+    def net_lines(self) -> int:
+        """Net line change (added - removed)."""
+        return self.lines_added - self.lines_removed
+    
+    @property
+    def is_addition(self) -> bool:
+        """True if file was added."""
+        return self.change_type == 'added' and self.lines_removed == 0
+    
+    @property
+    def is_deletion(self) -> bool:
+        """True if file was deleted."""
+        return self.change_type == 'deleted' and self.lines_added == 0
+
+
 

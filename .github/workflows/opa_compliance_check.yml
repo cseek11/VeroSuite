@@ -52,14 +52,16 @@ jobs:
               fi
               first=false
               
-              # Get diff for this file
+              # Get diff for this file (already escaped)
               diff=$(git diff $BASE_SHA $HEAD_SHA -- "$file" | sed 's/"/\\"/g' | awk '{printf "%s\\n", $0}')
+              # Escape file path for JSON using jq
+              escaped_path=$(printf '%s' "$file" | jq -Rs .)
               additions=$(git diff --numstat $BASE_SHA $HEAD_SHA -- "$file" | awk '{print $1}')
               deletions=$(git diff --numstat $BASE_SHA $HEAD_SHA -- "$file" | awk '{print $2}')
               
               cat >> changed_files.json <<EOF
           {
-            "path": "$file",
+            "path": $escaped_path,
             "diff": "$diff",
             "additions": ${additions:-0},
             "deletions": ${deletions:-0}
@@ -77,13 +79,13 @@ jobs:
         run: |
           PR_TITLE="${{ github.event.pull_request.title || github.event.head_commit.message }}"
           PR_BODY="${{ github.event.pull_request.body || '' }}"
-          PR_NUMBER="${{ github.event.pull_request.number || 0 }}"
           AUTHOR="${{ github.event.pull_request.user.login || github.actor }}"
           
           # Merge changed files with PR metadata
+          # Use single quotes around GitHub expression for --argjson to pass JSON number directly
           jq --arg title "$PR_TITLE" \
              --arg body "$PR_BODY" \
-             --argjson number "$PR_NUMBER" \
+             --argjson number '${{ github.event.pull_request.number || 0 }}' \
              --arg author "$AUTHOR" \
              '. + {
                "pr_title": $title,
@@ -280,8 +282,9 @@ jobs:
           PR_NUMBER="${{ github.event.pull_request.number || github.event.number }}"
           COMMIT_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
           
-          if [ -z "$PR_NUMBER" ] || [ "$PR_NUMBER" == "null" ]; then
-            echo "⚠️ No PR number found - skipping API integration"
+          # Validate PR_NUMBER is a valid number
+          if [ -z "$PR_NUMBER" ] || [ "$PR_NUMBER" == "null" ] || ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "⚠️ Invalid PR number: '$PR_NUMBER' - skipping API integration"
             exit 0
           fi
           
@@ -289,19 +292,27 @@ jobs:
           echo "Sending compliance results to API for PR #$PR_NUMBER..."
           
           # Create compliance checks from OPA results
-          # This is a simplified version - in production, parse opa-results.json more thoroughly
+          # Use jq to properly construct and escape JSON to prevent injection vulnerabilities
           jq -r '[.. | .deny? | select(. != null)] | flatten | .[]' opa-results.json | while read -r violation; do
+            # Use jq to properly construct and escape JSON
+            # Use --arg for PR_NUMBER and convert with tonumber to handle string-to-number conversion safely
+            JSON_PAYLOAD=$(jq -n \
+              --arg pr_number "$PR_NUMBER" \
+              --arg commit_sha "$COMMIT_SHA" \
+              --arg violation_msg "$violation" \
+              '{
+                pr_number: ($pr_number | tonumber),
+                commit_sha: $commit_sha,
+                rule_id: "R01",
+                status: "VIOLATION",
+                severity: "BLOCK",
+                violation_message: $violation_msg
+              }')
+            
             curl -X POST "$API_URL/compliance/checks" \
               -H "Authorization: Bearer $API_TOKEN" \
               -H "Content-Type: application/json" \
-              -d "{
-                \"pr_number\": $PR_NUMBER,
-                \"commit_sha\": \"$COMMIT_SHA\",
-                \"rule_id\": \"R01\",
-                \"status\": \"VIOLATION\",
-                \"severity\": \"BLOCK\",
-                \"violation_message\": \"$violation\"
-              }" || echo "Failed to send violation: $violation"
+              -d "$JSON_PAYLOAD" || echo "Failed to send violation: $violation"
           done
           
           echo "✅ Compliance results sent to API"

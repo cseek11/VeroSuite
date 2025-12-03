@@ -225,6 +225,8 @@ SELECT id, email, tenant_id FROM users WHERE email = 'your-email@example.com';
 
 ---
 
-**Last Updated:** 2025-11-24  
+**Last Updated:** 2025-11-30  
 **Status:** Use diagnostic script to identify the issue
+
+
 

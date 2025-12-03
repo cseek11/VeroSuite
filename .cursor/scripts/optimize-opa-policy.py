@@ -385,9 +385,12 @@ def main():
             
             # Export results
             output_file = Path('.cursor/scripts/optimization-suggestions.json')
-            with open(output_file, 'w') as f:
-                json.dump([asdict(s) for s in suggestions], f, indent=2)
-            print(f"📄 Suggestions exported to {output_file}")
+            try:
+                with open(output_file, 'w', encoding='utf-8') as f:
+                    json.dump([asdict(s) for s in suggestions], f, indent=2)
+                print(f"📄 Suggestions exported to {output_file}")
+            except (OSError, IOError) as e:
+                print(f"Error exporting suggestions: {e}", file=sys.stderr)
         
         else:
             print(f"❌ Not a file or directory: {target}")
@@ -400,6 +403,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 
 
 

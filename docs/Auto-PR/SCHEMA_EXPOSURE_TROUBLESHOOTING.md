@@ -133,3 +133,5 @@ SELECT COUNT(*) FROM veroscore.sessions;
 **Last Updated:** 2025-11-24  
 **Status:** ⏳ Waiting for schema exposure to propagate
 
+
+

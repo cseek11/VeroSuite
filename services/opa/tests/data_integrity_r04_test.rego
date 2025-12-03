@@ -6,9 +6,8 @@
 
 package compliance.data_integrity_r04_test
 
+import rego.v1
 import data.compliance.data_integrity
-import future.keywords.if
-import future.keywords.in
 
 # =============================================================================
 # R04: LAYER SYNCHRONIZATION TESTS
@@ -16,7 +15,7 @@ import future.keywords.in
 
 # Test 1: Happy Path - Schema change with migration passes
 test_schema_change_with_migration_passes if {
-    input := {
+    test_input := {
         "changed_files": [
             {
                 "path": "libs/common/prisma/schema.prisma",
@@ -29,12 +28,12 @@ test_schema_change_with_migration_passes if {
         ],
         "pr_body": "Add first_name to User"
     }
-    count(data_integrity.deny) == 0
+    count(data_integrity.deny) == 0 with input as test_input
 }
 
 # Test 2: Happy Path - Schema change with DTO and frontend type updates passes
 test_full_sync_passes if {
-    input := {
+    test_input := {
         "changed_files": [
             {
                 "path": "libs/common/prisma/schema.prisma",
@@ -55,27 +54,27 @@ test_full_sync_passes if {
         ],
         "pr_body": "Add first_name to User - full sync"
     }
-    count(data_integrity.deny) == 0
+    count(data_integrity.deny) == 0 with input as test_input
 }
 
 # Test 3: Violation - Schema change without migration fails
 test_schema_change_without_migration_fails if {
-    input := {
+    test_input := {
         "changed_files": [{
             "path": "libs/common/prisma/schema.prisma",
             "diff": "model User {\n  id String @id\n  email String @unique\n  firstName String\n}"
         }],
         "pr_body": "Add first_name to User"
     }
-    count(data_integrity.deny) > 0
-    some msg in data_integrity.deny
+    count(data_integrity.deny) > 0 with input as test_input
+    some msg in data_integrity.deny with input as test_input
     contains(msg, "R04")
     contains(msg, "migration")
 }
 
 # Test 4: Violation - Schema change without DTO update fails
 test_schema_change_without_dto_fails if {
-    input := {
+    test_input := {
         "changed_files": [
             {
                 "path": "libs/common/prisma/schema.prisma",
@@ -88,8 +87,8 @@ test_schema_change_without_dto_fails if {
         ],
         "pr_body": "Add first_name to User"
     }
-    count(data_integrity.deny) > 0
-    some msg in data_integrity.deny
+    count(data_integrity.deny) > 0 with input as test_input
+    some msg in data_integrity.deny with input as test_input
     contains(msg, "R04")
     contains(msg, "DTO")
     contains(msg, "User")
@@ -97,22 +96,22 @@ test_schema_change_without_dto_fails if {
 
 # Test 5: Violation - DTO change without frontend type update fails
 test_dto_change_without_frontend_fails if {
-    input := {
+    test_input := {
         "changed_files": [{
             "path": "apps/api/src/work-orders/dto/work-order.dto.ts",
             "diff": "export class WorkOrderDto {\n  priority: WorkOrderPriority;\n}"
         }],
         "pr_body": "Add priority to WorkOrder DTO"
     }
-    count(data_integrity.deny) > 0
-    some msg in data_integrity.deny
+    count(data_integrity.deny) > 0 with input as test_input
+    some msg in data_integrity.deny with input as test_input
     contains(msg, "R04")
     contains(msg, "frontend type")
 }
 
 # Test 6: Warning - Enum change detected
 test_enum_change_warns if {
-    input := {
+    test_input := {
         "changed_files": [{
             "path": "apps/api/src/work-orders/dto/work-order.dto.ts",
             "diff": "export enum WorkOrderStatus {\n  PENDING = 'pending',\n  IN_PROGRESS = 'in-progress',\n  COMPLETED = 'completed',\n  CANCELED = 'canceled'\n}"
@@ -120,14 +119,14 @@ test_enum_change_warns if {
         "pr_body": "Add CANCELED status"
     }
     count(data_integrity.warn) > 0
-    some msg in data_integrity.warn
+    some msg in data_integrity.warn with input as test_input
     contains(msg, "R04")
     contains(msg, "Enum")
 }
 
 # Test 7: Warning - Frontend type change warns about Zod schema
 test_frontend_type_change_warns_about_zod if {
-    input := {
+    test_input := {
         "changed_files": [{
             "path": "frontend/src/types/user.ts",
             "diff": "interface User {\n  firstName: string;\n}"
@@ -135,26 +134,26 @@ test_frontend_type_change_warns_about_zod if {
         "pr_body": "Add firstName to User type"
     }
     count(data_integrity.warn) > 0
-    some msg in data_integrity.warn
+    some msg in data_integrity.warn with input as test_input
     contains(msg, "R04")
     contains(msg, "Zod schema")
 }
 
 # Test 8: Override - Violation with override marker passes
 test_violation_with_override_passes if {
-    input := {
+    test_input := {
         "changed_files": [{
             "path": "libs/common/prisma/schema.prisma",
             "diff": "model User {\n  firstName String\n}"
         }],
         "pr_body": "Add first_name to User\n\n@override:layer-sync\nJustification: Migration will be created in separate PR after schema is finalized. This is a non-breaking nullable field addition."
     }
-    count(data_integrity.deny) == 0
+    count(data_integrity.deny) == 0 with input as test_input
 }
 
 # Test 9: Edge Case - Multiple entities changed
 test_multiple_entities_checked if {
-    input := {
+    test_input := {
         "changed_files": [
             {
                 "path": "libs/common/prisma/schema.prisma",
@@ -168,12 +167,12 @@ test_multiple_entities_checked if {
         "pr_body": "Add fields to User and WorkOrder"
     }
     # Should check for DTO updates for both entities
-    count(data_integrity.deny) >= 1
+    count(data_integrity.deny) >= 1 with input as test_input
 }
 
 # Test 10: Edge Case - Only frontend type changed (should verify matches DTO)
 test_only_frontend_type_changed if {
-    input := {
+    test_input := {
         "changed_files": [{
             "path": "frontend/src/types/user.ts",
             "diff": "interface User {\n  firstName: string;\n}"
@@ -181,12 +180,12 @@ test_only_frontend_type_changed if {
         "pr_body": "Update User type"
     }
     # Should warn about Zod schema
-    count(data_integrity.warn) > 0
+    count(data_integrity.warn) > 0 with input as test_input
 }
 
 # Test 11: Edge Case - Test file DTO change (should be ignored)
 test_test_dto_ignored if {
-    input := {
+    test_input := {
         "changed_files": [{
             "path": "apps/api/src/user/dto/user.dto.test.ts",
             "diff": "export class UserDto {\n  firstName: string;\n}"
@@ -194,19 +193,19 @@ test_test_dto_ignored if {
         "pr_body": "Update test DTO"
     }
     # Test DTOs should not trigger frontend type check
-    count(data_integrity.deny) == 0
+    count(data_integrity.deny) == 0 with input as test_input
 }
 
 # Test 12: Edge Case - Migration file only (no schema change)
 test_migration_only_passes if {
-    input := {
+    test_input := {
         "changed_files": [{
             "path": "libs/common/prisma/migrations/20251123120000_add_index/migration.sql",
             "diff": "CREATE INDEX idx_users_email ON users(email);"
         }],
         "pr_body": "Add index to users table"
     }
-    count(data_integrity.deny) == 0
+    count(data_integrity.deny) == 0 with input as test_input
 }
 
 # =============================================================================
@@ -218,7 +217,7 @@ test_migration_only_passes if {
 # Note: Run with `opa test --bench` to measure actual performance
 test_performance_within_budget if {
     # This test passes if it completes (OPA will measure timing)
-    input := {
+    test_input := {
         "changed_files": [{
             "path": "libs/common/prisma/schema.prisma",
             "diff": "model Test {}"
@@ -226,6 +225,6 @@ test_performance_within_budget if {
         "pr_body": "Performance test"
     }
     # Just checking that policy runs
-    true
+    true with input as test_input
 }
 

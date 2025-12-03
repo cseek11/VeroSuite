@@ -198,3 +198,5 @@ CREATE POLICY "tenant_isolation_alert_history" ON "compliance"."alert_history"
 CREATE POLICY "tenant_isolation_audit_log" ON "compliance"."audit_log"
     USING (tenant_id::text = current_setting('app.tenant_id', true));
 
+
+

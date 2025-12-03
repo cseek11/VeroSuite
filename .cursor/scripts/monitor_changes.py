@@ -255,7 +255,9 @@ def get_changed_files(repo_path: pathlib.Path) -> Dict[str, Dict]:
                                 if len(parts) > 1:
                                     try:
                                         lines_changed = int(parts[1].strip().split()[0])
-                                    except:
+                                    except (ValueError, IndexError) as e:
+                                        # Failed to parse lines changed - use default
+                                        logger.debug("Failed to parse lines changed from diff stat", operation="get_changed_files", error_code="PARSE_ERROR", root_cause=str(e), stat_line=stat_line)
                                         pass
                     
                     changed_files[file_path] = {
@@ -422,11 +424,16 @@ def generate_pr_title(files: Dict[str, Dict], config: Dict) -> str:
     
     # Try to detect feature/component name
     if file_paths:
-        # Get common directory prefix
-        common_prefix = os.path.commonprefix([str(pathlib.Path(f).parent) for f in file_paths])
-        if common_prefix and common_prefix != ".":
-            feature_name = pathlib.Path(common_prefix).name
-            return f"Auto-PR: {feature_name} ({len(file_paths)} files)"
+        # Get common directory prefix using pathlib (Chapter 05 - File Operations)
+        try:
+            path_objects = [pathlib.Path(f).parent.resolve() for f in file_paths]
+            common_path = pathlib.Path(*pathlib.Path.commonpath(path_objects).parts)
+            if common_path.exists() and str(common_path) != ".":
+                feature_name = common_path.name
+                return f"Auto-PR: {feature_name} ({len(file_paths)} files)"
+        except (ValueError, OSError):
+            # Paths have no common prefix or error occurred
+            pass
     
     # Fallback to file count
     return f"Auto-PR: {len(file_paths)} files changed"
@@ -615,7 +622,7 @@ def create_auto_pr(files: Dict[str, Dict], config: Dict, repo_path: pathlib.Path
     
     # Get gh path
     gh_path = r"C:\Program Files\GitHub CLI\gh.exe"
-    if not os.path.exists(gh_path):
+    if not pathlib.Path(gh_path).exists():
         gh_path = "gh"
     
     # Create PR using GitHub CLI directly (simpler than calling create_pr.py)
@@ -631,39 +638,55 @@ def create_auto_pr(files: Dict[str, Dict], config: Dict, repo_path: pathlib.Path
         # Add all changed files
         file_list = list(files.keys())
         if file_list:
+            try:
+                subprocess.run(
+                    ["git", "add"] + file_list,
+                    cwd=repo_path,
+                    check=True,
+                    timeout=30
+                )
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
+                print(f"Error adding files to git: {e}", file=sys.stderr)
+                return None
+        
+        # Commit
+        commit_message = f"{title}\n\n{body}"
+        try:
             subprocess.run(
-                ["git", "add"] + file_list,
+                ["git", "commit", "-m", commit_message],
                 cwd=repo_path,
                 check=True,
                 timeout=30
             )
-        
-        # Commit
-        commit_message = f"{title}\n\n{body}"
-        subprocess.run(
-            ["git", "commit", "-m", commit_message],
-            cwd=repo_path,
-            check=True,
-            timeout=30
-        )
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
+            print(f"Error committing changes: {e}", file=sys.stderr)
+            return None
         
         # Push branch
-        subprocess.run(
-            ["git", "push", "origin", branch_name],
-            cwd=repo_path,
-            check=True,
-            timeout=30
-        )
+        try:
+            subprocess.run(
+                ["git", "push", "origin", branch_name],
+                cwd=repo_path,
+                check=True,
+                timeout=30
+            )
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
+            print(f"Error pushing branch: {e}", file=sys.stderr)
+            return None
         
         # Create PR
         base_branch = config.get("pr_settings", {}).get("base_branch", "main")
-        result = subprocess.run(
-            [gh_path, "pr", "create", "--title", title, "--body", body, "--base", base_branch],
-            cwd=repo_path,
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
+        try:
+            result = subprocess.run(
+                [gh_path, "pr", "create", "--title", title, "--body", body, "--base", base_branch],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
+            print(f"Error creating PR: {e}", file=sys.stderr)
+            return None
         
         if result.returncode == 0:
             pr_url = result.stdout.strip()

@@ -1,361 +1,210 @@
 #!/usr/bin/env python3
 """
-VeroScore V3 - File Watcher
-Main entry point for file monitoring and session management.
+File Watcher - Auto-trigger enforcer on file changes.
+Enables fully autonomous Two-Brain operation.
 
-Phase 2: File Watcher Implementation
-Last Updated: 2025-11-24
-
-Usage:
-    python .cursor/scripts/file_watcher.py [--config CONFIG_FILE] [--watch-dir DIR]
+Last Updated: 2025-12-02
 """
 
-import os
-import sys
 import time
-import argparse
-import signal
+import subprocess
+import sys
 from pathlib import Path
-from typing import Optional
-
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
+from typing import Set
 
 try:
     from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler
+    WATCHDOG_AVAILABLE = True
 except ImportError:
-    print("❌ Missing watchdog package. Install with: pip install watchdog", file=sys.stderr)
-    sys.exit(1)
-
-try:
-    from supabase import create_client, Client
-except ImportError:
-    print("❌ Missing supabase-py package. Install with: pip install supabase", file=sys.stderr)
-    sys.exit(1)
-
-try:
-    import yaml
-except ImportError:
-    print("❌ Missing pyyaml package. Install with: pip install pyyaml", file=sys.stderr)
-    sys.exit(1)
-
-from veroscore_v3.change_handler import VeroFieldChangeHandler
-from veroscore_v3.change_buffer import ChangeBuffer
-from veroscore_v3.session_manager import SessionManager
-from veroscore_v3.threshold_checker import ThresholdChecker
-from logger_util import get_logger, get_or_create_trace_context
-
-logger = get_logger(context="file_watcher")
+    WATCHDOG_AVAILABLE = False
+    print("⚠️ watchdog library not installed")
+    print("   Install with: pip install watchdog")
+    print("   File watcher will not work without it")
 
 
-class FileWatcher:
-    """
-    Main file watcher orchestrator.
+class EnforcerTrigger(FileSystemEventHandler):
+    """Trigger enforcer when code files change."""
     
-    Features:
-    - File system monitoring via watchdog
-    - Session management via Supabase
-    - Change buffering and debouncing
-    - Threshold checking for PR creation
-    """
+    # Code file extensions to watch
+    CODE_EXTENSIONS = {".ts", ".tsx", ".py", ".js", ".jsx", ".mdc"}
     
-    def __init__(self, config_path: Optional[Path] = None, watch_dir: Optional[str] = None):
-        """
-        Initialize file watcher.
-        
-        Args:
-            config_path: Path to config file (default: .cursor/config/auto_pr_config.yaml)
-            watch_dir: Directory to watch (default: project root)
-        """
-        self.config_path = config_path or (project_root / ".cursor" / "config" / "auto_pr_config.yaml")
-        self.watch_dir = watch_dir or str(project_root)
-        self.config = self._load_config()
-        self.observer: Optional[Observer] = None
-        self.running = False
-        
-        # Initialize Supabase
-        self.supabase = self._init_supabase()
-        
-        # Initialize components
-        self.session_manager = SessionManager(self.supabase)
-        self.buffer = ChangeBuffer(debounce_seconds=self.config.get("thresholds", {}).get("debounce_seconds", 2.0))
-        self.threshold_checker = ThresholdChecker(self.config, self.session_manager)
-        
-        # Set flush callback
-        self.buffer.flush_callback = self._flush_changes
-        
-        # Get or create session
-        self.session_id = self.session_manager.get_or_create_session()
-        
-        logger.info(
-            "FileWatcher initialized",
-            operation="__init__",
-            session_id=self.session_id,
-            watch_dir=self.watch_dir,
-            config_path=str(self.config_path)
-        )
+    # Directories to ignore
+    IGNORE_DIRS = {
+        "node_modules",
+        ".git",
+        ".cursor/enforcement",  # Don't watch enforcement files themselves
+        ".cursor/context_manager",  # Don't watch context manager files
+        "dist",
+        "build",
+        ".next",
+        "__pycache__",
+        ".pytest_cache"
+    }
     
-    def _load_config(self) -> dict:
-        """Load configuration from YAML file."""
-        try:
-            if not self.config_path.exists():
-                logger.warn(
-                    "Config file not found, using defaults",
-                    operation="_load_config",
-                    error_code="CONFIG_NOT_FOUND",
-                    config_path=str(self.config_path)
-                )
-                return self._get_default_config()
-            
-            with open(self.config_path, 'r', encoding='utf-8') as f:
-                config = yaml.safe_load(f)
-                logger.info(
-                    "Config loaded",
-                    operation="_load_config",
-                    config_path=str(self.config_path)
-                )
-                return config or {}
-                
-        except Exception as e:
-            logger.error(
-                "Failed to load config, using defaults",
-                operation="_load_config",
-                error_code="CONFIG_LOAD_FAILED",
-                root_cause=str(e),
-                config_path=str(self.config_path)
-            )
-            return self._get_default_config()
-    
-    def _get_default_config(self) -> dict:
-        """Get default configuration."""
-        return {
-            "thresholds": {
-                "min_files": 3,
-                "min_lines": 50,
-                "max_wait_seconds": 300,
-                "debounce_seconds": 2.0,
-                "batch_size": 10
-            },
-            "exclusions": {
-                "patterns": []
-            }
-        }
-    
-    def _init_supabase(self) -> Client:
-        """Initialize Supabase client."""
-        try:
-            supabase_url = os.getenv("SUPABASE_URL")
-            supabase_key = os.getenv("SUPABASE_SECRET_KEY")
-            
-            if not supabase_url or not supabase_key:
-                raise ValueError(
-                    "Missing SUPABASE_URL or SUPABASE_SECRET_KEY environment variables"
-                )
-            
-            client = create_client(supabase_url, supabase_key)
-            
-            logger.info(
-                "Supabase client initialized",
-                operation="_init_supabase",
-                url=supabase_url
-            )
-            
-            return client
-            
-        except Exception as e:
-            logger.error(
-                "Failed to initialize Supabase client",
-                operation="_init_supabase",
-                error_code="SUPABASE_INIT_FAILED",
-                root_cause=str(e)
-            )
-            raise
-    
-    def _flush_changes(self):
-        """Flush buffered changes to Supabase."""
-        try:
-            trace_ctx = get_or_create_trace_context()
-            
-            changes = self.buffer.get_all()
-            if not changes:
-                return
-            
-            # Add changes to session
-            self.session_manager.add_changes_batch(self.session_id, changes)
-            
-            # Check if PR should be created
-            should_create, reason = self.threshold_checker.should_create_pr(self.session_id)
-            if should_create:
-                logger.info(
-                    "PR creation threshold met",
-                    operation="_flush_changes",
-                    session_id=self.session_id,
-                    reason=reason,
-                    change_count=len(changes),
-                    **trace_ctx
-                )
-                # TODO: Phase 3 - Trigger PR creation
-                # For now, just log that threshold was met
+    def __init__(self, debounce_seconds: int = 5, project_root: Path = None):
+        self.debounce_seconds = debounce_seconds
+        self.last_trigger = 0
+        self.project_root = project_root or Path.cwd()
+        
+        # Find fix loop script
+        possible_paths = [
+            self.project_root / ".cursor" / "enforcement" / "fix_loop.py",
+            self.project_root / ".cursor" / "scripts" / "fix_loop.py",
+        ]
+        for path in possible_paths:
+            if path.exists():
+                self.fix_loop_script = path
+                break
+        else:
+            # Fallback: use enforcer directly
+            self.fix_loop_script = None
+            enforcer_paths = [
+                self.project_root / ".cursor" / "enforcement" / "auto-enforcer.py",
+                self.project_root / ".cursor" / "scripts" / "auto-enforcer.py",
+            ]
+            for path in enforcer_paths:
+                if path.exists():
+                    self.enforcer_script = path
+                    break
             else:
-                logger.debug(
-                    "Changes flushed, PR threshold not met",
-                    operation="_flush_changes",
-                    session_id=self.session_id,
-                    change_count=len(changes),
-                    **trace_ctx
-                )
-                
-        except Exception as e:
-            logger.error(
-                "Failed to flush changes",
-                operation="_flush_changes",
-                error_code="FLUSH_CHANGES_FAILED",
-                root_cause=str(e),
-                session_id=self.session_id
-            )
+                raise FileNotFoundError("Could not find fix_loop.py or auto-enforcer.py")
+        
+        self.triggered_files: Set[Path] = set()
     
-    def start(self):
-        """Start file watcher."""
+    def _should_ignore(self, file_path: Path) -> bool:
+        """Check if file should be ignored."""
+        # Check if in ignored directory
+        for part in file_path.parts:
+            if part in self.IGNORE_DIRS:
+                return True
+        
+        # Check extension
+        if file_path.suffix not in self.CODE_EXTENSIONS:
+            return True
+        
+        return False
+    
+    def on_modified(self, event):
+        """Handle file modification events."""
+        if event.is_directory:
+            return
+        
+        file_path = Path(event.src_path)
+        
+        # Normalize path relative to project root
         try:
-            trace_ctx = get_or_create_trace_context()
-            
-            # Create event handler
-            handler = VeroFieldChangeHandler(
-                session_id=self.session_id,
-                config=self.config,
-                buffer=self.buffer
-            )
-            
-            # Create observer
-            self.observer = Observer()
-            self.observer.schedule(handler, self.watch_dir, recursive=True)
-            
-            # Start observer
-            self.observer.start()
-            self.running = True
-            
-            logger.info(
-                "File watcher started",
-                operation="start",
-                session_id=self.session_id,
-                watch_dir=self.watch_dir,
-                **trace_ctx
-            )
-            
-        except Exception as e:
-            logger.error(
-                "Failed to start file watcher",
-                operation="start",
-                error_code="WATCHER_START_FAILED",
-                root_cause=str(e),
-                session_id=self.session_id
-            )
-            raise
+            rel_path = file_path.relative_to(self.project_root)
+        except ValueError:
+            # File outside project root, ignore
+            return
+        
+        # Check if should ignore
+        if self._should_ignore(rel_path):
+            return
+        
+        # Debounce (avoid triggering too frequently)
+        now = time.time()
+        if now - self.last_trigger < self.debounce_seconds:
+            return
+        
+        self.last_trigger = now
+        self.triggered_files.add(rel_path)
+        
+        print(f"\n📝 File changed: {rel_path}")
+        print("🔄 Triggering auto-enforcer...")
+        
+        # Run fix loop (which runs enforcer → LLM → enforcer)
+        self._run_fix_loop()
     
-    def stop(self):
-        """Stop file watcher."""
+    def _run_fix_loop(self):
+        """Run the autonomous fix loop."""
+        
+        if self.fix_loop_script:
+            script = self.fix_loop_script
+            args = [sys.executable, str(script), "--skip-initial-audit"]
+        elif hasattr(self, 'enforcer_script'):
+            script = self.enforcer_script
+            args = [sys.executable, str(script)]  # No "audit" command needed
+        else:
+            print("❌ No fix loop or enforcer script found")
+            return
+        
         try:
-            trace_ctx = get_or_create_trace_context()
-            
-            if self.observer:
-                self.observer.stop()
-                self.observer.join(timeout=5)
-            
-            # Flush any remaining changes
-            self._flush_changes()
-            
-            self.running = False
-            
-            logger.info(
-                "File watcher stopped",
-                operation="stop",
-                session_id=self.session_id,
-                **trace_ctx
+            # Run in background (non-blocking)
+            process = subprocess.Popen(
+                args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                cwd=self.project_root
             )
+            
+            print(f"   Started: {script.name}")
+            print(f"   Process ID: {process.pid}")
+            print("   (Running in background)")
+            
+            # Don't wait for completion (non-blocking)
+            # The process will complete on its own
             
         except Exception as e:
-            logger.error(
-                "Failed to stop file watcher",
-                operation="stop",
-                error_code="WATCHER_STOP_FAILED",
-                root_cause=str(e),
-                session_id=self.session_id
-            )
-    
-    def run(self):
-        """Run file watcher (blocking)."""
-        try:
-            self.start()
-            
-            # Set up signal handlers for graceful shutdown
-            signal.signal(signal.SIGINT, self._signal_handler)
-            signal.signal(signal.SIGTERM, self._signal_handler)
-            
-            # Keep running until stopped
-            while self.running:
-                time.sleep(1)
-                
-        except KeyboardInterrupt:
-            logger.info(
-                "File watcher interrupted by user",
-                operation="run",
-                session_id=self.session_id
-            )
-        except Exception as e:
-            logger.error(
-                "File watcher error",
-                operation="run",
-                error_code="WATCHER_RUN_ERROR",
-                root_cause=str(e),
-                session_id=self.session_id
-            )
-        finally:
-            self.stop()
-    
-    def _signal_handler(self, signum, frame):
-        """Handle shutdown signals."""
-        logger.info(
-            "Received shutdown signal",
-            operation="_signal_handler",
-            signal=signum,
-            session_id=self.session_id
-        )
-        self.running = False
+            print(f"❌ Failed to start fix loop: {e}")
 
 
 def main():
-    """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="VeroScore V3 File Watcher - Monitor file changes and manage sessions"
-    )
-    parser.add_argument(
-        "--config",
-        type=Path,
-        help="Path to config file (default: .cursor/config/auto_pr_config.yaml)"
-    )
-    parser.add_argument(
-        "--watch-dir",
-        type=str,
-        help="Directory to watch (default: project root)"
-    )
+    """Run file watcher."""
     
-    args = parser.parse_args()
+    if not WATCHDOG_AVAILABLE:
+        print("❌ Cannot run file watcher without watchdog library")
+        print("   Install with: pip install watchdog")
+        sys.exit(1)
+    
+    print("👁️  VeroField File Watcher")
+    print("   Watching for code changes...")
+    print("   Will auto-trigger enforcer on modifications\n")
+    
+    project_root = Path.cwd()
+    
+    # Watch directories
+    watch_paths = [
+        project_root / "apps",
+        project_root / "libs",
+        project_root / "frontend",
+        project_root / "VeroFieldMobile",
+    ]
+    
+    # Filter to only existing paths
+    watch_paths = [p for p in watch_paths if p.exists()]
+    
+    if not watch_paths:
+        print("⚠️ No watchable directories found")
+        print("   Expected: apps/, libs/, frontend/, or VeroFieldMobile/")
+        sys.exit(1)
+    
+    # Create observer
+    event_handler = EnforcerTrigger(debounce_seconds=5, project_root=project_root)
+    observer = Observer()
+    
+    # Schedule watches
+    for path in watch_paths:
+        observer.schedule(event_handler, str(path), recursive=True)
+        print(f"✓ Watching: {path}")
+    
+    # Start watching
+    observer.start()
+    print("\n🟢 File watcher active")
+    print("   Press Ctrl+C to stop\n")
     
     try:
-        watcher = FileWatcher(config_path=args.config, watch_dir=args.watch_dir)
-        watcher.run()
-        return 0
-    except Exception as e:
-        logger.error(
-            "File watcher failed",
-            operation="main",
-            error_code="WATCHER_MAIN_FAILED",
-            root_cause=str(e)
-        )
-        return 1
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n\n🛑 Stopping file watcher...")
+        observer.stop()
+    
+    observer.join()
+    print("✅ File watcher stopped")
 
 
-if __name__ == '__main__':
-    sys.exit(main())
-
+if __name__ == "__main__":
+    main()

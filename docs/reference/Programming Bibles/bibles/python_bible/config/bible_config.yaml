@@ -1,0 +1,33 @@
+# Bible Configuration for Python Bible
+# This file defines the patterns and rules for splitting and processing the Python Bible
+
+# Chapter boundary patterns (checked in order, first match wins)
+# These patterns identify where chapters begin
+# Must capture chapter number in group 1
+chapter_boundary_patterns:
+  - '^<!--\s*SSM:CHUNK_BOUNDARY\s+id="ch(\d+)-start"\s*-->$'
+
+# Chapter title patterns (checked after boundary, used to extract title)
+# Must capture chapter number in group 1, title in group 2
+chapter_title_patterns:
+  - '^📘\s*CHAPTER\s+(\d+)\s+[-—]\s+(.*)$'
+
+# Part header patterns (optional, for organizing chapters into parts)
+# Must capture part identifier in group 1, part name in group 2
+part_header_patterns:
+  - '^#\s*Part\s+([IVXLC]+):\s*(.*)$'
+
+# Slug generation rules for chapter filenames
+slug_rules:
+  remove_emoji: true          # Remove emoji from titles
+  lowercase: true             # Convert to lowercase
+  replace_non_alnum_with_space: true  # Replace non-alphanumeric with spaces
+  collapse_whitespace: true   # Collapse multiple spaces to single space
+
+# Book metadata for SSM compilation
+book_metadata:
+  title: "Python Bible"
+  version: "3.0.0"
+  namespace: "python_bible"
+
+

@@ -3,7 +3,7 @@
 File Watcher Integration Test
 Tests end-to-end file watcher functionality.
 
-Last Updated: 2025-11-24
+Last Updated: 2025-12-01
 
 Usage:
     python .cursor/scripts/test_file_watcher_integration.py
@@ -11,17 +11,20 @@ Usage:
 
 import os
 import sys
-import time
-import tempfile
 from pathlib import Path
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from logger_util import get_logger
-
-logger = get_logger(context="test_file_watcher_integration")
+try:
+    from logger_util import get_logger
+    logger = get_logger(context="test_file_watcher_integration")
+except ImportError:
+    # Fallback logger if logger_util not available
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger("test_file_watcher_integration")
 
 
 def test_file_watcher_imports():
@@ -158,12 +161,13 @@ def test_threshold_checker():
         checker = ThresholdChecker(config, mock_session_manager)
         
         # Mock session data
+        from datetime import datetime, timezone
         mock_session = {
             "session_id": "test",
             "total_files": 5,
             "total_lines_added": 0,
             "total_lines_removed": 0,
-            "last_activity": "2025-11-24T12:00:00Z"
+            "last_activity": datetime.now(timezone.utc).isoformat()
         }
         
         checker._get_session_data = lambda x: mock_session
@@ -219,4 +223,3 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
-

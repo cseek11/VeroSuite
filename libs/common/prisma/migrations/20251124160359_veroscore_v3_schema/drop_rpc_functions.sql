@@ -42,3 +42,5 @@ DROP FUNCTION IF EXISTS veroscore.get_pending_changes_count(TEXT);
 -- Should return 0 rows (only cleanup functions should remain)
 -- ============================================================================
 
+
+

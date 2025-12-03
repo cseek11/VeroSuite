@@ -1,0 +1,377 @@
+---
+description: "Core philosophy: date handling, tech stack standards, foundational non-negotiables"
+alwaysApply: true
+---
+
+# PRIORITY: CRITICAL - Core Philosophy & Standards
+
+## Core Philosophy
+
+**"Work WITH the existing project structure, not against it. Always search, analyze, and understand before implementing. Maximize efficiency through parallel operations and maintain the highest standards of code quality and security."**
+
+**⚠️ CRITICAL: Before ANY implementation, you MUST:**
+1. Read `.cursor/rules/01-enforcement.mdc` for mandatory checklist
+2. Complete all mandatory searches (parallel execution)
+3. Verify rule compliance before coding
+4. Stop if any rule violation detected
+
+**⚠️ CRITICAL: After ANY file modification, you MUST:**
+1. Audit the file for code compliance
+2. Verify file paths, imports, security, dates, patterns
+3. Fix any violations found
+4. Re-audit after fixes
+5. Verify compliance before proceeding
+
+---
+
+## PRIORITY: CRITICAL - Date & Time Handling
+
+**⚠️ CRITICAL VIOLATION:** Hardcoding dates is a **HARD STOP** violation.
+
+**MANDATORY PROCEDURE:**
+1. **BEFORE writing ANY date:** Check current system/device date
+2. **USE that exact date** - Never hardcode or assume
+3. **FORMAT:** ISO 8601: `YYYY-MM-DD` (e.g., `2025-11-30`)
+4. **VERIFY:** Date must match current system date exactly
+
+**Rules:**
+- ❌ **NEVER** hardcode dates like `2025-01-27` or `2025-11-30`
+- ✅ **ALWAYS** check device/system date first
+- ✅ **ALWAYS** use current date for "Last Updated" fields
+- ✅ **ALWAYS** update "Last Updated" when modifying documentation
+- ✅ Format dates as ISO 8601: `YYYY-MM-DD` or full datetime: `YYYY-MM-DD HH:MM:SS`
+- ✅ For timestamps in code, use proper date/time libraries (Date, dayjs, etc.)
+
+**Verification:**
+- Before committing: Verify date matches current system date
+- If date is wrong: STOP and fix before proceeding
+- This is a **HARD STOP** violation - cannot proceed with wrong date
+
+**Note:** Auto-PR snapshot documentation under `docs/Auto-PR/` is treated as historical for date enforcement. These violations may appear as historical warnings and should not block current-session work.
+
+---
+
+## PRIORITY: HIGH - Project Context & Architecture
+
+### Tech Stack
+- **Frontend**: React + TypeScript + Tailwind CSS (purple theme preferences)
+- **Backend**: NestJS + Prisma + Supabase with comprehensive RLS
+- **Database**: PostgreSQL with strict tenant isolation via Row Level Security (RLS)
+- **Authentication**: JWT with multi-tenant security
+- **State Management**: Zustand + React Query for efficient data fetching
+- **Mobile**: React Native with offline-first architecture
+
+### Project Structure (Post-Restructuring)
+- **Components**: `/frontend/src/components/` - Follow established patterns
+- **APIs**: `/frontend/src/lib/` and `/apps/api/src/` - Maintain consistency
+- **Microservices**: `/apps/[service]/src/` - Independent services
+- **Shared Libraries**: `/libs/common/src/` - Shared code
+- **Database**: `libs/common/prisma/schema.prisma` - Preserve relationships and RLS
+- **External Services**: `/services/` - Flink, Feast, OPA
+- **Documentation**: All `.md` files - Keep current and accurate
+- **Mobile App**: `VeroFieldMobile/` - Production-ready React Native
+
+---
+
+## PRIORITY: HIGH - Code Organization
+
+### File Structure Rules (Post-Restructuring)
+- **Reusable components** → `frontend/src/components/ui/`
+- **Feature components** → `frontend/src/components/[feature]/`
+- **Main API modules** → `apps/api/src/[module]/`
+- **AI services** → `apps/crm-ai/src/`, `apps/ai-soc/src/`
+- **Shared libraries** → `libs/common/src/`
+- **Database schema** → `libs/common/prisma/schema.prisma`
+- **Forms** → Use standard form pattern
+- **Dialogs** → Use Dialog component from ui/
+
+### Naming Conventions
+- Components: PascalCase (e.g., `CustomerSearchSelector.tsx`)
+- Files: Match component name
+- Functions: camelCase
+- Constants: UPPER_SNAKE_CASE
+- Types/Interfaces: PascalCase
+
+---
+
+## R23: Naming Conventions — Step 5 Audit Procedures
+
+**For code changes affecting file names, component names, function names, constant names, directory names, or import paths:**
+
+### Component Naming Compliance
+
+- [ ] **MANDATORY:** Verify components use PascalCase (e.g., `CustomerSearchSelector.tsx`, `WorkOrderForm.tsx`)
+- [ ] **MANDATORY:** Verify component file names match component name exactly (case-sensitive)
+- [ ] **MANDATORY:** Verify component files use `.tsx` extension (React components)
+- [ ] **MANDATORY:** Verify component names are descriptive and follow established patterns
+- [ ] **RECOMMENDED:** Verify component names don't use abbreviations (unless established pattern)
+
+### Function Naming Compliance
+
+- [ ] **MANDATORY:** Verify functions use camelCase (e.g., `getUserById`, `processWorkOrder`)
+- [ ] **MANDATORY:** Verify function names are descriptive and indicate purpose
+- [ ] **MANDATORY:** Verify function names follow established patterns (check similar functions)
+- [ ] **RECOMMENDED:** Verify function names use verb-noun pattern (e.g., `createUser`, `updateOrder`)
+
+### Constant Naming Compliance
+
+- [ ] **MANDATORY:** Verify constants use UPPER_SNAKE_CASE (e.g., `MAX_FILE_SIZE`, `DEFAULT_TIMEOUT`)
+- [ ] **MANDATORY:** Verify constant names are descriptive and indicate purpose
+- [ ] **MANDATORY:** Verify constants are truly constant (not reassigned)
+- [ ] **RECOMMENDED:** Verify constant names follow established patterns (check similar constants)
+
+### Type/Interface Naming Compliance
+
+- [ ] **MANDATORY:** Verify types and interfaces use PascalCase (e.g., `User`, `WorkOrderStatus`, `CreateUserDto`)
+- [ ] **MANDATORY:** Verify type names are descriptive and indicate purpose
+- [ ] **MANDATORY:** Verify type names follow established patterns (DTOs end with `Dto`, enums end with enum type)
+- [ ] **RECOMMENDED:** Verify type names use established suffixes (e.g., `Dto`, `Response`, `Request`)
+
+### File Naming Compliance
+
+- [ ] **MANDATORY:** Verify file names follow conventions:
+  - PascalCase for components (`.tsx` files)
+  - camelCase for utilities (`.ts` files, not `.types.ts`, not `.spec.ts`, not `.test.ts`)
+  - kebab-case for configs (`.json`, `.yaml`, `.config.ts`)
+- [ ] **MANDATORY:** Verify file extensions are correct (`.ts` for TypeScript, `.tsx` for React, `.mdc` for rules)
+- [ ] **MANDATORY:** Verify file names match their content (component files match component name)
+- [ ] **RECOMMENDED:** Verify file names are descriptive and follow established patterns
+
+### Directory Naming Compliance
+
+- [ ] **MANDATORY:** Verify directory names use lowercase or kebab-case (e.g., `work-orders`, `user-management`)
+- [ ] **MANDATORY:** Verify directory names are descriptive and indicate purpose
+- [ ] **MANDATORY:** Verify directory names follow monorepo structure (feature-based or layer-based)
+- [ ] **RECOMMENDED:** Verify directory names match established patterns (check similar features)
+
+### Old Naming Detection
+
+- [ ] **MANDATORY:** Verify no old naming (VeroSuite, @verosuite/*) in new code
+- [ ] **MANDATORY:** Verify no old naming (VeroSuite, @verosuite/*) in modified code
+- [ ] **MANDATORY:** Verify imports use correct naming (@verofield/*, not @verosuite/*)
+- [ ] **MANDATORY:** Verify package.json files use correct naming (@verofield/* scope)
+- [ ] **RECOMMENDED:** Verify documentation references use correct naming (VeroField, not VeroSuite)
+
+### Naming Consistency
+
+- [ ] **MANDATORY:** Verify naming is consistent across similar files (check comparable files)
+- [ ] **MANDATORY:** Verify naming follows established patterns (check component library, similar features)
+- [ ] **MANDATORY:** Verify naming doesn't conflict with existing names (no duplicates)
+- [ ] **RECOMMENDED:** Verify naming is self-documenting (clear purpose from name)
+
+### Automated Checks
+
+```bash
+# Run naming conventions checker
+python .cursor/scripts/check-naming-conventions.py --file <file_path>
+
+# Check all changed files
+python .cursor/scripts/check-naming-conventions.py --pr <PR_NUMBER>
+
+# Check for old naming
+python .cursor/scripts/check-naming-conventions.py --old-naming
+
+# Expected: Warnings for naming violations (does not block)
+```
+
+### OPA Policy
+
+- **Policy:** `services/opa/policies/documentation.rego` (R23 section)
+- **Enforcement:** WARNING (Tier 3 MAD) - Logged but doesn't block PRs
+- **Tests:** `services/opa/tests/documentation_r23_test.rego`
+
+### Manual Verification (When Needed)
+
+1. **Review Naming Patterns** - Verify all names follow conventions (PascalCase, camelCase, UPPER_SNAKE_CASE)
+2. **Check Old Naming** - Search for VeroSuite, @verosuite/* patterns
+3. **Validate Consistency** - Compare with similar files for consistency
+4. **Verify File-Content Match** - Ensure file names match component/function names
+
+**Example Component Naming (✅):**
+
+```typescript
+// ✅ CORRECT: PascalCase component name
+// frontend/src/components/ui/CustomerSearchSelector.tsx
+export const CustomerSearchSelector = () => { ... };
+
+// ✅ CORRECT: File name matches component name
+// frontend/src/components/work-orders/WorkOrderForm.tsx
+export const WorkOrderForm = () => { ... };
+```
+
+**Example Function Naming (✅):**
+
+```typescript
+// ✅ CORRECT: camelCase function name
+async function getUserById(userId: string) { ... }
+
+// ✅ CORRECT: Verb-noun pattern
+async function createWorkOrder(data: CreateWorkOrderDto) { ... }
+```
+
+**Example Old Naming Violation (❌):**
+
+```typescript
+// ❌ VIOLATION: Old naming (VeroSuite)
+import { TenantContextService } from '@verosuite/common/auth';
+// Should be: @verofield/common/auth
+
+// ❌ VIOLATION: Old naming in code
+const VeroSuiteConfig = { ... };
+// Should be: VeroFieldConfig
+```
+
+---
+
+## PRIORITY: HIGH - Prohibited Actions
+
+### ❌ DO NOT (HARD STOPS - VIOLATION = STOP):
+1. ❌ **Create duplicate components** - MUST search first
+2. ❌ **Implement custom customer search** - MUST use CustomerSearchSelector
+3. ❌ **Create inline components (>50 lines)** - MUST extract to separate file
+4. ❌ **Mix styling approaches** - MUST follow established patterns
+5. ❌ **Skip component discovery** - MUST complete mandatory searches
+6. ❌ **Ignore existing patterns** - MUST follow established conventions
+7. ❌ **Create new form patterns** - MUST use standard form pattern
+8. ❌ **Use basic Select for customers** - MUST use CustomerSearchSelector
+9. ❌ **Assume field names** - MUST read existing schema first
+10. ❌ **Make changes without explanation** - MUST explain decisions
+11. ❌ **Commit `.env` files or secrets** - NEVER commit secrets
+12. ❌ **Break tenant isolation** - MUST include tenantId in all queries
+13. ❌ **Use old file paths** - MUST use monorepo structure (apps/, libs/)
+14. ❌ **Skip rule compliance check** - MUST verify before coding
+
+### ✅ DO:
+1. Search before implementing
+2. Reuse existing components
+3. Follow established patterns
+4. Match existing styling
+5. Document deviations
+6. Extract reusable code
+7. Use standard imports
+8. Follow naming conventions
+9. Use parallel tool calls
+10. Update documentation with current date/time
+11. Maintain TypeScript type safety
+12. Preserve tenant isolation
+
+---
+
+## PRIORITY: HIGH - Code Quality Standards
+
+### TypeScript Requirements
+- **100% TypeScript coverage** with proper interfaces
+- Use proper type definitions for all props and functions
+- Avoid `any` type - use proper types or `unknown`
+- Use TypeScript interfaces for component props
+- Follow ESLint rules from `frontend/.eslintrc.json` and `backend/.eslintrc.cjs`
+
+### Error Handling
+- Implement comprehensive error management following existing patterns
+- Provide user-friendly error messages
+- Log errors appropriately
+- Handle edge cases
+
+### Validation
+- Add proper input validation and sanitization
+- Use zod schemas for form validation
+- Validate API responses
+- Check for required fields
+
+### Testing
+- Include unit tests for new functionality when possible
+- Test integration with existing systems
+- Verify error handling
+- Test tenant isolation
+- **End-to-End Workflows:** For critical user workflows, consider adding E2E tests using Playwright
+
+### Documentation
+- Update relevant `.md` files for new features
+- Include "Last Updated" timestamp with current date/time
+- Document architectural decisions
+- Explain complex logic
+
+---
+
+## PRIORITY: HIGH - Python-Specific Reminders
+
+**⚠️ CRITICAL:** When working with Python code (`.py` files), you MUST:
+
+### Python Bible Compliance
+
+1. **MUST** reference `.cursor/rules/python_bible.mdc` for Python-specific rules
+2. **MUST** check `.cursor/PYTHON_LEARNINGS_LOG.md` for Python audit learnings
+3. **MUST** follow patterns from `docs/reference/Programming Bibles/bibles/python_bible/dist/python_bible/Agent.md`
+4. **MUST** avoid anti-patterns documented in Python Bible enforcement rules
+
+### Python Code Generation
+
+When generating Python code:
+- ✅ Use type hints (Python 3.8+)
+- ✅ Use dataclasses for simple data structures
+- ✅ Use pathlib.Path for file operations
+- ✅ Use structured logging (logger_util.py pattern)
+- ✅ Use proper error handling (no silent failures)
+- ✅ Follow existing patterns from similar Python files
+- ❌ Avoid mutable default arguments
+- ❌ Avoid global state
+- ❌ Avoid eval() or exec() with user input
+- ❌ Avoid pickle for untrusted data
+
+### Python Script Structure
+
+Python scripts should follow this structure:
+```python
+#!/usr/bin/env python3
+"""
+[Module docstring with purpose, features, last updated date]
+"""
+
+import os
+import sys
+from pathlib import Path
+from typing import List, Dict, Optional
+from dataclasses import dataclass
+
+# Add project root to path
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+try:
+    from logger_util import get_logger, get_or_create_trace_context
+    logger = get_logger(context="module_name")
+except ImportError:
+    # Fallback logger
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger("module_name")
+
+# [Implementation]
+```
+
+### Python-Specific Rule Activation
+
+When Python code is detected:
+```
+✓ Rule Activated: Python Bible Compliance (python_bible.mdc)
+- Triggered by: [file path]
+- Applicable sections: All Python-specific patterns and anti-patterns
+- Reference: docs/reference/Programming Bibles/bibles/python_bible/dist/python_bible/Agent.md
+- Learnings Log: .cursor/PYTHON_LEARNINGS_LOG.md
+```
+
+---
+
+## PRIORITY: NORMAL - Key Reminders
+
+1. **Reuse > Reinvent** - Always search first!
+2. **Parallel > Sequential** - Use multiple tools simultaneously
+3. **Pattern > Custom** - Follow established conventions
+4. **Security > Speed** - Maintain tenant isolation
+5. **Documentation > Code** - Keep docs current with date/time
+6. **Type Safety > Convenience** - Use proper TypeScript types
+7. **Component Library > Custom Code** - Use existing UI components
+
+---
+
+**Last Updated:** 2025-11-30

@@ -210,8 +210,12 @@ class CoverageRequirementsChecker:
         html = self._generate_html_report(current_coverage, history, exemptions, gaps, health_score)
         
         # Write report
-        with open(output_file, 'w') as f:
-            f.write(html)
+        try:
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(html)
+        except (OSError, IOError) as e:
+            print(f"Error writing report to {output_file}: {e}", file=sys.stderr)
+            return
         
         print(f"Enhanced coverage report generated: {output_file}")
         print(f"Coverage Health Score: {health_score}/100")
@@ -515,6 +519,8 @@ def main():
 
 if __name__ == '__main__':
     exit(main())
+
+
 
 
 

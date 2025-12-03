@@ -110,3 +110,5 @@ WHERE nspname = 'veroscore';
 -- 3. If successful, you can remove RPC functions using drop_rpc_functions.sql
 -- ============================================================================
 
+
+

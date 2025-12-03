@@ -32,3 +32,5 @@ CREATE POLICY write_queue_service_access ON compliance.write_queue
 -- Verify table was created
 SELECT 'write_queue table created successfully' AS status;
 
+
+

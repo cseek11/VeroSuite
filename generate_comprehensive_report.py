@@ -2,9 +2,26 @@
 """Generate comprehensive Auto-PR system analysis report"""
 import json
 import pathlib
+import sys
 from datetime import datetime
 from collections import Counter, defaultdict
-import sys
+from pathlib import Path
+
+# Import structured logger
+# Add project root to path to import .cursor module
+_project_root = Path(__file__).parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
+# Import logger utility using direct file import
+import importlib.util
+logger_util_path = _project_root / ".cursor" / "scripts" / "logger_util.py"
+spec = importlib.util.spec_from_file_location("logger_util", logger_util_path)
+logger_util = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(logger_util)
+get_logger = logger_util.get_logger
+
+logger = get_logger("generate_comprehensive_report")
 
 # Load reward scores
 try:
@@ -12,13 +29,23 @@ try:
         reward_data = json.load(f)
     scores = reward_data.get('scores', [])
 except Exception as e:
-    print(f"ERROR: Could not load reward_scores.json: {e}", file=sys.stderr)
+    logger.error(
+        "Could not load reward_scores.json",
+        operation="load_reward_scores",
+        error_code="FILE_LOAD_FAILED",
+        root_cause=str(e),
+        file_path="docs/metrics/reward_scores.json"
+    )
     scores = []
 
 recent_scores = sorted(scores, key=lambda x: x.get('timestamp', ''), reverse=True)[:40]
 
 # Output file
-report_file = open('AUTO_PR_SYSTEM_COMPREHENSIVE_REPORT.md', 'w', encoding='utf-8')
+try:
+    report_file = open('AUTO_PR_SYSTEM_COMPREHENSIVE_REPORT.md', 'w', encoding='utf-8')
+except (OSError, IOError) as e:
+    print(f"Error opening report file: {e}", file=sys.stderr)
+    sys.exit(1)
 
 def print_section(title, level=1):
     """Print a markdown section header"""
@@ -130,8 +157,25 @@ for s in scores:
     if timestamp:
         try:
             pr_times.append(datetime.fromisoformat(timestamp.replace('Z', '+00:00')))
-        except:
-            pass
+        except ValueError as e:
+            logger.warn(
+                "Invalid timestamp format",
+                operation="parse_pr_timestamp",
+                error_code="INVALID_TIMESTAMP",
+                root_cause=str(e),
+                timestamp=timestamp
+            )
+            # Continue processing other timestamps
+        except Exception as e:
+            logger.error(
+                "Unexpected error parsing timestamp",
+                operation="parse_pr_timestamp",
+                error_code="UNEXPECTED_ERROR",
+                root_cause=str(e),
+                timestamp=timestamp,
+                exc_info=True
+            )
+            raise  # Re-raise unexpected errors
 
 pr_times.sort()
 for i in range(1, len(pr_times)):
@@ -827,4 +871,8 @@ print_text(f"**Report Generated:** {datetime.now().isoformat()}")
 print_text("**End of Report**")
 
 report_file.close()
-print(f"Report generated: AUTO_PR_SYSTEM_COMPREHENSIVE_REPORT.md")
+logger.info(
+    "Report generated",
+    operation="generate_report",
+    report_file="AUTO_PR_SYSTEM_COMPREHENSIVE_REPORT.md"
+)

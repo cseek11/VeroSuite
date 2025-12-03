@@ -4,7 +4,7 @@
 
 **Priority:** High  
 **Estimated Effort:** 4 weeks  
-**Assigned To:** Development Team  
+**Assigned To:** Development Team
 
 ---
 

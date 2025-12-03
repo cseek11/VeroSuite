@@ -3,7 +3,7 @@
 Structured Logging Utility for VeroScore V3
 Provides structured logging with trace ID propagation per Cursor rules.
 
-Last Updated: 2025-11-24
+Last Updated: 2025-12-03
 """
 
 import json
@@ -13,34 +13,45 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, Optional, Any
 from pathlib import Path
+import threading
 
-# Global trace context (thread-local would be better for multi-threaded, but simple for now)
-_trace_context: Dict[str, Optional[str]] = {
-    "traceId": None,
-    "spanId": None,
-    "requestId": None
-}
+# Thread-local trace context for thread safety (Chapter 17 - Concurrency)
+_trace_context_local = threading.local()
+
+
+def _get_trace_context() -> Dict[str, Optional[str]]:
+    """Get thread-local trace context, creating if needed."""
+    if not hasattr(_trace_context_local, 'context'):
+        _trace_context_local.context = {
+            "traceId": None,
+            "spanId": None,
+            "requestId": None
+        }
+    return _trace_context_local.context
 
 
 def get_or_create_trace_context() -> Dict[str, Optional[str]]:
     """
     Get or create trace context for distributed tracing.
     Returns dict with traceId, spanId, requestId.
+    Thread-safe using threading.local() (Chapter 17 - Concurrency).
     """
-    if not _trace_context["traceId"]:
-        _trace_context["traceId"] = str(uuid.uuid4())
-    if not _trace_context["spanId"]:
-        _trace_context["spanId"] = str(uuid.uuid4())
-    if not _trace_context["requestId"]:
-        _trace_context["requestId"] = str(uuid.uuid4())
+    context = _get_trace_context()
+    if not context["traceId"]:
+        context["traceId"] = str(uuid.uuid4())
+    if not context["spanId"]:
+        context["spanId"] = str(uuid.uuid4())
+    if not context["requestId"]:
+        context["requestId"] = str(uuid.uuid4())
     
-    return _trace_context.copy()
+    return context.copy()
 
 
 def set_trace_context(trace_id: Optional[str] = None, span_id: Optional[str] = None, request_id: Optional[str] = None):
-    """Set trace context (for propagation from external sources)."""
+    """Set trace context (for propagation from external sources). Thread-safe."""
+    context = _get_trace_context()
     if trace_id:
-        _trace_context["traceId"] = trace_id
+        context["traceId"] = trace_id
     if span_id:
         _trace_context["spanId"] = span_id
     if request_id:
@@ -135,6 +146,75 @@ class StructuredLogger:
     def debug(self, message: str, operation: Optional[str] = None, **kwargs):
         """Log debug message."""
         self._log("DEBUG", message, operation=operation, **kwargs)
+    
+    def progress(
+        self,
+        message: str,
+        operation: Optional[str] = None,
+        stage: Optional[str] = None,
+        current: Optional[int] = None,
+        total: Optional[int] = None,
+        **kwargs
+    ):
+        """
+        Log progress message (for print("[PROGRESS]...") patterns).
+        
+        Args:
+            message: Progress message
+            operation: Operation name
+            stage: Current stage/phase
+            current: Current progress count
+            total: Total count (for percentage calculation)
+            **kwargs: Additional context data
+        """
+        progress_data = {}
+        if stage:
+            progress_data["stage"] = stage
+        if current is not None and total is not None:
+            progress_data["current"] = current
+            progress_data["total"] = total
+            progress_data["percentage"] = (current / total * 100) if total > 0 else 0
+        
+        self._log("INFO", message, operation=operation, **{**progress_data, **kwargs})
+    
+    def error_with_categorization(
+        self,
+        message: str,
+        operation: Optional[str] = None,
+        error_code: Optional[str] = None,
+        root_cause: Optional[str] = None,
+        error_type: Optional[str] = None,
+        exc_info: bool = False,
+        **kwargs
+    ):
+        """
+        Log error with proper categorization (validation, business rule, or system error).
+        
+        Args:
+            message: Error message
+            operation: Operation name
+            error_code: Error code (e.g., "VALIDATION_ERROR", "BUSINESS_RULE_ERROR", "SYSTEM_ERROR")
+            root_cause: Root cause description
+            error_type: Error type category ("validation", "business_rule", "system")
+            exc_info: Whether to include exception info (for unexpected errors)
+            **kwargs: Additional context data
+        """
+        # Add error type to additional data
+        if error_type:
+            kwargs["errorType"] = error_type
+        
+        # For system errors, include exception info
+        if exc_info:
+            kwargs["exc_info"] = True
+        
+        self._log(
+            "ERROR",
+            message,
+            operation=operation,
+            error_code=error_code,
+            root_cause=root_cause,
+            **kwargs
+        )
 
 
 class StructuredFormatter(logging.Formatter):
@@ -166,4 +246,6 @@ def get_logger(context: str, level: str = "INFO") -> StructuredLogger:
         StructuredLogger instance
     """
     return StructuredLogger(context, level)
+
+
 

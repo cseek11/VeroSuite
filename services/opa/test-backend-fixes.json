@@ -1,0 +1,23 @@
+{
+  "changed_files": [
+    {
+      "path": "apps/api/src/users/users.controller.ts",
+      "content": "@Controller('users')\nexport class UsersController {\n  @Post()\n  async create(@Body() data: any) {\n    return this.prisma.user.create({ data });\n  }\n}"
+    },
+    {
+      "path": "apps/api/src/orders/orders.service.ts",
+      "content": "@Injectable()\nexport class OrdersService {\n  async processOrder(id: string) {\n    await this.prisma.order.update({ where: { id }, data: { status: 'processing' } });\n    await this.prisma.payment.create({ data: { orderId: id } });\n  }\n}"
+    },
+    {
+      "path": "apps/api/src/customers/customers.service.ts",
+      "content": "@Injectable()\nexport class CustomersService {\n  async getCustomers() {\n    return this.prisma.customer.findMany();\n  }\n}"
+    },
+    {
+      "path": "apps/api/src/work-orders/work-orders.service.ts",
+      "content": "@Injectable()\nexport class WorkOrdersService {\n  async create(data: any) {\n    try {\n      const result = await this.prisma.workOrder.create({ data });\n      this.logger.info('Work order created');\n      return result;\n    } catch (error) {\n      throw error;\n    }\n  }\n}"
+    }
+  ],
+  "pr_body": "Test PR for backend patterns"
+}
+
+

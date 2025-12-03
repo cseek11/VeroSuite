@@ -108,6 +108,8 @@ curl http://localhost:3001/api/docs-json | grep -i compliance
 
 ---
 
-**Last Updated:** 2025-11-24  
+**Last Updated:** 2025-11-30  
 **Status:** Route is correctly configured, use `/api/v1/compliance/checks`
+
+
 

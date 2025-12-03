@@ -151,7 +151,7 @@ class SessionManager:
             else:
                 raise RuntimeError("Failed to create session - no data returned")
                 
-        except Exception as e:
+        except (ValueError, RuntimeError, ConnectionError) as e:
             logger.error(
                 "Failed to get or create session",
                 operation="get_or_create_session",
@@ -159,7 +159,16 @@ class SessionManager:
                 root_cause=str(e),
                 author=author
             )
-            raise
+            raise RuntimeError(f"Failed to get or create session: {e}") from e
+        except Exception as e:
+            logger.error(
+                "Unexpected error getting or creating session",
+                operation="get_or_create_session",
+                error_code="SESSION_CREATE_UNEXPECTED",
+                root_cause=str(e),
+                author=author
+            )
+            raise RuntimeError(f"Unexpected error getting or creating session: {e}") from e
     
     def add_changes_batch(self, session_id: str, changes: List[FileChange]):
         """
@@ -209,7 +218,7 @@ class SessionManager:
                 **trace_ctx
             )
             
-        except Exception as e:
+        except (ValueError, RuntimeError, ConnectionError) as e:
             logger.error(
                 "Failed to add changes batch",
                 operation="add_changes_batch",
@@ -218,7 +227,17 @@ class SessionManager:
                 session_id=session_id,
                 change_count=len(changes)
             )
-            raise
+            raise RuntimeError(f"Failed to add changes batch: {e}") from e
+        except Exception as e:
+            logger.error(
+                "Unexpected error adding changes batch",
+                operation="add_changes_batch",
+                error_code="CHANGES_BATCH_UNEXPECTED",
+                root_cause=str(e),
+                session_id=session_id,
+                change_count=len(changes)
+            )
+            raise RuntimeError(f"Unexpected error adding changes batch: {e}") from e
     
     def _update_session_stats(
         self,
@@ -275,11 +294,19 @@ class SessionManager:
                 lines_removed=lines_removed
             )
             
-        except Exception as e:
+        except (ValueError, RuntimeError, ConnectionError) as e:
             logger.error(
                 "Failed to update session stats",
                 operation="_update_session_stats",
                 error_code="SESSION_STATS_UPDATE_FAILED",
+                root_cause=str(e),
+                session_id=session_id
+            )
+        except Exception as e:
+            logger.error(
+                "Unexpected error updating session stats",
+                operation="_update_session_stats",
+                error_code="SESSION_STATS_UPDATE_UNEXPECTED",
                 root_cause=str(e),
                 session_id=session_id
             )
@@ -288,11 +315,20 @@ class SessionManager:
         """Get session by ID."""
         try:
             return self.schema_helper.get_session(session_id)
-        except Exception as e:
+        except (ValueError, RuntimeError, ConnectionError) as e:
             logger.error(
                 "Failed to get session",
                 operation="_get_session",
                 error_code="SESSION_GET_FAILED",
+                root_cause=str(e),
+                session_id=session_id
+            )
+            return None
+        except Exception as e:
+            logger.error(
+                "Unexpected error getting session",
+                operation="_get_session",
+                error_code="SESSION_GET_UNEXPECTED",
                 root_cause=str(e),
                 session_id=session_id
             )
@@ -336,11 +372,20 @@ class SessionManager:
                 if result.data and len(result.data) > 0:
                     return result.data[0]
             return None
-        except Exception as e:
+        except (ValueError, RuntimeError, ConnectionError) as e:
             logger.error(
                 "Failed to find active session",
                 operation="_find_active_session",
                 error_code="SESSION_FIND_FAILED",
+                root_cause=str(e),
+                author=author
+            )
+            return None
+        except Exception as e:
+            logger.error(
+                "Unexpected error finding active session",
+                operation="_find_active_session",
+                error_code="SESSION_FIND_UNEXPECTED",
                 root_cause=str(e),
                 author=author
             )
@@ -398,7 +443,7 @@ class SessionManager:
                 **trace_ctx
             )
             
-        except Exception as e:
+        except (ValueError, RuntimeError, ConnectionError) as e:
             logger.error(
                 "Failed to mark session as reward-eligible",
                 operation="mark_reward_eligible",
@@ -406,5 +451,14 @@ class SessionManager:
                 root_cause=str(e),
                 session_id=session_id
             )
-            raise
+            raise RuntimeError(f"Failed to mark session as reward-eligible: {e}") from e
+        except Exception as e:
+            logger.error(
+                "Unexpected error marking session as reward-eligible",
+                operation="mark_reward_eligible",
+                error_code="REWARD_ELIGIBLE_MARK_UNEXPECTED",
+                root_cause=str(e),
+                session_id=session_id
+            )
+            raise RuntimeError(f"Unexpected error marking session as reward-eligible: {e}") from e
 

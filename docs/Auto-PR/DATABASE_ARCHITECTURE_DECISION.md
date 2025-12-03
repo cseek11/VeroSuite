@@ -176,3 +176,5 @@ schemas  = ["auth", "compliance", "public", "veroscore"]
 **Status:** ✅ Decision Implemented  
 **Impact:** Migration file and Prisma schema updated
 
+
+

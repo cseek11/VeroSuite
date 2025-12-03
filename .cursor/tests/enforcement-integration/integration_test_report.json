@@ -1,0 +1,63 @@
+{
+  "timestamp": "2025-12-01T20:44:06.501394+00:00",
+  "test_results": [
+    {
+      "test_name": "enforcement_runs",
+      "status": "PASSED",
+      "duration_ms": 2180.7544231414795,
+      "violations_found": 0,
+      "context_updated": false,
+      "recommendations_generated": false,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "test_name": "context_integration",
+      "status": "PASSED",
+      "duration_ms": 2297.5196838378906,
+      "violations_found": 0,
+      "context_updated": true,
+      "recommendations_generated": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "test_name": "context_state_persistence",
+      "status": "PASSED",
+      "duration_ms": 4196.547985076904,
+      "violations_found": 0,
+      "context_updated": true,
+      "recommendations_generated": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "test_name": "enforcement_with_file_changes",
+      "status": "PASSED",
+      "duration_ms": 2117.889165878296,
+      "violations_found": 0,
+      "context_updated": true,
+      "recommendations_generated": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "test_name": "timeout_handling",
+      "status": "PASSED",
+      "duration_ms": 0.0,
+      "violations_found": 0,
+      "context_updated": false,
+      "recommendations_generated": false,
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "summary": {
+    "total_tests": 5,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "total_violations": 0,
+    "context_updates": 3
+  }
+}

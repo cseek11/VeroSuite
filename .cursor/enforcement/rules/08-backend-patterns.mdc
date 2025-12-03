@@ -1,0 +1,182 @@
+---
+description: "Backend patterns: business logic placement, transactions, service encapsulation"
+globs: "apps/**/*.controller.ts,apps/**/*.service.ts,libs/**/*.controller.ts,libs/**/*.service.ts"
+alwaysApply: false
+---
+
+# BACKEND PATTERNS (R08-PATTERN)
+
+## Purpose
+Enforce code-structure patterns that affect maintainability, performance, and architectural integrity in NestJS backend modules.
+
+## Rules
+
+### BACKEND-R08-PATTERN-001: Business Logic in Controllers
+- **Severity:** WARNING (Tier 2)
+- **Detection:** Controller methods containing loops, multiple conditionals, calculations, or transformations without service delegation
+- **Fix:** Extract business logic into a service and have the controller call a dedicated service method
+
+**Examples of violations:**
+```typescript
+// ❌ Business logic in controller
+@Controller('users')
+export class UsersController {
+  @Post()
+  async create(@Body() data: any) {
+    // Complex filtering logic
+    const filtered = data.items.filter(item => item.status === 'active');
+    
+    // Calculations
+    const total = filtered.reduce((sum, item) => sum + item.price, 0);
+    
+    // Multiple conditionals
+    if (total > 1000) {
+      if (data.discount) {
+        total = total * 0.9;
+      }
+    }
+    
+    return { total };
+  }
+}
+```
+
+**Correct usage:**
+```typescript
+// ✅ Controller delegates to service
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+  
+  @Post()
+  async create(@Body() dto: CreateUserDto) {
+    return this.usersService.createUser(dto);
+  }
+}
+```
+
+### BACKEND-R08-PATTERN-002: Multi-Step Operations Without $transaction
+- **Severity:** WARNING (Tier 2)
+- **Detection:** Service methods with 2+ Prisma mutation operations (create/update/delete) without $transaction wrapper
+- **Fix:** Wrap related operations in `prisma.$transaction()` to ensure atomicity
+
+**Example violation:**
+```typescript
+// ❌ Multiple mutations without transaction
+async updateOrder(orderId: string, data: UpdateOrderDto) {
+  await this.prisma.order.update({ where: { id: orderId }, data });
+  await this.prisma.orderItem.updateMany({ where: { order_id: orderId }, data: data.items });
+  await this.prisma.auditLog.create({ data: { action: 'order_updated' } });
+}
+```
+
+**Correct usage:**
+```typescript
+// ✅ Wrapped in transaction
+async updateOrder(orderId: string, data: UpdateOrderDto) {
+  return this.prisma.$transaction(async (tx) => {
+    await tx.order.update({ where: { id: orderId }, data });
+    await tx.orderItem.updateMany({ where: { order_id: orderId }, data: data.items });
+    await tx.auditLog.create({ data: { action: 'order_updated' } });
+  });
+}
+```
+
+### BACKEND-R08-PATTERN-003: Prisma Usage in Controllers
+- **Severity:** WARNING (Tier 2)
+- **Detection:** Controller methods calling Prisma directly (bypassing service layer)
+- **Fix:** Move Prisma calls into the corresponding service and inject/use the service in the controller
+
+**Example violation:**
+```typescript
+// ❌ Prisma in controller
+@Controller('users')
+export class UsersController {
+  constructor(private readonly prisma: PrismaService) {}
+  
+  @Get()
+  async findAll() {
+    return this.prisma.user.findMany();
+  }
+}
+```
+
+**Correct usage:**
+```typescript
+// ✅ Controller uses service
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+  
+  @Get()
+  async findAll() {
+    return this.usersService.findAll();
+  }
+}
+```
+
+### BACKEND-R08-PATTERN-004: Pass-Through Services
+- **Severity:** WARNING (Tier 2)
+- **Detection:** Service with 80%+ methods that are simple pass-through wrappers around Prisma with no domain logic
+- **Fix:** Add domain logic (validation, transformations, business constraints) or consolidate with existing services
+
+**Example violation:**
+```typescript
+// ❌ Pass-through service
+@Injectable()
+export class UsersService {
+  constructor(private readonly prisma: PrismaService) {}
+  
+  async findAll() {
+    return this.prisma.user.findMany();
+  }
+  
+  async findOne(id: string) {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
+  
+  async create(data: CreateUserDto) {
+    return this.prisma.user.create({ data });
+  }
+}
+```
+
+**Correct usage:**
+```typescript
+// ✅ Service with domain logic
+@Injectable()
+export class UsersService {
+  constructor(private readonly prisma: PrismaService) {}
+  
+  async findAll() {
+    // Domain logic: filtering, validation, transformations
+    const users = await this.prisma.user.findMany();
+    return users.map(user => this.transformUser(user));
+  }
+  
+  async create(data: CreateUserDto) {
+    // Validation and business rules
+    if (await this.emailExists(data.email)) {
+      throw new ConflictException('Email already exists');
+    }
+    
+    // Transformations
+    const hashedPassword = await this.hashPassword(data.password);
+    
+    return this.prisma.user.create({
+      data: { ...data, password: hashedPassword }
+    });
+  }
+}
+```
+
+**Note:** Repository pattern files (`*.repository.ts`) are exempt from this rule as they are intentionally pass-through.
+
+## Enforcement
+This rule is enforced by `BackendPatternsChecker`.
+
+## Boundaries
+This checker focuses on code-structure patterns and does not duplicate:
+- DTO semantics → handled by `DtoEnforcementChecker`
+- Module/dto directory invariants → handled by `BackendChecker`
+- Tenant isolation or secrets → handled by security checkers

@@ -28,9 +28,12 @@ from typing import Dict, List, Optional, Tuple
 # Configuration
 # ============================================================================
 
-ACCESSIBILITY_HISTORY_FILE = '.accessibility/history.json'
-ACCESSIBILITY_EXEMPTIONS_FILE = 'docs/accessibility-exemptions.md'
-ACCESSIBILITY_REPORT_FILE = 'accessibility-report.html'
+# Get project root (assume script is in .cursor/scripts/)
+PROJECT_ROOT = Path(__file__).parent.parent.parent.resolve()
+
+ACCESSIBILITY_HISTORY_FILE = PROJECT_ROOT / '.accessibility' / 'history.json'
+ACCESSIBILITY_EXEMPTIONS_FILE = PROJECT_ROOT / 'docs' / 'accessibility-exemptions.md'
+ACCESSIBILITY_REPORT_FILE = PROJECT_ROOT / 'accessibility-report.html'
 
 # WCAG AA Contrast Requirements
 WCAG_AA_NORMAL_TEXT = 4.5  # Minimum contrast ratio for normal text
@@ -62,30 +65,44 @@ HISTORY_RETENTION_DAYS = 365
 
 def load_accessibility_history() -> List[Dict]:
     """Load accessibility history from git-tracked file."""
-    if not os.path.exists(ACCESSIBILITY_HISTORY_FILE):
+    if not ACCESSIBILITY_HISTORY_FILE.exists():
         return []
     
     try:
-        with open(ACCESSIBILITY_HISTORY_FILE, 'r') as f:
+        with open(ACCESSIBILITY_HISTORY_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
-    except (json.JSONDecodeError, FileNotFoundError):
+    except (json.JSONDecodeError, FileNotFoundError, OSError):
         return []
 
 def save_accessibility_history(history: List[Dict]):
     """Save accessibility history to git-tracked file."""
-    os.makedirs(os.path.dirname(ACCESSIBILITY_HISTORY_FILE), exist_ok=True)
+    ACCESSIBILITY_HISTORY_FILE.parent.mkdir(parents=True, exist_ok=True)
     
-    with open(ACCESSIBILITY_HISTORY_FILE, 'w') as f:
+    with open(ACCESSIBILITY_HISTORY_FILE, 'w', encoding='utf-8') as f:
         json.dump(history, f, indent=2)
 
 def prune_accessibility_history(history: List[Dict]) -> List[Dict]:
     """Remove entries older than retention period."""
     cutoff_date = datetime.now() - timedelta(days=HISTORY_RETENTION_DAYS)
     
-    pruned = [
-        entry for entry in history
-        if datetime.fromisoformat(entry['date'].replace('Z', '+00:00')) > cutoff_date
-    ]
+    pruned = []
+    for entry in history:
+        try:
+            # Handle ISO format dates with or without timezone
+            date_str = entry.get('date', '')
+            if not date_str:
+                continue
+            
+            # Normalize timezone format
+            if date_str.endswith('Z'):
+                date_str = date_str.replace('Z', '+00:00')
+            
+            entry_date = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+            if entry_date > cutoff_date:
+                pruned.append(entry)
+        except (ValueError, KeyError, AttributeError):
+            # Skip entries with invalid dates
+            continue
     
     return pruned
 
@@ -111,11 +128,14 @@ def add_accessibility_entry(component: str, violations: List[Dict], compliance_s
 
 def parse_exemptions_file() -> List[Dict]:
     """Parse accessibility exemptions from markdown file."""
-    if not os.path.exists(ACCESSIBILITY_EXEMPTIONS_FILE):
+    if not ACCESSIBILITY_EXEMPTIONS_FILE.exists():
         return []
     
-    with open(ACCESSIBILITY_EXEMPTIONS_FILE, 'r') as f:
-        content = f.read()
+    try:
+        with open(ACCESSIBILITY_EXEMPTIONS_FILE, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except (OSError, IOError):
+        return []
     
     exemptions = []
     
@@ -163,7 +183,18 @@ def validate_exemptions() -> List[str]:
     for exemption in exemptions:
         # Check expiration date
         try:
-            expiration_date = datetime.fromisoformat(exemption['expiration'])
+            expiration_str = exemption.get('expiration', '').strip()
+            if not expiration_str or expiration_str == '-':
+                warnings.append(
+                    f"❌ Missing expiration date for {exemption['component']}"
+                )
+                continue
+            
+            # Normalize timezone format
+            if expiration_str.endswith('Z'):
+                expiration_str = expiration_str.replace('Z', '+00:00')
+            
+            expiration_date = datetime.fromisoformat(expiration_str)
             if expiration_date < datetime.now():
                 warnings.append(
                     f"⚠️  Exemption expired for {exemption['component']} "
@@ -174,10 +205,10 @@ def validate_exemptions() -> List[str]:
                     f"⏰ Exemption expiring soon for {exemption['component']} "
                     f"(expires: {exemption['expiration']})"
                 )
-        except ValueError:
+        except (ValueError, KeyError) as e:
             warnings.append(
-                f"❌ Invalid expiration date for {exemption['component']}: "
-                f"{exemption['expiration']}"
+                f"❌ Invalid expiration date for {exemption.get('component', 'Unknown')}: "
+                f"{exemption.get('expiration', 'N/A')} ({str(e)})"
             )
         
         # Check justification
@@ -201,7 +232,15 @@ def validate_exemptions() -> List[str]:
 def hex_to_rgb(hex_color: str) -> Tuple[int, int, int]:
     """Convert hex color to RGB tuple."""
     hex_color = hex_color.lstrip('#')
-    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    
+    # Validate hex color format
+    if len(hex_color) != 6:
+        raise ValueError(f"Invalid hex color format: {hex_color} (expected 6 characters)")
+    
+    try:
+        return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    except ValueError as e:
+        raise ValueError(f"Invalid hex color: {hex_color}") from e
 
 def calculate_luminance(r: int, g: int, b: int) -> float:
     """Calculate relative luminance of RGB color."""
@@ -219,14 +258,20 @@ def calculate_luminance(r: int, g: int, b: int) -> float:
 
 def calculate_contrast_ratio(color1: str, color2: str) -> float:
     """Calculate WCAG contrast ratio between two colors."""
-    rgb1 = hex_to_rgb(color1)
-    rgb2 = hex_to_rgb(color2)
+    try:
+        rgb1 = hex_to_rgb(color1)
+        rgb2 = hex_to_rgb(color2)
+    except ValueError as e:
+        raise ValueError(f"Invalid color format: {e}") from e
     
     lum1 = calculate_luminance(*rgb1)
     lum2 = calculate_luminance(*rgb2)
     
     lighter = max(lum1, lum2)
     darker = min(lum1, lum2)
+    
+    if darker == 0:
+        return float('inf') if lighter > 0 else 1.0
     
     return (lighter + 0.05) / (darker + 0.05)
 
@@ -584,7 +629,7 @@ def main():
         
         html = generate_html_report(violations, exemptions, compliance_score, trends)
         
-        with open(ACCESSIBILITY_REPORT_FILE, 'w') as f:
+        with open(ACCESSIBILITY_REPORT_FILE, 'w', encoding='utf-8') as f:
             f.write(html)
         
         print(f"✅ Report generated: {ACCESSIBILITY_REPORT_FILE}")
@@ -594,6 +639,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 
 
 

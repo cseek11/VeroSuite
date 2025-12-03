@@ -32,3 +32,5 @@ WHERE rolname = 'authenticator'
 -- 4. The Python client may need to be restarted/reconnected
 -- ============================================================================
 
+
+

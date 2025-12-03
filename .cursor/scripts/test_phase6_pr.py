@@ -9,9 +9,11 @@ Usage:
 import os
 import sys
 import time
+import json
 import subprocess
 from pathlib import Path
 from datetime import datetime, timezone
+from typing import Tuple, Optional
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -31,7 +33,7 @@ from logger_util import get_logger
 logger = get_logger(context="test_phase6_pr")
 
 
-def create_test_session():
+def create_test_session() -> Tuple[str, Client]:
     """Create a test session with Phase 6 files."""
     supabase_url = os.getenv("SUPABASE_URL")
     supabase_key = os.getenv("SUPABASE_SECRET_KEY")
@@ -155,9 +157,10 @@ describe('formatCurrency', () => {
     
     # 3. Create documentation file
     doc_file = utils_dir / "formatCurrency.md"
-    doc_content = """# formatCurrency Utility
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    doc_content = f"""# formatCurrency Utility
 
-**Last Updated:** 2025-11-25
+**Last Updated:** {current_date}
 
 ## Overview
 
@@ -274,7 +277,7 @@ Test coverage includes:
     return session_id, supabase
 
 
-def create_pr(session_id, supabase):
+def create_pr(session_id: str, supabase: Client) -> Tuple[Optional[int], Optional[str]]:
     """Create PR for session."""
     pr_creator = PRCreator(supabase, project_root)
     
@@ -293,7 +296,7 @@ def create_pr(session_id, supabase):
         return None, None
 
 
-def monitor_workflow(pr_number, max_wait=300):
+def monitor_workflow(pr_number: int, max_wait: int = 300) -> Optional[str]:
     """Monitor workflow execution for PR."""
     print(f"\n📊 Monitoring workflow for PR #{pr_number}...")
     print(f"   Waiting up to {max_wait} seconds...")
@@ -342,7 +345,7 @@ def monitor_workflow(pr_number, max_wait=300):
     return None
 
 
-def check_pr_comments(pr_number):
+def check_pr_comments(pr_number: int) -> Optional[str]:
     """Check PR comments for VeroScore results."""
     print(f"\n💬 Checking PR comments for PR #{pr_number}...")
     
@@ -354,7 +357,6 @@ def check_pr_comments(pr_number):
             check=True
         )
         
-        import json
         pr_data = json.loads(result.stdout)
         comments = pr_data.get("comments", [])
         

@@ -1,0 +1,114 @@
+# Task Taxonomy for Predictive Context Management
+# Defines task categories and their detection patterns
+
+task_categories:
+  code_modification:
+    - edit_code
+    - refactor
+    - fix_bug
+    - add_feature
+    - update_implementation
+    - modify_function
+    - change_class
+    - update_code
+
+  validation:
+    - run_tests
+    - lint_code
+    - type_check
+    - security_scan
+    - verify_changes
+    - execute_test_suite
+    - pytest
+    - test_validation
+
+  documentation:
+    - write_docs
+    - update_readme
+    - add_comments
+    - generate_api_docs
+    - document_code
+    - add_docstring
+    - update_documentation
+
+  analysis:
+    - review_code
+    - debug
+    - profile_performance
+    - trace_error
+    - analyze_code
+    - investigate_issue
+    - performance_analysis
+
+  scaffolding:
+    - create_file
+    - setup_project
+    - install_dependencies
+    - configure_environment
+    - initialize_project
+    - create_component
+    - setup_config
+
+# Task detection patterns (regex)
+task_patterns:
+  edit_code:
+    - r'edit\s+.*\.(py|ts|tsx|js|jsx)'
+    - r'modify\s+(the\s+)?(function|class|file|code)'
+    - r'change\s+.*(function|class|implementation)'
+    - r'update\s+(the\s+)?(implementation|code|function)'
+    - r'alter\s+.*\.(py|ts|tsx)'
+
+  refactor:
+    - r'refactor'
+    - r'clean\s+up'
+    - r'improve\s+structure'
+    - r'reorganize'
+    - r'restructure'
+
+  fix_bug:
+    - r'fix\s+(bug|error|issue)'
+    - r'resolve\s+(bug|error|issue)'
+    - r'correct\s+(bug|error)'
+    - r'bug\s+fix'
+    - r'error\s+fix'
+
+  add_feature:
+    - r'add\s+feature'
+    - r'new\s+functionality'
+    - r'implement\s+.*feature'
+    - r'create\s+.*feature'
+
+  run_tests:
+    - r'run\s+tests?'
+    - r'execute\s+test\s+suite'
+    - r'pytest'
+    - r'verify\s+(the\s+)?changes?'
+    - r'test\s+.*changes?'
+
+  write_docs:
+    - r'document'
+    - r'add\s+docstring'
+    - r'update\s+readme'
+    - r'write\s+documentation'
+    - r'generate\s+.*docs?'
+
+  review_code:
+    - r'review\s+code'
+    - r'code\s+review'
+    - r'inspect\s+code'
+    - r'examine\s+code'
+
+  debug:
+    - r'debug'
+    - r'troubleshoot'
+    - r'diagnose'
+    - r'investigate\s+.*error'
+
+  create_file:
+    - r'create\s+.*file'
+    - r'new\s+file'
+    - r'add\s+.*file'
+    - r'generate\s+.*file'
+
+
+

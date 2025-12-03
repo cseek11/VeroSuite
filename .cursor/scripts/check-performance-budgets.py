@@ -79,8 +79,11 @@ def save_performance_history(history: List[Dict]):
     """Save performance history to git-tracked file."""
     os.makedirs(os.path.dirname(PERFORMANCE_HISTORY_FILE), exist_ok=True)
     
-    with open(PERFORMANCE_HISTORY_FILE, 'w') as f:
-        json.dump(history, f, indent=2)
+    try:
+        with open(PERFORMANCE_HISTORY_FILE, 'w', encoding='utf-8') as f:
+            json.dump(history, f, indent=2)
+    except (OSError, IOError) as e:
+        print(f"Error saving performance history: {e}", file=sys.stderr)
 
 def prune_performance_history(history: List[Dict]) -> List[Dict]:
     """Remove entries older than retention period."""
@@ -194,8 +197,12 @@ def parse_exemptions_file() -> List[Dict]:
     
     exemptions = []
     
-    with open(PERFORMANCE_EXEMPTIONS_FILE, 'r') as f:
-        content = f.read()
+    try:
+        with open(PERFORMANCE_EXEMPTIONS_FILE, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except (OSError, IOError, UnicodeDecodeError) as e:
+        print(f"Error reading exemptions file: {e}", file=sys.stderr)
+        return []
     
     # Find tables in markdown
     table_pattern = r'\|([^\|]+)\|([^\|]+)\|([^\|]+)\|([^\|]+)\|([^\|]+)\|([^\|]+)\|([^\|]+)\|'
@@ -795,8 +802,12 @@ def generate_html_report(api_metrics: Dict, frontend_metrics: Dict, issues: List
 </html>
 """
     
-    with open(PERFORMANCE_REPORT_FILE, 'w') as f:
-        f.write(html)
+    try:
+        with open(PERFORMANCE_REPORT_FILE, 'w', encoding='utf-8') as f:
+            f.write(html)
+    except (OSError, IOError) as e:
+        print(f"Error writing performance report: {e}", file=sys.stderr)
+        return
     
     print(f"✅ Enhanced performance report generated: {PERFORMANCE_REPORT_FILE}")
 
@@ -989,6 +1000,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 
 
 

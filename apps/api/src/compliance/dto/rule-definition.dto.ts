@@ -55,3 +55,5 @@ export class RuleDefinitionListResponseDto {
   total!: number;
 }
 
+
+

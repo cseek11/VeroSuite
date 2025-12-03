@@ -1,0 +1,70 @@
+[FOLLOW_ENFORCER_REPORT]
+
+The auto-enforcer has detected 1 BLOCKING and 1 WARNING violations.
+
+Here is ENFORCER_REPORT.json:
+
+```json
+{
+  "status": "BLOCKING",
+  "session_id": "example-session-123",
+  "generated_at": "2025-12-02T06:08:27.031762+00:00",
+  "summary": {
+    "blocking_count": 1,
+    "warning_count": 1,
+    "auto_fixes_applied": 0
+  },
+  "violations": [
+    {
+      "id": "VF-RLS-001",
+      "severity": "BLOCKING",
+      "file": "apps/api/src/customers/customers.service.ts",
+      "rule_ref": "03-security.mdc#R02",
+      "description": "Multi-tenant query missing RLS guard",
+      "evidence": [
+        "Line 42: findMany without tenant_id filter"
+      ],
+      "fix_hint": "Add where: { tenant_id: currentUser.tenant_id }"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": "apps/api/src/auth/auth.service.ts",
+      "rule_ref": "07-observability.mdc#R08",
+      "description": "Missing structured logging",
+      "evidence": [],
+      "fix_hint": "Add logger.warn({ event: 'AUTH_FAILED', ... })"
+    }
+  ],
+  "auto_fixes": [],
+  "next_actions": [
+    "Fix VF-RLS-001 (BLOCKING)",
+    "Consider VF-LOG-001 (WARNING)"
+  ],
+  "context_updates": {
+    "load": [],
+    "unload": []
+  },
+  "memory_bank_updates": {
+    "files_to_update": [],
+    "summary": null
+  }
+}
+```
+
+**Your task:**
+1. Read all violations in the report
+2. Apply fixes to ONLY the files mentioned
+3. Use fix_hint as guidance (not strict template)
+4. Fix all BLOCKING violations first
+5. Fix WARNING violations if simple
+6. Output corrected code
+7. End with: [FIX_COMPLETE]
+
+**Important:**
+- Do NOT rewrite files not mentioned
+- Do NOT add unrelated features
+- Keep changes minimal and focused
+- Trust the report (it's from the enforcer's full rule analysis)
+
+When you're done, write your response to: `.cursor/llm_output.txt`

@@ -1,0 +1,129 @@
+{
+  "session_id": "1559a512-6f9c-409e-a1b7-3055b6c77746",
+  "start_time": "2025-12-01T22:25:31.096925+00:00",
+  "last_check": "2025-12-01T22:25:37.029674+00:00",
+  "violations": [
+    {
+      "severity": "BLOCKED",
+      "rule_ref": "01-enforcement.mdc Step 0.5",
+      "message": "Agent did not reference correct context-id. Expected: eb3c8d96-842f-46e4-bb8b-2a29a6f405f5, Found: 68856128-fc28-482a-b3e4-6fb9349ab930",
+      "file_path": ".cursor/context_manager/recommendations.md",
+      "line_number": null,
+      "timestamp": "2025-12-01T22:25:33.749120+00:00",
+      "session_scope": "current_session"
+    },
+    {
+      "severity": "BLOCKED",
+      "rule_ref": "01-enforcement.mdc Step 4.5",
+      "message": "Predicted context .cursor/rules/10-quality.md not pre-loaded. HARD STOP per rule (probability >70%).",
+      "file_path": ".cursor/rules/10-quality.md",
+      "line_number": null,
+      "timestamp": "2025-12-01T22:25:33.749120+00:00",
+      "session_scope": "current_session"
+    },
+    {
+      "severity": "BLOCKED",
+      "rule_ref": "01-enforcement.mdc Step 4.5",
+      "message": "Predicted context .cursor/rules/14-verification.mdc not pre-loaded. HARD STOP per rule (probability >70%).",
+      "file_path": ".cursor/rules/14-verification.mdc",
+      "line_number": null,
+      "timestamp": "2025-12-01T22:25:33.749120+00:00",
+      "session_scope": "current_session"
+    },
+    {
+      "severity": "BLOCKED",
+      "rule_ref": "01-enforcement.mdc Step 4.5",
+      "message": "Predicted context .cursor/rules/10-quality.mdc not pre-loaded. HARD STOP per rule (probability >70%).",
+      "file_path": ".cursor/rules/10-quality.mdc",
+      "line_number": null,
+      "timestamp": "2025-12-01T22:25:33.749120+00:00",
+      "session_scope": "current_session"
+    },
+    {
+      "severity": "BLOCKED",
+      "rule_ref": "01-enforcement.mdc Step 4.5",
+      "message": "Predicted context .cursor/rules/14-verification.md not pre-loaded. HARD STOP per rule (probability >70%).",
+      "file_path": ".cursor/rules/14-verification.md",
+      "line_number": null,
+      "timestamp": "2025-12-01T22:25:33.749120+00:00",
+      "session_scope": "current_session"
+    },
+    {
+      "severity": "BLOCKED",
+      "rule_ref": "01-enforcement.mdc Step 4.5",
+      "message": "Agent did not reference correct context-id. Expected: eb3c8d96-842f-46e4-bb8b-2a29a6f405f5, Found: 68856128-fc28-482a-b3e4-6fb9349ab930",
+      "file_path": ".cursor/context_manager/recommendations.md",
+      "line_number": null,
+      "timestamp": "2025-12-01T22:25:33.749120+00:00",
+      "session_scope": "current_session"
+    },
+    {
+      "severity": "BLOCKED",
+      "rule_ref": "01-enforcement.mdc Step 0.5",
+      "message": "Agent did not reference correct context-id. Expected: 20d26518-ce1c-40f0-9090-eeb92873ae2e, Found: 68856128-fc28-482a-b3e4-6fb9349ab930",
+      "file_path": ".cursor/context_manager/recommendations.md",
+      "line_number": null,
+      "timestamp": "2025-12-01T22:25:37.023430+00:00",
+      "session_scope": "current_session"
+    },
+    {
+      "severity": "BLOCKED",
+      "rule_ref": "01-enforcement.mdc Step 4.5",
+      "message": "Predicted context .cursor/rules/10-quality.md not pre-loaded. HARD STOP per rule (probability >70%).",
+      "file_path": ".cursor/rules/10-quality.md",
+      "line_number": null,
+      "timestamp": "2025-12-01T22:25:37.027651+00:00",
+      "session_scope": "current_session"
+    },
+    {
+      "severity": "BLOCKED",
+      "rule_ref": "01-enforcement.mdc Step 4.5",
+      "message": "Predicted context .cursor/rules/14-verification.mdc not pre-loaded. HARD STOP per rule (probability >70%).",
+      "file_path": ".cursor/rules/14-verification.mdc",
+      "line_number": null,
+      "timestamp": "2025-12-01T22:25:37.029674+00:00",
+      "session_scope": "current_session"
+    },
+    {
+      "severity": "BLOCKED",
+      "rule_ref": "01-enforcement.mdc Step 4.5",
+      "message": "Predicted context .cursor/rules/10-quality.mdc not pre-loaded. HARD STOP per rule (probability >70%).",
+      "file_path": ".cursor/rules/10-quality.mdc",
+      "line_number": null,
+      "timestamp": "2025-12-01T22:25:37.029674+00:00",
+      "session_scope": "current_session"
+    },
+    {
+      "severity": "BLOCKED",
+      "rule_ref": "01-enforcement.mdc Step 4.5",
+      "message": "Predicted context .cursor/rules/14-verification.md not pre-loaded. HARD STOP per rule (probability >70%).",
+      "file_path": ".cursor/rules/14-verification.md",
+      "line_number": null,
+      "timestamp": "2025-12-01T22:25:37.029674+00:00",
+      "session_scope": "current_session"
+    },
+    {
+      "severity": "BLOCKED",
+      "rule_ref": "01-enforcement.mdc Step 4.5",
+      "message": "Agent did not reference correct context-id. Expected: 20d26518-ce1c-40f0-9090-eeb92873ae2e, Found: 68856128-fc28-482a-b3e4-6fb9349ab930",
+      "file_path": ".cursor/context_manager/recommendations.md",
+      "line_number": null,
+      "timestamp": "2025-12-01T22:25:37.029674+00:00",
+      "session_scope": "current_session"
+    }
+  ],
+  "checks_passed": [
+    "Memory Bank Compliance",
+    "Security Compliance",
+    "activeContext.md Update",
+    "Memory Bank Compliance",
+    "Security Compliance",
+    "activeContext.md Update"
+  ],
+  "checks_failed": [
+    "Context Management Compliance",
+    "Context Management Compliance"
+  ],
+  "auto_fixes": [],
+  "file_hashes": {}
+}

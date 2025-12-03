@@ -49,14 +49,18 @@ class GitDiffAnalyzer:
                 repo_root = result.stdout.strip()
             
             # Get diff for the file
-            result = subprocess.run(
-                ['git', 'diff', '--numstat', 'HEAD', '--', file_path],
-                cwd=repo_root,
-                capture_output=True,
-                text=True,
-                check=False,
-                timeout=10
-            )
+            try:
+                result = subprocess.run(
+                    ['git', 'diff', '--numstat', 'HEAD', '--', file_path],
+                    cwd=repo_root,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    timeout=10
+                )
+            except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+                logger.warning(f"Error running git diff: {e}")
+                return None
             
             if result.returncode == 0 and result.stdout.strip():
                 # Parse: "added\tremoved\tfilename"
@@ -145,13 +149,17 @@ class GitDiffAnalyzer:
                 repo_root = result.stdout.strip()
             
             # Check if file is ignored
-            result = subprocess.run(
-                ['git', 'check-ignore', file_path],
-                cwd=repo_root,
-                capture_output=True,
-                check=False,
-                timeout=5
-            )
+            try:
+                result = subprocess.run(
+                    ['git', 'check-ignore', file_path],
+                    cwd=repo_root,
+                    capture_output=True,
+                    check=False,
+                    timeout=5
+                )
+            except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+                logger.warning(f"Error running git check-ignore: {e}")
+                return False
             
             is_ignored = result.returncode == 0
             
@@ -212,4 +220,6 @@ class GitDiffAnalyzer:
                 root_cause=str(e)
             )
             return None
+
+
 

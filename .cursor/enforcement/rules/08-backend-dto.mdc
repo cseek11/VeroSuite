@@ -1,0 +1,101 @@
+---
+description: "DTO enforcement: ensure all @Body() parameters use proper DTOs with validation"
+globs: "apps/**/*.controller.ts,libs/**/*.controller.ts"
+alwaysApply: false
+---
+
+# DTO ENFORCEMENT (R08-DTO)
+
+## Purpose
+Ensure all NestJS controller endpoints that accept request bodies use proper DTOs with class-validator decorators.
+
+## Rules
+
+### BACKEND-R08-DTO-001: Missing or Invalid DTO Type
+- **Severity:** WARNING (Tier 2)
+- **Detection:** `@Body()` parameter without explicit type, with `any`/primitive type, or with inline type literal
+- **Fix:** Create a dedicated DTO class in the module's `dto/` directory and use it as the `@Body()` type
+
+**Examples of violations:**
+```typescript
+// ❌ Missing type
+@Post()
+create(@Body() body) { ... }
+
+// ❌ Primitive type
+@Post()
+create(@Body() body: string) { ... }
+
+// ❌ any type
+@Post()
+create(@Body() body: any) { ... }
+
+// ❌ Inline literal
+@Post()
+create(@Body() body: { name: string }) { ... }
+```
+
+**Correct usage:**
+```typescript
+// ✅ Proper DTO type
+@Post()
+create(@Body() dto: CreateUserDto) { ... }
+```
+
+**Note:** `@Body('field')` with primitive types is allowed (field selector pattern).
+
+### BACKEND-R08-DTO-002: DTO Type Without File
+- **Severity:** WARNING (Tier 2)
+- **Detection:** DTO type used in controller but no corresponding `dto/*.dto.ts` file exists
+- **Fix:** Create the DTO file in the module's `dto/` directory with the matching class name
+
+**Example:**
+```typescript
+// Controller uses CreateUserDto
+@Post()
+create(@Body() dto: CreateUserDto) { ... }
+
+// But dto/create-user.dto.ts doesn't exist
+```
+
+### BACKEND-R08-DTO-003: DTO Without Validators
+- **Severity:** WARNING (Tier 2)
+- **Detection:** DTO file has typed properties but no class-validator decorators
+- **Fix:** Add class-validator decorators (e.g., `@IsString()`, `@IsEmail()`, `@IsOptional()`) to DTO properties
+
+**Example violation:**
+```typescript
+// ❌ DTO without validators
+export class CreateUserDto {
+  email: string;
+  name: string;
+}
+```
+
+**Correct usage:**
+```typescript
+// ✅ DTO with validators
+import { IsString, IsEmail } from 'class-validator';
+
+export class CreateUserDto {
+  @IsEmail()
+  email!: string;
+  
+  @IsString()
+  name!: string;
+}
+```
+
+## Enforcement
+This rule is enforced by `DtoEnforcementChecker`.
+
+## Module Root Detection
+The checker automatically detects the module root by looking for:
+1. `*.module.ts` file in parent directories
+2. `dto/` directory in parent directories
+3. Top of `apps/api/src` or `libs/**/src`
+
+## DTO File Naming Convention
+DTO types are converted to filenames using kebab-case:
+- `CreateUserDto` → `create-user.dto.ts`
+- `UpdateCustomerDto` → `update-customer.dto.ts`

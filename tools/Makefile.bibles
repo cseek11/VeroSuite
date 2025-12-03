@@ -1,0 +1,87 @@
+# Bible Build Makefile
+# 
+# Usage:
+#   make bible-rego          # Build Rego Bible (compile + ingest)
+#   make bible-python        # Build Python Bible
+#   make bibles-all          # Build all Bibles
+#   make bible-rego-compile  # Only compile (source → SSM)
+#   make bible-rego-ingest   # Only ingest (SSM → Cursor)
+
+.PHONY: help bible-rego bible-python bibles-all
+.PHONY: bible-rego-compile bible-rego-ingest
+.PHONY: bible-python-compile bible-python-ingest
+
+# Paths
+REGO_SRC      = docs/reference/Rego_OPM_BIBLE/rego_opa_bible.md
+REGO_SSM      = knowledge/bibles/rego/compiled/REGO_OPA_Bible.ssm.md
+REGO_MD       = knowledge/bibles/rego/cursor/REGO_OPA_Bible.cursor.md
+REGO_MDC      = .cursor/rules/rego_bible.mdc
+
+PY_SRC        = docs/reference/Python_Bible_backup_v2.md
+PY_SSM        = knowledge/bibles/python/compiled/Python_Bible.ssm.md
+PY_MD         = knowledge/bibles/python/cursor/Python_Bible.cursor.md
+PY_MDC        = .cursor/rules/python_bible.mdc
+
+COMPILER      = docs/reference/Rego_OPM_BIBLE/opa_ssm_compiler/main.py
+PIPELINE      = tools/bible_pipeline.py
+BUILD_SCRIPT  = tools/bible_build.py
+
+help:
+	@echo "Bible Build Targets:"
+	@echo "  make bible-rego          - Build Rego Bible (compile + ingest)"
+	@echo "  make bible-python        - Build Python Bible (compile + ingest)"
+	@echo "  make bibles-all          - Build all Bibles"
+	@echo ""
+	@echo "Compile-only targets:"
+	@echo "  make bible-rego-compile  - Compile Rego source → SSM"
+	@echo "  make bible-python-compile - Compile Python source → SSM"
+	@echo ""
+	@echo "Ingest-only targets:"
+	@echo "  make bible-rego-ingest   - Ingest Rego SSM → Cursor"
+	@echo "  make bible-python-ingest - Ingest Python SSM → Cursor"
+
+# Full pipeline targets
+bible-rego: $(REGO_MD) $(REGO_MDC)
+
+bible-python: $(PY_MD) $(PY_MDC)
+
+bibles-all: bible-rego bible-python
+
+# Compile targets (source → SSM)
+bible-rego-compile: $(REGO_SSM)
+
+bible-python-compile: $(PY_SSM)
+
+# Ingest targets (SSM → Cursor)
+bible-rego-ingest: $(REGO_MD) $(REGO_MDC)
+
+bible-python-ingest: $(PY_MD) $(PY_MDC)
+
+# Compile rules
+$(REGO_SSM): $(REGO_SRC)
+	@echo "[compile] Rego: $(REGO_SRC) → $(REGO_SSM)"
+	@mkdir -p $$(dirname $(REGO_SSM))
+	@cd $$(dirname $(COMPILER)) && python main.py ../../$(REGO_SRC) ../../$(REGO_SSM) --v3
+
+$(PY_SSM): $(PY_SRC)
+	@echo "[compile] Python: $(PY_SRC) → $(PY_SSM)"
+	@mkdir -p $$(dirname $(PY_SSM))
+	@cd $$(dirname $(COMPILER)) && python main.py ../../$(PY_SRC) ../../$(PY_SSM) --v3
+
+# Ingest rules
+$(REGO_MD) $(REGO_MDC): $(REGO_SSM)
+	@echo "[ingest] Rego: $(REGO_SSM) → Cursor outputs"
+	@python $(PIPELINE) \
+	  --language rego \
+	  --ssm $(REGO_SSM) \
+	  --out-md $(REGO_MD) \
+	  --out-mdc $(REGO_MDC)
+
+$(PY_MD) $(PY_MDC): $(PY_SSM)
+	@echo "[ingest] Python: $(PY_SSM) → Cursor outputs"
+	@python $(PIPELINE) \
+	  --language python \
+	  --ssm $(PY_SSM) \
+	  --out-md $(PY_MD) \
+	  --out-mdc $(PY_MDC)
+

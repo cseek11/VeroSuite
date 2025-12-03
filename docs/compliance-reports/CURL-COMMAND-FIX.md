@@ -166,6 +166,8 @@ All endpoints follow the same pattern with `/api/v1/` prefix:
 
 ---
 
-**Last Updated:** 2025-11-24  
+**Last Updated:** 2025-11-30  
 **Status:** Use `/api/v1/compliance/checks` with Authorization header
+
+
 

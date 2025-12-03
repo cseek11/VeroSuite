@@ -52,3 +52,5 @@ WHERE rolname = 'authenticator'
 -- Then test: python .cursor/scripts/test_supabase_schema_access.py
 -- ============================================================================
 
+
+

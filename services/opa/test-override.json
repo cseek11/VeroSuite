@@ -1,0 +1,11 @@
+{
+  "changed_files": [
+    {
+      "path": "apps/api/src/users/users.controller.ts",
+      "content": "@Controller('users')\nexport class UsersController {\n  @Post()\n  async create(@Body() data: any) {\n    return this.prisma.user.create({ data });\n  }\n  // @override:backend-patterns - Temporary workaround for legacy code\n}"
+    }
+  ],
+  "pr_body": "Add user creation endpoint with @override:backend-patterns override"
+}
+
+

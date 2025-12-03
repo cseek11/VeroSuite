@@ -70,10 +70,14 @@ def parse_design_system() -> Dict:
     }
     
     if os.path.exists(DESIGN_SYSTEM_FILE):
-        with open(DESIGN_SYSTEM_FILE, 'r') as f:
-            content = f.read()
-            
-            # Parse spacing
+        try:
+            with open(DESIGN_SYSTEM_FILE, 'r', encoding='utf-8') as f:
+                content = f.read()
+        except (OSError, IOError, UnicodeDecodeError) as e:
+            print(f"Error reading design system file: {e}", file=sys.stderr)
+            return design_system
+        
+        # Parse spacing
             spacing_match = re.search(r'Page Padding.*?`(p-\d+)`', content, re.DOTALL)
             if spacing_match:
                 design_system['spacing']['page_padding'] = spacing_match.group(1)
@@ -92,11 +96,15 @@ def parse_design_system() -> Dict:
                 design_system['typography']['section_header'] = typography_match.group(1)
     
     if os.path.exists(CRM_STYLING_GUIDE_FILE):
-        with open(CRM_STYLING_GUIDE_FILE, 'r') as f:
-            content = f.read()
-            
-            # Parse CRM-specific patterns
-            # Add CRM-specific parsing here
+        try:
+            with open(CRM_STYLING_GUIDE_FILE, 'r', encoding='utf-8') as f:
+                content = f.read()
+        except (OSError, IOError, UnicodeDecodeError) as e:
+            print(f"Error reading CRM styling guide: {e}", file=sys.stderr)
+            return design_system
+        
+        # Parse CRM-specific patterns
+        # Add CRM-specific parsing here
     
     return design_system
 
@@ -105,10 +113,14 @@ def parse_component_library_catalog() -> List[str]:
     components = []
     
     if os.path.exists(COMPONENT_LIBRARY_CATALOG_FILE):
-        with open(COMPONENT_LIBRARY_CATALOG_FILE, 'r') as f:
-            content = f.read()
-            
-            # Extract component names from catalog
+        try:
+            with open(COMPONENT_LIBRARY_CATALOG_FILE, 'r', encoding='utf-8') as f:
+                content = f.read()
+        except (OSError, IOError, UnicodeDecodeError) as e:
+            print(f"Error reading component library catalog: {e}", file=sys.stderr)
+            return components
+        
+        # Extract component names from catalog
             component_matches = re.findall(r'#### `(\w+)`', content)
             components.extend(component_matches)
     
@@ -189,7 +201,7 @@ def get_standard_spacing_suggestion(property_type: str, value: str) -> str:
             return f'm-{tailwind_unit}'
         elif property_type.startswith('space'):
             return f'space-y-{tailwind_unit}'
-    except:
+    except (AttributeError, ValueError, TypeError):
         pass
     
     return f'{property_type}-4'  # Default suggestion
@@ -212,7 +224,7 @@ def get_standard_typography_suggestion(value: str) -> str:
             return 'text-sm'
         else:
             return 'text-xs'
-    except:
+    except (AttributeError, ValueError):
         pass
     
     return 'text-sm'  # Default suggestion
@@ -370,9 +382,14 @@ def compare_spacing(file_path: str, content: str, similar_pages: List[str]) -> L
         if not os.path.exists(similar_page):
             continue
         
-        with open(similar_page, 'r') as f:
-            similar_content = f.read()
-            similar_spacing = set(re.findall(r'(p|m|px|py|mx|my|pt|pb|pl|pr|mt|mb|ml|mr|space-[xy])-\d+', similar_content))
+        try:
+            with open(similar_page, 'r', encoding='utf-8') as f:
+                similar_content = f.read()
+        except (OSError, IOError, UnicodeDecodeError) as e:
+            print(f"Error reading similar page {similar_page}: {e}", file=sys.stderr)
+            continue
+        
+        similar_spacing = set(re.findall(r'(p|m|px|py|mx|my|pt|pb|pl|pr|mt|mb|ml|mr|space-[xy])-\d+', similar_content))
             
             # Check for differences
             differences = current_spacing.symmetric_difference(similar_spacing)
@@ -398,9 +415,14 @@ def compare_typography(file_path: str, content: str, similar_pages: List[str]) -
         if not os.path.exists(similar_page):
             continue
         
-        with open(similar_page, 'r') as f:
-            similar_content = f.read()
-            similar_typography = set(re.findall(r'text-(xl|lg|base|sm|xs)', similar_content))
+        try:
+            with open(similar_page, 'r', encoding='utf-8') as f:
+                similar_content = f.read()
+        except (OSError, IOError, UnicodeDecodeError) as e:
+            print(f"Error reading similar page {similar_page}: {e}", file=sys.stderr)
+            continue
+        
+        similar_typography = set(re.findall(r'text-(xl|lg|base|sm|xs)', similar_content))
             
             # Check for differences
             differences = current_typography.symmetric_difference(similar_typography)
@@ -471,8 +493,12 @@ def check_file(file_path: str, design_system: Dict, catalog_components: List[str
     if not os.path.exists(file_path):
         return violations
     
-    with open(file_path, 'r', encoding='utf-8') as f:
-        content = f.read()
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except (OSError, IOError, UnicodeDecodeError) as e:
+        print(f"Error reading file {file_path}: {e}", file=sys.stderr)
+        return violations
     
     # Pattern matching
     violations['spacing'].extend(detect_custom_spacing(file_path, content))
@@ -624,8 +650,12 @@ def generate_report(violations: List[Dict]):
 </html>
 """
     
-    with open(UX_CONSISTENCY_REPORT_FILE, 'w') as f:
-        f.write(html)
+    try:
+        with open(UX_CONSISTENCY_REPORT_FILE, 'w', encoding='utf-8') as f:
+            f.write(html)
+    except (OSError, IOError) as e:
+        print(f"Error writing UX consistency report: {e}", file=sys.stderr)
+        return
     
     print(f"Report generated: {UX_CONSISTENCY_REPORT_FILE}")
 
@@ -689,6 +719,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 
 
 

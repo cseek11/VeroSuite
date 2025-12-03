@@ -5,6 +5,8 @@ Check if PR scores were saved to Supabase database.
 Usage:
     python .cursor/scripts/check_pr_scores.py --pr-numbers 370,371,372,373,374
     python .cursor/scripts/check_pr_scores.py --all-recent
+
+Last Updated: 2025-12-01
 """
 
 import os
@@ -12,19 +14,33 @@ import sys
 import argparse
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from typing import Optional
 
 # Add scripts directory to path
 scripts_dir = Path(__file__).parent
 if str(scripts_dir) not in sys.path:
     sys.path.insert(0, str(scripts_dir))
 
-from logger_util import get_logger, get_or_create_trace_context
-from supabase import create_client, Client
+try:
+    from logger_util import get_logger, get_or_create_trace_context
+    logger = get_logger(context="CheckPRScores")
+except ImportError:
+    # Fallback logger if logger_util not available
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger("CheckPRScores")
+    # Create a dummy trace context function
+    def get_or_create_trace_context():
+        return {}
 
-logger = get_logger(context="CheckPRScores")
+try:
+    from supabase import create_client, Client
+except ImportError:
+    print("❌ Missing supabase package. Install with: pip install supabase", file=sys.stderr)
+    sys.exit(1)
 
 
-def check_pr_scores(supabase: Client, pr_numbers: list[int] = None, all_recent: bool = False):
+def check_pr_scores(supabase: Client, pr_numbers: Optional[list[int]] = None, all_recent: bool = False):
     """
     Check if PR scores exist in database.
     
@@ -131,4 +147,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

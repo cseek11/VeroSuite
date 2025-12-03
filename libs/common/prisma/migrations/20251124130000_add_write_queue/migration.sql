@@ -28,3 +28,5 @@ CREATE POLICY "write_queue_service_access" ON "compliance"."write_queue"
     USING (true)
     WITH CHECK (true);
 
+
+

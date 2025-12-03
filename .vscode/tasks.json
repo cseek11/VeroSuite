@@ -22,6 +22,52 @@
         "clear": false
       },
       "isBackground": true
+    },
+    {
+      "label": "Start Auto-Enforcement System",
+      "type": "shell",
+      "command": "python ${workspaceFolder}/.cursor/scripts/watch-files.py",
+      "options": {
+        "env": {
+          "PYTHONUNBUFFERED": "1"
+        }
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "never",
+        "panel": "dedicated",
+        "showReuseMessage": false
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Run Enforcement Check",
+      "type": "shell",
+      "command": "python ${workspaceFolder}/.cursor/scripts/auto-enforcer.py",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Pre-Flight Check",
+      "type": "shell",
+      "command": "python ${workspaceFolder}/.cursor/scripts/pre-flight-check.py",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Enforcement Test Suite",
+      "type": "shell",
+      "command": "python ${workspaceFolder}/.cursor/scripts/test-enforcement.py",
+      "args": ["--run-automated"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate Manual Test Scenarios",
+      "type": "shell",
+      "command": "python ${workspaceFolder}/.cursor/scripts/test-enforcement.py",
+      "args": ["--generate-manual"],
+      "problemMatcher": []
     }
   ]
 }

@@ -1,0 +1,43 @@
+title: Python Bible
+version: 3.0.0
+parts:
+- name: 'Part II: Language Core'
+  chapters:
+  - chapters/01_introduction_to_python_beginner.md
+  - chapters/02_syntax_semantics_beginner.md
+  - chapters/03_core_execution_model_intermediate.md
+  - chapters/04_types_type_system_intermediate.md
+  - chapters/05_control_flow_beginner.md
+  - chapters/06_functions_functional_concepts_beginner.md
+- name: 'Part III: Applied Python'
+  chapters:
+  - chapters/07_classes_object_oriented_programming_intermediate.md
+  - chapters/08_modules_packages_project_structure_beginner.md
+  - chapters/09_standard_library_essentials_beginner.md
+  - chapters/10_error_handling_exceptions_intermediate.md
+- name: 'Part IV: Enterprise & Production'
+  chapters:
+  - chapters/11_architecture_application_design_intermediate.md
+  - chapters/12_performance_optimization_advanced.md
+  - chapters/13_security_critical.md
+  - chapters/14_testing_quality_engineering_intermediate.md
+  - chapters/15_debugging_troubleshooting_intermediate.md
+  - chapters/16_tooling_development_workflow_beginner.md
+  - chapters/17_concurrency_parallelism_advanced.md
+  - chapters/18_advanced_architecture_design_patterns_advanced.md
+  - chapters/19_database_integration_persistence_intermediate.md
+  - chapters/20_async_web_development_apis_intermediate.md
+  - chapters/21_data_engineering_with_python_intermediate.md
+  - chapters/22_packaging_distribution_deployment_intermediate.md
+  - chapters/23_logging_monitoring_observability_intermediate.md
+  - chapters/24_configuration_secrets_environment_management_intermediate.md
+  - chapters/25_scheduling_background_jobs_task_queues_intermediate.md
+- name: 'Part V: Expert & Specialized'
+  chapters:
+  - chapters/26_deployment_architectures_production_topologies_advanced.md
+  - chapters/26_chapter_26.md
+  - chapters/27_formal_semantics_the_python_execution_model_advanced.md
+  - chapters/28_cpython_internals_memory_architecture_advanced.md
+- name: 'Part VI: Appendices'
+  chapters:
+  - chapters/29_alternative_python_implementations_advanced.md

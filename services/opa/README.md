@@ -31,12 +31,36 @@ services/opa/
 
 ## Installation
 
+### Quick Find (For All Agents)
+
+**Use the helper script to locate OPA:**
+```bash
+# Python (works from any directory)
+python .cursor/scripts/find-opa.py
+
+# Shell script
+source .cursor/scripts/find-opa.sh
+$OPA_BIN version
+
+# PowerShell
+. .cursor/scripts/find-opa.ps1
+& $OPA_BIN version
+```
+
+**See:** `.cursor/OPA_QUICK_REFERENCE.md` for complete guide
+
+---
+
 ### Windows
 
 OPA v1.10.1 is already installed in `services/opa/bin/opa.exe`.
 
 **Verify installation:**
 ```powershell
+# Using helper script (recommended)
+python .cursor/scripts/find-opa.py
+
+# Or direct path
 ./services/opa/bin/opa.exe version
 ```
 
@@ -299,6 +323,7 @@ For questions or issues:
 **Installation Date:** 2025-11-23  
 **Installed By:** AI Agent (with human approval)  
 **Phase:** -1, Week 1, Task 1-2 Complete
+
 
 
 

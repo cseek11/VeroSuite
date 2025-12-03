@@ -1,0 +1,354 @@
+{
+  "errors": [
+    {
+      "type": "error",
+      "code": "ERR_DUPLICATE_CHAPTER_NUMBER",
+      "message": "Duplicate chapter number 3",
+      "line": 3961,
+      "column": 0,
+      "context": "Chapter 3 \u2014 Evaluation Flow (Diagram)",
+      "severity": "error",
+      "suggestion": "Chapters must be uniquely numbered.",
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "ERR_DUPLICATE_CHAPTER_NUMBER",
+      "message": "Duplicate chapter number 8",
+      "line": 4024,
+      "column": 0,
+      "context": "Chapter 8 \u2014 Deployment Topologies (Sidecar vs Central vs Embedded)",
+      "severity": "error",
+      "suggestion": "Chapters must be uniquely numbered.",
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "ERR_DUPLICATE_CHAPTER_NUMBER",
+      "message": "Duplicate chapter number 13",
+      "line": 4076,
+      "column": 0,
+      "context": "Chapter 13 \u2014 Multi-Layer Policy Architecture Visualization",
+      "severity": "error",
+      "suggestion": "Chapters must be uniquely numbered.",
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "ERR_DUPLICATE_CHAPTER_NUMBER",
+      "message": "Duplicate chapter number 14",
+      "line": 4149,
+      "column": 0,
+      "context": "Chapter 14 \u2014 Decision Log Flow Diagram",
+      "severity": "error",
+      "suggestion": "Chapters must be uniquely numbered.",
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "ERR_DUPLICATE_CHAPTER_NUMBER",
+      "message": "Duplicate chapter number 5",
+      "line": 4183,
+      "column": 0,
+      "context": "Chapter 5 \u2014 Real-World Comprehension Examples",
+      "severity": "error",
+      "suggestion": "Chapters must be uniquely numbered.",
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "ERR_DUPLICATE_CHAPTER_NUMBER",
+      "message": "Duplicate chapter number 9",
+      "line": 4316,
+      "column": 0,
+      "context": "Chapter 9 \u2014 Full Bundle Structure with Manifest",
+      "severity": "error",
+      "suggestion": "Chapters must be uniquely numbered.",
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "ERR_DUPLICATE_CHAPTER_NUMBER",
+      "message": "Duplicate chapter number 13",
+      "line": 4365,
+      "column": 0,
+      "context": "Chapter 13 \u2014 Multi-Tenant Decision Aggregation (End-to-End)",
+      "severity": "error",
+      "suggestion": "Chapters must be uniquely numbered.",
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "ERR_DUPLICATE_CHAPTER_NUMBER",
+      "message": "Duplicate chapter number 16",
+      "line": 4444,
+      "column": 0,
+      "context": "Chapter 16 \u2014 Complete GraphQL Authorization System",
+      "severity": "error",
+      "suggestion": "Chapters must be uniquely numbered.",
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "ERR_DUPLICATE_CHAPTER_NUMBER",
+      "message": "Duplicate chapter number 17",
+      "line": 4571,
+      "column": 0,
+      "context": "Chapter 17 \u2014 Full LLM \u2192 OPA Workflow with Validation",
+      "severity": "error",
+      "suggestion": "Chapters must be uniquely numbered.",
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "ERR_DUPLICATE_CHAPTER_NUMBER",
+      "message": "Duplicate chapter number 6",
+      "line": 4761,
+      "column": 0,
+      "context": "Chapter 6 \u2014 Common Pitfalls: Nulls, Missing Fields, and Type Guards",
+      "severity": "error",
+      "suggestion": "Chapters must be uniquely numbered.",
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "ERR_DUPLICATE_CHAPTER_NUMBER",
+      "message": "Duplicate chapter number 11",
+      "line": 4860,
+      "column": 0,
+      "context": "Chapter 11 \u2014 Common Pitfalls: Performance Anti-Patterns",
+      "severity": "error",
+      "suggestion": "Chapters must be uniquely numbered.",
+      "meta": {}
+    },
+    {
+      "type": "warning",
+      "code": "VAL_UNKNOWN_LANGUAGE",
+      "message": "Unknown language: ebnf",
+      "line": 0,
+      "column": 0,
+      "context": "Block CODE-957fbe78b55be1dc",
+      "severity": "warning",
+      "suggestion": null,
+      "meta": {}
+    }
+  ],
+  "warnings": [
+    {
+      "type": "warning",
+      "code": "VAL_UNKNOWN_LANGUAGE",
+      "message": "Unknown language: ebnf",
+      "line": 0,
+      "column": 0,
+      "context": "Block CODE-957fbe78b55be1dc",
+      "severity": "warning",
+      "suggestion": null,
+      "meta": {}
+    }
+  ],
+  "symbols": {
+    "terms": {},
+    "concepts": {},
+    "sections": {
+      "1.1 why policy as code?": "SEC-33-3",
+      "1.2 what is opa?": "SEC-65-3",
+      "1.3 what is rego?": "SEC-122-3",
+      "1.4 the opa ecosystem": "SEC-168-3",
+      "2.1 syntax overview": "SEC-191-3",
+      "2.2 grammar (complete ebnf)": "SEC-222-3",
+      "2.3 comments and formatting": "SEC-285-3",
+      "2.4 metadata annotations": "SEC-385-3",
+      "3.1 world model": "SEC-419-3",
+      "3.2 rules \u2014 the building blocks": "SEC-473-3",
+      "3.3 evaluation semantics": "SEC-511-3",
+      "3.4 undefined vs false": "SEC-559-3",
+      "3.5 logical conjunction and disjunction": "SEC-590-3",
+      "3.6 rule conflicts and resolution": "SEC-622-3",
+      "4.1 variables and unification": "SEC-688-3",
+      "4.2 references \u2014 traversing documents": "SEC-734-3",
+      "4.3 the `some` keyword": "SEC-849-3",
+      "4.4 operators": "SEC-894-3",
+      "assignment and equality": "SEC-896-4",
+      "comparison operators": "SEC-916-4",
+      "arithmetic operators": "SEC-937-4",
+      "bitwise operators": "SEC-956-4",
+      "membership: the `in` operator": "SEC-973-4",
+      "5.1 logical conjunction (and)": "SEC-1021-3",
+      "5.2 logical disjunction (or)": "SEC-1034-3",
+      "5.3 comprehensions": "SEC-1050-3",
+      "5.4 universal quantification (for all)": "SEC-1116-3",
+      "1. using `every` (modern, recommended)": "SEC-1120-4",
+      "2. using negation (helper pattern)": "SEC-1148-4",
+      "3. using comprehensions": "SEC-1159-4",
+      "5.5 negation": "SEC-1174-3"
+    },
+    "patterns": {},
+    "chapters": {
+      "1": "CH-01",
+      "2": "CH-02",
+      "3": "CH-03",
+      "4": "CH-04",
+      "5": "CH-05",
+      "7": "CH-07",
+      "8": "CH-08",
+      "9": "CH-09",
+      "10": "CH-10",
+      "11": "CH-11",
+      "12": "CH-12",
+      "13": "CH-13",
+      "14": "CH-14",
+      "15": "CH-15",
+      "16": "CH-16",
+      "17": "CH-17",
+      "18": "CH-18",
+      "19": "CH-19",
+      "6": "CH-06"
+    },
+    "aliases": {},
+    "duplicate_chapters": [
+      [
+        3,
+        "CH-03",
+        "CH-03"
+      ],
+      [
+        8,
+        "CH-08",
+        "CH-08"
+      ],
+      [
+        13,
+        "CH-13",
+        "CH-13"
+      ],
+      [
+        14,
+        "CH-14",
+        "CH-14"
+      ],
+      [
+        5,
+        "CH-05",
+        "CH-05"
+      ],
+      [
+        9,
+        "CH-09",
+        "CH-09"
+      ],
+      [
+        13,
+        "CH-13",
+        "CH-13"
+      ],
+      [
+        16,
+        "CH-16",
+        "CH-16"
+      ],
+      [
+        17,
+        "CH-17",
+        "CH-17"
+      ],
+      [
+        6,
+        "CH-06",
+        "CH-06"
+      ],
+      [
+        11,
+        "CH-11",
+        "CH-11"
+      ]
+    ],
+    "unresolved_references": [],
+    "stats": {
+      "terms": 0,
+      "concepts": 0,
+      "sections": 31,
+      "patterns": 0,
+      "chapters": 19,
+      "aliases": 0,
+      "duplicate_chapters": 11,
+      "unresolved_references": 0,
+      "total_symbols": 50
+    }
+  },
+  "validation_errors": [],
+  "validation_warnings": [
+    {
+      "code": "VAL_UNKNOWN_LANGUAGE",
+      "message": "Unknown language: ebnf",
+      "block_id": "CODE-957fbe78b55be1dc",
+      "block_type": "code-pattern",
+      "field": "language",
+      "severity": "warning"
+    }
+  ],
+  "metrics": {
+    "blocks_by_type": {
+      "chapter-meta": 30,
+      "term": 53,
+      "concept": 664,
+      "fact": 256,
+      "example": 28,
+      "code-pattern": 89,
+      "common-mistake": 40,
+      "constraint": 39,
+      "table": 3,
+      "qa": 973,
+      "reasoning-chain": 973,
+      "inference": 1,
+      "diagram": 16,
+      "pathway": 1,
+      "test-hint": 39,
+      "uncertainty": 14,
+      "relation": 1,
+      "ssm-meta": 1,
+      "part-meta": 2,
+      "role-note": 57,
+      "section-meta": 31
+    },
+    "total_blocks": 3311,
+    "error_count": 11,
+    "warning_count": 1,
+    "info_count": 0,
+    "term_count": 53,
+    "concept_count": 664,
+    "pattern_count": 89,
+    "relation_count": 1,
+    "diagram_count": 16,
+    "table_count": 3,
+    "unresolved_references": 0,
+    "duplicate_chapters": 11,
+    "validation_errors": 0,
+    "validation_warnings": 1,
+    "compile_time_seconds": 1.1132535934448242,
+    "start_time": "2025-11-26T10:14:02.868467",
+    "end_time": "2025-11-26T10:14:03.981721",
+    "namespace": "rego_opa_bible"
+  },
+  "summary": {
+    "total_blocks": 3311,
+    "error_count": 11,
+    "warning_count": 1,
+    "validation_error_count": 0,
+    "validation_warning_count": 1,
+    "symbol_stats": {
+      "terms": 0,
+      "concepts": 0,
+      "sections": 31,
+      "patterns": 0,
+      "chapters": 19,
+      "aliases": 0,
+      "duplicate_chapters": 11,
+      "unresolved_references": 0,
+      "total_symbols": 50
+    },
+    "compiler_version": "3.0.0",
+    "ssm_schema_version": "1.0.0",
+    "namespace": "rego_opa_bible",
+    "quality_score": 0.0
+  }
+}

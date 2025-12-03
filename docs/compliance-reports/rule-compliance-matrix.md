@@ -385,7 +385,8 @@ Best practice rules that warn but don't block.
 - **Description:** Follow naming conventions (PascalCase, camelCase, etc.)
 - **Step 5 Status:** ✅ Complete
 - **Test Results:** 15/15 passing
-- **Completion Date:** 2025-11-23
+- **Completion Date:** 2025-11-30
+- **Implementation:** [R23-IMPLEMENTATION-COMPLETE.md](R23-IMPLEMENTATION-COMPLETE.md)
 - **Triggers:**
   - Wrong case usage
   - Inconsistent naming
@@ -401,7 +402,8 @@ Best practice rules that warn but don't block.
 - **Description:** Ensure cross-platform compatibility for code shared between web and mobile
 - **Step 5 Status:** ✅ Complete
 - **Test Results:** 15/15 passing
-- **Completion Date:** 2025-11-23
+- **Completion Date:** 2025-11-30
+- **Implementation:** [R24-IMPLEMENTATION-COMPLETE.md](R24-IMPLEMENTATION-COMPLETE.md)
 - **Triggers:**
   - Platform-specific API without platform check
   - Node.js API in frontend/mobile code
@@ -409,15 +411,6 @@ Best practice rules that warn but don't block.
   - Duplicated business logic (shared library violation)
   - Hardcoded path separators
   - Case-sensitive path references
-- **Priority:** MEDIUM
-- **Description:** React Native/web code must be cross-platform compatible
-- **Step 5 Status:** ❌ Missing
-- **Triggers:**
-  - Platform-specific code without abstraction
-  - Web-only APIs in shared code
-  - Mobile-only APIs in shared code
-  - Path separator issues
-  - Timezone/locale handling issues
 
 ### R25: CI/CD Workflow Triggers
 - **File:** 11-operations.mdc

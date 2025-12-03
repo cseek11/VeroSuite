@@ -1,0 +1,822 @@
+# Agent Status
+
+**Status:** 🔴 BLOCKED
+**Last Updated:** 2025-12-03T19:03:21.074529+00:00
+**Session ID:** 7152174d-483c-407f-af65-afadadd86854
+
+## Summary
+
+- **Total Blocked Violations:** 646
+  - 🔧 **Current Session (Auto-Fixable):** 40
+  - 📋 **Historical (Require Human Input):** 606
+- **Warnings:** 2370
+- **Total Violations:** 3016
+
+## ⚠️ BLOCKING INSTRUCTIONS
+
+**🚨 YOU MUST STOP AND ADDRESS THESE VIOLATIONS BEFORE PROCEEDING WITH ANY TASK. 🚨**
+
+### 🔧 Current Session Violations (40 - Auto-Fixable)
+
+**These violations were introduced in the current session. You MUST auto-fix these immediately before proceeding.**
+
+**Instructions:**
+1. Review each violation below
+2. Auto-fix the violations (update dates, add error handling, etc.)
+3. Re-run enforcement to verify fixes
+4. Only proceed after all current session violations are resolved
+
+**Violations to Fix:**
+
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/scripts/check-architecture-boundaries.py`:19)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/scripts/check-file-organization.py`:22)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/scripts/check_pr_scores.py`:9)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/scripts/file_watcher.py`:6)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/scripts/test_file_watcher_integration.py`:6)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/ALL-ROUTES-REQUIRE-API-V1.md`:146)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/AUTH-V1-VS-V2.md`:224)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/AUTHENTICATION-SETUP.md`:224)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/COMPLIANCE-V1-ONLY.md`:129)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/CURL-COMMAND-FIX.md`:169)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/DATABASE_URL-SETUP.md`:375)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/GITHUB-SECRETS-SETUP.md`:139)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/MIGRATION-APPLICATION-GUIDE.md`:136)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/MODULE_NOT_FOUND-TROUBLESHOOTING.md`:209)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/OPA-INSTALLATION-NOTES.md`:3)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-API-TESTING-GUIDE.md`:234)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-COMPILATION-FIXES.md`:133)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-COMPLETE.md`:156)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-DAYS6-7-COMPLETE.md`:177)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-ERRORS-FIXED.md`:150)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-FRONTEND-COMPLETE.md`:236)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-IMPLEMENTATION-SUMMARY.md`:243)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-MIGRATION-APPLIED.md`:164)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-MIGRATION-COMPLETE.md`:150)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-NEXT-TASKS.md`:353)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-SCHEMA-FIX-COMPLETE.md`:172)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-SERVER-START-FIX.md`:124)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-SETUP-COMPLETE.md`:286)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-SETUP-GUIDE.md`:440)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-TESTING-COMPLETE.md`:320)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/QUEUE-PROCESSOR-VERIFICATION.md`:242)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/QUICK-START-GUIDE.md`:166)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/R25-IMPLEMENTATION-COMPLETE.md`:157)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/SWAGGER-AUTH-GUIDE.md`:166)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/SWAGGER-ROUTE-FIX.md`:111)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/TESTING-GUIDE.md`:264)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/TROUBLESHOOTING-VIOLATIONS-NOT-SHOWING.md`:228)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/rule-compliance-matrix.md`:388)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/error-patterns.md`:3268)
+- **02-core.mdc**: Hardcoded date detected: 2025-11-27 (should be 2025-12-03) (`docs/tech-debt.md`:3)
+
+---
+
+### 📋 Historical Violations (606 - Require Human Input)
+
+**These violations exist in historical code (not from current session). You MUST list these and request human guidance before proceeding.**
+
+**Instructions:**
+1. List ALL historical violations clearly in your response
+2. Request human input/guidance on how to proceed
+3. DO NOT attempt to auto-fix historical violations without explicit permission
+4. DO NOT proceed with new tasks until human guidance is provided
+
+**Historical Violations (First 20 shown, see VIOLATIONS.md for complete list):**
+
+- **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`.cursor/OPA_QUICK_REFERENCE.md`:3)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/AGENT_RESPONSE_CAPTURE_GUIDE.md`:164)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/ARCHITECTURE_COMPARISON.md`:375)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/AUTOMATIC_PROMPT_SYSTEM.md`:281)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/AUTO_ENFORCER_INTEGRATION_REVIEW.md`:720)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/COMPLETE_IMPLEMENTATION.md`:152)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/CONTEXT_ENFORCEMENT_PLAN.md`:646)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/ENFORCEMENT_BLOCKING_LIMITATION.md`:202)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/ENFORCEMENT_IMPLEMENTATION_COMPLETE.md`:237)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/ENFORCEMENT_IMPLEMENTATION_SUMMARY.md`:247)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/ENFORCEMENT_INTEGRATION_GUIDE.md`:539)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/FIX_PLAN.md`:522)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/FIX_SUMMARY.md`:225)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/IMPLEMENTATION_SUMMARY.md`:186)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/MONITORING_GUIDE.md`:3)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/MONITORING_GUIDE.md`:176)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/QUICK_REFERENCE_ENFORCEMENT.md`:427)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/README.md`:3)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/README_TESTING.md`:3)
+- **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/README_TESTING.md`:146)
+
+*... and 586 more historical violations. See `.cursor/enforcement/VIOLATIONS.md` for complete list.*
+
+**Action Required:** List these blockers and request human input/guidance before proceeding.
+
+---
+
+## Active Violations
+
+### 🔴 BLOCKED - Hard Stops (646 total)
+
+**Legend:** 🔧 = Current Session (Auto-Fixable) | 📋 = Historical (Require Human Input)
+
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`.cursor/OPA_QUICK_REFERENCE.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/AGENT_RESPONSE_CAPTURE_GUIDE.md`:164) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/ARCHITECTURE_COMPARISON.md`:375) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/AUTOMATIC_PROMPT_SYSTEM.md`:281) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/AUTO_ENFORCER_INTEGRATION_REVIEW.md`:720) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/COMPLETE_IMPLEMENTATION.md`:152) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/CONTEXT_ENFORCEMENT_PLAN.md`:646) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/ENFORCEMENT_BLOCKING_LIMITATION.md`:202) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/ENFORCEMENT_IMPLEMENTATION_COMPLETE.md`:237) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/ENFORCEMENT_IMPLEMENTATION_SUMMARY.md`:247) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/ENFORCEMENT_INTEGRATION_GUIDE.md`:539) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/FIX_PLAN.md`:522) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/FIX_SUMMARY.md`:225) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/IMPLEMENTATION_SUMMARY.md`:186) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/MONITORING_GUIDE.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/MONITORING_GUIDE.md`:176) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/QUICK_REFERENCE_ENFORCEMENT.md`:427) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/README.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/README_TESTING.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/README_TESTING.md`:146) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/__init__.py`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/analytics.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/auto_tune.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/context_manager/context_categorizer.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/context_loader.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/metrics.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/predictor.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/preloader.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/context_manager/recommendations.md`:8) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/context_manager/session_sequence_tracker.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/task_detector.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/tests/test_response_parser.py`:7) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/token_estimator.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/workflow_patterns.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/context_manager/workflow_tracker.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`.cursor/memory-bank/README.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/memory-bank/activeContext.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/memory-bank/activeContext.md`:73) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`.cursor/memory-bank/productContext.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/memory-bank/progress.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`.cursor/memory-bank/projectbrief.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/memory-bank/systemPatterns.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`.cursor/memory-bank/techContext.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`.cursor/patterns/backend/config-service-async-module-registration.md`:99) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`.cursor/patterns/backend/config-service-async-module-registration.md`:130) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`.cursor/patterns/infrastructure/monorepo-build-output-paths.md`:105) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`.cursor/patterns/infrastructure/monorepo-build-output-paths.md`:130) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/prompts/pre-implementation-enforcement.md`:262) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/rules/00-llm-interface.mdc`:10) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2007-11-12 (should be 2025-12-03) (`.cursor/rules/10-enforced_task_loop.mdc`:130) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2007-11-12 (should be 2025-12-03) (`.cursor/rules/10-enforced_task_loop.mdc`:130) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2007-11-12 (should be 2025-12-03) (`.cursor/rules/10-enforced_task_loop.mdc`:140) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2007-11-12 (should be 2025-12-03) (`.cursor/rules/10-enforced_task_loop.mdc`:143) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`.cursor/rules_backup/01-enforcement.mdc`:800) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`.cursor/rules_backup/02-core.mdc`:375) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/rules_backup/03-security.mdc`:834) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/rules_backup/04-architecture.mdc`:506) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/rules_backup/05-data.mdc`:385) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/rules_backup/06-error-resilience.mdc`:255) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/rules_backup/07-observability.mdc`:355) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/rules_backup/08-backend.mdc`:363) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/rules_backup/09-frontend.mdc`:303) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-01 (should be 2025-12-03) (`.cursor/rules_backup/10-quality.mdc`:474) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-15 (should be 2025-12-03) (`.cursor/rules_backup/10-quality.mdc`:475) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/rules_backup/10-quality.mdc`:476) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-01 (should be 2025-12-03) (`.cursor/rules_backup/10-quality.mdc`:480) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-15 (should be 2025-12-03) (`.cursor/rules_backup/10-quality.mdc`:481) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/rules_backup/10-quality.mdc`:482) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/rules_backup/10-quality.mdc`:756) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/rules_backup/12-tech-debt.mdc`:397) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/rules_backup/13-ux-consistency.mdc`:441) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/rules_backup/context_enforcement.mdc`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`.cursor/rules_backup/python_bible.mdc`:23) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`.cursor/rules_backup/typescript_bible.mdc`:19) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/scripts/README.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/scripts/auto-enforcer.py`:16) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-01-27 (should be 2025-12-03) (`.cursor/scripts/auto-enforcer.py`:459) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-01-27 (should be 2025-12-03) (`.cursor/scripts/auto-enforcer.py`:460) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/scripts/check-architecture-boundaries.py`:19) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/scripts/check-breaking-changes.py`:22) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/scripts/check-file-organization.py`:22) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/scripts/check-layer-sync.py`:18) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/scripts/check-rls-enforcement.py`:18) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/scripts/check-state-machines.py`:25) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/scripts/check-tenant-isolation.py`:18) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/scripts/check_pr_scores.py`:9) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/create_pr_cli.py`:6) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/scripts/file_watcher.py`:6) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`.cursor/scripts/find-opa.ps1`:7) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`.cursor/scripts/find-opa.py`:16) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`.cursor/scripts/find-opa.sh`:8) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/scripts/generate_context_dump.py`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/scripts/memory_summarizer.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/scripts/migration/cleanup_two_brain_conflicts.py`:7) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/scripts/migration/create_structure.py`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/scripts/migration/move_rules.py`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/scripts/optimize-opa-policy.py`:16) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`.cursor/scripts/python_bible_parser.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/run_phase2_tests.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/scripts/test-enforcement-integration.py`:9) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`.cursor/scripts/test-enforcement.py`:8) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`.cursor/scripts/test-enforcement.py`:69) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`.cursor/scripts/test-enforcement.py`:79) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/scripts/test-predictive-context-system.py`:8) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`.cursor/scripts/test_file_watcher_integration.py`:6) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/scripts/test_integration.py`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/test_pr_creation.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/test_supabase_schema_access.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/scripts/test_task_assignment_detection.py`:8) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/scripts/test_two_brain.py`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/scripts/validate-opa-policy.py`:17) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`.cursor/scripts/validate-step5-checks.py`:17) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/change_buffer.py`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/change_handler.py`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/enforcement_pipeline_section.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/file_change.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/git_diff_analyzer.py`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/idempotency_manager.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/postgrest_client.py`:8) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/pr_creator.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/session_manager.py`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/supabase_schema_helper.py`:8) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/tests/test_change_buffer.py`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/tests/test_detection_functions.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/tests/test_file_change.py`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/tests/test_pr_creator.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/tests/test_scoring_engine_integration.py`:181) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`.cursor/scripts/veroscore_v3/tests/test_threshold_checker.py`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`.cursor/tests/test_system_audit.py`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`AGENT_STATUS_DUPLICATE_INVESTIGATION.md`:218) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`AGENT_STATUS_FIX_SUMMARY.md`:151) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-27 (should be 2025-12-03) (`CODEBASE_AUDIT_REPORT.md`:412) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`CONTEXT_AUDIT_REQUIREMENT.md`:282) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`CONTEXT_CONSISTENCY_ANALYSIS.md`:69) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`CONTEXT_CONSISTENCY_ANALYSIS.md`:110) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`CONTEXT_CONSISTENCY_ANALYSIS.md`:256) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`CONTEXT_MANAGEMENT_SYSTEM_STATUS.md`:199) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`CONTEXT_SYSTEM_UPDATE_STATUS.md`:200) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`ENFORCEMENT_BLOCK_INVESTIGATION.md`:164) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`HYBRID_CONTEXT_SYSTEM_INTEGRATION.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`HYBRID_CONTEXT_SYSTEM_INTEGRATION.md`:921) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`HYBRID_CONTEXT_SYSTEM_INVESTIGATION.md`:219) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`HYBRID_SYSTEM_IMPLEMENTATION_AUDIT.md`:352) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`HYBRID_SYSTEM_IMPLEMENTATION_VERIFICATION.md`:444) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`PYTHON_BIBLE_COMPLIANCE_REPORT.md`:268) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-27 (should be 2025-12-03) (`PYTHON_BIBLE_COMPREHENSIVE_AUDIT_REPORT.md`:1075) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-27 (should be 2025-12-03) (`PYTHON_BIBLE_DEEP_AUDIT_REPORT.md`:596) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-27 (should be 2025-12-03) (`PYTHON_CODE_AUDIT_REPORT.md`:1112) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`PYTHON_CODE_QUALITY_AUDIT_FULL_REPORT.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`PYTHON_CODE_QUALITY_AUDIT_FULL_REPORT.md`:16) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`PYTHON_CODE_QUALITY_AUDIT_FULL_REPORT.md`:76) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`PYTHON_CODE_QUALITY_AUDIT_FULL_REPORT.md`:98) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`PYTHON_CODE_QUALITY_AUDIT_FULL_REPORT.md`:103) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`PYTHON_CODE_QUALITY_AUDIT_FULL_REPORT.md`:363) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`PYTHON_CODE_QUALITY_AUDIT_FULL_REPORT.md`:962) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`PYTHON_CODE_QUALITY_IMPROVEMENTS_REPORT.md`:956) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-27 (should be 2025-12-03) (`PYTHON_CODE_QUALITY_IMPROVEMENTS_REPORT.md`:1504) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-27 (should be 2025-12-03) (`REBUTTAL_RESPONSE_AND_REVISED_AUDIT.md`:489) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`RULE_COMPATIBILITY_FIX_SUMMARY.md`:130) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`RULE_COMPATIBILITY_INVESTIGATION.md`:170) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`RULE_COMPATIBILITY_REPORT.md`:162) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`RULE_SYSTEM_INVESTIGATION_REPORT.md`:308) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`SESSION_AWARE_PREDICTION_IMPLEMENTATION.md`:205) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`SESSION_AWARE_PREDICTION_PROPOSAL.md`:449) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`SESSION_START_COMPLETE_FIX.md`:251) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`SESSION_START_FIX.md`:150) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`TASK_ASSIGNMENT_DETECTION_FIX.md`:139) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`apps/README.md`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`apps/README.md`:48) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`apps/api/README_ENV_SETUP.md`:114) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/DATABASE_ARCHITECTURE_DECISION.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/DATABASE_ARCHITECTURE_DECISION.md`:175) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/MIGRATION_SYNTAX_FIX.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/Auto-PR/MIGRATION_SYNTAX_FIX.md`:103) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/MIGRATION_VERIFICATION.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/Auto-PR/MIGRATION_VERIFICATION.md`:277) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/PHASE1_COMPLETION_SUMMARY.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/PHASE1_COMPLETION_SUMMARY.md`:212) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/PHASE1_UPDATE_SAME_DATABASE.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/Auto-PR/PHASE1_UPDATE_SAME_DATABASE.md`:151) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/PHASE2_COMPLETE.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/Auto-PR/PHASE2_COMPLETE.md`:194) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/PHASE2_TESTING_GUIDE.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/Auto-PR/PHASE2_TESTING_GUIDE.md`:248) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/PHASE2_TESTING_STATUS.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/Auto-PR/PHASE2_TESTING_STATUS.md`:143) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/PRISMA_MODELS_ADDED.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/Auto-PR/PRISMA_MODELS_ADDED.md`:178) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/Auto-PR/SCORE_PERSISTENCE_RELIABILITY.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/SUPABASE_MIGRATION_SAFETY.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/SUPABASE_MIGRATION_SAFETY.md`:258) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/SUPABASE_SCHEMA_ACCESS_SOLUTION.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/Auto-PR/SUPABASE_SCHEMA_ACCESS_SOLUTION.md`:292) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/PYTHON_BIBLE_USAGE.md`:304) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/PYTHON_CODE_AUDIT_COMPREHENSIVE.md`:1349) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/SECRET_EXPOSURE_PREVENTION_GUIDE.md`:454) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/architecture/AUTO_ENFORCER_EXECUTION_FLOW.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/architecture/MEMORY_BANK_COMPLIANCE_ANALYSIS.md`:253) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/architecture/MEMORY_BANK_COMPLIANCE_RECOMMENDATIONS.md`:298) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/architecture/MEMORY_BANK_STEP0_IMPROVEMENTS.md`:147) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/audits/typescript_bible_implementation_plan.md`:978) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/audits/typescript_bible_implementation_plan.md`:979) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/PREPROCESSING_PLAN_AUDIT_REPORT.md`:261) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/PREPROCESSING_PLAN_AUDIT_REPORT.md`:332) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/SOURCE_READINESS_REPORT.md`:286) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/SPLIT_REVIEW_REPORT.md`:320) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/TYPESCRIPT_BIBLE_COMPILATION_PLAN.md`:643) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/TYPESCRIPT_BIBLE_CRITICAL_ISSUES.md`:169) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/TYPESCRIPT_BIBLE_PREP_ANALYSIS.md`:660) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/TYPESCRIPT_BIBLE_SPLIT_ANALYSIS_AND_REMEDIATION.md`:371) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/TYPESCRIPT_BIBLE_SPLIT_BUG_ROOT_CAUSE.md`:102) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/TYPESCRIPT_BIBLE_SPLIT_PREPARATION_PLAN.md`:728) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/Typescript production war.md`:1107) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/typescript_bible.mdc`:16) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/typescript_bible_audit_report.md`:266) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/bibles/typescript_bible_post_implementation_audit.md`:193) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/bibles/typescript_bible_post_implementation_audit.md`:208) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/bibles/typescript_bible_unified.mdc`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/bibles/typescript_bible_unified.mdc`:13) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/bibles/typescript_bible_unified.mdc`:21938) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/typescript_bible_unified_fixed.mdc`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/typescript_bible_unified_fixed.mdc`:13) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/bibles/typescript_bible_unified_fixed.mdc`:21806) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/bibles/typescript_v1.md`:247) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-06-01 (should be 2025-12-03) (`docs/bibles/typescript_v1.md`:258) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/bibles/typescript_v1_clean.md`:247) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/bibles/typescript_v1_clean.md`:258) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/AGENT-HANDOFF-PROMPT-PHASE3.md`:326) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/ALL-ROUTES-REQUIRE-API-V1.md`:146) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/ANNOTATION_CHECK_RESULTS.md`:79) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/API_STARTUP_FIX.md`:59) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/API_START_SCRIPT_FIX.md`:58) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/AUTH-V1-VS-V2.md`:224) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/AUTHENTICATION-SETUP.md`:224) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-FILES-LOCAL-VERIFICATION.md`:109) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-FILES-LOCAL-VERIFICATION.md`:116) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-FILES-LOCAL-VERIFICATION.md`:123) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-FILES-LOCAL-VERIFICATION.md`:220) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-GIT-STATUS-VERIFICATION.md`:210) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-PLANNING-DOCUMENTATION-SUMMARY.md`:14) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-20 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-PLANNING-DOCUMENTATION-SUMMARY.md`:42) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-20 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-PLANNING-DOCUMENTATION-SUMMARY.md`:68) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-20 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-PLANNING-DOCUMENTATION-SUMMARY.md`:85) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-20 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-PLANNING-DOCUMENTATION-SUMMARY.md`:99) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-PLANNING-DOCUMENTATION-SUMMARY.md`:113) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-PLANNING-DOCUMENTATION-SUMMARY.md`:138) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-20 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-PLANNING-DOCUMENTATION-SUMMARY.md`:139) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-20 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-PLANNING-DOCUMENTATION-SUMMARY.md`:140) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-20 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-PLANNING-DOCUMENTATION-SUMMARY.md`:141) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-20 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-PLANNING-DOCUMENTATION-SUMMARY.md`:142) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-PLANNING-DOCUMENTATION-SUMMARY.md`:221) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/AUTO-PR-RULES-ENFORCEMENT-INTEGRATION-REPORT.md`:724) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/AUTOMATED_SECRET_ROTATION_PLAN.md`:371) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/compliance-reports/BIBLE_STRUCTURE_IMPROVEMENT_PROPOSAL.md`:265) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/BUG_LOGGING_RULE_INVESTIGATION.md`:398) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/CI_CD_STATUS_CHECK.md`:123) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/CI_CD_VERIFICATION_GUIDE.md`:227) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/CI_CD_VERIFICATION_SUMMARY.md`:163) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/COMPLIANCE-V1-ONLY.md`:129) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/CONFIG_SERVICE_MIGRATION_SUMMARY.md`:178) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/CURL-COMMAND-FIX.md`:169) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/CURRENT_STATUS.md`:49) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/DATABASE_URL-SETUP.md`:375) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/compliance-reports/DATA_INTEGRITY_R05_TEST_COMPLIANCE_REPORT.md`:251) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/DOCUMENTATION-UPDATE-SUMMARY.md`:170) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/DOCUMENTATION-UPDATE-SUMMARY.md`:184) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/ENV_SETUP_REQUIRED.md`:64) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/FINAL_WORKFLOW_STATUS.md`:69) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/GITHUB-SECRETS-SETUP.md`:139) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/GITHUB-WORKFLOW-INTEGRATION.md`:561) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/HANDOFF-TO-NEXT-AGENT-R10.md`:482) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/HANDOFF-TO-NEXT-AGENT-R11.md`:489) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/HANDOFF-TO-NEXT-AGENT-R12.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/HANDOFF-TO-NEXT-AGENT-R12.md`:17) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/HANDOFF-TO-NEXT-AGENT-R13.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/HANDOFF-TO-NEXT-AGENT-R13.md`:17) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/HANDOFF-TO-NEXT-AGENT-R14.md`:341) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/HANDOFF-TO-NEXT-AGENT-R15.md`:281) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/HANDOFF-TO-NEXT-AGENT-R19.md`:350) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/HANDOFF-TO-NEXT-AGENT-R23.md`:184) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/HANDOFF-TO-NEXT-AGENT-R23.md`:189) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/HOW_TO_CHECK_VALIDATION.md`:62) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/IMMEDIATE-RECOMMENDATIONS-COMPLETE.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/IMMEDIATE-RECOMMENDATIONS-COMPLETE.md`:49) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/IMMEDIATE-RECOMMENDATIONS-COMPLETE.md`:76) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/IMMEDIATE-RECOMMENDATIONS-COMPLETE.md`:253) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/IMPLEMENTATION-vs-ORIGINAL-PLAN-ANALYSIS.md`:333) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/JWT_SECRET_LOADING_FIX.md`:78) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/MATRIX-ERRORS-FIXED.md`:94) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/MATRIX-FINAL-VERIFICATION.md`:124) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/MIGRATION-APPLICATION-GUIDE.md`:136) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/MODULE_NOT_FOUND-TROUBLESHOOTING.md`:209) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/NEXT-AGENT-HANDOFF-R18.md`:369) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/compliance-reports/OPA-FINDER-SOLUTION.md`:3) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/OPA-INSTALLATION-NOTES.md`:3) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/OPA-WORKFLOW-CODE-QUALITY-EVALUATION.md`:503) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/OPA-WORKFLOW-ERROR-ANALYSIS.md`:386) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/OPA-WORKFLOW-FIXES-APPLIED.md`:272) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/ORIGINAL-PLAN-vs-ACTUAL-IMPLEMENTATION.md`:127) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/PHASE-1-COMPLETION-REPORT.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/PHASE-1-COMPLETION-REPORT.md`:39) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/PHASE-1-COMPLETION-REPORT.md`:895) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/PHASE0-WEEK4-SIMPLE-TASKS-COMPLETE.md`:183) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-API-TESTING-GUIDE.md`:234) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-COMPILATION-FIXES.md`:133) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-COMPLETE.md`:156) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-DAYS6-7-COMPLETE.md`:177) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-ERRORS-FIXED.md`:150) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-FRONTEND-COMPLETE.md`:236) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-IMPLEMENTATION-SUMMARY.md`:243) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-MIGRATION-APPLIED.md`:164) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-MIGRATION-COMPLETE.md`:150) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-NEXT-TASKS.md`:353) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-PLANNING-COMPARISON.md`:253) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-SCHEMA-FIX-COMPLETE.md`:172) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-SERVER-START-FIX.md`:124) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-SETUP-COMPLETE.md`:286) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-SETUP-GUIDE.md`:440) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/PHASE3-TESTING-COMPLETE.md`:320) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/PHASE_1_IMPLEMENTATION_PLAN.md`:186) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/PHASE_2_ALL_TASKS_COMPLETE.md`:84) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/PHASE_2_FINAL_SUMMARY.md`:208) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/PHASE_2_VALIDATION_COMPLETE.md`:93) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/PR_367_ADDITIONAL_ERRORS.md`:80) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/PR_367_CI_ANALYSIS.md`:107) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/PR_367_CI_MONITORING_GUIDE.md`:102) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/PR_367_COMPLETE_SUMMARY.md`:110) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/PR_367_PRE_EXISTING_ERRORS_FIXED.md`:120) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/PR_367_UPDATE_METRICS_FIX.md`:121) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/PUSH_AND_VERIFY_INSTRUCTIONS.md`:260) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/PUSH_VERIFICATION_COMPLETE.md`:191) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/QUEUE-PROCESSOR-VERIFICATION.md`:242) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/QUICK-START-GUIDE.md`:166) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/QUICK-WINS-COMPLETE.md`:83) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/QUICK-WINS-COMPLETE.md`:235) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/compliance-reports/R15-FINAL-IMPLEMENTATION-SUMMARY.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/compliance-reports/R15-FINAL-IMPLEMENTATION-SUMMARY.md`:407) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R15-REVIEW-QUESTIONS-REASONING.md`:476) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R16-REVIEW-QUESTIONS-REASONING.md`:627) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R17-REVIEW-QUESTIONS-REASONING.md`:696) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R18-ERROR-LOGGING-VERIFICATION.md`:27) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R18-ERROR-LOGGING-VERIFICATION.md`:60) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R18-REVIEW-QUESTIONS-REASONING.md`:771) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R21-FINAL-FIX-SUMMARY.md`:258) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R21-FIX-RESULTS.md`:221) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R21-IMPLEMENTATION-COMPLETE.md`:322) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R21-TEST-ERRORS-ANALYSIS.md`:698) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R22-IMPLEMENTATION-COMPLETE.md`:218) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R22-IMPLEMENTATION-STATUS.md`:100) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R22-REVIEW-QUESTIONS-REASONING.md`:720) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R23-IMPLEMENTATION-COMPLETE.md`:167) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R23-REVIEW-QUESTIONS-REASONING.md`:452) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R24-EVIDENCE-ANALYSIS.md`:124) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/R24-IMPLEMENTATION-COMPLETE.md`:171) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/R25-IMPLEMENTATION-COMPLETE.md`:157) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/ROLLBACK_PLAN_BACKEND_MIGRATION.md`:200) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/SOURCE-OF-TRUTH-NOTES.md`:117) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/SOURCE-OF-TRUTH-NOTES.md`:127) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/SWAGGER-AUTH-GUIDE.md`:166) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/SWAGGER-ROUTE-FIX.md`:111) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/TASK5-R07-IMPLEMENTATION-COMPLETE.md`:376) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/TASK5-R08-IMPLEMENTATION-COMPLETE.md`:310) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/TASK5-R11-DRAFT-SUMMARY.md`:259) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/TASK5-R11-IMPLEMENTATION-COMPLETE.md`:464) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/TASK5-R12-DRAFT-SUMMARY.md`:264) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/TASK5-R14-DRAFT-SUMMARY.md`:264) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/TASK5-R15-DRAFT-SUMMARY.md`:260) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/TESTING-GUIDE.md`:264) [Scope: Current Session]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/TROUBLESHOOTING-VIOLATIONS-NOT-SHOWING.md`:228) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/V3-vs-CURRENT-IMPLEMENTATION-COMPARISON.md`:414) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/WEEK4-IMPLEMENTATION-COMPLETE.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/WHY_NO_NEW_WORKFLOWS.md`:85) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/WORKFLOW_FIXES_SUMMARY.md`:119) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/WORKFLOW_LOG_ANALYSIS.md`:196) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/WORKFLOW_TRIGGER_EXPLANATION.md`:77) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/WORKFLOW_VALIDATION_STATUS.md`:76) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/alert-testing-results.md`:438) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/compatibility-matrix.md`:628) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/phase-1-baseline-measurements.md`:54) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`docs/compliance-reports/phase-1-baseline-measurements.md`:111) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/phase-1-baseline-measurements.md`:336) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/rollback-test-results-staging.md`:767) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/rollback-test-results-staging.md`:768) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/rollback-test-results-staging.md`:769) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/rollback-test-results-staging.md`:770) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/rollback-test-results-staging.md`:771) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/rollback-test-results-staging.md`:772) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/rollback-test-results-staging.md`:773) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/rollback-test-results-staging.md`:890) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/rule-compliance-matrix.md`:388) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/compliance-reports/rule-compliance-matrix.md`:405) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/rule-compliance-matrix.md`:495) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/compliance-reports/rule-compliance-matrix.md`:564) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/compliance-reports/step5-baseline-report.md`:264) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/database/rls-policy-guide.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/database/rls-policy-guide.md`:377) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/developer/REGO & OPA Bible.md`:4) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/error-patterns.md`:3268) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/error-patterns.md`:3465) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/migrations/README.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/migrations/README.md`:140) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/migrations/README.md`:140) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/migrations/README.md`:345) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/opa/ai-policy-guidelines.md`:402) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/Planning/Bible Agent Prompts/bible_merge_compile_ingest.md`:500) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/reference/Programming Bibles/Planning/Bible Preprocessing System Plan.md`:256) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/reference/Programming Bibles/Planning/Bible Preprocessing System Plan.md`:314) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/reference/Programming Bibles/Planning/Bible Preprocessing System Plan.md`:376) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/Planning/Resources/Requirements for Successful Compile and Ingest.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/Planning/Resources/Requirements for Successful Compile and Ingest.md`:593) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/reference/Programming Bibles/bibles/python_bible/chapters/01_introduction_to_python_beginner.md`:8) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/bibles/python_bible/chapters/09_standard_library_essentials_beginner.md`:372) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/bibles/python_bible/chapters/09_standard_library_essentials_beginner.md`:544) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/bibles/python_bible/chapters/09_standard_library_essentials_beginner.md`:1152) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/bibles/python_bible/chapters/29_alternative_python_implementations_advanced.md`:13757) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/reference/Programming Bibles/bibles/typescript_bible/chapters/01_introduction_to_typescript.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/reference/Programming Bibles/bibles/typescript_bible/chapters/01_introduction_to_typescript.md`:13) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/bibles/typescript_bible/chapters/45_governance.md`:2900) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/bibles/typescript_bible/source/typescript_bible_unified.mdc`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/bibles/typescript_bible/source/typescript_bible_unified.mdc`:13) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/bibles/typescript_bible/source/typescript_bible_unified.mdc`:21895) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/bibles/typescript_bible/source/typescript_bible_unified.mdc.backup`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/bibles/typescript_bible/source/typescript_bible_unified.mdc.backup`:13) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/bibles/typescript_bible/source/typescript_bible_unified.mdc.backup`:21806) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/VERIFY_MERGE_GENERICITY_REPORT.md`:183) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/precompile/MERGE_BOOK_USAGE.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/precompile/MERGE_BOOK_USAGE.md`:177) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/CACHE_BENEFITS.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/CACHE_FIX_SUMMARY.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/CODE_QUALITY_REPORT.md`:505) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/COMPARISON_REPORT.md`:189) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/FEATURE_CHECK_GUIDE.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/FEATURE_CHECK_GUIDE.md`:278) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/FINAL_FIXES_REPORT.md`:142) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/FINAL_IMPLEMENTATION_SUMMARY.md`:284) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/FINAL_STATUS.md`:236) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/FIXES_COMPLETE.md`:65) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/FIXES_SUMMARY.md`:104) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/HANDOFF_BIBLE_PIPELINE.md`:175) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/IMPLEMENTATION_PROGRESS.md`:184) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/OUTPUT_FILE_LOCATIONS.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/OUTPUT_FILE_LOCATIONS.md`:375) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/PHASE_0_IMPLEMENTATION.md`:209) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/PIPELINE_IMPLEMENTATION_SUMMARY.md`:222) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/PIPELINE_IMPLEMENTATION_SUMMARY.md`:223) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_AUDIT_REPORT.md`:91) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_AUDIT_REPORT.md`:92) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_AUDIT_REPORT.md`:97) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_AUDIT_REPORT.md`:154) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_AUDIT_REPORT.md`:331) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_IMPLEMENTATION_AUDIT.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_IMPLEMENTATION_AUDIT.md`:99) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_IMPLEMENTATION_AUDIT.md`:100) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_IMPLEMENTATION_AUDIT.md`:101) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_IMPLEMENTATION_AUDIT.md`:105) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_IMPLEMENTATION_AUDIT.md`:253) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_IMPLEMENTATION_AUDIT.md`:254) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_IMPLEMENTATION_AUDIT.md`:255) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_IMPLEMENTATION_AUDIT.md`:450) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_IMPLEMENTATION_AUDIT.md`:469) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/POST_IMPLEMENTATION_AUDIT.md`:470) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/README.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/REMAINING_ISSUES_DETAILED.md`:93) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/REMAINING_ISSUES_DETAILED.md`:238) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/REMAINING_ISSUES_DETAILED.md`:559) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/REMAINING_ISSUES_SOLUTIONS.md`:284) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/SOLUTION1_IMPLEMENTATION.md`:124) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/SOLUTION2_IMPLEMENTATION.md`:162) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/SOLUTION3_IMPLEMENTATION.md`:165) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/SOLUTION4_IMPLEMENTATION.md`:191) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/SOLUTION5_IMPLEMENTATION.md`:192) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/V3_COMPARISON_REPORT.md`:186) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/V3_FIXES_APPLIED.md`:180) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/V3_SENIOR_ENGINEER_ANALYSIS.md`:498) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/V3_UPGRADE_PLAN.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-27 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/V3_UPGRADE_PLAN.md`:389) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Programming Bibles/tools/ssm_compiler/VALIDATION_FIXES.md`:82) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Bible_V3.md`:8) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Bible_V3.md`:5712) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Bible_V3.md`:5884) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Bible_V3.md`:6492) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Bible_V3.md`:34541) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-28 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Bible_V3_backup_Part2_Chapters21-28_Appendices.md`:14145) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-01-01 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Bible_V3_backup_Part2_Chapters21-28_Appendices.md`:15710) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-01-02 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Bible_V3_backup_Part2_Chapters21-28_Appendices.md`:15711) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-01-03 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Bible_V3_backup_Part2_Chapters21-28_Appendices.md`:15712) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-01-04 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Bible_V3_backup_Part2_Chapters21-28_Appendices.md`:15713) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Bible_backup_v3.5.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Bible_backup_v3.5.md`:11) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed.ssm.md`:726) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed.ssm.md`:104537) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed.ssm.md`:104544) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed.ssm.md`:104545) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed.ssm.md`:104548) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed.ssm.md`:104569) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed.ssm.md`:104576) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed.ssm.md`:104577) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed.ssm.md`:104580) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed2.ssm.md`:104510) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed2.ssm.md`:104517) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed2.ssm.md`:104518) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed2.ssm.md`:104521) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed2.ssm.md`:104542) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed2.ssm.md`:104549) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed2.ssm.md`:104550) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed2.ssm.md`:104553) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Python Bible/Python_Test_Fixed2.ssm.md`:109427) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/COMPILATION_VERIFICATION_REPORT.md`:181) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FIXES_APPLIED.md`:164) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest.ssm.md`:230) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest.ssm.md`:237) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest.ssm.md`:238) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest.ssm.md`:240) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest.ssm.md`:334) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest.ssm.md`:1583) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest_Fixed.ssm.md`:230) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest_Fixed.ssm.md`:237) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest_Fixed.ssm.md`:238) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest_Fixed.ssm.md`:240) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest_Fixed.ssm.md`:1071) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest_Fixed2.ssm.md`:230) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest_Fixed2.ssm.md`:237) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest_Fixed2.ssm.md`:238) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest_Fixed2.ssm.md`:240) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest_Fixed2.ssm.md`:1071) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/FinalCompilerTest_SUMMARY.md`:87) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/REGO & OPA Bible.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/SSM_V3_COMPILATION_REVIEW.md`:416) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/V3_FEATURES_STATUS.md`:141) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/V3_UPGRADE_PLAN_COMPARISON.md`:329) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible.md`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible.ssm.md`:9521) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible.ssm.md`:9525) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible.ssm.md`:9526) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible.ssm.md`:9528) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible.ssm.md`:15676) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible.ssm.md`:38400) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_compiled.ssm.md`:230) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_compiled.ssm.md`:237) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_compiled.ssm.md`:238) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_compiled.ssm.md`:240) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_compiled.ssm.md`:334) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_compiled.ssm.md`:1583) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_final.ssm.md`:9496) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_final.ssm.md`:9500) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_final.ssm.md`:9501) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_final.ssm.md`:9503) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_final.ssm.md`:15639) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_final.ssm.md`:38293) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_test.ssm.md`:9496) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_test.ssm.md`:9500) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_test.ssm.md`:9501) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_test.ssm.md`:9503) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_test.ssm.md`:15639) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_test.ssm.md`:38293) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_v3.ssm.md`:9496) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_v3.ssm.md`:9500) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_v3.ssm.md`:9501) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_v3.ssm.md`:9503) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_v3.ssm.md`:15639) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_v3.ssm.md`:38293) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_v3_fixed.ssm.md`:9496) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_v3_fixed.ssm.md`:9500) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_v3_fixed.ssm.md`:9501) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_v3_fixed.ssm.md`:9503) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_v3_fixed.ssm.md`:15639) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/Rego_OPM_BIBLE/rego_opa_bible_v3_fixed.ssm.md`:38293) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`docs/reference/SESSION_CODE_QUALITY_REPORT.md`:363) [Scope: Historical]
+- 🔧 **02-core.mdc**: Hardcoded date detected: 2025-11-27 (should be 2025-12-03) (`docs/tech-debt.md`:3) [Scope: Current Session]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`docs/tech-debt.md`:462) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/tech-debt.md`:579) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`docs/tech-debt.md`:597) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/testing/error-handling-testing-guide.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/testing/error-handling-testing-guide.md`:654) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/testing/rollback-quick-reference.md`:171) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/testing/state-machine-testing-guide.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/testing/state-machine-testing-guide.md`:445) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/testing/structured-logging-testing-guide.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/testing/structured-logging-testing-guide.md`:425) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/testing/test-coverage-testing-guide.md`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/testing/test-coverage-testing-guide.md`:406) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/testing/trace-propagation-testing-guide.md`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`docs/testing/trace-propagation-testing-guide.md`:486) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`enable-auto-enforcement-task.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`frontend/src/lib/api/compliance.api.ts`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`frontend/src/routes/compliance/components/ComplianceOverview.tsx`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`frontend/src/routes/compliance/components/ComplianceScore.tsx`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`frontend/src/routes/compliance/hooks/useComplianceData.ts`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`frontend/src/types/compliance.types.ts`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`knowledge/bibles/python/compiled/Python_Bible.ssm.md`:104510) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`knowledge/bibles/python/compiled/Python_Bible.ssm.md`:104517) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`knowledge/bibles/python/compiled/Python_Bible.ssm.md`:104518) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`knowledge/bibles/python/compiled/Python_Bible.ssm.md`:104521) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`knowledge/bibles/python/compiled/Python_Bible.ssm.md`:104542) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`knowledge/bibles/python/compiled/Python_Bible.ssm.md`:104549) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`knowledge/bibles/python/compiled/Python_Bible.ssm.md`:104550) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`knowledge/bibles/python/compiled/Python_Bible.ssm.md`:104553) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`knowledge/bibles/python/compiled/Python_Bible.ssm.md`:109427) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/python/cursor/Python_Bible.cursor.md`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/python/cursor/Python_Bible.cursor.md`:22688) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/python/cursor/Python_Bible.cursor.md`:22690) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/python/cursor/Python_Bible.cursor.md`:23823) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/python/cursor/Python_Bible.cursor.md`:31056) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/python/cursor/Python_Bible.cursor.md`:31101) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/python/cursor/Python_Bible.cursor.md`:31223) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/python/cursor/Python_Bible.cursor.md`:31546) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/python/cursor/Python_Bible.cursor.md`:35886) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/python/cursor/Python_Bible.cursor.md`:35966) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/python/cursor/Python_Bible.cursor.md`:40695) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`knowledge/bibles/rego/compiled/REGO_OPA_Bible.ssm.md`:22840) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`knowledge/bibles/rego/compiled/REGO_OPA_Bible.ssm.md`:22847) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`knowledge/bibles/rego/compiled/REGO_OPA_Bible.ssm.md`:22848) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`knowledge/bibles/rego/compiled/REGO_OPA_Bible.ssm.md`:22851) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`knowledge/bibles/rego/compiled/REGO_OPA_Bible.ssm.md`:25401) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`knowledge/bibles/rego/cursor/REGO_OPA_Bible.cursor.md`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/typescript/cursor/TypeScript_Bible.cursor.md`:6) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/typescript/cursor/TypeScript_Bible.cursor.md`:7800) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/typescript/cursor/TypeScript_Bible.cursor.md`:7802) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/typescript/cursor/TypeScript_Bible.cursor.md`:19491) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`knowledge/bibles/typescript/cursor/TypeScript_Bible.cursor.md`:23667) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`libs/README.md`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`libs/README.md`:57) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`libs/common/README.md`:5) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-22 (should be 2025-12-03) (`libs/common/README.md`:82) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`libs/common/prisma/migrations/20251124130000_add_write_queue/migration.sql`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`libs/common/prisma/migrations/20251124160359_veroscore_v3_schema/configure_schema_exposure.sql`:7) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`libs/common/prisma/migrations/20251124160359_veroscore_v3_schema/drop_rpc_functions.sql`:7) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-24 (should be 2025-12-03) (`libs/common/prisma/migrations/20251124160359_veroscore_v3_schema/rpc_functions.sql`:7) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`libs/common/src/utils/formatCurrency.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-25 (should be 2025-12-03) (`libs/common/src/utils/stringUtils.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`monitoring/README.md`:301) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`predictive-context-management-audit.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`predictive-context-management-recent-changes-summary.md`:423) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`predictive-context-system-verification-report.md`:396) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`services/opa/QUICK_START.md`:3) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`services/opa/README.md`:4) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-23 (should be 2025-12-03) (`services/opa/README.md`:323) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`tests/test_date_detection_critical.py`:10) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`tests/test_date_detection_phase2.py`:10) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-02 (should be 2025-12-03) (`tests/test_date_detection_phase3.py`:8) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`tests/test_date_detection_phase3.py`:41) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`tests/test_date_detection_phase3.py`:49) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-26 (should be 2025-12-03) (`tools/README_BIBLE_PIPELINE.md`:237) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`tools/bible_pipeline.py`:529) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-11-30 (should be 2025-12-03) (`tools/bible_pipeline.py`:778) [Scope: Historical]
+- 📋 **02-core.mdc**: Hardcoded date detected: 2025-12-01 (should be 2025-12-03) (`when-enforcer-runs.md`:3) [Scope: Historical]
+
+### 🟡 WARNINGS
+
+**Legend:** 🔧 = Current Session | 📋 = Historical
+
+#### 🔧 Current Session (8 total)
+
+- **06-error-resilience.mdc**: Error-prone operation without error handling: open\( (`.cursor/scripts/check-accessibility.py`:632)
+- **07-observability.mdc**: Console logging detected (use structured logging): print\s*\( (`.cursor/scripts/check-backend-patterns.py`:30)
+- **07-observability.mdc**: Console logging detected (use structured logging): print\s*\( (`.cursor/scripts/check-input-validation.py`:541)
+- **07-observability.mdc**: Console logging detected (use structured logging): print\s*\( (`.cursor/scripts/check-performance-budgets.py`:86)
+- **07-observability.mdc**: Console logging detected (use structured logging): print\s*\( (`.cursor/scripts/check-ux-consistency.py`:77)
+- **07-observability.mdc**: Console logging detected (use structured logging): print\s*\( (`.cursor/scripts/logger_util.py`:160)
+- **07-observability.mdc**: Console logging detected (use structured logging): print\s*\( (`.cursor/scripts/monitor_changes.py`:649)
+- **07-observability.mdc**: Console logging detected (use structured logging): print\s*\( (`generate_comprehensive_report.py`:47)
+
+#### 📋 Historical (2362 total)
+
+**Summary by Rule:**
+
+- **07-observability.mdc**: 2268 warning(s)
+- **06-error-resilience.mdc**: 88 warning(s)
+- **python_bible.mdc**: 3 warning(s)
+- **BACKEND-R08-DTO-001**: 2 warning(s)
+- **01-enforcement.mdc Step 5**: 1 warning(s)
+
+*See `.cursor/enforcement/VIOLATIONS.md` for complete historical violations list.*
+
+
+## Compliance Checks
+
+- [x] Backend Patterns Compliance
+- [x] Backend Architecture Compliance
+- [x] Tech Debt Compliance
+- [x] Verification Compliance
+- [x] TypeScript Bible Compliance
+- [x] Master Rule Compliance
+- [x] Security File Monitoring
+- [x] Architecture Compliance
+- [x] Data Layer Validation
+- [ ] Error Handling Compliance
+- [ ] Structured Logging Compliance
+- [ ] DTO Enforcement Compliance
+- [ ] Python Bible Compliance
+- [ ] activeContext.md Update
+- [ ] Hardcoded Date Detection
+- [ ] Modular Checker: 03-security-secrets.mdc
+- [ ] Modular Checker: 03-security-tenant.mdc
+
+## Session Information
+
+- **Session Start:** 2025-12-03T17:14:59.524926+00:00
+- **Last Check:** 2025-12-03T18:51:46.447062+00:00
+- **Total Violations:** 3016
+- **Blocked:** 646 total
+  - 🔧 Current Session: 40 (auto-fixable)
+  - 📋 Historical: 606 (require human input)
+- **Warnings:** 2370

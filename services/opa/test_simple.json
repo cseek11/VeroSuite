@@ -1,0 +1,8 @@
+{
+  "changed_files": [
+    {
+      "path": "test.ts",
+      "diff": "+ // TODO: test"
+    }
+  ]
+}

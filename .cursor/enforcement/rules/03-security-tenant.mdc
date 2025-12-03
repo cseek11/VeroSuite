@@ -1,0 +1,28 @@
+---
+description: "Tenant isolation: ensure all Prisma queries include tenant_id filters"
+globs: "apps/api/**/*.ts,apps/api/**/*.service.ts"
+alwaysApply: false
+---
+
+# TENANT ISOLATION (R01)
+
+## Purpose
+Ensure all database queries on tenant-scoped tables include tenant_id filters to prevent cross-tenant data access.
+
+## Rules
+
+### SEC-R01-001: Missing Tenant ID Filter
+- **Severity:** BLOCKING (Tier 1)
+- **Detection:** Prisma queries on tenant-scoped tables without `tenant_id` in `where` clause
+- **Fix:** Add `tenant_id: currentUser.tenant_id` to query `where` clause
+
+### SEC-R01-002: Client-Provided Tenant ID
+- **Severity:** BLOCKING (Tier 1)
+- **Detection:** Tenant ID extracted from request body/query/params instead of authenticated JWT
+- **Fix:** Extract `tenant_id` from authenticated JWT (`currentUser.tenant_id`) instead of client input
+
+## Enforcement
+This rule is enforced by `TenantIsolationChecker`.
+
+## Tenant-Scoped Tables
+See `.cursor/enforcement/tenant_tables.json` for the list of tables that require tenant filtering.

@@ -1,16 +1,17 @@
 # Backend Patterns Policy Tests (R11)
 
-package verofield.backend
+package compliance.backend_test
 
-import future.keywords.if
+import rego.v1
+import data.compliance.backend
 
 # ============================================================================
 # Test Case 1: Happy Path - Thin Controller with Proper Service
 # ============================================================================
 
 test_thin_controller_passes if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/users/users.controller.ts",
             "content": `
                 @Controller('users')
@@ -25,10 +26,10 @@ test_thin_controller_passes if {
                 }
             `
         }],
-        "pr_description": "Add user creation endpoint"
+        "pr_body": "Add user creation endpoint"
     }
     
-    count(deny) == 0
+    count(backend.deny) == 0 with input as test_input
 }
 
 # ============================================================================
@@ -36,8 +37,8 @@ test_thin_controller_passes if {
 # ============================================================================
 
 test_service_with_business_logic_passes if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/users/users.service.ts",
             "content": `
                 @Injectable()
@@ -60,10 +61,10 @@ test_service_with_business_logic_passes if {
                 }
             `
         }],
-        "pr_description": "Add user service"
+        "pr_body": "Add user service"
     }
     
-    count(deny) == 0
+    count(backend.deny) == 0 with input as test_input
 }
 
 # ============================================================================
@@ -71,8 +72,8 @@ test_service_with_business_logic_passes if {
 # ============================================================================
 
 test_dto_with_validation_passes if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/users/dto/create-user.dto.ts",
             "content": `
                 export class CreateUserDto {
@@ -87,10 +88,10 @@ test_dto_with_validation_passes if {
                 }
             `
         }],
-        "pr_description": "Add user DTO"
+        "pr_body": "Add user DTO"
     }
     
-    count(deny) == 0
+    count(backend.deny) == 0 with input as test_input
 }
 
 # ============================================================================
@@ -98,8 +99,8 @@ test_dto_with_validation_passes if {
 # ============================================================================
 
 test_business_logic_in_controller_fails if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/users/users.controller.ts",
             "content": `
                 @Controller('users')
@@ -116,10 +117,10 @@ test_business_logic_in_controller_fails if {
                 }
             `
         }],
-        "pr_description": "Add user endpoint"
+        "pr_body": "Add user endpoint"
     }
     
-    count(deny) > 0
+    count(backend.deny) > 0 with input as test_input
 }
 
 # ============================================================================
@@ -127,8 +128,8 @@ test_business_logic_in_controller_fails if {
 # ============================================================================
 
 test_missing_dto_fails if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/users/users.controller.ts",
             "content": `
                 @Controller('users')
@@ -140,10 +141,10 @@ test_missing_dto_fails if {
                 }
             `
         }],
-        "pr_description": "Add user endpoint"
+        "pr_body": "Add user endpoint"
     }
     
-    count(deny) > 0
+    count(backend.deny) > 0 with input as test_input
 }
 
 # ============================================================================
@@ -151,8 +152,8 @@ test_missing_dto_fails if {
 # ============================================================================
 
 test_missing_tenant_filter_fails if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/users/users.service.ts",
             "content": `
                 @Injectable()
@@ -164,10 +165,10 @@ test_missing_tenant_filter_fails if {
                 }
             `
         }],
-        "pr_description": "Add user service"
+        "pr_body": "Add user service"
     }
     
-    count(deny) > 0
+    count(backend.deny) > 0 with input as test_input
 }
 
 # ============================================================================
@@ -175,8 +176,8 @@ test_missing_tenant_filter_fails if {
 # ============================================================================
 
 test_missing_transaction_fails if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/users/users.service.ts",
             "content": `
                 @Injectable()
@@ -194,10 +195,10 @@ test_missing_transaction_fails if {
                 }
             `
         }],
-        "pr_description": "Add user service"
+        "pr_body": "Add user service"
     }
     
-    count(deny) > 0
+    count(backend.deny) > 0 with input as test_input
 }
 
 # ============================================================================
@@ -205,8 +206,8 @@ test_missing_transaction_fails if {
 # ============================================================================
 
 test_dto_with_any_type_fails if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/users/dto/create-user.dto.ts",
             "content": `
                 export class CreateUserDto {
@@ -215,10 +216,10 @@ test_dto_with_any_type_fails if {
                 }
             `
         }],
-        "pr_description": "Add user DTO"
+        "pr_body": "Add user DTO"
     }
     
-    count(deny) > 0
+    count(backend.deny) > 0 with input as test_input
 }
 
 # ============================================================================
@@ -226,8 +227,8 @@ test_dto_with_any_type_fails if {
 # ============================================================================
 
 test_service_passthrough_warns if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/users/users.service.ts",
             "content": `
                 @Injectable()
@@ -240,10 +241,10 @@ test_service_passthrough_warns if {
                 }
             `
         }],
-        "pr_description": "Add user service"
+        "pr_body": "Add user service"
     }
     
-    count(warn) > 0
+    count(backend.warn) > 0 with input as test_input
 }
 
 # ============================================================================
@@ -251,8 +252,8 @@ test_service_passthrough_warns if {
 # ============================================================================
 
 test_override_with_marker_passes if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/users/users.controller.ts",
             "content": `
                 @Controller('users')
@@ -266,10 +267,10 @@ test_override_with_marker_passes if {
                 }
             `
         }],
-        "pr_description": "Add user endpoint\n\n@override:backend-patterns\nJustification: Temporary migration, DTOs will be added in next PR"
+        "pr_body": "Add user endpoint\n\n@override:backend-patterns\nJustification: Temporary migration, DTOs will be added in next PR"
     }
     
-    count(deny) == 0
+    count(backend.deny) == 0 with input as test_input
 }
 
 # ============================================================================
@@ -277,8 +278,8 @@ test_override_with_marker_passes if {
 # ============================================================================
 
 test_repository_pattern_passes if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/users/users.repository.ts",
             "content": `
                 @Injectable()
@@ -292,10 +293,10 @@ test_repository_pattern_passes if {
                 }
             `
         }],
-        "pr_description": "Add user repository"
+        "pr_body": "Add user repository"
     }
     
-    count(deny) == 0
+    count(backend.deny) == 0 with input as test_input
 }
 
 # ============================================================================
@@ -303,8 +304,8 @@ test_repository_pattern_passes if {
 # ============================================================================
 
 test_complex_service_passes if {
-    input := {
-        "files": [{
+    test_input := {
+        "changed_files": [{
             "path": "apps/api/src/work-orders/work-orders.service.ts",
             "content": `
                 @Injectable()
@@ -350,10 +351,10 @@ test_complex_service_passes if {
                 }
             `
         }],
-        "pr_description": "Add work order service"
+        "pr_body": "Add work order service"
     }
     
-    count(deny) == 0
+    count(backend.deny) == 0 with input as test_input
 }
 
 # ============================================================================
@@ -361,10 +362,11 @@ test_complex_service_passes if {
 # ============================================================================
 
 test_metadata if {
-    metadata.rule_id == "R11"
-    metadata.tier == 2
-    metadata.enforcement == "OVERRIDE"
+    backend.metadata.rule_id == "R11"
+    backend.metadata.tier == 2
+    backend.metadata.enforcement == "OVERRIDE"
 }
+
 
 
 

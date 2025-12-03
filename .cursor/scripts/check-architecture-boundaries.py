@@ -16,7 +16,7 @@ Usage:
     python check-architecture-boundaries.py apps/api/src/module.ts
     python check-architecture-boundaries.py apps/
 
-Created: 2025-11-23
+Created: 2025-12-01
 Version: 1.0.0
 """
 
@@ -24,13 +24,16 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import List, Dict, Set
+from typing import List, Dict, Any
 
 class ArchitectureBoundariesChecker:
     def __init__(self):
         self.violations = []
         self.warnings = []
         self.files_checked = 0
+        
+        # Get project root (assume script is in .cursor/scripts/)
+        self.project_root = Path(__file__).parent.parent.parent.resolve()
         
         # Patterns for detection
         self.cross_service_import_pattern = re.compile(r'import.*from\s+[\'"](\.\./\.\./\.\./[^\'"]+/src/[^\'"]+)[\'"]')
@@ -42,22 +45,37 @@ class ArchitectureBoundariesChecker:
             'apps', 'libs', 'frontend', 'VeroFieldMobile', 'docs', 'services',
             '.cursor', '.github', 'monitoring', 'node_modules', '.git'
         }
+    
+    def _normalize_path(self, file_path: str) -> str:
+        """Normalize file path relative to project root for consistent checking."""
+        path_obj = Path(file_path).resolve()
+        try:
+            # Get relative path from project root
+            rel_path = path_obj.relative_to(self.project_root)
+            # Convert to forward slashes for consistent checking (works on all platforms)
+            return str(rel_path).replace('\\', '/')
+        except ValueError:
+            # Path is outside project root, return as-is but normalized
+            return str(path_obj).replace('\\', '/')
         
-    def check_file(self, file_path: str) -> List[Dict]:
+    def check_file(self, file_path: str) -> List[Dict[str, Any]]:
         """Check a single file for architecture violations."""
         violations = []
         warnings = []
         
         try:
-            # Check file path
-            violations.extend(self._check_file_path(file_path))
+            # Normalize path for consistent checking
+            normalized_path = self._normalize_path(file_path)
+            
+            # Check file path (use normalized path for checks, original for file operations)
+            violations.extend(self._check_file_path(normalized_path))
             
             # Check imports if TypeScript file
             if file_path.endswith(('.ts', '.tsx', '.js', '.jsx')):
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
-                violations.extend(self._check_imports(file_path, content))
-                warnings.extend(self._check_code_organization(file_path, content))
+                violations.extend(self._check_imports(normalized_path, content))
+                warnings.extend(self._check_code_organization(normalized_path, content))
                 
         except Exception as e:
             print(f"⚠️  Error reading {file_path}: {e}")
@@ -66,7 +84,7 @@ class ArchitectureBoundariesChecker:
         self.warnings.extend(warnings)
         return violations + warnings
     
-    def _check_file_path(self, file_path: str) -> List[Dict]:
+    def _check_file_path(self, file_path: str) -> List[Dict[str, Any]]:
         """Check if file is in correct monorepo path."""
         violations = []
         
@@ -109,7 +127,7 @@ class ArchitectureBoundariesChecker:
         
         return violations
     
-    def _check_imports(self, file_path: str, content: str) -> List[Dict]:
+    def _check_imports(self, file_path: str, content: str) -> List[Dict[str, Any]]:
         """Check for import violations."""
         violations = []
         lines = content.split('\n')
@@ -156,7 +174,7 @@ class ArchitectureBoundariesChecker:
         
         return violations
     
-    def _check_code_organization(self, file_path: str, content: str) -> List[Dict]:
+    def _check_code_organization(self, file_path: str, content: str) -> List[Dict[str, Any]]:
         """Check for code organization issues."""
         warnings = []
         
@@ -175,21 +193,32 @@ class ArchitectureBoundariesChecker:
     
     def check_path(self, path: str) -> None:
         """Check a file or directory for violations."""
-        path_obj = Path(path)
+        path_obj = Path(path).resolve()
         
         if path_obj.is_file():
-            self.check_file(path)
-            self.files_checked += 1
+            try:
+                self.check_file(str(path_obj))
+                self.files_checked += 1
+            except (OSError, IOError) as e:
+                print(f"⚠️  Error accessing file {path_obj}: {e}")
         elif path_obj.is_dir():
             # Check all TypeScript/JavaScript files
-            for ext in ['*.ts', '*.tsx', '*.js', '*.jsx']:
-                for file in path_obj.rglob(ext):
-                    self.check_file(str(file))
-                    self.files_checked += 1
+            extensions = ['.ts', '.tsx', '.js', '.jsx']
+            for file in path_obj.rglob('*'):
+                if file.is_file() and file.suffix in extensions:
+                    try:
+                        self.check_file(str(file))
+                        self.files_checked += 1
+                    except (OSError, IOError) as e:
+                        print(f"⚠️  Error accessing file {file}: {e}")
             # Check for schema files
             for schema_file in path_obj.rglob('schema.prisma'):
-                self.check_file(str(schema_file))
-                self.files_checked += 1
+                if schema_file.is_file():
+                    try:
+                        self.check_file(str(schema_file))
+                        self.files_checked += 1
+                    except (OSError, IOError) as e:
+                        print(f"⚠️  Error accessing file {schema_file}: {e}")
         else:
             print(f"❌ Path not found: {path}")
             sys.exit(1)
@@ -283,6 +312,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-

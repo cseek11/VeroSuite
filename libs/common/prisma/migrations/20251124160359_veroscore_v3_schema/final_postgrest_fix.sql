@@ -61,3 +61,5 @@ ORDER BY table_name;
 -- 3. Test: python .cursor/scripts/test_supabase_schema_access.py
 -- ============================================================================
 
+
+

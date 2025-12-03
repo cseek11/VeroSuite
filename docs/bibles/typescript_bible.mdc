@@ -1,0 +1,865 @@
+---
+description: "TypeScript Bible rules extracted from production war stories and canonical solutions"
+alwaysApply: true
+sources:
+  - typescript-production-war
+  - typescript-v1
+  - typescript-v1.1
+severityDefault: warning
+version: 1.0.0
+---
+
+# TypeScript Bible – Enforcement Rules (Auto-Generated)
+
+> This file is generated from the TypeScript production war stories and canonical solutions. Edit the source documents and re-run the pipeline instead of editing this file directly.
+
+**Last Updated:** 2025-11-30
+
+## Anti-Patterns (DO NOT)
+
+### BLK-ts-001
+- **Chapter:** `CH-01`
+- **Severity:** `high`
+
+**Problem:**
+
+Using `any` anywhere in production code leads to silent runtime explosions and is the #1 cause of production outages.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ts-002
+- **Chapter:** `CH-01`
+- **Severity:** `high`
+
+**Problem:**
+
+Using `enum` in libraries or apps causes runtime bloat, reverse mappings, and bundle size increases of 5–15%.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ts-003
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Naked conditional types `T extends U ? ...` distribute over unions, causing wrong handler signatures and type inference bugs.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ts-004
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Using `Partial<T>` for deep updates allows missing nested required fields, causing incomplete API payloads and DB corruption.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ts-005
+- **Chapter:** `CH-03`
+- **Severity:** `high`
+
+**Problem:**
+
+DeepReadonly/DeepPartial without function guard first causes infinite recursion on thunks, leading to `tsc` OOM in monorepos.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ts-006
+- **Chapter:** `CH-03`
+- **Severity:** `high`
+
+**Problem:**
+
+Branded types without `unique symbol` are erased at runtime, causing ID mix-ups in fintech applications.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ts-007
+- **Chapter:** `CH-04`
+- **Severity:** `high`
+
+**Problem:**
+
+Template literal types like `` `/${string}` `` expand to infinite unions, causing VS Code freezes and CI timeouts.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ts-008
+- **Chapter:** `CH-05`
+- **Severity:** `high`
+
+**Problem:**
+
+Using `satisfies` alone doesn't block extra properties, causing config drift and silent bad data.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ts-009
+- **Chapter:** `CH-05`
+- **Severity:** `high`
+
+**Problem:**
+
+Using `Partial<T> & Pick<T, "id">` for partial updates makes `id` still optional, causing DB corruption from partial patches.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ts-010
+- **Chapter:** `CH-06`
+- **Severity:** `high`
+
+**Problem:**
+
+Using `T extends Promise<infer U>` without tuple wrapping distributes over unions, causing wrong type inference.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ts-011
+- **Chapter:** `CH-07`
+- **Severity:** `high`
+
+**Problem:**
+
+Using raw `keyof Dict` on objects with index signatures returns `string | number`, causing dynamic access surprises.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ts-012
+- **Chapter:** `CH-08`
+- **Severity:** `high`
+
+**Problem:**
+
+Disabling strict flags in tsconfig hides bugs, causing 1000+ errors when finally enabled.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ts-013
+- **Chapter:** `CH-09`
+- **Severity:** `high`
+
+**Problem:**
+
+Manual types + manual parsers cause drift, leading to 30% of all validation bugs.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-ts-001
+- **Chapter:** `CH-01`
+- **Severity:** `medium`
+
+**Problem:**
+
+Using `as any`, `as unknown as T`, or `!` non-null assertions everywhere causes null dereferences and type lies.
+
+**Preferred Alternative / Solution:**
+
+Use `as` only in `*.d.ts` or with comment justification.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-ts-002
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Naked unions without `as const` cause narrowing to fail silently, leading to 40% of state-machine bugs.
+
+**Preferred Alternative / Solution:**
+
+Use `as const` on object/array literals when you want literals.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-ts-003
+- **Chapter:** `CH-03`
+- **Severity:** `medium`
+
+**Problem:**
+
+Discriminated unions without user-defined type guards cause `radius` to be `number | undefined`, leading to crashes in rendering loops.
+
+**Preferred Alternative / Solution:**
+
+Use user-defined type guards: `function isCircle(s: Shape): s is Extract<Shape, { kind: "circle" }> { ... }`
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-ts-004
+- **Chapter:** `CH-04`
+- **Severity:** `medium`
+
+**Problem:**
+
+Old union-to-tuple tricks fail at 30+ members with "type instantiation excessively deep", causing missed variants in design systems.
+
+**Preferred Alternative / Solution:**
+
+Use `LastOf` + reverse-build pattern (works to 60+ members).
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-ts-005
+- **Chapter:** `CH-05`
+- **Severity:** `medium`
+
+**Problem:**
+
+Relying on old inference for generics causes `any` inference, leading to lost literal types in builders.
+
+**Preferred Alternative / Solution:**
+
+Use `const` generics: `function create<const T>(value: T): T`
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-ts-006
+- **Chapter:** `CH-06`
+- **Severity:** `medium`
+
+**Problem:**
+
+Putting most specific overload signature first causes wrong overload to be chosen, leading to wrong function signatures.
+
+**Preferred Alternative / Solution:**
+
+Put most specific signature last, or use unions + type guards.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-ts-007
+- **Chapter:** `CH-07`
+- **Severity:** `medium`
+
+**Problem:**
+
+Using `this: Type` on methods without `ThisType` marker causes fluent APIs to break in strict mode.
+
+**Preferred Alternative / Solution:**
+
+Only use with `ThisType<T>` marker + `noImplicitThis: true`.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-ts-008
+- **Chapter:** `CH-08`
+- **Severity:** `low`
+
+**Problem:**
+
+Using `as const` on function parameters accidentally makes everything readonly in generics, causing frozen Redux state.
+
+**Preferred Alternative / Solution:**
+
+Always use on object/array literals when you want literals, not on function parameters.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+## Recommended Patterns (Prefer These)
+
+### CODE-ts-001
+- **Chapter:** `CH-01`
+- **Language:** `typescript`
+- **Pattern Type:** `type-safety`
+
+**Pattern:**
+
+Use `unknown` + type predicates everywhere instead of `any`.
+
+**Example:**
+
+```typescript
+function isUser(x: unknown): x is User {
+  return typeof x === "object" && x !== null && "id" in x && "email" in x;
+}
+
+function processUser(data: unknown) {
+  if (isUser(data)) {
+    // data is now User
+    console.log(data.email);
+  }
+}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-002
+- **Chapter:** `CH-01`
+- **Language:** `typescript`
+- **Pattern Type:** `type-safety`
+
+**Pattern:**
+
+Use `as const` objects instead of enums.
+
+**Example:**
+
+```typescript
+const Status = {
+  Loading: "loading",
+  Success: "success",
+  Error: "error",
+} as const;
+
+type Status = typeof Status[keyof typeof Status]; // "loading" | "success" | "error"
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-003
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conditional-types`
+
+**Pattern:**
+
+Always wrap the tested type in a tuple to prevent distribution: `[T] extends [U] ? ... : ...`
+
+**Example:**
+
+```typescript
+type EventType = "click" | "hover";
+type Handler<E extends string> = [E] extends ["click"] 
+  ? () => void 
+  : (e: MouseEvent) => void;
+
+declare function on<E extends EventType>(event: E, handler: Handler<E>): void;
+
+on("click", () => { /* no e */ }); // correct
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-004
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `utility-types`
+
+**Pattern:**
+
+Use custom deep partial for updates: `{ [K in keyof T]?: T[K] } & Pick<T, "id">`
+
+**Example:**
+
+```typescript
+type PartialButKeepId<T extends { id: unknown }> = { [K in keyof T]?: T[K] } & Pick<T, "id">;
+
+type User = { id: string; name: string; email?: string };
+type Patch = PartialButKeepId<User>; // id is required, others optional
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-005
+- **Chapter:** `CH-03`
+- **Language:** `typescript`
+- **Pattern Type:** `recursive-types`
+
+**Pattern:**
+
+Function guard first in recursive types: `T extends (...args: any[]) => any ? T : T extends object ? ...`
+
+**Example:**
+
+```typescript
+type DeepReadonly<T> = 
+  T extends (...args: any[]) => any ? T :
+  T extends object 
+    ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+    : T;
+
+type DeepPartial<T> = 
+  T extends (...args: any[]) => any ? T :
+  T extends object 
+    ? { [K in keyof T]?: DeepPartial<T[K]> }
+    : T;
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-006
+- **Chapter:** `CH-03`
+- **Language:** `typescript`
+- **Pattern Type:** `branded-types`
+
+**Pattern:**
+
+Use `unique symbol` for branded types.
+
+**Example:**
+
+```typescript
+declare const __brand: unique symbol;
+type Brand<T, B extends string> = T & { readonly [K in B]: typeof __brand };
+type UserId = Brand<string, "UserId">;
+type PostId = Brand<string, "PostId">;
+
+function getUser(id: UserId): User { /* ... */ }
+function getPost(id: PostId): Post { /* ... */ }
+
+const userId = "123" as UserId;
+getPost(userId); // Error: unique symbol prevents assignability
+getPost(userId as any); // Still error — unique symbol prevents assignability even with any
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-007
+- **Chapter:** `CH-04`
+- **Language:** `typescript`
+- **Pattern Type:** `template-literal-types`
+
+**Pattern:**
+
+Use branded string or bounded template literal types instead of unbounded ones.
+
+**Example:**
+
+```typescript
+// Option 1: Branded string
+type Path = string & { __path: never };
+
+// Option 2: Bounded template literal
+type Path = `/${string}` extends infer P ? P & string : never;
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-008
+- **Chapter:** `CH-04`
+- **Language:** `typescript`
+- **Pattern Type:** `union-to-tuple`
+
+**Pattern:**
+
+Use `LastOf` + reverse-build pattern for union-to-tuple (works to 60+ members).
+
+**Example:**
+
+```typescript
+type UnionToIntersection<U> = 
+  (U extends any ? (k: U) => void : never) extends (k: infer I) => void 
+    ? I : never;
+
+type LastOf<T> = 
+  UnionToIntersection<T extends any ? () => T : never> extends () => infer R 
+    ? R : never;
+
+type UnionToTuple<T, Acc extends any[] = []> =
+  [T] extends [never]
+    ? Acc
+    : UnionToTuple<Exclude<T, LastOf<T>>, [LastOf<T>, ...Acc]>;
+
+type Tuple = UnionToTuple<"a" | 1 | true | "b" | 42>; 
+// ["a", 1, true, "b", 42] — order preserved, 60+ members work
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-009
+- **Chapter:** `CH-05`
+- **Language:** `typescript`
+- **Pattern Type:** `exact-types`
+
+**Pattern:**
+
+Use `satisfies Record<string, unknown>` + `typeof` or `Exact<T>` for exact types.
+
+**Example:**
+
+```typescript
+// Option 1: satisfies + typeof
+const config = {
+  apiUrl: "https://api.com",
+  timeout: 5000,
+} satisfies Record<string, unknown>;
+
+type Config = typeof config; // { apiUrl: string; timeout: number }
+
+// Option 2: Exact type helper
+type Exact<T> = T & { [K in keyof T]: T[K] };
+const config2 = {
+  apiUrl: "https://api.com",
+  timeout: 5000,
+} satisfies Exact<{ apiUrl: string; timeout: number }>;
+
+// config2.debug → error
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-010
+- **Chapter:** `CH-05`
+- **Language:** `typescript`
+- **Pattern Type:** `const-generics`
+
+**Pattern:**
+
+Use `const` generics when you want literal inference (TS 5.0+).
+
+**Example:**
+
+```typescript
+function create<const T>(value: T): T { return value; }
+const x = create({ id: "123" }); // { readonly id: "123" }
+
+function makeArray<const T extends readonly string[]>(...items: T) {
+  return items; // T is readonly ["a", "b"] not string[]
+}
+const arr = makeArray("a", "b"); // const arr: readonly ["a", "b"]
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-011
+- **Chapter:** `CH-06`
+- **Language:** `typescript`
+- **Pattern Type:** `infer-unwrapping`
+
+**Pattern:**
+
+Wrap in tuple to prevent distribution when unwrapping unions: `[T] extends [Promise<infer U>] ? U : T`
+
+**Example:**
+
+```typescript
+// For nested promises (recursive, no tuple needed):
+type DeepAwaited<T> = T extends Promise<infer U> ? DeepAwaited<U> : T;
+type Nested = DeepAwaited<Promise<Promise<string>>>; // string
+
+// For unions (tuple wrapping prevents distribution):
+type Unwrap<T> = [T] extends [Promise<infer U>] ? U : T;
+type Bad = Unwrap<Promise<string> | string>; // string (not Promise<string> | string)
+type Good = Unwrap<Promise<string>>; // string
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-012
+- **Chapter:** `CH-07`
+- **Language:** `typescript`
+- **Pattern Type:** `keyof-patterns`
+
+**Pattern:**
+
+Use `KnownKeys<T>` to exclude index signatures from `keyof`.
+
+**Example:**
+
+```typescript
+type KnownKeys<T> = keyof Pick<T, Exclude<keyof T, keyof []>>;
+
+type Dict = { [key: string]: number; x: number };
+type Keys = KnownKeys<Dict>; // "x" (not string | number)
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-013
+- **Chapter:** `CH-08`
+- **Language:** `typescript`
+- **Pattern Type:** `tsconfig`
+
+**Pattern:**
+
+Always use `"strict": true` + `exactOptionalPropertyTypes` + `noUncheckedIndexedAccess`.
+
+**Example:**
+
+```typescript
+// tsconfig.json
+{
+  "compilerOptions": {
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
+  }
+}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-014
+- **Chapter:** `CH-09`
+- **Language:** `typescript`
+- **Pattern Type:** `runtime-validation`
+
+**Pattern:**
+
+One source of truth: `const UserSchema = z.object(...); type User = z.infer<typeof UserSchema>`
+
+**Example:**
+
+```typescript
+import { z } from "zod";
+
+const UserSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  name: z.string().min(1),
+  age: z.number().int().positive().optional(),
+});
+
+type User = z.infer<typeof UserSchema>;
+
+// Usage
+function validateUser(data: unknown): User {
+  return UserSchema.parse(data); // Runtime validation + type safety
+}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-015
+- **Chapter:** `CH-10`
+- **Language:** `typescript`
+- **Pattern Type:** `discriminated-unions`
+
+**Pattern:**
+
+Use discriminated unions with `as const` + exhaustive switch + `never` check.
+
+**Example:**
+
+```typescript
+type Shape = 
+  | { type: "circle"; radius: number }
+  | { type: "square"; side: number };
+
+function area(s: Shape): number {
+  switch (s.type) {
+    case "circle":
+      return Math.PI * s.radius ** 2;
+    case "square":
+      return s.side ** 2;
+    default:
+      const _exhaustive: never = s;
+      return _exhaustive;
+  }
+}
+
+// User-defined type guard for extra safety
+function isCircle(s: Shape): s is Extract<Shape, { type: "circle" }> {
+  return s.type === "circle";
+}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-016
+- **Chapter:** `CH-11`
+- **Language:** `typescript`
+- **Pattern Type:** `overloads`
+
+**Pattern:**
+
+Put most specific signature last, or use unions + type guards instead.
+
+**Example:**
+
+```typescript
+// Option 1: Correct overload order
+function pad(s: string, length?: number): string;
+function pad(n: number, length: number): string;
+function pad(x: string | number, length?: number): string {
+  return typeof x === "string" 
+    ? x.padEnd(length ?? 0) 
+    : x.toString().padStart(length!, "0");
+}
+
+// Option 2: Use unions + type guards (preferred)
+type PadInput = 
+  | { type: "string"; value: string; length?: number }
+  | { type: "number"; value: number; length: number };
+
+function pad(input: PadInput): string {
+  if (input.type === "string") {
+    return input.value.padEnd(input.length ?? 0);
+  }
+  return input.value.toString().padStart(input.length, "0");
+}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-ts-017
+- **Chapter:** `CH-12`
+- **Language:** `typescript`
+- **Pattern Type:** `thistype`
+
+**Pattern:**
+
+Use `ThisType<T>` marker + `noImplicitThis: true` for fluent APIs.
+
+**Example:**
+
+```typescript
+// In tsconfig.json
+{
+  "compilerOptions": {
+    "noImplicitThis": true,
+    "strict": true
+  }
+}
+
+// Then use ThisType marker
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface PointMethods {
+  move(dx: number, dy: number): void;
+}
+
+const p: Point & ThisType<Point & PointMethods> = {
+  x: 0,
+  y: 0,
+  move(dx: number, dy: number) {
+    this.x += dx;
+    this.y += dy;
+  }
+};
+
+p.move(1, 2); // Works with correct this type
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-ts-001
+- **Chapter:** `CH-13`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+Always constrain generics: `T extends string`, default only with `const`.
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.

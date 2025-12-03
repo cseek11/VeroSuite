@@ -56,9 +56,13 @@ def test_supabase_connection() -> Tuple[bool, str]:
         # Try both approaches
         try:
             result = supabase.table("sessions").select("id", count="exact").limit(0).execute()
-        except:
+        except (ValueError, AttributeError, KeyError) as e:
             # Fallback: query via raw SQL if schema prefix needed
-            result = supabase.rpc("exec_sql", {"query": "SELECT COUNT(*) FROM veroscore.sessions"}).execute()
+            try:
+                result = supabase.rpc("exec_sql", {"query": "SELECT COUNT(*) FROM veroscore.sessions"}).execute()
+            except (ValueError, AttributeError, KeyError) as fallback_error:
+                # Both approaches failed
+                return False, f"Both query approaches failed: {str(e)}, fallback: {str(fallback_error)}"
         
         return True, "Connection successful"
     except Exception as e:
@@ -190,7 +194,8 @@ def test_insert_and_query(supabase: Client) -> Tuple[bool, str]:
         # Try to cleanup on error
         try:
             supabase.table("sessions").delete().eq("session_id", test_session_id).execute()
-        except:
+        except (ValueError, AttributeError, KeyError) as cleanup_error:
+            # Cleanup failed - log but don't fail the test
             pass
         return False, str(e)
 

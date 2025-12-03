@@ -32,9 +32,12 @@ class TracePropagationChecker:
         if not Path(file_path).exists():
             return {"error": f"File not found: {file_path}"}
         
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-            lines = content.split('\n')
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                lines = content.split('\n')
+        except (OSError, IOError, UnicodeDecodeError) as e:
+            return {"error": f"Error reading file {file_path}: {e}"}
         
         # Reset violations for this file
         file_violations = []
@@ -420,6 +423,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 
 
 

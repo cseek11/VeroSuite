@@ -1,0 +1,58 @@
+title: TypeScript Bible
+version: 1.0.0
+parts:
+- name: 'Part I: FOUNDATIONS'
+  chapters:
+  - chapters/01_introduction_to_typescript.md
+  - chapters/02_language_syntax_semantics.md
+  - chapters/03_core_execution_model.md
+- name: 'Part II: LANGUAGE CONCEPTS'
+  chapters:
+  - chapters/04_types_type_system.md
+  - chapters/05_control_flow_analysis.md
+  - chapters/06_functions.md
+- name: 'Part III: ADVANCED TOPICS'
+  chapters:
+  - chapters/07_classes_oop.md
+  - chapters/08_modules_packages.md
+  - chapters/09_standard_library.md
+  - chapters/10_error_handling.md
+  - chapters/11_async_promises.md
+- name: 'Part IV: SPECIALIST TOPICS'
+  chapters:
+  - chapters/12_performance_engineering.md
+  - chapters/13_security.md
+  - chapters/14_testing.md
+  - chapters/15_tooling.md
+  - chapters/16_package_management.md
+  - chapters/17_build_systems.md
+  - chapters/18_frameworks.md
+  - chapters/19_dom_web_api_types.md
+  - chapters/20_node_js_types_modules.md
+  - chapters/21_third_party_type_libraries.md
+  - chapters/22_apis_rest_graphql_grpc.md
+  - chapters/23_data_engineering.md
+  - chapters/24_architecture_patterns.md
+  - chapters/25_observability.md
+  - chapters/26_configuration.md
+  - chapters/27_background_jobs.md
+  - chapters/28_deployment.md
+  - chapters/29_type_system_internals.md
+  - chapters/30_compiler_pipeline.md
+  - chapters/31_runtime_engines.md
+  - chapters/32_declaration_files.md
+  - chapters/33_ast_manipulation.md
+  - chapters/34_interop.md
+  - chapters/35_static_analysis.md
+  - chapters/36_maintaining_large_type_systems.md
+  - chapters/37_type_theory.md
+  - chapters/38_compiler_extensions.md
+  - chapters/39_distributed_systems.md
+  - chapters/40_ai_assisted_development.md
+  - chapters/41_mission_critical_systems.md
+  - chapters/42_future_of_typescript.md
+  - chapters/43_capstone.md
+  - chapters/44_language_specification_alignment.md
+- name: 'Part V: APPENDICES'
+  chapters:
+  - chapters/45_governance.md

@@ -1,0 +1,10 @@
+{
+  "active": [
+    "@.cursor/rules/02-core.mdc",
+    "@.cursor/rules/python_bible.mdc"
+  ],
+  "preloaded": [
+    "@.cursor/rules/10-quality.mdc",
+    "@.cursor/rules/14-verification.mdc"
+  ]
+}

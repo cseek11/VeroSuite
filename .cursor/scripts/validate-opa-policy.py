@@ -96,7 +96,7 @@ class OPAPolicyValidator:
             result = subprocess.run(['which', 'opa'], capture_output=True, text=True)
             if result.returncode == 0:
                 return result.stdout.strip()
-        except:
+        except (subprocess.SubprocessError, FileNotFoundError):
             pass
         
         return None
@@ -408,9 +408,12 @@ def main():
             
             # Export results as JSON
             output_file = Path('.cursor/scripts/validation-results.json')
-            with open(output_file, 'w') as f:
-                json.dump([r.to_dict() for r in results], f, indent=2)
-            print(f"📄 Results exported to {output_file}")
+            try:
+                with open(output_file, 'w', encoding='utf-8') as f:
+                    json.dump([r.to_dict() for r in results], f, indent=2)
+                print(f"📄 Results exported to {output_file}")
+            except (OSError, IOError) as e:
+                print(f"Error exporting results: {e}", file=sys.stderr)
             
             sys.exit(0 if failed == 0 else 1)
         
@@ -425,6 +428,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 
 
 

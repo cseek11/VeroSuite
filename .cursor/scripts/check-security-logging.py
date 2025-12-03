@@ -383,9 +383,15 @@ class SecurityLoggingChecker:
             for file in files:
                 if file.endswith('.ts') and not file.endswith('.spec.ts'):
                     file_path = os.path.join(root, file)
-                    analyzer = SecurityEventAnalyzer(file_path, open(file_path).read())
-                    file_violations = analyzer._check_category(category)
-                    violations.extend(file_violations)
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                        analyzer = SecurityEventAnalyzer(file_path, content)
+                        file_violations = analyzer._check_category(category)
+                        violations.extend(file_violations)
+                    except (OSError, IOError, UnicodeDecodeError) as e:
+                        print(f"Error reading file {file_path}: {e}", file=sys.stderr)
+                        continue
         
         return violations
     
@@ -515,6 +521,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 
 
 

@@ -274,3 +274,5 @@ class VeroFieldChangeHandler(FileSystemEventHandler):
         except Exception:
             return None
 
+
+

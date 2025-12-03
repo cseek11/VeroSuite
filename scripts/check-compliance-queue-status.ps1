@@ -106,3 +106,5 @@ Write-Host "  • If queue status is 'failed': Check error_message" -ForegroundC
 Write-Host "  • If queue status is 'completed' but no check: Check API logs for errors" -ForegroundColor White
 Write-Host "  • Check API server logs for queue processing messages" -ForegroundColor White
 
+
+

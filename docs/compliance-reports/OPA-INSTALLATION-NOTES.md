@@ -1,7 +1,40 @@
 # OPA Installation Notes
 
-**Last Updated:** 2025-11-23  
+**Last Updated:** 2025-11-30  
 **Purpose:** Clarify OPA installation location and usage across chat sessions
+
+---
+
+## ⚡ Quick Start - Finding OPA (For All Agents)
+
+**Use the helper script to find OPA reliably:**
+
+```bash
+# Python (works from any directory)
+python .cursor/scripts/find-opa.py
+
+# Shell script (Bash/Zsh)
+source .cursor/scripts/find-opa.sh
+$OPA_BIN version
+
+# PowerShell
+. .cursor/scripts/find-opa.ps1
+& $OPA_BIN version
+```
+
+**The helper script automatically:**
+- ✅ Checks `OPA_BINARY` environment variable
+- ✅ Finds project binary: `services/opa/bin/opa.exe` (Windows) or `services/opa/bin/opa` (Unix)
+- ✅ Falls back to system PATH if available
+- ✅ Verifies OPA works before returning path
+
+**For Python scripts:**
+```python
+from .cursor.scripts.find_opa import find_opa_binary
+opa_path = find_opa_binary()
+if not opa_path:
+    raise RuntimeError("OPA not found")
+```
 
 ---
 
@@ -177,6 +210,7 @@ chmod +x services/opa/bin/opa
 ---
 
 **Key Takeaway:** Always use `services/opa/bin/opa.exe` (Windows) or `services/opa/bin/opa` (Linux/Mac) - never rely on temporary locations or system PATH.
+
 
 
 

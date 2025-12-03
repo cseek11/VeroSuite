@@ -1,0 +1,802 @@
+---
+description: "Mandatory 5-step enforcement pipeline for all code changes"
+alwaysApply: true
+---
+
+# PRIORITY: CRITICAL - Rule Enforcement & Compliance
+
+## ⚠️ MANDATORY PRE-IMPLEMENTATION CHECKLIST
+
+**BEFORE writing ANY code, you MUST complete this checklist:**
+
+### Step 0: Memory Bank Context Loading (MANDATORY - HARD STOP) ⭐ **CRITICAL**
+
+**⚠️ HARD STOP - YOU CANNOT PROCEED TO STEP 1 UNTIL THIS IS COMPLETE AND VERIFIED:**
+
+**Required Output Format:**
+```
+Step 0 Verification:
+✓ Memory Bank Files Read:
+  - projectbrief.md: [summary or key points]
+  - productContext.md: [summary or key points]
+  - systemPatterns.md: [summary or key points]
+  - techContext.md: [summary or key points]
+  - activeContext.md: [summary or key points]
+  - progress.md: [summary or key points]
+
+✓ activeContext.md Updated:
+  [Show diff or summary of changes]
+
+✓ Relevant Context Identified:
+  1. [Context item from Memory Bank]
+  2. [Context item from Memory Bank]
+  3. [Context item from Memory Bank]
+
+✓ Ready to proceed to Step 1: [YES/NO]
+```
+
+#### 0.1: Read All Memory Bank Files (MANDATORY)
+- [ ] **MUST** read `.cursor/memory-bank/projectbrief.md` (use `read_file` tool) - Project foundation
+- [ ] **MUST** read `.cursor/memory-bank/productContext.md` (use `read_file` tool) - Product context
+- [ ] **MUST** read `.cursor/memory-bank/systemPatterns.md` (use `read_file` tool) - Architecture and patterns
+- [ ] **MUST** read `.cursor/memory-bank/techContext.md` (use `read_file` tool) - Technologies and setup
+- [ ] **MUST** read `.cursor/memory-bank/activeContext.md` (use `read_file` tool) - Current work focus
+- [ ] **MUST** read `.cursor/memory-bank/progress.md` (use `read_file` tool) - Project status
+
+**VERIFICATION:** You must show evidence of reading each file (list files read or show file content summaries).
+
+**OUTPUT REQUIREMENT:** You MUST output a summary for each file showing you read it.
+
+#### 0.2: Update Active Context (MANDATORY)
+- [ ] **MUST** update `activeContext.md` with current task:
+  - Set "Current Task" section with task description
+  - Set status to "in progress"
+  - Note files to be created/modified
+  - Update "Last Updated" date to current system date (check device date, never hardcode)
+- [ ] **MUST** show evidence of update (file diff or summary of changes)
+
+**VERIFICATION:** You must show the updated `activeContext.md` content or diff.
+
+**OUTPUT REQUIREMENT:** You MUST show the before/after or diff of activeContext.md update.
+
+#### 0.3: Reference Memory Bank Context (MANDATORY)
+- [ ] **MUST** identify relevant context from Memory Bank files:
+  - What project context is relevant? (from projectbrief.md)
+  - What patterns are relevant? (from systemPatterns.md)
+  - What tech constraints apply? (from techContext.md)
+  - What is current status? (from progress.md)
+- [ ] **MUST** explicitly state how Memory Bank context informs the task
+
+**VERIFICATION:** You must list specific context items from Memory Bank files that are relevant to the current task.
+
+**OUTPUT REQUIREMENT:** You MUST list at least 3 specific context items with their source file.
+
+#### 0.4: Step 0 Completion Verification (MANDATORY - HARD STOP)
+Before proceeding to Step 1, you MUST answer ALL of these questions with evidence:
+
+1. **Which Memory Bank files did you read?** (List all 6 with evidence - show file summaries or key points)
+2. **What is the current task from activeContext.md?** (Quote or summarize the current task)
+3. **What relevant context did you find in Memory Bank files?** (List 3+ specific items from Memory Bank files with source file names)
+4. **Did you update activeContext.md?** (Show evidence of update - diff or before/after)
+
+**HARD STOP:** If you cannot answer these questions with evidence, STOP and complete Step 0 first. DO NOT PROCEED TO STEP 1.
+
+**VERIFICATION MECHANISM:** You must output the Step 0 Verification format above before proceeding.
+
+**STOP if Memory Bank context is not loaded. DO NOT PROCEED TO STEP 1.**
+
+---
+
+### Step 0.5: Context Loading (MANDATORY - HARD STOP) ⭐ **CRITICAL**
+
+**⚠️ HARD STOP - YOU CANNOT PROCEED TO STEP 1 UNTIL THIS IS COMPLETE:**
+
+**Required Output Format:**
+```
+Step 0.5 Verification:
+✓ Read recommendations.md: [summary of recommendations]
+✓ Loaded PRIMARY context:
+  - @file1.md
+  - @file2.md
+✓ Context ready for task
+✓ Ready to proceed to Step 1: [YES/NO]
+```
+
+#### 0.5.1: Read Context Recommendations (MANDATORY)
+- [ ] **MUST** read `.cursor/context_manager/recommendations.md` (use `read_file` tool)
+- [ ] **MUST** read `.cursor/context_manager/dashboard.md` for workflow status
+- [ ] **MUST** read `.cursor/rules/context_enforcement.mdc` for context priorities
+- [ ] **MUST** understand current workflow and predicted next tasks
+
+**VERIFICATION:** You must show evidence of reading the recommendations file.
+
+**OUTPUT REQUIREMENT:** You MUST output a summary of recommendations showing you read them.
+
+#### 0.5.2: Load Primary Context (MANDATORY - Conditional)
+
+**CRITICAL: Check if task is assigned before loading context**
+
+- [ ] **MUST** check if recommendations.md shows "NO TASK ASSIGNED YET" or "Waiting for task assignment"
+- [ ] **MUST** check if current task type is "None" or "unknown"
+- [ ] **IF NO TASK ASSIGNED:**
+  - [ ] **DO NOT** load task-specific context (Python Bible, etc.)
+  - [ ] **DO NOT** pre-load predicted context
+  - [ ] **SKIP** context loading until task is assigned
+  - [ ] **LOG:** "No task assigned - skipping context loading"
+- [ ] **IF TASK IS ASSIGNED:**
+  - [ ] **MUST** load ALL files listed in "Active Context (Currently Loaded)" section
+  - [ ] **MUST** use `@` mentions to load context files
+  - [ ] **MUST** verify context is loaded before proceeding
+  - [ ] **MUST** log context loading actions in response
+
+**VERIFICATION:** You must show evidence of:
+- Checking task assignment status
+- Loading context files (if task assigned) OR skipping (if no task assigned)
+
+**OUTPUT REQUIREMENT:** 
+- If task assigned: List all context files loaded with `@` mentions
+- If no task assigned: State "No task assigned - context loading skipped"
+
+#### 0.5.3: Step 0.5 Completion Verification (MANDATORY - HARD STOP)
+Before proceeding to Step 1, you MUST answer ALL of these questions with evidence:
+
+1. **Did you read recommendations.md?** (Show summary of recommendations)
+2. **Is a task assigned?** (Check if recommendations.md shows task type or "NO TASK ASSIGNED YET")
+3. **What context files did you load?** (List all files with `@` mentions OR state "No task assigned - skipped")
+4. **Is context ready for the task?** (Confirm all required context is loaded OR confirm no task assigned)
+
+**HARD STOP:** If you cannot answer these questions with evidence, STOP and complete Step 0.5 first. DO NOT PROCEED TO STEP 1.
+
+**VERIFICATION MECHANISM:** You must output the Step 0.5 Verification format above before proceeding.
+
+**STOP if:**
+- Context is not loaded AND task is assigned (HARD STOP)
+- You cannot determine if task is assigned (HARD STOP)
+
+**DO NOT PROCEED TO STEP 1 if task is assigned but context is not loaded.**
+
+---
+
+## Pre-Flight Verification (Before Step 1)
+
+**⚠️ BEFORE proceeding to Step 1, you MUST answer these verification questions:**
+
+1. **Which Memory Bank files did you read?** (List all 6 files with evidence)
+2. **What is the current task from activeContext.md?** (Quote or summarize the current task)
+3. **What relevant context did you find in Memory Bank files?** (List 3+ specific items from Memory Bank files)
+4. **Did you update activeContext.md with current task?** (Show evidence of update)
+
+**HARD STOP:** If you cannot answer these questions with evidence, STOP and complete Step 0 first. DO NOT PROCEED TO STEP 1.
+
+---
+
+### Step 1: Search & Discovery (MANDATORY)
+
+**AI Self-Check Questions (Answer before proceeding):**
+1. Have I searched for existing components using codebase_search?
+2. Have I checked the component library catalog?
+3. Have I found 2-3 similar implementations?
+4. Have I identified all error-prone operations?
+5. Am I ready to proceed to pattern analysis?
+
+**If you answered NO to any question, complete that search first.**
+
+- [ ] **MUST** search for existing components: `codebase_search("How does [feature] work?")`
+- [ ] **MUST** check component library: `read_file("docs/reference/COMPONENT_LIBRARY_CATALOG.md")`
+- [ ] **MUST** find 2-3 similar implementations using `grep` and `codebase_search`
+- [ ] **MUST** verify file location using `list_dir` and `glob_file_search`
+- [ ] **MUST** read relevant documentation files
+- [ ] **MUST** search `docs/error-patterns.md` for similar past issues
+- [ ] **MUST** search `docs/engineering-decisions.md` for relevant decisions
+- [ ] **MUST** search `.cursor/PYTHON_LEARNINGS_LOG.md` for Python audit learnings (if working with Python code)
+- [ ] **MUST** identify all error-prone operations (external I/O, async/await, user input, parsing, cross-service, auth, caching, events, concurrency)
+- [ ] **MUST** search for existing logging patterns in similar code
+- [ ] **MUST** search for trace propagation implementations
+- [ ] **MUST** search for state machine documentation (if stateful component)
+- [ ] **MUST** search for contract definitions (if schema changes)
+- [ ] **MUST** check for existing dependencies (if adding new dependency)
+- [ ] **MUST** verify transaction requirements (if multi-step DB operations)
+- [ ] **MUST** check layer synchronization needs (if touching any layer)
+- [ ] **MUST** check for old naming (VeroSuite, @verosuite/*) in affected files
+
+**STOP if you haven't completed all searches above.**
+
+**CHECKPOINT 1-2: Step 1 Completion Verification (MANDATORY)**
+Before proceeding to Step 2, you MUST confirm:
+
+1. **What did you find in your searches?** (List key findings from codebase_search, grep, documentation)
+2. **What similar implementations did you identify?** (List 2-3 similar files/patterns)
+3. **What error-prone operations did you identify?** (List all risky operations found)
+4. **What patterns did you find for logging/tracing?** (List existing patterns)
+
+**OUTPUT REQUIREMENT:** You MUST output a summary of Step 1 findings before proceeding to Step 2.
+
+---
+
+### Step 2: Pattern Analysis (MANDATORY)
+
+**AI Self-Check Questions (Answer before proceeding):**
+1. Have I identified the pattern to follow from similar implementations?
+2. Have I verified the correct file path matches monorepo structure?
+3. Have I analyzed all risks from Step 1?
+4. Have I planned guardrails for identified risks?
+5. Am I ready to proceed to rule compliance check?
+
+**If you answered NO to any question, complete that analysis first.**
+
+- [ ] **MUST** identify the pattern to follow from similar implementations
+- [ ] **MUST** verify correct file path (check `.cursor/rules/04-architecture.mdc` for structure)
+- [ ] **MUST** check if component should be in `ui/` (reusable) or feature-specific
+- [ ] **MUST** verify import patterns match existing code
+- [ ] **MUST** analyze identified risks from Step 1
+- [ ] **MUST** check for known error patterns from `docs/error-patterns.md`
+- [ ] **MUST** verify error handling patterns match existing codebase
+- [ ] **MUST** check trace propagation patterns
+- [ ] **MUST** evaluate whether similar risks exist and plan guardrails
+- [ ] **MUST** verify state machine pattern matches existing implementations (if stateful)
+- [ ] **MUST** verify contract patterns match existing implementations (if schema changes)
+- [ ] **MUST** verify dependency patterns match existing code (if adding dependency)
+- [ ] **MUST** verify transaction patterns match existing code (if multi-step DB operations)
+- [ ] **MUST** verify layer synchronization patterns (if touching any layer)
+
+**STOP if pattern is unclear - ask for clarification.**
+
+**CHECKPOINT 2-3: Step 2 Completion Verification (MANDATORY)**
+Before proceeding to Step 3, you MUST confirm:
+
+1. **What pattern will you follow?** (Describe the pattern from similar implementations)
+2. **What file paths will you use?** (List all files to create/modify with full paths)
+3. **What risks did you identify?** (List all risks from Step 1 analysis)
+4. **What guardrails will you implement?** (List planned error handling, logging, validation)
+
+**OUTPUT REQUIREMENT:** You MUST output a summary of Step 2 pattern analysis before proceeding to Step 3.
+
+---
+
+### Step 3: Rule Compliance Check (MANDATORY)
+
+**AI Self-Check Questions (Answer before proceeding):**
+1. Have I verified tenant isolation (if touching database)?
+2. Have I checked file paths match monorepo structure?
+3. Have I verified date compliance (current system date)?
+4. Have I checked for silent failures?
+5. Have I verified all applicable rules are satisfied?
+6. Am I ready to proceed to implementation planning?
+
+**If you answered NO to any question, complete that check first.**
+
+- [ ] **MUST** verify tenant isolation if touching database
+- [ ] **MUST** check if using correct file paths (see `.cursor/rules/04-architecture.mdc`)
+- [ ] **MUST** verify using shared libraries from `libs/common/` when:
+  - Code is reusable across ≥2 apps/services within `apps/`
+  - Logic is domain-agnostic (auth, validation, types, utilities)
+  - Pattern already exists in `libs/common/` for similar functionality
+  - NOT applicable for: app-specific business logic, UI components, one-off features
+  - **Decision aid:** If you're copying code between apps, it belongs in shared libs
+- [ ] **MUST** use current system date (check device date) - NEVER hardcode dates ⭐ **CRITICAL**
+- [ ] **MUST** verify structured logging requirements met
+- [ ] **MUST** verify trace ID propagation present
+- [ ] **MUST** verify error handling blocks present for all error-prone operations
+- [ ] **MUST** check for silent failures (empty catch blocks, swallowed promises, missing awaits)
+- [ ] **MUST** verify security event logging when:
+  - Authentication or authorization logic changed
+  - PII or sensitive data modified (always log)
+  - PII or sensitive data accessed in privileged contexts (admin, security diagnostics)
+  - Security policies (RLS, permissions, roles) changed
+  - Admin actions performed (impersonation, privilege escalation)
+  - Financial transactions processed
+  - NOT applicable for: anonymous public endpoints, static asset serving
+  - **Critical:** Log metadata only, never raw PII values (SOC2/privacy compliance)
+- [ ] **MUST** verify no architecture changes without permission
+- [ ] **MUST** verify no old naming (VeroSuite, @verosuite/*) introduced
+- [ ] **MUST** verify performance characteristics analyzed
+- [ ] **MUST** verify event schemas validated (if producing/consuming events)
+- [ ] **MUST** verify cross-platform compatibility when:
+  - Code touches mobile app (`VeroFieldMobile/`)
+  - Shared code used by web + mobile
+  - File system operations (path separators, case sensitivity)
+  - Date/time handling (timezone, locale, formatting)
+  - Network requests (connectivity checks, offline handling, API retries)
+  - Platform-specific APIs used (localStorage vs AsyncStorage)
+  - Third-party library usage that may not have platform parity
+  - Push notification logic (mobile-only features)
+  - Feature flags used by both platforms
+  - NOT applicable for: web-only features, backend-only code, platform-abstracted code
+- [ ] **MUST** verify accessibility requirements met (if UI component)
+- [ ] **MUST** verify tooling compliance (lint/format, TypeScript)
+- [ ] **MUST** verify refactor integrity (if refactoring)
+- [ ] **MUST** verify UX consistency (if UI component)
+- [ ] **MUST** verify file ownership respected
+- [ ] **MUST** verify tech debt logged when:
+  - TODO/FIXME comments representing deferred work or technical shortcuts
+  - Workarounds or temporary solutions implemented
+  - Known limitations introduced that affect users
+  - Performance optimizations deferred (with measurable impact)
+  - **Triage rule:** If removing the TODO would require >2 hours OR create risk if forgotten, log it
+  - NOT applicable for: Trivial cleanup TODOs, refactoring notes, completed work markers
+- [ ] **MUST** verify file organization compliance
+- [ ] **MUST** verify workflow triggers are properly configured (if modifying workflows)
+
+**STOP if any rule violation detected.**
+
+**CHECKPOINT 3-4: Step 3 Completion Verification (MANDATORY)**
+Before proceeding to Step 4, you MUST confirm:
+
+1. **What rule compliance checks did you perform?** (List all checks completed)
+2. **What violations did you find?** (List any violations - if none, state "No violations found")
+3. **What compliance measures are in place?** (List tenant isolation, logging, error handling, etc.)
+4. **Are all hard stops satisfied?** (Confirm no hard stop violations)
+
+**OUTPUT REQUIREMENT:** You MUST output a summary of Step 3 compliance checks before proceeding to Step 4.
+
+---
+
+### Step 4: Implementation Plan (MANDATORY)
+
+**AI Self-Check Questions (Answer before proceeding):**
+1. Have I created a todo list (if complex feature)?
+2. Have I explained what I found in searches?
+3. Have I described the pattern I'll follow?
+4. Have I listed all files to create/modify?
+5. Have I referenced Memory Bank context in planning?
+6. Am I ready to proceed to implementation?
+
+**If you answered NO to any question, complete that planning first.**
+
+- [ ] **MUST** create todo list for complex features (>3 steps)
+- [ ] **MUST** explain what you found in searches
+- [ ] **MUST** describe the pattern you'll follow
+- [ ] **MUST** list files you'll create/modify
+- [ ] **MUST** reference Memory Bank context in planning:
+  - Reference relevant project context (from projectbrief.md)
+  - Reference relevant patterns (from systemPatterns.md)
+  - Reference tech constraints (from techContext.md)
+  - Reference current status (from progress.md)
+  - Explicitly state how Memory Bank context informed the plan
+
+**STOP if plan is not clear.**
+
+**CHECKPOINT 4-5: Step 4 Completion Verification (MANDATORY)**
+Before proceeding to Step 5 (implementation), you MUST confirm:
+
+1. **What is your implementation plan?** (Describe the approach)
+2. **What files will you create/modify?** (List all files with full paths)
+3. **What patterns will you follow?** (Reference specific patterns from Step 2)
+4. **How does Memory Bank context inform your plan?** (Reference specific context items)
+
+**OUTPUT REQUIREMENT:** You MUST output a clear implementation plan before proceeding to implementation.
+
+**NOTE:** After implementation, proceed to Step 4.5 (Context Management) before Step 5.
+
+---
+
+### Step 4.5: Context Management (MANDATORY - HARD STOP) ⭐ **CRITICAL**
+
+**⚠️ HARD STOP - YOU CANNOT PROCEED TO STEP 5 UNTIL THIS IS COMPLETE:**
+
+**Required Output Format:**
+```
+Step 4.5 Verification:
+✓ Read updated recommendations.md: [summary of changes]
+✓ Unloaded obsolete context:
+  - @old-file1.md (no longer needed)
+✓ Pre-loaded predicted context:
+  - @next-file1.md (87% confidence)
+✓ Context state updated
+✓ Ready to proceed to Step 5: [YES/NO]
+```
+
+#### 4.5.1: Read Updated Context Recommendations (MANDATORY)
+- [ ] **MUST** read `.cursor/context_manager/recommendations.md` again (context may have changed)
+- [ ] **MUST** check `.cursor/context_manager/dashboard.md` for updated workflow status
+- [ ] **MUST** read `.cursor/rules/context_enforcement.mdc` for updated context priorities
+- [ ] **MUST** identify what context has changed since task start
+
+**VERIFICATION:** You must show evidence of reading the updated recommendations file.
+
+**OUTPUT REQUIREMENT:** You MUST output a summary of updated recommendations showing what changed.
+
+#### 4.5.2: Unload Obsolete Context (MANDATORY)
+- [ ] **MUST** check "Context to Unload" section in recommendations.md
+- [ ] **MUST** remove `@` mentions for files no longer needed
+- [ ] **MUST** verify context is unloaded (remove from active context)
+- [ ] **MUST** log context unloading actions in response
+
+**VERIFICATION:** You must show evidence of unloading context files (list files unloaded).
+
+**OUTPUT REQUIREMENT:** You MUST list all context files unloaded (remove `@` mentions).
+
+#### 4.5.3: Pre-load Predicted Context (MANDATORY)
+- [ ] **MUST** check "Pre-loaded Context" section in recommendations.md
+- [ ] **MUST** load files for predicted next tasks (if probability >70%)
+- [ ] **MUST** use `@` mentions to pre-load context files
+- [ ] **MUST** verify context is pre-loaded
+- [ ] **MUST** log context pre-loading actions in response
+
+**VERIFICATION:** You must show evidence of pre-loading context files (list files pre-loaded).
+
+**OUTPUT REQUIREMENT:** You MUST list all context files pre-loaded with `@` mentions and confidence scores.
+
+#### 4.5.4: Step 4.5 Completion Verification (MANDATORY - HARD STOP)
+Before proceeding to Step 5, you MUST answer ALL of these questions with evidence:
+
+1. **Did you read updated recommendations.md?** (Show summary of changes)
+2. **What context files did you unload?** (List all files unloaded)
+3. **What context files did you pre-load?** (List all files pre-loaded with confidence scores)
+4. **Is context state updated?** (Confirm context management is complete)
+
+**HARD STOP:** If you cannot answer these questions with evidence, STOP and complete Step 4.5 first. DO NOT PROCEED TO STEP 5.
+
+**VERIFICATION MECHANISM:** You must output the Step 4.5 Verification format above before proceeding.
+
+**STOP if context management is not complete. DO NOT PROCEED TO STEP 5.**
+
+---
+
+### Step 5: Post-Implementation Audit (MANDATORY) ⭐ **CRITICAL**
+
+**⚠️ REQUIRED OUTPUT FORMAT - Fill out this audit template:**
+
+```
+Step 5: Post-Implementation Audit
+
+## 5.1: Memory Bank Updates (MANDATORY - Do First)
+
+### activeContext.md Update:
+- [ ] Status changed to "completed"
+- [ ] Completed work added to "Recent Changes"
+- [ ] "Next Steps" updated
+- [ ] "Last Updated" date set to [CURRENT_DATE]
+- Evidence: [Show diff or summary]
+
+### progress.md Update (if applicable):
+- [ ] "What Works" updated: [Yes/No - describe if yes]
+- [ ] "Current Status" updated: [Yes/No - describe if yes]
+- Evidence: [Show diff or summary]
+
+### systemPatterns.md Update (if applicable):
+- [ ] New architectural decisions documented: [Yes/No - describe if yes]
+- [ ] New patterns added: [Yes/No - describe if yes]
+- Evidence: [Show diff or summary]
+
+## 5.2: Files Modified
+
+List all files created/modified:
+1. [file_path] - [created/modified] - [purpose]
+2. [file_path] - [created/modified] - [purpose]
+...
+
+## 5.3: Code Compliance Checks
+
+### File Organization:
+- [ ] File paths correct (monorepo structure): [Yes/No - list any issues]
+- [ ] Imports use correct paths (@verofield/common/*): [Yes/No - list any issues]
+- [ ] No old naming (VeroSuite, @verosuite/*): [Yes/No - list any issues]
+
+### Security:
+- [ ] Tenant isolation verified (if DB queries): [Yes/No - describe]
+- [ ] Security boundaries maintained: [Yes/No - describe]
+- [ ] Security event logging (if applicable): [Yes/No - describe]
+
+### Code Quality:
+- [ ] Date compliance (current system date, not hardcoded): [Yes/No - list any issues]
+- [ ] TypeScript types correct (no `any`): [Yes/No - list any issues]
+- [ ] Following established patterns: [Yes/No - describe]
+- [ ] No duplicate components: [Yes/No - list any issues]
+
+### Error Handling & Observability:
+- [ ] Error handling present for all error-prone operations: [Yes/No - list any issues]
+- [ ] No silent failures: [Yes/No - list any issues]
+- [ ] Structured logging used: [Yes/No - list any issues]
+- [ ] Trace IDs propagated: [Yes/No - list any issues]
+
+### Testing:
+- [ ] All error paths have tests: [Yes/No - describe]
+- [ ] Tests pass (regression + preventative): [Yes/No - describe]
+
+### Documentation:
+- [ ] Documentation updated with current date: [Yes/No - list files]
+
+## 5.4: Bug Logging (if applicable)
+
+- [ ] Bug logged in .cursor/BUG_LOG.md: [Yes/No - show entry]
+- [ ] Error pattern documented in docs/error-patterns.md: [Yes/No - show entry]
+- [ ] Anti-pattern logged (if REWARD_SCORE ≤ 0): [Yes/No - show entry]
+
+## 5.5: Context Usage & Token Statistics (MANDATORY) ⭐ **CRITICAL**
+
+**⚠️ MANDATORY:** You MUST report context usage and token statistics in EVERY Step 5 audit, regardless of whether the predictive context system is active or not. This section is NEVER optional.
+
+### Context Usage Report
+
+- [ ] **MUST** read `.cursor/context_manager/dashboard.md` for current context metrics
+- [ ] **MUST** read `.cursor/context_manager/recommendations.md` for context plan
+- [ ] **MUST** report active context files loaded during this task (even if empty list)
+- [ ] **MUST** report pre-loaded context files (even if empty list - show "0 files")
+- [ ] **MUST** report context files unloaded during this task (even if empty list - show "0 files")
+
+**Required Output Format:**
+```
+### Context Usage Summary
+
+**Active Context Files (Loaded):**
+- @file1.md (PRIMARY)
+- @file2.md (PRIMARY)
+- Total: [N] files
+
+**Pre-loaded Context Files:**
+- @next-file1.md (87% confidence)
+- @next-file2.md (75% confidence)
+- Total: [N] files
+
+**Context Unloaded:**
+- @old-file1.md (no longer needed)
+- Total: [N] files
+
+**Context Efficiency:**
+- Active context files: [N]
+- Pre-loaded context files: [N]
+- Context files unloaded: [N]
+```
+
+### Token Statistics Report
+
+- [ ] **MUST** call `get_context_metrics_for_audit()` from `VeroFieldEnforcer` to get automated metrics
+- [ ] **MUST** use the returned token statistics (NOT manual estimates)
+- [ ] **MUST** report token usage for active context files (from metrics, even if 0)
+- [ ] **MUST** report token usage for pre-loaded context files (from metrics, even if 0)
+- [ ] **MUST** report token savings (from metrics, even if system is inactive - show "0 tokens saved")
+- [ ] **MUST** report token metrics in audit (ALWAYS include this section, never skip)
+
+**⚠️ CRITICAL:** Do NOT manually estimate tokens. You MUST use `get_context_metrics_for_audit()` which uses `TokenEstimator` for accurate calculations.
+
+**Required Output Format:**
+```
+### Token Statistics
+
+**Token Usage:**
+- Active context tokens: [N] tokens ([N] files)
+- Pre-loaded context tokens: [N] tokens ([N] files, 30% cost)
+- Total tokens used: [N] tokens
+
+**Token Savings (Predictive vs Static):**
+- Static approach (baseline): [N] tokens
+- Predictive approach (actual): [N] tokens
+- Tokens saved: [N] tokens
+- Savings percentage: [N]%
+
+**Efficiency Metrics:**
+- Average tokens per file (static): [N] tokens/file
+- Average tokens per file (predictive): [N] tokens/file
+- Context swap overhead: [N]% (if applicable)
+
+**⚠️ CRITICAL:** Even if the system reports "no predictive context system active", you MUST still:
+1. Report the metrics returned by `get_context_metrics_for_audit()` (even if all zeros)
+2. Include the complete token statistics section (never skip it)
+3. Show the error message from metrics['error'] if present
+4. Report "System Status: INACTIVE" if metrics['available'] is False
+
+**Note:** If metrics['available'] is False, this means:
+- The system may not have updated yet (try running auto-enforcer)
+- OR the recommendations.md file doesn't exist (system will generate it on next update)
+- OR the system is not initialized (check if PREDICTIVE_CONTEXT_AVAILABLE is True)
+- **BUT YOU MUST STILL REPORT THE METRICS** (show zeros and explain why)
+```
+
+### Context Management Compliance
+
+- [ ] **MUST** verify Step 0.5 (Context Loading) was completed
+- [ ] **MUST** verify Step 4.5 (Context Management) was completed
+- [ ] **MUST** verify context recommendations were followed
+- [ ] **MUST** report any context management violations
+
+**Required Output Format:**
+```
+### Context Management Compliance
+
+**Step 0.5 (Context Loading):**
+- [ ] Completed: [Yes/No]
+- [ ] Primary context loaded: [List files]
+- [ ] Evidence: [Show verification output]
+
+**Step 4.5 (Context Management):**
+- [ ] Completed: [Yes/No]
+- [ ] Obsolete context unloaded: [List files]
+- [ ] Predicted context pre-loaded: [List files]
+- [ ] Evidence: [Show verification output]
+
+**Compliance Status:**
+- Context loading: [COMPLIANT / NON-COMPLIANT]
+- Context management: [COMPLIANT / NON-COMPLIANT]
+- Recommendations followed: [YES / NO]
+```
+
+**VERIFICATION:** You must show evidence of:
+- Calling `get_context_metrics_for_audit()` from `VeroFieldEnforcer` instance
+- Using the returned metrics (NOT manual token estimates)
+- Reading dashboard.md and recommendations.md for context
+- Verifying context management steps were completed
+
+**How to Call the Function:**
+```python
+# In Step 5 audit, you MUST call:
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path('.cursor/scripts').resolve()))
+from auto_enforcer import VeroFieldEnforcer
+
+enforcer = VeroFieldEnforcer()
+metrics = enforcer.get_context_metrics_for_audit()
+
+# Then use metrics['context_usage'], metrics['token_statistics'], etc.
+# DO NOT manually estimate tokens - use the automated metrics
+```
+
+**OUTPUT REQUIREMENT:** You MUST include complete context usage and token statistics in Step 5 audit output using automated metrics from `get_context_metrics_for_audit()`.
+
+**HARD STOP:** If context management system is available but metrics are not reported, audit is incomplete.
+
+## 5.6: Outstanding Items
+
+List any outstanding items, TODOs, or follow-up work:
+1. [item]
+2. [item]
+...
+
+## 5.7: Compliance Status
+
+Overall Compliance: [COMPLIANT / NON-COMPLIANT]
+Blocking Issues: [List any blocking issues]
+Warnings: [List any warnings]
+
+**Context Management Status:**
+- Context usage reported: [YES / NO] ⚠️ **MUST BE YES - NEVER SKIP THIS SECTION**
+- Token statistics reported: [YES / NO] ⚠️ **MUST BE YES - NEVER SKIP THIS SECTION**
+- Context management compliance: [COMPLIANT / NON-COMPLIANT]
+- System active: [YES / NO] (from metrics['available'])
+- Error message: [None / error message from metrics['error'] if system inactive]
+
+**⚠️ CRITICAL REMINDER:** Section 5.5 (Context Usage & Token Statistics) is MANDATORY and must ALWAYS be included in every Step 5 audit, even if:
+- The system is inactive (show zeros and explain why)
+- No context files were loaded (show empty lists)
+- Token calculations failed (show zeros and error message)
+- The recommendations.md file doesn't exist (show zeros and explain)
+
+**NEVER skip this section. It is a HARD STOP requirement.**
+```
+
+**VERIFICATION:** You must fill out the complete audit template above with evidence for each section.
+
+**MANDATORY CHECKS:**
+- [ ] **MUST** update `activeContext.md` FIRST (before other audits) - show evidence
+- [ ] **MUST** update `progress.md` (if significant changes) - show evidence
+- [ ] **MUST** update `systemPatterns.md` (if architectural changes) - show evidence
+- [ ] **MUST** audit ALL files touched for code compliance
+- [ ] **MUST** verify file paths are correct (monorepo structure)
+- [ ] **MUST** verify imports use correct paths (`@verofield/common/*`)
+- [ ] **MUST** verify no old naming (VeroSuite, @verosuite/*) remains
+- [ ] **MUST** verify tenant isolation (if database queries)
+- [ ] **MUST** verify file organization compliance
+- [ ] **MUST** verify date compliance (current system date, not hardcoded)
+- [ ] **MUST** verify following established patterns
+- [ ] **MUST** verify no duplicate components created
+- [ ] **MUST** verify TypeScript types are correct (no `any`)
+- [ ] **MUST** verify security boundaries maintained
+- [ ] **MUST** verify documentation updated with current date
+- [ ] **MUST** verify all error paths have tests
+- [ ] **MUST** verify logging meets structured logging policy
+- [ ] **MUST** verify no silent failures remain
+- [ ] **MUST** verify observability hooks present (trace IDs, structured logs)
+- [ ] **MUST** verify tests pass (regression + preventative)
+- [ ] **MUST** verify cross-layer traceability intact (traceId, spanId, requestId propagated)
+- [ ] **MUST** verify workflow triggers validated (if workflows modified)
+- [ ] **MUST** verify bug logged in `.cursor/BUG_LOG.md` (if bug was fixed) ⭐ **CRITICAL**
+- [ ] **MUST** verify error pattern documented in `docs/error-patterns.md` (if bug was fixed) ⭐ **CRITICAL**
+- [ ] **MUST** verify anti-pattern logged in `.cursor/anti_patterns.md` (if REWARD_SCORE ≤ 0) ⭐ **CRITICAL**
+
+**STOP if any compliance violation found - fix before proceeding.**
+
+---
+
+## Session End Trigger - Step 5 Audit
+
+**⚠️ MANDATORY: When user types "exit" or session end commands:**
+
+When the user types any of the following commands, you **MUST** run Step 5 (Post-Implementation Audit) before ending the session:
+
+- `exit`
+- `done`
+- `complete`
+- `finish`
+- `end session`
+- `session complete`
+- `wrap up`
+- `finalize`
+
+**Required Actions:**
+
+1. **DETECT** the session end command in user's message
+2. **TRIGGER** Step 5 audit immediately
+3. **COMPLETE** the full Step 5 audit template (see above)
+4. **UPDATE** Memory Bank files (activeContext.md, progress.md, systemPatterns.md)
+5. **VERIFY** all compliance checks
+6. **PROVIDE** final compliance status
+
+**You MUST NOT end the session until Step 5 is complete.**
+
+**Example Response:**
+
+```
+Session End Detected - Running Step 5 Audit
+
+Step 5: Post-Implementation Audit
+
+## 5.1: Memory Bank Updates (MANDATORY - Do First)
+[Complete audit template...]
+
+## 5.2: Files Modified
+[List all files...]
+
+## 5.3: Code Compliance Checks
+[Complete all checks...]
+
+## 5.4: Bug Logging (if applicable)
+[Document bugs fixed...]
+
+## 5.5: Outstanding Items
+[List any remaining work...]
+
+## 5.6: Compliance Status
+Overall Compliance: [COMPLIANT / NON-COMPLIANT]
+Blocking Issues: [List any blocking issues]
+Warnings: [List any warnings]
+
+Session Complete - All compliance checks completed.
+```
+
+---
+
+## 🚫 HARD STOPS - DO NOT PROCEED IF:
+
+1. **File Path Violations**
+   - ❌ Using `backend/src/` instead of `apps/api/src/`
+   - ❌ Using `backend/prisma/` instead of `libs/common/prisma/`
+   - ❌ Creating files in wrong directory
+   - **ACTION:** Read `.cursor/rules/04-architecture.mdc` and correct path
+
+2. **Component Duplication**
+   - ❌ Creating component that already exists
+   - ❌ Not checking `frontend/src/components/ui/` first
+   - **ACTION:** Search for existing component, use it instead
+
+3. **Security Violations**
+   - ❌ Database query without `tenantId` filter
+   - ❌ Bypassing RLS policies
+   - ❌ Not validating tenant context
+   - **ACTION:** Read `.cursor/rules/03-security.mdc` and fix
+
+4. **Import Violations**
+   - ❌ Using relative imports across services
+   - ❌ Not using `@verofield/common/*` for shared code
+   - ❌ Duplicating code instead of using shared library
+   - **ACTION:** Read `.cursor/rules/04-architecture.mdc` and fix imports
+
+5. **Pattern Violations**
+   - ❌ Creating custom form pattern instead of using standard
+   - ❌ Not using `CustomerSearchSelector` for customer fields
+   - ❌ Not following established component patterns
+   - **ACTION:** Read relevant rule files
+
+6. **Date Violations** ⭐ **CRITICAL**
+   - ❌ Hardcoding dates (e.g., "2025-11-30" instead of checking current date)
+   - ❌ Using old dates in "Last Updated" fields
+   - ❌ Not updating "Last Updated" when modifying documentation
+   - **ACTION:** Always check device/system date before writing dates
+   - **FORMAT:** Use ISO 8601: `YYYY-MM-DD` (e.g., `2025-11-30`)
+   - **VERIFY:** Date must match current system date, not a hardcoded value
+
+---
+
+**Last Updated:** 2025-11-30  
+**Status:** Active Enforcement  
+**Priority:** CRITICAL - Must be followed for every implementation

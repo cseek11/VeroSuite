@@ -1,0 +1,4074 @@
+{
+  "errors": [
+    {
+      "type": "warning",
+      "code": "VAL_UNRESOLVED_REFERENCE",
+      "message": "relation.to references unknown chapter: CH-11",
+      "line": 0,
+      "column": 0,
+      "context": "Block REL-6e2862322abea38d",
+      "severity": "warning",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "line": 0,
+      "column": 0,
+      "context": "Block unknown",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: headers",
+      "line": 0,
+      "column": 0,
+      "context": "Block TABLE-ca9fb1ed9ebf3089",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: rows",
+      "line": 0,
+      "column": 0,
+      "context": "Block TABLE-ca9fb1ed9ebf3089",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "warning",
+      "code": "VAL_UNKNOWN_LANGUAGE",
+      "message": "Unknown language: ebnf",
+      "line": 0,
+      "column": 0,
+      "context": "Block CODE-957fbe78b55be1dc",
+      "severity": "warning",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: headers",
+      "line": 0,
+      "column": 0,
+      "context": "Block TABLE-2bfcb4b007b1266d",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: rows",
+      "line": 0,
+      "column": 0,
+      "context": "Block TABLE-2bfcb4b007b1266d",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: headers",
+      "line": 0,
+      "column": 0,
+      "context": "Block TABLE-2564f122b06d6c6c",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: rows",
+      "line": 0,
+      "column": 0,
+      "context": "Block TABLE-2564f122b06d6c6c",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: headers",
+      "line": 0,
+      "column": 0,
+      "context": "Block TABLE-9a6e7e95ed856ec4",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: rows",
+      "line": 0,
+      "column": 0,
+      "context": "Block TABLE-9a6e7e95ed856ec4",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: headers",
+      "line": 0,
+      "column": 0,
+      "context": "Block TABLE-f3829f7c85d60ef1",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "error",
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: rows",
+      "line": 0,
+      "column": 0,
+      "context": "Block TABLE-f3829f7c85d60ef1",
+      "severity": "error",
+      "suggestion": null,
+      "meta": {}
+    }
+  ],
+  "warnings": [
+    {
+      "type": "warning",
+      "code": "VAL_UNRESOLVED_REFERENCE",
+      "message": "relation.to references unknown chapter: CH-11",
+      "line": 0,
+      "column": 0,
+      "context": "Block REL-6e2862322abea38d",
+      "severity": "warning",
+      "suggestion": null,
+      "meta": {}
+    },
+    {
+      "type": "warning",
+      "code": "VAL_UNKNOWN_LANGUAGE",
+      "message": "Unknown language: ebnf",
+      "line": 0,
+      "column": 0,
+      "context": "Block CODE-957fbe78b55be1dc",
+      "severity": "warning",
+      "suggestion": null,
+      "meta": {}
+    }
+  ],
+  "symbols": {
+    "terms": {},
+    "concepts": {},
+    "sections": {
+      "1.1 why policy as code?": "SEC-33-3",
+      "1.2 what is opa?": "SEC-65-3",
+      "1.3 what is rego?": "SEC-122-3",
+      "1.4 the opa ecosystem": "SEC-168-3",
+      "2.1 syntax overview": "SEC-191-3",
+      "2.2 grammar (complete ebnf)": "SEC-222-3",
+      "2.3 comments and formatting": "SEC-285-3",
+      "2.4 metadata annotations": "SEC-385-3",
+      "3.1 world model": "SEC-419-3",
+      "3.2 rules \u2014 the building blocks": "SEC-473-3",
+      "3.3 evaluation semantics": "SEC-511-3",
+      "3.4 undefined vs false": "SEC-559-3",
+      "3.5 logical conjunction and disjunction": "SEC-590-3",
+      "3.6 rule conflicts and resolution": "SEC-622-3",
+      "4.1 variables and unification": "SEC-688-3",
+      "4.2 references \u2014 traversing documents": "SEC-734-3",
+      "4.3 the `some` keyword": "SEC-849-3",
+      "4.4 operators": "SEC-894-3",
+      "assignment and equality": "SEC-896-4",
+      "comparison operators": "SEC-916-4",
+      "arithmetic operators": "SEC-937-4",
+      "bitwise operators": "SEC-956-4",
+      "membership: the `in` operator": "SEC-973-4",
+      "5.1 logical conjunction (and)": "SEC-1021-3",
+      "5.2 logical disjunction (or)": "SEC-1034-3",
+      "5.3 comprehensions": "SEC-1050-3",
+      "5.4 universal quantification (for all)": "SEC-1116-3",
+      "1. using `every` (modern, recommended)": "SEC-1120-4",
+      "2. using negation (helper pattern)": "SEC-1148-4",
+      "3. using comprehensions": "SEC-1159-4",
+      "5.5 negation": "SEC-1174-3"
+    },
+    "patterns": {},
+    "chapters": {
+      "1": "CH-01",
+      "2": "CH-02",
+      "3": "CH-03",
+      "4": "CH-04",
+      "5": "CH-05"
+    },
+    "aliases": {},
+    "duplicate_chapters": [],
+    "unresolved_references": [],
+    "stats": {
+      "terms": 0,
+      "concepts": 0,
+      "sections": 31,
+      "patterns": 0,
+      "chapters": 5,
+      "aliases": 0,
+      "duplicate_chapters": 0,
+      "unresolved_references": 0,
+      "total_symbols": 36
+    }
+  },
+  "validation_errors": [
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "relation",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: from",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "from",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: to",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "relation missing required field: type",
+      "block_id": "",
+      "block_type": "relation",
+      "field": "type",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "antipattern",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "rationale",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_ID",
+      "message": "Block missing required 'id' field",
+      "block_id": null,
+      "block_type": "contrast",
+      "field": null,
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: headers",
+      "block_id": "TABLE-ca9fb1ed9ebf3089",
+      "block_type": "table",
+      "field": "headers",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: rows",
+      "block_id": "TABLE-ca9fb1ed9ebf3089",
+      "block_type": "table",
+      "field": "rows",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: headers",
+      "block_id": "TABLE-2bfcb4b007b1266d",
+      "block_type": "table",
+      "field": "headers",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: rows",
+      "block_id": "TABLE-2bfcb4b007b1266d",
+      "block_type": "table",
+      "field": "rows",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: headers",
+      "block_id": "TABLE-2564f122b06d6c6c",
+      "block_type": "table",
+      "field": "headers",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: rows",
+      "block_id": "TABLE-2564f122b06d6c6c",
+      "block_type": "table",
+      "field": "rows",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: headers",
+      "block_id": "TABLE-9a6e7e95ed856ec4",
+      "block_type": "table",
+      "field": "headers",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: rows",
+      "block_id": "TABLE-9a6e7e95ed856ec4",
+      "block_type": "table",
+      "field": "rows",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: headers",
+      "block_id": "TABLE-f3829f7c85d60ef1",
+      "block_type": "table",
+      "field": "headers",
+      "severity": "error"
+    },
+    {
+      "code": "VAL_MISSING_FIELD",
+      "message": "table missing required field: rows",
+      "block_id": "TABLE-f3829f7c85d60ef1",
+      "block_type": "table",
+      "field": "rows",
+      "severity": "error"
+    }
+  ],
+  "validation_warnings": [
+    {
+      "code": "VAL_UNRESOLVED_REFERENCE",
+      "message": "relation.to references unknown chapter: CH-11",
+      "block_id": "REL-6e2862322abea38d",
+      "block_type": "relation",
+      "field": "to",
+      "severity": "warning"
+    },
+    {
+      "code": "VAL_UNKNOWN_LANGUAGE",
+      "message": "Unknown language: ebnf",
+      "block_id": "CODE-957fbe78b55be1dc",
+      "block_type": "code-pattern",
+      "field": "language",
+      "severity": "warning"
+    }
+  ],
+  "metrics": {
+    "blocks_by_type": {
+      "chapter-meta": 5,
+      "concept": 634,
+      "fact": 249,
+      "constraint": 51,
+      "qa": 940,
+      "reasoning-chain": 940,
+      "inference": 1,
+      "pathway": 1,
+      "uncertainty": 19,
+      "relation": 24,
+      "ssm-meta": 1,
+      "part-meta": 2,
+      "antipattern": 41,
+      "rationale": 42,
+      "contrast": 19,
+      "term": 61,
+      "example": 134,
+      "code-pattern": 115,
+      "table": 8,
+      "role-note": 15,
+      "diagram": 16,
+      "test-hint": 68,
+      "section-meta": 31,
+      "common-mistake": 39,
+      "pattern": 13
+    },
+    "total_blocks": 3469,
+    "error_count": 204,
+    "warning_count": 2,
+    "info_count": 0,
+    "term_count": 61,
+    "concept_count": 634,
+    "pattern_count": 115,
+    "relation_count": 24,
+    "diagram_count": 16,
+    "table_count": 8,
+    "unresolved_references": 0,
+    "duplicate_chapters": 0,
+    "validation_errors": 204,
+    "validation_warnings": 2,
+    "compile_time_seconds": 2.547330856323242,
+    "start_time": "2025-11-26T17:53:20.592438",
+    "end_time": "2025-11-26T17:53:23.139769",
+    "namespace": "default"
+  },
+  "summary": {
+    "total_blocks": 3469,
+    "error_count": 204,
+    "warning_count": 2,
+    "validation_error_count": 204,
+    "validation_warning_count": 2,
+    "symbol_stats": {
+      "terms": 0,
+      "concepts": 0,
+      "sections": 31,
+      "patterns": 0,
+      "chapters": 5,
+      "aliases": 0,
+      "duplicate_chapters": 0,
+      "unresolved_references": 0,
+      "total_symbols": 36
+    },
+    "compiler_version": "3.0.0",
+    "ssm_schema_version": "1.0.0",
+    "namespace": "default",
+    "quality_score": 0.0
+  }
+}

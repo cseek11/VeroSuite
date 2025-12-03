@@ -171,6 +171,8 @@ RPC functions are created in `veroscore` schema:
 
 ---
 
-**Last Updated:** 2025-11-24  
+**Last Updated:** 2025-11-30  
 **Next Action:** Deploy RPC functions to Supabase or configure schema exposure
+
+
 

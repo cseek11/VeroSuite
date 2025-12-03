@@ -9,16 +9,17 @@ Usage:
     python check-structured-logging.py --file <file_path>
     python check-structured-logging.py --pr <PR_NUMBER>
     python check-structured-logging.py --all
+
+Last Updated: 2025-12-01
 """
 
 import argparse
-import json
 import os
 import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Tuple
 
 # ============================================================================
 # Configuration
@@ -52,6 +53,123 @@ ALLOWED_CONSOLE_PATTERNS = [
 
 # Required fields for structured logging
 REQUIRED_FIELDS = ['message', 'context', 'operation', 'traceId']
+
+# Maximum lines to look back for traceId
+TRACE_ID_LOOKBACK_LINES = 5
+
+# ============================================================================
+# Helper Functions
+# ============================================================================
+
+def count_function_parameters(code_snippet: str) -> int:
+    """
+    Count function parameters more accurately by handling:
+    - Strings with commas
+    - Nested function calls
+    - Object literals
+    - Multi-line calls (if code_snippet spans multiple lines)
+    
+    This is a simplified parser that counts top-level commas outside strings.
+    """
+    if not code_snippet.strip():
+        return 0
+    
+    # Remove comments
+    code_snippet = re.sub(r'//.*$', '', code_snippet, flags=re.MULTILINE)
+    code_snippet = re.sub(r'/\*.*?\*/', '', code_snippet, flags=re.DOTALL)
+    
+    # Find the opening parenthesis
+    open_paren = code_snippet.find('(')
+    if open_paren == -1:
+        return 0
+    
+    # Extract content between parentheses
+    paren_content = code_snippet[open_paren + 1:]
+    
+    # Track depth and string state
+    depth = 0
+    in_string = False
+    string_char = None
+    param_count = 1  # Start with 1 parameter
+    last_char = None
+    
+    i = 0
+    while i < len(paren_content):
+        char = paren_content[i]
+        
+        # Handle string escaping
+        if in_string and char == '\\' and i + 1 < len(paren_content):
+            i += 2
+            continue
+        
+        # Toggle string state
+        if char in ("'", '"', '`') and (not in_string or char == string_char):
+            if not in_string:
+                in_string = True
+                string_char = char
+            elif char == string_char:
+                in_string = False
+                string_char = None
+            i += 1
+            continue
+        
+        # Only count commas outside strings
+        if not in_string:
+            if char == '(':
+                depth += 1
+            elif char == ')':
+                if depth == 0:
+                    break  # Closing paren of function call
+                depth -= 1
+            elif char == ',' and depth == 0:
+                param_count += 1
+        
+        i += 1
+        last_char = char
+    
+    return param_count
+
+def extract_multiline_call(lines: List[str], start_line: int) -> Tuple[str, int]:
+    """
+    Extract a multi-line function call starting at start_line.
+    Returns (code_snippet, end_line).
+    """
+    if start_line >= len(lines):
+        return '', start_line
+    
+    code_snippet = lines[start_line]
+    line_num = start_line
+    
+    # Count opening and closing parentheses
+    open_count = code_snippet.count('(')
+    close_count = code_snippet.count(')')
+    
+    # If not closed on first line, continue reading
+    while open_count > close_count and line_num + 1 < len(lines):
+        line_num += 1
+        code_snippet += ' ' + lines[line_num]
+        open_count += lines[line_num].count('(')
+        close_count += lines[line_num].count(')')
+    
+    return code_snippet, line_num
+
+def find_trace_id_in_context(lines: List[str], line_num: int, lookback: int = TRACE_ID_LOOKBACK_LINES) -> bool:
+    """
+    Check if traceId is present in the current line or previous lines.
+    """
+    trace_id_patterns = [
+        r'requestId',
+        r'traceId',
+        r'this\.requestContext\.getTraceId\(\)',
+        r'request\.id',
+        r'getTraceId\(\)',
+    ]
+    
+    # Check current line and previous lines
+    start = max(0, line_num - lookback)
+    context = '\n'.join(lines[start:line_num + 1])
+    
+    return any(re.search(pattern, context) for pattern in trace_id_patterns)
 
 # ============================================================================
 # Console.log Detection
@@ -132,22 +250,34 @@ def detect_missing_required_fields(code: str, file_path: str) -> List[Dict[str, 
     # Pattern: logger.log(...) with fewer than 4 parameters
     logger_pattern = re.compile(r'(this\.)?logger\.(log|error|warn|info|debug)\s*\(')
     
-    for i, line in enumerate(lines, 1):
-        if logger_pattern.search(line):
-            # Count parameters (simplified - count commas)
-            param_count = line.count(',') + 1
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        match = logger_pattern.search(line)
+        
+        if match:
+            # Extract multi-line call if needed
+            call_snippet, end_line = extract_multiline_call(lines, i)
+            
+            # Count parameters more accurately
+            param_count = count_function_parameters(call_snippet)
             
             # StructuredLoggerService signature: logger.log(message, context, requestId, operation, additionalData?)
             # Minimum 4 parameters
             if param_count < 4:
                 violations.append({
                     'file': file_path,
-                    'line': i,
+                    'line': i + 1,  # 1-indexed
                     'type': 'missing_required_fields',
                     'severity': 'error',
-                    'code': line.strip(),
+                    'code': call_snippet.strip()[:100] + ('...' if len(call_snippet) > 100 else ''),
                     'suggestion': f'Logger call has {param_count} parameter(s), needs at least 4: message, context, requestId, operation.'
                 })
+            
+            # Skip to end of call
+            i = end_line + 1
+        else:
+            i += 1
     
     return violations
 
@@ -161,27 +291,33 @@ def detect_missing_trace_id(code: str, file_path: str) -> List[Dict[str, Any]]:
     lines = code.split('\n')
     
     logger_pattern = re.compile(r'(this\.)?logger\.(log|error|warn|info|debug)\s*\(')
-    trace_id_patterns = [
-        r'requestId',
-        r'traceId',
-        r'this\.requestContext\.getTraceId\(\)',
-        r'request\.id',
-    ]
     
-    for i, line in enumerate(lines, 1):
-        if logger_pattern.search(line):
-            # Check if line includes traceId source
-            has_trace_id = any(re.search(pattern, line) for pattern in trace_id_patterns)
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        match = logger_pattern.search(line)
+        
+        if match:
+            # Extract multi-line call if needed
+            call_snippet, end_line = extract_multiline_call(lines, i)
+            
+            # Check if traceId is present in call or context
+            has_trace_id = find_trace_id_in_context(lines, i)
             
             if not has_trace_id:
                 violations.append({
                     'file': file_path,
-                    'line': i,
+                    'line': i + 1,  # 1-indexed
                     'type': 'missing_trace_id',
                     'severity': 'error',
-                    'code': line.strip(),
+                    'code': call_snippet.strip()[:100] + ('...' if len(call_snippet) > 100 else ''),
                     'suggestion': 'Include requestId parameter or use this.requestContext.getTraceId() for traceId propagation.'
                 })
+            
+            # Skip to end of call
+            i = end_line + 1
+        else:
+            i += 1
     
     return violations
 
@@ -195,7 +331,8 @@ def detect_missing_context_operation(code: str, file_path: str) -> List[Dict[str
     lines = code.split('\n')
     
     # Pattern: logger.log(message, undefined/null, ...)
-    undefined_pattern = re.compile(r'logger\.\w+\([^,]+,\s*(undefined|null)')
+    # Improved pattern that handles multi-line
+    undefined_pattern = re.compile(r'logger\.\w+\([^,)]+,\s*(undefined|null)')
     
     for i, line in enumerate(lines, 1):
         if undefined_pattern.search(line):
@@ -222,20 +359,29 @@ def check_optional_fields(code: str, file_path: str) -> List[Dict[str, Any]]:
     # Check for error logs without errorCode or rootCause
     error_log_pattern = re.compile(r'logger\.error\s*\(')
     
-    for i, line in enumerate(lines, 1):
+    i = 0
+    while i < len(lines):
+        line = lines[i]
         if error_log_pattern.search(line):
-            has_error_code = 'errorCode' in line
-            has_root_cause = 'rootCause' in line
+            # Extract multi-line call if needed
+            call_snippet, end_line = extract_multiline_call(lines, i)
+            
+            has_error_code = 'errorCode' in call_snippet
+            has_root_cause = 'rootCause' in call_snippet
             
             if not (has_error_code or has_root_cause):
                 warnings.append({
                     'file': file_path,
-                    'line': i,
+                    'line': i + 1,  # 1-indexed
                     'type': 'missing_optional_fields',
                     'severity': 'warning',
-                    'code': line.strip(),
+                    'code': call_snippet.strip()[:100] + ('...' if len(call_snippet) > 100 else ''),
                     'suggestion': 'Consider including errorCode and rootCause in additionalData for better error classification.'
                 })
+            
+            i = end_line + 1
+        else:
+            i += 1
     
     return warnings
 
@@ -274,10 +420,31 @@ def check_logger_injection(code: str, file_path: str) -> List[Dict[str, Any]]:
 def check_file(file_path: str) -> Dict[str, Any]:
     """Check a single file for structured logging violations."""
     
-    # Read file
+    # Read file with better error handling
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
             code = f.read()
+    except FileNotFoundError:
+        return {
+            'file': file_path,
+            'error': 'File not found',
+            'violations': [],
+            'warnings': []
+        }
+    except PermissionError:
+        return {
+            'file': file_path,
+            'error': 'Permission denied',
+            'violations': [],
+            'warnings': []
+        }
+    except UnicodeDecodeError as e:
+        return {
+            'file': file_path,
+            'error': f'Unicode decode error: {e}',
+            'violations': [],
+            'warnings': []
+        }
     except Exception as e:
         return {
             'file': file_path,
@@ -368,6 +535,45 @@ def format_results(results: List[Dict[str, Any]]) -> str:
     return '\n'.join(output)
 
 # ============================================================================
+# Git Helper Functions
+# ============================================================================
+
+def get_default_branch() -> str:
+    """Detect the default branch dynamically."""
+    try:
+        # Try to get default branch from remote
+        result = subprocess.run(
+            ['git', 'symbolic-ref', 'refs/remotes/origin/HEAD'],
+            capture_output=True,
+            text=True,
+            cwd=REPO_ROOT
+        )
+        if result.returncode == 0:
+            # Extract branch name from refs/remotes/origin/main
+            branch = result.stdout.strip().split('/')[-1]
+            if branch:
+                return branch
+    except Exception:
+        pass
+    
+    # Fallback: try common branch names
+    for branch in ['main', 'master', 'develop']:
+        try:
+            result = subprocess.run(
+                ['git', 'rev-parse', '--verify', f'origin/{branch}'],
+                capture_output=True,
+                text=True,
+                cwd=REPO_ROOT
+            )
+            if result.returncode == 0:
+                return branch
+        except Exception:
+            continue
+    
+    # Final fallback
+    return 'main'
+
+# ============================================================================
 # CLI
 # ============================================================================
 
@@ -386,19 +592,31 @@ def main():
     elif args.pr:
         # Get files from PR (requires git)
         try:
+            default_branch = get_default_branch()
             result = subprocess.run(
-                ['git', 'diff', '--name-only', f'origin/main...HEAD'],
+                ['git', 'diff', '--name-only', f'origin/{default_branch}...HEAD'],
                 capture_output=True,
                 text=True,
                 cwd=REPO_ROOT
             )
+            
+            if result.returncode != 0:
+                print(f"Error: Git command failed: {result.stderr}", file=sys.stderr)
+                return 1
+            
             files_to_check = [
                 str(REPO_ROOT / f.strip())
                 for f in result.stdout.split('\n')
                 if f.strip().endswith(('.ts', '.tsx', '.js', '.jsx'))
             ]
-        except Exception as e:
+        except FileNotFoundError:
+            print("Error: Git not found. Please install Git to use --pr option.", file=sys.stderr)
+            return 1
+        except subprocess.SubprocessError as e:
             print(f"Error getting PR files: {e}", file=sys.stderr)
+            return 1
+        except Exception as e:
+            print(f"Unexpected error: {e}", file=sys.stderr)
             return 1
     elif args.all:
         # Find all TypeScript files
@@ -430,6 +648,3 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
-
-
-

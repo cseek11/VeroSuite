@@ -1,0 +1,436 @@
+{
+  "timestamp": "2025-12-01T20:43:39.676264+00:00",
+  "test_results": [
+    {
+      "test_name": "small_task_python_edit",
+      "status": "PASSED",
+      "duration_ms": 19.64545249938965,
+      "details": {
+        "snapshot": {
+          "timestamp": "2025-12-01T20:43:39.622767+00:00",
+          "active_context": [
+            "@.cursor/rules/python_bible.mdc",
+            "@.cursor/rules/02-core.mdc"
+          ],
+          "suggested_context": [
+            "@.cursor/rules/08-backend.mdc",
+            "@.cursor/patterns/**/*.md",
+            "@.cursor/rules/03-security.mdc",
+            "@.cursor/rules/07-observability.mdc"
+          ],
+          "preloaded_context": [
+            "@.cursor/rules/10-quality.mdc",
+            "@.cursor/rules/14-verification.mdc"
+          ],
+          "context_to_unload": [],
+          "active_tokens": 84062,
+          "preloaded_tokens": 2340,
+          "total_tokens": 86402
+        },
+        "context_plan": {
+          "active_context": [
+            "@.cursor/rules/python_bible.mdc",
+            "@.cursor/rules/02-core.mdc"
+          ],
+          "suggested_context": [
+            "@.cursor/rules/08-backend.mdc",
+            "@.cursor/patterns/**/*.md",
+            "@.cursor/rules/03-security.mdc",
+            "@.cursor/rules/07-observability.mdc"
+          ],
+          "preloaded_context": [
+            "@.cursor/rules/10-quality.mdc",
+            "@.cursor/rules/14-verification.mdc"
+          ],
+          "context_to_unload": [],
+          "predictions_used": [
+            "run_tests (90%)",
+            "run_tests (75%)"
+          ]
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Token usage high: 86402"
+      ]
+    },
+    {
+      "test_name": "medium_task_multiple_files",
+      "status": "PASSED",
+      "duration_ms": 2.9900074005126953,
+      "details": {
+        "snapshot": {
+          "timestamp": "2025-12-01T20:43:39.627766+00:00",
+          "active_context": [
+            "@.cursor/rules/python_bible.mdc",
+            "@.cursor/rules/02-core.mdc"
+          ],
+          "suggested_context": [
+            "@.cursor/rules/08-backend.mdc",
+            "@.cursor/patterns/**/*.md",
+            "@.cursor/rules/03-security.mdc",
+            "@.cursor/rules/07-observability.mdc"
+          ],
+          "preloaded_context": [
+            "@.cursor/rules/10-quality.mdc",
+            "@.cursor/rules/14-verification.mdc"
+          ],
+          "context_to_unload": [],
+          "active_tokens": 84062,
+          "preloaded_tokens": 2340,
+          "total_tokens": 86402
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "test_name": "large_task_many_files",
+      "status": "PASSED",
+      "duration_ms": 4.799365997314453,
+      "details": {
+        "snapshot": {
+          "timestamp": "2025-12-01T20:43:39.632565+00:00",
+          "active_context": [
+            "@.cursor/rules/python_bible.mdc",
+            "@.cursor/rules/02-core.mdc"
+          ],
+          "suggested_context": [
+            "@.cursor/rules/08-backend.mdc",
+            "@.cursor/patterns/**/*.md",
+            "@.cursor/rules/03-security.mdc",
+            "@.cursor/rules/07-observability.mdc"
+          ],
+          "preloaded_context": [
+            "@.cursor/rules/10-quality.mdc",
+            "@.cursor/rules/14-verification.mdc"
+          ],
+          "context_to_unload": [],
+          "active_tokens": 84062,
+          "preloaded_tokens": 2340,
+          "total_tokens": 86402
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "test_name": "context_unloading",
+      "status": "PASSED",
+      "duration_ms": 6.098031997680664,
+      "details": {
+        "snapshot1": {
+          "timestamp": "2025-12-01T20:43:39.635595+00:00",
+          "active_context": [
+            "@.cursor/rules/python_bible.mdc",
+            "@.cursor/rules/02-core.mdc"
+          ],
+          "suggested_context": [
+            "@.cursor/rules/08-backend.mdc",
+            "@.cursor/patterns/**/*.md",
+            "@.cursor/rules/03-security.mdc",
+            "@.cursor/rules/07-observability.mdc"
+          ],
+          "preloaded_context": [
+            "@.cursor/rules/10-quality.mdc",
+            "@.cursor/rules/14-verification.mdc"
+          ],
+          "context_to_unload": [],
+          "active_tokens": 84062,
+          "preloaded_tokens": 2340,
+          "total_tokens": 86402
+        },
+        "snapshot2": {
+          "timestamp": "2025-12-01T20:43:39.636595+00:00",
+          "active_context": [
+            "@.cursor/rules/10-quality.mdc",
+            "@.cursor/rules/14-verification.mdc"
+          ],
+          "suggested_context": [
+            "@.cursor/rules/typescript_bible.mdc"
+          ],
+          "preloaded_context": [],
+          "context_to_unload": [
+            "@.cursor/rules/python_bible.mdc",
+            "@.cursor/rules/02-core.mdc"
+          ],
+          "active_tokens": 7800,
+          "preloaded_tokens": 0,
+          "total_tokens": 7800
+        },
+        "unloaded_count": 2
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "test_name": "file_specific_context",
+      "status": "FAILED",
+      "duration_ms": 0.0,
+      "details": {
+        "snapshot": {
+          "timestamp": "2025-12-01T20:43:39.638663+00:00",
+          "active_context": [],
+          "suggested_context": [],
+          "preloaded_context": [],
+          "context_to_unload": [
+            "@.cursor/rules/10-quality.mdc",
+            "@.cursor/rules/14-verification.mdc"
+          ],
+          "active_tokens": 0,
+          "preloaded_tokens": 0,
+          "total_tokens": 0
+        }
+      },
+      "errors": [
+        "Expected 2 active context files, got 0"
+      ],
+      "warnings": [
+        "Database context not suggested for schema file"
+      ]
+    },
+    {
+      "test_name": "state_persistence",
+      "status": "PASSED",
+      "duration_ms": 33.09988975524902,
+      "details": {
+        "snapshot1": {
+          "timestamp": "2025-12-01T20:43:39.645538+00:00",
+          "active_context": [
+            "@.cursor/rules/python_bible.mdc",
+            "@.cursor/rules/02-core.mdc"
+          ],
+          "suggested_context": [
+            "@.cursor/rules/08-backend.mdc",
+            "@.cursor/patterns/**/*.md",
+            "@.cursor/rules/03-security.mdc",
+            "@.cursor/rules/07-observability.mdc"
+          ],
+          "preloaded_context": [
+            "@.cursor/rules/10-quality.mdc",
+            "@.cursor/rules/14-verification.mdc"
+          ],
+          "context_to_unload": [],
+          "active_tokens": 84062,
+          "preloaded_tokens": 2340,
+          "total_tokens": 86402
+        },
+        "snapshot2": {
+          "timestamp": "2025-12-01T20:43:39.669752+00:00",
+          "active_context": [
+            "@.cursor/rules/10-quality.mdc",
+            "@.cursor/rules/14-verification.mdc"
+          ],
+          "suggested_context": [
+            "@.cursor/rules/python_bible.mdc",
+            "@.cursor/PYTHON_LEARNINGS_LOG.md"
+          ],
+          "preloaded_context": [],
+          "context_to_unload": [
+            "@.cursor/rules/python_bible.mdc",
+            "@.cursor/rules/02-core.mdc"
+          ],
+          "active_tokens": 7800,
+          "preloaded_tokens": 0,
+          "total_tokens": 7800
+        },
+        "state_file_exists": true
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "test_name": "prediction_accuracy",
+      "status": "PASSED",
+      "duration_ms": 4.047870635986328,
+      "details": {
+        "predictions": [
+          {
+            "task": "run_tests",
+            "probability": 0.75,
+            "reason": "Common transition pattern",
+            "workflow_name": null
+          },
+          {
+            "task": "write_docs",
+            "probability": 0.3,
+            "reason": "Common transition pattern",
+            "workflow_name": null
+          },
+          {
+            "task": "review_code",
+            "probability": 0.25,
+            "reason": "Common transition pattern",
+            "workflow_name": null
+          }
+        ]
+      },
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "context_snapshots": [
+    {
+      "timestamp": "2025-12-01T20:43:39.622767+00:00",
+      "active_context": [
+        "@.cursor/rules/python_bible.mdc",
+        "@.cursor/rules/02-core.mdc"
+      ],
+      "suggested_context": [
+        "@.cursor/rules/08-backend.mdc",
+        "@.cursor/patterns/**/*.md",
+        "@.cursor/rules/03-security.mdc",
+        "@.cursor/rules/07-observability.mdc"
+      ],
+      "preloaded_context": [
+        "@.cursor/rules/10-quality.mdc",
+        "@.cursor/rules/14-verification.mdc"
+      ],
+      "context_to_unload": [],
+      "active_tokens": 84062,
+      "preloaded_tokens": 2340,
+      "total_tokens": 86402
+    },
+    {
+      "timestamp": "2025-12-01T20:43:39.627766+00:00",
+      "active_context": [
+        "@.cursor/rules/python_bible.mdc",
+        "@.cursor/rules/02-core.mdc"
+      ],
+      "suggested_context": [
+        "@.cursor/rules/08-backend.mdc",
+        "@.cursor/patterns/**/*.md",
+        "@.cursor/rules/03-security.mdc",
+        "@.cursor/rules/07-observability.mdc"
+      ],
+      "preloaded_context": [
+        "@.cursor/rules/10-quality.mdc",
+        "@.cursor/rules/14-verification.mdc"
+      ],
+      "context_to_unload": [],
+      "active_tokens": 84062,
+      "preloaded_tokens": 2340,
+      "total_tokens": 86402
+    },
+    {
+      "timestamp": "2025-12-01T20:43:39.632565+00:00",
+      "active_context": [
+        "@.cursor/rules/python_bible.mdc",
+        "@.cursor/rules/02-core.mdc"
+      ],
+      "suggested_context": [
+        "@.cursor/rules/08-backend.mdc",
+        "@.cursor/patterns/**/*.md",
+        "@.cursor/rules/03-security.mdc",
+        "@.cursor/rules/07-observability.mdc"
+      ],
+      "preloaded_context": [
+        "@.cursor/rules/10-quality.mdc",
+        "@.cursor/rules/14-verification.mdc"
+      ],
+      "context_to_unload": [],
+      "active_tokens": 84062,
+      "preloaded_tokens": 2340,
+      "total_tokens": 86402
+    },
+    {
+      "timestamp": "2025-12-01T20:43:39.635595+00:00",
+      "active_context": [
+        "@.cursor/rules/python_bible.mdc",
+        "@.cursor/rules/02-core.mdc"
+      ],
+      "suggested_context": [
+        "@.cursor/rules/08-backend.mdc",
+        "@.cursor/patterns/**/*.md",
+        "@.cursor/rules/03-security.mdc",
+        "@.cursor/rules/07-observability.mdc"
+      ],
+      "preloaded_context": [
+        "@.cursor/rules/10-quality.mdc",
+        "@.cursor/rules/14-verification.mdc"
+      ],
+      "context_to_unload": [],
+      "active_tokens": 84062,
+      "preloaded_tokens": 2340,
+      "total_tokens": 86402
+    },
+    {
+      "timestamp": "2025-12-01T20:43:39.636595+00:00",
+      "active_context": [
+        "@.cursor/rules/10-quality.mdc",
+        "@.cursor/rules/14-verification.mdc"
+      ],
+      "suggested_context": [
+        "@.cursor/rules/typescript_bible.mdc"
+      ],
+      "preloaded_context": [],
+      "context_to_unload": [
+        "@.cursor/rules/python_bible.mdc",
+        "@.cursor/rules/02-core.mdc"
+      ],
+      "active_tokens": 7800,
+      "preloaded_tokens": 0,
+      "total_tokens": 7800
+    },
+    {
+      "timestamp": "2025-12-01T20:43:39.638663+00:00",
+      "active_context": [],
+      "suggested_context": [],
+      "preloaded_context": [],
+      "context_to_unload": [
+        "@.cursor/rules/10-quality.mdc",
+        "@.cursor/rules/14-verification.mdc"
+      ],
+      "active_tokens": 0,
+      "preloaded_tokens": 0,
+      "total_tokens": 0
+    },
+    {
+      "timestamp": "2025-12-01T20:43:39.645538+00:00",
+      "active_context": [
+        "@.cursor/rules/python_bible.mdc",
+        "@.cursor/rules/02-core.mdc"
+      ],
+      "suggested_context": [
+        "@.cursor/rules/08-backend.mdc",
+        "@.cursor/patterns/**/*.md",
+        "@.cursor/rules/03-security.mdc",
+        "@.cursor/rules/07-observability.mdc"
+      ],
+      "preloaded_context": [
+        "@.cursor/rules/10-quality.mdc",
+        "@.cursor/rules/14-verification.mdc"
+      ],
+      "context_to_unload": [],
+      "active_tokens": 84062,
+      "preloaded_tokens": 2340,
+      "total_tokens": 86402
+    },
+    {
+      "timestamp": "2025-12-01T20:43:39.669752+00:00",
+      "active_context": [
+        "@.cursor/rules/10-quality.mdc",
+        "@.cursor/rules/14-verification.mdc"
+      ],
+      "suggested_context": [
+        "@.cursor/rules/python_bible.mdc",
+        "@.cursor/PYTHON_LEARNINGS_LOG.md"
+      ],
+      "preloaded_context": [],
+      "context_to_unload": [
+        "@.cursor/rules/python_bible.mdc",
+        "@.cursor/rules/02-core.mdc"
+      ],
+      "active_tokens": 7800,
+      "preloaded_tokens": 0,
+      "total_tokens": 7800
+    }
+  ],
+  "summary": {
+    "total_tests": 7,
+    "passed": 6,
+    "failed": 1,
+    "total_errors": 1,
+    "total_warnings": 2
+  }
+}

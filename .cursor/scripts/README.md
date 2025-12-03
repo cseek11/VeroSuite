@@ -265,7 +265,17 @@ All scripts export JSON results for programmatic access:
 
 **Error:** `OPA binary not found`
 
-**Solution:**
+**Solution (Recommended):**
+```bash
+# Use the helper script to find OPA
+python .cursor/scripts/find-opa.py
+
+# Or in Python scripts:
+from .cursor.scripts.find_opa import find_opa_binary
+opa_path = find_opa_binary()
+```
+
+**Alternative Solutions:**
 ```bash
 # Set OPA_BINARY environment variable
 export OPA_BINARY=./services/opa/bin/opa.exe  # Windows
@@ -274,6 +284,8 @@ export OPA_BINARY=./services/opa/bin/opa        # Linux/Mac
 # Or install OPA system-wide
 # See services/opa/README.md for installation instructions
 ```
+
+**Quick Reference:** See `.cursor/OPA_QUICK_REFERENCE.md` for all methods to find OPA.
 
 ### Python Not Found
 
@@ -362,6 +374,7 @@ For questions or issues:
 **Created:** 2025-11-23  
 **Phase:** -1, Week 2 Complete ✅  
 **Next:** Phase -1, Week 3 (Rule Compliance Matrix & Baseline)
+
 
 
 

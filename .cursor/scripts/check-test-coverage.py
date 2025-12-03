@@ -115,7 +115,7 @@ class TestCoverageChecker:
                 timeout=5
             )
             return len(result.stdout) > 0
-        except:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
             return False
     
     def _is_source_file(self, file_path: str) -> bool:
@@ -142,12 +142,13 @@ class TestCoverageChecker:
             return adjacent
         
         # Pattern 2: __tests__ directory
-        source_dir = os.path.dirname(source_path)
-        source_basename = os.path.basename(source_path)
+        source_path_obj = Path(source_path)
+        source_dir = source_path_obj.parent
+        source_basename = source_path_obj.name
         test_basename = source_basename.replace('.ts', '.test.ts').replace('.tsx', '.test.tsx')
-        test_dir_path = os.path.join(source_dir, '__tests__', test_basename)
-        if Path(test_dir_path).exists():
-            return test_dir_path
+        test_dir_path = source_dir / '__tests__' / test_basename
+        if test_dir_path.exists():
+            return str(test_dir_path)
         
         # Pattern 3: Parallel test directory
         parallel = source_path.replace('/src/', '/test/').replace('.ts', '.test.ts').replace('.tsx', '.test.tsx')
@@ -348,7 +349,7 @@ class TestCoverageChecker:
             ]
             
             return any(re.search(pattern, content, re.IGNORECASE) for pattern in indicators)
-        except:
+        except (FileNotFoundError, PermissionError, OSError):
             return False
     
     def _calculate_coverage_delta(self, pr_files: List[str]) -> Dict:
@@ -440,6 +441,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 
 
 
