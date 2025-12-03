@@ -1,7 +1,7 @@
 {
   "active": [
-    "@.cursor/enforcement/rules/python_bible.mdc",
-    "@.cursor/enforcement/rules/02-core.mdc"
+    "@.cursor/enforcement/rules/02-core.mdc",
+    "@.cursor/enforcement/rules/python_bible.mdc"
   ],
   "preloaded": []
 }

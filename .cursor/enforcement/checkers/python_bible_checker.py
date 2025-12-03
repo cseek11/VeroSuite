@@ -105,3 +105,4 @@ class PythonBibleChecker(BaseChecker):
 
 
 
+

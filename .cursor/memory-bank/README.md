@@ -189,3 +189,4 @@ Optional: `.cursor/memory-bank/personal/` folder (gitignored) for individual wor
 
 
 
+

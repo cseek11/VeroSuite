@@ -1,0 +1,6 @@
+[33m237dd41[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge: Restore critical VeroScore V3 files
+[33m5d8386b[m Merge PR #365: Phase 2 - Backend Migration to Monorepo Structure
+[33mf726804[m Merge origin/main: Resolve conflict in auto_pr_sessions.json
+[33maf3b991[m[33m ([m[1;32mauto-pr-1763667409[m[33m)[m Merge origin/main: Resolve conflict in reward_scores.json (accept remote version)
+[33m167b5fa[m Merge recovery: Restore Auto-PR Session Management System with Unicode fix
+[33m04c4f44[m chore: Add 3 missed PR reward scores to metrics

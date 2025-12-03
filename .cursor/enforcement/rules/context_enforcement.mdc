@@ -1,6 +1,6 @@
 # Context Enforcement Rules (Auto-Generated)
 
-**Last Updated:** 2025-12-03 18:51:22 UTC
+**Last Updated:** 2025-12-03 21:39:26 UTC
 
 ## Two-Brain Model: Context Management
 
@@ -25,13 +25,20 @@ These files are automatically loaded via rule files - no @ mention needed:
 
 These files MUST be loaded with @ mentions for the current task:
 
-- No dynamic context files required.
+- `.cursor/enforcement/rules/python_bible.mdc` - **REQUIRED: Load with @ mention**
+- `.cursor/enforcement/rules/02-core.mdc` - **REQUIRED: Load with @ mention**
 
 ### Pre-loaded Context (Medium Priority) - LOAD FOR NEXT TASKS
 
 These files should be pre-loaded for predicted next tasks (load if probability >70%):
 
 - No pre-loaded context files.
+
+### Context to Unload - REMOVE THESE
+
+These files should be unloaded (no longer needed for current/predicted tasks):
+
+- `libs/common/prisma/schema.prisma` - **UNLOAD: Remove @ mention**
 
 ## Two-Brain Model: Context Management
 

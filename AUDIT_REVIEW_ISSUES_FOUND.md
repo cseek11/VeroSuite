@@ -146,3 +146,4 @@ Memory Bank files: ~15,000 chars ≈ 3,750 tokens  ← WRONG
 
 
 
+
