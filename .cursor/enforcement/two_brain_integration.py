@@ -59,14 +59,30 @@ class TwoBrainIntegration:
         report = EnforcerReport(session_id=session_id)
         
         # Convert enforcer violations to report violations
+        # Deduplicate violations by (file, line_number, rule_ref) only when a line number
+        # is provided. Violations without line numbers should always be reported.
+        seen = set()
+        
         if hasattr(enforcer_instance, 'violations'):
             for v in enforcer_instance.violations:
+                file_path = self._get_file_path(v)
+                line_number = getattr(v, 'line_number', None)
+                rule_ref = self._get_rule_ref(v)
+                
+                if line_number is not None:
+                    key = (file_path, line_number, rule_ref)
+                    if key in seen:
+                        # Duplicate violation detected - skip to prevent duplicates in report
+                        # This can happen when violations are re-evaluated or when multiple scopes are involved
+                        continue
+                    seen.add(key)
+                
                 # Map enforcer Violation to report Violation
                 report_violation = Violation(
                     id=self._generate_violation_id(v),
                     severity=self._map_severity(v),
-                    file=self._get_file_path(v),
-                    rule_ref=self._get_rule_ref(v),
+                    file=file_path,
+                    rule_ref=rule_ref,
                     description=self._get_description(v),
                     evidence=self._get_evidence(v),
                     fix_hint=self._get_fix_hint(v),

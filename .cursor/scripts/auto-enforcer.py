@@ -13,7 +13,7 @@ Features:
 - Python Bible compliance (python_bible.mdc)
 - Bug logging validation (BUG_LOG.md updates)
 
-Last Updated: 2025-12-01
+Last Updated: See git history for current revision metadata
 """
 
 import os
@@ -22,21 +22,50 @@ import re
 import json
 import uuid
 import subprocess
-import hashlib
 import argparse
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple, Set, Any
-from dataclasses import dataclass, asdict
-from enum import Enum
-from collections import defaultdict
-from functools import lru_cache
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 # Also add .cursor to path for enforcement module
 sys.path.insert(0, str(project_root / ".cursor"))
+
+from enforcement.core.violations import Violation, ViolationSeverity, AutoFix
+from enforcement.core.session_state import (
+    EnforcementSession,
+    load_session,
+    save_session,
+    get_file_hash,
+)
+from enforcement.core.scope_evaluator import (
+    is_historical_dir_path,
+)
+from enforcement.core.git_utils import (
+    GitUtils,
+    get_git_state_key,
+    get_changed_files_impl,
+    run_git_command_cached,
+)
+from enforcement.core.file_scanner import is_file_modified_in_session
+from enforcement.reporting import (
+    BlockGenerator,
+    ContextBundleBuilder,
+    StatusGenerator,
+    TwoBrainReporter,
+    ViolationsLogger,
+)
+
+from enforcement.checks.date_checker import DateChecker
+from enforcement.checks.security_checker import SecurityChecker
+from enforcement.checks.memory_bank_checker import MemoryBankChecker
+from enforcement.checks.error_handling_checker import ErrorHandlingChecker
+from enforcement.checks.logging_checker import LoggingChecker
+from enforcement.checks.python_bible_checker import PythonBibleChecker
+from enforcement.checks.bug_logging_checker import BugLoggingChecker
+from enforcement.checks.context_checker import ContextChecker
 
 # Import modular checkers (Phase 4: Modular Architecture)
 try:
@@ -48,21 +77,6 @@ except ImportError:
     MODULAR_CHECKERS_AVAILABLE = False
     get_all_checker_classes = None
     CheckerRouter = None
-
-# Import date detection module (Phase 3: Complete DateDetector)
-try:
-    from enforcement.date_detector import (
-        DocumentContext,
-        DateDetector,
-        DateMatch,
-        DateClassification
-    )
-except ImportError:
-    # Fallback if module not available (shouldn't happen in normal operation)
-    DocumentContext = None
-    DateDetector = None
-    DateMatch = None
-    DateClassification = None
 
 # Lazy loading for context management modules (memory optimization)
 # Only import when actually needed, not at module load time
@@ -180,124 +194,6 @@ def _use_ascii_output() -> bool:
         return True  # Default to ASCII-safe if we can't determine
 
 
-class ViolationSeverity(Enum):
-    """Violation severity levels."""
-    BLOCKED = "BLOCKED"  # Hard stop - cannot proceed
-    WARNING = "WARNING"  # Warning - should fix but can proceed
-    INFO = "INFO"  # Informational - no action required
-
-
-@dataclass(slots=True)  # Python 3.10+ - reduces memory by 4-5× (Chapter 07.5.3)
-class Violation:
-    """Represents a rule violation."""
-    severity: ViolationSeverity
-    rule_ref: str  # e.g., "02-core.mdc", "01-enforcement.mdc Step 0"
-    message: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    timestamp: str = None
-    session_scope: str = "unknown"  # "current_session" or "historical"
-    fix_hint: Optional[str] = None  # Suggestion for fixing the violation
-    
-    def __post_init__(self):
-        if self.timestamp is None:
-            self.timestamp = datetime.now(timezone.utc).isoformat()
-
-
-@dataclass(slots=True)  # Python 3.10+ - reduces memory by 4-5× (Chapter 07.5.3)
-class AutoFix:
-    """Represents an auto-fix action."""
-    violation_id: str  # Reference to original violation
-    rule_ref: str
-    file_path: Optional[str]
-    line_number: Optional[int]
-    fix_type: str  # e.g., "date_updated", "error_handling_added"
-    fix_description: str  # What was fixed
-    before_state: str  # State before fix
-    after_state: str  # State after fix
-    timestamp: str
-    session_id: str
-
-
-@dataclass(slots=True)  # Python 3.10+ - reduces memory by 4-5× (Python Bible Chapter 07.5.3, 12.4.1)
-class EnforcementSession:
-    """
-    Tracks enforcement session state.
-    
-    Memory optimization: Using __slots__ reduces memory footprint by 4-5×
-    compared to regular dataclass with __dict__ (Python Bible Chapter 07.5.3).
-    """
-    session_id: str
-    start_time: str
-    last_check: str
-    violations: List[Dict]
-    checks_passed: List[str]
-    checks_failed: List[str]
-    auto_fixes: List[Dict]  # Track auto-fixes
-    file_hashes: Dict[str, str] = None  # Track file content hashes to detect actual changes
-    version: Optional[int] = None  # Session version for migration tracking
-    
-    @classmethod
-    def create_new(cls) -> "EnforcementSession":
-        """Create a new enforcement session."""
-        return cls(
-            session_id=str(uuid.uuid4()),
-            start_time=datetime.now(timezone.utc).isoformat(),
-            last_check=datetime.now(timezone.utc).isoformat(),
-            violations=[],
-            checks_passed=[],
-            checks_failed=[],
-            auto_fixes=[],
-            file_hashes={},
-            version=2  # Current version (v2: fixed hash cache)
-        )
-
-
-# Module-level cached function for git commands (Phase 2.3)
-# Python Bible 12.2.3: Extract to module-level function to avoid 'self' in cache key
-# Python Bible 12.7.1: LRU Cache for expensive repeated computations
-@lru_cache(maxsize=256)
-def _run_git_command_cached(project_root: str, command_tuple: tuple) -> str:
-    """
-    Cached git command execution.
-    
-    Python Bible 12.7.1: LRU Cache for expensive repeated computations.
-    Python Bible 12.2.3: Extract to module-level function to avoid 'self' in cache key.
-    
-    Args:
-        project_root: Project root directory as string
-        command_tuple: Git command arguments as tuple (hashable)
-    
-    Returns:
-        Git command output as string
-    """
-    args = list(command_tuple)
-    try:
-        result = subprocess.run(
-            ['git'] + args,
-            cwd=Path(project_root),
-            capture_output=True,
-            text=True,
-            encoding='utf-8',
-            errors='replace',  # Replace invalid characters instead of failing
-            timeout=10,
-            check=False
-        )
-        if result.returncode == 0:
-            return result.stdout.strip() if result.stdout else ""
-        return ""
-    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
-        # Log warning but don't cache errors (they might be transient)
-        logger.warn(
-            "Git command failed",
-            operation="_run_git_command_cached",
-            error_code="GIT_COMMAND_FAILED",
-            root_cause=str(e),
-            command=" ".join(['git'] + args)
-        )
-        return ""
-
-
 class VeroFieldEnforcer:
     """
     Main enforcement engine for VeroField rules.
@@ -330,164 +226,6 @@ class VeroFieldEnforcer:
         "apps/api/src/**/*tenant*.ts"
     ]
     
-    # Hardcoded date patterns - supports multiple formats
-    # ISO 8601: YYYY-MM-DD or YYYY/MM/DD
-    # US format: MM/DD/YYYY or MM-DD-YYYY
-    HARDCODED_DATE_PATTERN = re.compile(
-        r'\b(20\d{2})[-/](0[1-9]|1[0-2])[-/](0[1-9]|[12]\d|3[01])\b|'  # YYYY-MM-DD or YYYY/MM/DD
-        r'\b(0[1-9]|1[0-2])[/-](0[1-9]|[12]\d|3[01])[/-](20\d{2})\b'   # MM/DD/YYYY or MM-DD-YYYY
-    )
-    
-    # Helper method to normalize date strings from matches
-    def _normalize_date_match(self, match: tuple) -> str:
-        """
-        Normalize date match groups to ISO format (YYYY-MM-DD).
-        
-        FIXED: Properly handles regex alternation tuples with None values.
-        
-        Handles both YYYY-MM-DD and MM/DD/YYYY formats.
-        With alternation regex, groups will be:
-        - YYYY-MM-DD: (YYYY, MM, DD, None, None, None)
-        - MM/DD/YYYY: (None, None, None, MM, DD, YYYY)
-        
-        Args:
-            match: Tuple from regex.findall() with potential None values
-            
-        Returns:
-            ISO format date string (YYYY-MM-DD) or empty string if invalid
-        """
-        # Filter out None values first (critical for alternation handling)
-        parts = [g for g in match if g is not None]
-        
-        if len(parts) < 3:
-            return ''
-        
-        # Detect format by checking if first part is 4-digit year
-        if len(parts[0]) == 4 and parts[0].startswith('20'):
-            # YYYY-MM-DD format: (YYYY, MM, DD)
-            return f"{parts[0]}-{parts[1]}-{parts[2]}"
-        elif len(parts[-1]) == 4 and parts[-1].startswith('20'):
-            # MM/DD/YYYY format - reorder to YYYY-MM-DD
-            return f"{parts[-1]}-{parts[0]}-{parts[1]}"
-        else:
-            # Fallback: assume first 3 parts are YYYY-MM-DD
-            return '-'.join(parts[:3])
-    
-    # Historical date patterns (contexts where dates are intentionally historical)
-    # Phase 1 Refactoring: Consolidated from 67 patterns to 5 for performance
-    # Legacy patterns kept commented below for 2 sprints validation, then will be removed
-    
-    # Flag to use consolidated patterns (default: True)
-    USE_CONSOLIDATED_PATTERNS = True
-    
-    # Consolidated historical date patterns (5 patterns instead of 67)
-    CONSOLIDATED_HISTORICAL_PATTERNS = [
-        # 1. Entry/log patterns: entry #1, log #2, note, memo, etc.
-        re.compile(r'(entry|log|note|memo)\s*#?\d*\s*[-–:]', re.IGNORECASE),
-        
-        # 2. Status/completion markers: completed, resolved, fixed, closed
-        re.compile(r'(completed|resolved|fixed|closed)\s*[:\(]', re.IGNORECASE),
-        
-        # 3. Metadata fields: **Date:**, **Created:**, **Updated:**, **Generated:**, **Report:**
-        re.compile(r'\*\*(date|created|updated|generated|report)[:*]', re.IGNORECASE),
-        
-        # 4. Code examples: backticks or function calls with dates
-        re.compile(r'(`[^`]*\d{4}[^`]*`|\w+\([^)]*\d{4})', re.IGNORECASE),
-        
-        # 5. Document structure: headers/titles with dates
-        re.compile(r'^#{1,6}\s+.*\d{4}', re.IGNORECASE | re.MULTILINE),
-    ]
-    
-    # LEGACY PATTERNS (67 patterns) - DEPRECATED, will be removed after 2 sprints validation
-    # Kept for comparison/rollback if needed
-    # Uncomment USE_CONSOLIDATED_PATTERNS = False to use legacy patterns
-    LEGACY_HISTORICAL_PATTERNS = [
-        # ISO format dates (YYYY-MM-DD)
-        re.compile(r'entry\s*#\d+\s*[-–]\s*\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "Entry #1 - 2025-11-27"
-        re.compile(r'###\s*entry\s*#\d+\s*[-–]\s*\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "### Entry #1 - 2025-11-27"
-        re.compile(r'\*\*completed\*\*\s*\([^)]*\d{4}-\d{2}-\d{2}[^)]*\)', re.IGNORECASE),  # "**COMPLETED** (2025-11-29)"
-        re.compile(r'completed\s*\([^)]*\d{4}-\d{2}-\d{2}[^)]*\)', re.IGNORECASE),  # "Completed (2025-11-29)"
-        re.compile(r'###\s+.*?\([^)]*\d{4}-\d{2}-\d{2}[^)]*\)\s*[-–]\s*completed', re.IGNORECASE),  # "### Title (2025-11-29) - COMPLETED"
-        re.compile(r'added\s+on\s+\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "Added on 2025-11-27"
-        re.compile(r'created\s+on\s+\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "Created on 2025-11-27"
-        re.compile(r'fixed\s+on\s+\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "Fixed on 2025-11-27"
-        re.compile(r'resolved\s+on\s+\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "Resolved on 2025-11-27"
-        re.compile(r'###\s+\d{4}-\d{2}-\d{2}\s+[-–]', re.IGNORECASE),  # "### 2025-11-30 -"
-        re.compile(r'^\s*\*\*\d{4}-\d{2}-\d{2}\s+[-–]', re.IGNORECASE | re.MULTILINE),  # "**2025-11-30 -"
-        re.compile(r'recent\s+(major\s+)?change.*?\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "Recent Major Change: ... 2025-11-29"
-        re.compile(r'\([^)]*\d{4}-\d{2}-\d{2}[^)]*\)\s*[-–]\s*\*\*completed\*\*', re.IGNORECASE),  # "(2025-11-29) - **COMPLETED**"
-        re.compile(r'goal.*?\([^)]*\d{4}-\d{2}-\d{2}[^)]*\)', re.IGNORECASE),  # "Goal: ... (2025-11-29)"
-        # Version dates (historical version information)
-        re.compile(r'version\s*:.*?\([^)]*\d{4}-\d{2}-\d{2}[^)]*\)', re.IGNORECASE),  # "Version: 2.0 (2025-11-28)"
-        re.compile(r'version\s+\d+\.\d+.*?\([^)]*\d{4}-\d{2}-\d{2}[^)]*\)', re.IGNORECASE),  # "Version 2.0 (2025-11-28)"
-        # Integration/change log dates
-        re.compile(r'(integration|added|change\s+log).*?\([^)]*\d{4}-\d{2}-\d{2}[^)]*\)', re.IGNORECASE),  # "Memory Bank Integration: ... (2025-11-28)"
-        # Example dates in documentation (e.g., "2025-11-21" in examples)
-        re.compile(r'\(e\.g\.|example|format\):.*?\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "(e.g., `2025-11-21`)"
-        re.compile(r'format.*?:.*?\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "FORMAT: YYYY-MM-DD (e.g., 2025-11-21)"
-        # Dates in backticks (code examples): `2025-01-27`
-        re.compile(r'`\d{4}-\d{2}-\d{2}`', re.IGNORECASE),  # "`2025-01-27`"
-        re.compile(r'like\s+`\d{4}-\d{2}-\d{2}`', re.IGNORECASE),  # "like `2025-01-27`"
-        # Dates in comments (Python/script comments): # "2025-11-27" or # "**2025-11-27 -"
-        re.compile(r'#\s*["\'].*?\d{4}-\d{2}-\d{2}.*?["\']', re.IGNORECASE),  # "# '2025-11-27'" or "# \"**2025-11-27 -\""
-        re.compile(r'#\s*.*?\([^)]*\d{4}-\d{2}-\d{2}[^)]*\)', re.IGNORECASE),  # "# Example (2025-11-27)"
-        # Report/document dates: "**Date:** 2025-11-28" or "Date: 2025-11-28"
-        # Note: In markdown, "**Date:**" has colon inside bold markers, so pattern is "**date:**"
-        re.compile(r'\*\*date:\*\*\s*\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "**Date:** 2025-11-28" (colon inside bold markers)
-        re.compile(r'^date\s*:.*?\d{4}-\d{2}-\d{2}', re.IGNORECASE | re.MULTILINE),  # "Date: 2025-11-28"
-        # Report metadata fields: "**Report Generated:** 2025-11-28", "**Generated:** 2025-11-28", etc.
-        re.compile(r'\*\*report\s+generated:\*\*\s*\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "**Report Generated:** 2025-11-28"
-        re.compile(r'\*\*generated:\*\*\s*\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "**Generated:** 2025-11-28"
-        re.compile(r'\*\*created:\*\*\s*\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "**Created:** 2025-11-28"
-        # Report metadata fields: "**Report Generated:** 2025-11-28", "**Auditor:** ...", "**Reference:** ..."
-        re.compile(r'\*\*report\s+generated:\*\*\s*\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "**Report Generated:** 2025-11-28"
-        re.compile(r'\*\*generated:\*\*\s*\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "**Generated:** 2025-11-28"
-        re.compile(r'\*\*created:\*\*\s*\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "**Created:** 2025-11-28"
-        re.compile(r'\*\*auditor:\*\*', re.IGNORECASE),  # "**Auditor:** ..." (report metadata, dates nearby are historical)
-        re.compile(r'\*\*reference:\*\*', re.IGNORECASE),  # "**Reference:** ..." (report metadata, dates nearby are historical)
-        # Resolution/status dates: "**RESOLVED** (2025-11-29)" or "**Status:** ✅ **RESOLVED** (2025-11-29)"
-        re.compile(r'\*\*resolved\*\*\s*\([^)]*\d{4}-\d{2}-\d{2}[^)]*\)', re.IGNORECASE),  # "**RESOLVED** (2025-11-29)"
-        re.compile(r'\*\*status:\*\*.*?\([^)]*\d{4}-\d{2}-\d{2}[^)]*\)', re.IGNORECASE),  # "**Status:** ✅ **ALL RESOLVED** (2025-11-29)" (colon inside bold markers)
-        # Resolution date fields: "**Resolution Date:** 2025-11-29" or "- **Resolution Date:** 2025-11-29"
-        re.compile(r'resolution\s+date\s*:.*?\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "Resolution Date: 2025-11-29"
-        # "Updated YYYY-MM-DD" pattern: "(Updated 2025-11-29)" or "Updated: 2025-11-29"
-        re.compile(r'\(updated\s+\d{4}-\d{2}-\d{2}\)', re.IGNORECASE),  # "(Updated 2025-11-29)"
-        re.compile(r'updated\s*:\s*\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "Updated: 2025-11-29"
-        # Example dates in test strings or prompt strings (test cases)
-        # Match any line containing "**Last Updated:**" followed by a date (for test scenarios, prompts, examples)
-        # Note: In markdown, "**Last Updated:**" has colon inside bold markers, so pattern is "**last updated:**"
-        re.compile(r'\*\*last\s+updated:\*\*\s*\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "**Last Updated:** 2025-01-27" (colon inside bold markers)
-        re.compile(r'.*["\'].*?\*\*last\s+updated:\*\*\s*\d{4}-\d{2}-\d{2}.*?["\'].*', re.IGNORECASE | re.DOTALL),  # "**Last Updated:** 2025-01-27" within quoted strings (for test cases)
-        # Dates in function calls (code examples): date_range("2025-01-01", ...), datetime(2025, 1, 1), etc.
-        re.compile(r'\w+\s*\([^)]*?["\']\d{4}-\d{2}-\d{2}["\']', re.IGNORECASE),  # date_range("2025-01-01", ...) - non-greedy to handle multiple dates
-        re.compile(r'\w+\s*\([^)]*\d{4}\s*,\s*\d{1,2}\s*,\s*\d{1,2}', re.IGNORECASE),  # datetime(2025, 1, 1)
-        # Dates in code blocks (between ``` markers) - these are example code
-        # We'll check for code block context separately, but also match common patterns
-        re.compile(r'for\s+\w+\s+in\s+\w+\s*\([^)]*?["\']\d{4}-\d{2}-\d{2}["\']', re.IGNORECASE),  # for date in date_range("2025-01-01", ...) - non-greedy to handle multiple dates
-        re.compile(r'#\s*(generate|example|demo|test).*?\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "# Generate dates in January 2025" followed by date
-        # Dates in documentation/example files (files in docs/, examples/, etc.)
-        # This will be handled by file path checking, but also match common doc patterns
-        re.compile(r'example.*?:.*?\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "Example: 2025-01-01"
-        re.compile(r'demo.*?:.*?\d{4}-\d{2}-\d{2}', re.IGNORECASE),  # "Demo: 2025-01-01"
-        # NEW: Month name date formats (e.g., "December 21, 2026", "Dec 21, 2026")
-        re.compile(r'\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},?\s+\d{4}\b', re.IGNORECASE),  # "December 21, 2026"
-        re.compile(r'\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)\.?\s+\d{1,2},?\s+\d{4}\b', re.IGNORECASE),  # "Dec 21, 2026" or "Dec. 21, 2026"
-        # NEW: US date formats (MM/DD/YYYY, MM/DD/YY) - historical context patterns
-        re.compile(r'\*\*date:\*\*\s*\d{1,2}/\d{1,2}/\d{2,4}', re.IGNORECASE),  # "**Date:** 12/21/26" or "**Date:** 12/21/2026"
-        re.compile(r'^date\s*:.*?\d{1,2}/\d{1,2}/\d{2,4}', re.IGNORECASE | re.MULTILINE),  # "Date: 12/21/26"
-        re.compile(r'dated\s+\d{1,2}/\d{1,2}/\d{2,4}', re.IGNORECASE),  # "dated 12/21/26"
-        re.compile(r'information\s+dated\s+', re.IGNORECASE),  # "information dated ..." (context for historical dates)
-        # NEW: Document title patterns with dates
-        re.compile(r'^#\s+.*?\d{4}-\d{2}-\d{2}', re.IGNORECASE | re.MULTILINE),  # "# Document - December 21, 2026" or "# Document - 2026-12-21"
-        re.compile(r'^#\s+.*?(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},?\s+\d{4}', re.IGNORECASE | re.MULTILINE),  # "# Document - December 21, 2026"
-        # NEW: Lines that explicitly state dates are historical or from a specific time
-        re.compile(r'contains\s+information\s+dated', re.IGNORECASE),  # "contains information dated ..."
-        re.compile(r'date\s+set\s+per\s+user\s+request', re.IGNORECASE),  # "Date set per user request"
-        re.compile(r'system\s+date\s*:', re.IGNORECASE),  # "System date: ..." (indicates historical context)
-    ]
-    
-    # Select which pattern set to use (consolidated by default)
-    HISTORICAL_DATE_PATTERNS = CONSOLIDATED_HISTORICAL_PATTERNS if USE_CONSOLIDATED_PATTERNS else LEGACY_HISTORICAL_PATTERNS
     
     # Current system date (for comparison)
     CURRENT_DATE = datetime.now().strftime("%Y-%m-%d")
@@ -500,24 +238,21 @@ class VeroFieldEnforcer:
         self.session: Optional[EnforcementSession] = None
         self.violations: List[Violation] = []
         
-        # Initialize predictor to None first (before _init_session checks it)
+        # Initialize predictor to None first (before load_session potentially uses it)
         self.predictor = None
         self.session_sequence_tracker = None
         
         # Ensure enforcement directory exists
         self.enforcement_dir.mkdir(parents=True, exist_ok=True)
         
-        # Initialize session (before predictor, but predictor is None so check will pass)
-        self._init_session()
+        self.session, self.session_sequence_tracker = load_session(
+            self.enforcement_dir,
+            predictor=self.predictor if hasattr(self, 'predictor') else None,
+            session_sequence_tracker_ref=self.session_sequence_tracker
+        )
         
-        # Performance optimization: Cache for changed files (Phase 1.1)
-        # Python Bible 12.7.2: Manual memoization for session-level caching
-        self._cached_changed_files: Optional[Dict[str, List[str]]] = None
-        self._changed_files_cache_key: Optional[str] = None
-        
-        # Performance optimization: Cache for file diffs (Phase 1.2)
-        # Python Bible 12.7.2: Manual memoization for session-level caching
-        self._file_diff_cache: Dict[str, Optional[str]] = {}
+        # Git utilities helper (manages git interactions and caching)
+        self.git_utils = GitUtils(self.project_root)
         
         # Phase 4: Initialize modular checker router (if available)
         self.checker_router = None
@@ -561,7 +296,7 @@ class VeroFieldEnforcer:
                 
                 # Initialize session sequence tracker (for session-aware predictions)
                 # CRITICAL FIX: Initialize tracker AFTER predictor is created
-                # If tracker wasn't initialized in _init_session(), initialize it now
+                # If tracker wasn't initialized in load_session(), initialize it now
                 if not self.session_sequence_tracker and self.session:
                     try:
                         SessionSequenceTrackerCls = _lazy_import_context_manager('SessionSequenceTracker')
@@ -701,250 +436,6 @@ class VeroFieldEnforcer:
             response_length=len(response)
         )
     
-    def get_file_hash(self, file_path_str: str) -> Optional[str]:
-        """
-        Get SHA256 hash of file content with proper cache invalidation.
-        
-        FIXED: Removed @lru_cache - now uses session-based cache with mtime in key.
-        This ensures cache invalidates when files are modified.
-        
-        Uses content hashing to detect actual file changes, ignoring timestamp changes.
-        This is more reliable than timestamps which can be updated just by opening files.
-        
-        Args:
-            file_path_str: Path to the file as string
-            
-        Returns:
-            SHA256 hash as hex string, or None if file doesn't exist or can't be read
-        """
-        file_path = Path(file_path_str)
-        if not file_path.exists():
-            return None
-        
-        try:
-            # Get file modification time for cache key
-            stat_info = file_path.stat()
-            cache_key = f"{file_path_str}:{stat_info.st_mtime}"
-            
-            # Check session cache first (with mtime in key for proper invalidation)
-            if self.session.file_hashes is None:
-                self.session.file_hashes = {}
-            
-            if cache_key in self.session.file_hashes:
-                return self.session.file_hashes[cache_key]
-            
-            # Compute hash (unchanged logic)
-            hasher = hashlib.sha256()
-            # Memory optimization: Process in chunks (already implemented)
-            # Python Bible Chapter 12.4.3: Process large files in chunks
-            with open(file_path, 'rb') as f:
-                for chunk in iter(lambda: f.read(4096), b""):
-                    hasher.update(chunk)
-            hash_value = hasher.hexdigest()
-            
-            # Cache with mtime as part of key (ensures invalidation on file change)
-            self.session.file_hashes[cache_key] = hash_value
-            return hash_value
-        except (OSError, FileNotFoundError, PermissionError, UnicodeDecodeError) as e:
-            logger.debug(
-                f"Could not compute file hash: {file_path}",
-                operation="get_file_hash",
-                error_code="HASH_COMPUTE_FAILED",
-                root_cause=str(e)
-            )
-            return None
-    
-    def _migrate_session_v1_to_v2(self, old_data: Dict) -> Dict:
-        """
-        Migrate session from v1 (buggy hash cache) to v2 (fixed cache).
-        
-        Phase 1: Clears old file_hashes cache (was using wrong cache key format).
-        Adds version field for future migrations.
-        
-        Args:
-            old_data: Old session data dictionary
-            
-        Returns:
-            Migrated session data dictionary
-        """
-        new_data = old_data.copy()
-        
-        # Clear old hash cache (was using wrong cache key format - file_path only, no mtime)
-        if 'file_hashes' in new_data:
-            try:
-                logger.info(
-                    "Clearing stale file_hashes cache (v1 → v2 migration)",
-                    operation="_migrate_session_v1_to_v2",
-                    old_cache_size=len(new_data.get('file_hashes', {}))
-                )
-            except TypeError:
-                # Fallback for standard logger that doesn't support operation keyword
-                logger.info(f"Clearing stale file_hashes cache (v1 → v2 migration, old_cache_size={len(new_data.get('file_hashes', {}))})")
-            new_data['file_hashes'] = {}
-        
-        # Add version field
-        new_data['version'] = 2
-        
-        # Keep violations, checks_passed, checks_failed (still valid)
-        # Keep auto_fixes if exists
-        if 'auto_fixes' not in new_data:
-            new_data['auto_fixes'] = []
-        
-        return new_data
-    
-    def _init_session(self):
-        """Initialize or load enforcement session."""
-        session_file = self.enforcement_dir / "session.json"
-        
-        if session_file.exists():
-            try:
-                with open(session_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    
-                    # Check version and migrate if needed
-                    if 'version' not in data or data.get('version', 1) < 2:
-                        try:
-                            logger.info(
-                                "Migrating session from v1 to v2",
-                                operation="_init_session",
-                                old_version=data.get('version', 1)
-                            )
-                        except TypeError:
-                            # Fallback for standard logger that doesn't support operation keyword
-                            logger.info(f"Migrating session from v1 to v2 (old_version={data.get('version', 1)})")
-                        data = self._migrate_session_v1_to_v2(data)
-                    
-                    # Ensure auto_fixes field exists (for backward compatibility)
-                    if 'auto_fixes' not in data:
-                        data['auto_fixes'] = []
-                    # Ensure file_hashes field exists (for backward compatibility)
-                    if 'file_hashes' not in data:
-                        data['file_hashes'] = {}
-                    # Ensure version field exists
-                    if 'version' not in data:
-                        data['version'] = 2
-                    
-                    self.session = EnforcementSession(**data)
-                    _safe_log_info(
-                        "Session loaded",
-                        operation="_init_session",
-                        session_id=self.session.session_id
-                    )
-                    
-                    # Initialize session sequence tracker with session ID
-                    if PREDICTIVE_CONTEXT_AVAILABLE and hasattr(self, 'predictor') and self.predictor:
-                        try:
-                            from context_manager.session_sequence_tracker import SessionSequenceTracker
-                            self.session_sequence_tracker = SessionSequenceTracker(self.session.session_id)
-                            logger.info(
-                                "Session sequence tracker initialized",
-                                operation="_init_session",
-                                session_id=self.session.session_id
-                            )
-                        except Exception as e:
-                            logger.warn(
-                                f"Failed to initialize session sequence tracker: {e}",
-                                operation="_init_session",
-                                error_code="SESSION_SEQUENCE_TRACKER_INIT_FAILED",
-                                root_cause=str(e)
-                            )
-                            self.session_sequence_tracker = None
-            except (FileNotFoundError, json.JSONDecodeError, PermissionError, OSError) as e:
-                logger.warn(
-                    "Failed to load session, creating new",
-                    operation="_init_session",
-                    error_code="SESSION_LOAD_FAILED",
-                    root_cause=str(e)
-                )
-                self.session = EnforcementSession.create_new()
-        else:
-            self.session = EnforcementSession.create_new()
-        
-        # Initialize session sequence tracker with session ID (if not already initialized)
-        if PREDICTIVE_CONTEXT_AVAILABLE and hasattr(self, 'predictor') and self.predictor and self.session_sequence_tracker is None:
-            try:
-                from context_manager.session_sequence_tracker import SessionSequenceTracker
-                self.session_sequence_tracker = SessionSequenceTracker(self.session.session_id)
-                logger.info(
-                    "Session sequence tracker initialized",
-                    operation="_init_session",
-                    session_id=self.session.session_id
-                )
-            except Exception as e:
-                logger.warn(
-                    f"Failed to initialize session sequence tracker: {e}",
-                    operation="_init_session",
-                    error_code="SESSION_SEQUENCE_TRACKER_INIT_FAILED",
-                    root_cause=str(e)
-                )
-                self.session_sequence_tracker = None
-    
-    def _prune_session_data(self):
-        """
-        Prune session data to prevent unbounded memory growth.
-        
-        Python Bible Chapter 12.2.3: Prevent memory leaks from unbounded growth.
-        Limits session history to prevent memory bloat.
-        """
-        # Limit violations in session (keep most recent)
-        MAX_VIOLATIONS = 2000
-        if len(self.session.violations) > MAX_VIOLATIONS:
-            # Keep only most recent violations
-            self.session.violations = self.session.violations[-MAX_VIOLATIONS:]
-            logger.debug(
-                f"Pruned violations list to {MAX_VIOLATIONS} most recent",
-                operation="_prune_session_data",
-                violations_count=len(self.session.violations)
-            )
-        
-        # Limit file hashes (keep most recent)
-        MAX_FILE_HASHES = 10000
-        if self.session.file_hashes and len(self.session.file_hashes) > MAX_FILE_HASHES:
-            # Keep only most recent file hashes
-            oldest_keys = list(self.session.file_hashes.keys())[:-MAX_FILE_HASHES]
-            for key in oldest_keys:
-                del self.session.file_hashes[key]
-            logger.debug(
-                f"Pruned file_hashes to {MAX_FILE_HASHES} most recent",
-                operation="_prune_session_data",
-                file_hashes_count=len(self.session.file_hashes)
-            )
-        
-        # Limit checks lists (keep most recent)
-        MAX_CHECKS = 500
-        if len(self.session.checks_passed) > MAX_CHECKS:
-            self.session.checks_passed = self.session.checks_passed[-MAX_CHECKS:]
-        if len(self.session.checks_failed) > MAX_CHECKS:
-            self.session.checks_failed = self.session.checks_failed[-MAX_CHECKS:]
-    
-    def _save_session(self):
-        """Save session state to file."""
-        # Prune session data before saving (memory optimization)
-        self._prune_session_data()
-        
-        session_file = self.enforcement_dir / "session.json"
-        try:
-            # Convert session to dict, handling Enums
-            session_dict = {
-                "session_id": self.session.session_id,
-                "start_time": self.session.start_time,
-                "last_check": self.session.last_check,
-                "violations": self.session.violations,  # Already converted to dict in _log_violation
-                "checks_passed": self.session.checks_passed,
-                "checks_failed": self.session.checks_failed,
-                "auto_fixes": self.session.auto_fixes,  # Track auto-fixes
-                "file_hashes": self.session.file_hashes or {}  # Track file content hashes
-            }
-            with open(session_file, 'w', encoding='utf-8') as f:
-                json.dump(session_dict, f, indent=2)
-        except (FileNotFoundError, PermissionError, OSError, TypeError) as e:
-            logger.error(
-                "Failed to save session",
-                operation="_save_session",
-                error_code="SESSION_SAVE_FAILED",
-                root_cause=str(e)
-            )
-    
     def _log_violation(self, violation: Violation):
         """Log violation and add to session."""
         # Log violation creation with diagnostic information
@@ -1009,73 +500,6 @@ class VeroFieldEnforcer:
             check_name=check_name
         )
     
-    def run_git_command(self, args: List[str]) -> str:
-        """
-        Run git command and return output (with caching).
-        
-        Phase 2.3: Uses module-level cached function to avoid 'self' in cache key.
-        Python Bible 12.7.1: LRU Cache for expensive repeated computations.
-        Python Bible 12.2.3: Extract to module-level function to avoid 'self' in cache key.
-        """
-        # Use cached function with hashable arguments
-        command_tuple = tuple(args)  # Convert to tuple for hashing
-        project_root_str = str(self.project_root)
-        
-        return _run_git_command_cached(project_root_str, command_tuple)
-    
-    def _get_git_state_key(self) -> str:
-        """
-        Generate cache key based on git state.
-        
-        Python Bible 12.7.4: Cache invalidation patterns - version tagging.
-        Uses git HEAD + index state as cache key to detect when git state changes.
-        
-        Returns:
-            Cache key string based on current git state
-        """
-        try:
-            head = self.run_git_command(['rev-parse', 'HEAD'])
-            index = self.run_git_command(['diff', '--cached', '--name-only'])
-            # Use hash of index for shorter key
-            index_hash = str(hash(index)) if index else ''
-            return f"{head}:{index_hash}"
-        except Exception:
-            # If git commands fail, return unique key to force cache miss
-            return f"error:{datetime.now(timezone.utc).isoformat()}"
-    
-    def _get_changed_files_impl(self, include_untracked: bool = False) -> List[str]:
-        """
-        Internal implementation of get_changed_files (actual git calls).
-        
-        Python Bible 12.7.2: Extract implementation to separate method for caching.
-        
-        Args:
-            include_untracked: If True, include untracked files (default: False)
-        
-        Returns:
-            List of changed file paths
-        """
-        # Get staged and unstaged changes (actual edits)
-        # Use --ignore-cr-at-eol to ignore CRLF vs LF line ending differences
-        # Use --ignore-all-space and --ignore-blank-lines to exclude whitespace-only changes
-        staged = self.run_git_command(['diff', '--cached', '--ignore-cr-at-eol', '--ignore-all-space', '--ignore-blank-lines', '--name-only'])
-        unstaged = self.run_git_command(['diff', '--ignore-cr-at-eol', '--ignore-all-space', '--ignore-blank-lines', '--name-only'])
-        
-        files = set()
-        if staged:
-            files.update(staged.split('\n'))
-        if unstaged:
-            files.update(unstaged.split('\n'))
-        
-        # Only include untracked files if explicitly requested (for enforcement checks)
-        # NOT for context loading - untracked files shouldn't trigger context loading
-        if include_untracked:
-            untracked = self.run_git_command(['ls-files', '--others', '--exclude-standard'])
-            if untracked:
-                files.update(untracked.split('\n'))
-        
-        return sorted([f for f in files if f.strip()])
-    
     def _get_changed_files_for_session(self) -> List[str]:
         """
         Get changed files for current session (incremental scan).
@@ -1087,576 +511,13 @@ class VeroFieldEnforcer:
             List of changed file paths (tracked + untracked)
         """
         # Get all changed files (tracked + untracked)
-        tracked = self._get_changed_files_impl(include_untracked=False)
-        untracked = self._get_changed_files_impl(include_untracked=True)
+        tracked = get_changed_files_impl(self.project_root, include_untracked=False)
+        untracked = get_changed_files_impl(self.project_root, include_untracked=True)
         return sorted(set(tracked) | set(untracked))
-    
-    def get_changed_files(self, include_untracked: bool = False) -> List[str]:
-        """
-        Get list of changed files from git (cached).
-        
-        Python Bible 12.7.2: Manual memoization for session-level caching.
-        Cache is invalidated when git state changes (detected via git state key).
-        
-        Args:
-            include_untracked: If True, include untracked files (default: False)
-                              Only include untracked for enforcement checks, not context loading
-        
-        Returns:
-            List of changed file paths
-        """
-        # Use cached result if available and cache key matches
-        if self._cached_changed_files is not None:
-            key = 'untracked' if include_untracked else 'tracked'
-            if key in self._cached_changed_files:
-                logger.debug(
-                    f"Using cached changed files ({key})",
-                    operation="get_changed_files",
-                    cache_key=self._changed_files_cache_key
-                )
-                return self._cached_changed_files[key]
-        
-        # Fallback to direct call (shouldn't happen in normal flow after cache is populated)
-        logger.debug(
-            "Cache miss - computing changed files directly",
-            operation="get_changed_files",
-            include_untracked=include_untracked
-        )
-        return self._get_changed_files_impl(include_untracked)
-    
-    def get_file_diff(self, file_path: str) -> Optional[str]:
-        """
-        Get git diff for a specific file (cached).
-        
-        Python Bible 12.7.2: Manual memoization for session-level caching.
-        Cache is cleared when git state changes (in run_all_checks).
-        
-        Returns None if file is untracked or git diff fails.
-        """
-        # Check cache first (Phase 1.2)
-        if file_path in self._file_diff_cache:
-            logger.debug(
-                f"Using cached file diff for {file_path}",
-                operation="get_file_diff"
-            )
-            return self._file_diff_cache[file_path]
-        
-        # Compute diff (existing logic)
-        try:
-            # Check if file is tracked
-            tracked = self.run_git_command(['ls-files', '--error-unmatch', file_path])
-            if not tracked:
-                # File is untracked - return None (will treat as new file)
-                self._file_diff_cache[file_path] = None
-                return None
-            
-            # Get diff for this file (staged + unstaged)
-            staged_diff = self.run_git_command(['diff', '--cached', file_path])
-            unstaged_diff = self.run_git_command(['diff', file_path])
-            
-            # Combine diffs
-            combined_diff = ""
-            if staged_diff:
-                combined_diff += staged_diff
-            if unstaged_diff:
-                if combined_diff:
-                    combined_diff += "\n"
-                combined_diff += unstaged_diff
-            
-            result = combined_diff if combined_diff else None
-            # Cache result
-            self._file_diff_cache[file_path] = result
-            logger.debug(
-                f"Cached file diff for {file_path}",
-                operation="get_file_diff",
-                has_diff=result is not None
-            )
-            return result
-        except (subprocess.TimeoutExpired, FileNotFoundError, OSError, ValueError) as e:
-            logger.debug(
-                f"Git diff failed for {file_path}",
-                operation="get_file_diff",
-                error_code="GIT_DIFF_FAILED",
-                root_cause=str(e)
-            )
-            # Cache None result to avoid repeated failures
-            self._file_diff_cache[file_path] = None
-            return None
-    
-    def get_file_last_modified_time(self, file_path: str) -> Optional[datetime]:
-        """
-        Get the timestamp when a file was last modified.
-        
-        For tracked files: Uses git log to get last commit time, or file system
-        modification time if file has unstaged changes.
-        For untracked files: Uses file system modification time.
-        
-        Args:
-            file_path: The file path to check
-            
-        Returns:
-            datetime if file exists and is trackable, None otherwise
-        """
-        full_path = self.project_root / file_path
-        if not full_path.exists():
-            return None
-        
-        # Check if file is tracked
-        tracked = self.run_git_command(['ls-files', '--error-unmatch', file_path])
-        
-        if tracked:
-            # File is tracked - try to get last commit time
-            # Format: %ct = commit time (Unix timestamp)
-            last_commit_time = self.run_git_command([
-                'log', '-1', '--format=%ct', '--', file_path
-            ])
-            
-            if last_commit_time and last_commit_time.strip():
-                try:
-                    timestamp = int(last_commit_time.strip())
-                    commit_time = datetime.fromtimestamp(timestamp, tz=timezone.utc)
-                    
-                    # Check if file has unstaged changes
-                    # Only use file system time if unstaged changes exist AND they're actual content changes (not just whitespace)
-                    unstaged_diff = self.run_git_command(['diff', file_path])
-                    unstaged_diff_no_whitespace = self.run_git_command(['diff', '--ignore-all-space', file_path])
-                    
-                    # If unstaged diff exists but diff without whitespace is empty, changes are only line endings/whitespace
-                    # In this case, ignore unstaged changes and use commit time
-                    if unstaged_diff and unstaged_diff.strip():
-                        if not unstaged_diff_no_whitespace or not unstaged_diff_no_whitespace.strip():
-                            # Only whitespace/line ending changes - ignore and use commit time
-                            logger.debug(
-                                f"File has only whitespace/line ending changes, using commit time: {file_path}",
-                                operation="get_file_last_modified_time",
-                                commit_time=commit_time.isoformat()
-                            )
-                            return commit_time
-                        
-                        # File has actual content changes - check file system time
-                        try:
-                            file_mtime = datetime.fromtimestamp(
-                                full_path.stat().st_mtime, 
-                                tz=timezone.utc
-                            )
-                            
-                            # Get today's date (start of day) for comparison
-                            try:
-                                today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-                            except (ValueError, AttributeError):
-                                # Can't get today's date - use commit time (conservative)
-                                logger.debug(
-                                    f"Could not get today's date, using commit time: {file_path}",
-                                    operation="get_file_last_modified_time",
-                                    commit_time=commit_time.isoformat()
-                                )
-                                return commit_time
-                            
-                            # Only use file system time if file was modified AFTER start of today
-                            # Otherwise, unstaged changes are from previous day - use commit time
-                            if file_mtime >= today_start:
-                                logger.debug(
-                                    f"File has unstaged content changes modified today, using file system time: {file_path}",
-                                    operation="get_file_last_modified_time",
-                                    commit_time=commit_time.isoformat(),
-                                    file_mtime=file_mtime.isoformat(),
-                                    today_start=today_start.isoformat()
-                                )
-                                return file_mtime
-                            else:
-                                # Unstaged changes are from previous day - use commit time
-                                logger.debug(
-                                    f"File has unstaged content changes from previous day, using commit time: {file_path}",
-                                    operation="get_file_last_modified_time",
-                                    commit_time=commit_time.isoformat(),
-                                    file_mtime=file_mtime.isoformat(),
-                                    today_start=today_start.isoformat()
-                                )
-                                return commit_time
-                        except (OSError, FileNotFoundError):
-                            # Fallback to commit time if file system check fails
-                            return commit_time
-                    
-                    # No unstaged changes - use commit time
-                    logger.debug(
-                        f"Using git commit time: {file_path}",
-                        operation="get_file_last_modified_time",
-                        commit_time=commit_time.isoformat()
-                    )
-                    return commit_time
-                except (ValueError, OSError) as e:
-                    logger.debug(
-                        f"Could not parse commit timestamp for {file_path}",
-                        operation="get_file_last_modified_time",
-                        error_code="COMMIT_TIME_PARSE_FAILED",
-                        root_cause=str(e)
-                    )
-                    # Fall through to file system time
-        
-        # For untracked files or if git log fails, use file system creation time (ctime)
-        # ctime is more reliable for untracked files - it represents when the file was created,
-        # not when it was last accessed/modified (which can be updated just by opening the file)
-        try:
-            stat_info = full_path.stat()
-            # Use creation time (ctime) for untracked files - more reliable than mtime
-            # On Windows, ctime is creation time; on Unix, it's change time (but still better than mtime)
-            file_ctime = datetime.fromtimestamp(stat_info.st_ctime, tz=timezone.utc)
-            file_mtime = datetime.fromtimestamp(stat_info.st_mtime, tz=timezone.utc)
-            
-            # For untracked files, prefer ctime (creation time) over mtime (modification time)
-            # mtime can be updated just by opening the file, while ctime is more stable
-            # However, if mtime is significantly older than ctime, use mtime (file was actually modified)
-            file_time = file_ctime if file_ctime <= file_mtime else file_mtime
-            
-            logger.debug(
-                f"Using file system time (untracked file): {file_path}",
-                operation="get_file_last_modified_time",
-                file_ctime=file_ctime.isoformat(),
-                file_mtime=file_mtime.isoformat(),
-                file_time=file_time.isoformat()
-            )
-            return file_time
-        except (OSError, FileNotFoundError, PermissionError) as e:
-            logger.debug(
-                f"Could not get file modification time for {file_path}",
-                operation="get_file_last_modified_time",
-                error_code="FILE_TIME_CHECK_FAILED",
-                root_cause=str(e)
-            )
-            return None
-    
-    def is_line_changed_in_session(self, file_path: str, line_number: int) -> bool:
-        """
-        Check if a specific line was added or modified in the current session.
-        Uses git diff to determine if line was changed.
-        
-        For untracked files, only returns True if file was created after session start.
-        """
-        diff = self.get_file_diff(file_path)
-        if diff is None:
-            # Untracked file - check if file is truly new (created after session start)
-            full_path = self.project_root / file_path
-            if not full_path.exists():
-                return False
-            
-            try:
-                # Get file modification time
-                file_mtime = datetime.fromtimestamp(full_path.stat().st_mtime, tz=timezone.utc)
-                session_start = datetime.fromisoformat(self.session.start_time.replace('Z', '+00:00'))
-                
-                # Line is new if file was created after session started
-                is_new = file_mtime >= session_start
-                
-                logger.debug(
-                    f"Untracked file line check: {file_path}:{line_number}",
-                    operation="is_line_changed_in_session",
-                    file_mtime=file_mtime.isoformat(),
-                    session_start=session_start.isoformat(),
-                    is_new=is_new
-                )
-                
-                return is_new
-            except (OSError, FileNotFoundError, PermissionError, ValueError) as e:
-                # If we can't determine, assume it's new (conservative approach)
-                logger.warn(
-                    f"Could not determine file age for {file_path}, assuming new",
-                    operation="is_line_changed_in_session",
-                    error_code="FILE_AGE_CHECK_FAILED",
-                    root_cause=str(e)
-                )
-                return True
-        
-        # Parse diff to find changed line ranges
-        # Format: @@ -old_start,old_count +new_start,new_count @@
-        for line in diff.split('\n'):
-            if line.startswith('@@'):
-                # Parse hunk header: @@ -old_start,old_count +new_start,new_count @@
-                match = re.search(r'\+(\d+)(?:,(\d+))?', line)
-                if match:
-                    new_start = int(match.group(1))
-                    new_count = int(match.group(2)) if match.group(2) else 1
-                    new_end = new_start + new_count - 1
-                    
-                    # Check if our line number is in this range
-                    if new_start <= line_number <= new_end:
-                        return True
-        
-        return False
-    
-    def _has_actual_content_changes(self, file_path: str) -> bool:
-        """
-        Check if a file has actual content changes (not just whitespace or metadata).
-        
-        Uses git diff with --ignore-all-space to detect real content changes.
-        A file is considered "actually modified" if it has content changes beyond
-        just whitespace differences.
-        
-        Args:
-            file_path: The file path to check
-            
-        Returns:
-            True if file has actual content changes, False otherwise
-        """
-        try:
-            # Get diff ignoring whitespace changes
-            # --ignore-all-space ignores all whitespace changes
-            staged_content = self.run_git_command(['diff', '--cached', '--ignore-all-space', file_path])
-            unstaged_content = self.run_git_command(['diff', '--ignore-all-space', file_path])
-            
-            # Ensure we have strings (handle None returns)
-            staged_content = staged_content if staged_content else ""
-            unstaged_content = unstaged_content if unstaged_content else ""
-            
-            # Memory optimization: Process diffs incrementally instead of concatenating
-            # Python Bible Chapter 12.4.3: Process large data in chunks
-            # Check if either diff has content changes (don't need full concatenation)
-            has_staged_changes = bool(staged_content and staged_content.strip())
-            has_unstaged_changes = bool(unstaged_content and unstaged_content.strip())
-            
-            if not has_staged_changes and not has_unstaged_changes:
-                return False
-            
-            # Process diffs incrementally (memory-efficient)
-            content_lines = []
-            for diff_content in [staged_content, unstaged_content]:
-                if not diff_content:
-                    continue
-                for line in diff_content.split('\n'):
-                    line_stripped = line.strip()
-                    # Include lines that are actual content changes
-                    if (line.startswith('+') or line.startswith('-')) and line_stripped:
-                        # Exclude diff headers and context markers
-                        if not line_stripped.startswith('+++') and not line_stripped.startswith('---') and not line_stripped.startswith('@@'):
-                            # Check if line has actual content (not just whitespace)
-                            # Remove the + or - prefix and check if there's actual content
-                            content_part = line[1:].strip() if len(line) > 1 else ""
-                            if content_part:
-                                content_lines.append(line)
-            
-            has_actual_changes = len(content_lines) > 0
-            
-            logger.debug(
-                f"Content change check: {file_path}",
-                operation="_has_actual_content_changes",
-                has_staged_changes=bool(staged_content),
-                has_unstaged_changes=bool(unstaged_content),
-                actual_change_count=len(content_lines),
-                has_actual_changes=has_actual_changes
-            )
-            
-            return has_actual_changes
-        except (subprocess.TimeoutExpired, FileNotFoundError, OSError, ValueError) as e:
-            # If we can't determine, assume it has changes (conservative approach)
-            logger.warn(
-                f"Could not determine content changes for {file_path}, assuming modified",
-                operation="_has_actual_content_changes",
-                error_code="CONTENT_CHANGE_CHECK_FAILED",
-                root_cause=str(e)
-            )
-            return True
-    
-    def is_file_modified_in_session(self, file_path: str) -> bool:
-        """
-        Check if a file was actually modified in the current session using hash-only comparison.
-        
-        Phase 2: Simplified to hash-only comparison - removes complex whitespace/line ending logic.
-        Phase 1.3: FIXED - Uses cached changed_files list instead of calling get_changed_files().
-        
-        Python Bible 12.4 Rule 3: Prefer local variables (cached list) to function calls.
-        Python Bible 12.7.2: Use cached data instead of recomputing.
-        
-        Returns True ONLY if:
-        - File content hash has changed since last check in this session
-        
-        Uses content hashing (SHA256) to detect actual file changes, which is more reliable
-        than timestamps or git diff analysis.
-        
-        Args:
-            file_path: Relative file path from project root
-            
-        Returns:
-            True if file hash changed since last check, False otherwise
-        """
-        # Use cached changed files (set in run_all_checks) - Phase 1.3
-        # Python Bible 12.7.2: Use cached data instead of recomputing
-        if self._cached_changed_files is None:
-            # Fallback: compute if cache not available (shouldn't happen in normal flow)
-            logger.warn(
-                "Changed files cache not available, falling back to direct call",
-                operation="is_file_modified_in_session",
-                file_path=file_path
-            )
-            changed_files = self._get_changed_files_impl(include_untracked=False)
-        else:
-            changed_files = self._cached_changed_files['tracked']
-        
-        if file_path not in changed_files:
-            return False
-        
-        full_path = self.project_root / file_path
-        if not full_path.exists():
-            return False
-        
-        # Get current file content hash (uses mtime in cache key internally)
-        current_hash = self.get_file_hash(str(full_path))
-        if not current_hash:
-            # Can't compute hash - skip (conservative: don't assume modified)
-            logger.debug(
-                f"Could not compute file hash for {file_path}, skipping",
-                operation="is_file_modified_in_session",
-                file_path=file_path
-            )
-            return False
-        
-        # Initialize file_hashes if not present (backward compatibility)
-        if self.session.file_hashes is None:
-            self.session.file_hashes = {}
-        
-        # Phase 2: Use same cache key format as get_file_hash() (includes mtime)
-        # This ensures cache invalidation when file is modified
-        try:
-            stat_info = full_path.stat()
-            cache_key = f"{file_path}:{stat_info.st_mtime}"
-        except (OSError, FileNotFoundError):
-            # Fallback to file_path only if we can't get mtime
-            cache_key = file_path
-        
-        # Get previous hash from session (if file was checked before)
-        # Phase 2: Use a separate key for tracking "previous hash" vs "current hash"
-        # The cache_key includes mtime, so it changes when file is modified
-        # We need a stable key to track the file across checks
-        previous_hash_key = f"{file_path}:previous"
-        previous_hash = self.session.file_hashes.get(previous_hash_key)
-        
-        # Phase 2: Simplified hash-only comparison
-        # If no previous hash, this is first time checking this file in this session
-        if previous_hash is None:
-            # First time checking - store current hash as baseline
-            self.session.file_hashes[previous_hash_key] = current_hash
-            # Also store with cache_key (includes mtime) for get_file_hash() compatibility
-            self.session.file_hashes[cache_key] = current_hash
-            
-            # For first check, assume file is modified if it's in changed_files
-            # (get_changed_files() already filters by git status)
-            logger.debug(
-                f"First check of file in session, storing hash: {file_path}",
-                operation="is_file_modified_in_session",
-                file_path=file_path
-            )
-            return True
-        
-        # File was checked before - compare hashes
-        # If hash changed, file content was actually modified
-        hash_changed = current_hash != previous_hash
-        
-        if hash_changed:
-            # Content actually changed - update stored hash
-            self.session.file_hashes[previous_hash_key] = current_hash
-            self.session.file_hashes[cache_key] = current_hash
-            logger.debug(
-                f"File content hash changed, file was modified: {file_path}",
-                operation="is_file_modified_in_session",
-                file_path=file_path,
-                previous_hash=previous_hash[:16] + "..." if previous_hash else None,
-                current_hash=current_hash[:16] + "..."
-            )
-            return True
-        else:
-            # Hash unchanged - file content not actually modified
-            # (timestamp might have changed, but content is the same)
-            logger.debug(
-                f"File content hash unchanged, file not modified: {file_path}",
-                operation="is_file_modified_in_session",
-                file_path=file_path,
-                hash=current_hash[:16] + "..."
-            )
-            return False
     
     # ============================================================================
     # Context Management Enforcement Methods
     # ============================================================================
-    
-    def check_context_management_compliance(self) -> bool:
-        """
-        Check context management compliance (Two-Brain Model: Step 0.5/4.5 removed).
-        
-        Returns:
-            True if compliant, False if violations found
-        """
-        if not PREDICTIVE_CONTEXT_AVAILABLE:
-            return True  # Skip if system not available
-        
-        if not self.preloader or not self.context_loader:
-            return True  # Skip if components not initialized
-        
-        # Try to reload agent response from file (in case it was updated)
-        # This allows the agent to write its response to a file and the enforcer will read it
-        self._load_agent_response_from_file()
-        
-        check_name = "Context Management Compliance"
-        
-        # CRITICAL FIX: Skip context management checks when there's no agent response
-        # These checks require an active agent session to verify behavior
-        # When running from file watcher or without agent, skip these checks
-        if not self._last_agent_response:
-            logger.debug(
-                "Skipping context management compliance checks - no agent response available",
-                operation="check_context_management_compliance",
-                reason="no_agent_response"
-            )
-            # Skip checks but report success (not a violation when no agent session)
-            # Use consistent skip message format
-            self._report_success(f"{check_name} (skipped - no agent session)")
-            return True
-        
-        # CRITICAL FIX: Also skip if agent response context-id doesn't match current recommendations
-        # This handles the case where agent response file exists but is stale (old context-id)
-        if self.response_parser:
-            try:
-                parsed = self.response_parser.parse(self._last_agent_response)
-                agent_context_id = parsed.get("context_id")
-                
-                # Get current context-id from recommendations.md
-                context_id_match, latest_context_id = self._verify_context_id_match()
-                
-                # If context-ids don't match, agent response is stale - skip checks
-                if agent_context_id and latest_context_id and agent_context_id != latest_context_id:
-                    logger.debug(
-                        f"Skipping context management compliance checks - agent response context-id is stale",
-                        operation="check_context_management_compliance",
-                        reason="stale_context_id",
-                        agent_context_id=agent_context_id,
-                        latest_context_id=latest_context_id
-                    )
-                    # Skip checks but report success (not a violation when agent response is stale)
-                    # Use consistent skip message format
-                    self._report_success(f"{check_name} (skipped - stale agent response)")
-                    return True
-            except Exception as e:
-                # If parsing fails, skip checks (don't block on parsing errors)
-                logger.debug(
-                    f"Could not parse agent response for context-id check: {e}",
-                    operation="check_context_management_compliance",
-                    error_code="PARSE_FAILED",
-                    root_cause=str(e)
-                )
-                # Continue with checks (might still be valid)
-        
-        all_passed = True
-        
-        # Two-Brain Model: Step 0.5/4.5 compliance checks removed
-        # Context management is now handled by enforcer internally, not by LLM
-        
-        # Check context state validity
-        if not self._check_context_state_validity():
-            all_passed = False
-        
-        if all_passed:
-            self._report_success(check_name)
-        else:
-            self._report_failure(check_name)
-        
-        return all_passed
     
     # Two-Brain Model: _verify_agent_behavior() removed
     # Step 0.5/4.5 compliance checks are no longer needed
@@ -1747,7 +608,7 @@ class VeroFieldEnforcer:
         if not self.context_loader:
             return set()
         
-        changed_files = self.get_changed_files(include_untracked=False)
+        changed_files = self.git_utils.get_changed_files(include_untracked=False)
         if not changed_files:
             return set()
         
@@ -1934,1376 +795,39 @@ class VeroFieldEnforcer:
     # End Context Management Enforcement Methods
     # ============================================================================
     
-    def check_memory_bank(self) -> bool:
-        """
-        Check Memory Bank compliance (Step 0 requirement).
-        
-        Validates:
-        - All 6 Memory Bank files exist
-        - Files are recent (not stale)
-        """
-        check_name = "Memory Bank Compliance"
-        all_passed = True
-        
-        # Check all required files exist
-        for filename in self.MEMORY_BANK_FILES:
-            file_path = self.memory_bank_dir / filename
-            if not file_path.exists():
-                self._log_violation(Violation(
-                    severity=ViolationSeverity.BLOCKED,
-                    rule_ref="01-enforcement.mdc Step 0",
-                    message=f"Missing Memory Bank file: {filename}",
-                    file_path=str(file_path),
-                    session_scope="current_session"
-                ))
-                all_passed = False
-                self._report_failure(check_name)
-            else:
-                # Check file is not empty
-                if file_path.stat().st_size == 0:
-                    self._log_violation(Violation(
-                        severity=ViolationSeverity.WARNING,
-                        rule_ref="01-enforcement.mdc Step 0",
-                        message=f"Memory Bank file is empty: {filename}",
-                        file_path=str(file_path),
-                        session_scope="current_session"
-                    ))
-                    all_passed = False
-        
-        if all_passed:
-            self._report_success(check_name)
-        
-        return all_passed
     
-    def _is_date_future_or_past(self, date_str: str) -> Optional[bool]:
-        """
-        Check if a date is clearly in the future or past relative to current date.
-        
-        Future dates (more than 1 day ahead) are likely historical/test dates.
-        Past dates (more than 1 year old) are likely historical records.
-        
-        Args:
-            date_str: Date string in ISO format (YYYY-MM-DD)
-            
-        Returns:
-            True if date is clearly future/past (likely historical), 
-            False if date is near current (likely should be current),
-            None if date cannot be parsed
-        """
-        try:
-            from datetime import datetime
-            date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
-            current_date_obj = datetime.strptime(self.CURRENT_DATE, "%Y-%m-%d").date()
-            
-            days_diff = (date_obj - current_date_obj).days
-            
-            # Future dates (more than 1 day ahead) are likely historical/test dates
-            if days_diff > 1:
-                return True
-            # Past dates (more than 1 year old) are likely historical records
-            if days_diff < -365:
-                return True
-            # Dates within 1 day of current are likely should be current
-            return False
-        except (ValueError, AttributeError):
-            return None
-    
-    def _is_historical_date_pattern(self, line: str, context: str = '') -> bool:
-        """
-        Check if a line contains a historical date pattern.
-        
-        Historical dates are dates that are intentionally preserved as historical
-        records (e.g., "Entry #1 - 2025-11-27", "Completed (2025-11-29)").
-        
-        Phase 1: Uses consolidated patterns (5 instead of 67) for better performance.
-        
-        Args:
-            line: The line of text to check
-            context: Optional surrounding context (for document-level awareness)
-            
-        Returns:
-            True if the line matches a historical date pattern, False otherwise
-        """
-        # Quick check: Does line contain a date?
-        if not self.HARDCODED_DATE_PATTERN.search(line):
-            return False
-        
-        # Check consolidated patterns (5 checks instead of 67!)
-        for idx, pattern in enumerate(self.HISTORICAL_DATE_PATTERNS, 1):
-            if pattern.search(line):
-                logger.debug(
-                    f"Historical date pattern matched",
-                    operation="_is_historical_date_pattern",
-                    pattern_number=idx,
-                    pattern=pattern.pattern,
-                    line_preview=line[:100]
-                )
-                return True
-        
-        # Check context if provided (e.g., document title)
-        if context:
-            for pattern in self.HISTORICAL_DATE_PATTERNS:
-                if pattern.search(context):
-                    logger.debug(
-                        f"Historical date pattern matched in context",
-                        operation="_is_historical_date_pattern",
-                        line_preview=line[:100],
-                        context_preview=context[:100]
-                    )
-                    return True
-        
-        # Check if line contains dates that are clearly future/past (likely historical)
-        matches = self.HARDCODED_DATE_PATTERN.findall(line)
-        for match in matches:
-            date_str = self._normalize_date_match(match if isinstance(match, tuple) else (match,))
-            if date_str:
-                is_future_or_past = self._is_date_future_or_past(date_str)
-                if is_future_or_past is True:
-                    logger.debug(
-                        f"Date is clearly future/past (likely historical): {date_str}",
-                        operation="_is_historical_date_pattern",
-                        line_preview=line[:100],
-                        date=date_str
-                    )
-                    return True
-        
-        return False
-    
-    def _is_historical_document_file(self, file_path: Path) -> bool:
-        """
-        Check if a file is a historical document (e.g., document_2026-12-21.md).
-        
-        Files with dates in their names are typically historical documents
-        where dates should be preserved as historical records.
-        
-        Args:
-            file_path: The file path to check
-            
-        Returns:
-            True if the file appears to be a historical document, False otherwise
-        """
-        # Check for historical documentation directories (e.g., docs/Auto-PR/)
-        file_path_str = str(file_path).replace("\\", "/").lower()
-        historical_dirs = [
-            "docs/auto-pr/",
-            "docs/archive/",
-            "docs/historical/",
-        ]
-        # Fix: Check if historical directory is contained in path (not just if path starts with it)
-        # This handles full absolute paths like "c:/users/.../docs/auto-pr/file.md"
-        for dir_path in historical_dirs:
-            dir_pattern = f"/{dir_path.rstrip('/')}/"
-            if dir_pattern in file_path_str:
-                return True
-        
-        file_name = file_path.name.lower()
-        
-        # Check for date patterns in filename (e.g., document_2026-12-21.md, report_12-21-2026.md)
-        # ISO format: YYYY-MM-DD or YYYY_MM_DD
-        if re.search(r'\d{4}[-_]\d{2}[-_]\d{2}', file_name):
-            return True
-        # US format: MM-DD-YYYY or MM_DD_YYYY
-        if re.search(r'\d{2}[-_]\d{2}[-_]\d{4}', file_name):
-            return True
-        # Year-only patterns (e.g., document_2026.md)
-        if re.search(r'_\d{4}\.', file_name) or re.search(r'-\d{4}\.', file_name):
-            return True
-        
-        # Check for common historical document prefixes
-        historical_prefixes = ['document_', 'report_', 'entry_', 'log_', 'note_', 'memo_']
-        if any(file_name.startswith(prefix) for prefix in historical_prefixes):
-            # If it has a date-like pattern anywhere in the name, treat as historical
-            if re.search(r'\d{4}', file_name):
-                return True
-        
-        return False
-    
-    def _is_log_file(self, file_path: Path) -> bool:
-        """
-        Check if a file is a log/learning file where historical dates should be preserved.
-        
-        Log files contain historical entries and "Last Updated" fields should be
-        preserved as historical records, not updated to current date.
-        
-        Args:
-            file_path: The file path to check
-            
-        Returns:
-            True if the file is a log file, False otherwise
-        """
-        log_file_names = [
-            "BUG_LOG.md",
-            "PYTHON_LEARNINGS_LOG.md",
-            "LEARNINGS_LOG.md",
-            "LEARNINGS.md",
-        ]
-        
-        # Memory Bank files are log-like (preserve historical dates)
-        memory_bank_files = [
-            "activeContext.md",
-            "progress.md",
-            "projectbrief.md",
-            "productContext.md",
-            "systemPatterns.md",
-            "techContext.md",
-        ]
-        
-        # Check if file is in memory-bank directory
-        if "memory-bank" in str(file_path):
-            return True
-        
-        return file_path.name in log_file_names or file_path.name in memory_bank_files
-    
-    def _is_documentation_file(self, file_path: Path) -> bool:
-        """
-        Check if a file is a documentation/example file where example dates should be preserved.
-        
-        Documentation files contain example code with example dates that should be preserved
-        as educational examples, not updated to current date.
-        
-        Args:
-            file_path: The file path to check
-            
-        Returns:
-            True if the file is a documentation/example file, False otherwise
-        """
-        # Documentation directories
-        doc_dirs = [
-            "docs/",
-            "documentation/",
-            "examples/",
-            "bibles/",
-            "reference/",
-            ".cursor/enforcement/rules/",  # Rule files contain example code
-        ]
-        
-        # Documentation file patterns
-        doc_patterns = [
-            r'.*\.md$',  # Markdown files in docs/ are likely documentation
-            r'.*_bible.*',  # Bible/reference files
-            r'.*example.*',  # Example files
-            r'.*tutorial.*',  # Tutorial files
-            r'.*guide.*',  # Guide files
-        ]
-        
-        file_path_str = str(file_path).lower()
-        
-        # Check if file is in documentation directory
-        for doc_dir in doc_dirs:
-            if doc_dir.lower() in file_path_str:
-                return True
-        
-        # Check if file name matches documentation patterns
-        import re
-        for pattern in doc_patterns:
-            if re.search(pattern, file_path.name.lower()):
-                return True
-        
-        return False
-    
-    def check_hardcoded_dates(self, violation_scope: str = "current_session") -> bool:
-        """
-        Check for hardcoded dates (02-core.mdc violation).
-        
-        Scans changed files for hardcoded dates that don't match current date.
-        Uses git diff to determine if dates were added/modified in current session.
-        
-        Excludes:
-        - Historical dates (not changed in current session)
-        - Historical date patterns (Entry #N - YYYY-MM-DD, Completed (YYYY-MM-DD), etc.)
-        - "Last Updated" fields that weren't modified (or were correctly updated)
-        - Dates in BUG_LOG.md (all historical)
-        
-        Args:
-            violation_scope: Scope for violations - "current_session" or "historical"
-        """
-        check_name = "Hardcoded Date Detection"
-        all_passed = True
-        
-        # Determine session scope for violations (use provided scope, default to current_session)
-        session_scope = violation_scope if violation_scope else "current_session"
-        
-        # Include untracked files for enforcement checks (to catch dates in new files)
-        changed_files = self.get_changed_files(include_untracked=True)
-        
-        # Memory optimization: Process git output incrementally instead of loading all at once
-        # Python Bible Chapter 12.4.3: Use generators for memory-efficient iteration
-        git_output = self.run_git_command(['ls-files'])
-        if git_output:
-            # Process line-by-line to build set (more memory-efficient)
-            all_tracked = {line.strip() for line in git_output.split('\n') if line.strip()}
-        else:
-            all_tracked = set()
-        
-        # Separate untracked files (always check these - they're new files)
-        untracked_files = [f for f in changed_files if f not in all_tracked]
-        tracked_files = [f for f in changed_files if f in all_tracked]
-        
-        # Limit tracked files to prevent timeouts (process max 50 files for date checking)
-        # But always check ALL untracked files (they're new and need validation)
-        if len(tracked_files) > 50:
-            logger.warn(
-                f"Too many tracked files ({len(tracked_files)}) for date check, limiting to 50",
-                operation="check_hardcoded_dates",
-                total_tracked=len(tracked_files),
-                untracked_count=len(untracked_files),
-                limited_to=50
-            )
-            tracked_files = tracked_files[:50]
-        
-        # Combine: all untracked + limited tracked files
-        changed_files = untracked_files + tracked_files
-        
-        # Phase 1.4: Performance optimization - batch file modification checks
-        # Python Bible 12.8: Batch operations for IO-bound workloads
-        # Pre-compute file modification status for all files at once (O(n) instead of O(n²))
-        logger.debug(
-            f"Pre-computing file modification status for {len(changed_files)} files",
-            operation="check_hardcoded_dates",
-            total_files=len(changed_files)
-        )
-        file_modification_cache = {}
-        for file_path_str in changed_files:
-            file_path = self.project_root / file_path_str
-            if file_path.exists() and not file_path.is_dir():
-                # Python Bible 12.4 Rule 3: Prefer local variables (dict lookup) to function calls
-                file_modification_cache[file_path_str] = self.is_file_modified_in_session(file_path_str)
-        
-        logger.debug(
-            f"Pre-computed modification status for {len(file_modification_cache)} files",
-            operation="check_hardcoded_dates",
-            modified_count=sum(1 for v in file_modification_cache.values() if v)
-        )
-        
-        # Phase 3: Performance optimization - cache DocumentContext instances
-        # Initialize DateDetector once (reuse for all files)
-        detector = None
-        if DateDetector:
-            detector = DateDetector(current_date=self.CURRENT_DATE)
-        
-        # Cache for DocumentContext instances (avoid recreating for same file)
-        doc_context_cache = {}
-        
-        # Define directories to exclude from date checks
-        excluded_dirs = [
-            self.enforcement_dir,
-            self.project_root / '.cursor' / 'archive',
-            self.project_root / '.cursor' / 'backups'
-        ]
-        
-        for file_path_str in changed_files:
-            file_path = self.project_root / file_path_str
-            
-            # Skip binary files and directories
-            if not file_path.exists() or file_path.is_dir():
-                continue
-            
-            if file_path.suffix in ['.png', '.jpg', '.jpeg', '.gif', '.ico', '.pdf']:
-                continue
-            
-            # Exclude specific directories using Path.is_relative_to()
-            if any(file_path.is_relative_to(excluded_dir) for excluded_dir in excluded_dirs):
-                continue
-            
-            # Defensive check: Skip historical document directories early
-            # This ensures Auto-PR files are skipped even if DocumentContext check fails
-            file_path_str_normalized = str(file_path).replace("\\", "/").lower()
-            # Check for both absolute paths (with leading /) and relative paths (without)
-            historical_dir_patterns = [
-                "/docs/auto-pr/", "/docs/archive/", "/docs/historical/",  # Absolute paths
-                "docs/auto-pr/", "docs/archive/", "docs/historical/"      # Relative paths
-            ]
-            if any(pattern in file_path_str_normalized for pattern in historical_dir_patterns):
-                logger.debug(
-                    f"Skipping historical document directory in date checker: {file_path_str}",
-                    operation="check_hardcoded_dates",
-                    file_path=file_path_str,
-                    reason="historical_document_directory"
-                )
-                continue
-            
-            # Phase 3: Use cached DocumentContext for file-level detection
-            doc_context = None
-            if DocumentContext:
-                # Cache DocumentContext per file path (performance optimization)
-                if file_path_str not in doc_context_cache:
-                    doc_context_cache[file_path_str] = DocumentContext(file_path)
-                doc_context = doc_context_cache[file_path_str]
-                
-                # Skip log files entirely (all dates are historical entries)
-                if doc_context.is_log_file:
-                    continue
-                # Skip historical document files (files with dates in their names)
-                if doc_context.is_historical_doc:
-                    logger.debug(
-                        f"Skipping historical document file: {file_path_str}",
-                        operation="check_hardcoded_dates",
-                        file_path=file_path_str,
-                        reason="file_name_contains_date"
-                    )
-                    continue
-            else:
-                # Fallback to old methods if DocumentContext not available
-                if self._is_log_file(file_path):
-                    continue
-                if self._is_historical_document_file(file_path):
-                    logger.debug(
-                        f"Skipping historical document file: {file_path_str}",
-                        operation="check_hardcoded_dates",
-                        file_path=file_path_str,
-                        reason="file_name_contains_date"
-                    )
-                    continue
-            
-            # Check if file was actually modified in this session
-            # Phase 1.4: Use pre-computed modification status (O(1) lookup)
-            # Python Bible 12.4 Rule 3: Prefer local variables (dict lookup) to function calls
-            file_modified = file_modification_cache.get(file_path_str, False)
-            
-            # Early exit: if file wasn't modified, skip entirely (all dates are historical)
-            if not file_modified:
-                logger.debug(
-                    f"Skipping file (not modified in session): {file_path_str}",
-                    operation="check_hardcoded_dates",
-                    file_path=file_path_str
-                )
-                continue
-            
-            try:
-                # Phase 3: Use DateDetector for efficient date finding and classification
-                if detector and doc_context:
-                    # Read file content once
-                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                        file_content = f.read()
-                    
-                    # Find all dates in file (detector already initialized above)
-                    date_matches = detector.find_dates(file_content, context_lines=3)
-                    
-                    # Process each date match
-                    for date_match in date_matches:
-                        line_num = date_match.line_number
-                        line = date_match.line_content
-                        
-                        # Skip pattern definition lines in auto-enforcer.py itself (meta-checking)
-                        if file_path.name == 'auto-enforcer.py' and (
-                            'HISTORICAL_DATE_PATTERNS' in line or
-                            're.compile' in line and 'date' in line.lower()
-                        ):
-                            continue
-                        
-                        # Check if this line was changed in the current session
-                        line_changed = self.is_line_changed_in_session(file_path_str, line_num)
-                        
-                        # Early exit: if line wasn't changed, it's historical - skip
-                        if not line_changed:
-                            continue
-                        
-                        # Classify the date
-                        classification = detector.classify_date(date_match, doc_context)
-                        
-                        # Handle "Last Updated" fields specially
-                        is_last_updated = re.search(r'last\s+updated\s*:', line, re.IGNORECASE)
-                        
-                        if is_last_updated:
-                            # Skip "Last Updated" checks for log files (historical dates are preserved)
-                            if doc_context.is_log_file:
-                                continue
-                            
-                            # "Last Updated" field logic:
-                            if line_changed:
-                                # Line was changed - check if date is current
-                                if date_match.date_str != self.CURRENT_DATE:
-                                    # Date was changed but not to current date - violation
-                                    self._log_violation(Violation(
-                                        severity=ViolationSeverity.BLOCKED,
-                                        rule_ref="02-core.mdc",
-                                        message=f"'Last Updated' field modified but date not updated to current: {date_match.date_str} (current: {self.CURRENT_DATE})",
-                                        file_path=str(file_path),
-                                        line_number=line_num,
-                                        session_scope=session_scope
-                                    ))
-                                    all_passed = False
-                                    self._report_failure(check_name)
-                            else:
-                                # File was modified but "Last Updated" wasn't updated - violation
-                                self._log_violation(Violation(
-                                    severity=ViolationSeverity.BLOCKED,
-                                    rule_ref="02-core.mdc",
-                                    message=f"'Last Updated' field should be updated to current date ({self.CURRENT_DATE}) since file was modified",
-                                    file_path=str(file_path),
-                                    line_number=line_num,
-                                    session_scope=session_scope
-                                ))
-                                all_passed = False
-                                self._report_failure(check_name)
-                            continue
-                        
-                        # For non-"Last Updated" dates: only flag CURRENT dates that don't match system date
-                        if classification == DateClassification.CURRENT:
-                            if date_match.date_str != self.CURRENT_DATE:
-                                # Date was added/modified but not to current date - violation
-                                self._log_violation(Violation(
-                                    severity=ViolationSeverity.BLOCKED,
-                                    rule_ref="02-core.mdc",
-                                    message=f"Hardcoded date found in modified line: {date_match.date_str} (current date: {self.CURRENT_DATE})",
-                                    file_path=str(file_path),
-                                    line_number=line_num,
-                                    session_scope=session_scope
-                                ))
-                                all_passed = False
-                                self._report_failure(check_name)
-                        # HISTORICAL, EXAMPLE, and UNKNOWN dates are skipped (preserved)
-                
-                else:
-                    # Fallback to old line-by-line method if DateDetector not available
-                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                        in_code_block = False
-                        
-                        for line_num, line in enumerate(f, 1):
-                            if '```' in line:
-                                in_code_block = not in_code_block
-                            if not self.HARDCODED_DATE_PATTERN.search(line):
-                                continue
-                            
-                            if file_path.name == 'auto-enforcer.py' and (
-                                'HISTORICAL_DATE_PATTERNS' in line or
-                                're.compile' in line and 'date' in line.lower()
-                            ):
-                                continue
-                            
-                            line_changed = self.is_line_changed_in_session(file_path_str, line_num)
-                            if not line_changed:
-                                continue
-                            
-                            if self._is_historical_date_pattern(line):
-                                continue
-                            
-                            if self._is_documentation_file(file_path) and in_code_block:
-                                continue
-                            
-                            is_last_updated = re.search(r'last\s+updated\s*:', line, re.IGNORECASE)
-                            if is_last_updated:
-                                if DocumentContext and doc_context and doc_context.is_log_file:
-                                    continue
-                                elif not DocumentContext and self._is_log_file(file_path):
-                                    continue
-                                
-                                if line_changed:
-                                    matches = self.HARDCODED_DATE_PATTERN.findall(line)
-                                    for match in matches:
-                                        date_str = self._normalize_date_match(match if isinstance(match, tuple) else (match,))
-                                        if date_str != self.CURRENT_DATE:
-                                            self._log_violation(Violation(
-                                                severity=ViolationSeverity.BLOCKED,
-                                                rule_ref="02-core.mdc",
-                                                message=f"'Last Updated' field modified but date not updated to current: {date_str} (current: {self.CURRENT_DATE})",
-                                                file_path=str(file_path),
-                                                line_number=line_num,
-                                                session_scope=session_scope
-                                            ))
-                                            all_passed = False
-                                            self._report_failure(check_name)
-                                else:
-                                    self._log_violation(Violation(
-                                        severity=ViolationSeverity.BLOCKED,
-                                        rule_ref="02-core.mdc",
-                                        message=f"'Last Updated' field should be updated to current date ({self.CURRENT_DATE}) since file was modified",
-                                        file_path=str(file_path),
-                                        line_number=line_num,
-                                        session_scope=session_scope
-                                    ))
-                                    all_passed = False
-                                    self._report_failure(check_name)
-                                continue
-                            
-                            matches = self.HARDCODED_DATE_PATTERN.findall(line)
-                            for match in matches:
-                                date_str = self._normalize_date_match(match if isinstance(match, tuple) else (match,))
-                                if date_str != self.CURRENT_DATE:
-                                    self._log_violation(Violation(
-                                        severity=ViolationSeverity.BLOCKED,
-                                        rule_ref="02-core.mdc",
-                                        message=f"Hardcoded date found in modified line: {date_str} (current date: {self.CURRENT_DATE})",
-                                        file_path=str(file_path),
-                                        line_number=line_num,
-                                        session_scope=session_scope
-                                    ))
-                                    all_passed = False
-                                    self._report_failure(check_name)
-                        
-            except (FileNotFoundError, PermissionError, OSError, UnicodeDecodeError) as e:
-                logger.warn(
-                    f"Failed to check file for hardcoded dates: {str(e)}",
-                    operation="check_hardcoded_dates",
-                    error_code="DATE_CHECK_FAILED",
-                    file_path=str(file_path)
-                )
-        
-        if all_passed:
-            self._report_success(check_name)
-        
-        return all_passed
-    
-    def check_security_compliance(self) -> bool:
-        """
-        Check security file compliance (03-security.mdc).
-        
-        Validates that security-sensitive files are not modified without proper checks.
-        """
-        check_name = "Security Compliance"
-        all_passed = True
-        
-        changed_files = self.get_changed_files()
-        security_files_changed = []
-        
-        for file_path_str in changed_files:
-            # Check if file is security-sensitive
-            is_security_file = False
-            for pattern in self.SECURITY_FILES:
-                if pattern.replace('**/', '').replace('/*', '') in file_path_str:
-                    is_security_file = True
-                    break
-            
-            if is_security_file:
-                security_files_changed.append(file_path_str)
-        
-        if security_files_changed:
-            # Log warning (not blocked, but should be reviewed)
-            for file_path_str in security_files_changed:
-                self._log_violation(Violation(
-                    severity=ViolationSeverity.WARNING,
-                    rule_ref="03-security.mdc",
-                    message=f"Security-sensitive file modified: {file_path_str}",
-                    file_path=file_path_str,
-                    session_scope="current_session"
-                ))
-            self._report_failure(check_name)
-            all_passed = False
-        
-        if all_passed:
-            self._report_success(check_name)
-        
-        return all_passed
-    
-    def check_active_context(self) -> bool:
-        """
-        Check activeContext.md update (Step 5 requirement).
-        
-        Validates that activeContext.md was updated after file changes.
-        """
-        check_name = "activeContext.md Update"
-        all_passed = True
-        
-        active_context_file = self.memory_bank_dir / "activeContext.md"
-        
-        if not active_context_file.exists():
-            self._log_violation(Violation(
-                severity=ViolationSeverity.BLOCKED,
-                rule_ref="01-enforcement.mdc Step 5",
-                message="activeContext.md does not exist",
-                file_path=str(active_context_file),
-                session_scope="current_session"
-            ))
-            all_passed = False
-            self._report_failure(check_name)
-            return all_passed
-        
-        # Check if file was modified recently (within last hour)
-        file_mtime = datetime.fromtimestamp(active_context_file.stat().st_mtime, tz=timezone.utc)
-        now = datetime.now(timezone.utc)
-        time_diff = (now - file_mtime).total_seconds()
-        
-        # If file hasn't been updated in last hour and there are changes, warn
-        changed_files = self.get_changed_files()
-        if changed_files and time_diff > 3600:  # 1 hour
-            self._log_violation(Violation(
-                severity=ViolationSeverity.WARNING,
-                rule_ref="01-enforcement.mdc Step 5",
-                message=f"activeContext.md not updated recently (last modified: {file_mtime.isoformat()})",
-                file_path=str(active_context_file),
-                session_scope="current_session"
-            ))
-            all_passed = False
-            self._report_failure(check_name)
-        
-        if all_passed:
-            self._report_success(check_name)
-        
-        return all_passed
-    
-    def check_error_handling(self) -> bool:
-        """
-        Check error handling patterns (06-error-resilience.mdc).
-        
-        Validates that error-prone operations have proper error handling.
-        """
-        check_name = "Error Handling Compliance"
-        all_passed = True
-        
-        changed_files = self.get_changed_files()
-        
-        # Filter to only files actually modified in current session
-        # This prevents re-detection of historical violations
-        session_modified_files = [
-            f for f in changed_files 
-            if self.is_file_modified_in_session(f)
-        ]
-        
-        # Patterns to check for (language-agnostic)
-        error_prone_patterns = [
-            (r'await\s+\w+\(', None),  # Async operations should have error handling
-            (r'subprocess\.(run|call|Popen)', None),  # Subprocess should have error handling
-            (r'open\(', None),  # File operations should have error handling
-        ]
-        
-        for file_path_str in session_modified_files:
-            file_path = self.project_root / file_path_str
-            
-            if not file_path.exists() or file_path.suffix not in ['.py', '.ts', '.tsx', '.js', '.jsx']:
-                continue
-            
-            # Determine file type for appropriate error handling pattern
-            is_python = file_path.suffix == '.py'
-            is_typescript_js = file_path.suffix in ['.ts', '.tsx', '.js', '.jsx']
-            
-            # Error handling patterns by language
-            if is_python:
-                # Python: try: or try\n
-                error_handling_patterns = [r'try\s*:', r'try\s*\n']
-            elif is_typescript_js:
-                # TypeScript/JavaScript: try { or try\n{ or catch
-                error_handling_patterns = [r'try\s*\{', r'try\s*\n\s*\{', r'catch\s*\(', r'catch\s*\{']
-            else:
-                error_handling_patterns = []
-            
-            try:
-                # Phase 2.2: Use line-by-line processing instead of f.read()
-                # Python Bible 12.12.1: Use generators for memory-efficient iteration
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    # Read lines directly (more efficient than read().split('\n'))
-                    lines = list(f)
-                    
-                    for pattern, _ in error_prone_patterns:
-                        for line_num, line in enumerate(lines, 1):
-                            if re.search(pattern, line):
-                                # Check if there's error handling nearby (within 10 lines)
-                                context_start = max(0, line_num - 10)
-                                context_end = min(len(lines), line_num + 10)
-                                context = '\n'.join(lines[context_start:context_end])
-                                
-                                # Check if any error handling pattern is present
-                                has_error_handling = any(
-                                    re.search(eh_pattern, context, re.MULTILINE)
-                                    for eh_pattern in error_handling_patterns
-                                )
-                                
-                                if not has_error_handling:
-                                    self._log_violation(Violation(
-                                        severity=ViolationSeverity.WARNING,
-                                        rule_ref="06-error-resilience.mdc",
-                                        message=f"Error-prone operation without error handling: {pattern}",
-                                        file_path=str(file_path),
-                                        line_number=line_num,
-                                        session_scope="current_session"
-                                    ))
-                                    all_passed = False
-                                    self._report_failure(check_name)
-            except (FileNotFoundError, PermissionError, OSError, UnicodeDecodeError) as e:
-                logger.warn(
-                    f"Failed to check file for error handling: {str(e)}",
-                    operation="check_error_handling",
-                    error_code="ERROR_HANDLING_CHECK_FAILED",
-                    file_path=str(file_path)
-                )
-        
-        if all_passed:
-            self._report_success(check_name)
-        
-        return all_passed
-    
-    def check_logging(self) -> bool:
-        """
-        Check structured logging compliance (07-observability.mdc).
-        
-        Validates that logging uses structured format, not console.log.
-        """
-        check_name = "Structured Logging Compliance"
-        all_passed = True
-        
-        changed_files = self.get_changed_files()
-        
-        # Filter to only files actually modified in current session
-        # This prevents re-detection of historical violations
-        session_modified_files = [
-            f for f in changed_files 
-            if self.is_file_modified_in_session(f)
-        ]
-        
-        # Patterns to check for
-        console_log_patterns = [
-            r'console\.(log|error|warn|debug)',
-            r'print\(',
-        ]
-        
-        for file_path_str in session_modified_files:
-            file_path = self.project_root / file_path_str
-            
-            if not file_path.exists() or file_path.suffix not in ['.py', '.ts', '.tsx', '.js', '.jsx']:
-                continue
-            
-            # Skip test files (they can use console.log)
-            if 'test' in str(file_path).lower() or 'spec' in str(file_path).lower():
-                continue
-            
-            try:
-                # Phase 2.2: Use line-by-line processing instead of f.read()
-                # Python Bible 12.12.1: Use generators for memory-efficient iteration
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    # Read lines directly (more efficient than read().split('\n'))
-                    lines = list(f)
-                    
-                    for pattern in console_log_patterns:
-                        for line_num, line in enumerate(lines, 1):
-                            if re.search(pattern, line):
-                                # Allow in comments
-                                if line.strip().startswith('//') or line.strip().startswith('#'):
-                                    continue
-                                
-                                self._log_violation(Violation(
-                                    severity=ViolationSeverity.WARNING,
-                                    rule_ref="07-observability.mdc",
-                                    message=f"Console logging detected (use structured logging): {pattern}",
-                                    file_path=str(file_path),
-                                    line_number=line_num,
-                                    session_scope="current_session"
-                                ))
-                                all_passed = False
-                                self._report_failure(check_name)
-            except (FileNotFoundError, PermissionError, OSError, UnicodeDecodeError) as e:
-                logger.warn(
-                    f"Failed to check file for logging: {str(e)}",
-                    operation="check_logging",
-                    error_code="LOGGING_CHECK_FAILED",
-                    file_path=str(file_path)
-                )
-        
-        if all_passed:
-            self._report_success(check_name)
-        
-        return all_passed
-    
-    def check_python_bible(self) -> bool:
-        """
-        Check Python Bible compliance (python_bible.mdc).
-        
-        Validates Python files follow Python Bible patterns.
-        """
-        check_name = "Python Bible Compliance"
-        all_passed = True
-        
-        changed_files = self.get_changed_files()
-        
-        # Filter to only files actually modified in current session
-        # This prevents re-detection of historical violations
-        session_modified_files = [
-            f for f in changed_files 
-            if self.is_file_modified_in_session(f)
-        ]
-        python_files = [f for f in session_modified_files if f.endswith('.py')]
-        
-        if not python_files:
-            self._report_success(check_name)
-            return all_passed
-        
-        # Basic Python Bible checks
-        for file_path_str in python_files:
-            file_path = self.project_root / file_path_str
-            
-            if not file_path.exists():
-                continue
-            
-            try:
-                # Phase 2.2: Use line-by-line processing instead of f.read()
-                # Python Bible 12.12.1: Use generators for memory-efficient iteration
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    # Process line-by-line for regex searches (more memory-efficient)
-                    for line_num, line in enumerate(f, 1):
-                        # Check for common anti-patterns line-by-line
-                        # 1. Mutable default arguments
-                        if re.search(r'def\s+\w+\([^)]*=\s*\[', line):
-                            self._log_violation(Violation(
-                                severity=ViolationSeverity.WARNING,
-                                rule_ref="python_bible.mdc",
-                                message="Mutable default argument detected (use None instead)",
-                                file_path=str(file_path),
-                                line_number=line_num,
-                                session_scope="current_session"
-                            ))
-                            all_passed = False
-                            self._report_failure(check_name)
-                        
-                        # 2. Bare except clauses
-                        if re.search(r'except\s*:', line):
-                            self._log_violation(Violation(
-                                severity=ViolationSeverity.WARNING,
-                                rule_ref="python_bible.mdc",
-                                message="Bare except clause detected (specify exception type)",
-                                file_path=str(file_path),
-                                line_number=line_num,
-                                session_scope="current_session"
-                            ))
-                            all_passed = False
-                            self._report_failure(check_name)
-            except (FileNotFoundError, PermissionError, OSError, UnicodeDecodeError) as e:
-                logger.warn(
-                    f"Failed to check file for Python Bible compliance: {str(e)}",
-                    operation="check_python_bible",
-                    error_code="PYTHON_BIBLE_CHECK_FAILED",
-                    file_path=str(file_path)
-                )
-        
-        if all_passed:
-            self._report_success(check_name)
-        
-        return all_passed
-    
-    def check_bug_logging(self) -> bool:
-        """
-        Check bug logging compliance.
-        
-        Validates that bugs are logged in BUG_LOG.md.
-        """
-        check_name = "Bug Logging Compliance"
-        all_passed = True
-        
-        bug_log_file = self.project_root / ".cursor" / "BUG_LOG.md"
-        
-        # This is a soft check - we can't always determine if a bug was fixed
-        # Just verify the file exists and is accessible
-        if not bug_log_file.exists():
-            self._log_violation(Violation(
-                severity=ViolationSeverity.WARNING,
-                rule_ref="01-enforcement.mdc",
-                message="BUG_LOG.md does not exist",
-                file_path=str(bug_log_file),
-                session_scope="current_session"
-            ))
-            all_passed = False
-            self._report_failure(check_name)
-        else:
-            self._report_success(check_name)
-        
-        return all_passed
     
     def re_evaluate_violation_scope(self, violation: Violation) -> str:
         """
-        Re-evaluate a violation's session scope based on current git state.
+        Re-evaluate a violation's session scope using conservative rules.
         
-        Returns "current_session" if violation is still valid, "historical" otherwise.
+        - Historical directories (docs/auto-pr, docs/archive, docs/historical) always return "historical"
+        - Existing "historical" scopes remain historical
+        - All other cases default to "current_session" (no cache/diff downgrades)
         """
-        # If violation has no file path, keep original scope
+        # Default to the violation's existing scope (fallback to current_session)
+        original_scope = violation.session_scope or "current_session"
+        
         if not violation.file_path:
-            return violation.session_scope
+            return original_scope
         
         file_path_str = violation.file_path
         
-        # Check if file is in a historical document directory (e.g., docs/Auto-PR/)
-        # This ensures Auto-PR files are always treated as historical
-        file_path_normalized = file_path_str.replace("\\", "/").lower()
-        # Check for both absolute paths (with leading /) and relative paths (without)
-        historical_dir_patterns = [
-            "/docs/auto-pr/", "/docs/archive/", "/docs/historical/",  # Absolute paths
-            "docs/auto-pr/", "docs/archive/", "docs/historical/"      # Relative paths
-        ]
-        if any(pattern in file_path_normalized for pattern in historical_dir_patterns):
+        if is_historical_dir_path(file_path_str):
             logger.debug(
-                f"Re-evaluating violation scope: {file_path_str} is in historical directory",
+                "Re-evaluating violation scope: historical directory match",
                 operation="re_evaluate_violation_scope",
                 file_path=file_path_str,
-                original_scope=violation.session_scope,
+                original_scope=original_scope,
                 new_scope="historical"
             )
             return "historical"
         
-        # Check if file is still in changed_files
-        changed_files = self.get_changed_files()
-        if file_path_str not in changed_files:
-            # File is no longer in changed_files - mark as historical
-            logger.debug(
-                f"Re-evaluating violation scope: {file_path_str} no longer in changed_files",
-                operation="re_evaluate_violation_scope",
-                file_path=file_path_str,
-                original_scope=violation.session_scope,
-                new_scope="historical"
-            )
+        if original_scope == "historical":
             return "historical"
         
-        # Check if file was actually modified in this session
-        file_modified = self.is_file_modified_in_session(file_path_str)
-        if not file_modified:
-            # File is in changed_files but wasn't actually modified - mark as historical
-            logger.debug(
-                f"Re-evaluating violation scope: {file_path_str} not actually modified",
-                operation="re_evaluate_violation_scope",
-                file_path=file_path_str,
-                original_scope=violation.session_scope,
-                new_scope="historical"
-            )
-            return "historical"
-        
-        # If violation has a line number, check if that line was actually changed
-        if violation.line_number:
-            line_changed = self.is_line_changed_in_session(file_path_str, violation.line_number)
-            if not line_changed:
-                # Line wasn't actually changed - mark as historical
-                logger.debug(
-                    f"Re-evaluating violation scope: {file_path_str}:{violation.line_number} not actually changed",
-                    operation="re_evaluate_violation_scope",
-                    file_path=file_path_str,
-                    line_number=violation.line_number,
-                    original_scope=violation.session_scope,
-                    new_scope="historical"
-                )
-                return "historical"
-        
-        # Violation is still valid - keep as current_session
+        # All other cases stay as current_session (conservative default)
         return "current_session"
-    
-    def generate_agent_status(self):
-        """Generate AGENT_STATUS.md file."""
-        status_file = self.enforcement_dir / "AGENT_STATUS.md"
-        
-        # Re-evaluate violation scopes before generating status
-        # This ensures violations are correctly categorized even if git state changed
-        for violation in self.violations:
-            new_scope = self.re_evaluate_violation_scope(violation)
-            if new_scope != violation.session_scope:
-                logger.info(
-                    f"Updating violation scope: {violation.file_path}:{violation.line_number}",
-                    operation="generate_agent_status",
-                    original_scope=violation.session_scope,
-                    new_scope=new_scope
-                )
-                violation.session_scope = new_scope
-                # Update in session data as well
-                for v_dict in self.session.violations:
-                    if (v_dict.get('file_path') == violation.file_path and 
-                        v_dict.get('line_number') == violation.line_number and
-                        v_dict.get('rule_ref') == violation.rule_ref):
-                        v_dict['session_scope'] = new_scope
-        
-        # Determine overall status
-        # Memory optimization: Use generator expressions, convert to list only when needed
-        # Python Bible Chapter 12.4.3: Generators for memory-efficient iteration
-        blocked_violations = list(v for v in self.violations if v.severity == ViolationSeverity.BLOCKED)
-        warning_violations = list(v for v in self.violations if v.severity == ViolationSeverity.WARNING)
-        
-        # Separate violations by session scope (after re-evaluation)
-        current_session_blocked = list(v for v in blocked_violations if v.session_scope == "current_session")
-        historical_blocked = list(v for v in blocked_violations if v.session_scope != "current_session")
-        
-        if blocked_violations:
-            status_emoji = "🔴"
-            status_text = "BLOCKED"
-        elif warning_violations:
-            status_emoji = "🟡"
-            status_text = "WARNING"
-        else:
-            status_emoji = "🟢"
-            status_text = "COMPLIANT"
-        
-        # Generate status content with summary counts
-        content = f"""# Agent Status
-
-**Status:** {status_emoji} {status_text}
-**Last Updated:** {datetime.now(timezone.utc).isoformat()}
-**Session ID:** {self.session.session_id}
-
-## Summary
-
-- **Total Blocked Violations:** {len(blocked_violations)}
-  - 🔧 **Current Session (Auto-Fixable):** {len(current_session_blocked)}
-  - 📋 **Historical (Require Human Input):** {len(historical_blocked)}
-- **Warnings:** {len(warning_violations)}
-- **Total Violations:** {len(self.violations)}
-
-"""
-        
-        # Add blocking instructions if BLOCKED (ALWAYS SHOW WHEN BLOCKED)
-        if blocked_violations:
-            content += "## ⚠️ BLOCKING INSTRUCTIONS\n\n"
-            content += "**🚨 YOU MUST STOP AND ADDRESS THESE VIOLATIONS BEFORE PROCEEDING WITH ANY TASK. 🚨**\n\n"
-            
-            if current_session_blocked:
-                content += f"### 🔧 Current Session Violations ({len(current_session_blocked)} - Auto-Fixable)\n\n"
-                content += "**These violations were introduced in the current session. You MUST auto-fix these immediately before proceeding.**\n\n"
-                content += "**Instructions:**\n"
-                content += "1. Review each violation below\n"
-                content += "2. Auto-fix the violations (update dates, add error handling, etc.)\n"
-                content += "3. Re-run enforcement to verify fixes\n"
-                content += "4. Only proceed after all current session violations are resolved\n\n"
-                content += "**Violations to Fix:**\n\n"
-                for violation in current_session_blocked:
-                    content += f"- **{violation.rule_ref}**: {violation.message}"
-                    if violation.file_path:
-                        content += f" (`{violation.file_path}`"
-                        if violation.line_number:
-                            content += f":{violation.line_number}"
-                        content += ")"
-                    content += "\n"
-                content += "\n---\n\n"
-            
-            if historical_blocked:
-                content += f"### 📋 Historical Violations ({len(historical_blocked)} - Require Human Input)\n\n"
-                content += "**These violations exist in historical code (not from current session). You MUST list these and request human guidance before proceeding.**\n\n"
-                content += "**Instructions:**\n"
-                content += "1. List ALL historical violations clearly in your response\n"
-                content += "2. Request human input/guidance on how to proceed\n"
-                content += "3. DO NOT attempt to auto-fix historical violations without explicit permission\n"
-                content += "4. DO NOT proceed with new tasks until human guidance is provided\n\n"
-                content += "**Historical Violations (First 20 shown, see VIOLATIONS.md for complete list):**\n\n"
-                for violation in historical_blocked[:20]:
-                    content += f"- **{violation.rule_ref}**: {violation.message}"
-                    if violation.file_path:
-                        content += f" (`{violation.file_path}`"
-                        if violation.line_number:
-                            content += f":{violation.line_number}"
-                        content += ")"
-                    content += "\n"
-                if len(historical_blocked) > 20:
-                    content += f"\n*... and {len(historical_blocked) - 20} more historical violations. See `.cursor/enforcement/VIOLATIONS.md` for complete list.*\n"
-                content += "\n**Action Required:** List these blockers and request human input/guidance before proceeding.\n\n"
-                content += "---\n\n"
-        
-        content += "## Active Violations\n\n"
-        
-        if blocked_violations:
-            content += f"### 🔴 BLOCKED - Hard Stops ({len(blocked_violations)} total)\n\n"
-            content += "**Legend:** 🔧 = Current Session (Auto-Fixable) | 📋 = Historical (Require Human Input)\n\n"
-            for violation in blocked_violations:
-                scope_indicator = "🔧" if violation.session_scope == "current_session" else "📋"
-                scope_text = "Current Session" if violation.session_scope == "current_session" else "Historical"
-                content += f"- {scope_indicator} **{violation.rule_ref}**: {violation.message}"
-                if violation.file_path:
-                    content += f" (`{violation.file_path}`"
-                    if violation.line_number:
-                        content += f":{violation.line_number}"
-                    content += ")"
-                content += f" [Scope: {scope_text}]\n"
-            content += "\n"
-        
-        if warning_violations:
-            # Separate warnings by session scope
-            current_session_warnings = [v for v in warning_violations if v.session_scope == "current_session"]
-            historical_warnings = [v for v in warning_violations if v.session_scope != "current_session"]
-            
-            content += "### 🟡 WARNINGS\n\n"
-            content += "**Legend:** 🔧 = Current Session | 📋 = Historical\n\n"
-            
-            # Current Session Warnings (show in detail, max 50)
-            if current_session_warnings:
-                content += f"#### 🔧 Current Session ({len(current_session_warnings)} total)\n\n"
-                display_count = min(50, len(current_session_warnings))
-                for violation in current_session_warnings[:display_count]:
-                    content += f"- **{violation.rule_ref}**: {violation.message}"
-                    if violation.file_path:
-                        content += f" (`{violation.file_path}`"
-                        if violation.line_number:
-                            content += f":{violation.line_number}"
-                        content += ")"
-                    content += "\n"
-                if len(current_session_warnings) > 50:
-                    content += f"\n*... and {len(current_session_warnings) - 50} more current session warnings. See `.cursor/enforcement/VIOLATIONS.md` for complete list.*\n"
-                content += "\n"
-            
-            # Historical Warnings (aggregated by rule)
-            if historical_warnings:
-                content += f"#### 📋 Historical ({len(historical_warnings)} total)\n\n"
-                content += "**Summary by Rule:**\n\n"
-                
-                # Aggregate by rule_ref
-                rule_counts = defaultdict(int)
-                for violation in historical_warnings:
-                    rule_counts[violation.rule_ref] += 1
-                
-                # Sort by count (descending) and show top 20 rules
-                sorted_rules = sorted(rule_counts.items(), key=lambda x: x[1], reverse=True)
-                for rule_ref, count in sorted_rules[:20]:
-                    content += f"- **{rule_ref}**: {count} warning(s)\n"
-                
-                if len(sorted_rules) > 20:
-                    remaining_count = sum(count for _, count in sorted_rules[20:])
-                    content += f"- **Other rules**: {remaining_count} warning(s)\n"
-                
-                content += f"\n*See `.cursor/enforcement/VIOLATIONS.md` for complete historical violations list.*\n\n"
-            
-            content += "\n"
-        
-        # Add auto-fixes summary if any
-        if self.session.auto_fixes:
-            content += "## Auto-Fixes Applied\n\n"
-            content += f"**Total Fixes:** {len(self.session.auto_fixes)}\n\n"
-            content += "The following violations were auto-fixed during this session:\n\n"
-            
-            for fix in self.session.auto_fixes:
-                content += f"- **{fix['rule_ref']}**: {fix['fix_description']}"
-                if fix['file_path']:
-                    content += f" (`{fix['file_path']}`"
-                    if fix['line_number']:
-                        content += f":{fix['line_number']}"
-                    content += ")"
-                content += "\n"
-            
-            content += "\n**See `.cursor/enforcement/AUTO_FIXES.md` for detailed fix information.**\n\n"
-            content += "---\n\n"
-        
-        content += "## Compliance Checks\n\n"
-        # Deduplicate checks to prevent accumulation over multiple runs
-        unique_checks_passed = list(dict.fromkeys(self.session.checks_passed))  # Preserves order
-        unique_checks_failed = list(dict.fromkeys(self.session.checks_failed))  # Preserves order
-        
-        # CRITICAL FIX: Remove from failed list if it appears in passed list (latest status wins)
-        # This handles the case where a check fails then passes in the same session
-        # Also normalize check names by removing skip reasons for comparison
-        def normalize_check_name(check: str) -> str:
-            """Normalize check name by removing skip reasons for comparison."""
-            # Remove "(skipped - ...)" suffix for comparison
-            if " (skipped -" in check:
-                return check.split(" (skipped -")[0]
-            return check
-        
-        # Create normalized sets for comparison
-        normalized_passed = {normalize_check_name(check): check for check in unique_checks_passed}
-        normalized_failed = {normalize_check_name(check): check for check in unique_checks_failed}
-        
-        # Remove from failed if same normalized name appears in passed (latest status wins)
-        checks_failed_filtered = [
-            check for check in unique_checks_failed
-            if normalize_check_name(check) not in normalized_passed
-        ]
-        
-        for check in unique_checks_passed:
-            content += f"- [x] {check}\n"
-        for check in checks_failed_filtered:
-            content += f"- [ ] {check}\n"
-        
-        content += f"""
-## Session Information
-
-- **Session Start:** {self.session.start_time}
-- **Last Check:** {self.session.last_check}
-- **Total Violations:** {len(self.violations)}
-- **Blocked:** {len(blocked_violations)} total
-  - 🔧 Current Session: {len(current_session_blocked)} (auto-fixable)
-  - 📋 Historical: {len(historical_blocked)} (require human input)
-- **Warnings:** {len(warning_violations)}
-"""
-        
-        try:
-            with open(status_file, 'w', encoding='utf-8') as f:
-                f.write(content)
-            logger.info(
-                "Agent status file generated",
-                operation="generate_agent_status",
-                status=status_text,
-                violations_count=len(self.violations)
-            )
-            # Save session after re-evaluation to persist updated scopes
-            self._save_session()
-        except (FileNotFoundError, PermissionError, OSError) as e:
-            logger.error(
-                "Failed to generate agent status file",
-                operation="generate_agent_status",
-                error_code="STATUS_FILE_GENERATION_FAILED",
-                root_cause=str(e)
-            )
-    
-    def generate_violations_log(self):
-        """Generate VIOLATIONS.md file."""
-        violations_file = self.enforcement_dir / "VIOLATIONS.md"
-        
-        content = f"""# Violations Log
-
-**Last Updated:** {datetime.now(timezone.utc).isoformat()}
-**Session ID:** {self.session.session_id}
-
-## All Violations
-
-"""
-        
-        for violation in self.violations:
-            content += f"""### {violation.severity.value} - {violation.rule_ref}
-
-**Message:** {violation.message}
-**Timestamp:** {violation.timestamp}
-**Session Scope:** {violation.session_scope}
-"""
-            if violation.file_path:
-                content += f"**File:** `{violation.file_path}`"
-                if violation.line_number:
-                    content += f" (line {violation.line_number})"
-                content += "\n"
-            content += "\n---\n\n"
-        
-        try:
-            with open(violations_file, 'w', encoding='utf-8') as f:
-                f.write(content)
-            logger.info(
-                "Violations log generated",
-                operation="generate_violations_log",
-                violations_count=len(self.violations)
-            )
-        except (FileNotFoundError, PermissionError, OSError) as e:
-            logger.error(
-                "Failed to generate violations log",
-                operation="generate_violations_log",
-                error_code="VIOLATIONS_LOG_GENERATION_FAILED",
-                root_cause=str(e)
-            )
-    
-    def generate_agent_reminders(self):
-        """Generate AGENT_REMINDERS.md file."""
-        reminders_file = self.enforcement_dir / "AGENT_REMINDERS.md"
-        
-        blocked_violations = [v for v in self.violations if v.severity == ViolationSeverity.BLOCKED]
-        warning_violations = [v for v in self.violations if v.severity == ViolationSeverity.WARNING]
-        
-        content = f"""# Agent Reminders
-
-**Last Updated:** {datetime.now(timezone.utc).isoformat()}
-
-## Active Reminders
-
-"""
-        
-        if blocked_violations:
-            content += "### 🔴 CRITICAL - Must Fix Before Proceeding\n\n"
-            for violation in blocked_violations:
-                content += f"**{violation.rule_ref}**: {violation.message}\n\n"
-        
-        if warning_violations:
-            content += "### 🟡 Warnings - Should Fix\n\n"
-            for violation in warning_violations[:5]:  # Limit to top 5 warnings
-                content += f"**{violation.rule_ref}**: {violation.message}\n\n"
-        
-        if not blocked_violations and not warning_violations:
-            content += "✅ No active reminders. All checks passed.\n"
-        
-        try:
-            with open(reminders_file, 'w', encoding='utf-8') as f:
-                f.write(content)
-            logger.info(
-                "Agent reminders generated",
-                operation="generate_agent_reminders",
-                reminders_count=len(blocked_violations) + len(warning_violations)
-            )
-        except (FileNotFoundError, PermissionError, OSError) as e:
-            logger.error(
-                "Failed to generate agent reminders",
-                operation="generate_agent_reminders",
-                error_code="REMINDERS_GENERATION_FAILED",
-                root_cause=str(e)
-            )
     
     def track_auto_fix(self, violation: Violation, fix_type: str, 
                        fix_description: str, before_state: str, 
@@ -3336,7 +860,7 @@ class VeroFieldEnforcer:
         }
         
         self.session.auto_fixes.append(auto_fix_dict)
-        self._save_session()
+        save_session(self.session, self.enforcement_dir)
         
         logger.info(
             f"Auto-fix tracked: {fix_description}",
@@ -3344,258 +868,6 @@ class VeroFieldEnforcer:
             rule_ref=violation.rule_ref,
             file_path=violation.file_path,
             fix_type=fix_type
-            )
-    
-    def generate_enforcement_block_message(self):
-        """
-        Generate ENFORCEMENT_BLOCK.md file with blocking message for agent.
-        
-        This is the "automatic prompt" mechanism - the enforcer writes a blocking
-        message file that the agent MUST read before proceeding. If violations
-        are detected, this file contains a clear STOP message.
-        
-        The agent's pre-flight check (in .cursorrules) reads this file and
-        displays the blocking message, effectively "sending a prompt" to stop.
-        """
-        block_file = self.enforcement_dir / "ENFORCEMENT_BLOCK.md"
-        
-        # Check if there are any blocked violations
-        blocked_violations = [v for v in self.violations if v.severity == ViolationSeverity.BLOCKED]
-        current_session_blocked = [v for v in blocked_violations if v.session_scope == "current_session"]
-        historical_blocked = [v for v in blocked_violations if v.session_scope != "current_session"]
-        
-        if not blocked_violations:
-            # No violations - remove block file if it exists
-            if block_file.exists():
-                try:
-                    block_file.unlink()
-                    logger.debug(
-                        "Enforcement block file removed (no violations)",
-                        operation="generate_enforcement_block_message"
-                    )
-                except OSError:
-                    pass
-            return
-        
-        # Generate blocking message
-        content = f"""# 🚨 ENFORCEMENT BLOCK - DO NOT PROCEED 🚨
-
-**Status:** 🔴 BLOCKED  
-**Generated:** {datetime.now(timezone.utc).isoformat()}  
-**Session ID:** {self.session.session_id}
-
----
-
-## ⚠️ CRITICAL: YOU MUST STOP IMMEDIATELY
-
-**The enforcement system has detected violations that BLOCK task execution.**
-
-**YOU MUST:**
-1. **STOP all current work immediately**
-2. **Read this entire message**
-3. **Fix violations before proceeding**
-4. **DO NOT continue with any task until violations are resolved**
-
----
-
-## Blocking Violations Summary
-
-- **Total Blocked Violations:** {len(blocked_violations)}
-  - 🔧 **Current Session (Auto-Fixable):** {len(current_session_blocked)}
-  - 📋 **Historical (Require Human Input):** {len(historical_blocked)}
-
----
-
-"""
-        
-        if current_session_blocked:
-            content += f"""## 🔧 Current Session Violations ({len(current_session_blocked)} - Auto-Fixable)
-
-**These violations were introduced in the current session. You MUST auto-fix these immediately.**
-
-**Instructions:**
-1. Review each violation below
-2. Auto-fix the violations (update dates, add error handling, etc.)
-3. Re-run enforcement to verify fixes: `python .cursor/scripts/auto-enforcer.py`
-4. Only proceed after all current session violations are resolved
-
-**Violations to Fix:**
-
-"""
-            for idx, violation in enumerate(current_session_blocked, 1):
-                content += f"""### Violation #{idx}: {violation.rule_ref}
-
-**Message:** {violation.message}
-"""
-                if violation.file_path:
-                    content += f"**File:** `{violation.file_path}`"
-                    if violation.line_number:
-                        content += f" (line {violation.line_number})"
-                    content += "\n"
-                content += "\n"
-            content += "\n---\n\n"
-        
-        if historical_blocked:
-            content += f"""## 📋 Historical Violations ({len(historical_blocked)} - Require Human Input)
-
-**These violations exist in historical code (not from current session). You MUST list these and request human guidance before proceeding.**
-
-**Instructions:**
-1. List ALL historical violations clearly in your response
-2. Request human input/guidance on how to proceed
-3. DO NOT attempt to auto-fix historical violations without explicit permission
-4. DO NOT proceed with new tasks until human guidance is provided
-
-**Historical Violations (First 20 shown):**
-
-"""
-            for idx, violation in enumerate(historical_blocked[:20], 1):
-                content += f"""### Violation #{idx}: {violation.rule_ref}
-
-**Message:** {violation.message}
-"""
-                if violation.file_path:
-                    content += f"**File:** `{violation.file_path}`"
-                    if violation.line_number:
-                        content += f" (line {violation.line_number})"
-                    content += "\n"
-                content += "\n"
-            if len(historical_blocked) > 20:
-                content += f"\n*... and {len(historical_blocked) - 20} more historical violations. See `.cursor/enforcement/VIOLATIONS.md` for complete list.*\n"
-            content += "\n**Action Required:** List these blockers and request human input/guidance before proceeding.\n\n---\n\n"
-        
-        content += f"""## Next Steps
-
-### If You Have Current Session Violations (🔧):
-
-1. **Auto-fix violations:**
-   - Update hardcoded dates to current system date
-   - Add missing error handling
-   - Update "Last Updated" fields
-   - Fix any other violations listed above
-
-2. **Re-run enforcement:**
-   ```bash
-   python .cursor/scripts/auto-enforcer.py
-   ```
-
-3. **Verify fixes:**
-   - Check that AGENT_STATUS.md shows COMPLIANT
-   - Verify ENFORCEMENT_BLOCK.md is removed (no violations)
-
-4. **Only then proceed** with your task
-
-### If You Have Historical Violations (📋):
-
-1. **List all violations** in your response
-2. **Request human guidance** on how to proceed
-3. **DO NOT proceed** until human provides guidance
-4. **DO NOT auto-fix** historical violations without permission
-
----
-
-## Full Details
-
-For complete violation details, see:
-- **AGENT_STATUS.md** - Full status report
-- **VIOLATIONS.md** - Complete violations log
-- **AGENT_REMINDERS.md** - Active reminders
-
----
-
-## This File Will Be Removed When Compliant
-
-**Once all violations are resolved:**
-- Re-run enforcement: `python .cursor/scripts/auto-enforcer.py`
-- This file will be automatically removed
-- You can then proceed with your task
-
----
-
-**Last Updated:** {datetime.now(timezone.utc).isoformat()}  
-**Generated By:** VeroField Auto-Enforcement System
-"""
-        
-        try:
-            with open(block_file, 'w', encoding='utf-8') as f:
-                f.write(content)
-            logger.info(
-                "Enforcement block message generated",
-                operation="generate_enforcement_block_message",
-                blocked_violations=len(blocked_violations),
-                current_session=len(current_session_blocked),
-                historical=len(historical_blocked)
-            )
-        except (FileNotFoundError, PermissionError, OSError) as e:
-            logger.error(
-                "Failed to generate enforcement block message",
-                operation="generate_enforcement_block_message",
-                error_code="BLOCK_MESSAGE_GENERATION_FAILED",
-                root_cause=str(e)
-            )
-    
-    def generate_auto_fixes_summary(self):
-        """Generate AUTO_FIXES.md file with summary of all auto-fixes."""
-        fixes_file = self.enforcement_dir / "AUTO_FIXES.md"
-        
-        if not self.session.auto_fixes:
-            # No fixes - create empty file
-            content = f"""# Auto-Fixes Summary
-
-**Last Updated:** {datetime.now(timezone.utc).isoformat()}
-**Session ID:** {self.session.session_id}
-
-## No Auto-Fixes in This Session
-
-No violations were auto-fixed during this session.
-"""
-        else:
-            content = f"""# Auto-Fixes Summary
-
-**Last Updated:** {datetime.now(timezone.utc).isoformat()}
-**Session ID:** {self.session.session_id}
-**Total Fixes:** {len(self.session.auto_fixes)}
-
-## Auto-Fixes Applied
-
-"""
-            for idx, fix in enumerate(self.session.auto_fixes, 1):
-                content += f"""### Fix #{idx}
-
-**Rule:** {fix['rule_ref']}
-**File:** `{fix['file_path']}` (line {fix['line_number']})
-**Fix Type:** {fix['fix_type']}
-**Description:** {fix['fix_description']}
-**Timestamp:** {fix['timestamp']}
-
-**Before:**
-```
-
-{fix['before_state']}
-
-```
-
-**After:**
-```
-
-{fix['after_state']}
-
-```
-
----
-
-"""
-        
-        try:
-            with open(fixes_file, 'w', encoding='utf-8') as f:
-                f.write(content)
-            logger.info("Generated AUTO_FIXES.md", operation="generate_auto_fixes_summary")
-        except (FileNotFoundError, PermissionError, OSError) as e:
-            logger.error(
-                "Failed to save auto-fixes summary",
-                operation="generate_auto_fixes_summary",
-                error_code="AUTO_FIXES_SAVE_FAILED",
-                root_cause=str(e)
             )
     
     def _pre_flight_check(self) -> bool:
@@ -3693,18 +965,17 @@ No violations were auto-fixed during this session.
             # Performance optimization: Cache changed files at start of run (Phase 1.1)
             # Python Bible 12.7.2: Manual memoization for session-level caching
             # Python Bible 12.7.4: Cache invalidation patterns - version tagging
-            cache_key = self._get_git_state_key()
-            if self._cached_changed_files is None or self._changed_files_cache_key != cache_key:
-                # Clear file diff cache when git state changes (Phase 1.2)
-                # Python Bible 12.7.4: Cache invalidation on state change
-                if self._changed_files_cache_key is not None and self._changed_files_cache_key != cache_key:
-                    self._file_diff_cache.clear()
-                    # Phase 2.3: Clear git command cache when git state changes
-                    _run_git_command_cached.cache_clear()
+            cache_key = get_git_state_key(self.project_root)
+            cached_key = self.git_utils.get_cache_key()
+            cached_changed_files = self.git_utils.get_cached_changed_files()
+            if cached_changed_files is None or cached_key != cache_key:
+                if cached_key is not None and cached_key != cache_key:
+                    self.git_utils.clear_diff_cache()
+                    run_git_command_cached.cache_clear()
                     logger.debug(
                         "Cleared file diff cache and git command cache due to git state change",
                         operation="run_all_checks",
-                        old_key=self._changed_files_cache_key,
+                        old_key=cached_key,
                         new_key=cache_key
                     )
                 
@@ -3712,13 +983,10 @@ No violations were auto-fixed during this session.
                     "Populating changed files cache",
                     operation="run_all_checks",
                     cache_key=cache_key,
-                    previous_key=self._changed_files_cache_key
+                    previous_key=cached_key
                 )
-                self._cached_changed_files = {
-                    'tracked': self._get_changed_files_impl(include_untracked=False),
-                    'untracked': self._get_changed_files_impl(include_untracked=True)
-                }
-                self._changed_files_cache_key = cache_key
+                self.git_utils.update_cache(cache_key)
+                cached_changed_files = self.git_utils.get_cached_changed_files()
             else:
                 logger.debug(
                     "Using existing changed files cache",
@@ -3726,9 +994,8 @@ No violations were auto-fixed during this session.
                     cache_key=cache_key
                 )
             
-            # Check file count early to optimize checks
-            tracked_files = self._cached_changed_files['tracked']
-            untracked_files_list = self._cached_changed_files['untracked']
+            tracked_files = cached_changed_files['tracked']
+            untracked_files_list = cached_changed_files['untracked']
             
             # Combine tracked and untracked files for enforcement checks
             # Untracked files should always be checked for violations (they're new files)
@@ -3783,31 +1050,65 @@ No violations were auto-fixed during this session.
         
         # Update session
         self.session.last_check = datetime.now(timezone.utc).isoformat()
-        self._save_session()
+        save_session(self.session, self.enforcement_dir)
         
-        # Generate status files
-        self.generate_agent_status()
-        self.generate_violations_log()
-        self.generate_agent_reminders()
-        self.generate_auto_fixes_summary()
-        
-        # Generate enforcement block message (if violations detected)
-        # This is the "automatic prompt" - enforcer writes blocking message that agent must read
-        self.generate_enforcement_block_message()
-        
-        # Generate Two-Brain report (ENFORCER_REPORT.json) for Brain B (LLM)
-        # This enables the Two-Brain Model communication protocol
-        report = None
+        status_generator = StatusGenerator()
+        violations_logger = ViolationsLogger()
+        block_generator = BlockGenerator()
+
+        status_generator.generate_agent_status(
+            self.violations,
+            self.session,
+            self.enforcement_dir,
+            self.re_evaluate_violation_scope,
+            save_session,
+        )
+        violations_logger.generate_violations_log(
+            self.violations,
+            self.session,
+            self.enforcement_dir,
+        )
+        block_generator.generate_agent_reminders(
+            self.violations,
+            self.session,
+            self.enforcement_dir,
+        )
+        status_generator.generate_auto_fixes_summary(
+            self.session,
+            self.enforcement_dir,
+        )
+        block_generator.generate_enforcement_block_message(
+            self.violations,
+            self.session,
+            self.enforcement_dir,
+        )
+
+        context_bundle = {}
         try:
-            report = self.generate_two_brain_report()
-        except Exception as e:
-            # Don't fail the entire run if report generation fails
-            logger.warn(
-                f"Failed to generate Two-Brain report: {e}",
-                operation="run_all_checks",
-                error_code="TWO_BRAIN_REPORT_FAILED",
-                root_cause=str(e)
+            context_bundle_builder = ContextBundleBuilder()
+            context_bundle = context_bundle_builder.build_context_bundle(
+                violations=self.violations,
+                changed_files=all_changed_files,
+                project_root=self.project_root,
+                git_utils=self.git_utils,
             )
+        except Exception as e:
+            logger.error(
+                f"Failed to build context bundle: {e}",
+                operation="run_all_checks",
+                error_code="CONTEXT_BUNDLE_FAILED",
+                root_cause=str(e),
+            )
+            context_bundle = {}
+
+        reporter = TwoBrainReporter()
+        report = reporter.generate_report(
+            violations=self.violations,
+            session=self.session,
+            enforcement_dir=self.enforcement_dir,
+            project_root=self.project_root,
+            context_bundle=context_bundle,
+        )
         
         # Generate handshake files (ENFORCER_STATUS.md, ACTIVE_VIOLATIONS.md, ACTIVE_CONTEXT_DUMP.md)
         # These files provide Brain 1 (LLM) with status, violations, and context
@@ -3944,63 +1245,126 @@ No violations were auto-fixed during this session.
     
     def _run_legacy_checks(self, skip_non_critical: bool = False, violation_scope: str = "current_session"):
         """
-        Run checks using legacy methods (fallback).
+        Run checks using the extracted legacy checker classes (fallback path).
         
         Args:
             skip_non_critical: Whether to skip non-critical checks
             violation_scope: Scope for violations - "current_session" or "historical"
         """
-        # Critical checks (always run)
-        critical_checks = [
-            ("Memory Bank", self.check_memory_bank),
-            ("Security Compliance", self.check_security_compliance),
-            ("Active Context", self.check_active_context),
-            ("Context Management", self.check_context_management_compliance),
-        ]
-        
-        # Non-critical checks (skip if too many files)
-        # Pass violation_scope to check_hardcoded_dates
-        non_critical_checks = [
-            ("Hardcoded Dates", lambda: self.check_hardcoded_dates(violation_scope=violation_scope)),
-            ("Error Handling", self.check_error_handling),
-            ("Structured Logging", self.check_logging),
-            ("Python Bible", self.check_python_bible),
-            ("Bug Logging", self.check_bug_logging),
-        ]
-        
-        # Run critical checks
-        for check_name, check_func in critical_checks:
+        changed_files_with_untracked = self.git_utils.get_changed_files(include_untracked=True)
+        changed_files_tracked = self.git_utils.get_changed_files(include_untracked=False)
+
+        # Ensure agent response is up to date for context checks
+        self._load_agent_response_from_file()
+
+        date_checker = DateChecker(current_date=self.CURRENT_DATE)
+        security_checker = SecurityChecker(self.session)
+        memory_bank_checker = MemoryBankChecker()
+        error_checker = ErrorHandlingChecker()
+        logging_checker = LoggingChecker()
+        python_bible_checker = PythonBibleChecker()
+        bug_logging_checker = BugLoggingChecker()
+        context_checker = ContextChecker(
+            git_utils=self.git_utils,
+            predictive_context_available=PREDICTIVE_CONTEXT_AVAILABLE,
+        )
+
+        is_file_modified = lambda file_path: is_file_modified_in_session(
+            file_path,
+            self.session,
+            self.project_root,
+            self.git_utils,
+        )
+
+        context_manager_dir = self.project_root / ".cursor" / "context_manager"
+        agent_response = getattr(self, "_last_agent_response", None)
+
+        def run_check(check_name: str, func):
             try:
-                check_func()
-            except Exception as e:
+                violations = func()
+                if violations:
+                    for violation in violations:
+                        self._log_violation(violation)
+                    self._report_failure(check_name)
+                else:
+                    self._report_success(check_name)
+            except Exception as exc:
                 logger.error(
                     f"Check failed with exception: {check_name}",
                     operation="_run_legacy_checks",
                     error_code="CHECK_EXCEPTION",
-                    root_cause=str(e),
-                    check_name=check_name
+                    root_cause=str(exc),
+                    check_name=check_name,
                 )
                 self._report_failure(check_name)
-        
-        # Run non-critical checks only if file count is reasonable
+
+        critical_checks = [
+            ("Memory Bank", lambda: memory_bank_checker.check_memory_bank(
+                self.memory_bank_dir,
+                self.MEMORY_BANK_FILES,
+            )),
+            ("Security Compliance", lambda: security_checker.check_security_compliance(
+                changed_files_tracked,
+                self.project_root,
+                self.SECURITY_FILES,
+            )),
+            ("Active Context", lambda: context_checker.check_active_context(
+                self.project_root,
+                self.memory_bank_dir,
+            )),
+            ("Context Management", lambda: context_checker.check_context_management_compliance(
+                context_manager_dir=context_manager_dir,
+                agent_response=agent_response,
+                preloader=self.preloader,
+                context_loader=self.context_loader,
+                response_parser=self.response_parser,
+                verify_context_id_match_func=self._verify_context_id_match,
+            )),
+        ]
+
+        non_critical_checks = [
+            ("Hardcoded Dates", lambda: date_checker.check_hardcoded_dates(
+                changed_files=changed_files_with_untracked,
+                project_root=self.project_root,
+                session=self.session,
+                git_utils=self.git_utils,
+                enforcement_dir=self.enforcement_dir,
+                violation_scope=violation_scope,
+            )),
+            ("Error Handling", lambda: error_checker.check_error_handling(
+                changed_files=changed_files_tracked,
+                project_root=self.project_root,
+                git_utils=self.git_utils,
+                is_file_modified_in_session_func=is_file_modified,
+            )),
+            ("Structured Logging", lambda: logging_checker.check_logging(
+                changed_files=changed_files_tracked,
+                project_root=self.project_root,
+                git_utils=self.git_utils,
+                is_file_modified_in_session_func=is_file_modified,
+            )),
+            ("Python Bible", lambda: python_bible_checker.check_python_bible(
+                changed_files=changed_files_tracked,
+                project_root=self.project_root,
+                git_utils=self.git_utils,
+                is_file_modified_in_session_func=is_file_modified,
+            )),
+            ("Bug Logging", lambda: bug_logging_checker.check_bug_logging(
+                self.project_root,
+            )),
+        ]
+
+        for check_name, check_callable in critical_checks:
+            run_check(check_name, check_callable)
+
         if not skip_non_critical:
-            for check_name, check_func in non_critical_checks:
-                try:
-                    check_func()
-                except Exception as e:
-                    logger.error(
-                        f"Check failed with exception: {check_name}",
-                        operation="_run_legacy_checks",
-                        error_code="CHECK_EXCEPTION",
-                        root_cause=str(e),
-                        check_name=check_name
-                    )
-                    self._report_failure(check_name)
+            for check_name, check_callable in non_critical_checks:
+                run_check(check_name, check_callable)
         else:
             logger.info(
                 "Skipped non-critical checks due to large file count",
                 operation="_run_legacy_checks",
-                skipped_checks=[name for name, _ in non_critical_checks]
+                skipped_checks=[name for name, _ in non_critical_checks],
             )
     
     def _update_context_recommendations(self, user_message: Optional[str] = None):
@@ -4071,7 +1435,7 @@ No violations were auto-fixed during this session.
             # Get changed files from git (with timeout protection)
             # CRITICAL: Don't include untracked files for context loading
             # Only use actual edits (staged/unstaged) - untracked files shouldn't trigger context loading
-            changed_files = self.get_changed_files(include_untracked=False)
+            changed_files = self.git_utils.get_changed_files(include_untracked=False)
             
             # Limit file count to prevent timeouts (process max 100 files)
             if len(changed_files) > 100:
@@ -4415,7 +1779,7 @@ No violations were auto-fixed during this session.
                 # File doesn't exist yet - system may not have updated
                 # Try to trigger update if we have changed files
                 # Don't include untracked files for context metrics (only actual edits)
-                changed_files = self.get_changed_files(include_untracked=False)
+                changed_files = self.git_utils.get_changed_files(include_untracked=False)
                 if changed_files and self.predictor:
                     try:
                         self._update_context_recommendations()
@@ -4964,9 +2328,12 @@ The following rule files have been created or deleted:
             total_tokens = 0
         
         # Generate dashboard content
+        current_time_utc = datetime.now(timezone.utc)
+        # Align dashboard timestamp with enforcement system date to avoid false positives
+        last_updated_str = f"{self.CURRENT_DATE} {current_time_utc.strftime('%H:%M:%S UTC')}"
         content = f"""# Context Management Dashboard
 
-**Last Updated:** {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}
+**Last Updated:** {last_updated_str}
 
 *This file is auto-generated by the Predictive Context Management System.*
 
@@ -5053,533 +2420,7 @@ The following rule files have been created or deleted:
                 root_cause=str(e)
             )
     
-    def generate_two_brain_report(self):
-        """
-        Generate ENFORCER_REPORT.json for Two-Brain Model communication.
-        
-        This method creates the report that Brain B (LLM) reads to understand
-        violations and receive context hints.
-        
-        Returns:
-            EnforcerReport instance if successful, None otherwise
-        """
-        try:
-            # Import Two-Brain integration
-            import sys
-            enforcement_path = self.project_root / ".cursor" / "enforcement"
-            if str(enforcement_path) not in sys.path:
-                sys.path.insert(0, str(enforcement_path.parent))
-            from enforcement.two_brain_integration import integrate_with_enforcer
-            
-            # Generate report from current enforcer state
-            report = integrate_with_enforcer(self)
-            
-            # Add context hints based on current task and violations
-            self._add_context_hints_to_report(report)
-            
-            # Save report
-            report.save()
-            
-            logger.info(
-                "Two-Brain report generated",
-                operation="generate_two_brain_report",
-                violations_count=len(report.violations),
-                status=report.get_status()
-            )
-            
-            return report
-            
-        except ImportError:
-            # Fallback if two_brain_integration not available
-            logger.warn(
-                "Two-Brain integration not available, skipping report generation",
-                operation="generate_two_brain_report",
-                error_code="INTEGRATION_NOT_AVAILABLE"
-            )
-            return None
-        except Exception as e:
-            logger.error(
-                f"Failed to generate Two-Brain report: {e}",
-                operation="generate_two_brain_report",
-                error_code="REPORT_GENERATION_FAILED",
-                root_cause=str(e)
-            )
-            return None
-    
-    def _add_context_hints_to_report(self, report):
-        """
-        Add context hints to ENFORCER_REPORT based on violations and task type.
-        
-        Two-Brain Model: Provides minimal guidance to LLM without loading heavy rules.
-        Uses unified context manager to compute optimal context bundle.
-        
-        Args:
-            report: EnforcerReport instance to update
-        """
-        # Use unified context manager to compute context bundle
-        context_bundle = self._compute_unified_context_bundle()
-        
-        # Set context bundle in report
-        report.set_context_bundle(
-            task_type=context_bundle.get('task_type'),
-            hints=context_bundle.get('hints', []),
-            relevant_files=context_bundle.get('relevant_files', []),
-            patterns_to_follow=context_bundle.get('patterns_to_follow', [])
-        )
-    
-    def _compute_unified_context_bundle(self) -> Dict[str, Any]:
-        """
-        Unified Context Manager: Compute optimal context bundle for LLM.
-        
-        Two-Brain Model: Brain A (enforcer) computes all context decisions.
-        Brain B (LLM) receives curated context bundle in ENFORCER_REPORT.
-        
-        This method:
-        1. Detects task type from violations and file changes
-        2. Computes optimal context (using internal recommendations)
-        3. Extracts minimal hints (not full rule files)
-        4. Finds relevant example files
-        5. Identifies patterns to follow
-        
-        Returns:
-            Dict with task_type, hints, relevant_files, patterns_to_follow
-        """
-        # Step 1: Detect task type
-        task_type = self._detect_task_type_unified()
-        
-        # Step 2: Load internal recommendations (if available)
-        internal_recommendations = self._load_internal_recommendations()
-        
-        # Step 3: Extract hints based on task type and recommendations
-        hints = self._extract_context_hints_unified(task_type, internal_recommendations)
-        
-        # Step 4: Find relevant example files
-        relevant_files = self._find_relevant_example_files(task_type, internal_recommendations)
-        
-        # Step 5: Get patterns to follow
-        patterns = self._get_patterns_to_follow_unified(task_type, internal_recommendations)
-        
-        return {
-            "task_type": task_type,
-            "hints": hints,
-            "relevant_files": relevant_files,
-            "patterns_to_follow": patterns
-        }
-    
-    def _detect_task_type_unified(self) -> Optional[str]:
-        """
-        Unified task type detection from violations and file changes.
-        
-        Returns:
-            Task type string or None
-        """
-        # First, try to detect from violations
-        task_type_from_violations = self._detect_task_type_from_violations()
-        if task_type_from_violations:
-            return task_type_from_violations
-        
-        # Fallback: Detect from file changes
-        changed_files = self.get_changed_files(include_untracked=False)
-        if not changed_files:
-            return None
-        
-        # Infer task type from file patterns
-        file_types = set()
-        for file_path in changed_files[:20]:  # Sample first 20
-            if file_path.endswith('.ts') or file_path.endswith('.tsx'):
-                file_types.add('typescript')
-            elif file_path.endswith('.py'):
-                file_types.add('python')
-            elif 'schema.prisma' in file_path:
-                return "database_change"
-            elif 'auth' in file_path.lower():
-                return "auth_change"
-            elif 'test' in file_path.lower():
-                return "test_change"
-        
-        # Default based on file types
-        if 'typescript' in file_types:
-            return "edit_code"
-        elif 'python' in file_types:
-            return "edit_code"
-        
-        return "edit_code"
-    
-    def _load_internal_recommendations(self) -> Optional[Dict]:
-        """
-        Load internal recommendations from enforcer-only location.
-        
-        Returns:
-            Recommendations dict or None
-        """
-        recommendations_file = self.project_root / ".cursor" / "enforcement" / "internal" / "context_recommendations.json"
-        
-        if not recommendations_file.exists():
-            return None
-        
-        try:
-            with open(recommendations_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception as e:
-            logger.debug(
-                f"Could not load internal recommendations: {e}",
-                operation="_load_internal_recommendations",
-                error_code="LOAD_RECOMMENDATIONS_FAILED",
-                root_cause=str(e)
-            )
-            return None
-    
-    def _extract_context_hints_unified(self, task_type: Optional[str], 
-                                     recommendations: Optional[Dict]) -> List[str]:
-        """
-        Extract context hints using unified approach.
-        
-        Args:
-            task_type: Detected task type
-            recommendations: Internal recommendations (if available)
-            
-        Returns:
-            List of guidance hints
-        """
-        # Start with base hints from task type
-        hints = self._extract_context_hints(task_type)
-        
-        # Enhance with recommendations if available
-        if recommendations and task_type:
-            task_info = recommendations.get('task', {})
-            context_info = recommendations.get('context', {})
-            
-            # Add task-specific hints from recommendations
-            if task_info.get('type') == task_type:
-                # Use recommendations context if it matches
-                pass  # Base hints are already good
-        
-        return hints
-    
-    def _find_relevant_example_files(self, task_type: Optional[str], 
-                                    recommendations: Optional[Dict]) -> List[str]:
-        """
-        Find relevant example files using unified approach.
-        
-        Args:
-            task_type: Detected task type
-            recommendations: Internal recommendations (if available)
-            
-        Returns:
-            List of example file paths
-        """
-        # Start with base example files
-        example_files = self._get_relevant_example_files(task_type)
-        
-        # Enhance with recommendations if available
-        if recommendations:
-            context_info = recommendations.get('context', {})
-            active_files = context_info.get('active', [])
-            
-            # Filter to actual code files (not rule files)
-            code_examples = [
-                f for f in active_files 
-                if not f.startswith('.cursor/') and 
-                   (f.endswith('.ts') or f.endswith('.tsx') or f.endswith('.py'))
-            ]
-            
-            # Add top examples from recommendations
-            example_files.extend(code_examples[:3])
-        
-        # Remove duplicates and limit
-        seen = set()
-        unique_files = []
-        for f in example_files:
-            if f and f not in seen:
-                seen.add(f)
-                unique_files.append(f)
-        
-        return unique_files[:5]  # Limit to 5 examples
-    
-    def _get_patterns_to_follow_unified(self, task_type: Optional[str],
-                                       recommendations: Optional[Dict]) -> List[str]:
-        """
-        Get patterns to follow using unified approach.
-        
-        Args:
-            task_type: Detected task type
-            recommendations: Internal recommendations (if available)
-            
-        Returns:
-            List of pattern descriptions
-        """
-        # Start with base patterns
-        patterns = self._get_patterns_to_follow(task_type)
-        
-        # Enhance with recommendations if available
-        if recommendations:
-            # Could extract patterns from recommendations context
-            pass  # Base patterns are already good
-        
-        return patterns
-    
-    def _detect_task_type_from_violations(self) -> Optional[str]:
-        """
-        Detect task type from violations.
-        
-        Returns:
-            Task type string (e.g., "add_rls", "add_logging", "fix_date") or None
-        """
-        if not self.violations:
-            return None
-        
-        # Analyze violations to determine task type
-        for v in self.violations:
-            rule_ref = getattr(v, 'rule_ref', '') or getattr(v, 'message', '')
-            rule_ref_lower = rule_ref.lower()
-            
-            if 'rls' in rule_ref_lower or 'tenant' in rule_ref_lower or 'security' in rule_ref_lower:
-                return "add_rls"
-            elif 'date' in rule_ref_lower or '02-core' in rule_ref:
-                return "fix_date"
-            elif 'logging' in rule_ref_lower or 'observability' in rule_ref_lower:
-                return "add_logging"
-            elif 'error' in rule_ref_lower or 'resilience' in rule_ref_lower:
-                return "add_error_handling"
-        
-        return "fix_violations"
-    
-    def _extract_context_hints(self, task_type: Optional[str]) -> List[str]:
-        """
-        Extract minimal context hints for task type.
-        
-        Uses comprehensive context hints library.
-        
-        Args:
-            task_type: Type of task detected
-            
-        Returns:
-            List of guidance hints
-        """
-        if not task_type:
-            return []
-        
-        # Comprehensive Context Hints Library
-        hints_map = {
-            "add_rls": [
-                "RLS pattern: Filter all queries by tenant_id",
-                "Use TenantGuard decorator on controller methods",
-                "Example: where: { tenant_id: ctx.user.tenant_id, ... }",
-                "Verify tenant_id from authenticated JWT (never from request body)",
-                "Test: Add multi-tenant test coverage with different tenant_ids"
-            ],
-            "add_logging": [
-                "Use structured logging: this.logger.warn({ event, user_id, tenant_id, ip, timestamp, ... })",
-                "Log security events: AUTH_FAILED, ACCESS_DENIED, RLS_VIOLATION, etc.",
-                "Include context: user_id, tenant_id, ip, timestamp, traceId",
-                "Never use console.log in production code"
-            ],
-            "fix_date": [
-                "Replace hardcoded dates with: @Inject(SYSTEM_DATE) or inject(SYSTEM_DATE)",
-                "Use date abstraction: this.systemDate.now() or similar",
-                "Never use: new Date('2023-01-01') or hardcoded date strings",
-                "For 'Last Updated' fields: Use current system date dynamically"
-            ],
-            "add_error_handling": [
-                "No silent failures: Always log errors with context",
-                "Use try/catch with proper error propagation",
-                "Log with traceId and tenantId for correlation",
-                "Map errors to appropriate HTTP status codes (400, 422, 500)"
-            ],
-            "fix_violations": [
-                "Review violation descriptions and fix_hints carefully",
-                "Follow patterns from similar implementations in codebase",
-                "Ensure compliance with rule references",
-                "Keep fixes minimal and focused on the violation"
-            ],
-            "database_change": [
-                "Update schema.prisma → Create migration → Update DTOs → Update frontend types",
-                "Maintain RLS policies for tenant-scoped tables",
-                "Verify tenant isolation is maintained",
-                "Test with multiple tenant_ids"
-            ],
-            "auth_change": [
-                "Always validate JWT tokens on every request",
-                "Extract tenant_id from validated JWT (never from request)",
-                "Use JwtAuthGuard and TenantGuard decorators",
-                "Log all authentication events (success and failure)"
-            ],
-            "test_change": [
-                "Add regression tests that reproduce the bug",
-                "Test with multiple tenant_ids for multi-tenant features",
-                "Verify error handling paths",
-                "Check test coverage for new code"
-            ],
-            "edit_code": [
-                "Follow existing patterns in the codebase",
-                "Maintain consistency with project structure",
-                "Add error handling and logging where appropriate",
-                "Verify security compliance (RLS, auth, validation)"
-            ]
-        }
-        
-        return hints_map.get(task_type, [
-            "Review violation descriptions and fix_hints",
-            "Follow existing patterns in the codebase",
-            "Ensure security and error handling compliance"
-        ])
-    
-    def _get_relevant_example_files(self, task_type: Optional[str]) -> List[str]:
-        """
-        Get relevant example files for task type.
-        
-        Searches codebase for example implementations.
-        
-        Args:
-            task_type: Type of task detected
-            
-        Returns:
-            List of example file paths
-        """
-        if not task_type:
-            return []
-        
-        example_files = []
-        
-        try:
-            import subprocess
-            
-            # Search patterns based on task type
-            search_patterns = {
-                "add_rls": [
-                    ('tenant_id.*where', '*.ts'),
-                    ('TenantGuard', '*.ts'),
-                    ('@UseGuards.*Tenant', '*.ts')
-                ],
-                "add_logging": [
-                    ('logger\\.(warn|error|info)', '*.ts'),
-                    ('structured.*log', '*.ts')
-                ],
-                "fix_date": [
-                    ('SYSTEM_DATE', '*.ts'),
-                    ('systemDate', '*.ts'),
-                    ('inject.*DATE', '*.ts')
-                ],
-                "add_error_handling": [
-                    ('try.*catch', '*.ts'),
-                    ('AppError', '*.ts'),
-                    ('HttpException', '*.ts')
-                ],
-                "database_change": [
-                    ('schema\\.prisma', '*.prisma'),
-                    ('migration', '*.ts')
-                ],
-                "auth_change": [
-                    ('JwtAuthGuard', '*.ts'),
-                    ('@UseGuards.*Jwt', '*.ts'),
-                    ('validate.*token', '*.ts')
-                ]
-            }
-            
-            patterns = search_patterns.get(task_type, [])
-            
-            for pattern, file_glob in patterns[:2]:  # Limit to 2 patterns per task type
-                try:
-                    result = subprocess.run(
-                        ['git', 'grep', '-l', pattern, '--', file_glob],
-                        capture_output=True,
-                        text=True,
-                        timeout=5,
-                        cwd=str(self.project_root)
-                    )
-                    if result.returncode == 0:
-                        files = result.stdout.strip().split('\n')
-                        # Filter to actual source files (not test files for examples)
-                        source_files = [f for f in files if f and 'test' not in f.lower()][:2]
-                        example_files.extend(source_files)
-                except Exception:
-                    pass
-            
-        except Exception:
-            pass
-        
-        # Remove duplicates and limit
-        seen = set()
-        unique_files = []
-        for f in example_files:
-            if f and f not in seen:
-                seen.add(f)
-                unique_files.append(f)
-        
-        return unique_files[:5]  # Limit to 5 examples
-    
-    def _get_patterns_to_follow(self, task_type: Optional[str]) -> List[str]:
-        """
-        Get patterns to follow for task type.
-        
-        Comprehensive patterns library.
-        
-        Args:
-            task_type: Type of task detected
-            
-        Returns:
-            List of pattern descriptions
-        """
-        if not task_type:
-            return []
-        
-        patterns_map = {
-            "add_rls": [
-                "Use TenantGuard decorator on controller methods",
-                "Inject tenant_id from authenticated context (JWT)",
-                "Filter all queries by tenant_id: where: { tenant_id: ctx.user.tenant_id, ... }",
-                "Use Prisma RLS middleware or manual guards",
-                "Never trust client-provided tenant_id"
-            ],
-            "add_logging": [
-                "Use structured logger (not console.log)",
-                "Include event name, user_id, tenant_id, ip, timestamp",
-                "Log security events at WARN level",
-                "Include traceId for request correlation"
-            ],
-            "fix_date": [
-                "Use system date injection: @Inject(SYSTEM_DATE)",
-                "Never hardcode dates like new Date('2023-01-01')",
-                "Use date abstraction layer: this.systemDate.now()",
-                "For documentation: Use current system date dynamically"
-            ],
-            "add_error_handling": [
-                "Wrap risky operations in try/catch",
-                "Log errors with context (traceId, tenantId, user_id)",
-                "Propagate typed errors (AppError, HttpException)",
-                "No silent failures - always log or throw"
-            ],
-            "database_change": [
-                "Update schema.prisma → Create migration → Update DTOs → Update frontend types",
-                "Maintain RLS policies for tenant-scoped tables",
-                "Use prisma.$transaction for multi-step operations",
-                "Verify tenant isolation in all queries"
-            ],
-            "auth_change": [
-                "Validate JWT tokens on every request",
-                "Extract tenant_id from validated JWT (never from request body)",
-                "Use JwtAuthGuard and TenantGuard decorators",
-                "Log authentication events (AUTH_SUCCESS, AUTH_FAILED)"
-            ],
-            "test_change": [
-                "Add regression tests that reproduce the bug",
-                "Test with multiple tenant_ids for multi-tenant features",
-                "Verify error handling paths",
-                "Check test coverage meets requirements"
-            ],
-            "edit_code": [
-                "Follow existing patterns in the codebase",
-                "Maintain consistency with project structure",
-                "Add error handling and logging where appropriate",
-                "Verify security compliance (RLS, auth, validation)"
-            ]
-        }
-        
-        return patterns_map.get(task_type, [
-            "Follow existing patterns in the codebase",
-            "Ensure security and error handling compliance"
-        ])
-    
+
     def run(self, user_message: Optional[str] = None, scope: str = "full") -> int:
         """Main entry point."""
         try:

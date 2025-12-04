@@ -1,16 +1,1888 @@
 {
-  "status": "OK",
-  "session_id": "bfb73f53-4f98-45c6-8af6-9d37ff3d1f3b",
-  "generated_at": "2025-12-03T21:48:12.218628+00:00",
+  "status": "WARNING",
+  "session_id": "9fa1b583-d2fb-4e56-8f44-0d34909f3033",
+  "generated_at": "2025-12-04T06:05:48.537100+00:00",
   "summary": {
     "blocking_count": 0,
-    "warning_count": 0,
+    "warning_count": 144,
     "auto_fixes_applied": 0
   },
-  "violations": [],
+  "violations": [
+    {
+      "id": "VF-001",
+      "severity": "WARNING",
+      "file": ".cursor\\memory-bank\\activeContext.md",
+      "rule_ref": "01-enforcement.mdc Step 5",
+      "description": "activeContext.md not updated recently (last modified: 2025-12-03T21:33:37.318206+00:00)",
+      "evidence": [
+        "activeContext.md not updated recently (last modified: 2025-12-03T21:33:37.318206+00:00)"
+      ],
+      "fix_hint": "Replace hardcoded date with injected system date or configuration value",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-ERR-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "06-error-resilience.mdc",
+      "description": "Error-prone operation without error handling: open\\(",
+      "evidence": [
+        "Line 405: .cursor/scripts/auto-enforcer.py",
+        "Error-prone operation without error handling: open\\("
+      ],
+      "fix_hint": "Add proper error handling with logging and error propagation",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-ERR-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "06-error-resilience.mdc",
+      "description": "Error-prone operation without error handling: open\\(",
+      "evidence": [
+        "Line 1863: .cursor/scripts/auto-enforcer.py",
+        "Error-prone operation without error handling: open\\("
+      ],
+      "fix_hint": "Add proper error handling with logging and error propagation",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-ERR-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations.py",
+      "rule_ref": "06-error-resilience.mdc",
+      "description": "Error-prone operation without error handling: open\\(",
+      "evidence": [
+        "Line 7: .cursor/analyze_violations.py",
+        "Error-prone operation without error handling: open\\("
+      ],
+      "fix_hint": "Add proper error handling with logging and error propagation",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-ERR-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations_detailed.py",
+      "rule_ref": "06-error-resilience.mdc",
+      "description": "Error-prone operation without error handling: open\\(",
+      "evidence": [
+        "Line 7: .cursor/analyze_violations_detailed.py",
+        "Error-prone operation without error handling: open\\("
+      ],
+      "fix_hint": "Add proper error handling with logging and error propagation",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-ERR-001",
+      "severity": "WARNING",
+      "file": ".cursor/enforcement/checks/date_checker.py",
+      "rule_ref": "06-error-resilience.mdc",
+      "description": "Error-prone operation without error handling: open\\(",
+      "evidence": [
+        "Line 387: .cursor/enforcement/checks/date_checker.py",
+        "Error-prone operation without error handling: open\\("
+      ],
+      "fix_hint": "Add proper error handling with logging and error propagation",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-ERR-001",
+      "severity": "WARNING",
+      "file": ".cursor/enforcement/core/session_state.py",
+      "rule_ref": "06-error-resilience.mdc",
+      "description": "Error-prone operation without error handling: open\\(",
+      "evidence": [
+        "Line 231: .cursor/enforcement/core/session_state.py",
+        "Error-prone operation without error handling: open\\("
+      ],
+      "fix_hint": "Add proper error handling with logging and error propagation",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-ERR-001",
+      "severity": "WARNING",
+      "file": ".cursor/enforcement/core/session_state.py",
+      "rule_ref": "06-error-resilience.mdc",
+      "description": "Error-prone operation without error handling: open\\(",
+      "evidence": [
+        "Line 270: .cursor/enforcement/core/session_state.py",
+        "Error-prone operation without error handling: open\\("
+      ],
+      "fix_hint": "Add proper error handling with logging and error propagation",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-ERR-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_backward_compatibility.py",
+      "rule_ref": "06-error-resilience.mdc",
+      "description": "Error-prone operation without error handling: open\\(",
+      "evidence": [
+        "Line 36: .cursor/test_backward_compatibility.py",
+        "Error-prone operation without error handling: open\\("
+      ],
+      "fix_hint": "Add proper error handling with logging and error propagation",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-ERR-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_migration.py",
+      "rule_ref": "06-error-resilience.mdc",
+      "description": "Error-prone operation without error handling: open\\(",
+      "evidence": [
+        "Line 39: .cursor/test_session_migration.py",
+        "Error-prone operation without error handling: open\\("
+      ],
+      "fix_hint": "Add proper error handling with logging and error propagation",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-ERR-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_migration.py",
+      "rule_ref": "06-error-resilience.mdc",
+      "description": "Error-prone operation without error handling: open\\(",
+      "evidence": [
+        "Line 55: .cursor/test_session_migration.py",
+        "Error-prone operation without error handling: open\\("
+      ],
+      "fix_hint": "Add proper error handling with logging and error propagation",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/enforcement/two_brain_integration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 289: .cursor/enforcement/two_brain_integration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/enforcement/two_brain_integration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 290: .cursor/enforcement/two_brain_integration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/enforcement/two_brain_integration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 291: .cursor/enforcement/two_brain_integration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/enforcement/two_brain_integration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 292: .cursor/enforcement/two_brain_integration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/enforcement/two_brain_integration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 293: .cursor/enforcement/two_brain_integration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/enforcement/two_brain_integration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 294: .cursor/enforcement/two_brain_integration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 326: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 328: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 370: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 372: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2463: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2464: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2466: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2467: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2472: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2473: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2474: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2475: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2476: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2478: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2479: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2480: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2481: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2482: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2486: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2489: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2491: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2492: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2495: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2497: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/scripts/auto-enforcer.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 2498: .cursor/scripts/auto-enforcer.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 14: .cursor/analyze_violations.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 15: .cursor/analyze_violations.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 16: .cursor/analyze_violations.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 17: .cursor/analyze_violations.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 21: .cursor/analyze_violations.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 24: .cursor/analyze_violations.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 25: .cursor/analyze_violations.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations_detailed.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 22: .cursor/analyze_violations_detailed.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations_detailed.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 23: .cursor/analyze_violations_detailed.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations_detailed.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 24: .cursor/analyze_violations_detailed.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations_detailed.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 32: .cursor/analyze_violations_detailed.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations_detailed.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 33: .cursor/analyze_violations_detailed.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations_detailed.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 37: .cursor/analyze_violations_detailed.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations_detailed.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 38: .cursor/analyze_violations_detailed.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations_detailed.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 40: .cursor/analyze_violations_detailed.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations_detailed.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 41: .cursor/analyze_violations_detailed.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations_detailed.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 42: .cursor/analyze_violations_detailed.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations_detailed.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 43: .cursor/analyze_violations_detailed.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/analyze_violations_detailed.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 44: .cursor/analyze_violations_detailed.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/enforcement/reporting/context_bundle_builder.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): console\\.(log|error|warn|debug)",
+      "evidence": [
+        "Line 212: .cursor/enforcement/reporting/context_bundle_builder.py",
+        "Console logging detected (use structured logging): console\\.(log|error|warn|debug)"
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/enforcement/reporting/context_bundle_builder.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): console\\.(log|error|warn|debug)",
+      "evidence": [
+        "Line 342: .cursor/enforcement/reporting/context_bundle_builder.py",
+        "Console logging detected (use structured logging): console\\.(log|error|warn|debug)"
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_backward_compatibility.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 12: .cursor/test_backward_compatibility.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_backward_compatibility.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 42: .cursor/test_backward_compatibility.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_backward_compatibility.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 43: .cursor/test_backward_compatibility.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_backward_compatibility.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 44: .cursor/test_backward_compatibility.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_backward_compatibility.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 52: .cursor/test_backward_compatibility.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_backward_compatibility.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 54: .cursor/test_backward_compatibility.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_error_handling.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 11: .cursor/test_error_handling.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_error_handling.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 30: .cursor/test_error_handling.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_error_handling.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 31: .cursor/test_error_handling.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_error_handling.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 35: .cursor/test_error_handling.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_error_handling.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 37: .cursor/test_error_handling.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_error_handling.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 40: .cursor/test_error_handling.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_hash_caching.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 11: .cursor/test_file_hash_caching.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_hash_caching.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 15: .cursor/test_file_hash_caching.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_hash_caching.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 16: .cursor/test_file_hash_caching.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_hash_caching.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 17: .cursor/test_file_hash_caching.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_hash_caching.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 26: .cursor/test_file_hash_caching.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_hash_caching.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 28: .cursor/test_file_hash_caching.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_hash_caching.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 33: .cursor/test_file_hash_caching.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_hash_caching.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 37: .cursor/test_file_hash_caching.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_hash_caching.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 41: .cursor/test_file_hash_caching.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_hash_caching.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 43: .cursor/test_file_hash_caching.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_modification.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 15: .cursor/test_file_modification.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_modification.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 33: .cursor/test_file_modification.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_modification.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 38: .cursor/test_file_modification.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_modification.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 46: .cursor/test_file_modification.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_modification.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 50: .cursor/test_file_modification.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_modification.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 58: .cursor/test_file_modification.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_file_modification.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 60: .cursor/test_file_modification.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_imports.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 13: .cursor/test_git_imports.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_imports.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 16: .cursor/test_git_imports.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 17: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 20: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 25: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 31: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 34: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 39: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 45: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 50: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 63: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 64: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 65: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 71: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 83: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 84: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 85: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 90: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 99: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 100: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 101: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_git_utils.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 104: .cursor/test_git_utils.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_imports.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 15: .cursor/test_imports.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_imports.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 18: .cursor/test_imports.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_line_change.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 37: .cursor/test_line_change.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_line_change.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 38: .cursor/test_line_change.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_line_change.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 44: .cursor/test_line_change.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_line_change.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 47: .cursor/test_line_change.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_migration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 12: .cursor/test_session_migration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_migration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 44: .cursor/test_session_migration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_migration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 45: .cursor/test_session_migration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_migration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 46: .cursor/test_session_migration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_migration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 50: .cursor/test_session_migration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_migration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 51: .cursor/test_session_migration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_migration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 52: .cursor/test_session_migration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_migration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 57: .cursor/test_session_migration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_migration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 58: .cursor/test_session_migration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_migration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 66: .cursor/test_session_migration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_migration.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 68: .cursor/test_session_migration.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_pruning.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 11: .cursor/test_session_pruning.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_pruning.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 31: .cursor/test_session_pruning.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_pruning.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 32: .cursor/test_session_pruning.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_pruning.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 33: .cursor/test_session_pruning.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_pruning.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 34: .cursor/test_session_pruning.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_pruning.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 39: .cursor/test_session_pruning.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_pruning.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 40: .cursor/test_session_pruning.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_pruning.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 41: .cursor/test_session_pruning.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_pruning.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 42: .cursor/test_session_pruning.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_pruning.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 53: .cursor/test_session_pruning.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_pruning.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 55: .cursor/test_session_pruning.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_pruning.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 56: .cursor/test_session_pruning.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    },
+    {
+      "id": "VF-LOG-001",
+      "severity": "WARNING",
+      "file": ".cursor/test_session_pruning.py",
+      "rule_ref": "07-observability.mdc",
+      "description": "Console logging detected (use structured logging): print\\s*\\(",
+      "evidence": [
+        "Line 57: .cursor/test_session_pruning.py",
+        "Console logging detected (use structured logging): print\\s*\\("
+      ],
+      "fix_hint": "Replace console.log with structured logging.\n\nUse the centralized logger:\n  this.logger.log({ level: 'info', message: '...', context: '...' });\n\nOr if using NestJS Logger:\n  this.logger.log('Message', 'Context');\n  this.logger.error('Error message', 'Stack trace', 'Context');\n\nFor debug statements, either:\n  1. Use this.logger.debug(...) if debug logging is needed\n  2. Remove the statement entirely if it was temporary debugging",
+      "session_scope": "current_session"
+    }
+  ],
   "auto_fixes": [],
   "next_actions": [
-    "No violations - system is clean"
+    "Consider fixing 144 WARNING violation(s) if simple"
   ],
   "context_updates": {
     "load": [],
@@ -21,19 +1893,23 @@
     "summary": null
   },
   "context_bundle": {
-    "task_type": "edit_code",
+    "task_type": "add_error_handling",
     "hints": [
-      "Follow existing patterns in the codebase",
-      "Maintain consistency with project structure",
-      "Add error handling and logging where appropriate",
-      "Verify security compliance (RLS, auth, validation)"
+      "No silent failures: Always log errors with context",
+      "Use try/catch with proper error propagation",
+      "Log with traceId and tenantId for correlation",
+      "Map errors to appropriate HTTP status codes (400, 422, 500)"
     ],
-    "relevant_files": [],
+    "relevant_files": [
+      "frontend/src/routes/dashboard/hooks/useServerPersistence.ts",
+      "VeroSuiteMobile/src/hooks/useAuth.ts",
+      "VeroSuiteMobile/src/hooks/useJobs.ts"
+    ],
     "patterns_to_follow": [
-      "Follow existing patterns in the codebase",
-      "Maintain consistency with project structure",
-      "Add error handling and logging where appropriate",
-      "Verify security compliance (RLS, auth, validation)"
+      "Wrap risky operations in try/catch",
+      "Log errors with context (traceId, tenantId, user_id)",
+      "Propagate typed errors (AppError, HttpException)",
+      "No silent failures - always log or throw"
     ]
   }
 }
