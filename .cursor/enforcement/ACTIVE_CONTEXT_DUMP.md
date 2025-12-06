@@ -1,20 +1,20 @@
 # ACTIVE CONTEXT DUMP
 
-**Generated:** 2025-12-06T02:12:16.201417+00:00  
-**Task Type:** `fix_date`  
+**Generated:** 2025-12-06T03:23:43.513810+00:00  
+**Task Type:** `edit_code`  
 **Session ID:** 4850fc61-c840-4d53-9737-54a7400fcc11
 
 ---
 
 ## Task Context
 
-**Detected Task Type:** `fix_date`
+**Detected Task Type:** `edit_code`
 
 **Hints:**
-- Replace hardcoded dates with: @Inject(SYSTEM_DATE) or inject(SYSTEM_DATE)
-- Use date abstraction: this.systemDate.now() or similar
-- Never use: new Date('2025-12-04') or hardcoded date strings
-- For 'Last Updated' fields: Use current system date dynamically
+- Follow existing patterns in the codebase
+- Maintain consistency with project structure
+- Add error handling and logging where appropriate
+- Verify security compliance (RLS, auth, validation)
 
 ---
 
@@ -26,10 +26,10 @@ No specific files recommended at this time.
 
 ## Patterns to Follow
 
-1. **Use system date injection: @Inject(SYSTEM_DATE)**
-2. **Never hardcode dates like new Date('2025-12-04')**
-3. **Use date abstraction layer: this.systemDate.now()**
-4. **For documentation: Use current system date dynamically**
+1. **Follow existing patterns in the codebase**
+2. **Maintain consistency with project structure**
+3. **Add error handling and logging where appropriate**
+4. **Verify security compliance (RLS, auth, validation)**
 
 ---
 
