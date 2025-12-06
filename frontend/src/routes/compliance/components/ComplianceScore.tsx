@@ -2,7 +2,7 @@
  * Compliance Score Component
  * Displays compliance score with visualization
  * 
- * Last Updated: 2025-11-24
+ * Last Updated: 2025-12-06
  */
 
 import { useMemo } from 'react';
@@ -15,8 +15,6 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  TrendingUp,
-  TrendingDown,
   Minus,
   Shield,
 } from 'lucide-react';

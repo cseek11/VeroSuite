@@ -2,7 +2,7 @@ import React from 'react';
 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
-  error?: string;
+  error?: string | undefined;
   helperText?: string;
 }
 

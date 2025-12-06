@@ -3,6 +3,7 @@ import React from 'react';
 import { enhancedApi } from '@/lib/enhanced-api';
 import { secureApiClient } from '@/lib/secure-api-client';
 import { Account } from '@/types/enhanced-types';
+import { logger } from '@/utils/logger';
 
 interface CustomerPageState {
   customer: Account | null;
@@ -50,7 +51,7 @@ export const useCustomerPageStore = create<CustomerPageState>((set, get) => ({
     
     try {
       // Use secureApiClient for updates (which goes to our backend)
-      const updatedCustomer = await secureApiClient.put(`/accounts/${customer.id}`, updates);
+      const updatedCustomer = await secureApiClient.put<Account>(`/accounts/${customer.id}`, updates);
       set({ 
         customer: updatedCustomer, 
         isLoading: false, 
@@ -79,7 +80,12 @@ export const useCustomerPageStore = create<CustomerPageState>((set, get) => ({
   saveChanges: async () => {
     const { changes, updateCustomer } = get();
     if (Object.keys(changes).length > 0) {
-      await updateCustomer(changes);
+      try {
+        await updateCustomer(changes);
+      } catch (error) {
+        logger.error('Failed to save customer changes', error, 'customerPageStore');
+        throw error;
+      }
     }
   },
 

@@ -2,7 +2,7 @@
  * Compliance Overview Component
  * Displays all 25 rules with compliance status
  * 
- * Last Updated: 2025-11-24
+ * Last Updated: 2025-12-06
  */
 
 import { useMemo, useState } from 'react';
@@ -21,7 +21,7 @@ import {
   Filter,
   Search,
 } from 'lucide-react';
-import type { RuleDefinition, RuleTier, ComplianceStatus } from '@/types/compliance.types';
+import type { RuleTier, ComplianceStatus } from '@/types/compliance.types';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 

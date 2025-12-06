@@ -103,11 +103,11 @@ const formatAddress = (customer: Account | null) => {
   return parts.join(', ') || 'No address provided';
 };
 
-// UUID validation helper - more lenient to accept mock UUIDs
-const _isValidUUID = (uuid: string) => {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(uuid);
-};
+// UUID validation helper - more lenient to accept mock UUIDs (currently unused but kept for future use)
+// const isValidUUID = (uuid: string) => {
+//   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+//   return uuidRegex.test(uuid);
+// };
 
 export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initialData }: InvoiceFormProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<Account | null>(null);
@@ -125,8 +125,8 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
     defaultValues: {
       account_id: '',
       invoice_number: '',
-      issue_date: new Date().toISOString().split('T')[0],
-      due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      issue_date: new Date().toISOString().split('T')[0] as string,
+      due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] as string,
       notes: '',
       items: [{ service_type_id: '', description: '', quantity: 1, unit_price: 0, total_price: 0 }],
     },
@@ -161,7 +161,7 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
           throw new Error('API call failed');
         }
       } catch (error) {
-        logger.warn('Using fallback service types due to error', error, 'InvoiceForm');
+        logger.warn('Using fallback service types due to error', error as Error, 'InvoiceForm');
         // Use real service types from database
         return [
           { 
@@ -207,13 +207,13 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
 
   // Create/Update invoice mutation
   const submitMutation = useMutation({
-    mutationFn: async (data: Record<string, unknown>) => {
+    mutationFn: async (data: InvoiceFormData) => {
       if (invoice) {
         logger.debug('Updating existing invoice', { invoiceId: invoice.id }, 'InvoiceForm');
-        return billing.updateInvoice(invoice.id, data);
+        return billing.updateInvoice(invoice.id, data as any);
       } else {
         logger.debug('Creating new invoice', {}, 'InvoiceForm');
-        return billing.createInvoice(data);
+        return billing.createInvoice(data as any);
       }
     },
     onSuccess: (result) => {
@@ -237,18 +237,21 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
         total_price: Number(item.quantity || 1) * Number(item.unit_price || 0),
       })) || [{ service_type_id: '', description: '', quantity: 1, unit_price: 0, total_price: 0 }];
       
+      const issueDate = (invoice.issue_date ? new Date(invoice.issue_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]) as string;
+      const dueDate = (invoice.due_date ? new Date(invoice.due_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]) as string;
+      
       reset({
         account_id: invoice.account_id || '',
         invoice_number: invoice.invoice_number || '',
-        issue_date: new Date(invoice.issue_date || new Date()).toISOString().split('T')[0],
-        due_date: new Date(invoice.due_date || new Date()).toISOString().split('T')[0],
+        issue_date: issueDate,
+        due_date: dueDate,
         notes: invoice.notes || '',
         items: invoiceItems,
       });
       
       // Set customer from invoice if available
       if (invoice.accounts) {
-        setSelectedCustomer(invoice.accounts);
+        setSelectedCustomer(invoice.accounts as Account);
       }
     } else if (!invoice && isOpen) {
       // Use initialData if provided, otherwise use defaults
@@ -263,12 +266,15 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
             }))
           : [{ service_type_id: '', description: '', quantity: 1, unit_price: 0, total_price: 0 }];
 
+        const initIssueDate = (initialData.issue_date ?? new Date().toISOString().split('T')[0]) as string;
+        const initDueDate = (initialData.due_date ?? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]) as string;
+        
         reset({
           account_id: initialData.account_id || '',
           invoice_number: '',
-          issue_date: initialData.issue_date || new Date().toISOString().split('T')[0],
-          due_date: initialData.due_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          notes: initialData.notes || '',
+          issue_date: initIssueDate,
+          due_date: initDueDate,
+          notes: initialData.notes ?? '',
           items: initialItems,
         });
 
@@ -279,11 +285,13 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
       } else {
         // Clear customer when creating new invoice
         setSelectedCustomer(null);
+        const defaultIssueDate = new Date().toISOString().split('T')[0] as string;
+        const defaultDueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] as string;
         reset({
           account_id: '',
           invoice_number: '',
-          issue_date: new Date().toISOString().split('T')[0],
-          due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          issue_date: defaultIssueDate,
+          due_date: defaultDueDate,
           notes: '',
           items: [{ service_type_id: '', description: '', quantity: 1, unit_price: 0, total_price: 0 }],
         });
@@ -350,7 +358,16 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
         return;
       }
       
-      await submitMutation.mutateAsync(apiData);
+      // Ensure all items have total_price
+      const apiDataWithTotals = {
+        ...apiData,
+        items: apiData.items.map((item: { service_type_id: string; description: string; quantity: number; unit_price: number; total_price?: number }) => ({
+          ...item,
+          total_price: item.total_price ?? (item.quantity * item.unit_price)
+        }))
+      };
+      
+      await submitMutation.mutateAsync(apiDataWithTotals);
       
       // Form will close via onSuccess callback
     } catch (error) {
@@ -383,7 +400,8 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-5xl max-h-[92vh] overflow-hidden flex flex-col p-0">
         {/* Header */}
-        <DialogHeader className="bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border-b border-white/20 p-6">
+        <div className="bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border-b border-white/20 p-6">
+          <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 flex-1">
               <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg">
@@ -430,7 +448,8 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
               <X className="w-5 h-5" />
             </button>
           </div>
-        </DialogHeader>
+          </DialogHeader>
+        </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50/50 to-white">
@@ -480,7 +499,7 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
                           {...field}
                           label="Invoice Number"
                           placeholder="Auto-generated if left blank"
-                          error={errors.invoice_number?.message}
+                          error={errors.invoice_number?.message || undefined}
                         />
                       )}
                     />
@@ -493,7 +512,7 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
                           {...field}
                           type="date"
                           label="Issue Date *"
-                          error={errors.issue_date?.message}
+                          error={errors.issue_date?.message || undefined}
                         />
                       )}
                     />
@@ -508,7 +527,7 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
                           {...field}
                           type="date"
                           label="Due Date *"
-                          error={errors.due_date?.message}
+                          error={errors.due_date?.message || undefined}
                         />
                       )}
                     />
@@ -523,7 +542,7 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
                             label="Notes"
                             placeholder="Additional notes or terms..."
                             rows={1}
-                            error={errors.notes?.message}
+                            error={errors.notes?.message || undefined}
                           />
                         )}
                       />
@@ -587,7 +606,7 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
                                         label: serviceType.service_name,
                                       })),
                                     ]}
-                                    error={errors.items?.[index]?.service_type_id?.message}
+                                    error={errors.items?.[index]?.service_type_id?.message || undefined}
                                   />
                                 )}
                               />
@@ -609,7 +628,7 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
                                     const unitPrice = watchedItems[index]?.unit_price || 0;
                                     setValue(`items.${index}.total_price`, qty * unitPrice);
                                   }}
-                                  error={errors.items?.[index]?.quantity?.message}
+                                  error={errors.items?.[index]?.quantity?.message || undefined}
                                 />
                               )}
                             />
@@ -631,7 +650,7 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
                                     const qty = watchedItems[index]?.quantity || 1;
                                     setValue(`items.${index}.total_price`, qty * price);
                                   }}
-                                  error={errors.items?.[index]?.unit_price?.message}
+                                  error={errors.items?.[index]?.unit_price?.message || undefined}
                                 />
                               )}
                             />
@@ -670,7 +689,7 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
                                   label="Description *"
                                   placeholder="Service description..."
                                   rows={1}
-                                  error={errors.items?.[index]?.description?.message}
+                                  error={errors.items?.[index]?.description?.message || undefined}
                                 />
                               )}
                             />
@@ -728,16 +747,19 @@ export default function InvoiceForm({ invoice, isOpen, onClose, onSuccess, initi
               >
                 Cancel
               </Button>
-              <Button
+              <button
                 type="submit"
                 form="invoice-form"
-                variant="primary"
-                loading={submitMutation.isPending}
-                icon={Save}
+                className="px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm flex items-center gap-2"
                 disabled={submitMutation.isPending}
               >
+                {submitMutation.isPending ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
                 {invoice ? 'Update Invoice' : 'Create Invoice'}
-              </Button>
+              </button>
             </div>
           </div>
         </DialogFooter>

@@ -1,0 +1,158 @@
+[
+  {
+    "module": "accounts",
+    "covered": 321,
+    "total": 484,
+    "pct": 66.32
+  },
+  {
+    "module": "agreements",
+    "covered": 130,
+    "total": 147,
+    "pct": 88.44
+  },
+  {
+    "module": "audit",
+    "covered": 5,
+    "total": 13,
+    "pct": 38.46
+  },
+  {
+    "module": "auth",
+    "covered": 252,
+    "total": 394,
+    "pct": 63.96
+  },
+  {
+    "module": "billing",
+    "covered": 417,
+    "total": 1103,
+    "pct": 37.81
+  },
+  {
+    "module": "common",
+    "covered": 964,
+    "total": 1462,
+    "pct": 65.94
+  },
+  {
+    "module": "company",
+    "covered": 126,
+    "total": 186,
+    "pct": 67.74
+  },
+  {
+    "module": "compliance",
+    "covered": 127,
+    "total": 258,
+    "pct": 49.22
+  },
+  {
+    "module": "crm",
+    "covered": 106,
+    "total": 195,
+    "pct": 54.36
+  },
+  {
+    "module": "dashboard",
+    "covered": 981,
+    "total": 1838,
+    "pct": 53.37
+  },
+  {
+    "module": "health",
+    "covered": 34,
+    "total": 53,
+    "pct": 64.15
+  },
+  {
+    "module": "jobs",
+    "covered": 519,
+    "total": 576,
+    "pct": 90.1
+  },
+  {
+    "module": "kpi-templates",
+    "covered": 240,
+    "total": 338,
+    "pct": 71.01
+  },
+  {
+    "module": "kpis",
+    "covered": 242,
+    "total": 448,
+    "pct": 54.02
+  },
+  {
+    "module": "layouts",
+    "covered": 147,
+    "total": 175,
+    "pct": 84
+  },
+  {
+    "module": "middleware",
+    "covered": 0,
+    "total": 21,
+    "pct": 0
+  },
+  {
+    "module": "routing",
+    "covered": 265,
+    "total": 337,
+    "pct": 78.64
+  },
+  {
+    "module": "service-types",
+    "covered": 62,
+    "total": 72,
+    "pct": 86.11
+  },
+  {
+    "module": "services",
+    "covered": 24,
+    "total": 25,
+    "pct": 96
+  },
+  {
+    "module": "sessions",
+    "covered": 71,
+    "total": 169,
+    "pct": 42.01
+  },
+  {
+    "module": "technician",
+    "covered": 410,
+    "total": 508,
+    "pct": 80.71
+  },
+  {
+    "module": "test-violations",
+    "covered": 0,
+    "total": 59,
+    "pct": 0
+  },
+  {
+    "module": "uploads",
+    "covered": 44,
+    "total": 51,
+    "pct": 86.27
+  },
+  {
+    "module": "user",
+    "covered": 240,
+    "total": 610,
+    "pct": 39.34
+  },
+  {
+    "module": "websocket",
+    "covered": 31,
+    "total": 112,
+    "pct": 27.68
+  },
+  {
+    "module": "work-orders",
+    "covered": 303,
+    "total": 326,
+    "pct": 92.94
+  }
+]

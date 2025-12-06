@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 // import { enhancedApi } from '@/lib/enhanced-api';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { logger } from '@/utils/logger';
+import { presignUpload } from '@/lib/upload-service';
 import {
   Upload,
   Image,
@@ -26,7 +27,7 @@ export default function Uploads() {
       setFiles((prev) => [presign.fileUrl, ...prev]);
     } catch (error: unknown) {
       setUploadError('Upload failed. Please try again.');
-      logger.error('Upload error', error, 'Uploads');
+      logger.error('Upload error', error as Error, 'Uploads');
     } finally {
       setUploading(false);
     }
@@ -157,7 +158,13 @@ export default function Uploads() {
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => window.open(url, '_blank')}
+                      onClick={() => {
+                        try {
+                          window.open(url, '_blank');
+                        } catch (error) {
+                          logger.error('Failed to open uploaded file', error as Error, 'Uploads');
+                        }
+                      }}
                       className="flex-1 bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 px-2 py-1 rounded hover:bg-white hover:shadow-lg transition-all duration-200 text-xs flex items-center justify-center gap-1"
                     >
                       <Download className="h-3 w-3" />

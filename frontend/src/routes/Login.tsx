@@ -21,8 +21,6 @@ export default function Login() {
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -31,8 +29,6 @@ export default function Login() {
       password: '',
     },
   });
-
-  const watchedValues = watch();
 
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
@@ -103,7 +99,6 @@ export default function Login() {
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300 h-4 w-4" />
                 <input
                   id="email"
-                  name="email"
                   type="email"
                   className="login-gradient-input pl-10 w-full"
                   placeholder="Enter your email"
@@ -124,7 +119,6 @@ export default function Login() {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300 h-4 w-4" />
                 <input
                   id="password"
-                  name="password"
                   type={showPassword ? 'text' : 'password'}
                   className="login-gradient-input pl-10 pr-10 w-full"
                   placeholder="Enter your password"

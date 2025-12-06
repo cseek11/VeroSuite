@@ -27,7 +27,13 @@
     "db:studio": "cd libs/common && npm run prisma:studio"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "@aduh95/viz.js": "^3.4.0",
+    "@hpcc-js/wasm": "^2.29.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "@viz-js/viz": "^3.7.0",
+    "concurrently": "^8.2.2",
+    "madge": "^8.0.0",
+    "svg2png-wasm": "^1.4.1"
   },
   "dependencies": {
     "sonner": "^2.0.7"

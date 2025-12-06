@@ -1,0 +1,13 @@
+[31m[Nest] 14596  - [39m12/06/2025, 12:44:14 AM [31m  ERROR[39m [38;5;3m[StripeService] [39m[31mSTRIPE_SECRET_KEY not found in environment variables[39m
+[31m[Nest] 14596  - [39m12/06/2025, 12:44:14 AM [31m  ERROR[39m [38;5;3m[ExceptionHandler] [39m[31mStripe configuration is required. Please set STRIPE_SECRET_KEY environment variable.[39m
+Error: Stripe configuration is required. Please set STRIPE_SECRET_KEY environment variable.
+    at new StripeService (C:\Users\ashse\Documents\VeroField\Training\VeroField\apps\api\dist\apps\api\src\billing\stripe.service.js:24:19)
+    at Injector.instantiateClass (C:\Users\ashse\Documents\VeroField\Training\VeroField\node_modules\@nestjs\core\injector\injector.js:373:19)
+    at callback (C:\Users\ashse\Documents\VeroField\Training\VeroField\node_modules\@nestjs\core\injector\injector.js:65:45)
+    at async Injector.resolveConstructorParams (C:\Users\ashse\Documents\VeroField\Training\VeroField\node_modules\@nestjs\core\inject^C\injector.js:145:24)
+    at async Injector.loadInstance (C:\Users\ashse\Documents\VeroField\Training\VeroField\node_modules\@nestjs\core\injector\injector.js:70:13)
+    at async Injector.loadProvider (C:\Users\ashse\Documents\VeroField\Training\VeroField\node_modules\@nestjs\core\injector\injector.js:98:9)
+    at async C:\Users\ashse\Documents\VeroField\Training\VeroField\node_modules\@nestjs\core\injector\instance-loader.js:56:13
+    at async Promise.all (index 4)
+    at async InstanceLoader.createInstancesOfProviders (C:\Users\ashse\Documents\VeroField\Training\VeroField\node_modules\@nestjs\core\injector\instance-loader.js:55:9)
+    at async C:\Users\ashse\Documents\VeroField\Training\VeroField\node_modules\@nestjs\core\injector\instance-loader.js:40:13

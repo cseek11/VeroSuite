@@ -94,8 +94,8 @@ async function bootstrap() {
     .setDescription('Multi-tenant Field Operations Platform')
     .setVersion('1.0')
     .addServer('http://localhost:3001', 'Development Server')
-    .addServer('http://localhost:3001/api/v1', 'API v1', { description: 'Version 1 (some endpoints deprecated)' })
-    .addServer('http://localhost:3001/api/v2', 'API v2', { description: 'Version 2 (recommended)' })
+    .addServer('http://localhost:3001/api/v1', 'API v1')
+    .addServer('http://localhost:3001/api/v2', 'API v2')
     .addBearerAuth()
     .build();
 

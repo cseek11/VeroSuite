@@ -9,7 +9,7 @@ interface SelectOption {
 
 interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
   label?: string;
-  error?: string;
+  error?: string | undefined;
   helperText?: string;
   options: SelectOption[];
   placeholder?: string;

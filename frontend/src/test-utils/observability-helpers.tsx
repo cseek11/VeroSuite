@@ -45,12 +45,12 @@ export class MockLogger {
     this.logs.push({
       level: LogLevel.DEBUG,
       message,
-      context: typeof context === 'string' ? context : undefined,
-      operation,
+      ...(typeof context === 'string' ? { context } : {}),
+      ...(operation ? { operation } : {}),
       severity: 'debug',
-      traceId,
-      spanId,
-      requestId,
+      ...(traceId ? { traceId } : {}),
+      ...(spanId ? { spanId } : {}),
+      ...(requestId ? { requestId } : {}),
     });
   }
 
@@ -65,12 +65,12 @@ export class MockLogger {
     this.logs.push({
       level: LogLevel.INFO,
       message,
-      context: typeof context === 'string' ? context : undefined,
-      operation,
+      ...(typeof context === 'string' ? { context } : {}),
+      ...(operation ? { operation } : {}),
       severity: 'info',
-      traceId,
-      spanId,
-      requestId,
+      ...(traceId ? { traceId } : {}),
+      ...(spanId ? { spanId } : {}),
+      ...(requestId ? { requestId } : {}),
     });
   }
 
@@ -87,13 +87,13 @@ export class MockLogger {
     this.logs.push({
       level: LogLevel.WARN,
       message,
-      context: typeof context === 'string' ? context : undefined,
-      operation,
+      ...(typeof context === 'string' ? { context } : {}),
+      ...(operation ? { operation } : {}),
       severity: 'warn',
-      errorCode,
-      traceId,
-      spanId,
-      requestId,
+      ...(errorCode ? { errorCode } : {}),
+      ...(traceId ? { traceId } : {}),
+      ...(spanId ? { spanId } : {}),
+      ...(requestId ? { requestId } : {}),
     });
   }
 
@@ -111,14 +111,14 @@ export class MockLogger {
     this.logs.push({
       level: LogLevel.ERROR,
       message,
-      context: typeof context === 'string' ? context : undefined,
-      operation,
+      ...(typeof context === 'string' ? { context } : {}),
+      ...(operation ? { operation } : {}),
       severity: 'error',
-      errorCode,
-      rootCause,
-      traceId,
-      spanId,
-      requestId,
+      ...(errorCode ? { errorCode } : {}),
+      ...(rootCause ? { rootCause } : {}),
+      ...(traceId ? { traceId } : {}),
+      ...(spanId ? { spanId } : {}),
+      ...(requestId ? { requestId } : {}),
     });
   }
 
@@ -136,14 +136,14 @@ export class MockLogger {
     this.logs.push({
       level: LogLevel.FATAL,
       message,
-      context: typeof context === 'string' ? context : undefined,
-      operation,
+      ...(typeof context === 'string' ? { context } : {}),
+      ...(operation ? { operation } : {}),
       severity: 'error',
-      errorCode,
-      rootCause,
-      traceId,
-      spanId,
-      requestId,
+      ...(errorCode ? { errorCode } : {}),
+      ...(rootCause ? { rootCause } : {}),
+      ...(traceId ? { traceId } : {}),
+      ...(spanId ? { spanId } : {}),
+      ...(requestId ? { requestId } : {}),
     });
   }
 

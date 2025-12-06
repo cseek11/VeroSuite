@@ -217,9 +217,8 @@ class OfflineQueueService {
   private async executeLayoutOperation(op: QueuedOperation): Promise<void> {
     switch (op.type) {
       case 'update':
-        if (!op.resourceId) throw new Error('Resource ID required for update');
-        await enhancedApi.dashboardLayouts.update(op.resourceId, op.data);
-        break;
+        // TODO: Implement layout update when API method is available
+        throw new Error('Layout update not yet implemented - no API method available');
       default:
         throw new Error(`Unsupported layout operation: ${op.type}`);
     }
@@ -287,7 +286,7 @@ class OfflineQueueService {
     this.queue.forEach(op => {
       if (op.status === 'failed' && op.retries < MAX_RETRIES) {
         op.status = 'pending';
-        op.error = undefined;
+        delete op.error;
       }
     });
     this.saveQueue();

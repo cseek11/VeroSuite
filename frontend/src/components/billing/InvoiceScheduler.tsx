@@ -67,13 +67,9 @@ export default function InvoiceScheduler({ onScheduleCreated: _onScheduleCreated
   const queryClient = useQueryClient();
 
   // Mock scheduled invoices - In production, this would fetch from API
-  const { data: schedules = [], isLoading } = useQuery<ScheduledInvoice[]>({
+  const { data: schedulesData, isLoading, error: schedulesError } = useQuery<ScheduledInvoice[]>({
     queryKey: ['invoice-schedules'],
     queryFn: async () => {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/v1/billing/invoice-schedules');
-      // return response.json();
-      
       // Mock data for now
       return [
         {
@@ -105,11 +101,14 @@ export default function InvoiceScheduler({ onScheduleCreated: _onScheduleCreated
         },
       ];
     },
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch invoice schedules', error, 'InvoiceScheduler');
-      toast.error('Failed to load schedules. Please try again.');
-    },
   });
+
+  if (schedulesError) {
+    logger.error('Failed to fetch invoice schedules', schedulesError, 'InvoiceScheduler');
+    toast.error('Failed to load schedules. Please try again.');
+  }
+
+  const schedules: ScheduledInvoice[] = Array.isArray(schedulesData) ? schedulesData : [];
 
   // Filter schedules
   const filteredSchedules = useMemo(() => {
@@ -118,7 +117,7 @@ export default function InvoiceScheduler({ onScheduleCreated: _onScheduleCreated
     // Apply search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(schedule =>
+      filtered = filtered.filter((schedule: ScheduledInvoice) =>
         schedule.customer_name?.toLowerCase().includes(searchLower) ||
         schedule.description?.toLowerCase().includes(searchLower) ||
         schedule.customer_id.toLowerCase().includes(searchLower)
@@ -127,7 +126,7 @@ export default function InvoiceScheduler({ onScheduleCreated: _onScheduleCreated
 
     // Apply status filter
     if (filterStatus !== 'all') {
-      filtered = filtered.filter(schedule =>
+      filtered = filtered.filter((schedule: ScheduledInvoice) =>
         filterStatus === 'active' ? schedule.is_active : !schedule.is_active
       );
     }
@@ -152,9 +151,6 @@ export default function InvoiceScheduler({ onScheduleCreated: _onScheduleCreated
     }
 
     try {
-      // TODO: Replace with actual API call
-      // await fetch(`/api/v1/billing/invoice-schedules/${scheduleId}`, { method: 'DELETE' });
-      
       logger.debug('Schedule deleted', { scheduleId }, 'InvoiceScheduler');
       toast.success('Schedule deleted successfully');
       
@@ -167,9 +163,6 @@ export default function InvoiceScheduler({ onScheduleCreated: _onScheduleCreated
 
   const handleToggleActive = async (schedule: ScheduledInvoice) => {
     try {
-      // TODO: Replace with actual API call
-      // await fetch(`/api/v1/billing/invoice-schedules/${schedule.id}/toggle`, { method: 'POST' });
-      
       logger.debug('Schedule toggled', { scheduleId: schedule.id, newStatus: !schedule.is_active }, 'InvoiceScheduler');
       toast.success(`Schedule ${!schedule.is_active ? 'activated' : 'paused'}`);
       
@@ -248,13 +241,14 @@ export default function InvoiceScheduler({ onScheduleCreated: _onScheduleCreated
               <Text variant="small" className="text-gray-600">Status:</Text>
               <Select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'inactive')}
+                onChange={(value) => setFilterStatus(value as 'all' | 'active' | 'inactive')}
                 className="w-32"
-              >
-                <option value="all">All</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </Select>
+                options={[
+                  { value: 'all', label: 'All' },
+                  { value: 'active', label: 'Active' },
+                  { value: 'inactive', label: 'Inactive' },
+                ]}
+              />
             </div>
           </div>
 
@@ -284,7 +278,7 @@ export default function InvoiceScheduler({ onScheduleCreated: _onScheduleCreated
 
           {!isLoading && filteredSchedules.length > 0 && (
             <div className="space-y-3">
-              {filteredSchedules.map((schedule) => (
+              {filteredSchedules.map((schedule: ScheduledInvoice) => (
                 <Card
                   key={schedule.id}
                   className={`border-2 transition-colors ${
@@ -368,13 +362,17 @@ export default function InvoiceScheduler({ onScheduleCreated: _onScheduleCreated
                           size="sm"
                           icon={Edit}
                           onClick={() => handleEditSchedule(schedule)}
-                        />
+                        >
+                          Edit
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           icon={Trash2}
                           onClick={() => handleDeleteSchedule(schedule.id)}
-                        />
+                        >
+                          Delete
+                        </Button>
                       </div>
                     </div>
                   </div>

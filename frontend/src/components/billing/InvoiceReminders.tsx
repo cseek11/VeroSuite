@@ -58,23 +58,22 @@ export default function InvoiceReminders({ onReminderSent }: InvoiceRemindersPro
   const queryClient = useQueryClient();
 
   // Fetch overdue invoices
-  const { data: overdueInvoices = [], isLoading: invoicesLoading } = useQuery<Invoice[]>({
+  const { data: overdueInvoicesData, isLoading: invoicesLoading, error: invoicesError } = useQuery<Invoice[]>({
     queryKey: ['billing', 'overdue-invoices'],
     queryFn: () => billing.getOverdueInvoices(),
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch overdue invoices', error, 'InvoiceReminders');
-      toast.error('Failed to load overdue invoices. Please try again.');
-    },
   });
 
+  if (invoicesError) {
+    logger.error('Failed to fetch overdue invoices', invoicesError, 'InvoiceReminders');
+    toast.error('Failed to load overdue invoices. Please try again.');
+  }
+
+  const overdueInvoices: Invoice[] = Array.isArray(overdueInvoicesData) ? overdueInvoicesData : [];
+
   // Fetch reminder history
-  const { data: reminderHistory = [], isLoading: historyLoading } = useQuery<ReminderHistory[]>({
+  const { data: reminderHistoryData, isLoading: historyLoading, error: historyError } = useQuery<ReminderHistory[]>({
     queryKey: ['billing', 'reminder-history'],
     queryFn: async () => {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/v1/billing/reminder-history');
-      // return response.json();
-      
       // Mock data for now
       return [
         {
@@ -89,10 +88,13 @@ export default function InvoiceReminders({ onReminderSent }: InvoiceRemindersPro
         },
       ];
     },
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch reminder history', error, 'InvoiceReminders');
-    },
   });
+
+  if (historyError) {
+    logger.error('Failed to fetch reminder history', historyError, 'InvoiceReminders');
+  }
+
+  const reminderHistory: ReminderHistory[] = Array.isArray(reminderHistoryData) ? reminderHistoryData : [];
 
   // Filter invoices
   const filteredInvoices = useMemo(() => {
@@ -101,7 +103,7 @@ export default function InvoiceReminders({ onReminderSent }: InvoiceRemindersPro
     // Apply search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(invoice =>
+      filtered = filtered.filter((invoice: Invoice) =>
         invoice.invoice_number?.toLowerCase().includes(searchLower) ||
         invoice.accounts?.name?.toLowerCase().includes(searchLower) ||
         invoice.id.toLowerCase().includes(searchLower)
@@ -117,7 +119,7 @@ export default function InvoiceReminders({ onReminderSent }: InvoiceRemindersPro
 
     // Apply type filter
     if (filterType !== 'all') {
-      filtered = filtered.filter(reminder => reminder.reminder_type === filterType);
+      filtered = filtered.filter((reminder: ReminderHistory) => reminder.reminder_type === filterType);
     }
 
     return filtered;
@@ -137,7 +139,7 @@ export default function InvoiceReminders({ onReminderSent }: InvoiceRemindersPro
     if (selectedInvoices.size === filteredInvoices.length) {
       setSelectedInvoices(new Set());
     } else {
-      setSelectedInvoices(new Set(filteredInvoices.map(inv => inv.id)));
+      setSelectedInvoices(new Set(filteredInvoices.map((inv: Invoice) => inv.id)));
     }
   };
 
@@ -424,7 +426,7 @@ export default function InvoiceReminders({ onReminderSent }: InvoiceRemindersPro
 
           {!historyLoading && filteredHistory.length > 0 && (
             <div className="space-y-3">
-              {filteredHistory.map((reminder) => (
+              {filteredHistory.map((reminder: ReminderHistory) => (
                 <Card key={reminder.id} className="border border-gray-200">
                   <div className="p-4">
                     <div className="flex items-start justify-between">

@@ -1,4 +1,5 @@
 import { DrillDownLevel } from '@/hooks/useDrillDown';
+import { logger } from '@/utils/logger';
 
 export interface ExportOptions {
   format: 'csv' | 'excel' | 'pdf';
@@ -22,7 +23,7 @@ export interface ExportData {
 
 // Export to CSV
 export function exportToCSV(exportData: ExportData, options: ExportOptions = { format: 'csv' }) {
-  const { data, title } = exportData;
+  const { data, title, level, metadata, filters } = exportData;
   
   if (data.length === 0) {
     throw new Error('No data to export');
@@ -108,7 +109,7 @@ export function exportToPDF(exportData: ExportData, options: ExportOptions = { f
 
 // Generate HTML content for PDF
 function generatePDFHTML(exportData: ExportData, options: ExportOptions): string {
-  const { data, title } = exportData;
+  const { data, title, level, metadata, filters } = exportData;
   
   const headers = Object.keys(data[0]);
   
@@ -268,7 +269,7 @@ export function exportBatch(exportDatas: ExportData[], options: ExportOptions) {
   }
   
   // Multiple exports - create a zip file (would need a library like JSZip)
-  console.log('Batch export not yet implemented - exporting individually');
+  logger.warn('Batch export not yet implemented - exporting individually', {}, 'exportUtils');
   
   exportDatas.forEach((exportData, index) => {
     setTimeout(() => {

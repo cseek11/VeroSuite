@@ -49,7 +49,7 @@ vi.mock('@/utils/toast', () => ({
 // @ts-expect-error - Type assertion for mocking
 const _mockBilling = billing as unknown as { getPaymentTracking: ReturnType<typeof vi.fn> };
 const mockLogger = logger as unknown as { error: ReturnType<typeof vi.fn>; debug: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 const mockToast = toast as unknown as { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
 
 describe('PaymentTracking', () => {
@@ -100,35 +100,50 @@ describe('PaymentTracking', () => {
   };
 
   describe('Component Rendering', () => {
-    it('should render loading state', () => {
-      vi.mocked(billing.getPaymentTracking).mockImplementation(
-        () => new Promise(() => {}) // Never resolves
-      );
+    it('should render loading state', async () => {
+      try {
+        vi.mocked(billing.getPaymentTracking).mockImplementation(
+          () => new Promise(() => {}) // Never resolves
+        );
 
-      renderComponent();
+        renderComponent();
 
-      expect(screen.getByText(/loading payment tracking data/i)).toBeInTheDocument();
+        expect(screen.getByText(/loading payment tracking data/i)).toBeInTheDocument();
+      } catch (error) {
+        mockLogger.error('Test "should render loading state" failed', error, 'PaymentTrackingTest');
+        throw error;
+      }
     });
 
     it('should render error state', async () => {
-      vi.mocked(billing.getPaymentTracking).mockRejectedValue(new Error('API Error'));
+      try {
+        vi.mocked(billing.getPaymentTracking).mockRejectedValue(new Error('API Error'));
 
-      renderComponent();
+        renderComponent();
 
-      await waitFor(() => {
-        expect(screen.getByText(/failed to load payment tracking data/i)).toBeInTheDocument();
-      });
+        await waitFor(() => {
+          expect(screen.getByText(/failed to load payment tracking data/i)).toBeInTheDocument();
+        });
+      } catch (error) {
+        mockLogger.error('Test "should render error state" failed', error, 'PaymentTrackingTest');
+        throw error;
+      }
     });
 
     it('should render payment tracking data', async () => {
-      vi.mocked(billing.getPaymentTracking).mockResolvedValue(mockTrackingData);
+      try {
+        vi.mocked(billing.getPaymentTracking).mockResolvedValue(mockTrackingData);
 
-      renderComponent();
+        renderComponent();
 
-      await waitFor(() => {
-        expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
-        expect(screen.getByText(/test customer/i)).toBeInTheDocument();
-      });
+        await waitFor(() => {
+          expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
+          expect(screen.getByText(/test customer/i)).toBeInTheDocument();
+        });
+      } catch (error) {
+        mockLogger.error('Test "should render payment tracking data" failed', error, 'PaymentTrackingTest');
+        throw error;
+      }
     });
   });
 
@@ -138,256 +153,307 @@ describe('PaymentTracking', () => {
     // after early returns, causing "Rendered more hooks than during the previous render"
 
     it('should call all hooks before early returns', async () => {
-      // Start with loading state
-      vi.mocked(billing.getPaymentTracking).mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(mockTrackingData), 100))
-      );
+      try {
+        vi.mocked(billing.getPaymentTracking).mockImplementation(
+          () => new Promise((resolve) => setTimeout(() => resolve(mockTrackingData), 100))
+        );
 
-      const { rerender } = renderComponent();
+        const { rerender } = renderComponent();
 
-      // Component should render loading state without crashing
-      expect(screen.getByText(/loading payment tracking data/i)).toBeInTheDocument();
+        expect(screen.getByText(/loading payment tracking data/i)).toBeInTheDocument();
 
-      // Wait for data to load
-      await waitFor(() => {
-        expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
-      });
+        await waitFor(() => {
+          expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
+        });
 
-      // If hooks are in wrong order, React will throw error
-      // This test verifies hooks are called in correct order on every render
-      expect(() => {
+        expect(() => {
+          rerender(
+            <QueryClientProvider client={queryClient}>
+              <PaymentTracking />
+            </QueryClientProvider>
+          );
+        }).not.toThrow();
+      } catch (error) {
+        mockLogger.error('Test "should call all hooks before early returns" failed', error, 'PaymentTrackingTest');
+        throw error;
+      }
+    });
+
+    it('should handle hook order correctly when transitioning from loading to loaded', async () => {
+      try {
+        let resolvePromise: (value: any) => void;
+        const promise = new Promise((resolve) => {
+          resolvePromise = resolve;
+        });
+
+        vi.mocked(billing.getPaymentTracking).mockReturnValue(promise as any);
+
+        renderComponent();
+
+        expect(screen.getByText(/loading payment tracking data/i)).toBeInTheDocument();
+
+        resolvePromise!(mockTrackingData);
+
+        await waitFor(() => {
+          expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
+        }, { timeout: 2000 });
+
+        expect(mockLogger.error).not.toHaveBeenCalledWith(
+          expect.stringContaining('hooks'),
+          expect.anything(),
+          expect.anything()
+        );
+      } catch (error) {
+        mockLogger.error('Test "handle hook order from loading to loaded" failed', error, 'PaymentTrackingTest');
+        throw error;
+      }
+    });
+
+    it('should handle hook order correctly when transitioning from loaded to error', async () => {
+      try {
+        vi.mocked(billing.getPaymentTracking).mockResolvedValueOnce(mockTrackingData);
+
+        const { rerender } = renderComponent();
+
+        await waitFor(() => {
+          expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
+        });
+
+        vi.mocked(billing.getPaymentTracking).mockRejectedValueOnce(new Error('API Error'));
+
+        queryClient = new QueryClient({
+          defaultOptions: {
+            queries: { retry: false },
+          },
+        });
+
         rerender(
           <QueryClientProvider client={queryClient}>
             <PaymentTracking />
           </QueryClientProvider>
         );
-      }).not.toThrow();
-    });
 
-    it('should handle hook order correctly when transitioning from loading to loaded', async () => {
-      let resolvePromise: (value: any) => void;
-      const promise = new Promise((resolve) => {
-        resolvePromise = resolve;
-      });
+        await waitFor(() => {
+          expect(screen.getByText(/failed to load payment tracking data/i)).toBeInTheDocument();
+        });
 
-      vi.mocked(billing.getPaymentTracking).mockReturnValue(promise as any);
-
-      renderComponent();
-
-      // Should be in loading state
-      expect(screen.getByText(/loading payment tracking data/i)).toBeInTheDocument();
-
-      // Resolve the promise to trigger data load
-      resolvePromise!(mockTrackingData);
-
-      // Should transition to loaded state without hook order errors
-      await waitFor(() => {
-        expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
-      }, { timeout: 2000 });
-
-      // No React hooks warnings should occur
-      expect(mockLogger.error).not.toHaveBeenCalledWith(
-        expect.stringContaining('hooks'),
-        expect.anything(),
-        expect.anything()
-      );
-    });
-
-    it('should handle hook order correctly when transitioning from loaded to error', async () => {
-      // Start with successful data
-      vi.mocked(billing.getPaymentTracking).mockResolvedValueOnce(mockTrackingData);
-
-      const { rerender } = renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
-      });
-
-      // Change to error state
-      vi.mocked(billing.getPaymentTracking).mockRejectedValueOnce(new Error('API Error'));
-
-      // Create new query client to trigger new query
-      queryClient = new QueryClient({
-        defaultOptions: {
-          queries: { retry: false },
-        },
-      });
-
-      rerender(
-        <QueryClientProvider client={queryClient}>
-          <PaymentTracking />
-        </QueryClientProvider>
-      );
-
-      // Should handle error state without hook order errors
-      await waitFor(() => {
-        expect(screen.getByText(/failed to load payment tracking data/i)).toBeInTheDocument();
-      });
-
-      // No React hooks warnings should occur
-      expect(mockLogger.error).not.toHaveBeenCalledWith(
-        expect.stringContaining('hooks'),
-        expect.anything(),
-        expect.anything()
-      );
+        expect(mockLogger.error).not.toHaveBeenCalledWith(
+          expect.stringContaining('hooks'),
+          expect.anything(),
+          expect.anything()
+        );
+      } catch (error) {
+        mockLogger.error('Test "handle hook order from loaded to error" failed', error, 'PaymentTrackingTest');
+        throw error;
+      }
     });
   });
 
   describe('Error Handling', () => {
     it('should log errors when API call fails', async () => {
-      const error = new Error('API Error');
-      vi.mocked(billing.getPaymentTracking).mockRejectedValue(error);
+      try {
+        const error = new Error('API Error');
+        vi.mocked(billing.getPaymentTracking).mockRejectedValue(error);
 
-      renderComponent();
+        renderComponent();
 
-      await waitFor(() => {
-        expect(mockLogger.error).toHaveBeenCalledWith(
-          'Failed to fetch payment tracking data',
-          error,
-          'PaymentTracking'
+        await waitFor(() => {
+          expect(mockLogger.error).toHaveBeenCalledWith(
+            'Failed to fetch payment tracking data',
+            error,
+            'PaymentTracking'
+          );
+        });
+
+        expect(mockToast.error).toHaveBeenCalledWith(
+          'Failed to load payment tracking data. Please try again.'
         );
-      });
-
-      expect(mockToast.error).toHaveBeenCalledWith(
-        'Failed to load payment tracking data. Please try again.'
-      );
+      } catch (error) {
+        mockLogger.error('Test "log errors when API call fails" failed', error, 'PaymentTrackingTest');
+        throw error;
+      }
     });
 
     it('should handle CSV export errors', async () => {
-      vi.mocked(billing.getPaymentTracking).mockResolvedValue(mockTrackingData);
+      try {
+        vi.mocked(billing.getPaymentTracking).mockResolvedValue(mockTrackingData);
 
-      // Mock URL.createObjectURL to throw error
-      const originalCreateObjectURL = URL.createObjectURL;
-      URL.createObjectURL = vi.fn(() => {
-        throw new Error('Blob error');
-      }) as any;
+        // Mock URL.createObjectURL to throw error
+        const originalCreateObjectURL = URL.createObjectURL;
+        URL.createObjectURL = vi.fn(() => {
+          throw new Error('Blob error');
+        }) as any;
 
-      renderComponent();
+        renderComponent();
 
-      await waitFor(() => {
-        expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
-      });
+        try {
+          await waitFor(() => {
+            expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
+          });
+        } catch (error) {
+          mockLogger.error('Wait for render failed in CSV export error test', error, 'PaymentTrackingTest');
+          throw error;
+        }
 
-      const exportButton = screen.getByText(/export csv/i);
-      fireEvent.click(exportButton);
+        const exportButton = screen.getByText(/export csv/i);
+        fireEvent.click(exportButton);
 
-      await waitFor(() => {
-        expect(mockLogger.error).toHaveBeenCalledWith(
-          'Failed to export Payment Tracking CSV',
-          expect.any(Error),
-          'PaymentTracking'
+        try {
+          await waitFor(() => {
+            expect(mockLogger.error).toHaveBeenCalledWith(
+              'Failed to export Payment Tracking CSV',
+              expect.any(Error),
+              'PaymentTracking'
+            );
+          });
+        } catch (error) {
+          mockLogger.error('Wait for logger call failed in CSV export error test', error, 'PaymentTrackingTest');
+          throw error;
+        }
+
+        expect(mockToast.error).toHaveBeenCalledWith(
+          'Failed to export report. Please try again.'
         );
-      });
 
-      expect(mockToast.error).toHaveBeenCalledWith(
-        'Failed to export report. Please try again.'
-      );
-
-      // Restore
-      URL.createObjectURL = originalCreateObjectURL;
+        // Restore
+        URL.createObjectURL = originalCreateObjectURL;
+      } catch (error) {
+        mockLogger.error('Test "handle CSV export errors" failed', error, 'PaymentTrackingTest');
+        throw error;
+      }
     });
   });
 
   describe('Data Processing', () => {
     it('should process chart data correctly', async () => {
-      vi.mocked(billing.getPaymentTracking).mockResolvedValue(mockTrackingData);
+      try {
+        vi.mocked(billing.getPaymentTracking).mockResolvedValue(mockTrackingData);
 
-      renderComponent();
+        renderComponent();
 
-      await waitFor(() => {
-        expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
-      });
+        await waitFor(() => {
+          expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
+        });
 
-      // Chart should render without errors
-      // (We can't easily test chart rendering, but we can verify no errors)
-      expect(mockLogger.error).not.toHaveBeenCalled();
+        // Chart should render without errors
+        // (We can't easily test chart rendering, but we can verify no errors)
+        expect(mockLogger.error).not.toHaveBeenCalled();
+      } catch (error) {
+        mockLogger.error('Test "process chart data correctly" failed', error, 'PaymentTrackingTest');
+        throw error;
+      }
     });
 
     it('should handle empty dailyTrends', async () => {
-      const dataWithoutTrends = {
-        ...mockTrackingData,
-        dailyTrends: {},
-      };
+      try {
+        const dataWithoutTrends = {
+          ...mockTrackingData,
+          dailyTrends: {},
+        };
 
-      vi.mocked(billing.getPaymentTracking).mockResolvedValue(dataWithoutTrends);
+        vi.mocked(billing.getPaymentTracking).mockResolvedValue(dataWithoutTrends);
 
-      renderComponent();
+        renderComponent();
 
-      await waitFor(() => {
-        expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
-      });
+        await waitFor(() => {
+          expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
+        });
 
-      // Should not crash with empty trends
-      expect(mockLogger.error).not.toHaveBeenCalled();
+        // Should not crash with empty trends
+        expect(mockLogger.error).not.toHaveBeenCalled();
+      } catch (error) {
+        mockLogger.error('Test "handle empty dailyTrends" failed', error, 'PaymentTrackingTest');
+        throw error;
+      }
     });
 
     it('should handle undefined trackingData safely', async () => {
-      // useMemo should handle undefined data with guard
-      vi.mocked(billing.getPaymentTracking).mockResolvedValue(null as any);
+      try {
+        // useMemo should handle undefined data with guard
+        vi.mocked(billing.getPaymentTracking).mockResolvedValue(null as any);
 
-      renderComponent();
+        renderComponent();
 
-      await waitFor(() => {
-        // Should render null or error state, not crash
-        expect(screen.queryByText(/payment tracking & reconciliation/i)).not.toBeInTheDocument();
-      });
+        await waitFor(() => {
+          // Should render null or error state, not crash
+          expect(screen.queryByText(/payment tracking & reconciliation/i)).not.toBeInTheDocument();
+        });
 
-      // Should not throw hook order errors
-      expect(mockLogger.error).not.toHaveBeenCalledWith(
-        expect.stringContaining('hooks'),
-        expect.anything(),
-        expect.anything()
-      );
+        // Should not throw hook order errors
+        expect(mockLogger.error).not.toHaveBeenCalledWith(
+          expect.stringContaining('hooks'),
+          expect.anything(),
+          expect.anything()
+        );
+      } catch (error) {
+        mockLogger.error('Test "handle undefined trackingData safely" failed', error, 'PaymentTrackingTest');
+        throw error;
+      }
     });
   });
 
   describe('CSV Export', () => {
     it('should export CSV successfully', async () => {
-      vi.mocked(billing.getPaymentTracking).mockResolvedValue(mockTrackingData);
+      try {
+        vi.mocked(billing.getPaymentTracking).mockResolvedValue(mockTrackingData);
 
-      // Mock URL.createObjectURL and document methods
-      const mockCreateObjectURL = vi.fn(() => 'blob:url');
-      const mockRevokeObjectURL = vi.fn();
-      const mockClick = vi.fn();
-      const mockRemoveChild = vi.fn();
-      const mockAppendChild = vi.fn((element: any) => {
-        element.click = mockClick;
-        return element;
-      });
+        // Mock URL.createObjectURL and document methods
+        const mockCreateObjectURL = vi.fn(() => 'blob:url');
+        const mockRevokeObjectURL = vi.fn();
+        const mockClick = vi.fn();
+        const mockRemoveChild = vi.fn();
+        const mockAppendChild = vi.fn((element: any) => {
+          element.click = mockClick;
+          return element;
+        });
 
-      global.URL.createObjectURL = mockCreateObjectURL;
-      global.URL.revokeObjectURL = mockRevokeObjectURL;
-      document.createElement = vi.fn(() => ({
-        href: '',
-        download: '',
-        click: mockClick,
-      })) as any;
-      document.body.appendChild = mockAppendChild;
-      document.body.removeChild = mockRemoveChild;
+        global.URL.createObjectURL = mockCreateObjectURL;
+        global.URL.revokeObjectURL = mockRevokeObjectURL;
+        document.createElement = vi.fn(() => ({
+          href: '',
+          download: '',
+          click: mockClick,
+        })) as any;
+        document.body.appendChild = mockAppendChild;
+        document.body.removeChild = mockRemoveChild;
 
-      renderComponent();
+        renderComponent();
 
-      await waitFor(() => {
-        expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
-      });
+        try {
+          await waitFor(() => {
+            expect(screen.getByText(/payment tracking & reconciliation/i)).toBeInTheDocument();
+          });
+        } catch (error) {
+          mockLogger.error('Wait for render failed in CSV export success test', error, 'PaymentTrackingTest');
+          throw error;
+        }
 
-      const exportButton = screen.getByText(/export csv/i);
-      fireEvent.click(exportButton);
+        const exportButton = screen.getByText(/export csv/i);
+        fireEvent.click(exportButton);
 
-      await waitFor(() => {
-        expect(mockLogger.debug).toHaveBeenCalledWith(
-          'Payment Tracking CSV exported',
-          expect.objectContaining({
-            startDate: expect.any(String),
-            endDate: expect.any(String),
-          }),
-          'PaymentTracking'
+        try {
+          await waitFor(() => {
+            expect(mockLogger.debug).toHaveBeenCalledWith(
+              'Payment Tracking CSV exported',
+              expect.objectContaining({
+                startDate: expect.any(String),
+                endDate: expect.any(String),
+              }),
+              'PaymentTracking'
+            );
+          });
+        } catch (error) {
+          mockLogger.error('Wait for logger call failed in CSV export success test', error, 'PaymentTrackingTest');
+          throw error;
+        }
+
+        expect(mockToast.success).toHaveBeenCalledWith(
+          'Payment tracking report exported successfully'
         );
-      });
-
-      expect(mockToast.success).toHaveBeenCalledWith(
-        'Payment tracking report exported successfully'
-      );
+      } catch (error) {
+        mockLogger.error('Test "export CSV successfully" failed', error, 'PaymentTrackingTest');
+        throw error;
+      }
     });
   });
 });

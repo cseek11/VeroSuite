@@ -206,7 +206,7 @@ class UpdateQueueManager {
       
       // Retry logic with exponential backoff for other errors
       const firstEntry = queue[0];
-      if (firstEntry.retryCount < this.MAX_RETRIES) {
+      if (firstEntry && firstEntry.retryCount < this.MAX_RETRIES) {
         firstEntry.retryCount++;
         const backoffDelay = Math.pow(2, firstEntry.retryCount) * 1000;
         
@@ -251,7 +251,7 @@ export const useRegionStore = create<RegionStoreState>()(
   devtools(
     persist(
       subscribeWithSelector(
-        ((set, get) => ({
+        ((set: (partial: Partial<RegionStoreState> | ((state: RegionStoreState) => Partial<RegionStoreState>)) => void, get: () => RegionStoreState) => ({
           // Initial state
           regions: new Map(),
           layouts: new Map(),
@@ -344,7 +344,7 @@ export const useRegionStore = create<RegionStoreState>()(
             let gridCol = position?.col ?? 0;
             
             // Map existing regions for overlap checking
-            const existingRegionsForCheck = existingRegions.map(r => ({
+            const existingRegionsForCheck = existingRegions.map((r: VersionedRegion) => ({
               id: r.id,
               grid_row: r.grid_row,
               grid_col: r.grid_col,
@@ -401,7 +401,7 @@ export const useRegionStore = create<RegionStoreState>()(
                   ];
                   
                   for (const [r, c] of positions) {
-                    if (isValidPosition(r, c)) {
+                    if (typeof r === 'number' && typeof c === 'number' && isValidPosition(r, c)) {
                       gridRow = r;
                       gridCol = c;
                       found = true;
@@ -467,10 +467,11 @@ export const useRegionStore = create<RegionStoreState>()(
                 
                 const newLayouts = new Map(state.layouts);
                 const layout = newLayouts.get(layoutId);
-                if (layout) {
+                const currentLayout = newLayouts.get(layoutId);
+                if (currentLayout) {
                   newLayouts.set(layoutId, {
-                    ...layout,
-                    regions: [...layout.regions, versionedRegion.id]
+                    ...currentLayout,
+                    regions: [...currentLayout.regions, versionedRegion.id]
                   });
                 }
                 
@@ -526,7 +527,7 @@ export const useRegionStore = create<RegionStoreState>()(
               });
               
               // Queue for coalescing
-              queueManager.enqueue(layoutId, regionId, updates, async (id, merged) => {
+              queueManager.enqueue(layoutId, regionId, updates, async (id: string, merged: Partial<DashboardRegion>) => {
                 const currentState = get();
                 const currentRegion = currentState.regions.get(id);
                 
@@ -553,9 +554,9 @@ export const useRegionStore = create<RegionStoreState>()(
                   const updated: VersionedRegion = {
                     ...(result as DashboardRegion),
                     version: (result as any).version || (currentRegion.version || 1) + 1,
-                    optimistic: false,
-                    pendingUpdate: undefined
+                    optimistic: false
                   };
+                  // pendingUpdate is optional, don't set to undefined
                   
                   set((state) => {
                     const newRegions = new Map(state.regions);
@@ -844,7 +845,12 @@ export const useRegionStore = create<RegionStoreState>()(
               for (const regionId of layout.regions) {
                 const region = state.regions.get(regionId);
                 if (region?.optimistic && region.pendingUpdate) {
+                try {
                   await get().updateRegion(layoutId, regionId, region.pendingUpdate, false);
+                } catch (error) {
+                  logger.error('Failed to flush region update', { layoutId, regionId, error }, 'regionStore');
+                  throw error;
+                }
                 }
               }
             }
@@ -1034,7 +1040,7 @@ export const useRegionStore = create<RegionStoreState>()(
             if (!layout) return [];
             
             return layout.regions
-              .map(id => state.regions.get(id))
+              .map((id: string) => state.regions.get(id))
               .filter((r): r is VersionedRegion => r !== undefined);
           },
           

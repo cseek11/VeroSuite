@@ -1,0 +1,40 @@
+---
+id: minimal-context
+name: Minimal Context Mode
+description: Enforces minimal context loading, minimal tokens, minimal back-and-forth.
+priority: highest
+enabled: true
+alwaysApply: true
+---
+
+# Minimal Context Rule
+
+Cursor MUST:
+
+1. Load ONLY the following into context:
+   - Files the user explicitly opens in the editor.
+   - Files the user pastes or uploads into the chat.
+   - Files explicitly listed in an Execution Contract.
+
+2. DO NOT load:
+   - Inferred dependencies.
+   - Files referenced by keywords.
+   - Cross-project modules.
+   - Archived or legacy directories.
+   - Context from unrelated folders.
+
+3. Ask **once only** if a missing file or dependency is required.
+
+4. Use the **minimum possible number of input/output tokens**:
+   - No restating instructions.
+   - No verbose reasoning.
+   - No full-file rewrites unless explicitly required.
+   - Prefer diffs and minimal snippets.
+
+5. Avoid accumulating context over time:
+   - Do not reload previously loaded files unless the user reopens them.
+   - Do not infer cached context unless explicitly requested.
+
+6. Stop output after completing the exact requested change.
+
+This rule applies globally unless overridden by a task-specific rule.

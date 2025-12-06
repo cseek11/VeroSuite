@@ -1,0 +1,37 @@
+---
+id: context-limiter
+name: Hard Context Limiter
+description: Forces Cursor to restrict context usage unless explicitly overridden.
+priority: critical
+enabled: true
+alwaysApply: true
+---
+
+# Context Limiter Rule
+
+Cursor MUST restrict context loading using the following constraints:
+
+1. Context Source Priority (highest → lowest):
+   1. Files open in the editor.
+   2. Files explicitly pasted by the user.
+   3. Files listed in an Execution Contract.
+   4. Nothing else.
+
+2. Hard Limits:
+   - DO NOT load context from unrelated folders.
+   - DO NOT expand context based on imports or inferred dependencies.
+   - DO NOT use cached conversation context unless explicitly referenced.
+   - Limit reasoning to the minimum needed to complete the task.
+
+3. Token Constraints:
+   - Minimize input token usage.
+   - Minimize output tokens.
+   - Avoid unnecessary reasoning.
+   - Avoid indirect references to entire modules.
+
+4. Behavior:
+   - If a required file is missing, ask ONCE.
+   - Do not repeatedly re-request the same file.
+   - Do not reload previously closed files.
+
+This limiter applies globally to all tasks.

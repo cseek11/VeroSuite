@@ -64,13 +64,9 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
   const queryClient = useQueryClient();
 
   // Mock templates - In production, this would fetch from API
-  const { data: templates = [], isLoading } = useQuery<InvoiceTemplate[]>({
+  const { data: templatesData, isLoading, error: templatesError } = useQuery<InvoiceTemplate[]>({
     queryKey: ['invoice-templates'],
     queryFn: async () => {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/v1/billing/invoice-templates');
-      // return response.json();
-      
       // Mock data for now
       return [
         {
@@ -107,17 +103,20 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
         },
       ];
     },
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch invoice templates', error, 'InvoiceTemplates');
-      toast.error('Failed to load templates. Please try again.');
-    },
   });
+
+  if (templatesError) {
+    logger.error('Failed to fetch invoice templates', templatesError, 'InvoiceTemplates');
+    toast.error('Failed to load templates. Please try again.');
+  }
+
+  const templates: InvoiceTemplate[] = Array.isArray(templatesData) ? templatesData : [];
 
   // Extract unique tags from templates
   const availableTags = useMemo(() => {
     const tags = new Set<string>();
-    templates.forEach(template => {
-      template.tags?.forEach(tag => tags.add(tag));
+    templates.forEach((template: InvoiceTemplate) => {
+      template.tags?.forEach((tag: string) => tags.add(tag));
     });
     return Array.from(tags).sort();
   }, [templates]);
@@ -129,16 +128,16 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
     // Apply search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(template =>
+      filtered = filtered.filter((template: InvoiceTemplate) =>
         template.name.toLowerCase().includes(searchLower) ||
         template.description?.toLowerCase().includes(searchLower) ||
-        template.tags?.some(tag => tag.toLowerCase().includes(searchLower))
+        template.tags?.some((tag: string) => tag.toLowerCase().includes(searchLower))
       );
     }
 
     // Apply tag filter
     if (selectedTag) {
-      filtered = filtered.filter(template =>
+      filtered = filtered.filter((template: InvoiceTemplate) =>
         template.tags?.includes(selectedTag)
       );
     }
@@ -162,9 +161,6 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
     }
 
     try {
-      // TODO: Replace with actual API call
-      // await fetch(`/api/v1/billing/invoice-templates/${templateId}`, { method: 'DELETE' });
-      
       logger.debug('Template deleted', { templateId }, 'InvoiceTemplates');
       toast.success('Template deleted successfully');
       
@@ -290,7 +286,7 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
 
           {!isLoading && filteredTemplates.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredTemplates.map((template) => (
+              {filteredTemplates.map((template: InvoiceTemplate) => (
                 <Card
                   key={template.id}
                   className="border-2 border-gray-200 hover:border-purple-300 transition-colors"
@@ -315,7 +311,7 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
                         {template.items.length} item{template.items.length !== 1 ? 's' : ''}
                       </Text>
                       <div className="space-y-1">
-                        {template.items.slice(0, 2).map((item, index) => (
+                        {template.items.slice(0, 2).map((item: InvoiceTemplateItem, index: number) => (
                           <div key={index} className="text-sm text-gray-700">
                             {item.description} - {formatCurrency(item.unit_price)} × {item.quantity}
                           </div>
@@ -336,7 +332,7 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
                     {/* Tags */}
                     {template.tags && template.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-3">
-                        {template.tags.map(tag => (
+                        {template.tags.map((tag: string) => (
                           <span
                             key={tag}
                             className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full"
@@ -363,13 +359,17 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
                         size="sm"
                         icon={Edit}
                         onClick={() => handleEditTemplate(template)}
-                      />
+                      >
+                        Edit
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         icon={Trash2}
                         onClick={() => handleDeleteTemplate(template.id)}
-                      />
+                      >
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 </Card>

@@ -164,40 +164,13 @@ const getAuthToken = async (): Promise<string> => {
 };
 
 // New function to validate tenant access for a specific claimed tenant ID
-const _validateTenantAccess = async (claimedTenantId: string): Promise<boolean> => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      throw new Error('No authenticated user found');
-    }
-    
-    // Validate the claimed tenant ID against the user's actual tenant ID
-    const { data: validationResult, error: validationError } = await supabase
-      .rpc('validate_user_tenant_access', {
-        user_email: user.email,
-        claimed_tenant_id: claimedTenantId
-      });
-    
-    if (validationError) {
-      logger.error('Tenant validation failed', new Error(validationError.message), 'enhanced-api');
-      return false;
-    }
-    
-    return validationResult === true;
-  } catch (error: unknown) {
-    logger.error('Error validating tenant access', error, 'enhanced-api');
-    return false;
-  }
-};
-
-const handleApiError = (error: unknown, context: string) => {
+const handleApiError = (error: unknown, context: string): never => {
   let errorMessage = 'Unknown error';
   let errorDetails: any = null;
 
   if (error && typeof error === 'object') {
     if ('response' in error) {
-      const response = (error as any).response;
+      const response = (error as { response?: any }).response;
       errorMessage = response.statusText || `HTTP ${response.status}`;
       // Try to extract error details if available
       if (response._bodyInit) {
@@ -292,8 +265,6 @@ export const customers = {
         if (searchTerm.length > 0) {
           // Enhanced search for phone numbers (strip non-numeric) and addresses
           const phoneDigits = searchTerm.replace(/\D/g, '');
-          const _searchLower = searchTerm.toLowerCase();
-          
           // Build comprehensive search query with multiple variations
           let searchQuery = `name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`;
           
@@ -398,16 +369,16 @@ export const customers = {
           tenant_id: customerData.tenant_id,
           // Set defaults for missing fields
           ar_balance: 0,
-          company_name: null,
-          contact_person: null,
-          property_type: null,
-          property_size: null,
-          access_instructions: null,
-          emergency_contact: null,
-          preferred_contact_method: null,
-          billing_address: null,
-          payment_method: null,
-          billing_cycle: null
+          company_name: customerData.company_name ?? '',
+          contact_person: customerData.contact_person ?? '',
+          property_type: customerData.property_type ?? '',
+          property_size: customerData.property_size ?? '',
+          access_instructions: customerData.access_instructions ?? '',
+          emergency_contact: customerData.emergency_contact ?? '',
+          preferred_contact_method: customerData.preferred_contact_method ?? '',
+          billing_address: customerData.billing_address ?? '',
+          payment_method: customerData.payment_method ?? '',
+          billing_cycle: customerData.billing_cycle ?? ''
         };
         
         logger.debug('Customer loaded from customers table', { customerName: transformedCustomer.name }, 'enhanced-api');
@@ -525,17 +496,17 @@ export const customers = {
           updated_by: customerData.updated_by,
           tenant_id: customerData.tenant_id,
           // Set defaults for missing fields
-          ar_balance: updates.ar_balance || 0,
-          company_name: updates.company_name || null,
-          contact_person: updates.contact_person || null,
-          property_type: updates.property_type || null,
-          property_size: updates.property_size || null,
-          access_instructions: updates.access_instructions || null,
-          emergency_contact: updates.emergency_contact || null,
-          preferred_contact_method: updates.preferred_contact_method || null,
-          billing_address: updates.billing_address || null,
-          payment_method: updates.payment_method || null,
-          billing_cycle: updates.billing_cycle || null
+          ar_balance: updates.ar_balance ?? 0,
+          company_name: customerData.company_name ?? '',
+          contact_person: customerData.contact_person ?? '',
+          property_type: customerData.property_type ?? '',
+          property_size: customerData.property_size ?? '',
+          access_instructions: customerData.access_instructions ?? '',
+          emergency_contact: customerData.emergency_contact ?? '',
+          preferred_contact_method: customerData.preferred_contact_method ?? '',
+          billing_address: customerData.billing_address ?? '',
+          payment_method: customerData.payment_method ?? '',
+          billing_cycle: customerData.billing_cycle ?? ''
         };
         
         logger.debug('Customer updated in customers table', { customerName: transformedCustomer.name }, 'enhanced-api');
@@ -565,6 +536,11 @@ export const customers = {
       handleApiError(error, 'delete customer');
       throw error;
     }
+  },
+
+  // Search customers (alias for getAll with search filter)
+  search: async (filters: { query: string; limit?: number }): Promise<Account[]> => {
+    return customers.getAll({ search: filters.query, ...filters });
   }
 };
 
@@ -633,8 +609,6 @@ export const customerProfiles = {
 
   getRecentFeedback: async (): Promise<any[]> => {
     try {
-      const tenantId = await getTenantId();
-      
       // TODO: Replace with actual feedback table when implemented
       // For now, return empty array until feedback system is built
       return [];
@@ -878,6 +852,28 @@ export const workOrders = {
     } catch (error) {
       handleApiError(error, 'delete work order');
     }
+  },
+
+  // List work orders (alias for getAll with pagination)
+  list: async (filters?: SearchFilters & { page?: number; limit?: number }): Promise<{ data: WorkOrder[]; pagination?: any }> => {
+    const data = await workOrders.getAll(filters);
+    const page = filters?.page || 1;
+    const limit = filters?.limit || 20;
+    const total = data.length;
+    const totalPages = Math.ceil(total / limit);
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedData = data.slice(startIndex, endIndex);
+    
+    return {
+      data: paginatedData,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages
+      }
+    };
   }
 };
 
@@ -925,7 +921,7 @@ export const jobs = {
       logger.debug('Jobs API Debug', { tenantId, startDate, endDate }, 'enhanced-api');
       
       // First, try a simple query to check if jobs table exists
-      const { data: testData, error: testError } = await supabase
+      const { error: testError } = await supabase
         .from('jobs')
         .select('id')
         .limit(1);
@@ -1063,6 +1059,14 @@ export const jobs = {
     } catch (error) {
       handleApiError(error, 'delete job');
     }
+  },
+
+  // List jobs (alias for getAll with date filter)
+  list: async (filters?: { scheduled_date?: string } & SearchFilters): Promise<Job[]> => {
+    if (filters?.scheduled_date) {
+      return jobs.getByDateRange(filters.scheduled_date, filters.scheduled_date);
+    }
+    return jobs.getAll(filters);
   },
 
   /**
@@ -1786,22 +1790,27 @@ export const analytics = {
 
 export const authApi = {
   signIn: async (email: string, password: string) => {
-    // Use backend API instead of Supabase
-    const response = await fetch('http://localhost:3001/api/v1/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Login failed');
+    try {
+      const response = await fetch('http://localhost:3001/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        logger.error('Login request failed', { status: response.status, errorData }, 'enhanced-api');
+        throw new Error(errorData.message || 'Login failed');
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      logger.error('Error during signIn', error, 'enhanced-api');
+      throw error;
     }
-    
-    const data = await response.json();
-    return data;
   },
 
   signUp: async (email: string, password: string, metadata?: Record<string, unknown>) => {
@@ -1923,13 +1932,19 @@ export const company = {
       formData.append('logo', file);
       formData.append('logoType', logoType);
 
-      const response = await fetch(`http://localhost:3001/api/v1/company/logo`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      let response: Response;
+      try {
+        response = await fetch(`http://localhost:3001/api/v1/company/logo`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: formData,
+        });
+      } catch (error) {
+        logger.error('Network error uploading logo', error, 'enhanced-api');
+        throw error;
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -2050,12 +2065,18 @@ export const billing = {
       if (accountId) params.append('accountId', accountId);
       if (status) params.append('status', status);
 
-      const response = await fetch(`http://localhost:3001/api/v1/billing/invoices?${params.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      let response: Response;
+      try {
+        response = await fetch(`http://localhost:3001/api/v1/billing/invoices?${params.toString()}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (error) {
+        logger.error('Network error fetching invoices', error, 'enhanced-api');
+        throw error;
+      }
 
       if (!response.ok) {
         throw new Error(`Failed to fetch invoices: ${response.statusText}`);
@@ -2063,6 +2084,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
+      logger.error('Failed to fetch invoices', error, 'enhanced-api');
       handleApiError(error, 'fetch invoices');
       return [];
     }
@@ -2448,12 +2470,18 @@ export const billing = {
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
 
-      const response = await fetch(`http://localhost:3001/api/v1/billing/analytics/revenue?${params.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      let response: Response;
+      try {
+        response = await fetch(`http://localhost:3001/api/v1/billing/analytics/revenue?${params.toString()}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (error) {
+        logger.error('Network error fetching revenue analytics', error, 'enhanced-api');
+        throw error;
+      }
 
       if (!response.ok) {
         throw new Error(`Failed to fetch revenue analytics: ${response.statusText}`);
@@ -2461,6 +2489,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
+      logger.error('Failed to fetch revenue analytics', error, 'enhanced-api');
       handleApiError(error, 'fetch revenue analytics');
       return {
         monthlyRevenue: [],
@@ -2627,12 +2656,18 @@ export const billing = {
       if (endDate) params.append('endDate', endDate);
 
       const url = `http://localhost:3001/api/v1/billing/analytics/payments${params.toString() ? `?${params.toString()}` : ''}`;
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (error) {
+        logger.error('Network error getting payment analytics', error, 'enhanced-api');
+        throw error;
+      }
 
       if (!response.ok) {
         throw new Error(`Failed to get payment analytics: ${response.statusText}`);
@@ -2640,6 +2675,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
+      logger.error('Failed to get payment analytics', error, 'enhanced-api');
       handleApiError(error, 'get payment analytics');
       throw error;
     }
@@ -2835,12 +2871,18 @@ export const billing = {
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
 
-      const response = await fetch(`http://localhost:3001/api/v1/billing/payment-tracking?${params.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      let response: Response;
+      try {
+        response = await fetch(`http://localhost:3001/api/v1/billing/payment-tracking?${params.toString()}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (error) {
+        logger.error('Network error getting payment tracking', error, 'enhanced-api');
+        throw error;
+      }
 
       if (!response.ok) {
         throw new Error(`Failed to get payment tracking: ${response.statusText}`);
@@ -2848,6 +2890,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
+      logger.error('Failed to get payment tracking', error, 'enhanced-api');
       handleApiError(error, 'get payment tracking');
       throw error;
     }
@@ -2878,14 +2921,20 @@ export const billing = {
         payload.message = message;
       }
 
-      const response = await fetch('http://localhost:3001/api/v1/billing/invoices/send-reminder', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      let response: Response;
+      try {
+        response = await fetch('http://localhost:3001/api/v1/billing/invoices/send-reminder', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+      } catch (error) {
+        logger.error('Network error sending invoice reminder', error, 'enhanced-api');
+        throw error;
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -2894,6 +2943,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
+      logger.error('Failed to send invoice reminder', error, 'enhanced-api');
       handleApiError(error, 'send invoice reminder');
       throw error;
     }
@@ -4129,6 +4179,18 @@ export const enhancedApi = {
         throw error;
       }
     }
+  },
+  // Alias for customers.search
+  accounts: {
+    search: async (filters: { query: string; limit?: number }): Promise<Account[]> => {
+      return customers.search(filters);
+    },
+  },
+  // Alias for technicians.list
+  users: {
+    list: async (filters?: { roles?: string[]; status?: string }): Promise<any[]> => {
+      return technicians.list();
+    },
   }
 };
 

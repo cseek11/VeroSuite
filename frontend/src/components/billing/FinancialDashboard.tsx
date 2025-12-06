@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Card from '@/components/ui/Card';
 import { Heading, Text } from '@/components/ui';
-import { Tabs } from '@/components/ui';
+import { Tabs } from '@/components/ui/EnhancedUI';
 import {
   DollarSign,
   TrendingUp,
@@ -238,9 +238,9 @@ export default function FinancialDashboard({ defaultTab = 'overview' }: Financia
 
       {/* Tabs */}
       <Tabs
-        tabs={tabs}
+        tabs={tabs.map(tab => ({ id: tab.id as string, label: tab.label, icon: tab.icon as any }))}
         active={activeTab}
-        onTabChange={(tabId: TabType) => setActiveTab(tabId)}
+        onTabChange={(tabId: string) => setActiveTab(tabId as TabType)}
         variant="pills"
         size="lg"
         className="mb-8"

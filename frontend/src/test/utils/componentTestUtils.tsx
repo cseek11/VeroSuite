@@ -182,9 +182,18 @@ export const mockWindowLocation = (url: string) => {
 /**
  * Restore window.location
  */
-export const restoreWindowLocation = () => {
-  delete (window.location);
-  window.location = location;
+export const restoreWindowLocation = (originalLocation: Location) => {
+  // Note: window.location is read-only, so we can't actually restore it
+  // This is a test utility that documents the intent
+  // In actual tests, use Object.defineProperty to mock location
+  if (typeof window !== 'undefined' && 'location' in window) {
+    // Cannot actually restore, but this documents the pattern
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+      writable: true,
+      configurable: true
+    });
+  }
 };
 
 /**

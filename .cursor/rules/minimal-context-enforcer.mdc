@@ -1,0 +1,40 @@
+---
+id: minimal-context-enforcer
+name: Minimal Context for Enforcer Tasks
+description: Automatically activates minimal context mode when working with the auto-enforcer.
+priority: very-high
+enabled: true
+alwaysApply: true
+trigger:
+  paths:
+    - ".cursor/enforcement/"
+    - ".cursor/scripts/auto-enforcer.py"
+    - "enforcement/"
+    - "enforcement/checkers/"
+    - "enforcement/checks/"
+---
+
+# Enforcer-Specific Minimal Context Behavior
+
+When the user is working on the Auto-Enforcer or its checkers:
+
+1. Load ONLY:
+   - The file currently opened in the editor.
+   - The file explicitly referenced in the task.
+   - Supporting checker modules if explicitly named.
+   - No automatic loading of other enforcement modules.
+
+2. DO NOT:
+   - Auto-infer legacy checkers.
+   - Load backend/frontend files.
+   - Pull context from unrelated Python or TypeScript directories.
+   - Expand context based on imports.
+
+3. Maintain strict minimal-token output:
+   - Use diffs or modified snippets only.
+   - No explanation unless asked.
+   - No back-and-forth questions unless required for correctness.
+
+4. Ask only **once** if a required file is missing.
+
+This rule overrides all other rules during enforcer tasks.

@@ -2,10 +2,9 @@
  * Compliance API Client
  * API client for compliance endpoints
  * 
- * Last Updated: 2025-11-24
+ * Last Updated: 2025-12-06
  */
 
-import { enhancedApiCall } from '../api-utils';
 import { logger } from '@/utils/logger';
 import type {
   RuleDefinition,

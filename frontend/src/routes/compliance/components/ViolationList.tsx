@@ -2,7 +2,7 @@
  * Violation List Component
  * Displays list of compliance violations with filtering and search
  * 
- * Last Updated: 2025-11-24
+ * Last Updated: 2025-12-06
  */
 
 import { useMemo, useState } from 'react';
@@ -21,13 +21,12 @@ import {
   FileCode,
   GitBranch,
   Calendar,
-  User,
   Search,
   Filter,
   X,
   CheckCircle2,
 } from 'lucide-react';
-import type { ComplianceCheck, ComplianceStatus, ComplianceSeverity } from '@/types/compliance.types';
+import type { ComplianceStatus, ComplianceSeverity } from '@/types/compliance.types';
 
 interface ViolationListProps {
   className?: string;

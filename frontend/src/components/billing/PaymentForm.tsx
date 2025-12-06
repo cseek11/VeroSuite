@@ -1,12 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { loadStripe, StripeCardElement, StripePaymentIntent } from '@stripe/stripe-js';
+import { loadStripe, PaymentIntent } from '@stripe/stripe-js';
 import {
   Elements,
   CardElement,
   useStripe,
   useElements,
-  CardElementChangeEvent
 } from '@stripe/react-stripe-js';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -55,11 +54,10 @@ function PaymentFormInner({
   const [cardError, setCardError] = useState<string>('');
   const [paymentError, setPaymentError] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentIntent, setPaymentIntent] = useState<StripePaymentIntent | null>(null);
+  const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [lastError, setLastError] = useState<Error | null>(null);
   const [showRetry, setShowRetry] = useState(false);
-  const _cardElementRef = useRef<StripeCardElement | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -106,7 +104,7 @@ function PaymentFormInner({
     onSuccess: async (result) => {
       // If Stripe payment, verify status and show success
       if (useNewCard && result && typeof result === 'object' && 'id' in result) {
-        const intent = result as StripePaymentIntent;
+        const intent = result as PaymentIntent;
         setPaymentIntent(intent);
         
         // Verify payment status from Stripe
@@ -114,7 +112,7 @@ function PaymentFormInner({
           const status = await billing.getStripePaymentStatus(intent.id);
           logger.debug('Payment status verified', { status: status.status, id: intent.id }, 'PaymentForm');
         } catch (error) {
-          logger.warn('Could not verify payment status', error, 'PaymentForm');
+          logger.warn('Could not verify payment status', error as Record<string, any> | undefined, 'PaymentForm');
           // Continue anyway - payment was confirmed by Stripe
         }
         
@@ -158,9 +156,9 @@ function PaymentFormInner({
     }
   };
 
-    const handleCardElementChange = (event: CardElementChangeEvent) => {
+    const handleCardElementChange = (event: { error?: { message?: string } }) => {
       if (event.error) {
-        setCardError(event.error.message);
+        setCardError(event.error.message || '');
         setPaymentError(''); // Clear payment error when user fixes card
       } else {
         setCardError('');
@@ -255,7 +253,7 @@ function PaymentFormInner({
         {/* Use PaymentMethodSelector component */}
         <PaymentMethodSelector
           accountId={invoice.account_id}
-          value={selectedPaymentMethod?.id}
+          {...(selectedPaymentMethod?.id ? { value: selectedPaymentMethod.id } : {})}
           onChange={(method) => {
             if (method === 'new') {
               handlePaymentMethodSelect('new');
@@ -341,10 +339,12 @@ function PaymentFormInner({
               <ErrorMessage 
                 message={paymentError} 
                 type="error"
-                actionable={retryCount < 3 ? {
-                  label: 'Retry Payment',
-                  onClick: handleRetryPayment
-                } : undefined}
+                {...(retryCount < 3 ? {
+                  actionable: {
+                    label: 'Retry Payment',
+                    onClick: handleRetryPayment
+                  }
+                } : {})}
               />
             </div>
           )}
@@ -356,9 +356,9 @@ function PaymentFormInner({
                   <p className="text-sm font-medium text-red-800 mb-1">{paymentError}</p>
                   {lastError && (
                     <p className="text-xs text-red-600 mb-3">
-                      {lastError.message.includes('card') 
+                      {lastError.message?.includes('card') 
                         ? 'Please check your card details and try again.'
-                        : lastError.message.includes('network')
+                        : lastError.message?.includes('network')
                         ? 'Network error. Please check your connection and try again.'
                         : 'An error occurred while processing your payment.'}
                     </p>
@@ -630,7 +630,7 @@ export default function PaymentForm({ invoice, paymentMethods, onSuccess, onCanc
   }
 
   return (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
+    <Elements stripe={stripePromise} options={{ clientSecret: clientSecret ?? undefined }}>
       <PaymentFormInner
         invoice={invoice}
         paymentMethods={paymentMethods}

@@ -100,7 +100,7 @@ export default function OverdueAlerts() {
     setSelectedInvoices(new Set());
   };
 
-  const { showAlert, DialogComponents } = useDialog();
+  const { showAlert, showConfirm, DialogComponents } = useDialog();
 
   const handleSendReminder = async (invoiceId: string) => {
     logger.debug('Sending reminder for invoice', { invoiceId }, 'OverdueAlerts');
@@ -123,28 +123,44 @@ export default function OverdueAlerts() {
   };
 
   const handleSendBulkReminders = async () => {
-    if (selectedInvoices.size === 0) {
-      await showAlert({
-        title: 'No Selection',
-        message: 'Please select at least one invoice',
-        type: 'warning',
-      });
-      return;
-    }
-    
-    const confirmed = await showAlert({
-      title: 'Send Bulk Reminders',
-      message: `Are you sure you want to send reminders for ${selectedInvoices.size} invoice${selectedInvoices.size !== 1 ? 's' : ''}?`,
-      type: 'confirm',
-    });
-
-    if (!confirmed) return;
-
-    logger.debug('Sending bulk reminders', { count: selectedInvoices.size }, 'OverdueAlerts');
-    
     try {
+      if (selectedInvoices.size === 0) {
+        try {
+          await showAlert({
+            title: 'No Selection',
+            message: 'Please select at least one invoice',
+            type: 'warning',
+          });
+        } catch (error) {
+          logger.error('Failed to display no selection alert', error, 'OverdueAlerts');
+          throw error;
+        }
+        return;
+      }
+      
+      let confirmed = false;
+      try {
+        confirmed = await showConfirm({
+          title: 'Send Bulk Reminders',
+          message: `Are you sure you want to send reminders for ${selectedInvoices.size} invoice${selectedInvoices.size !== 1 ? 's' : ''}?`,
+        });
+      } catch (error) {
+        logger.error('Failed to show confirmation dialog for bulk reminders', error, 'OverdueAlerts');
+        throw error;
+      }
+  
+      if (!confirmed) return;
+  
+      logger.debug('Sending bulk reminders', { count: selectedInvoices.size }, 'OverdueAlerts');
+      
       const invoiceIds = Array.from(selectedInvoices);
-      const result = await billing.sendInvoiceReminder(invoiceIds);
+      let result;
+      try {
+        result = await billing.sendInvoiceReminder(invoiceIds);
+      } catch (error) {
+        logger.error('Failed to send invoice reminders', error, 'OverdueAlerts');
+        throw error;
+      }
       
       if (result.successful > 0) {
         toast.success(`Reminders sent to ${result.successful} customer${result.successful !== 1 ? 's' : ''}`);
@@ -154,11 +170,16 @@ export default function OverdueAlerts() {
         if (result.failed > 0) {
           const failedResults = result.results.filter((r: any) => !r.success);
           const errorMessages = failedResults.map((r: any) => r.error || 'Unknown error').join(', ');
-          await showAlert({
-            title: 'Partial Success',
-            message: `${result.successful} reminder${result.successful !== 1 ? 's' : ''} sent successfully. ${result.failed} failed: ${errorMessages}`,
-            type: 'warning',
-          });
+          try {
+            await showAlert({
+              title: 'Partial Success',
+              message: `${result.successful} reminder${result.successful !== 1 ? 's' : ''} sent successfully. ${result.failed} failed: ${errorMessages}`,
+              type: 'warning',
+            });
+          } catch (error) {
+            logger.error('Failed to show partial success alert', error, 'OverdueAlerts');
+            throw error;
+          }
         }
         
         // Clear selection after successful send
@@ -171,6 +192,7 @@ export default function OverdueAlerts() {
     } catch (error) {
       logger.error('Error sending bulk reminders', error, 'OverdueAlerts');
       toast.error('Failed to send reminders. Please try again.');
+      throw error;
     }
   };
 

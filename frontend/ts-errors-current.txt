@@ -1,0 +1,380 @@
+﻿
+src/components/billing/InvoiceReminders.tsx(64,
+5): error TS2769: No overload matches this 
+call.
+src/components/billing/InvoiceReminders.tsx(94,
+5): error TS2769: No overload matches this 
+call.
+src/components/billing/InvoiceScheduler.tsx(108
+,5): error TS2769: No overload matches this 
+call.
+src/components/billing/InvoiceTemplates.tsx(110
+,5): error TS2769: No overload matches this 
+call.
+src/components/billing/InvoiceView.tsx(52,5): 
+error TS2769: No overload matches this call.
+src/components/billing/PaymentAnalytics.tsx(62,
+35): error TS2769: No overload matches this 
+call.
+src/components/billing/PaymentAnalytics.tsx(63,
+33): error TS2769: No overload matches this 
+call.
+src/components/billing/PaymentDashboard.tsx(56,
+5): error TS2769: No overload matches this 
+call.
+src/components/billing/PaymentDashboard.tsx(71,
+5): error TS2769: No overload matches this 
+call.
+src/components/billing/PaymentDashboard.tsx(86,
+5): error TS2769: No overload matches this 
+call.
+src/components/billing/PaymentDashboard.tsx(91,
+24): error TS2339: Property 'dailyTrends' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(94,
+40): error TS2339: Property 'dailyTrends' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(101
+,21): error TS2339: Property 'dailyTrends' 
+does not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(105
+,25): error TS2339: Property 
+'paymentMethodBreakdown' does not exist on 
+type 'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(108
+,41): error TS2339: Property 
+'paymentMethodBreakdown' does not exist on 
+type 'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(112
+,22): error TS2339: Property 
+'paymentMethodBreakdown' does not exist on 
+type 'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(137
+,23): error TS2339: Property 'summary' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(137
+,61): error TS2339: Property 'summary' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(138
+,23): error TS2339: Property 'summary' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(139
+,24): error TS2339: Property 'summary' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(139
+,51): error TS2339: Property 'summary' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(252
+,34): error TS2339: Property 'summary' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(252
+,72): error TS2339: Property 'summary' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(255
+,34): error TS2339: Property 'summary' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(255
+,88): error TS2339: Property 'summary' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(271
+,34): error TS2339: Property 'summary' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(271
+,72): error TS2339: Property 'summary' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(290
+,35): error TS2339: Property 'summary' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(290
+,62): error TS2339: Property 'summary' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(309
+,57): error TS2339: Property 'totalAR' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(399
+,66): error TS18048: 'percent' is possibly 
+'undefined'.
+src/components/billing/PaymentDashboard.tsx(426
+,22): error TS2339: Property 'payments' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(426
+,47): error TS2339: Property 'payments' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(438
+,29): error TS2339: Property 'payments' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(478
+,29): error TS2339: Property 'payments' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentDashboard.tsx(481
+,49): error TS2339: Property 'payments' does 
+not exist on type 
+'NonNullable<NoInfer<TQueryFnData>>'.
+src/components/billing/PaymentForm.tsx(3,41): 
+error TS2724: '"@stripe/stripe-js"' has no 
+exported member named 'StripePaymentIntent'. 
+Did you mean 'PaymentIntent'?
+src/components/billing/PaymentForm.tsx(9,3): 
+error TS2305: Module 
+'"@stripe/react-stripe-js"' has no exported 
+member 'CardElementChangeEvent'.
+src/components/billing/PaymentForm.tsx(62,9): 
+error TS6133: '_cardElementRef' is declared 
+but its value is never read.
+src/components/billing/PaymentForm.tsx(117,58):
+ error TS2345: Argument of type 'unknown' is 
+not assignable to parameter of type 
+'Record<string, any> | undefined'.
+src/components/billing/PaymentForm.tsx(256,10):
+ error TS2375: Type '{ accountId: string; 
+value: string | undefined; onChange: (method: 
+PaymentMethod | "new" | null) => void; 
+onAddNew: () => void; showAddNew: true; }' is 
+not assignable to type 
+'PaymentMethodSelectorProps' with 
+'exactOptionalPropertyTypes: true'. Consider 
+adding 'undefined' to the types of the 
+target's properties.
+src/components/billing/PaymentForm.tsx(341,16):
+ error TS2375: Type '{ message: string; type: 
+"error"; actionable: { label: string; onClick: 
+() => Promise<void>; } | undefined; }' is not 
+assignable to type 'ErrorMessageProps' with 
+'exactOptionalPropertyTypes: true'. Consider 
+adding 'undefined' to the types of the 
+target's properties.
+src/components/billing/PaymentForm.tsx(359,24):
+ error TS18047: 'lastError' is possibly 'null'.
+src/components/billing/PaymentForm.tsx(361,27):
+ error TS18047: 'lastError' is possibly 'null'.
+src/components/billing/PaymentForm.tsx(633,49):
+ error TS2322: Type 'string | null' is not 
+assignable to type 'string | undefined'.
+src/components/billing/PaymentHistory.tsx(129,2
+0): error TS7053: Element implicitly has an 
+'any' type because expression of type 
+'PaymentStatus' can't be used to index type '{ 
+completed: { variant: "success"; icon: 
+ForwardRefExoticComponent<Omit<LucideProps, 
+"ref"> & RefAttributes<SVGSVGElement>>; label: 
+string; className: string; }; pending: { ...; 
+}; failed: { ...; }; refunded: { ...; }; }'.
+src/components/billing/PaymentMethodManager.tsx
+(61,5): error TS2769: No overload matches this 
+call.
+src/components/billing/PaymentMethodManager.tsx
+(69,147): error TS2345: Argument of type '{ 
+account_id: string; payment_type: string; 
+payment_name: string; }' is not assignable to 
+parameter of type 'CreatePaymentMethodDto'.
+src/components/billing/PaymentMethodManager.tsx
+(70,7): error TS2783: 'account_id' is 
+specified more than once, so this usage will 
+be overwritten.
+src/components/billing/PaymentMethodManager.tsx
+(135,40): error TS2345: Argument of type '{ 
+payment_type: PaymentMethod["payment_type"]; 
+payment_name: string; card_type: string; 
+card_last4: string; card_expiry: string; 
+account_number: string; routing_number: 
+string; is_default: boolean; }' is not 
+assignable to parameter of type '{ [key: 
+string]: unknown; account_id: string; 
+payment_type: string; payment_name: string; }'.
+src/components/billing/PaymentMethodManager.tsx
+(228,12): error TS18046: 'paymentMethods' is 
+of type 'unknown'.
+src/components/billing/PaymentMethodManager.tsx
+(251,16): error TS18046: 'paymentMethods' is 
+of type 'unknown'.
+src/components/billing/PaymentMethodManager.tsx
+(251,36): error TS7006: Parameter 'method' 
+implicitly has an 'any' type.
+src/components/billing/PaymentMethodManager.tsx
+(349,79): error TS2339: Property 'target' does 
+not exist on type 'string'.
+src/components/billing/PaymentMethodManager.tsx
+(380,80): error TS2339: Property 'target' does 
+not exist on type 'string'.
+src/components/billing/PaymentTracking.tsx(36,5
+): error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/PaymentTracking.tsx(39,5
+): error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/PaymentTracking.tsx(45,5
+): error TS2769: No overload matches this call.
+src/components/billing/PaymentTracking.tsx(53,2
+4): error TS2339: Property 'dailyTrends' does 
+not exist on type '{}'.
+src/components/billing/PaymentTracking.tsx(56,4
+0): error TS2339: Property 'dailyTrends' does 
+not exist on type '{}'.
+src/components/billing/PaymentTracking.tsx(63,2
+1): error TS2339: Property 'dailyTrends' does 
+not exist on type '{}'.
+src/components/billing/PaymentTracking.tsx(108,
+11): error TS2339: Property 'payments' does 
+not exist on type '{}'.
+src/components/billing/PaymentTracking.tsx(108,
+21): error TS2339: Property 'summary' does not 
+exist on type '{}'.
+src/components/billing/PaymentTracking.tsx(147,
+21): error TS7006: Parameter 'row' implicitly 
+has an 'any' type.
+src/components/billing/PaymentTracking.tsx(147,
+36): error TS7006: Parameter 'cell' implicitly 
+has an 'any' type.
+src/components/billing/PaymentTracking.tsx(284,
+48): error TS2339: Property 'dailyTrends' does 
+not exist on type '{}'.
+src/components/billing/PLReport.tsx(22,5): 
+error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/PLReport.tsx(25,5): 
+error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/PLReport.tsx(50,11): 
+error TS6133: '_pageHeight' is declared but 
+its value is never read.
+src/components/billing/ReconciliationTools.tsx(
+35,5): error TS2345: Argument of type 'string 
+| undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/ReconciliationTools.tsx(
+38,5): error TS2345: Argument of type 'string 
+| undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/ReconciliationTools.tsx(
+48,5): error TS2769: No overload matches this 
+call.
+src/components/billing/ReconciliationTools.tsx(
+56,24): error TS2339: Property 'payments' does 
+not exist on type '{}'.
+src/components/billing/ReconciliationTools.tsx(
+60,25): error TS2339: Property 'payments' does 
+not exist on type '{}'.
+src/components/billing/ReconciliationTools.tsx(
+88,21): error TS2339: Property 'payments' does 
+not exist on type '{}'.
+src/components/billing/RecurringPayments.tsx(18
+9,16): error TS2741: Property 'children' is 
+missing in type '{ variant: "ghost"; icon: 
+ForwardRefExoticComponent<Omit<LucideProps, 
+"ref"> & RefAttributes<SVGSVGElement>>; 
+onClick: () => void; }' but required in type 
+'ButtonProps'.
+src/components/billing/ReportExport.tsx(40,5): 
+error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/ReportExport.tsx(43,5): 
+error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/ReportExport.tsx(46,5): 
+error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/ReportExport.tsx(53,28):
+ error TS2339: Property 'getPLReport' does not 
+exist on type '{ getInvoices: (accountId?: 
+string | undefined, status?: string | 
+undefined) => Promise<Invoice[]>; 
+getInvoiceById: (id: string) => 
+Promise<Invoice | null>; ... 21 more ...; 
+sendInvoiceReminder: (invoiceIds: string[], 
+message?: string | undefined) => Promise<...>; 
+}'.
+src/components/billing/ReportExport.tsx(55,5): 
+error TS2769: No overload matches this call.
+src/components/billing/ReportExport.tsx(64,28):
+ error TS2339: Property 'getARAgingReport' 
+does not exist on type '{ getInvoices: 
+(accountId?: string | undefined, status?: 
+string | undefined) => Promise<Invoice[]>; 
+getInvoiceById: (id: string) => 
+Promise<Invoice | null>; ... 21 more ...; 
+sendInvoiceReminder: (invoiceIds: string[], 
+message?: string | undefined) => Promise<...>; 
+}'.
+src/components/billing/ReportExport.tsx(66,5): 
+error TS2769: No overload matches this call.
+src/components/billing/ReportExport.tsx(105,29)
+: error TS2339: Property 'monthlyBreakdown' 
+does not exist on type '{}'.
+src/components/billing/ReportExport.tsx(117,51)
+: error TS2339: Property 'totalRevenue' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(118,52)
+: error TS2339: Property 'totalExpenses' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(119,48)
+: error TS2339: Property 'netIncome' does not 
+exist on type '{}'.
+src/components/billing/ReportExport.tsx(136,34)
+: error TS2339: Property 'invoiceDetails' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(151,51)
+: error TS2339: Property 'totalAR' does not 
+exist on type '{}'.
+src/components/billing/ReportExport.tsx(153,52)
+: error TS2339: Property 'agingBuckets' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(154,53)
+: error TS2339: Property 'agingBuckets' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(155,53)
+: error TS2339: Property 'agingBuckets' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(156,51)
+: error TS2339: Property 'agingBuckets' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(225,58)
+: error TS2339: Property 'totalRevenue' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(227,59)
+: error TS2339: Property 'totalExpenses' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(230,55)
+: error TS2339: Property 'netIncome' does not 
+exist on type '{}'.
+src/components/billing/ReportExport.tsx(234,20)
+: error TS2339: Property 'monthlyBreakdown' 
+does not exist on type '{}'.
+src/components/billing/ReportExport.tsx(234,47)
+: error TS2339: Property 'monthlyBreakdown' 
+does not exist on type '{}'.
+src/components/billing/ReportExport.tsx(240,18)
+: error TS2339: Property 'monthlyBreakdown' 
+does not exist on type '{}'.
+src/components/billing/ReportExport.tsx(277,58)
+: error TS2339: Property 'totalAR' does not 
+exist on type '{}'.
+
+

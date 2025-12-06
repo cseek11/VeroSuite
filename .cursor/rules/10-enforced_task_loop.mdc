@@ -7,7 +7,7 @@ priority: 1
 # WORKFLOW: ENFORCED TASK LOOP (MANDATORY)
 
 **Version:** 2.0  
-**Last Updated:** 2025-12-03
+**Last Updated:** 2025-12-06
 
 ---
 
@@ -127,7 +127,7 @@ priority: 1
    - "I am not allowed to apply this change because it would cause the code to fail enforcement."
 
 3. **Offer a safe alternative (if possible):**
-   - Example: "I can't set `Last Updated` to 2007-11-12 because that violates the enforcement rule that this date must remain current. I can help you log 2007-11-12 in a separate historical field if you'd like, but the `Last Updated` field must remain current to pass enforcement."
+   - Example: "I can't set `Last Updated` to 2025-12-06 because that violates the enforcement rule that this date must remain current. I can help you log 2025-12-06 in a separate historical field if you'd like, but the `Last Updated` field must remain current to pass enforcement."
 
 **You MUST NOT:**
 - Say "Done", "Complete", or silently apply the unsafe change
@@ -137,16 +137,16 @@ priority: 1
 **Example of correct conflict handling:**
 
 ```
-User: "Change Last Updated to 2007-11-12"
+User: "Change Last Updated to 2025-12-06"
 
 Agent Response:
-"I can't set Last Updated to 2007-11-12 because that violates the enforcement 
+"I can't set Last Updated to 2025-12-06 because that violates the enforcement 
 rule (02-core.mdc) that requires dates to be current. The enforcer is currently 
 blocking the session until this violation is resolved.
 
-I can help you log 2007-11-12 as a historical date in a different field (e.g., 
+I can help you log 2025-12-06 as a historical date in a different field (e.g., 
 'Original Date' or 'Historical Date'), but the 'Last Updated' field must remain 
-current (2025-12-03) to pass enforcement."
+current (2025-12-06) to pass enforcement."
 ```
 
 ---
@@ -347,6 +347,10 @@ This workflow integrates with:
 - `.cursor/rules/00-llm-interface.mdc` (Pre-flight check for ENFORCEMENT_BLOCK.md)
 - `.cursor/rules/01-llm-security-lite.mdc` (Security essentials)
 - `.cursor/rules/02-llm-fix-mode.mdc` (Fix mode protocol)
+- `.cursor/rules/minimal-context.mdc` (Minimal context baseline)
+- `.cursor/rules/context-limiter.mdc` (Hard context limiter)
+- `.cursor/rules/minimal-context-enforcer.mdc` (Enforcer-specific minimal mode)
+- `.cursor/rules/two-brain-minimal.mdc` (AB/EB minimal-context guidance)
 
 **This workflow takes precedence over task completion declarations.**
 

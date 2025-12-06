@@ -7,8 +7,15 @@
 import { unifiedSearchService } from './unified-search-service';
 import { searchErrorLogger } from './search-error-logger';
 import { supabase } from './supabase-client';
-import type { SearchResult, SearchOptions } from './unified-search-service';
+import type { SearchResult as SearchResponse, SearchOptions } from './unified-search-service';
+import type { SearchFilters, Account } from '@/types/enhanced-types';
 import { logger } from '@/utils/logger';
+
+type SearchResultItem = Account & {
+  matchedFields?: string[];
+  score?: number;
+  type?: string;
+};
 
 // ============================================================================
 // TYPES AND INTERFACES
@@ -20,10 +27,17 @@ export interface SearchIntegrationOptions extends SearchOptions {
   minSearchLength?: number;
   showLoadingState?: boolean;
   enableRealTimeSearch?: boolean;
+  includeFields?: string[];
+  excludeFields?: string[];
+  limit?: number;
+  offset?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  filters?: SearchFilters;
 }
 
 export interface SearchIntegrationResult {
-  results: SearchResult[];
+  results: SearchResultItem[];
   loading: boolean;
   error: string | null;
   searchTerm: string;
@@ -34,11 +48,11 @@ export interface SearchIntegrationResult {
 
 export interface SearchIntegrationState {
   currentSearch: string;
-  results: SearchResult[];
+  results: SearchResultItem[];
   loading: boolean;
   error: string | null;
   searchHistory: string[];
-  recentSearches: SearchResult[];
+  recentSearches: SearchResultItem[];
   totalResults: number;
   searchTime: number;
   lastSearched: Date | null;
@@ -154,13 +168,19 @@ class SearchIntegration {
    */
   private async performSearch(
     searchTerm: string, 
-    options: SearchOptions = {}
+    options: SearchIntegrationOptions = {}
   ): Promise<SearchIntegrationResult> {
     const startTime = Date.now();
 
     try {
       // Perform search using unified search service
-      const results = await unifiedSearchService.search(searchTerm, options);
+      const { filters, ...searchOptions } = options;
+      const result: SearchResponse = await unifiedSearchService.searchCustomers(
+        searchTerm,
+        filters,
+        searchOptions
+      );
+      const results = result.data ?? [];
       const searchTime = Date.now() - startTime;
 
       // Update state with results
@@ -186,9 +206,10 @@ class SearchIntegration {
 
     } catch (error: unknown) {
       const searchTime = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Search failed';
       
       // Log search error
-      await searchErrorLogger.logError(error, {
+      await searchErrorLogger.logError(error as Error, {
         operation: 'search',
         query: searchTerm,
         tenantId: await this.getCurrentTenantId(),
@@ -199,7 +220,7 @@ class SearchIntegration {
       this.updateState({
         results: [],
         loading: false,
-        error: error.message || 'Search failed',
+        error: errorMessage,
         totalResults: 0,
         searchTime,
         lastSearched: new Date()
@@ -265,7 +286,7 @@ class SearchIntegration {
   /**
    * Add result to recent searches
    */
-  addToRecentSearches(result: SearchResult): void {
+  addToRecentSearches(result: SearchResultItem): void {
     const recent = this.state.recentSearches.filter(r => r.id !== result.id);
     recent.unshift(result);
     
@@ -285,7 +306,7 @@ class SearchIntegration {
   /**
    * Get recent searches
    */
-  getRecentSearches(): SearchResult[] {
+  getRecentSearches(): SearchResultItem[] {
     return [...this.state.recentSearches];
   }
 
@@ -405,7 +426,7 @@ export function useSearchIntegration(options: SearchIntegrationOptions = {}) {
     searchIntegrationRef.current.cancelSearch();
   }, []);
 
-  const addToRecentSearches = useCallback((result: SearchResult) => {
+  const addToRecentSearches = useCallback((result: SearchResultItem) => {
     searchIntegrationRef.current.addToRecentSearches(result);
   }, []);
 
@@ -463,7 +484,7 @@ export function createSearchInputProps(
 /**
  * Create search result props for component integration
  */
-export function createSearchResultProps(result: SearchResult) {
+export function createSearchResultProps(result: SearchResultItem) {
   return {
     id: result.id,
     name: result.name,

@@ -17,6 +17,8 @@ model Tenant {
   subscription_tier       String                    @default("basic") @db.VarChar(20)
   created_at              DateTime                  @default(now()) @db.Timestamptz(6)
   updated_at              DateTime                  @default(now()) @updatedAt @db.Timestamptz(6)
+  complianceChecks        ComplianceCheck[]
+  complianceTrends        ComplianceTrend[]
   Invoice                 Invoice[]
   Payment                 Payment[]
   ServiceAgreement        ServiceAgreement[]
@@ -54,8 +56,6 @@ model Tenant {
   userKpis                UserKpi[]
   users                   User[]
   workOrders              WorkOrder[]
-  complianceChecks        ComplianceCheck[]
-  complianceTrends         ComplianceTrend[]
 
   @@map("tenants")
   @@schema("public")
@@ -232,11 +232,6 @@ model Account {
   property_size      String?   @db.VarChar(100)
   ar_balance         Decimal?  @default(0.00) @db.Decimal(10, 2)
   stripe_customer_id String?   @db.VarChar(255)
-  Invoice            Invoice[]
-  PaymentMethod      PaymentMethod[]
-  ServiceAgreement   ServiceAgreement[]
-  WorkOrder          WorkOrder[]
-  Job                Job[]
 
   @@index([address(ops: raw("gin_trgm_ops"))], map: "idx_accounts_address", type: Gin)
   @@index([email], map: "idx_accounts_email")
@@ -362,7 +357,6 @@ model WorkOrder {
   location                             Location? @relation(fields: [location_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_work_orders_location_id")
   assignedTechnician                   User?     @relation("WorkOrderAssignedTo", fields: [assigned_to], references: [id])
   tenant                               Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  account                              Account?  @relation(fields: [account_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
 
   @@unique([tenant_id, id])
   @@index([tenant_id, status], map: "idx_work_orders_tenant_status")
@@ -401,7 +395,6 @@ model Job {
   recurring_job_templates                     recurring_job_templates?  @relation(fields: [recurring_template_id], references: [id], onUpdate: NoAction)
   tenant                                      Tenant                    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
   workOrder                                   WorkOrder                 @relation(fields: [tenant_id, work_order_id], references: [tenant_id, id])
-  account                                     Account                   @relation(fields: [account_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   recurring_job_instances                     recurring_job_instances[]
 
   @@unique([tenant_id, id])
@@ -513,7 +506,6 @@ model PaymentMethod {
   created_at     DateTime  @default(now()) @db.Timestamptz(6)
   Payment        Payment[]
   tenant         Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  account        Account   @relation(fields: [account_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([tenant_id, account_id, payment_type])
   @@map("payment_methods")
@@ -927,7 +919,6 @@ model Invoice {
   work_orders                     WorkOrder?        @relation(fields: [work_order_id], references: [id])
   InvoiceItem                     InvoiceItem[]
   Payment                         Payment[]
-  account                         Account           @relation(fields: [account_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([invoice_number, tenant_id])
   @@index([account_id])
@@ -1001,7 +992,6 @@ model ServiceAgreement {
   service_types                            ServiceType            @relation(fields: [service_type_id], references: [id])
   tenants                                  Tenant                 @relation(fields: [tenant_id], references: [id])
   users_ServiceAgreement_updated_byTousers User                   @relation("ServiceAgreement_updated_byTousers", fields: [updated_by], references: [id])
-  account                                  Account                @relation(fields: [account_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([agreement_number, tenant_id])
   @@index([account_id])
@@ -1739,6 +1729,7 @@ model oauth_authorizations {
   created_at            DateTime                   @default(now()) @db.Timestamptz(6)
   expires_at            DateTime                   @default(dbgenerated("(now() + '00:03:00'::interval)")) @db.Timestamptz(6)
   approved_at           DateTime?                  @db.Timestamptz(6)
+  nonce                 String?
   oauth_clients         oauth_clients              @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users                 users?                     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -1888,6 +1879,7 @@ model sessions {
   oauth_client_id        String?          @db.Uuid
   refresh_token_hmac_key String?
   refresh_token_counter  BigInt?
+  scopes                 String?
   mfa_amr_claims         mfa_amr_claims[]
   refresh_tokens         refresh_tokens[]
   oauth_clients          oauth_clients?   @relation(fields: [oauth_client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -2394,37 +2386,16 @@ model time_off_requests {
   @@schema("public")
 }
 
-enum BillingFrequency {
-  monthly
-  quarterly
-  annually
-  one_time
-
-  @@schema("public")
-}
-
-enum InvoiceStatus {
-  draft
-  sent
-  paid
-  overdue
-  cancelled
-
-  @@schema("public")
-}
-
-// Compliance Schema Models (Phase 3)
 model RuleDefinition {
-  id          String   @id @db.VarChar(10)
-  name        String   @db.VarChar(255)
-  description String?
-  tier        String   @db.VarChar(20)
-  category    String?  @db.VarChar(100)
-  file_path   String?  @db.VarChar(500)
-  opa_policy  String?  @db.VarChar(255)
-  created_at  DateTime @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-
+  id               String            @id @db.VarChar(10)
+  name             String            @db.VarChar(255)
+  description      String?
+  tier             String            @db.VarChar(20)
+  category         String?           @db.VarChar(100)
+  file_path        String?           @db.VarChar(500)
+  opa_policy       String?           @db.VarChar(255)
+  created_at       DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime          @default(now()) @updatedAt @db.Timestamptz(6)
   complianceChecks ComplianceCheck[]
   complianceTrends ComplianceTrend[]
 
@@ -2433,40 +2404,32 @@ model RuleDefinition {
 }
 
 model ComplianceCheck {
-  id                  String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id           String          @db.Uuid
-  pr_number           Int
-  commit_sha          String          @db.VarChar(40)
-  rule_id             String          @db.VarChar(10)
-  status              String          @db.VarChar(20)
-  severity            String          @db.VarChar(20)
-  file_path           String?         @db.VarChar(500)
-  line_number         Int?
-  violation_message   String?
-  context             Json?
-  created_at          DateTime        @default(now()) @db.Timestamptz(6)
-  resolved_at        DateTime?       @db.Timestamptz(6)
-  resolved_by         String?         @db.Uuid
-  override_reason     String?
-  override_approved_by String?        @db.Uuid
+  id                   String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id            String            @db.Uuid
+  pr_number            Int
+  commit_sha           String            @db.VarChar(40)
+  rule_id              String            @db.VarChar(10)
+  status               String            @db.VarChar(20)
+  severity             String            @db.VarChar(20)
+  file_path            String?           @db.VarChar(500)
+  line_number          Int?
+  violation_message    String?
+  context              Json?
+  created_at           DateTime          @default(now()) @db.Timestamptz(6)
+  resolved_at          DateTime?         @db.Timestamptz(6)
+  resolved_by          String?           @db.Uuid
+  override_reason      String?
+  override_approved_by String?           @db.Uuid
+  alertHistory         AlertHistory[]
+  rule                 RuleDefinition    @relation(fields: [rule_id], references: [id])
+  tenant               Tenant            @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  overrideRequests     OverrideRequest[]
 
-  rule                RuleDefinition @relation(fields: [rule_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  tenant              Tenant          @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  overrideRequests    OverrideRequest[]
-  alertHistory        AlertHistory[]
-
-  @@index([tenant_id])
-  @@index([pr_number])
-  @@index([rule_id])
-  @@index([status])
-  @@index([severity])
-  @@index([created_at(sort: Desc)])
-  @@index([tenant_id, pr_number])
-  @@index([tenant_id, rule_id])
-  @@index([tenant_id, status])
-  // Note: Partial indexes (idx_checks_unresolved, idx_checks_tenant_unresolved) 
-  // are created in migration SQL but not supported in Prisma schema
+  @@index([created_at(sort: Desc)], map: "idx_checks_created")
+  @@index([pr_number], map: "idx_checks_pr")
+  @@index([rule_id], map: "idx_checks_rule")
+  @@index([status], map: "idx_checks_status")
+  @@index([tenant_id], map: "idx_checks_tenant")
   @@map("compliance_checks")
   @@schema("compliance")
 }
@@ -2479,11 +2442,10 @@ model ComplianceTrend {
   violation_count Int             @default(0)
   compliance_rate Decimal?        @db.Decimal(5, 2)
   created_at      DateTime        @default(now()) @db.Timestamptz(6)
+  rule            RuleDefinition? @relation(fields: [rule_id], references: [id])
+  tenant          Tenant          @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
-  rule            RuleDefinition? @relation(fields: [rule_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  tenant          Tenant          @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  @@unique([tenant_id, date, rule_id], map: "compliance_trends_tenant_id_date_rule_id_key")
+  @@unique([tenant_id, date, rule_id])
   @@index([tenant_id, date(sort: Desc)], map: "idx_trends_tenant_date")
   @@index([rule_id], map: "idx_trends_rule")
   @@map("compliance_trends")
@@ -2491,18 +2453,17 @@ model ComplianceTrend {
 }
 
 model OverrideRequest {
-  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id       String          @db.Uuid
-  violation_id    String          @db.Uuid
-  requested_by    String          @db.Uuid
-  requested_at    DateTime        @default(now()) @db.Timestamptz(6)
-  reason          String
-  status          String          @db.VarChar(20)
-  approved_by     String?         @db.Uuid
-  approved_at     DateTime?       @db.Timestamptz(6)
+  id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id        String          @db.Uuid
+  violation_id     String          @db.Uuid
+  requested_by     String          @db.Uuid
+  requested_at     DateTime        @default(now()) @db.Timestamptz(6)
+  reason           String
+  status           String          @db.VarChar(20)
+  approved_by      String?         @db.Uuid
+  approved_at      DateTime?       @db.Timestamptz(6)
   rejection_reason String?
-
-  violation       ComplianceCheck @relation(fields: [violation_id], references: [id], onDelete: Cascade)
+  violation        ComplianceCheck @relation(fields: [violation_id], references: [id], onDelete: Cascade)
 
   @@index([tenant_id, status], map: "idx_override_tenant_status")
   @@index([violation_id], map: "idx_override_violation")
@@ -2520,12 +2481,9 @@ model AlertHistory {
   acknowledged_by String?         @db.Uuid
   status          String          @db.VarChar(20)
   delivery_error  String?
-
   violation       ComplianceCheck @relation(fields: [violation_id], references: [id], onDelete: Cascade)
 
   @@index([violation_id], map: "idx_alert_violation")
-  @@index([status], map: "idx_alert_status")
-  // Note: Partial index filter is created in migration SQL but not supported in Prisma schema
   @@map("alert_history")
   @@schema("compliance")
 }
@@ -2549,13 +2507,13 @@ model ComplianceAuditLog {
 }
 
 model WriteQueue {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  job_type      String   @db.VarChar(50)
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  job_type      String    @db.VarChar(50)
   job_data      Json
-  status        String   @default("pending") @db.VarChar(20)
-  attempts      Int      @default(0)
-  max_attempts  Int      @default(3)
-  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  status        String    @default("pending") @db.VarChar(20)
+  attempts      Int       @default(0)
+  max_attempts  Int       @default(3)
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
   processed_at  DateTime? @db.Timestamptz(6)
   error_message String?
 
@@ -2564,98 +2522,92 @@ model WriteQueue {
   @@schema("compliance")
 }
 
-// VeroScore V3 Schema Models (Phase 1)
 model VeroScoreSession {
-  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  session_id            String    @unique
+  id                    String                  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  session_id            String                  @unique
   author                String
   branch_name           String?
-  started               DateTime  @default(now()) @db.Timestamptz(6)
-  last_activity         DateTime  @default(now()) @db.Timestamptz(6)
-  completed_at          DateTime? @db.Timestamptz(6)
-  total_files           Int       @default(0)
-  total_lines_added     Int       @default(0)
-  total_lines_removed   Int       @default(0)
-  prs                   Json      @default("[]")
-  status                String    @default("active") @db.VarChar(20)
-  reward_score_eligible Boolean   @default(false)
-  last_reward_score     Decimal?  @db.Decimal(5, 2)
-  reward_scored_at      DateTime? @db.Timestamptz(6)
-  config                Json      @default("{}")
-  metadata              Json      @default("{}")
-  created_at            DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
-
+  started               DateTime                @default(now()) @db.Timestamptz(6)
+  last_activity         DateTime                @default(now()) @db.Timestamptz(6)
+  completed_at          DateTime?               @db.Timestamptz(6)
+  total_files           Int?                    @default(0)
+  total_lines_added     Int?                    @default(0)
+  total_lines_removed   Int?                    @default(0)
+  prs                   Json?                   @default("[]")
+  status                String?                 @default("active")
+  reward_score_eligible Boolean?                @default(false)
+  last_reward_score     Decimal?                @db.Decimal(5, 2)
+  reward_scored_at      DateTime?               @db.Timestamptz(6)
+  config                Json?                   @default("{}")
+  metadata              Json?                   @default("{}")
+  created_at            DateTime?               @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime?               @default(now()) @updatedAt @db.Timestamptz(6)
   changesQueue          VeroScoreChangesQueue[]
   prScores              VeroScorePrScore[]
 
   @@index([author], map: "idx_veroscore_sessions_author")
   @@index([status], map: "idx_veroscore_sessions_status")
   @@index([last_activity], map: "idx_veroscore_sessions_last_activity")
-  @@index([reward_score_eligible], map: "idx_veroscore_sessions_reward_eligible")
   @@map("sessions")
   @@schema("veroscore")
 }
 
 model VeroScoreChangesQueue {
-  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  session_id  String
-  file_path   String
-  change_type String          @db.VarChar(20)
-  old_path    String?
-  lines_added Int             @default(0)
-  lines_removed Int           @default(0)
-  commit_hash String?
-  processed   Boolean         @default(false)
-  processed_at DateTime?      @db.Timestamptz(6)
-  metadata    Json            @default("{}")
-  timestamp   DateTime        @default(now()) @db.Timestamptz(6)
-
-  session     VeroScoreSession @relation(fields: [session_id], references: [session_id], onDelete: Cascade)
+  id            String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  session_id    String
+  file_path     String
+  change_type   String
+  old_path      String?
+  lines_added   Int?             @default(0)
+  lines_removed Int?             @default(0)
+  commit_hash   String?
+  processed     Boolean?         @default(false)
+  processed_at  DateTime?        @db.Timestamptz(6)
+  metadata      Json?            @default("{}")
+  timestamp     DateTime         @default(now()) @db.Timestamptz(6)
+  session       VeroScoreSession @relation(fields: [session_id], references: [session_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([session_id], map: "idx_veroscore_changes_session")
-  @@index([processed], map: "idx_veroscore_changes_processed")
   @@index([timestamp(sort: Desc)], map: "idx_veroscore_changes_timestamp")
   @@map("changes_queue")
   @@schema("veroscore")
 }
 
 model VeroScorePrScore {
-  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pr_number               Int
-  repository              String
-  session_id              String?
-  author                  String
-  code_quality            Decimal   @default(0) @db.Decimal(4, 2)
-  test_coverage           Decimal   @default(0) @db.Decimal(4, 2)
-  documentation           Decimal   @default(0) @db.Decimal(4, 2)
-  architecture            Decimal   @default(0) @db.Decimal(4, 2)
-  security                Decimal   @default(0) @db.Decimal(4, 2)
-  rule_compliance         Decimal   @default(0) @db.Decimal(5, 2)
-  code_quality_weighted   Decimal?  @db.Decimal(5, 2)
-  test_coverage_weighted  Decimal?  @db.Decimal(5, 2)
-  documentation_weighted  Decimal?  @db.Decimal(5, 2)
-  architecture_weighted  Decimal?  @db.Decimal(5, 2)
-  security_weighted       Decimal?  @db.Decimal(5, 2)
-  rule_compliance_weighted Decimal? @db.Decimal(5, 2)
-  raw_score               Decimal   @db.Decimal(6, 2)
-  stabilized_score        Decimal   @db.Decimal(5, 2)
-  violations              Json      @default("[]")
-  warnings                Json      @default("[]")
-  pipeline_complete       Boolean   @default(false)
-  pipeline_bonus          Decimal   @default(0) @db.Decimal(3, 2)
-  decision                String?   @db.VarChar(20)
-  decision_reason         String?
-  reward_score            Decimal?  @db.Decimal(5, 2)
-  reward_score_timestamp  DateTime? @db.Timestamptz(6)
-  scan_duration_ms        Int?
-  detector_versions       Json      @default("{}")
-  created_at              DateTime  @default(now()) @db.Timestamptz(6)
+  id                       String                     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  pr_number                Int
+  repository               String
+  session_id               String?
+  author                   String
+  code_quality             Decimal?                   @default(0) @db.Decimal(4, 2)
+  test_coverage            Decimal?                   @default(0) @db.Decimal(4, 2)
+  documentation            Decimal?                   @default(0) @db.Decimal(4, 2)
+  architecture             Decimal?                   @default(0) @db.Decimal(4, 2)
+  security                 Decimal?                   @default(0) @db.Decimal(4, 2)
+  rule_compliance          Decimal?                   @default(0) @db.Decimal(5, 2)
+  code_quality_weighted    Decimal?                   @db.Decimal(5, 2)
+  test_coverage_weighted   Decimal?                   @db.Decimal(5, 2)
+  documentation_weighted   Decimal?                   @db.Decimal(5, 2)
+  architecture_weighted    Decimal?                   @db.Decimal(5, 2)
+  security_weighted        Decimal?                   @db.Decimal(5, 2)
+  rule_compliance_weighted Decimal?                   @db.Decimal(5, 2)
+  raw_score                Decimal                    @db.Decimal(6, 2)
+  stabilized_score         Decimal                    @db.Decimal(5, 2)
+  violations               Json?                      @default("[]")
+  warnings                 Json?                      @default("[]")
+  pipeline_complete        Boolean?                   @default(false)
+  pipeline_bonus           Decimal?                   @default(0) @db.Decimal(3, 2)
+  decision                 String?
+  decision_reason          String?
+  reward_score             Decimal?                   @db.Decimal(5, 2)
+  reward_score_timestamp   DateTime?                  @db.Timestamptz(6)
+  scan_duration_ms         Int?
+  detector_versions        Json?                      @default("{}")
+  created_at               DateTime?                  @default(now()) @db.Timestamptz(6)
+  detectionResults         VeroScoreDetectionResult[]
+  session                  VeroScoreSession?          @relation(fields: [session_id], references: [session_id], onDelete: NoAction, onUpdate: NoAction)
 
-  session                 VeroScoreSession? @relation(fields: [session_id], references: [session_id])
-  detectionResults        VeroScoreDetectionResult[]
-
-  @@unique([pr_number, repository, created_at], map: "veroscore_pr_scores_pr_number_repository_created_at_key")
+  @@unique([pr_number, repository, created_at])
   @@index([pr_number, repository], map: "idx_veroscore_pr_scores_pr")
   @@index([session_id], map: "idx_veroscore_pr_scores_session")
   @@index([decision], map: "idx_veroscore_pr_scores_decision")
@@ -2665,22 +2617,21 @@ model VeroScorePrScore {
 }
 
 model VeroScoreDetectionResult {
-  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pr_score_id     String            @db.Uuid
-  detector_name   String
+  id               String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  pr_score_id      String           @db.Uuid
+  detector_name    String
   detector_version String?
-  severity        String            @db.VarChar(20)
-  rule_id         String?
-  message         String
-  file_path       String?
-  line_number     Int?
-  code_snippet    String?
-  suggested_fix   String?
-  penalty_applied Decimal           @default(0) @db.Decimal(5, 2)
-  metadata        Json              @default("{}")
-  created_at      DateTime          @default(now()) @db.Timestamptz(6)
-
-  prScore         VeroScorePrScore  @relation(fields: [pr_score_id], references: [id], onDelete: Cascade)
+  severity         String
+  rule_id          String?
+  message          String
+  file_path        String?
+  line_number      Int?
+  code_snippet     String?
+  suggested_fix    String?
+  penalty_applied  Decimal?         @default(0) @db.Decimal(5, 2)
+  metadata         Json?            @default("{}")
+  created_at       DateTime?        @default(now()) @db.Timestamptz(6)
+  prScore          VeroScorePrScore @relation(fields: [pr_score_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([pr_score_id], map: "idx_veroscore_detection_pr_score")
   @@index([severity], map: "idx_veroscore_detection_severity")
@@ -2690,13 +2641,13 @@ model VeroScoreDetectionResult {
 }
 
 model VeroScoreIdempotencyKey {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  key           String    @unique
+  id             String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  key            String    @unique
   operation_type String
-  status        String    @db.VarChar(20)
-  result        Json      @default("{}")
-  expires_at    DateTime  @db.Timestamptz(6)
-  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  status         String
+  result         Json?     @default("{}")
+  expires_at     DateTime  @db.Timestamptz(6)
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([key], map: "idx_veroscore_idempotency_key")
   @@index([expires_at], map: "idx_veroscore_idempotency_expires")
@@ -2705,36 +2656,56 @@ model VeroScoreIdempotencyKey {
 }
 
 model VeroScoreSystemMetric {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   metric_name  String
   metric_value Decimal   @db.Decimal
-  metric_type  String    @db.VarChar(20)
-  labels       Json      @default("{}")
-  timestamp    DateTime  @default(now()) @db.Timestamptz(6)
+  metric_type  String
+  labels       Json?     @default("{}")
+  timestamp    DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([metric_name], map: "idx_veroscore_metrics_name")
   @@index([timestamp(sort: Desc)], map: "idx_veroscore_metrics_timestamp")
+  @@index([labels], map: "idx_veroscore_metrics_labels", type: Gin)
   @@map("system_metrics")
   @@schema("veroscore")
 }
 
 model VeroScoreAuditLog {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  event_type  String
+  id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  event_type   String
   event_action String
-  actor       String
-  session_id  String?
-  pr_number   Int?
-  old_state   Json?
-  new_state   Json?
-  metadata    Json      @default("{}")
-  timestamp    DateTime  @default(now()) @db.Timestamptz(6)
+  actor        String
+  session_id   String?
+  pr_number    Int?
+  old_state    Json?
+  new_state    Json?
+  metadata     Json?     @default("{}")
+  timestamp    DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([event_type], map: "idx_veroscore_audit_type")
   @@index([actor], map: "idx_veroscore_audit_actor")
   @@index([timestamp(sort: Desc)], map: "idx_veroscore_audit_timestamp")
   @@map("audit_log")
   @@schema("veroscore")
+}
+
+enum BillingFrequency {
+  monthly
+  quarterly
+  annually
+  one_time
+
+  @@schema("public")
+}
+
+enum InvoiceStatus {
+  draft
+  sent
+  paid
+  overdue
+  cancelled
+
+  @@schema("public")
 }
 
 enum ServiceAgreementStatus {

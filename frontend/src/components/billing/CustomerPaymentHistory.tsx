@@ -143,15 +143,14 @@ export default function CustomerPaymentHistory({
     }).format(amount);
   };
 
-  // Helper function for date formatting (currently unused, kept for potential future use)
-   
-  const _formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
+  // Helper function for date formatting (currently unused but kept for future use)
+  // const formatDate = (dateString: string) => {
+  //   return new Date(dateString).toLocaleDateString('en-US', {
+  //     year: 'numeric',
+  //     month: 'short',
+  //     day: 'numeric',
+  //   });
+  // };
 
   const formatDateTime = (dateString: string) => {
     return new Date(dateString).toLocaleString('en-US', {

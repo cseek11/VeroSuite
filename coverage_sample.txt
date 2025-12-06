@@ -1,0 +1,5 @@
+C:\Users\ashse\Documents\VeroField\Training\VeroField\apps\api\src\app.module.ts
+C:\Users\ashse\Documents\VeroField\Training\VeroField\apps\api\src\main.ts
+C:\Users\ashse\Documents\VeroField\Training\VeroField\apps\api\src\accounts\accounts.controller.ts
+C:\Users\ashse\Documents\VeroField\Training\VeroField\apps\api\src\accounts\accounts.module.ts
+C:\Users\ashse\Documents\VeroField\Training\VeroField\apps\api\src\accounts\accounts.service.ts

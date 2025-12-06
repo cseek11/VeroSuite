@@ -2,7 +2,7 @@
  * Invoice View Component
  * Comprehensive invoice viewing interface with list, detail, and actions
  * 
- * Last Updated: 2025-11-22
+ * Last Updated: 2025-12-06
  */
 
 import { useState, useEffect, useMemo } from 'react';
@@ -46,14 +46,17 @@ export default function InvoiceView({
   const [searchTerm, setSearchTerm] = useState('');
 
   // Fetch invoices
-  const { data: invoices = [], isLoading, error, refetch } = useQuery({
+  const { data: invoicesData, isLoading, error, refetch } = useQuery<Invoice[]>({
     queryKey: ['billing', 'invoices', customerId || 'all'],
     queryFn: () => billing.getInvoices(customerId),
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch invoices', error, 'InvoiceView');
-      toast.error('Failed to load invoices. Please try again.');
-    },
   });
+
+  if (error) {
+    logger.error('Failed to fetch invoices', error, 'InvoiceView');
+    toast.error('Failed to load invoices. Please try again.');
+  }
+
+  const invoices: Invoice[] = Array.isArray(invoicesData) ? invoicesData : [];
 
   // Fetch payment methods for payment form
   const { data: paymentMethods = [] } = useQuery({
@@ -104,10 +107,10 @@ export default function InvoiceView({
     setViewMode('detail');
   };
 
-  const _handleViewInvoice = (invoice: Invoice) => {
-    setSelectedInvoice(invoice);
-    setViewMode('viewer');
-  };
+  // const _handleViewInvoice = (invoice: Invoice) => {
+  //   setSelectedInvoice(invoice);
+  //   setViewMode('viewer');
+  // };
 
   const handlePayInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
@@ -250,7 +253,7 @@ export default function InvoiceView({
 
       {/* Invoice List */}
       <InvoiceList
-        customerId={customerId}
+        {...(customerId ? { customerId } : {})}
         onInvoiceSelect={handleInvoiceSelect}
         onInvoicePay={handlePayInvoice}
         showActions={true}

@@ -1,0 +1,781 @@
+﻿
+src/components/billing/InvoiceGenerator.tsx(238
+,14): error TS2375: Type '{ value: string | 
+undefined; onChange: (customerId: string, 
+customer: Account | null) => void; 
+placeholder: string; }' is not assignable to 
+type 'CustomerSearchSelectorProps' with 
+'exactOptionalPropertyTypes: true'. Consider 
+adding 'undefined' to the types of the 
+target's properties.
+src/components/billing/InvoiceGenerator.tsx(240
+,26): error TS6133: 'customerId' is declared 
+but its value is never read.
+src/components/billing/InvoiceList.tsx(164,34):
+ error TS2304: Cannot find name 
+'InvoiceStatus'.
+src/components/billing/InvoiceList.tsx(177,35):
+ error TS2304: Cannot find name 
+'InvoiceStatus'.
+src/components/billing/InvoiceList.tsx(386,54):
+ error TS2339: Property 'target' does not 
+exist on type 'string'.
+src/components/billing/InvoiceList.tsx(493,46):
+ error TS2339: Property 'address' does not 
+exist on type '{ id: string; name: string; 
+email?: string; phone?: string; }'.
+src/components/billing/InvoiceList.tsx(496,50):
+ error TS2339: Property 'address' does not 
+exist on type '{ id: string; name: string; 
+email?: string; phone?: string; }'.
+src/components/billing/InvoiceList.tsx(496,76):
+ error TS2339: Property 'city' does not exist 
+on type '{ id: string; name: string; email?: 
+string; phone?: string; }'.
+src/components/billing/InvoiceList.tsx(496,99):
+ error TS2339: Property 'state' does not exist 
+on type '{ id: string; name: string; email?: 
+string; phone?: string; }'.
+src/components/billing/InvoiceList.tsx(496,123)
+: error TS2339: Property 'zip_code' does not 
+exist on type '{ id: string; name: string; 
+email?: string; phone?: string; }'.
+src/components/billing/InvoiceManagement.tsx(32
+,19): error TS2305: Module 
+'"@/types/enhanced-types"' has no exported 
+member 'InvoiceStatus'.
+src/components/billing/InvoiceManagement.tsx(22
+1,34): error TS2339: Property 'address' does 
+not exist on type '{ id: string; name: string; 
+email?: string; phone?: string; }'.
+src/components/billing/InvoiceManagement.tsx(22
+4,38): error TS2339: Property 'address' does 
+not exist on type '{ id: string; name: string; 
+email?: string; phone?: string; }'.
+src/components/billing/InvoiceManagement.tsx(22
+4,64): error TS2339: Property 'city' does not 
+exist on type '{ id: string; name: string; 
+email?: string; phone?: string; }'.
+src/components/billing/InvoiceManagement.tsx(22
+4,87): error TS2339: Property 'state' does not 
+exist on type '{ id: string; name: string; 
+email?: string; phone?: string; }'.
+src/components/billing/InvoiceManagement.tsx(22
+4,111): error TS2339: Property 'zip_code' does 
+not exist on type '{ id: string; name: string; 
+email?: string; phone?: string; }'.
+src/components/billing/InvoiceManagement.tsx(47
+6,21): error TS2322: Type '{ children: string; 
+variant: "outline"; size: "sm"; icon: 
+ForwardRefExoticComponent<Omit<LucideProps, 
+"ref"> & RefAttributes<SVGSVGElement>>; 
+onClick: () => void; title: string; }' is not 
+assignable to type 'IntrinsicAttributes & 
+ButtonProps'.
+src/components/billing/InvoiceReminders.tsx(64,
+5): error TS2769: No overload matches this 
+call.
+src/components/billing/InvoiceReminders.tsx(92,
+5): error TS2769: No overload matches this 
+call.
+src/components/billing/InvoiceReminders.tsx(104
+,27): error TS2339: Property 'filter' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceReminders.tsx(104
+,34): error TS7006: Parameter 'invoice' 
+implicitly has an 'any' type.
+src/components/billing/InvoiceReminders.tsx(120
+,27): error TS2339: Property 'filter' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceReminders.tsx(120
+,34): error TS7006: Parameter 'reminder' 
+implicitly has an 'any' type.
+src/components/billing/InvoiceReminders.tsx(137
+,52): error TS2339: Property 'length' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceReminders.tsx(140
+,52): error TS2339: Property 'map' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceReminders.tsx(140
+,56): error TS7006: Parameter 'inv' implicitly 
+has an 'any' type.
+src/components/billing/InvoiceReminders.tsx(284
+,49): error TS2339: Property 'length' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceReminders.tsx(298
+,49): error TS2339: Property 'length' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceReminders.tsx(302
+,37): error TS2339: Property 'length' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceReminders.tsx(302
+,78): error TS2339: Property 'length' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceReminders.tsx(309
+,63): error TS2339: Property 'length' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceReminders.tsx(314
+,35): error TS2339: Property 'map' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceReminders.tsx(314
+,40): error TS7006: Parameter 'invoice' 
+implicitly has an 'any' type.
+src/components/billing/InvoiceReminders.tsx(411
+,47): error TS2339: Property 'length' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceReminders.tsx(425
+,47): error TS2339: Property 'length' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceReminders.tsx(427
+,32): error TS2339: Property 'map' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceReminders.tsx(427
+,37): error TS7006: Parameter 'reminder' 
+implicitly has an 'any' type.
+src/components/billing/InvoiceScheduler.tsx(108
+,5): error TS2769: No overload matches this 
+call.
+src/components/billing/InvoiceScheduler.tsx(121
+,27): error TS2339: Property 'filter' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceScheduler.tsx(121
+,34): error TS7006: Parameter 'schedule' 
+implicitly has an 'any' type.
+src/components/billing/InvoiceScheduler.tsx(130
+,27): error TS2339: Property 'filter' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceScheduler.tsx(130
+,34): error TS7006: Parameter 'schedule' 
+implicitly has an 'any' type.
+src/components/billing/InvoiceScheduler.tsx(249
+,16): error TS2741: Property 'options' is 
+missing in type '{ children: Element[]; value: 
+"all" | "active" | "inactive"; onChange: (e: 
+string) => void; className: string; }' but 
+required in type 'SelectProps'.
+src/components/billing/InvoiceScheduler.tsx(251
+,52): error TS2339: Property 'target' does not 
+exist on type 'string'.
+src/components/billing/InvoiceScheduler.tsx(269
+,44): error TS2339: Property 'length' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceScheduler.tsx(285
+,44): error TS2339: Property 'length' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceScheduler.tsx(287
+,34): error TS2339: Property 'map' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceScheduler.tsx(287
+,39): error TS7006: Parameter 'schedule' 
+implicitly has an 'any' type.
+src/components/billing/InvoiceScheduler.tsx(366
+,26): error TS2741: Property 'children' is 
+missing in type '{ variant: "outline"; size: 
+"sm"; icon: 
+ForwardRefExoticComponent<Omit<LucideProps, 
+"ref"> & RefAttributes<SVGSVGElement>>; 
+onClick: () => void; }' but required in type 
+'ButtonProps'.
+src/components/billing/InvoiceScheduler.tsx(372
+,26): error TS2741: Property 'children' is 
+missing in type '{ variant: "outline"; size: 
+"sm"; icon: 
+ForwardRefExoticComponent<Omit<LucideProps, 
+"ref"> & RefAttributes<SVGSVGElement>>; 
+onClick: () => Promise<...>; }' but required 
+in type 'ButtonProps'.
+src/components/billing/InvoiceTemplates.tsx(110
+,5): error TS2769: No overload matches this 
+call.
+src/components/billing/InvoiceTemplates.tsx(119
+,15): error TS2339: Property 'forEach' does 
+not exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceTemplates.tsx(119
+,23): error TS7006: Parameter 'template' 
+implicitly has an 'any' type.
+src/components/billing/InvoiceTemplates.tsx(120
+,30): error TS7006: Parameter 'tag' implicitly 
+has an 'any' type.
+src/components/billing/InvoiceTemplates.tsx(132
+,27): error TS2339: Property 'filter' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceTemplates.tsx(132
+,34): error TS7006: Parameter 'template' 
+implicitly has an 'any' type.
+src/components/billing/InvoiceTemplates.tsx(135
+,29): error TS7006: Parameter 'tag' implicitly 
+has an 'any' type.
+src/components/billing/InvoiceTemplates.tsx(141
+,27): error TS2339: Property 'filter' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceTemplates.tsx(141
+,34): error TS7006: Parameter 'template' 
+implicitly has an 'any' type.
+src/components/billing/InvoiceTemplates.tsx(275
+,44): error TS2339: Property 'length' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceTemplates.tsx(291
+,44): error TS2339: Property 'length' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceTemplates.tsx(293
+,34): error TS2339: Property 'map' does not 
+exist on type 'never[] | 
+NoInfer<TQueryFnData>'.
+src/components/billing/InvoiceTemplates.tsx(293
+,39): error TS7006: Parameter 'template' 
+implicitly has an 'any' type.
+src/components/billing/InvoiceTemplates.tsx(318
+,58): error TS7006: Parameter 'item' 
+implicitly has an 'any' type.
+src/components/billing/InvoiceTemplates.tsx(318
+,64): error TS7006: Parameter 'index' 
+implicitly has an 'any' type.
+src/components/billing/InvoiceTemplates.tsx(339
+,44): error TS7006: Parameter 'tag' implicitly 
+has an 'any' type.
+src/components/billing/InvoiceTemplates.tsx(361
+,24): error TS2741: Property 'children' is 
+missing in type '{ variant: "outline"; size: 
+"sm"; icon: 
+ForwardRefExoticComponent<Omit<LucideProps, 
+"ref"> & RefAttributes<SVGSVGElement>>; 
+onClick: () => void; }' but required in type 
+'ButtonProps'.
+src/components/billing/InvoiceTemplates.tsx(367
+,24): error TS2741: Property 'children' is 
+missing in type '{ variant: "outline"; size: 
+"sm"; icon: 
+ForwardRefExoticComponent<Omit<LucideProps, 
+"ref"> & RefAttributes<SVGSVGElement>>; 
+onClick: () => Promise<...>; }' but required 
+in type 'ButtonProps'.
+src/components/billing/InvoiceView.tsx(52,5): 
+error TS2769: No overload matches this call.
+src/components/billing/InvoiceView.tsx(67,29): 
+error TS18046: 'invoices' is of type 'unknown'.
+src/components/billing/InvoiceView.tsx(68,23): 
+error TS18046: 'invoices' is of type 'unknown'.
+src/components/billing/InvoiceView.tsx(107,9): 
+error TS6133: '_handleViewInvoice' is declared 
+but its value is never read.
+src/components/billing/InvoiceView.tsx(252,8): 
+error TS2375: Type '{ customerId: string | 
+undefined; onInvoiceSelect: (invoice: Invoice) 
+=> void; onInvoicePay: (invoice: Invoice) => 
+void; showActions: true; }' is not assignable 
+to type 'InvoiceListProps' with 
+'exactOptionalPropertyTypes: true'. Consider 
+adding 'undefined' to the types of the 
+target's properties.
+src/components/billing/OverdueAlerts.tsx(138,7)
+: error TS2322: Type '"confirm"' is not 
+assignable to type '"info" | "error" | 
+"warning" | "success"'.
+src/components/billing/OverdueAlerts.tsx(141,10
+): error TS1345: An expression of type 'void' 
+cannot be tested for truthiness.
+src/components/billing/PaymentAnalytics.tsx(62,
+35): error TS2769: No overload matches this 
+call.
+src/components/billing/PaymentAnalytics.tsx(63,
+33): error TS2769: No overload matches this 
+call.
+src/components/billing/PaymentDashboard.tsx(40,
+5): error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/PaymentDashboard.tsx(43,
+5): error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/PaymentDashboard.tsx(50,
+5): error TS2769: No overload matches this 
+call.
+src/components/billing/PaymentDashboard.tsx(60,
+5): error TS2769: No overload matches this 
+call.
+src/components/billing/PaymentDashboard.tsx(74,
+24): error TS2339: Property 'dailyTrends' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(77,
+40): error TS2339: Property 'dailyTrends' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(84,
+21): error TS2339: Property 'dailyTrends' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(88,
+25): error TS2339: Property 
+'paymentMethodBreakdown' does not exist on 
+type '{}'.
+src/components/billing/PaymentDashboard.tsx(91,
+41): error TS2339: Property 
+'paymentMethodBreakdown' does not exist on 
+type '{}'.
+src/components/billing/PaymentDashboard.tsx(95,
+22): error TS2339: Property 
+'paymentMethodBreakdown' does not exist on 
+type '{}'.
+src/components/billing/PaymentDashboard.tsx(120
+,23): error TS2339: Property 'summary' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(120
+,61): error TS2339: Property 'summary' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(121
+,23): error TS2339: Property 'summary' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(122
+,24): error TS2339: Property 'summary' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(122
+,51): error TS2339: Property 'summary' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(235
+,34): error TS2339: Property 'summary' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(235
+,72): error TS2339: Property 'summary' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(238
+,34): error TS2339: Property 'summary' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(238
+,88): error TS2339: Property 'summary' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(254
+,34): error TS2339: Property 'summary' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(254
+,72): error TS2339: Property 'summary' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(273
+,35): error TS2339: Property 'summary' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(273
+,62): error TS2339: Property 'summary' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(382
+,66): error TS18048: 'percent' is possibly 
+'undefined'.
+src/components/billing/PaymentDashboard.tsx(409
+,22): error TS2339: Property 'payments' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(409
+,47): error TS2339: Property 'payments' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(421
+,29): error TS2339: Property 'payments' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(461
+,29): error TS2339: Property 'payments' does 
+not exist on type '{}'.
+src/components/billing/PaymentDashboard.tsx(464
+,49): error TS2339: Property 'payments' does 
+not exist on type '{}'.
+src/components/billing/PaymentForm.tsx(3,41): 
+error TS2724: '"@stripe/stripe-js"' has no 
+exported member named 'StripePaymentIntent'. 
+Did you mean 'PaymentIntent'?
+src/components/billing/PaymentForm.tsx(9,3): 
+error TS2305: Module 
+'"@stripe/react-stripe-js"' has no exported 
+member 'CardElementChangeEvent'.
+src/components/billing/PaymentForm.tsx(62,9): 
+error TS6133: '_cardElementRef' is declared 
+but its value is never read.
+src/components/billing/PaymentForm.tsx(117,58):
+ error TS2345: Argument of type 'unknown' is 
+not assignable to parameter of type 
+'Record<string, any> | undefined'.
+src/components/billing/PaymentForm.tsx(256,10):
+ error TS2375: Type '{ accountId: string; 
+value: string | undefined; onChange: (method: 
+PaymentMethod | "new" | null) => void; 
+onAddNew: () => void; showAddNew: true; }' is 
+not assignable to type 
+'PaymentMethodSelectorProps' with 
+'exactOptionalPropertyTypes: true'. Consider 
+adding 'undefined' to the types of the 
+target's properties.
+src/components/billing/PaymentForm.tsx(341,16):
+ error TS2375: Type '{ message: string; type: 
+"error"; actionable: { label: string; onClick: 
+() => Promise<void>; } | undefined; }' is not 
+assignable to type 'ErrorMessageProps' with 
+'exactOptionalPropertyTypes: true'. Consider 
+adding 'undefined' to the types of the 
+target's properties.
+src/components/billing/PaymentForm.tsx(359,24):
+ error TS18047: 'lastError' is possibly 'null'.
+src/components/billing/PaymentForm.tsx(361,27):
+ error TS18047: 'lastError' is possibly 'null'.
+src/components/billing/PaymentForm.tsx(633,49):
+ error TS2322: Type 'string | null' is not 
+assignable to type 'string | undefined'.
+src/components/billing/PaymentHistory.tsx(129,2
+0): error TS7053: Element implicitly has an 
+'any' type because expression of type 
+'PaymentStatus' can't be used to index type '{ 
+completed: { variant: "success"; icon: 
+ForwardRefExoticComponent<Omit<LucideProps, 
+"ref"> & RefAttributes<SVGSVGElement>>; label: 
+string; className: string; }; pending: { ...; 
+}; failed: { ...; }; refunded: { ...; }; }'.
+src/components/billing/PaymentMethodManager.tsx
+(61,5): error TS2769: No overload matches this 
+call.
+src/components/billing/PaymentMethodManager.tsx
+(69,147): error TS2345: Argument of type '{ 
+account_id: string; payment_type: string; 
+payment_name: string; }' is not assignable to 
+parameter of type 'CreatePaymentMethodDto'.
+src/components/billing/PaymentMethodManager.tsx
+(70,7): error TS2783: 'account_id' is 
+specified more than once, so this usage will 
+be overwritten.
+src/components/billing/PaymentMethodManager.tsx
+(135,40): error TS2345: Argument of type '{ 
+payment_type: PaymentMethod["payment_type"]; 
+payment_name: string; card_type: string; 
+card_last4: string; card_expiry: string; 
+account_number: string; routing_number: 
+string; is_default: boolean; }' is not 
+assignable to parameter of type '{ [key: 
+string]: unknown; account_id: string; 
+payment_type: string; payment_name: string; }'.
+src/components/billing/PaymentMethodManager.tsx
+(228,12): error TS18046: 'paymentMethods' is 
+of type 'unknown'.
+src/components/billing/PaymentMethodManager.tsx
+(251,16): error TS18046: 'paymentMethods' is 
+of type 'unknown'.
+src/components/billing/PaymentMethodManager.tsx
+(251,36): error TS7006: Parameter 'method' 
+implicitly has an 'any' type.
+src/components/billing/PaymentMethodManager.tsx
+(349,79): error TS2339: Property 'target' does 
+not exist on type 'string'.
+src/components/billing/PaymentMethodManager.tsx
+(380,80): error TS2339: Property 'target' does 
+not exist on type 'string'.
+src/components/billing/PaymentTracking.tsx(36,5
+): error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/PaymentTracking.tsx(39,5
+): error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/PaymentTracking.tsx(45,5
+): error TS2769: No overload matches this call.
+src/components/billing/PaymentTracking.tsx(53,2
+4): error TS2339: Property 'dailyTrends' does 
+not exist on type '{}'.
+src/components/billing/PaymentTracking.tsx(56,4
+0): error TS2339: Property 'dailyTrends' does 
+not exist on type '{}'.
+src/components/billing/PaymentTracking.tsx(63,2
+1): error TS2339: Property 'dailyTrends' does 
+not exist on type '{}'.
+src/components/billing/PaymentTracking.tsx(108,
+11): error TS2339: Property 'payments' does 
+not exist on type '{}'.
+src/components/billing/PaymentTracking.tsx(108,
+21): error TS2339: Property 'summary' does not 
+exist on type '{}'.
+src/components/billing/PaymentTracking.tsx(147,
+21): error TS7006: Parameter 'row' implicitly 
+has an 'any' type.
+src/components/billing/PaymentTracking.tsx(147,
+36): error TS7006: Parameter 'cell' implicitly 
+has an 'any' type.
+src/components/billing/PaymentTracking.tsx(284,
+48): error TS2339: Property 'dailyTrends' does 
+not exist on type '{}'.
+src/components/billing/PLReport.tsx(22,5): 
+error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/PLReport.tsx(25,5): 
+error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/PLReport.tsx(50,11): 
+error TS6133: '_pageHeight' is declared but 
+its value is never read.
+src/components/billing/ReconciliationTools.tsx(
+35,5): error TS2345: Argument of type 'string 
+| undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/ReconciliationTools.tsx(
+38,5): error TS2345: Argument of type 'string 
+| undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/ReconciliationTools.tsx(
+48,5): error TS2769: No overload matches this 
+call.
+src/components/billing/ReconciliationTools.tsx(
+56,24): error TS2339: Property 'payments' does 
+not exist on type '{}'.
+src/components/billing/ReconciliationTools.tsx(
+60,25): error TS2339: Property 'payments' does 
+not exist on type '{}'.
+src/components/billing/ReconciliationTools.tsx(
+88,21): error TS2339: Property 'payments' does 
+not exist on type '{}'.
+src/components/billing/RecurringPayments.tsx(18
+9,16): error TS2741: Property 'children' is 
+missing in type '{ variant: "ghost"; icon: 
+ForwardRefExoticComponent<Omit<LucideProps, 
+"ref"> & RefAttributes<SVGSVGElement>>; 
+onClick: () => void; }' but required in type 
+'ButtonProps'.
+src/components/billing/ReportExport.tsx(40,5): 
+error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/ReportExport.tsx(43,5): 
+error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/ReportExport.tsx(46,5): 
+error TS2345: Argument of type 'string | 
+undefined' is not assignable to parameter of 
+type 'string | (() => string)'.
+src/components/billing/ReportExport.tsx(53,28):
+ error TS2339: Property 'getPLReport' does not 
+exist on type '{ getInvoices: (accountId?: 
+string | undefined, status?: string | 
+undefined) => Promise<Invoice[]>; 
+getInvoiceById: (id: string) => 
+Promise<Invoice | null>; ... 21 more ...; 
+sendInvoiceReminder: (invoiceIds: string[], 
+message?: string | undefined) => Promise<...>; 
+}'.
+src/components/billing/ReportExport.tsx(55,5): 
+error TS2769: No overload matches this call.
+src/components/billing/ReportExport.tsx(64,28):
+ error TS2339: Property 'getARAgingReport' 
+does not exist on type '{ getInvoices: 
+(accountId?: string | undefined, status?: 
+string | undefined) => Promise<Invoice[]>; 
+getInvoiceById: (id: string) => 
+Promise<Invoice | null>; ... 21 more ...; 
+sendInvoiceReminder: (invoiceIds: string[], 
+message?: string | undefined) => Promise<...>; 
+}'.
+src/components/billing/ReportExport.tsx(66,5): 
+error TS2769: No overload matches this call.
+src/components/billing/ReportExport.tsx(105,29)
+: error TS2339: Property 'monthlyBreakdown' 
+does not exist on type '{}'.
+src/components/billing/ReportExport.tsx(117,51)
+: error TS2339: Property 'totalRevenue' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(118,52)
+: error TS2339: Property 'totalExpenses' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(119,48)
+: error TS2339: Property 'netIncome' does not 
+exist on type '{}'.
+src/components/billing/ReportExport.tsx(136,34)
+: error TS2339: Property 'invoiceDetails' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(151,51)
+: error TS2339: Property 'totalAR' does not 
+exist on type '{}'.
+src/components/billing/ReportExport.tsx(153,52)
+: error TS2339: Property 'agingBuckets' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(154,53)
+: error TS2339: Property 'agingBuckets' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(155,53)
+: error TS2339: Property 'agingBuckets' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(156,51)
+: error TS2339: Property 'agingBuckets' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(225,58)
+: error TS2339: Property 'totalRevenue' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(227,59)
+: error TS2339: Property 'totalExpenses' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(230,55)
+: error TS2339: Property 'netIncome' does not 
+exist on type '{}'.
+src/components/billing/ReportExport.tsx(234,20)
+: error TS2339: Property 'monthlyBreakdown' 
+does not exist on type '{}'.
+src/components/billing/ReportExport.tsx(234,47)
+: error TS2339: Property 'monthlyBreakdown' 
+does not exist on type '{}'.
+src/components/billing/ReportExport.tsx(240,18)
+: error TS2339: Property 'monthlyBreakdown' 
+does not exist on type '{}'.
+src/components/billing/ReportExport.tsx(277,58)
+: error TS2339: Property 'totalAR' does not 
+exist on type '{}'.
+src/components/billing/ReportExport.tsx(285,59)
+: error TS2339: Property 'agingBuckets' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(287,60)
+: error TS2339: Property 'agingBuckets' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(289,60)
+: error TS2339: Property 'agingBuckets' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(291,58)
+: error TS2339: Property 'agingBuckets' does 
+not exist on type '{}'.
+src/components/billing/ReportExport.tsx(295,25)
+: error TS2339: Property 'customerBreakdown' 
+does not exist on type '{}'.
+src/components/billing/ReportExport.tsx(295,58)
+: error TS2339: Property 'customerBreakdown' 
+does not exist on type '{}'.
+src/components/billing/ReportExport.tsx(301,23)
+: error TS2339: Property 'customerBreakdown' 
+does not exist on type '{}'.
+src/components/billing/RevenueAnalytics.tsx(41,
+7): error TS6133: '_COLORS' is declared but 
+its value is never read.
+src/components/billing/SavedPaymentMethods.tsx(
+92,42): error TS2379: Argument of type '{ 
+account_id: string; payment_type: 
+"credit_card" | "debit_card" | "ach" | "check" 
+| "cash" | "cod"; payment_name: string | 
+undefined; account_number: string | undefined; 
+routing_number: string | undefined; card_type: 
+string | undefined; card_last4: string | 
+undefined; card_expiry: string | undefined; }' 
+is not assignable to parameter of type 
+'CreatePaymentMethodDto' with 
+'exactOptionalPropertyTypes: true'. Consider 
+adding 'undefined' to the types of the 
+target's properties.
+src/components/crm/BusinessIntelligenceDashboar
+d.tsx(226,26): error TS2322: Type '5' is not 
+assignable to type '1 | 2 | 3 | 4'.
+src/components/crm/BusinessIntelligenceDashboar
+d.tsx(268,26): error TS2322: Type '5' is not 
+assignable to type '1 | 2 | 3 | 4'.
+src/components/crm/BusinessIntelligenceDashboar
+d.tsx(303,22): error TS2322: Type '5' is not 
+assignable to type '1 | 2 | 3 | 4'.
+src/components/crm/CommunicationHub.tsx(96,9): 
+error TS6133: '_getDirectionColor' is declared 
+but its value is never read.
+src/components/crm/CommunicationHub.tsx(166,32)
+: error TS2322: Type '5' is not assignable to 
+type '1 | 2 | 3 | 4'.
+src/components/crm/CommunicationHub.tsx(185,30)
+: error TS2322: Type '6' is not assignable to 
+type '1 | 2 | 3 | 4'.
+src/components/crm/CommunicationHub.tsx(332,49)
+: error TS2345: Argument of type 
+'ChangeEvent<HTMLInputElement>' is not 
+assignable to parameter of type 
+'SetStateAction<string>'.
+src/components/crm/CommunicationHub.tsx(345,47)
+: error TS2345: Argument of type 
+'ChangeEvent<HTMLTextAreaElement>' is not 
+assignable to parameter of type 
+'SetStateAction<string>'.
+src/components/crm/ComplianceCenter.tsx(265,26)
+: error TS2322: Type '5' is not assignable to 
+type '1 | 2 | 3 | 4'.
+src/components/crm/ComplianceCenter.tsx(285,26)
+: error TS2322: Type '5' is not assignable to 
+type '1 | 2 | 3 | 4'.
+src/components/crm/ComplianceCenter.tsx(305,26)
+: error TS2322: Type '5' is not assignable to 
+type '1 | 2 | 3 | 4'.
+src/components/crm/ComplianceCenter.tsx(334,26)
+: error TS2322: Type '5' is not assignable to 
+type '1 | 2 | 3 | 4'.
+src/components/crm/ComplianceCenter.tsx(346,26)
+: error TS2322: Type '5' is not assignable to 
+type '1 | 2 | 3 | 4'.
+src/components/crm/ComplianceCenter.tsx(359,26)
+: error TS2322: Type '5' is not assignable to 
+type '1 | 2 | 3 | 4'.
+src/components/crm/ComplianceCenter.tsx(411,34)
+: error TS2322: Type '5' is not assignable to 
+type '1 | 2 | 3 | 4'.
+src/components/crm/ContractManager.tsx(49,9): 
+error TS6133: '_updateContract' is declared 
+but its value is never read.
+src/components/crm/ContractManager.tsx(183,32):
+ error TS2322: Type '5' is not assignable to 
+type '1 | 2 | 3 | 4'.
+src/components/crm/CustomerDashboard.tsx(48,32)
+: error TS2339: Property 'serviceHistory' does 
+not exist on type '{ customers: { getAll: 
+(filters?: SearchFilters | undefined) => 
+Promise<Account[]>; getById: (id: string) => 
+Promise<Account | null>; create: 
+(customerData: Partial<...>) => Promise<...>; 
+update: (id: string, updates: Partial<...>) => 
+Promise<...>; delete: (id: string) => 
+Promise<...>; search: (filters: { ...; }) 
+=>...'.
+src/components/crm/CustomerDashboard.tsx(55,32)
+: error TS2551: Property 'customerNotes' does 
+not exist on type '{ customers: { getAll: 
+(filters?: SearchFilters | undefined) => 
+Promise<Account[]>; getById: (id: string) => 
+Promise<Account | null>; create: 
+(customerData: Partial<...>) => Promise<...>; 
+update: (id: string, updates: Partial<...>) => 
+Promise<...>; delete: (id: string) => 
+Promise<...>; search: (filters: { ...; }) 
+=>...'. Did you mean 'customers'?
+src/components/crm/CustomerDashboard.tsx(62,32)
+: error TS2339: Property 'customerPhotos' does 
+not exist on type '{ customers: { getAll: 
+(filters?: SearchFilters | undefined) => 
+Promise<Account[]>; getById: (id: string) => 
+Promise<Account | null>; create: 
+(customerData: Partial<...>) => Promise<...>; 
+update: (id: string, updates: Partial<...>) => 
+Promise<...>; delete: (id: string) => 
+Promise<...>; search: (filters: { ...; }) 
+=>...'.
+src/components/crm/CustomerDashboard.tsx(69,32)
+: error TS2339: Property 'contracts' does not 
+exist on type '{ customers: { getAll: 
+(filters?: SearchFilters | undefined) => 
+Promise<Account[]>; getById: (id: string) => 
+Promise<Account | null>; create: 
+(customerData: Partial<...>) => Promise<...>; 
+update: (id: string, updates: Partial<...>) => 
+Promise<...>; delete: (id: string) => 
+Promise<...>; search: (filters: { ...; }) 
+=>...'.
+
+

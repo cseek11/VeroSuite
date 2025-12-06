@@ -1,0 +1,6 @@
+{
+  "root": "C:\\Users\\ashse\\Documents\\VeroField\\Training\\VeroField",
+  "outJson": "C:\\Users\\ashse\\Documents\\VeroField\\Training\\VeroField\\docs\\migration\\coverage-modules.json",
+  "outTxt": "C:\\Users\\ashse\\Documents\\VeroField\\Training\\VeroField\\docs\\migration\\coverage-modules.txt",
+  "rowCount": 26
+}

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ReusablePopup } from '@/components/ui';
+import { logger } from '@/utils/logger';
 
 // Real API using enhanced-api
 import { enhancedApi } from '@/lib/enhanced-api';
@@ -37,7 +38,7 @@ const workOrdersApi = {
 
 // Real customer search API
 const customerSearchApi = {
-  search: async (query: string) => {
+  search: async (query: string): Promise<any[]> => {
     if (!query) return [];
     return await enhancedApi.accounts.search({ query, limit: 10 });
   }
@@ -99,7 +100,7 @@ export default function WorkOrders() {
     if (selectedWorkOrder && showEditModal) {
       // Find and set the selected customer
       if (selectedWorkOrder.customer_id && customerSearchResults) {
-        const customer = customerSearchResults.find((c: any) => c.id === selectedWorkOrder.customer_id);
+        const customer = (customerSearchResults as any[]).find((c: any) => c.id === selectedWorkOrder.customer_id);
         if (customer) {
           setSelectedCustomer(customer);
         }
@@ -107,7 +108,7 @@ export default function WorkOrders() {
       
       // Find and set the selected technician
       if (selectedWorkOrder.assigned_to && technicians) {
-        const technician = technicians.find((t: any) => t.id === selectedWorkOrder.assigned_to);
+        const technician = (technicians as any[]).find((t: any) => t.id === selectedWorkOrder.assigned_to);
         if (technician) {
           setSelectedTechnician(technician);
         }
@@ -406,15 +407,19 @@ export default function WorkOrders() {
                       </button>
                       <button
                         onClick={async () => {
-                          const confirmed = await showConfirm({
-                            title: 'Delete Work Order',
-                            message: 'Are you sure you want to delete this work order?',
-                            type: 'danger',
-                            confirmText: 'Delete',
-                            cancelText: 'Cancel',
-                          });
-                          if (confirmed) {
-                            deleteMutation.mutate(workOrder.id);
+                          try {
+                            const confirmed = await showConfirm({
+                              title: 'Delete Work Order',
+                              message: 'Are you sure you want to delete this work order?',
+                              type: 'danger',
+                              confirmText: 'Delete',
+                              cancelText: 'Cancel',
+                            });
+                            if (confirmed) {
+                              deleteMutation.mutate(workOrder.id);
+                            }
+                          } catch (error) {
+                            logger.error('Failed to delete work order', { workOrderId: workOrder.id, error }, 'WorkOrders');
                           }
                         }}
                         className="p-1 hover:bg-red-100 rounded transition-colors"
@@ -571,8 +576,8 @@ export default function WorkOrders() {
                        {/* Customer Search Dropdown */}
                        {showCustomerDropdown && customerSearchResults && (
                          <div className="absolute z-50 w-full mt-2 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
-                           {customerSearchResults.length > 0 ? (
-                             customerSearchResults.map((customer: any) => (
+                           {(customerSearchResults as any[]).length > 0 ? (
+                             (customerSearchResults as any[]).map((customer: any) => (
                                <div
                                  key={customer.id}
                                  onClick={() => {
@@ -630,8 +635,8 @@ export default function WorkOrders() {
                        {/* Technician Dropdown */}
                        {showTechnicianDropdown && technicians && (
                          <div className="absolute z-50 w-full mt-2 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
-                           {technicians.length > 0 ? (
-                             technicians.map((technician: any) => (
+                           {(technicians as any[]).length > 0 ? (
+                             (technicians as any[]).map((technician: any) => (
                                <div
                                  key={technician.id}
                                  onClick={() => {

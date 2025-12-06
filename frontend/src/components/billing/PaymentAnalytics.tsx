@@ -40,9 +40,19 @@ export default function PaymentAnalytics({
   );
 
   // Fetch payment analytics
-  const { data: analyticsData, isLoading, error } = useQuery({
+  const { data: analyticsData, isLoading, error } = useQuery<{
+    paymentMethodBreakdown?: Record<string, number>;
+    summary?: {
+      successRate: number;
+      totalPayments?: number;
+      totalAmount?: number;
+      averagePaymentAmount?: number;
+    };
+    failureReasons?: Record<string, number>;
+    monthlyTrends?: Record<string, number>;
+  }>({
     queryKey: ['payment-analytics', dateRangeStart, dateRangeEnd],
-    queryFn: () => billing.getPaymentAnalytics(dateRangeStart, dateRangeEnd),
+    queryFn: () => billing.getPaymentAnalytics(dateRangeStart ?? '', dateRangeEnd ?? ''),
   });
 
   const formatCurrency = (amount: number) => {
@@ -94,7 +104,33 @@ export default function PaymentAnalytics({
     return null;
   }
 
-  const { summary, paymentMethodBreakdown, failureReasons, monthlyTrends } = analyticsData;
+  const { summary, paymentMethodBreakdown: paymentMethodBreakdownRaw, failureReasons: failureReasonsRaw, monthlyTrends: monthlyTrendsRaw } = analyticsData || {};
+  
+  // Convert paymentMethodBreakdown from Record to array format for charts
+  const paymentMethodBreakdown = paymentMethodBreakdownRaw 
+    ? Object.entries(paymentMethodBreakdownRaw).map(([method, count]) => ({
+        method,
+        count,
+        total: count, // For display
+      }))
+    : [];
+
+  // Convert monthlyTrends from Record to array format for charts
+  const monthlyTrends = monthlyTrendsRaw
+    ? Object.entries(monthlyTrendsRaw).map(([month, value]) => ({
+        month,
+        successful: value,
+        failed: 0, // Placeholder if not available
+      }))
+    : [];
+
+  // Convert failureReasons from Record to array format for charts
+  const failureReasons = failureReasonsRaw
+    ? Object.entries(failureReasonsRaw).map(([reason, count]) => ({
+        reason,
+        count,
+      }))
+    : [];
 
   return (
     <div className="space-y-6">
@@ -145,7 +181,7 @@ export default function PaymentAnalytics({
                   Total Payments
                 </Text>
                 <Heading level={2} className="mt-2">
-                  {summary.totalPayments}
+                  {summary?.totalPayments ?? 0}
                 </Heading>
               </div>
               <div className="bg-purple-100 rounded-full p-3">
@@ -163,7 +199,7 @@ export default function PaymentAnalytics({
                   Success Rate
                 </Text>
                 <Heading level={2} className="mt-2">
-                  {formatPercentage(summary.successRate)}
+                  {summary ? formatPercentage(summary.successRate) : '0%'}
                 </Heading>
               </div>
               <div className="bg-green-100 rounded-full p-3">
@@ -181,7 +217,7 @@ export default function PaymentAnalytics({
                   Total Amount
                 </Text>
                 <Heading level={2} className="mt-2">
-                  {formatCurrency(summary.totalAmount)}
+                  {summary?.totalAmount ? formatCurrency(summary.totalAmount) : '$0.00'}
                 </Heading>
               </div>
               <div className="bg-blue-100 rounded-full p-3">
@@ -199,7 +235,7 @@ export default function PaymentAnalytics({
                   Avg Payment
                 </Text>
                 <Heading level={2} className="mt-2">
-                  {formatCurrency(summary.averagePaymentAmount)}
+                  {summary?.averagePaymentAmount ? formatCurrency(summary.averagePaymentAmount) : '$0.00'}
                 </Heading>
               </div>
               <div className="bg-orange-100 rounded-full p-3">
@@ -248,7 +284,7 @@ export default function PaymentAnalytics({
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ method, percentage }) => `${method}: ${formatPercentage(percentage)}`}
+                  label={(entry: { method: string; count: number }) => `${entry.method}: ${entry.count}`}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="count"

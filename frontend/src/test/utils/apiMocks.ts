@@ -7,8 +7,8 @@
 
 import { vi } from 'vitest';
 import type { Account } from '@/types/enhanced-types';
-import type { TechnicianProfile } from '@/types/technician';
-import type { WorkOrder } from '@/types/work-orders';
+import type { TechnicianProfile, EmploymentType, TechnicianStatus } from '@/types/technician';
+import type { WorkOrder, WorkOrderStatus, WorkOrderPriority } from '@/types/work-orders';
 
 /**
  * Mock technicians API responses
@@ -22,8 +22,8 @@ export const mockTechniciansApi = () => {
       hire_date: new Date().toISOString(),
       position: 'Pest Control Technician',
       department: 'Field Operations',
-      employment_type: 'full_time',
-      status: 'active',
+      employment_type: EmploymentType.FULL_TIME,
+      status: TechnicianStatus.ACTIVE,
       country: 'US',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -42,8 +42,8 @@ export const mockTechniciansApi = () => {
       hire_date: new Date().toISOString(),
       position: 'Senior Technician',
       department: 'Field Operations',
-      employment_type: 'full_time',
-      status: 'active',
+      employment_type: EmploymentType.FULL_TIME,
+      status: TechnicianStatus.ACTIVE,
       country: 'US',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -169,8 +169,8 @@ export const mockWorkOrdersApi = () => {
       work_order_number: 'WO-002',
       tenant_id: 'tenant-123',
       customer_id: 'account-2',
-      status: 'in-progress',
-      priority: 'high',
+      status: WorkOrderStatus.IN_PROGRESS,
+      priority: WorkOrderPriority.HIGH,
       scheduled_date: new Date().toISOString(),
       description: 'Test work order 2',
       assigned_to: 'tech-1',

@@ -30,7 +30,7 @@ const SchedulerPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [calendarView, setCalendarView] = useState('week');
+  const [_calendarView, _setCalendarView] = useState('week');
   const [mapInteracting, setMapInteracting] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -38,7 +38,10 @@ const SchedulerPage: React.FC = () => {
   // Fetch jobs and technicians from API
   const { data: jobs = [] } = useQuery({
     queryKey: ['scheduler-jobs', selectedDate],
-    queryFn: () => enhancedApi.jobs.list({ scheduled_date: selectedDate.toISOString().split('T')[0] }),
+    queryFn: () => {
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      return enhancedApi.jobs.list({ scheduled_date: dateStr });
+    },
   });
 
   const { data: technicians = [] } = useQuery({
@@ -81,7 +84,7 @@ const SchedulerPage: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const _getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed': return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'scheduled': return <Clock className="h-4 w-4 text-blue-600" />;
@@ -90,7 +93,7 @@ const SchedulerPage: React.FC = () => {
     }
   };
 
-  const getMarkerColor = (status: string) => {
+  const _getMarkerColor = (status: string) => {
     switch (status) {
       case 'completed': return '#22c55e';
       case 'scheduled': return '#3b82f6';
@@ -100,73 +103,23 @@ const SchedulerPage: React.FC = () => {
   };
 
   // Filter jobs based on search query - FIXED to search by names
-  const filteredJobs = jobs.filter(job => {
+  const filteredJobs = jobs.filter((job: any) => {
     const searchLower = searchQuery.toLowerCase();
     return (
-      job.customer.toLowerCase().includes(searchLower) ||
+      job.customer?.toLowerCase().includes(searchLower) ||
       (job.technician && job.technician.toLowerCase().includes(searchLower)) ||
-      job.service.toLowerCase().includes(searchLower)
+      job.service?.toLowerCase().includes(searchLower)
     );
   });
 
-  // Convert jobs to calendar events with proper dates
-  const calendarEvents = filteredJobs.map(job => {
-    // Parse time string like "9:00 AM" or "2:00 PM"
-    const timeStr = job.time;
-    let hour = 9; // default
-    let minute = 0;
-    
-    if (timeStr.includes(':')) {
-      const [timePart, ampm] = timeStr.split(' ');
-      const [hours, minutes] = timePart.split(':');
-      hour = parseInt(hours);
-      minute = parseInt(minutes);
-      
-      // Convert to 24-hour format
-      if (ampm === 'PM' && hour !== 12) {
-        hour += 12;
-      } else if (ampm === 'AM' && hour === 12) {
-        hour = 0;
-      }
-    }
-    
-    const startDate = new Date(selectedDate);
-    startDate.setHours(hour, minute, 0, 0);
-    
-    const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + 2); // 2 hour duration
-
-    // Create technician ID for calendar
-    let technicianId = 'unassigned';
-    if (job.technician) {
-      technicianId = job.technician.toLowerCase().replace(/\s+/g, '');
-    }
-
-    return {
-      id: job.id.toString(),
-      title: job.customer,
-      start: startDate.toISOString(),
-      end: endDate.toISOString(),
-      resourceId: technicianId,
-      color: getMarkerColor(job.status),
-      status: job.status,
-      service: job.service,
-      location: job.location
-    };
-  });
-
-  // Get technician resource mapping - FIXED to match calendar events
-  const technicianResources = technicians.map(tech => ({
-    id: tech.id,
-    name: tech.name,
-    color: tech.color
-  }));
+  // Note: calendarEvents and technicianResources are computed by ScheduleCalendar internally
+  // These were previously computed here but are now unused as ScheduleCalendar handles its own data
 
   // Calculate map center based on job locations
   const mapCenter = filteredJobs.length > 0 
     ? [
-        filteredJobs.reduce((sum, job) => sum + job.location[0], 0) / filteredJobs.length,
-        filteredJobs.reduce((sum, job) => sum + job.location[1], 0) / filteredJobs.length
+        filteredJobs.reduce((sum: number, job: any) => sum + (job.location?.[0] || 0), 0) / filteredJobs.length,
+        filteredJobs.reduce((sum: number, job: any) => sum + (job.location?.[1] || 0), 0) / filteredJobs.length
       ]
     : [40.44, -79.99]; // Default to Pittsburgh
 
@@ -233,7 +186,7 @@ const SchedulerPage: React.FC = () => {
               </div>
             </div>
             <div className="text-xl font-bold mb-1">
-              {filteredJobs.filter(job => job.status === 'completed').length}
+              {filteredJobs.filter((job: any) => job.status === 'completed').length}
             </div>
             <div className="text-violet-100 font-medium text-xs">Completed</div>
           </div>
@@ -248,7 +201,7 @@ const SchedulerPage: React.FC = () => {
               </div>
             </div>
             <div className="text-xl font-bold mb-1">
-              {filteredJobs.filter(job => job.status === 'overdue').length}
+              {filteredJobs.filter((job: any) => job.status === 'overdue').length}
             </div>
             <div className="text-amber-100 font-medium text-xs">Overdue</div>
           </div>
@@ -361,7 +314,7 @@ const SchedulerPage: React.FC = () => {
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                         
                         {/* Job Locations - Now properly synced with filtered jobs */}
-                        {filteredJobs.map((job) => (
+                        {filteredJobs.map((job: any) => (
                           <Marker 
                             key={job.id} 
                             position={job.location}
@@ -393,7 +346,7 @@ const SchedulerPage: React.FC = () => {
                         {/* Route Lines - Connect jobs in sequence */}
                         {filteredJobs.length > 1 && (
                           <Polyline
-                            positions={filteredJobs.map(job => job.location)}
+                            positions={filteredJobs.map((job: any) => job.location || [0, 0])}
                             color="blue"
                             weight={3}
                             opacity={0.7}
@@ -494,7 +447,7 @@ const SchedulerPage: React.FC = () => {
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {technicians.filter(tech => tech.id !== 'unassigned').map((technician) => (
+                {technicians.filter((tech: any) => tech.id !== 'unassigned').map((technician: any) => (
                   <div key={technician.id} className="p-3 hover:shadow-lg transition-shadow border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
@@ -512,7 +465,7 @@ const SchedulerPage: React.FC = () => {
                         {technician.name}
                       </h3>
                       <p className="text-xs text-slate-600 mb-2">
-                        {filteredJobs.filter(job => job.technician === technician.name).length} jobs today
+                        {filteredJobs.filter((job: any) => job.technician === technician.name).length} jobs today
                       </p>
                     </div>
                     <div className="flex items-center justify-between">

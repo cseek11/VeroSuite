@@ -20,11 +20,12 @@ import {
   ArrowUpDown,
   Filter,
   X,
-  MapPin,
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
-import { Invoice, InvoiceStatus } from '@/types/enhanced-types';
+import { Invoice } from '@/types/enhanced-types';
 import { logger } from '@/utils/logger';
+
+type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
 import { toast } from '@/utils/toast';
 import { trackInvoiceView, trackInvoiceSearch, trackInvoiceFilter } from '@/lib/billing-analytics';
 import { InvoiceListSkeleton } from './BillingSkeletons';
@@ -57,14 +58,18 @@ export default function InvoiceList({
   const [dateRangeEnd, setDateRangeEnd] = useState<string>('');
 
   // Fetch invoices
-  const { data: invoices = [], isLoading, error, refetch } = useQuery({
+  const { data: invoicesData, isLoading, error, refetch } = useQuery<Invoice[]>({
     queryKey: ['billing', 'invoices', customerId || 'all'],
     queryFn: () => billing.getInvoices(customerId),
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch invoices', error, 'InvoiceList');
-      toast.error('Failed to load invoices. Please try again.');
-    },
   });
+
+  const invoices: Invoice[] = Array.isArray(invoicesData) ? invoicesData : [];
+
+  // Handle query errors
+  if (error) {
+    logger.error('Failed to fetch invoices', error as Record<string, any>, 'InvoiceList');
+    toast.error('Failed to load invoices. Please try again.');
+  }
 
   // Filter and sort invoices
   const filteredAndSortedInvoices = useMemo(() => {
@@ -379,7 +384,7 @@ export default function InvoiceList({
                 </label>
                 <Select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as InvoiceStatusFilter)}
+                  onChange={(value) => setStatusFilter(value as InvoiceStatusFilter)}
                   options={statusOptions}
                 />
               </div>
@@ -486,13 +491,7 @@ export default function InvoiceList({
                           <Text variant="body" className="text-gray-600 mt-1">
                             {invoice.accounts?.name || 'Unknown Customer'}
                           </Text>
-                          {invoice.accounts?.address && (
-                            <Text variant="small" className="text-gray-500 text-xs mt-1 flex items-center">
-                              <MapPin className="w-3 h-3 mr-1" />
-                              {[invoice.accounts.address, invoice.accounts.city, invoice.accounts.state, invoice.accounts.zip_code]
-                                .filter(Boolean).join(', ')}
-                            </Text>
-                          )}
+                          {/* Note: invoice.accounts is a simplified type without address fields */}
                         </div>
                       </div>
 

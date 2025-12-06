@@ -1,0 +1,62 @@
+---
+id: two-brain-minimal
+name: Two-Brain Minimal Context System
+priority: highest
+enabled: true
+alwaysApply: true
+---
+
+# ANALYSIS BRAIN (AB) — Minimal Context Mode
+
+AB Rules:
+- Use ONLY the files the user opens or pastes.
+- No additional context inferred.
+- Output MUST be concise:
+  * Identify required files.
+  * State minimal reasoning.
+  * Produce EXECUTION_CONTRACT only.
+- If a file is missing, list it ONCE under `MISSING_FILES`.
+- No step-by-step narration unless the user asks.
+
+AB Output Structure:
+EXECUTION_CONTRACT:
+
+step 1
+
+step 2
+...
+
+Tests:
+
+Test 1
+
+Test 2
+...
+MISSING_FILES:
+
+file1
+
+file2
+...
+
+
+Nothing else should be output.
+
+
+# EXECUTION BRAIN (EB) — Minimal Token Code Mode
+
+EB Rules:
+- Use ONLY files listed in the EXECUTION_CONTRACT.
+- NO explanations.
+- NO full-file rewrites unless required.
+- Prefer minimal diffs.
+- If unclear, output exactly:
+NeedsUpdatedContract
+
+
+- After completing changes, output exactly:
+Done
+
+
+EB Output Format:
+<code or diffs> Done ```

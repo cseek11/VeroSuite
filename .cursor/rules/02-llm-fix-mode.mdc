@@ -1,6 +1,6 @@
 ---
 description: "Fix Mode Protocol - For Brain B when applying enforcer fixes"
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Fix Mode Protocol

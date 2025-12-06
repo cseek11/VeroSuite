@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { logger } from '@/utils/logger';
+import { supabase } from '@/lib/supabase-client';
 
 interface AuthState {
   token: string | null;
@@ -13,7 +14,7 @@ interface AuthState {
 }
 
 // Add tenant resolution logic
-const resolveTenantId = (user: any): string | null => {
+const _resolveTenantId = (user: any): string | null => {
   // Try multiple sources for tenant ID
   return user?.user_metadata?.tenant_id || 
          user?.app_metadata?.tenant_id || 
@@ -51,24 +52,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const tenantId = user.tenant_id;
       
       if (!tenantId) {
-        console.error('No tenant ID found in user data');
+        logger.error('No tenant ID found in user data', new Error('No tenant ID found in user data'), 'auth-store');
         throw new Error('No tenant ID found in user data');
       }
       
-      console.log('✅ User tenant ID from JWT token:', tenantId);
-      console.log('✅ User permissions on login:', {
+      logger.debug('User tenant ID resolved from JWT token', { tenantId }, 'auth-store');
+      logger.debug('User permissions on login', {
         hasPermissions: !!user.permissions,
         permissionsCount: user.permissions?.length || 0,
         permissions: user.permissions
-      });
+      }, 'auth-store');
       
       // Store auth data with tenant ID from JWT
       localStorage.setItem('verofield_auth', JSON.stringify({ token, tenantId, user }));
       set({ token, tenantId, user, isAuthenticated: true });
       
     } catch (error) {
-      console.error('Error setting auth data:', error);
-      throw new Error(`Login failed: ${error.message}`);
+      logger.error('Error setting auth data', error, 'auth-store');
+      throw new Error(`Login failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   },
   clear: () => {
@@ -89,16 +90,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // Clear state
     set({ token: null, tenantId: null, user: null, isAuthenticated: null });
     
-    console.log('🧹 Auth store cleared completely');
+    logger.info('Auth store cleared completely', {}, 'auth-store');
   },
 
   forceLogout: async () => {
     try {
       // Sign out from Supabase
       await supabase.auth.signOut();
-      console.log('✅ Supabase auth signed out');
+      logger.debug('Supabase auth signed out', {}, 'auth-store');
     } catch (error) {
-      console.error('Error signing out from Supabase:', error);
+      logger.error('Error signing out from Supabase', error, 'auth-store');
     }
     
     // Clear local storage and state
@@ -109,7 +110,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     allKeys.forEach(key => {
       if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
         localStorage.removeItem(key);
-        console.log('🗑️ Removed:', key);
+        logger.debug('Removed auth-related storage key', { key }, 'auth-store');
       }
     });
     
@@ -124,27 +125,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // Clear any remaining auth state
     try {
       // Force clear any remaining Supabase session
-      await supabase.auth.setSession(null);
-      console.log('✅ Supabase session cleared');
+      await supabase.auth.signOut();
+      logger.debug('Supabase session cleared', {}, 'auth-store');
     } catch (error) {
-      console.error('Error clearing session:', error);
+      logger.error('Error clearing session', error, 'auth-store');
     }
     
-    console.log('🧹 Complete cleanup done');
+    logger.info('Complete cleanup done', {}, 'auth-store');
     
     // Force page reload to clear any remaining state
     window.location.reload();
   },
 
   nuclearLogout: async () => {
-    console.log('🚨 NUCLEAR LOGOUT - Complete system reset');
+    logger.warn('NUCLEAR LOGOUT - Complete system reset', {}, 'auth-store');
     
     try {
       // Sign out from Supabase
       await supabase.auth.signOut();
-      console.log('✅ Supabase auth signed out');
+      logger.debug('Supabase auth signed out', {}, 'auth-store');
     } catch (error) {
-      console.error('Error signing out from Supabase:', error);
+      logger.error('Error signing out from Supabase', error, 'auth-store');
     }
     
     // Clear ALL storage without exceptions
@@ -159,7 +160,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // Clear state
     set({ token: null, tenantId: null, user: null, isAuthenticated: null });
     
-    console.log('🧨 Nuclear cleanup complete - redirecting to login');
+    logger.info('Nuclear cleanup complete - redirecting to login', {}, 'auth-store');
     
     // Redirect to login page instead of reload
     window.location.href = '/login';
@@ -168,7 +169,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { user, tenantId } = get();
     
     if (!user) {
-      console.error('Cannot validate tenant access: missing user');
+      logger.error('Cannot validate tenant access: missing user', new Error('No user'), 'auth-store');
       set({ isAuthenticated: false });
       return false;
     }
@@ -184,7 +185,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           });
         
         if (tenantError) {
-          console.error('Failed to get user tenant ID:', tenantError.message);
+          logger.error('Failed to get user tenant ID', tenantError, 'auth-store');
           set({ isAuthenticated: false });
           return false;
         }
@@ -193,12 +194,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           currentTenantId = validTenantId;
           set({ tenantId: validTenantId });
         } else {
-          console.error('No tenant ID found for user in database');
+          logger.error('No tenant ID found for user in database', new Error('Missing tenant ID'), 'auth-store');
           set({ isAuthenticated: false });
           return false;
         }
       } catch (error) {
-        console.error('Error getting user tenant ID:', error);
+        logger.error('Error getting user tenant ID', error, 'auth-store');
         set({ isAuthenticated: false });
         return false;
       }
@@ -214,22 +215,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
       
       if (validationError) {
-        console.error('Tenant validation failed:', validationError.message);
+        logger.error('Tenant validation failed', validationError, 'auth-store');
         set({ isAuthenticated: false });
         return false;
       }
       
       if (validationResult) {
-        console.log('✅ User tenant access validated for:', currentTenantId);
+        logger.info('User tenant access validated', { tenantId: currentTenantId }, 'auth-store');
         set({ isAuthenticated: true, tenantId: currentTenantId });
         return true;
       } else {
-        console.error('Tenant validation returned false');
+        logger.error('Tenant validation returned false', {}, 'auth-store');
         set({ isAuthenticated: false });
         return false;
       }
     } catch (error) {
-      console.error('Error validating tenant access:', error);
+      logger.error('Error validating tenant access', error, 'auth-store');
       set({ isAuthenticated: false });
       return false;
     }
@@ -345,7 +346,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
       } catch (tokenError) {
         // Token refresh failed, but continue with user data update
-        logger.debug('Token refresh error (non-critical)', tokenError, 'auth-store');
+        logger.debug('Token refresh error (non-critical)', tokenError as Record<string, any>, 'auth-store');
       }
 
       // Update the stored user data and token
@@ -370,7 +371,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             }, 'auth-store');
           } catch (error) {
             // If localStorage update fails, don't clear auth - just log
-            logger.warn('Failed to update localStorage during refresh (non-critical)', error, 'auth-store');
+            logger.warn('Failed to update localStorage during refresh (non-critical)', error as Record<string, any>, 'auth-store');
           }
         } else {
           // If no stored auth, create it with the refreshed data

@@ -13,7 +13,7 @@ interface CustomerPopupState {
   clearCustomer: () => void;
 }
 
-export const useCustomerPopupStore = create<CustomerPopupState>((set, get) => ({
+export const useCustomerPopupStore = create<CustomerPopupState>((set) => ({
   customer: null,
   isLoading: false,
   error: null,

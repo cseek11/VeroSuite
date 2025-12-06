@@ -94,7 +94,7 @@ export async function updateRegionWithOffline(
 export async function deleteRegionWithOffline(
   layoutId: string,
   regionId: string
-): Promise<void> {
+): Promise<{ success: boolean }> {
   return withOfflineQueue(
     () => enhancedApi.dashboardLayouts.deleteRegion(layoutId, regionId),
     {
@@ -112,7 +112,7 @@ export async function deleteRegionWithOffline(
 export async function reorderRegionsWithOffline(
   layoutId: string,
   regionIds: string[]
-): Promise<void> {
+): Promise<{ success: boolean }> {
   return withOfflineQueue(
     () => enhancedApi.dashboardLayouts.reorderRegions(layoutId, regionIds),
     {

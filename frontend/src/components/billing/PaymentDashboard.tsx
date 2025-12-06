@@ -37,37 +37,65 @@ const COLORS = ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899'
 
 export default function PaymentDashboard() {
   const [startDate, setStartDate] = useState<string>(
-    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] || ''
   );
   const [endDate, setEndDate] = useState<string>(
-    new Date().toISOString().split('T')[0]
+    new Date().toISOString().split('T')[0] || ''
   );
 
   // Fetch payment tracking data
-  const { data: trackingData, isLoading: isLoadingTracking, error: trackingError, refetch: refetchTracking } = useQuery({
+  const { data: trackingData, isLoading: isLoadingTracking, error: trackingError, refetch: refetchTracking } = useQuery<{
+    dailyTrends?: Record<string, number>;
+    summary?: {
+      averagePayment: number;
+      paymentCount: number;
+    };
+    payments?: Array<{
+      id?: string | number;
+      payment_date?: string;
+      amount?: number | string;
+      Invoice?: {
+        invoice_number?: string;
+        accounts?: { name?: string };
+      };
+    }>;
+  }>({
     queryKey: ['billing', 'payment-tracking', startDate, endDate],
-    queryFn: () => billing.getPaymentTracking(startDate, endDate),
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch payment tracking data', error, 'PaymentDashboard');
-      toast.error('Failed to load payment tracking data. Please try again.');
-    },
+    queryFn: () => billing.getPaymentTracking(startDate ?? '', endDate ?? ''),
   });
+
+  if (trackingError) {
+    logger.error('Failed to fetch payment tracking data', trackingError, 'PaymentDashboard');
+    toast.error('Failed to load payment tracking data. Please try again.');
+  }
 
   // Fetch payment analytics
-  const { data: analyticsData, isLoading: isLoadingAnalytics, error: analyticsError } = useQuery({
+  const { data: analyticsData, isLoading: isLoadingAnalytics, error: analyticsError } = useQuery<{
+    paymentMethodBreakdown?: Record<string, number>;
+    summary?: {
+      successRate: number;
+    };
+  }>({
     queryKey: ['payment-analytics', startDate, endDate],
-    queryFn: () => billing.getPaymentAnalytics(startDate, endDate),
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch payment analytics', error, 'PaymentDashboard');
-      toast.error('Failed to load payment analytics. Please try again.');
-    },
+    queryFn: () => billing.getPaymentAnalytics(startDate ?? '', endDate ?? ''),
   });
 
+  if (analyticsError) {
+    logger.error('Failed to fetch payment analytics', analyticsError, 'PaymentDashboard');
+    toast.error('Failed to load payment analytics. Please try again.');
+  }
+
   // Fetch AR summary
-  const { data: arSummary, isLoading: isLoadingAR } = useQuery({
+  const { data: arSummaryData, isLoading: isLoadingAR } = useQuery<{
+    totalAR?: number;
+    overdueAR?: number;
+    currentAR?: number;
+  }>({
     queryKey: ['billing', 'ar-summary'],
     queryFn: () => billing.getARSummary(),
   });
+
+  const arSummary = arSummaryData;
 
   // Prepare chart data from daily trends - MUST be called before early returns (Rules of Hooks)
   const chartData = useMemo(() => {
@@ -232,7 +260,7 @@ export default function PaymentDashboard() {
               <div>
                 <Text className="text-green-700 font-medium text-sm">Total Payments</Text>
                 <Heading level={2} className="text-green-900 font-bold mt-1">
-                  {trackingData?.summary ? formatCurrency(trackingData.summary.totalAmount) : '$0.00'}
+                  {trackingData?.summary ? formatCurrency(trackingData.summary.averagePayment * (trackingData.summary.paymentCount || 0)) : '$0.00'}
                 </Heading>
                 <Text className="text-green-600 text-xs mt-1">
                   {trackingData?.summary?.paymentCount || 0} transaction{trackingData?.summary?.paymentCount !== 1 ? 's' : ''}
@@ -289,7 +317,7 @@ export default function PaymentDashboard() {
               <div>
                 <Text className="text-orange-700 font-medium text-sm">Total AR</Text>
                 <Heading level={2} className="text-orange-900 font-bold mt-1">
-                  {arSummary ? formatCurrency(arSummary.totalAR) : '$0.00'}
+                  {arSummary?.totalAR ? formatCurrency(arSummary.totalAR) : '$0.00'}
                 </Heading>
                 <Text className="text-orange-600 text-xs mt-1">
                   Outstanding receivables
@@ -379,7 +407,7 @@ export default function PaymentDashboard() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }: { name: string; percent?: number }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
                       outerRadius={100}
                       fill="#8884d8"
                       dataKey="value"

@@ -128,7 +128,7 @@ export class TestExecutionService extends EventEmitter {
   private extractTestName(line: string): string | null {
     // Extract test name from output line
     const match = line.match(/(?:PASS|FAIL|RUNS|✓|✗|●)\s+(.+?)(?:\s|$)/);
-    return match ? match[1].trim() : null;
+    return match && match[1] ? match[1].trim() : null;
   }
 
   private updateTestResult(categoryId: string, testName: string, status: TestResult['status']): void {

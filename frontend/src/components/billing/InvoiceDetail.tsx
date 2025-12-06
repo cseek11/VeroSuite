@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -50,23 +50,30 @@ export default function InvoiceDetail({
   }, [invoice?.id]);
 
   // Fetch company settings for display
-  const { data: companySettings, isLoading: companyLoading } = useQuery({
+  const { data: companySettings, isLoading: companyLoading, error: companyError } = useQuery({
     queryKey: ['company', 'settings'],
     queryFn: company.getSettings,
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch company settings', error, 'InvoiceDetail');
-    },
   });
 
   // Fetch payment history for this invoice
-  const { data: payments = [], isLoading: paymentsLoading } = useQuery({
+  const { data: payments = [], isLoading: paymentsLoading, error: paymentsError } = useQuery({
     queryKey: ['billing', 'payments', invoice.id],
     queryFn: () => billing.getPayments(invoice.id),
     enabled: !!invoice.id,
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch payment history', error, 'InvoiceDetail');
-    },
   });
+
+  // Handle errors
+  React.useEffect(() => {
+    if (companyError) {
+      logger.error('Failed to fetch company settings', companyError, 'InvoiceDetail');
+    }
+  }, [companyError]);
+
+  React.useEffect(() => {
+    if (paymentsError) {
+      logger.error('Failed to fetch payment history', paymentsError, 'InvoiceDetail');
+    }
+  }, [paymentsError]);
 
   if (companyLoading || paymentsLoading) {
     return <InvoiceDetailSkeleton />;
@@ -118,7 +125,7 @@ export default function InvoiceDetail({
     (invoice.status === 'sent' && new Date(invoice.due_date) < new Date());
 
   // Calculate total paid
-  const totalPaid = payments.reduce((sum: number, payment: Payment) => sum + Number(payment.amount), 0);
+  const totalPaid = (payments as Payment[]).reduce((sum: number, payment: Payment) => sum + Number(payment.amount), 0);
   const remainingBalance = Number(invoice.total_amount) - totalPaid;
 
   return (
@@ -128,9 +135,9 @@ export default function InvoiceDetail({
         <div className="p-6">
           <div className="flex items-start justify-between mb-6">
             <div className="flex-1">
-              {companySettings?.invoice_logo_url && (
+              {(companySettings as any)?.invoice_logo_url && (
                 <img 
-                  src={companySettings.invoice_logo_url} 
+                  src={(companySettings as any).invoice_logo_url} 
                   alt="Company Logo" 
                   className="w-auto h-16 max-w-[180px] object-contain mb-4"
                   onError={(e) => {
@@ -194,22 +201,22 @@ export default function InvoiceDetail({
                 <Text variant="body" className="font-semibold mb-2">
                   {invoice.accounts?.name || 'Unknown Customer'}
                 </Text>
-                {invoice.accounts?.address && (
+                {(invoice.accounts as any)?.address && (
                   <div className="space-y-1 text-sm text-gray-600">
                     <div className="flex items-start">
                       <MapPin className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
                       <span>
-                        {[invoice.accounts.address, invoice.accounts.city, invoice.accounts.state, invoice.accounts.zip_code]
+                        {[(invoice.accounts as any).address, (invoice.accounts as any).city, (invoice.accounts as any).state, (invoice.accounts as any).zip_code]
                           .filter(Boolean).join(', ')}
                       </span>
                     </div>
-                    {invoice.accounts.email && (
+                    {invoice.accounts?.email && (
                       <div className="flex items-center">
                         <Mail className="w-4 h-4 mr-2 flex-shrink-0" />
                         <span>{invoice.accounts.email}</span>
                       </div>
                     )}
-                    {invoice.accounts.phone && (
+                    {invoice.accounts?.phone && (
                       <div className="flex items-center">
                         <Phone className="w-4 h-4 mr-2 flex-shrink-0" />
                         <span>{invoice.accounts.phone}</span>
@@ -347,7 +354,7 @@ export default function InvoiceDetail({
       </Card>
 
       {/* Payment History */}
-      {payments.length > 0 && (
+      {(payments as Payment[]).length > 0 && (
         <Card className="mb-6">
           <div className="p-6">
             <Heading level={3} className="mb-4 flex items-center">
@@ -363,7 +370,7 @@ export default function InvoiceDetail({
               </div>
             ) : (
               <div className="space-y-3">
-                {payments.map((payment: Payment) => (
+                {(payments as Payment[]).map((payment: Payment) => (
                   <div
                     key={payment.id}
                     className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200"

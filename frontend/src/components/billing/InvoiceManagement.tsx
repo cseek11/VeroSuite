@@ -25,12 +25,13 @@ import {
   User,
   Loader2,
   MoreVertical,
-  MapPin,
   ArrowUpDown
 } from 'lucide-react';
 import { billing } from '@/lib/enhanced-api';
-import { Invoice, InvoiceStatus } from '@/types/enhanced-types';
+import { Invoice } from '@/types/enhanced-types';
 import InvoiceForm from './InvoiceForm';
+
+type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
 import InvoiceViewer from './InvoiceViewer';
 import { logger } from '@/utils/logger';
 
@@ -218,13 +219,7 @@ export default function InvoiceManagement() {
               <Text variant="small" className="text-gray-600">
                 {invoice.accounts?.name || 'Unknown Customer'}
               </Text>
-              {invoice.accounts?.address && (
-                <Text variant="small" className="text-gray-500 text-xs mt-1 flex items-center">
-                  <MapPin className="w-3 h-3 mr-1" />
-                  {[invoice.accounts.address, invoice.accounts.city, invoice.accounts.state, invoice.accounts.zip_code]
-                    .filter(Boolean).join(', ')}
-                </Text>
-              )}
+              {/* Note: invoice.accounts is a simplified type without address fields */}
             </div>
             <div className="flex items-center space-x-2">
               {getStatusIcon(invoice.status)}
@@ -473,7 +468,6 @@ export default function InvoiceManagement() {
                     size="sm"
                     icon={ArrowUpDown}
                     onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                    title={`Sort ${sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
                   >
                     {sortOrder === 'asc' ? '↑' : '↓'}
                   </Button>

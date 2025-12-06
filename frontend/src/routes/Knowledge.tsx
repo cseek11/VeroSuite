@@ -110,8 +110,8 @@ const KnowledgePage: React.FC = () => {
   };
 
   const usingFetched = fetchedArticles.length > 0;
-  const categories = usingFetched ? fetchedCategories : mockCategories;
-  const articles = usingFetched ? fetchedArticles : (mockArticles as any[]);
+  const categories = usingFetched ? fetchedCategories : [];
+  const articles = usingFetched ? fetchedArticles : [];
 
   const filteredArticles = articles.filter((article: any) => {
     const title = (article.title || '').toLowerCase();
@@ -123,9 +123,7 @@ const KnowledgePage: React.FC = () => {
     return matchesTitle && article.category === selectedCategory;
   });
 
-  const filteredFaqs = mockFaqs.filter(faq =>
-    faq.question.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredFaqs: any[] = []; // TODO: Add FAQ fetching when API is available
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev => 
@@ -136,7 +134,7 @@ const KnowledgePage: React.FC = () => {
   };
 
   const getCategoryArticles = (categoryId: string) => {
-    return mockArticles.filter(article => article.category === categoryId);
+    return articles.filter((article: any) => usingFetched ? article.category_slug === categoryId : article.category === categoryId);
   };
 
   return (
@@ -182,7 +180,7 @@ const KnowledgePage: React.FC = () => {
                 <FileText className="h-5 w-5" />
               </div>
             </div>
-            <div className="text-xl font-bold mb-1">{mockArticles.length}</div>
+            <div className="text-xl font-bold mb-1">{articles.length}</div>
             <div className="text-blue-100 font-medium text-xs">Total Articles</div>
           </div>
         </div>
@@ -195,7 +193,7 @@ const KnowledgePage: React.FC = () => {
                 <FolderOpen className="h-5 w-5" />
               </div>
             </div>
-            <div className="text-xl font-bold mb-1">{mockCategories.length}</div>
+            <div className="text-xl font-bold mb-1">{categories.length}</div>
             <div className="text-emerald-100 font-medium text-xs">Categories</div>
           </div>
         </div>
@@ -209,7 +207,7 @@ const KnowledgePage: React.FC = () => {
               </div>
             </div>
             <div className="text-xl font-bold mb-1">
-              {mockArticles.reduce((sum, article) => sum + article.views, 0).toLocaleString()}
+              {articles.reduce((sum: number, article: any) => sum + (article.views || 0), 0).toLocaleString()}
             </div>
             <div className="text-violet-100 font-medium text-xs">Total Views</div>
           </div>
@@ -224,7 +222,7 @@ const KnowledgePage: React.FC = () => {
               </div>
             </div>
             <div className="text-xl font-bold mb-1">
-              {(mockArticles.reduce((sum, article) => sum + article.rating, 0) / mockArticles.length).toFixed(1)}
+              {articles.length > 0 ? (articles.reduce((sum: number, article: any) => sum + (article.rating || 0), 0) / articles.length).toFixed(1) : '0.0'}
             </div>
             <div className="text-amber-100 font-medium text-xs">Avg Rating</div>
           </div>
@@ -458,7 +456,7 @@ const KnowledgePage: React.FC = () => {
               <div className="space-y-3">
                 {categories.map((category: any) => {
                   const isExpanded = expandedCategories.includes(category.id);
-                  const categoryArticles = (usingFetched ? articles.filter((a: any) => a.category_slug === (category.slug || category.id)) : mockArticles.filter((a: any) => a.category === category.id));
+                  const categoryArticles = (usingFetched ? articles.filter((a: any) => a.category_slug === (category.slug || category.id)) : articles.filter((a: any) => a.category === category.id));
                   
                   return (
                     <div key={category.id} className="border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
@@ -527,7 +525,7 @@ const KnowledgePage: React.FC = () => {
                 FAQs
               </h2>
               <div className="space-y-3">
-                {filteredFaqs.map((faq) => (
+                {filteredFaqs.map((faq: any) => (
                   <div key={faq.id} className="p-3 border border-slate-200 rounded-lg bg-white/80 backdrop-blur-sm">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
@@ -727,39 +725,56 @@ const KnowledgePage: React.FC = () => {
                           return;
                         }
                         if (editorData.id) {
-                          await updateKnowledgeArticle(editorData.id, {
-                            title: editorData.title,
-                            category_id: editorData.category_id,
-                            author: editorData.author,
-                            read_time: editorData.read_time,
-                            difficulty: editorData.difficulty,
-                            tags: editorData.tags,
-                            content: editorData.content,
-                            featured: editorData.featured,
-                            last_updated: new Date().toISOString().slice(0, 10)
-                          });
+                          try {
+                            await updateKnowledgeArticle(editorData.id, {
+                              title: editorData.title,
+                              category_id: editorData.category_id,
+                              author: editorData.author,
+                              read_time: editorData.read_time,
+                              difficulty: editorData.difficulty,
+                              tags: editorData.tags,
+                              content: editorData.content,
+                              featured: editorData.featured,
+                              last_updated: new Date().toISOString().slice(0, 10)
+                            });
+                          } catch (error) {
+                            logger.error('Failed to update knowledge article', error, 'Knowledge');
+                            throw error;
+                          }
                         } else {
-                          await createKnowledgeArticle({
-                            title: editorData.title,
-                            category_id: editorData.category_id,
-                            author: editorData.author,
-                            publish_date: new Date().toISOString().slice(0, 10),
-                            last_updated: new Date().toISOString().slice(0, 10),
-                            read_time: editorData.read_time,
-                            difficulty: editorData.difficulty,
-                            rating: 0,
-                            views: 0,
-                            tags: editorData.tags,
-                            content: editorData.content,
-                            featured: editorData.featured
-                          } as any);
+                          try {
+                            await createKnowledgeArticle({
+                              title: editorData.title,
+                              category_id: editorData.category_id,
+                              author: editorData.author,
+                              publish_date: new Date().toISOString().slice(0, 10),
+                              last_updated: new Date().toISOString().slice(0, 10),
+                              read_time: editorData.read_time,
+                              difficulty: editorData.difficulty,
+                              rating: 0,
+                              views: 0,
+                              tags: editorData.tags,
+                              content: editorData.content,
+                              featured: editorData.featured
+                            } as any);
+                          } catch (error) {
+                            logger.error('Failed to create knowledge article', error, 'Knowledge');
+                            throw error;
+                          }
                         }
-                        const arts = await fetchKnowledgeArticles();
+                        let arts;
+                        try {
+                          arts = await fetchKnowledgeArticles();
+                        } catch (error) {
+                          logger.error('Failed to fetch knowledge articles after save', error, 'Knowledge');
+                          throw error;
+                        }
                         setFetchedArticles(arts);
                         setIsEditorOpen(false);
                       } catch (e: unknown) {
                         logger.error('Failed to save article', e, 'Knowledge');
                         toast.error('Failed to save article');
+                        throw e;
                       }
                     }}
                   >

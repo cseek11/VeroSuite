@@ -163,7 +163,7 @@ const Reports: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [pinnedReports, setPinnedReports] = useState<string[]>([]);
-  const [dateRange, setDateRange] = useState({ start: null, end: null });
+  const [dateRange] = useState({ start: null, end: null });
   const [selectedBranch, setSelectedBranch] = useState('all');
   const [selectedTechnician, setSelectedTechnician] = useState('all');
 
@@ -203,7 +203,7 @@ const Reports: React.FC = () => {
     });
   };
 
-  const handleExportReport = (reportId: string, format: 'csv' | 'pdf' | 'excel') => {
+  const _handleExportReport = (reportId: string, format: 'csv' | 'pdf' | 'excel') => {
     // Handle report export
     if (process.env.NODE_ENV === 'development') {
       logger.debug('Exporting report', { reportId, format }, 'Reports');

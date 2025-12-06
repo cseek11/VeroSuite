@@ -1,5 +1,6 @@
 import { DashboardLayout } from '@/hooks/useDashboardLayout';
 import { useAuthStore } from '@/stores/auth';
+import { logger } from '@/utils/logger';
 
 export interface SavedLayout {
   id: string;
@@ -78,7 +79,7 @@ class LayoutStorageServiceImpl implements LayoutStorageService {
       const result = await response.json();
       return result;
     } catch (error) {
-      console.error('Error saving layout:', error);
+      logger.error('Error saving layout', error as Error, 'layoutStorage');
       throw error;
     }
   }
@@ -104,7 +105,7 @@ class LayoutStorageServiceImpl implements LayoutStorageService {
       const result = await response.json();
       return result;
     } catch (error) {
-      console.error('Error loading layout:', error);
+      logger.error('Error loading layout', error as Error, 'layoutStorage');
       return null;
     }
   }
@@ -130,7 +131,7 @@ class LayoutStorageServiceImpl implements LayoutStorageService {
       const result = await response.json();
       return result;
     } catch (error) {
-      console.error('Error loading layout data:', error);
+      logger.error('Error loading layout data', error as Error, 'layoutStorage');
       return null;
     }
   }
@@ -153,7 +154,7 @@ class LayoutStorageServiceImpl implements LayoutStorageService {
       const result = await response.json();
       return result;
     } catch (error) {
-      console.error('Error loading user layouts:', error);
+      logger.error('Error loading user layouts', error as Error, 'layoutStorage');
       throw error;
     }
   }
@@ -176,7 +177,7 @@ class LayoutStorageServiceImpl implements LayoutStorageService {
       const result = await response.json();
       return result.success || true;
     } catch (error) {
-      console.error('Error deleting layout:', error);
+      logger.error('Error deleting layout', error as Error, 'layoutStorage');
       throw error;
     }
   }
@@ -203,7 +204,7 @@ class LayoutStorageServiceImpl implements LayoutStorageService {
       const result = await response.json();
       return result;
     } catch (error) {
-      console.error('Error updating layout:', error);
+      logger.error('Error updating layout', error as Error, 'layoutStorage');
       return null;
     }
   }
@@ -226,7 +227,7 @@ class LayoutStorageServiceImpl implements LayoutStorageService {
       const result = await response.json();
       return result;
     } catch (error) {
-      console.error('Error searching layouts:', error);
+      logger.error('Error searching layouts', error as Error, 'layoutStorage');
       throw error;
     }
   }
@@ -248,10 +249,10 @@ class LayoutStorageServiceImpl implements LayoutStorageService {
 
       // Get the filename from the Content-Disposition header or use a default
       const contentDisposition = response.headers.get('Content-Disposition');
-      let filename = 'layout.json';
+      let filename: string = 'layout.json';
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-        if (filenameMatch) {
+        if (filenameMatch && filenameMatch[1]) {
           filename = filenameMatch[1];
         }
       }
@@ -267,7 +268,7 @@ class LayoutStorageServiceImpl implements LayoutStorageService {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading layout:', error);
+      logger.error('Error downloading layout', error as Error, 'layoutStorage');
       throw error;
     }
   }
@@ -286,8 +287,8 @@ class LayoutStorageServiceImpl implements LayoutStorageService {
 
       return this.saveLayout(fileName, layout, fileDescription, fileTags);
     } catch (error) {
-      console.error('Error uploading layout:', error);
-      throw new Error(`Failed to upload layout: ${error.message}`);
+      logger.error('Error uploading layout', error as Error, 'layoutStorage');
+      throw new Error(`Failed to upload layout: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }

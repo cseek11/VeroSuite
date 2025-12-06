@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -7,7 +7,7 @@ import { logger } from '@/utils/logger';
 // TODO: Implement routing API in enhanced API
 // For now, using placeholder functions
 const routingApi = {
-  optimize: async (date: string) => {
+  optimize: async (_date: string) => {
     if (process.env.NODE_ENV === 'development') {
       logger.debug('TODO: Implement routing API in enhanced API', {}, 'Routing');
     }

@@ -4,6 +4,7 @@
 // Robust intent detection with context awareness, validation, and reliability
 
 import { logger } from '@/utils/logger';
+import type { IntentType, ActionData } from './intent-classification-service';
 
 export interface EnhancedIntentResult {
   intent: IntentType;
@@ -200,6 +201,7 @@ class EnhancedIntentClassificationService {
       
     } catch (error: unknown) {
       logger.error('Intent classification failed', error, 'enhanced-intent-service');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
       return {
         intent: 'search',
@@ -207,7 +209,7 @@ class EnhancedIntentClassificationService {
         entities: { validation: {} },
         originalQuery: query,
         processedQuery: normalizedQuery,
-        validationErrors: [`Classification failed: ${error.message}`],
+        validationErrors: [`Classification failed: ${errorMessage}`],
         suggestions: ['Please try rephrasing your command'],
         context: { ...this.context }
       };
@@ -317,7 +319,7 @@ class EnhancedIntentClassificationService {
     let entityConfidence = 0;
     let validEntityCount = 0;
     
-    for (const [key, validation] of Object.entries(entities.validation)) {
+    for (const validation of Object.values(entities.validation)) {
       if (validation?.confidence !== undefined) {
         entityConfidence += validation.confidence;
         validEntityCount++;
@@ -334,7 +336,7 @@ class EnhancedIntentClassificationService {
   private generateSuggestions(entities: ValidatedEntities, errors: string[]): string[] {
     const suggestions: string[] = [];
     
-    for (const [key, validation] of Object.entries(entities.validation)) {
+    for (const validation of Object.values(entities.validation)) {
       if (!validation.isValid && validation.suggestions) {
         suggestions.push(...validation.suggestions);
       }
@@ -369,9 +371,10 @@ class EnhancedIntentClassificationService {
     ).join(' ');
   }
 
-  private async extractGenericEntities(query: string, entities: ValidatedEntities): Promise<void> {
+  private async extractGenericEntities(_query: string, _entities: ValidatedEntities): Promise<void> {
     // Implement generic entity extraction for other intents
     // This is a placeholder for the existing logic
+    return;
   }
 }
 
@@ -383,6 +386,6 @@ interface ValidationResult {
 }
 
 // Export types for use in other files
-export type { ValidationResult, ConversationContext };
+export type { ValidationResult };
 export { EnhancedIntentClassificationService };
 

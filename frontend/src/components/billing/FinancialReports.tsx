@@ -84,13 +84,14 @@ export default function FinancialReports({ onReportGenerated }: FinancialReports
     }).format(amount);
   };
 
-  const _formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+  // Helper function for date formatting (currently unused but kept for future use)
+  // const formatDate = (date: string) => {
+  //   return new Date(date).toLocaleDateString('en-US', {
+  //     year: 'numeric',
+  //     month: 'long',
+  //     day: 'numeric',
+  //   });
+  // };
 
     const generatePDF = async (content: string, filename: string) => {
       try {
@@ -309,7 +310,12 @@ export default function FinancialReports({ onReportGenerated }: FinancialReports
       }
 
       if (format === 'pdf') {
-        await generatePDF(content, filename);
+        try {
+          await generatePDF(content, filename);
+        } catch (error) {
+          logger.error('PDF generation failed', error as Error, 'FinancialReports');
+          throw error;
+        }
       } else if (format === 'csv') {
         if (csvData.length > 0) {
           generateCSV(csvData, filename);
@@ -345,6 +351,7 @@ export default function FinancialReports({ onReportGenerated }: FinancialReports
       toast.error(
         `Failed to generate ${format.toUpperCase()} report. ${errorMessage}. Please try again or use a different export format.`
       );
+      throw error;
     } finally {
       setIsGenerating(false);
     }

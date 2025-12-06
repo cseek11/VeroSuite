@@ -11,7 +11,7 @@
  * - Support for multiple work orders
  */
 
-// React import removed (not needed with new JSX transform), { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -46,7 +46,7 @@ export default function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
   const [workOrderToInvoice, setWorkOrderToInvoice] = useState<WorkOrder | null>(null);
 
   // Fetch work orders for selected customer
-  const { data: workOrdersList, isLoading, error, refetch } = useQuery<WorkOrder[]>({
+  const { data: workOrdersList = [], isLoading, error, refetch } = useQuery<WorkOrder[]>({
     queryKey: ['work-orders', selectedCustomer?.id],
     queryFn: () => {
       if (!selectedCustomer?.id) {
@@ -55,17 +55,19 @@ export default function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
       return workOrders.getByCustomerId(selectedCustomer.id);
     },
     enabled: !!selectedCustomer?.id,
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch work orders', error, 'InvoiceGenerator');
-      toast.error('Failed to load work orders. Please try again.');
-    },
   });
+
+  // Handle query errors
+  if (error) {
+    logger.error('Failed to fetch work orders', error as Record<string, any>, 'InvoiceGenerator');
+    toast.error('Failed to load work orders. Please try again.');
+  }
 
   // Filter work orders by search term and status
   const filteredWorkOrders = useMemo(() => {
-    if (!workOrdersList) return [];
+    if (!workOrdersList || !Array.isArray(workOrdersList)) return [];
 
-    let filtered = workOrdersList.filter(wo => {
+    let filtered = workOrdersList.filter((wo: WorkOrder) => {
       // Only show completed work orders that don't have invoices yet
       // Note: In a real implementation, you'd check if work order already has an invoice
       return wo.status === 'completed';
@@ -94,7 +96,7 @@ export default function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
   };
 
   const handleGenerateInvoice = async (workOrderId: string) => {
-    const workOrder = workOrdersList?.find((wo: WorkOrder) => wo.id === workOrderId);
+    const workOrder = Array.isArray(workOrdersList) ? workOrdersList.find((wo: WorkOrder) => wo.id === workOrderId) : undefined;
     if (!workOrder) {
       logger.error('Work order not found', { workOrderId }, 'InvoiceGenerator');
       toast.error('Work order not found');
@@ -122,7 +124,9 @@ export default function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
 
     if (selectedWorkOrders.size === 1) {
       const workOrderId = Array.from(selectedWorkOrders)[0];
-      handleGenerateInvoice(workOrderId);
+      if (workOrderId) {
+        handleGenerateInvoice(workOrderId);
+      }
       return;
     }
 
@@ -171,11 +175,20 @@ export default function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
 
   if (showInvoiceForm && workOrderToInvoice && selectedCustomer) {
     // Pre-populate invoice data from work order
-    const invoiceData = {
+    const issueDate = new Date().toISOString().split('T')[0];
+    const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const invoiceData: {
+      account_id: string;
+      work_order_id: string;
+      issue_date?: string;
+      due_date?: string;
+      notes?: string;
+      items?: Array<{ service_type_id: string; description: string; quantity: number; unit_price: number }>;
+    } = {
       account_id: selectedCustomer.id,
       work_order_id: workOrderToInvoice.id,
-      issue_date: new Date().toISOString().split('T')[0],
-      due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      ...(issueDate ? { issue_date: issueDate } : {}),
+      ...(dueDate ? { due_date: dueDate } : {}),
       notes: `Invoice generated from work order: ${workOrderToInvoice.id}${workOrderToInvoice.description ? `\n${workOrderToInvoice.description}` : ''}`,
       items: [
         {
@@ -223,8 +236,8 @@ export default function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
               Select Customer
             </Text>
             <CustomerSearchSelector
-              value={selectedCustomer}
-              onChange={(customer) => {
+              {...(selectedCustomer?.id ? { value: selectedCustomer.id } : {})}
+              onChange={(_customerId, customer) => {
                 setSelectedCustomer(customer);
                 setSelectedWorkOrders(new Set());
                 setSearchTerm('');
@@ -310,15 +323,18 @@ export default function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
                     {filteredWorkOrders.map((workOrder: WorkOrder) => {
                       const isSelected = selectedWorkOrders.has(workOrder.id);
                       return (
-                        <Card
+                        <div
                           key={workOrder.id}
-                          className={`border-2 transition-colors cursor-pointer ${
+                          className={`border-2 transition-colors cursor-pointer rounded-xl ${
                             isSelected
                               ? 'border-purple-500 bg-purple-50'
                               : 'border-gray-200 hover:border-purple-300'
                           }`}
                           onClick={() => handleSelectWorkOrder(workOrder.id)}
                         >
+                          <Card
+                            className="border-0 shadow-none"
+                          >
                           <div className="p-4">
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
@@ -371,8 +387,7 @@ export default function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
                                   variant="outline"
                                   size="sm"
                                   icon={FileText}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
+                                  onClick={() => {
                                     handleGenerateInvoice(workOrder.id);
                                   }}
                                 >
@@ -382,6 +397,7 @@ export default function InvoiceGenerator({ onSuccess }: InvoiceGeneratorProps) {
                             </div>
                           </div>
                         </Card>
+                        </div>
                       );
                     })}
                   </div>
