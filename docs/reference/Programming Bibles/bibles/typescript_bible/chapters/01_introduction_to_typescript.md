@@ -1,6 +1,6 @@
 ---
 title: The TypeScript Bible — Deep-Dive Edition
-version: 2025-12-02
+version: 2025-12-05
 status: Living Architectural Reference
 audience: Beginner → Practitioner → Expert → PhD-Level Researcher
 domain: typescript
@@ -10,7 +10,7 @@ ssm_version: 3
 
 # The TypeScript Bible — Deep-Dive Edition
 
-**Last Updated:** 2025-12-02
+**Last Updated:** 2025-12-05
 
 ## Front Matter
 

@@ -1,6 +1,6 @@
 # Dashboard Guide
 
-**Last Updated:** 2025-11-17
+**Last Updated:** 2025-12-05
 
 ## Overview
 

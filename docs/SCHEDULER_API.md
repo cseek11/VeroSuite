@@ -1,6 +1,6 @@
 # ScheduleCalendar API Documentation
 
-**Last Updated:** 2025-01-27  
+**Last Updated:** 2025-12-05  
 **Component:** `frontend/src/components/scheduling/ScheduleCalendar.tsx`
 
 ## Overview
@@ -388,7 +388,7 @@ ScheduleCalendar exports shared utilities from `@/components/scheduling/utils`:
 
 ---
 
-**Last Updated:** 2025-01-27
+**Last Updated:** 2025-12-05
 
 
 

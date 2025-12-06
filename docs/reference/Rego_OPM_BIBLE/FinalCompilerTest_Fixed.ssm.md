@@ -227,17 +227,17 @@ vector_summary: Definitive Guide to the Rego Language and the Open Policy Agent 
 
 ::: fact
 id: BLK-09dfc188b90c17d9
-summary: Version: 2025-11-25 (Expanded) Author: Prof.
+summary: Version: 2025-12-05 (Expanded) Author: Prof.
 digest: 1edbef5985a36ee31b28b4f003fa78bc409178f9051d965cc1b1f16e5b945fe0
 symbol_refs: []
 semantic_role: assertion
 embedding_hint_importance: high
 embedding_hint_scope: section
 embedding_hint_chunk: auto
-intuition: This explains that Version: 2025-11-25 (Expanded) Author: Prof..
-vector_summary: Version: 2025-11-25 (Expanded) Author: Prof.
+intuition: This explains that Version: 2025-12-05 (Expanded) Author: Prof..
+vector_summary: Version: 2025-12-05 (Expanded) Author: Prof.
 :::
-Version: 2025-11-25 (Expanded) Author: Prof. [Your Name], Ph.D. Discipline: Computer Engineering, Logic Programming, Declarative Policy Systems
+Version: 2025-12-05 (Expanded) Author: Prof. [Your Name], Ph.D. Discipline: Computer Engineering, Logic Programming, Declarative Policy Systems
 :::
 
 ::: fact
@@ -1068,7 +1068,7 @@ Sequential chapters
 id: SSMMETA-33d6c5928b456d51
 compiler_version: 3.0.0
 ssm_schema_version: 1.0.0
-bible_version: 2025-11-26
+bible_version: 2025-12-05
 namespace: default
 digest: fcd7bf271256a414d5c79fd9853ecfbab41180ba657b2e386d6133baae290fe5
 symbol_refs: []
@@ -11504,7 +11504,7 @@ graph_two_hop: []
 graph_three_hop: []
 chapter: CH-05
 :::
-allow if { input.attributes.request.http.method == "GET" input.attributes.request.http.path == "/status" } CI/CD – GitHub Actions, GitLab CI, etc. PR/diff metadata → JSON (opa-input.json). OPA evaluates data.compliance. CI interprets deny, warn, override arrays and posts PR comments / fails build. IaC scanning (Terraform, Kubernetes YAML) Terraform plan JSON or Kubernetes manifests as input. Policies check: Public buckets. Unencrypted volumes. Exposed security groups. ________________________________________ 8.4 Multi-layer Policy Architecture on OPA Layers usually look like: Global baseline – org-level security/compliance invariants. Domain policies – per product or platform (e.g., CRM, billing). Team/service policies – localized rules. Tenant overlays – per customer/tenant customizations. Implement via: Multiple bundles merged in OPA. Data-driven toggles (e.g., data.tenants[tenant_id].overrides). Rego evaluation order (e.g., base allow, then deny overlays). ________________________________________ 8.5 OPA as a Policy Mesh In large environments, you might have: Many OPAs running across clusters/namespaces. A central bundle server pushing policies. Decision logs shipped to SIEM / data lake. Rego itself doesn’t change; the architecture around it does. ________________________________________ Chapter 9 – Policy Bundling & Distribution OPA is not just an evaluator; it has a bundle system for shipping policies and data. ________________________________________ 9.1 Bundle Basics A bundle is: A .tar.gz containing: /policies/*.rego /data/*.json (or YAML, etc.) .manifest file with metadata. Example manifest (conceptual): { "revision": "git-sha-1234", "roots": ["authz", "compliance"], "metadata": { "version": "1.2.3", "built_at": "2025-11-25T12:00:00Z" } } OPA config: services: policy: url: https://opa-bundles.example.com
+allow if { input.attributes.request.http.method == "GET" input.attributes.request.http.path == "/status" } CI/CD – GitHub Actions, GitLab CI, etc. PR/diff metadata → JSON (opa-input.json). OPA evaluates data.compliance. CI interprets deny, warn, override arrays and posts PR comments / fails build. IaC scanning (Terraform, Kubernetes YAML) Terraform plan JSON or Kubernetes manifests as input. Policies check: Public buckets. Unencrypted volumes. Exposed security groups. ________________________________________ 8.4 Multi-layer Policy Architecture on OPA Layers usually look like: Global baseline – org-level security/compliance invariants. Domain policies – per product or platform (e.g., CRM, billing). Team/service policies – localized rules. Tenant overlays – per customer/tenant customizations. Implement via: Multiple bundles merged in OPA. Data-driven toggles (e.g., data.tenants[tenant_id].overrides). Rego evaluation order (e.g., base allow, then deny overlays). ________________________________________ 8.5 OPA as a Policy Mesh In large environments, you might have: Many OPAs running across clusters/namespaces. A central bundle server pushing policies. Decision logs shipped to SIEM / data lake. Rego itself doesn’t change; the architecture around it does. ________________________________________ Chapter 9 – Policy Bundling & Distribution OPA is not just an evaluator; it has a bundle system for shipping policies and data. ________________________________________ 9.1 Bundle Basics A bundle is: A .tar.gz containing: /policies/*.rego /data/*.json (or YAML, etc.) .manifest file with metadata. Example manifest (conceptual): { "revision": "git-sha-1234", "roots": ["authz", "compliance"], "metadata": { "version": "1.2.3", "built_at": "2025-12-05T12:00:00Z" } } OPA config: services: policy: url: https://opa-bundles.example.com
 :::
 
 ::: concept
@@ -14146,18 +14146,18 @@ A typical bundle layout on disk:
 
 ::: concept
 id: BLK-69b6a886fdd31d76
-summary: 9.X.1 Example .manifest File { "revision": "2025-11-25T10:00:00Z-abc123", "roots": [ "authz", "jwt", "config", "tenants" ] }.
+summary: 9.X.1 Example .manifest File { "revision": "2025-12-05T10:00:00Z-abc123", "roots": [ "authz", "jwt", "config", "tenants" ] }.
 digest: 042ceca72e8a6ea1907b6e10c31fbc98d78fe897175c5261461236e511115be3
 symbol_refs: []
 semantic_role: concept
 embedding_hint_importance: high
 embedding_hint_scope: section
 embedding_hint_chunk: auto
-intuition: This explains that 9.X.1 Example .manifest File { "revision": "2025-11-25T10:00:00Z-abc123", "roots": [ "authz", "jwt", "config", "tenants" ] }..
-vector_summary: 9.X.1 Example .manifest File { "revision": "2025-11-25T10:00:00Z-abc123", "roots": [ "authz", "jwt", "config", "tenants" ] }.
+intuition: This explains that 9.X.1 Example .manifest File { "revision": "2025-12-05T10:00:00Z-abc123", "roots": [ "authz", "jwt", "config", "tenants" ] }..
+vector_summary: 9.X.1 Example .manifest File { "revision": "2025-12-05T10:00:00Z-abc123", "roots": [ "authz", "jwt", "config", "tenants" ] }.
 chapter: CH-05
 :::
-9.X.1 Example .manifest File { "revision": "2025-11-25T10:00:00Z-abc123", "roots": [ "authz", "jwt", "config", "tenants" ] }
+9.X.1 Example .manifest File { "revision": "2025-12-05T10:00:00Z-abc123", "roots": [ "authz", "jwt", "config", "tenants" ] }
 :::
 
 ::: concept
@@ -18569,7 +18569,7 @@ semantic_categories: [distribution, observability]
 vector_summary: Allow if { base_allow not tenant_extra_deny[_] } This gives global → domain final say on allow, and tenant extra ways to say “no.” ________________...
 chapter: CH-05
 :::
-allow if { base_allow not tenant_extra_deny[_] } This gives global → domain final say on allow, and tenant extra ways to say “no.” ________________________________________ Chapter 14 – Observability & Audit OPA is not only a decision engine; it’s an evidence generator. Observability and audit are how you prove that decisions are: • Correct • Consistent • Explainable • Compliant with regulation ________________________________________ 14.1 Decision Logs Every OPA decision should be treatable as a replayable event: Minimum recommended fields: • decision_id (UUID) • timestamp • path (e.g., data.authz.allow) • input_hash or input (with PII scrubbing) • result (decision doc: allow/deny/effects) • bundle_revision • metrics (evaluation time, rule count) • correlation_id (to tie into tracing) Conceptual log: { "decision_id": "3f7b9b1a-0ee2-4e52-9f39-4edb8b6a3a01", "timestamp": "2025-11-25T10:02:45Z", "path": "data.authz.allow", "input_hash": "sha256:abcd...", "result": { "allow": false, "effects": [ { "effect": "deny", "rule_id": "ACCT_001", "layer": "domain", "msg": "Closed accounts cannot be reopened" } ] }, "bundle_revision": "git:1234abcd", "metrics": { "eval_time_ns": 45321, "num_rules_evaluated": 37 }, "correlation_id": "trace-xyz-123" } OPA supports decision logs via configuration; your host system should stream them to: • Kafka / Kinesis • ELK / Loki • Datadog / Prometheus / Grafana ________________________________________ 14.2 Metrics and SLOs To treat OPA like a production service, track at least: • Latency: o p50 / p95 / p99 evaluation time. • Throughput: o decisions per second. • Decision deltas: o How often outcomes change after a new bundle. • Error rate: o Number of evaluation failures (e.g., built-in errors in strict mode). Define SLOs like: • 99.9% of policy decisions complete in < 10 ms. • < 0.1% of decisions result in evaluation error. • Decision delta after bundle rollout < 1% for stable inputs (in shadow mode). ________________________________________ 14.3 Correlation IDs and Tracing Policy evaluations rarely stand alone; they’re part of a larger request trace: • HTTP header: o X-Request-Id o traceparent (W3C Trace Context) • PEP should pass correlation ID in: o input.trace_id o or embed as part of input.request.headers. Then decision logs include correlation_id, which lets you: • Trace a single user’s journey across services. • Root-cause analyze unauthorized/denied requests quickly. Example pattern: package authz
+allow if { base_allow not tenant_extra_deny[_] } This gives global → domain final say on allow, and tenant extra ways to say “no.” ________________________________________ Chapter 14 – Observability & Audit OPA is not only a decision engine; it’s an evidence generator. Observability and audit are how you prove that decisions are: • Correct • Consistent • Explainable • Compliant with regulation ________________________________________ 14.1 Decision Logs Every OPA decision should be treatable as a replayable event: Minimum recommended fields: • decision_id (UUID) • timestamp • path (e.g., data.authz.allow) • input_hash or input (with PII scrubbing) • result (decision doc: allow/deny/effects) • bundle_revision • metrics (evaluation time, rule count) • correlation_id (to tie into tracing) Conceptual log: { "decision_id": "3f7b9b1a-0ee2-4e52-9f39-4edb8b6a3a01", "timestamp": "2025-12-05T10:02:45Z", "path": "data.authz.allow", "input_hash": "sha256:abcd...", "result": { "allow": false, "effects": [ { "effect": "deny", "rule_id": "ACCT_001", "layer": "domain", "msg": "Closed accounts cannot be reopened" } ] }, "bundle_revision": "git:1234abcd", "metrics": { "eval_time_ns": 45321, "num_rules_evaluated": 37 }, "correlation_id": "trace-xyz-123" } OPA supports decision logs via configuration; your host system should stream them to: • Kafka / Kinesis • ELK / Loki • Datadog / Prometheus / Grafana ________________________________________ 14.2 Metrics and SLOs To treat OPA like a production service, track at least: • Latency: o p50 / p95 / p99 evaluation time. • Throughput: o decisions per second. • Decision deltas: o How often outcomes change after a new bundle. • Error rate: o Number of evaluation failures (e.g., built-in errors in strict mode). Define SLOs like: • 99.9% of policy decisions complete in < 10 ms. • < 0.1% of decisions result in evaluation error. • Decision delta after bundle rollout < 1% for stable inputs (in shadow mode). ________________________________________ 14.3 Correlation IDs and Tracing Policy evaluations rarely stand alone; they’re part of a larger request trace: • HTTP header: o X-Request-Id o traceparent (W3C Trace Context) • PEP should pass correlation ID in: o input.trace_id o or embed as part of input.request.headers. Then decision logs include correlation_id, which lets you: • Trace a single user’s journey across services. • Root-cause analyze unauthorized/denied requests quickly. Example pattern: package authz
 :::
 
 ::: fact
@@ -18699,7 +18699,7 @@ semantic_categories: [distribution]
 vector_summary: OPA uses that state to decide: o Allow or deny new events.
 chapter: CH-05
 :::
-count(recent_failures) > 5 msg := "Too many recent login failures" } OPA sees only a subset; the window is curated by your stateful event pipeline. ________________________________________ 15.3 Event-Driven Architectures with OPA Typical pattern: 1. Events flow into Kafka / Kinesis. 2. A stream processor: o Maintains aggregates:  counts, sums, last-seen times, sliding windows. o Writes materialized state to:  Redis, DB, or data-bundles for OPA. 3. OPA uses that state to decide: o Allow or deny new events. o Trigger downstream actions/alerts. OPA remains pure — no long-lived state, no hidden mutable variables. ________________________________________ 15.4 Time-Scoped Exceptions Sometimes you want: • “Allow this temporary override until 2025-12-31.” Pattern: package overrides
+count(recent_failures) > 5 msg := "Too many recent login failures" } OPA sees only a subset; the window is curated by your stateful event pipeline. ________________________________________ 15.3 Event-Driven Architectures with OPA Typical pattern: 1. Events flow into Kafka / Kinesis. 2. A stream processor: o Maintains aggregates:  counts, sums, last-seen times, sliding windows. o Writes materialized state to:  Redis, DB, or data-bundles for OPA. 3. OPA uses that state to decide: o Allow or deny new events. o Trigger downstream actions/alerts. OPA remains pure — no long-lived state, no hidden mutable variables. ________________________________________ 15.4 Time-Scoped Exceptions Sometimes you want: • “Allow this temporary override until 2025-12-05.” Pattern: package overrides
 :::
 
 ::: fact
@@ -24124,7 +24124,7 @@ Minimum recommended fields:
 Conceptual log:
 {
   "decision_id": "3f7b9b1a-0ee2-4e52-9f39-4edb8b6a3a01",
-  "timestamp": "2025-11-25T10:02:45Z",
+  "timestamp": "2025-12-05T10:02:45Z",
   "path": "data.authz.allow",
   "input_hash": "sha256:abcd...",
   "result": {
@@ -24216,7 +24216,7 @@ Minimum recommended fields:
 Conceptual log:
 {
   "decision_id": "3f7b9b1a-0ee2-4e52-9f39-4edb8b6a3a01",
-  "timestamp": "2025-11-25T10:02:45Z",
+  "timestamp": "2025-12-05T10:02:45Z",
   "path": "data.authz.allow",
   "input_hash": "sha256:abcd...",
   "result": {
@@ -24409,7 +24409,7 @@ OPA remains pure — no long-lived state, no hidden mutable variables.
 ________________________________________
 15.4 Time-Scoped Exceptions
 Sometimes you want:
-•	“Allow this temporary override until 2025-12-31.”
+•	“Allow this temporary override until 2025-12-05.”
 Pattern:
 package overrides
 category: architecture
@@ -24443,7 +24443,7 @@ OPA remains pure — no long-lived state, no hidden mutable variables.
 ________________________________________
 15.4 Time-Scoped Exceptions
 Sometimes you want:
-•	“Allow this temporary override until 2025-12-31.”
+•	“Allow this temporary override until 2025-12-05.”
 Pattern:
 package overrides
 :::

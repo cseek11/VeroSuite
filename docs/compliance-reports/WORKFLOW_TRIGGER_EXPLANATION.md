@@ -1,6 +1,6 @@
 # Workflow Trigger Explanation
 
-**Date:** 2025-11-22
+**Date:** 2025-12-05
 
 ## Why You Don't See New Workflows
 
@@ -74,7 +74,7 @@ Some workflows can be manually triggered from GitHub Actions UI.
 
 ---
 
-**Last Updated:** 2025-11-22
+**Last Updated:** 2025-12-05
 
 
 

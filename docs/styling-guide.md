@@ -2,7 +2,7 @@
 title: Styling Guide
 category: Development
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: frontend_team
 related:
   - docs/reference/design-system.md
@@ -548,7 +548,7 @@ See [Enterprise Styling Guide v2](../reference/enterprise-styling-guide.md) for 
 - ❌ Table rows smaller than 44px or larger than 48px
 - ❌ Button heights larger than 36px (avoid 40px+)
 
-**Last Updated:** 2025-01-27  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Frontend Team  
 **Review Frequency:** On styling changes  
 **Enterprise Standards Applied:** Yes

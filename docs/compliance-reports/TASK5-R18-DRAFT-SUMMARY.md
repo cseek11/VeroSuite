@@ -1,6 +1,6 @@
 # R18: Performance Budgets — Draft Summary
 
-**Date:** 2025-11-23  
+**Date:** 2025-12-05  
 **Rule:** R18 - Performance Budgets  
 **Tier:** 3 (WARNING-level enforcement)  
 **Status:** DRAFT - Awaiting Review  

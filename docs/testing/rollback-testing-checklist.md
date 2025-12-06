@@ -1,7 +1,7 @@
 # Rollback Testing Checklist
 
 **Purpose:** Systematic testing of rollback procedures for VeroField Rules v2.0 → v2.1 migration  
-**Created:** 2025-11-23  
+**Created:** 2025-12-05  
 **Version:** 1.0.0  
 **Owner:** DevOps + Governance Lead  
 **Estimated Time:** 3-4 hours per phase
@@ -708,7 +708,7 @@ AND table_name LIKE 'compliance%';
 
 ---
 
-**Last Updated:** 2025-11-23  
+**Last Updated:** 2025-12-05  
 **Version:** 1.0.0  
 **Next Review:** Before Phase 1 begins
 

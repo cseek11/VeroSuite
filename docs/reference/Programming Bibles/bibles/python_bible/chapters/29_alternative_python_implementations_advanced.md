@@ -13754,7 +13754,7 @@ This appendix provides visual reference for concepts explained in detail through
 
 # MASTER INDEX
 
-**Last Updated:** 2025-11-30
+**Last Updated:** 2025-12-05
 
 This index provides quick access to all major topics, concepts, patterns, and examples covered in the Python Bible. Use Ctrl+F (or Cmd+F) to search for specific terms.
 

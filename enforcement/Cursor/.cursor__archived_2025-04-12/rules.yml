@@ -1,0 +1,29 @@
+---
+# Cursor Rules Index
+# ⚠️ DEPRECATED: This file is archived for Two-Brain Model
+# 
+# Two-Brain Model (Phase 2) Active:
+# - Brain B (LLM): Only loads 3-4 lightweight files from .cursor/rules/
+# - Brain A (Enforcer): Owns all heavy rules in .cursor/enforcement/rules/
+#
+# This file is kept for reference only. Cursor auto-discovers .mdc files.
+# The actual rule loading is controlled by .cursorrules file.
+#
+# Version: 2.0 (deprecated)
+# Project: VeroField
+# Last Updated: 2025-12-04
+# Archived: 2025-12-04 (Two-Brain Model migration)
+
+# ⚠️ DO NOT USE: These paths are outdated
+# All heavy rules have been moved to .cursor/enforcement/rules/
+# Only lightweight LLM interface files remain in .cursor/rules/
+
+# For reference only - shows where rules were located before migration:
+# include:
+#   - .cursor/enforcement/rules/00-master.mdc
+#   - .cursor/enforcement/rules/01-enforcement.mdc
+#   - .cursor/enforcement/rules/02-core.mdc
+#   - ... (all rules now in .cursor/enforcement/rules/)
+
+# See .cursorrules for current active rule loading
+# See docs/architecture/TWO_BRAIN_IMPLEMENTATION_PLAN.md for details

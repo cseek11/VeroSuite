@@ -1,6 +1,6 @@
 # Compliance Dashboard - Quick Start Guide
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Purpose:** Quick reference for setting up and using the compliance dashboard
 
 ---
@@ -163,7 +163,7 @@ curl -X POST \
 
 ---
 
-**Last Updated:** 2025-11-30
+**Last Updated:** 2025-12-05
 
 
 

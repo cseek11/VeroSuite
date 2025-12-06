@@ -1,8 +1,9 @@
 # File Organization Guide
 
-**Date:** 2025-11-16  
+**Date:** 2025-12-05  
 **Status:** Active  
-**Reference:** `.cursor/rules/file-organization.md`
+**Reference:** `.cursor/rules/file-organization.md`  
+**Last Reorganization:** 2025-12-05
 
 ## Overview
 
@@ -37,20 +38,40 @@ VeroField/
 ├── tsconfig.json               # TypeScript config (if at root)
 ├── nest-cli.json               # NestJS config (if at root)
 │
-├── docs/                       # ALL documentation
-│   ├── reference/              # Essential reference docs
-│   ├── guides/                 # How-to guides
-│   ├── architecture/           # Design documents
-│   ├── planning/               # Development plans
+├── .ai/                        # AI/LLM Data Home (SOURCE OF TRUTH)
+│   ├── rules/                  # Rule definitions (.mdc files)
+│   ├── memory_bank/           # Memory bank files (.md)
+│   ├── patterns/               # Pattern definitions (.md)
+│   └── logs/                   # AI agent logs and reports
+│       └── enforcer/           # Auto-enforcer full reports (>5KB)
+│
+├── .cursor/                    # Cursor IDE Integration (light summaries only)
+│   ├── enforcement/            # Light summaries and status (<5KB)
+│   │   ├── ENFORCER_STATUS.md # Current status summary
+│   │   ├── VIOLATIONS.md       # Current violations summary
+│   │   ├── AGENT_STATUS.md     # Agent status summary
+│   │   └── session.json        # Current session state
+│   └── rules/                  # LLM interface rules (referenced by .cursorrules)
+│
+├── .build/                     # Generated outputs (gitignored)
+│   ├── coverage/               # Test coverage reports
+│   ├── test-results/           # Test result outputs
+│   └── logs/                   # Build logs, temporary outputs
+│
+├── docs/                       # ALL human documentation
+│   ├── audits/                 # Audit reports (from root reorganization)
+│   ├── planning/               # Execution plans and development plans
+│   ├── reference/            # Essential reference docs
+│   ├── guides/                 # How-to guides and protocols
+│   ├── architecture/           # System design documents
+│   ├── bibles/                 # Bible SOURCE files (before compilation)
 │   ├── archive/                # Historical documentation
-│   │   ├── progress/           # Progress tracking
-│   │   ├── tickets/            # Developer tickets
-│   │   ├── reports/            # Reports and analyses
-│   │   ├── test-results/       # Test outputs (if keeping)
-│   │   └── migrations/        # SQL migration scripts
-│   ├── developer/               # Developer tools
+│   ├── developer/              # Developer tools
 │   ├── examples/               # Code examples
 │   └── assets/                 # Documentation assets
+│
+├── knowledge/                  # Compiled knowledge (generated)
+│   └── bibles/                 # Compiled bibles (for consumption)
 │
 ├── branding/                   # Branding assets
 │   ├── logos/                  # Logo files
@@ -70,13 +91,22 @@ VeroField/
 │   ├── dev/                    # Development environment
 │   ├── staging/                # Staging environment
 │   ├── prod/                   # Production environment
-│   └── shared/                  # Common configs
+│   └── shared/                 # Common configs
 │
 ├── apps/                       # Microservices (monorepo)
 ├── libs/                       # Shared libraries (monorepo)
 ├── frontend/                   # React frontend
-├── backend/                    # Backend (legacy, migrating to apps/)
+├── VeroSuiteMobile/            # React Native mobile app
+├── verofield-website/          # Marketing website
+├── shared/                     # Shared code
+├── services/                   # Service configurations (OPA, etc.)
+├── tools/                      # Development tools
+├── tests/                      # Root-level tests
+├── monitoring/                  # Monitoring configs
 └── supabase/                   # Supabase configs
+│
+├── .cursor__archived_*/        # Archived Cursor configs (READ-ONLY)
+└── .cursor__disabled/          # Disabled Cursor config (READ-ONLY)
 ```
 
 ## File Type → Directory Mapping
@@ -121,9 +151,21 @@ VeroField/
 
 | File Type | Target Directory | Notes |
 |-----------|----------------|-------|
-| Test results | `docs/archive/test-results/` (if keeping) | Should be gitignored |
-| Coverage reports | `coverage/` | Auto-generated, gitignored |
-| Test logs | Clean up or archive | Should not be committed |
+| Test results | `.build/test-results/` | Auto-generated, gitignored |
+| Coverage reports | `.build/coverage/` | Auto-generated, gitignored |
+| Test logs | `.build/logs/` | Should not be committed |
+| Build logs | `.build/logs/` | Temporary outputs |
+
+### AI/LLM Files
+
+| File Type | Target Directory | Notes |
+|-----------|----------------|-------|
+| Heavy reports (>5KB) | `.ai/logs/enforcer/` | Full detailed reports |
+| Light summaries (<5KB) | `.cursor/enforcement/` | IDE-visible summaries |
+| Rules (.mdc) | `.ai/rules/` | Source of truth for rules |
+| Memory bank | `.ai/memory_bank/` | Source of truth for memory |
+| Patterns | `.ai/patterns/` | Pattern definitions |
+| Session state | `.cursor/enforcement/session.json` | Current session |
 
 ## Organization Scripts
 
@@ -214,23 +256,39 @@ VeroField/
 - Videos → `branding/assets/videos/` or `branding/assets/context/videos/`
 - Screenshots → `branding/assets/screenshots/`
 
-### Test_Results/
+### .build/
 
-**Status:** Test output directory  
-**Action:** Auto-cleanup or archive to `docs/archive/test-results/`
+**Status:** Generated outputs directory  
+**Structure:**
+- `.build/coverage/` - Test coverage reports
+- `.build/test-results/` - Test result outputs
+- `.build/logs/` - Build logs, temporary outputs
 
 **Rules:**
-- Should be gitignored
-- Archive only if needed for historical reference
-- Auto-generated files should be cleaned up regularly
-
-### coverage/
-
-**Status:** Test coverage reports  
-**Rules:**
-- Must be gitignored (auto-generated only)
+- Entire `.build/` directory is gitignored
+- Auto-generated files only
 - No manual files should be placed here
-- Generated by test runners automatically
+- Generated by build/test runners automatically
+
+### .ai/ vs .cursor/
+
+**Boundary Rules:**
+- `.ai/` = Heavy AI data, rules, memory, patterns, full reports (>5KB)
+- `.cursor/` = Light IDE summaries (<5KB), interface rules, session state
+- Full reports → `.ai/logs/enforcer/`
+- Summaries → `.cursor/enforcement/`
+
+### Archive Directories
+
+**Status:** Read-only archives  
+**Directories:**
+- `.cursor__archived_*/` - Historical Cursor configurations
+- `.cursor__disabled/` - Disabled/legacy enforcement code
+
+**Rules:**
+- ⚠️ **DO NOT MODIFY** - These are read-only archives
+- Active configuration lives in `.cursor/` and `.ai/`
+- See archive README.md files for details
 
 ## Best Practices
 
@@ -347,7 +405,8 @@ For questions or issues with file organization:
 
 ---
 
-**Last Updated:** 2025-11-16
+**Last Updated:** 2025-12-05  
+**Reorganization Date:** 2025-12-05
 
 
 

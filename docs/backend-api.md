@@ -2,7 +2,7 @@
 title: Backend API Reference
 category: API
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: api_lead
 related:
   - docs/guides/api/frontend-api.md
@@ -145,7 +145,7 @@ Requests should be authorized at the controller/service layer and audit-logged f
 
 ---
 
-**Last Updated:** 2025-11-11  
+**Last Updated:** 2025-12-05  
 **Maintained By:** API Lead  
 **Review Frequency:** On API changes
 

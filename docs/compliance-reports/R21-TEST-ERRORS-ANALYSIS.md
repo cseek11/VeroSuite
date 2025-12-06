@@ -1,6 +1,6 @@
 # R21 Test Errors - Detailed Analysis
 
-**Date:** 2025-11-23  
+**Date:** 2025-12-05  
 **Rule:** R21 - File Organization  
 **Test Suite:** `services/opa/tests/architecture_r21_test.rego`  
 **Policy:** `services/opa/policies/architecture.rego`
@@ -695,7 +695,7 @@ contains(file.diff, "export function")
 
 ---
 
-**Last Updated:** 2025-11-23  
+**Last Updated:** 2025-12-05  
 **Status:** Analysis Complete - Awaiting Fixes
 
 

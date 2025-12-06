@@ -1,6 +1,6 @@
 # Reward Score Investigation: -6 Penalty Pattern
 
-**Date:** 2025-11-19  
+**Date:** 2025-12-05  
 **Issue:** Consistent -6 penalties appearing in batches, when rubric specifies -4 for `failing_ci`
 
 ## Findings

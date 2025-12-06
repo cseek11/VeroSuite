@@ -8,7 +8,7 @@ This script:
 3. Fixes Chapter 40/41 ordering (moves 40 before 41)
 4. Updates all cross-references to chapters
 
-Last Updated: 2025-11-30
+Last Updated: 2025-12-05
 """
 
 import re

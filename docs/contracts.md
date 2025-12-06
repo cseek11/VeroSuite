@@ -8,7 +8,7 @@ scope:
   - mobile
   - microservices
 priority: critical
-last_updated: 2025-11-16
+last_updated: 2025-12-05
 always_apply: true
 ---
 
@@ -330,7 +330,7 @@ describe('WorkOrder API Contract', () => {
     const requestBody = {
       customer_id: 'uuid-123',
       status: WorkOrderStatus.PENDING,
-      scheduled_date: '2025-11-16T10:00:00Z'
+      scheduled_date: '2025-12-05T10:00:00Z'
     };
 
     const response = await request(app)
@@ -450,7 +450,7 @@ describe('Contract Shape Consistency', () => {
 
 ---
 
-**Last Updated:** 2025-11-16  
+**Last Updated:** 2025-12-05  
 **Status:** Active Enforcement  
 **Priority:** CRITICAL - Must be followed for every schema change
 

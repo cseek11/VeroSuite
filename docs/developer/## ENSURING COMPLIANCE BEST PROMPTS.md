@@ -440,7 +440,7 @@ Show me the security compliance report with file paths and line numbers"
 - ❌ Not following established component patterns
 
 **Date Violations (02-core.mdc - CRITICAL):**
-- ❌ Hardcoding dates (e.g., "2025-01-27" instead of checking current date)
+- ❌ Hardcoding dates (e.g., "2025-12-05" instead of checking current date)
 - ❌ Using old dates in "Last Updated" fields
 - ❌ Not updating "Last Updated" when modifying documentation
 

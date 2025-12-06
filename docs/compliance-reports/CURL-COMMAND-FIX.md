@@ -1,7 +1,7 @@
 # cURL Command Fix for Compliance Checks
 
 **Issue:** Swagger UI generates curl command without `/api/v1` prefix  
-**Date:** 2025-11-24
+**Date:** 2025-12-05
 
 ---
 
@@ -166,7 +166,7 @@ All endpoints follow the same pattern with `/api/v1/` prefix:
 
 ---
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Status:** Use `/api/v1/compliance/checks` with Authorization header
 
 

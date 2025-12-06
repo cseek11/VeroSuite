@@ -1,0 +1,35 @@
+{
+  "context_id": "ee99f463-a8c6-47bd-8911-3b1eeaaf0470",
+  "workflow_id": "unknown",
+  "workflow_name": "Unknown",
+  "generated_at": "2025-12-04T15:01:32.291399+00:00",
+  "task": {
+    "type": null,
+    "status": "waiting_for_assignment",
+    "files_modified": 0,
+    "file_types": [],
+    "confidence": 0.0
+  },
+  "predictions": [],
+  "context": {
+    "active": [],
+    "preloaded": [],
+    "to_unload": [],
+    "core_files": [],
+    "dynamic_files": [],
+    "suggested": []
+  },
+  "rule_changes": {
+    "created": [],
+    "updated": [],
+    "deleted": [],
+    "unchanged": []
+  },
+  "metrics": {
+    "active_context_files": 0,
+    "preloaded_context_files": 0,
+    "context_to_unload": 0,
+    "workflow_position": 0
+  },
+  "note": "Two-Brain Model: This file is for enforcer's internal use only. LLM does not read this."
+}

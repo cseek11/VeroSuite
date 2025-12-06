@@ -1,6 +1,6 @@
 # Debugging: Sessions Not Showing on Dashboard
 
-**Date:** 2025-11-20  
+**Date:** 2025-12-05  
 **Issue:** Active session created but not appearing on dashboard
 
 ---

@@ -1,0 +1,16 @@
+excluded_paths:
+  - ".cursor__archived_2025-04-12/**"
+  - ".cursor__disabled/**"
+  - "docs/archive/**"
+  - "docs/historical/**"
+  - "docs/reference/**"
+  - "analyze_violations.py"
+  - "check_*.py"
+safe_async_wrappers:
+  - "safeRequest"
+  - "callWithRetry"
+safe_subprocess_wrappers:
+  - "run_command_safe"
+  - "run_checked"
+max_warnings_per_file: 5
+

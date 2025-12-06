@@ -1,6 +1,6 @@
 # State Machine Documentation
 
-**Last Updated:** 2025-11-16  
+**Last Updated:** 2025-12-05  
 **Purpose:** Central registry for all state machine definitions
 
 ---

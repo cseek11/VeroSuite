@@ -1,6 +1,6 @@
 # Swagger UI Authorization Guide
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Purpose:** Step-by-step guide for authorizing in Swagger UI
 
 ---
@@ -163,7 +163,7 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4
 
 ---
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Status:** Authorization working correctly
 
 

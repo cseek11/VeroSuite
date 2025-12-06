@@ -1,6 +1,6 @@
 # Workflow Run Trigger Investigation
 
-**Date:** 2025-11-17  
+**Date:** 2025-12-05  
 **Issue:** Metrics collection workflow not triggering automatically after REWARD_SCORE workflow completes
 
 ---

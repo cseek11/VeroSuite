@@ -1,6 +1,6 @@
 # Dashboard API v2 Migration Guide
 
-**Last Updated:** 2025-11-14  
+**Last Updated:** 2025-12-05  
 **Status:** API v2 Available, v1 Deprecated (Sunset: 2026-11-14)
 
 ---
@@ -22,7 +22,7 @@ All v2 endpoints return responses in a standardized format:
   "data": { /* response data */ },
   "meta": {
     "version": "2.0",
-    "timestamp": "2025-11-14T12:00:00.000Z",
+    "timestamp": "2025-12-05T12:00:00.000Z",
     "count": 10  // when applicable
   }
 }
@@ -247,7 +247,7 @@ VITE_DASHBOARD_API_V2=true
 
 ## Timeline
 
-- **2025-11-14**: API v2 released, v1 deprecated
+- **2025-12-05**: API v2 released, v1 deprecated
 - **2026-05-14**: v1 deprecation warning increased (6 months remaining)
 - **2026-11-14**: v1 sunset (removed from codebase)
 

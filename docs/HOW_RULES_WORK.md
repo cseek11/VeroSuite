@@ -1,6 +1,6 @@
 # How Cursor Rules Work & Ensuring Compliance
 
-**Last Updated:** 2025-11-15  
+**Last Updated:** 2025-12-05  
 **Purpose:** Understanding how rules are applied and how to ensure the AI follows them
 
 ---
@@ -192,7 +192,7 @@ STOP - Before doing anything:
 **Ask:** "What date did you use? Verify it matches current system date."
 
 **Verify:**
-- [ ] Date is current (2025-11-15, not hardcoded)
+- [ ] Date is current (2025-12-05, not hardcoded)
 - [ ] Format is ISO 8601: YYYY-MM-DD
 - [ ] All "Last Updated" fields updated
 
@@ -295,7 +295,7 @@ complete the mandatory search phase, then show me:
 
 ---
 
-**Last Updated:** 2025-11-15  
+**Last Updated:** 2025-12-05  
 **Status:** Active Guide  
 **Owner:** Development Team
 

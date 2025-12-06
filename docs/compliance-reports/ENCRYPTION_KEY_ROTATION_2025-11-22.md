@@ -1,6 +1,6 @@
 # Encryption Key Rotation - Implementation Guide
 
-**Date:** 2025-11-22  
+**Date:** 2025-12-05  
 **Secret Type:** AES-256-GCM Encryption Key (for sensitive data)  
 **Status:** ⚠️ **MIGRATION SCRIPT CREATED** - Manual execution required
 
@@ -187,7 +187,7 @@ if (user?.social_security_number) {
 
 1. ✅ `backend/scripts/rotate-encryption-key.ts` - Migration script created
 2. ⚠️ `backend/.env` - **NOT YET UPDATED** (wait for migration script execution)
-3. ✅ `docs/compliance-reports/ENCRYPTION_KEY_ROTATION_2025-11-22.md` - This document
+3. ✅ `docs/compliance-reports/ENCRYPTION_KEY_ROTATION_2025-12-05.md` - This document
 
 ---
 
@@ -218,7 +218,7 @@ if (user?.social_security_number) {
 ## Related Documentation
 
 - `docs/SECRET_ROTATION_GUIDE.md` - Complete rotation procedures
-- `docs/compliance-reports/COMPREHENSIVE_CODEBASE_AUDIT_2025-11-22.md` - Original audit findings
+- `docs/compliance-reports/COMPREHENSIVE_CODEBASE_AUDIT_2025-12-05.md` - Original audit findings
 - `backend/src/common/services/encryption.service.ts` - Encryption service implementation
 
 ---

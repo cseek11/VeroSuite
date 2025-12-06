@@ -1,6 +1,6 @@
 # SSM Compiler v3 Comparison Report
 
-**Date:** 2025-11-26  
+**Date:** 2025-12-05  
 **Source:** `rego_opa_bible.md`  
 **Compiled:** `rego_opa_bible_v3.ssm.md`  
 **Compiler Version:** 3.0.0  
@@ -183,7 +183,7 @@ The SSM Compiler v3 successfully preserves **99.75% of content** (1 embedded tab
 
 ---
 
-**Last Updated:** 2025-11-26  
+**Last Updated:** 2025-12-05  
 **Compiler Version:** 3.0.0  
 **Status:** ✅ Production Ready
 

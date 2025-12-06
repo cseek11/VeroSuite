@@ -1,0 +1,399 @@
+---
+description: "Technical debt logging, TODO/FIXME cleanup, remediation planning"
+alwaysApply: true
+---
+<!-- @version: 2.0 @owner: platform-core -->
+
+# TECHNICAL DEBT & TODO/FIXME RULES
+
+## PURPOSE
+Ensure all technical debt is visible, logged, and has a remediation plan.
+
+---
+
+## TECH DEBT LOGGING
+- All meaningful debt must be logged in `docs/tech-debt.md` with:
+  - Category (code quality, performance, security, docs, testing, architecture, dependencies).
+  - Location (file path).
+  - Impact.
+  - Remediation plan.
+  - Estimated effort.
+  - Status (open/resolved).
+
+Dates must follow the dynamic date rules from `02-core.mdc` (no hardcoded historical dates).
+
+---
+
+## TODO/FIXME HANDLING
+- AI must **search for** `TODO`/`FIXME` in touched areas.
+- If a TODO/FIXME is resolved:
+  - Remove the comment.
+  - Update `docs/tech-debt.md` entry (mark as resolved).
+  - Optionally add a brief comment explaining solution if non-obvious.
+
+---
+
+## REMEDIATION PLANS
+For meaningful debt:
+- Problem statement
+- Root cause
+- Impact
+- Steps to fix
+- Effort estimate
+- Priority (High/Medium/Low)
+- Dependencies
+
+---
+
+## PIPELINE INTEGRATION
+
+**Step 1:** Search for existing tech debt entries and TODO/FIXME markers.
+
+**Step 3:** Check:
+- New debt discovered is logged.
+- Relevant TODO/FIXME items are addressed or updated.
+
+**Step 5:** Confirm:
+- No resolved TODO/FIXME left in code.
+- Tech-debt log updated.
+
+---
+
+## VIOLATIONS (HARD STOP)
+- Leaving TODO/FIXME after finishing a task.
+- Introducing debt without logging it (when it's known).
+- Using hardcoded dates in the tech-debt log.
+
+---
+
+## Step 5: Post-Implementation Audit for Tech Debt Logging
+
+### R14: Tech Debt Logging — Audit Procedures
+
+**For code changes that introduce technical debt or modify code with existing debt:**
+
+#### Tech Debt Detection
+
+- [ ] **MANDATORY:** Verify all meaningful technical debt is identified and logged
+- [ ] **MANDATORY:** Verify debt categories are correctly assigned (code quality, performance, security, docs, testing, architecture, dependencies)
+- [ ] **MANDATORY:** Verify debt priority is correctly assigned (High/Medium/Low)
+- [ ] **MANDATORY:** Verify debt location includes file path(s) and line numbers (if applicable)
+- [ ] **RECOMMENDED:** Verify debt entries include related issues or dependencies
+
+#### Tech Debt Entry Format
+
+- [ ] **MANDATORY:** Verify debt entries follow the template format in `docs/tech-debt.md`
+- [ ] **MANDATORY:** Verify debt entries include: category, priority, location, description, impact, remediation plan, estimated effort, status
+- [ ] **MANDATORY:** Verify debt entries use current system date (not hardcoded dates)
+- [ ] **MANDATORY:** Verify debt entries are added to appropriate priority section (High/Medium/Low)
+- [ ] **MANDATORY:** Verify "Last Updated" date is updated when adding new debt entries
+- [ ] **RECOMMENDED:** Verify debt entries include related issues or cross-references
+
+#### Remediation Plans
+
+- [ ] **MANDATORY:** Verify remediation plans include problem statement
+- [ ] **MANDATORY:** Verify remediation plans include root cause (if known)
+- [ ] **MANDATORY:** Verify remediation plans include impact description
+- [ ] **MANDATORY:** Verify remediation plans include steps to fix (numbered list)
+- [ ] **MANDATORY:** Verify remediation plans include effort estimate (time estimate)
+- [ ] **MANDATORY:** Verify remediation plans include priority (High/Medium/Low)
+- [ ] **RECOMMENDED:** Verify remediation plans include dependencies (other debt, features, etc.)
+
+#### Date Compliance
+
+- [ ] **MANDATORY:** Verify dates use current system date (check device date before writing)
+- [ ] **MANDATORY:** Verify dates follow ISO 8601 format: `YYYY-MM-DD`
+- [ ] **MANDATORY:** Verify "Last Updated" date is updated when modifying `docs/tech-debt.md`
+- [ ] **MANDATORY:** Verify no hardcoded historical dates are used
+- [ ] **RECOMMENDED:** Verify dates are consistent across related entries
+
+#### Debt Status Management
+
+- [ ] **MANDATORY:** Verify new debt entries have status "Open"
+- [ ] **MANDATORY:** Verify debt entries are updated when work begins (status: "In Progress")
+- [ ] **MANDATORY:** Verify debt entries are updated when resolved (status: "Resolved", moved to resolved section)
+- [ ] **MANDATORY:** Verify resolved debt entries include resolution date and notes
+- [ ] **RECOMMENDED:** Verify resolved debt entries are moved to "Resolved Technical Debt" section
+
+#### Meaningful Debt Detection
+
+- [ ] **MANDATORY:** Verify workarounds are logged as debt (when proper solution deferred)
+- [ ] **MANDATORY:** Verify deferred fixes are logged as debt (when time constraints prevent immediate fix)
+- [ ] **MANDATORY:** Verify deprecated patterns are logged as debt (when still in use)
+- [ ] **MANDATORY:** Verify skipped tests are logged as debt (when complexity prevents testing)
+- [ ] **MANDATORY:** Verify hardcoded values are logged as debt (when should be configurable)
+- [ ] **MANDATORY:** Verify code duplication is logged as debt (when should be abstracted)
+- [ ] **RECOMMENDED:** Verify performance optimizations deferred are logged as debt (with measurable impact)
+
+#### Automated Checks
+
+```bash
+# Run tech debt logging checker
+python .cursor/scripts/check-tech-debt.py --file <file_path>
+
+# Check all changed files
+python .cursor/scripts/check-tech-debt.py --all
+
+# Expected: Warnings for missing debt entries (does not block)
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/tech-debt.rego` (R14 section)
+- **Enforcement:** WARNING (Tier 3 MAD) - Logged but doesn't block
+- **Tests:** `services/opa/tests/tech_debt_r14_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review Code Changes** - Identify all technical debt introduced or modified
+2. **Verify Debt Logging** - Check that all meaningful debt is logged in `docs/tech-debt.md`
+3. **Check Entry Format** - Verify debt entries follow template format
+4. **Validate Dates** - Verify dates use current system date, not hardcoded dates
+5. **Review Remediation Plans** - Verify remediation plans are complete and actionable
+
+**Example Tech Debt Entry (✅):**
+
+```markdown
+## 2025-12-04 - WorkOrderService N+1 Query Issue
+
+**Category:** Performance
+**Priority:** High
+**Location:** `apps/api/src/work-orders/work-orders.service.ts` (lines 45-67)
+**Description:** N+1 query issue in getWorkOrdersWithCustomers method. Each work order triggers a separate customer query.
+**Impact:** Slow response times for work order lists (>2 seconds for 100+ work orders)
+**Remediation Plan:**
+1. Use Prisma include to fetch customers in single query
+2. Add database index on customer_id
+3. Add caching for frequently accessed customers
+**Estimated Effort:** 2 hours
+**Status:** Open
+**Related Issues:** Performance optimization sprint Q1 2026
+```
+
+**Example Missing Debt Logging (❌):**
+
+```typescript
+// ❌ VIOLATION: Workaround introduced but not logged as debt
+async getWorkOrders() {
+  // TODO: Fix N+1 query issue (deferred due to time constraints)
+  // Missing: No entry in docs/tech-debt.md
+  const workOrders = await this.prisma.workOrder.findMany();
+  for (const order of workOrders) {
+    order.customer = await this.prisma.customer.findUnique({
+      where: { id: order.customerId }
+    });
+  }
+  return workOrders;
+}
+```
+
+**Example Proper Debt Logging (✅):**
+
+```typescript
+// ✅ CORRECT: Workaround logged as debt
+async getWorkOrders() {
+  // Workaround: N+1 query issue deferred (see docs/tech-debt.md#DEBT-001)
+  const workOrders = await this.prisma.workOrder.findMany();
+  for (const order of workOrders) {
+    order.customer = await this.prisma.customer.findUnique({
+      where: { id: order.customerId }
+    });
+  }
+  return workOrders;
+}
+```
+
+---
+
+### R15: TODO/FIXME Handling — Audit Procedures
+
+**For code changes that add, modify, or remove TODO/FIXME comments:**
+
+#### TODO/FIXME Detection
+
+- [ ] **MANDATORY:** Verify all TODO/FIXME comments in changed files are identified
+- [ ] **MANDATORY:** Verify TODO/FIXME comments have clear, specific descriptions (not vague)
+- [ ] **MANDATORY:** Verify TODO/FIXME comments are categorized as meaningful or trivial
+- [ ] **MANDATORY:** Verify meaningful TODO/FIXME comments reference tech-debt.md entry
+- [ ] **RECOMMENDED:** Verify TODO/FIXME comments include context (why deferred, what's needed)
+
+#### Meaningful vs Trivial Distinction
+
+- [ ] **MANDATORY:** Verify meaningful TODOs (workarounds, deferred fixes, temporary solutions, hacks) are logged as technical debt
+- [ ] **MANDATORY:** Verify trivial TODOs (current PR work, simple additions, debug statements) are completed in PR
+- [ ] **MANDATORY:** Verify meaningful keywords detected: workaround, deferred, temporary, hack, time constraint, blocked, waiting
+- [ ] **MANDATORY:** Verify trivial keywords detected: add console.log, remove console.log, debug, test this, cleanup
+- [ ] **RECOMMENDED:** Verify context analysis used to distinguish meaningful from trivial (not just keyword matching)
+
+#### TODO/FIXME Resolution Verification
+
+- [ ] **MANDATORY:** Verify resolved TODO/FIXME comments are removed from code
+- [ ] **MANDATORY:** Verify corresponding tech-debt.md entry is updated (status: Resolved)
+- [ ] **MANDATORY:** Verify resolution includes brief comment if solution is non-obvious
+- [ ] **MANDATORY:** Verify no orphaned TODO/FIXME comments left after completing work
+- [ ] **RECOMMENDED:** Verify resolution date is added to tech-debt.md entry
+
+#### Tech Debt Cross-Referencing
+
+- [ ] **MANDATORY:** Verify meaningful TODO/FIXME comments include tech-debt.md reference (e.g., "see docs/tech-debt.md#DEBT-001")
+- [ ] **MANDATORY:** Verify tech-debt.md entries exist for referenced debt IDs
+- [ ] **MANDATORY:** Verify tech-debt.md entries include correct file paths and line numbers
+- [ ] **MANDATORY:** Verify no orphaned references (TODO references non-existent debt entry)
+- [ ] **RECOMMENDED:** Verify bidirectional references (tech-debt.md entry mentions TODO location)
+
+#### Context Analysis
+
+- [ ] **MANDATORY:** Verify TODO/FIXME comments include sufficient context (what, why, when)
+- [ ] **MANDATORY:** Verify TODO/FIXME comments are not vague or empty (minimum 5 characters)
+- [ ] **MANDATORY:** Verify TODO/FIXME comments explain why work is deferred (time constraint, complexity, dependency)
+- [ ] **MANDATORY:** Verify TODO/FIXME comments indicate expected timeline (if known)
+- [ ] **RECOMMENDED:** Verify TODO/FIXME comments include owner or responsible party
+
+#### Multiple TODO/FIXME Handling
+
+- [ ] **MANDATORY:** Verify multiple TODO/FIXME comments in same file are either logged as debt or completed in PR
+- [ ] **MANDATORY:** Verify multiple related TODOs are grouped under single tech-debt.md entry (if appropriate)
+- [ ] **MANDATORY:** Verify multiple unrelated TODOs have separate tech-debt.md entries
+- [ ] **RECOMMENDED:** Verify multiple TODOs are prioritized (which should be addressed first)
+
+#### Automated Checks
+
+```bash
+# Run TODO/FIXME handling checker
+python .cursor/scripts/check-todo-fixme.py --file <file_path>
+
+# Check all changed files
+python .cursor/scripts/check-todo-fixme.py --all
+
+# Check for orphaned TODO references
+python .cursor/scripts/check-todo-fixme.py --check-orphaned
+
+# Expected: Warnings for unhandled TODOs (does not block)
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/tech-debt.rego` (R15 section)
+- **Enforcement:** WARNING (Tier 3 MAD) - Logged but doesn't block
+- **Tests:** `services/opa/tests/tech_debt_r15_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review TODO/FIXME Comments** - Identify all TODO/FIXME comments in changed files
+2. **Categorize TODOs** - Distinguish meaningful (log as debt) from trivial (complete in PR)
+3. **Verify Tech Debt Logging** - Check that meaningful TODOs reference tech-debt.md entries
+4. **Check Resolution** - Verify resolved TODOs are removed and tech-debt.md updated
+5. **Validate Context** - Verify TODOs have sufficient context and clear descriptions
+
+**Example Meaningful TODO (✅):**
+
+```typescript
+// ✅ CORRECT: Meaningful TODO logged as debt with reference
+async getWorkOrders() {
+  // TODO: Fix N+1 query issue (workaround, see docs/tech-debt.md#DEBT-001)
+  const workOrders = await this.prisma.workOrder.findMany();
+  for (const order of workOrders) {
+    order.customer = await this.prisma.customer.findUnique({
+      where: { id: order.customerId }
+    });
+  }
+  return workOrders;
+}
+```
+
+**Example Trivial TODO (❌):**
+
+```typescript
+// ❌ VIOLATION: Trivial TODO should be completed in PR
+async getUsers() {
+  // TODO: Add pagination
+  return this.prisma.user.findMany();
+}
+
+// ✅ CORRECT: Complete trivial work in same PR
+async getUsers(page: number = 1, pageSize: number = 10) {
+  return this.prisma.user.findMany({
+    skip: (page - 1) * pageSize,
+    take: pageSize
+  });
+}
+```
+
+**Example Vague TODO (❌):**
+
+```typescript
+// ❌ VIOLATION: Vague TODO without clear action
+async processOrder(orderId: string) {
+  // TODO: Fix
+  return this.orderService.process(orderId);
+}
+
+// ✅ CORRECT: Clear TODO with specific action
+async processOrder(orderId: string) {
+  // TODO: Add retry logic for failed payment processing (see docs/tech-debt.md#DEBT-002)
+  return this.orderService.process(orderId);
+}
+```
+
+**Example Resolved TODO (✅):**
+
+```typescript
+// ✅ CORRECT: TODO resolved and removed
+// Before:
+// async getUsers() {
+//   // TODO: Add pagination
+//   return this.prisma.user.findMany();
+// }
+
+// After:
+async getUsers(page: number = 1, pageSize: number = 10) {
+  // Pagination implemented (was TODO, now complete)
+  return this.prisma.user.findMany({
+    skip: (page - 1) * pageSize,
+    take: pageSize
+  });
+}
+```
+
+**Example Orphaned TODO Reference (❌):**
+
+```typescript
+// ❌ VIOLATION: References non-existent debt entry
+async getOrders() {
+  // TODO: Fix N+1 query (see docs/tech-debt.md#DEBT-999)
+  // DEBT-999 does not exist in tech-debt.md
+  return this.prisma.order.findMany();
+}
+
+// ✅ CORRECT: Valid reference to existing debt entry
+async getOrders() {
+  // TODO: Fix N+1 query (see docs/tech-debt.md#DEBT-001)
+  // DEBT-001 exists in tech-debt.md with full details
+  return this.prisma.order.findMany();
+}
+```
+
+**Example Multiple TODOs (✅):**
+
+```typescript
+// ✅ CORRECT: Multiple related TODOs grouped under single debt entry
+async getWorkOrders() {
+  // TODO: Optimize query performance (see docs/tech-debt.md#DEBT-003)
+  // - Fix N+1 query for customers
+  // - Add database indexes
+  // - Implement caching
+  const workOrders = await this.prisma.workOrder.findMany();
+  for (const order of workOrders) {
+    order.customer = await this.prisma.customer.findUnique({
+      where: { id: order.customerId }
+    });
+  }
+  return workOrders;
+}
+```
+
+---
+
+**Last Updated:** 2025-12-04  
+**Maintained By:** Platform Core Team  
+**Review Frequency:** Quarterly or when tech debt requirements change

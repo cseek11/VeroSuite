@@ -497,9 +497,25 @@ ls -lh dist/book_raw.md dist/book.ssm.md knowledge/bibles/<lang>/cursor/*.cursor
 
 ---
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Version:** 1.0.0  
 **Status:** Active
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

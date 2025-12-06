@@ -1105,7 +1105,7 @@ def create_user(request: CreateUserRequest) -> UserResponse | ErrorResponse:
         id="1",
         name=request["name"],
         email=request["email"],
-        created_at="2025-11-30T12:00:00Z"
+        created_at="2025-12-05T12:00:00Z"
     )
 ```
 

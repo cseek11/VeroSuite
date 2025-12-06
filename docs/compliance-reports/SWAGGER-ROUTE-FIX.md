@@ -1,7 +1,7 @@
 # Swagger UI Route Fix
 
 **Issue:** 404 error when trying to POST to `/compliance/checks`  
-**Date:** 2025-11-24
+**Date:** 2025-12-05
 
 ---
 
@@ -108,7 +108,7 @@ curl http://localhost:3001/api/docs-json | grep -i compliance
 
 ---
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Status:** Route is correctly configured, use `/api/v1/compliance/checks`
 
 

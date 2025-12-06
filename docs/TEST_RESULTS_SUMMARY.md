@@ -3,9 +3,9 @@
 ## Scope & Authority
 
 - **Scope:** Region Dashboard backend unit/integration tests, frontend E2E tests, and dashboard-specific performance/security tests.
-- **Authoritative as of:** 2025-11-14 (see CI history for newer runs).
+- **Authoritative as of:** 2025-12-05 (see CI history for newer runs).
 
-**Date:** 2025-11-14  
+**Date:** 2025-12-05  
 **Status:** ✅ **ALL DASHBOARD TESTS PASSING**
 
 ---
@@ -192,6 +192,6 @@ npm test -- --testPathPattern="region.repository.spec|dashboard.service.spec" --
 
 ---
 
-**Last Updated:** 2025-11-14  
+**Last Updated:** 2025-12-05  
 **Status:** ✅ Region Dashboard backend unit & integration tests passing; additional enterprise suites available on demand
 

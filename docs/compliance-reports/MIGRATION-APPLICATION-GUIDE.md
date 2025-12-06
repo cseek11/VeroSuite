@@ -1,6 +1,6 @@
 # Migration Application Guide
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Purpose:** Guide for applying the write_queue migration when database is available
 
 ---
@@ -133,7 +133,7 @@ AND tablename = 'write_queue';
 
 ---
 
-**Last Updated:** 2025-11-30
+**Last Updated:** 2025-12-05
 
 
 

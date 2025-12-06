@@ -1,6 +1,6 @@
 # R22: Refactor Integrity — Draft Summary
 
-**Date:** 2025-11-23  
+**Date:** 2025-12-05  
 **Rule:** R22 - Refactor Integrity  
 **Tier:** 3 (WARNING-level enforcement)  
 **Status:** DRAFT - Awaiting Review  
@@ -333,6 +333,6 @@ R22 ensures that refactors maintain behavior, include regression tests, and docu
 
 ---
 
-**Last Updated:** 2025-11-23  
+**Last Updated:** 2025-12-05  
 **Status:** ✅ APPROVED - Ready for Implementation
 

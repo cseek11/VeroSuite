@@ -2,7 +2,7 @@
 title: Contributing to Documentation
 category: Development
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: documentation_admin
 related:
   - docs/README.md
@@ -30,7 +30,7 @@ Every documentation file MUST include frontmatter:
 title: Component Library Guide
 category: Development
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: frontend_team
 related:
   - docs/reference/design-system.md
@@ -231,7 +231,7 @@ CI validates that referenced docs exist and reports broken links.
 
 ---
 
-**Last Updated:** 2025-11-11  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Documentation Admin
 
 

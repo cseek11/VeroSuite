@@ -7,7 +7,7 @@ scope:
   - backend
   - mobile
 priority: high
-last_updated: 2025-11-16
+last_updated: 2025-12-05
 always_apply: true
 ---
 
@@ -340,7 +340,7 @@ export function getStorage(key: string): string | null | Promise<string | null> 
 
 ---
 
-**Last Updated:** 2025-11-16  
+**Last Updated:** 2025-12-05  
 **Status:** Active Enforcement  
 **Priority:** HIGH - Must be followed for every implementation
 

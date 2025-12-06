@@ -1,6 +1,6 @@
 # SSM Compiler - Output File Locations
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Version:** 3.0.0
 
 ## Overview
@@ -123,12 +123,12 @@ python compiler.py input.md output.ssm.md custom_diagnostics.json
     "ch01": {
       "hash": "def456...",
       "line_count": 547,
-      "last_modified": "2025-01-27T10:00:00"
+      "last_modified": "2025-12-05T10:00:00"
     },
     ...
   },
   "total_blocks": 1234,
-  "last_compile_time": "2025-01-27T10:05:00",
+  "last_compile_time": "2025-12-05T10:05:00",
   "cached_blocks": ["block-id-1", "block-id-2", ...]
 }
 ```
@@ -372,5 +372,5 @@ Compilation complete for namespace 'python_bible':
 
 ---
 
-**Last Updated:** 2025-11-30
+**Last Updated:** 2025-12-05
 

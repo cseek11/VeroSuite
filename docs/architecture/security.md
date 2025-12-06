@@ -2,7 +2,7 @@
 title: Security Architecture
 category: Architecture
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: backend_team
 related:
   - docs/reference/tenant-context.md
@@ -152,6 +152,6 @@ See [Tenant Context Reference](../reference/tenant-context.md) for details.
 
 ---
 
-**Last Updated:** 2025-11-11  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Backend Team  
 **Review Frequency:** Quarterly

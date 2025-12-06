@@ -1,6 +1,6 @@
 # R14 Tech Debt Policy Test Failures Report
 
-**Date:** 2025-11-25  
+**Date:** 2025-12-05  
 **Rule:** R14 - Tech Debt Logging  
 **Status:** ⚠️ PARTIAL - 7/12 tests passing (58%)  
 **Priority:** MEDIUM (Test suite debugging required)
@@ -177,7 +177,7 @@ mock_input := {"changed_files": [{
 
 ## Related Documentation
 
-- **Bug Log Entry:** `.cursor/BUG_LOG.md` (2025-11-25)
+- **Bug Log Entry:** `.cursor/BUG_LOG.md` (2025-12-05)
 - **Implementation Status:** `docs/compliance-reports/TASK5-R14-IMPLEMENTATION-COMPLETE.md`
 - **Policy File:** `services/opa/policies/tech-debt.rego`
 - **Test File:** `services/opa/tests/tech_debt_r14_test.rego`
@@ -196,7 +196,7 @@ cd services/opa
 ---
 
 **Reported By:** AI Agent  
-**Date:** 2025-11-25  
+**Date:** 2025-12-05  
 **Status:** Open - Awaiting Policy Debugging
 
 

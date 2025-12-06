@@ -2,7 +2,7 @@
 title: Component Library Guide
 category: Development
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: frontend_team
 related:
   - docs/reference/component-catalog.md
@@ -280,7 +280,7 @@ See [Form Patterns Guide](form-patterns.md) for detailed form implementation pat
 
 ---
 
-**Last Updated:** 2025-11-11  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Frontend Team  
 **Review Frequency:** On component changes
 

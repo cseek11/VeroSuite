@@ -1,6 +1,6 @@
 # R16: Testing Requirements (Additional) — Draft Summary
 
-**Date:** 2025-11-23  
+**Date:** 2025-12-05  
 **Rule:** R16 - Testing Requirements (Additional)  
 **Tier:** 3 (WARNING-level enforcement)  
 **Status:** DRAFT - Awaiting Review  

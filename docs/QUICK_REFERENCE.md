@@ -1,6 +1,6 @@
 # Cursor Rules Quick Reference
 
-**Last Updated:** 2025-11-16  
+**Last Updated:** 2025-12-05  
 **Purpose:** Quick lookup for most common rules
 
 ---
@@ -93,7 +93,7 @@
 **MUST** check device/system date before writing ANY date  
 **NEVER** hardcode dates - always use current date  
 **Check:** `.cursor/rules/core.md` - Date & Time Handling  
-**Format:** ISO 8601: `YYYY-MM-DD` (e.g., `2025-11-15`)
+**Format:** ISO 8601: `YYYY-MM-DD` (e.g., `2025-12-05`)
 
 ### Rule 7: File Audit Compliance ⭐ **MANDATORY**
 **MUST** audit ALL files touched for code compliance  

@@ -6,7 +6,7 @@ scope:
   - verification
   - ci
 priority: high
-last_updated: 2025-11-11 20:13:54
+last_updated: 2025-12-05 20:13:54
 always_apply: true
 ---
 

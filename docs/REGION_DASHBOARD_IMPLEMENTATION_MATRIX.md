@@ -1,6 +1,6 @@
 ## Region Dashboard Refactor Plan → Implementation Matrix
 
-**Authoritative as of:** 2025-11-14  
+**Authoritative as of:** 2025-12-05  
 **Scope:** Region Dashboard phases 1–8 as defined in `Region_Dashboard_Enterprise_Refactor_plan.md`.
 
 ### Legend

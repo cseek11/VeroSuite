@@ -172,7 +172,7 @@ bible-rego: bible-rego-ssm bible-rego-cursor
 
 ---
 
-**Last Updated:** 2025-11-26  
+**Last Updated:** 2025-12-05  
 **Status:** Ready for Implementation  
 **Owner:** Engineering Team
 

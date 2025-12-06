@@ -1,6 +1,6 @@
 # Compliance API - V1 Only
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Status:** Compliance module currently only has v1 endpoints
 
 ---
@@ -126,7 +126,7 @@ Your compliance check was successfully queued:
 
 ---
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Status:** V1 compliance endpoints working correctly, v2 not needed yet
 
 

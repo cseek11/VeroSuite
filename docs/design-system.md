@@ -2,7 +2,7 @@
 title: Design System Reference
 category: Reference
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: design_lead
 related:
   - docs/guides/development/styling-guide.md
@@ -329,7 +329,7 @@ This design system ensures a cohesive, professional appearance across all pages 
 - ❌ Card padding of 16px in data-heavy areas (use 12px instead)
 - ❌ Table rows smaller than 44px or larger than 48px
 
-**Last Updated:** 2025-01-27  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Design Lead  
 **Review Frequency:** Quarterly  
 **Enterprise Standards Applied:** Yes

@@ -1,6 +1,6 @@
 # Phase -1 Baseline Measurements
 
-**Date:** 2025-11-23  
+**Date:** 2025-12-05  
 **Phase:** -1, Week 3  
 **Version:** 1.0.0  
 **Purpose:** Establish baseline metrics before Phase 0 implementation
@@ -51,7 +51,7 @@ This document establishes the baseline measurements for VeroField Rules 2.1 impl
 
 ### 2. Step 5 Coverage
 
-**Current:** 2.5% (measured 2025-11-23)  
+**Current:** 2.5% (measured 2025-12-05)  
 **Target:** 100% (25/25 rules)  
 **Source:** `.cursor/scripts/validate-step5-checks.py`
 
@@ -108,7 +108,7 @@ This document establishes the baseline measurements for VeroField Rules 2.1 impl
 
 **Current:** 127 open violations (from audit)  
 **Target:** <10 open violations  
-**Source:** Codebase audit 2025-11-22
+**Source:** Codebase audit 2025-12-05
 
 **Violation Categories:**
 - File path violations: 45
@@ -333,7 +333,7 @@ This document establishes the baseline measurements for VeroField Rules 2.1 impl
 
 ---
 
-**Baseline Established:** 2025-11-23  
+**Baseline Established:** 2025-12-05  
 **Next Review:** End of Phase 0 (Week 5)  
 **Maintained By:** Rules Champion Team
 

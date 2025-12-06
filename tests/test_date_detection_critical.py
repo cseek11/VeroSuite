@@ -7,7 +7,7 @@ Tests the three critical fixes:
 2. Historical pattern consolidation (5 vs 67 patterns)
 3. File hash cache invalidation
 
-Last Updated: 2025-12-02
+Last Updated: 2025-12-05
 """
 
 import unittest
@@ -76,14 +76,14 @@ class TestNormalizeDateMatchAlternation(unittest.TestCase):
         # YYYY-MM-DD format returns: (YYYY, MM, DD, None, None, None)
         match = ('2025', '11', '27', None, None, None)
         result = self.enforcer._normalize_date_match(match)
-        self.assertEqual(result, '2025-11-27')
+        self.assertEqual(result, '2025-12-05')
     
     def test_mm_dd_yyyy_format(self):
         """Test MM/DD/YYYY format normalization."""
         # MM/DD/YYYY format returns: (None, None, None, MM, DD, YYYY)
         match = (None, None, None, '11', '27', '2025')
         result = self.enforcer._normalize_date_match(match)
-        self.assertEqual(result, '2025-11-27')
+        self.assertEqual(result, '2025-12-05')
     
     def test_mixed_none_values(self):
         """Test handling of mixed None values in tuple."""
@@ -91,7 +91,7 @@ class TestNormalizeDateMatchAlternation(unittest.TestCase):
         match = ('2025', None, '11', None, '27', None)
         result = self.enforcer._normalize_date_match(match)
         # Should filter None and detect YYYY-MM-DD format
-        self.assertEqual(result, '2025-11-27')
+        self.assertEqual(result, '2025-12-05')
     
     def test_insufficient_parts(self):
         """Test handling of insufficient parts."""
@@ -176,10 +176,10 @@ class TestHistoricalPatternConsolidated(unittest.TestCase):
     def test_entry_pattern(self):
         """Test entry/log pattern matching."""
         test_cases = [
-            ("Entry #1 - 2025-11-27", True),
-            ("log #2: 2025-11-27", True),
-            ("note - 2025-11-27", True),
-            ("memo: 2025-11-27", True),
+            ("Entry #1 - 2025-12-05", True),
+            ("log #2: 2025-12-05", True),
+            ("note - 2025-12-05", True),
+            ("memo: 2025-12-05", True),
         ]
         for line, expected in test_cases:
             with self.subTest(line=line):
@@ -189,10 +189,10 @@ class TestHistoricalPatternConsolidated(unittest.TestCase):
     def test_status_completion_pattern(self):
         """Test status/completion pattern matching."""
         test_cases = [
-            ("Completed (2025-11-29)", True),
-            ("resolved: 2025-11-29", True),
-            ("fixed (2025-11-29)", True),
-            ("closed: 2025-11-29", True),
+            ("Completed (2025-12-05)", True),
+            ("resolved: 2025-12-05", True),
+            ("fixed (2025-12-05)", True),
+            ("closed: 2025-12-05", True),
         ]
         for line, expected in test_cases:
             with self.subTest(line=line):
@@ -202,11 +202,11 @@ class TestHistoricalPatternConsolidated(unittest.TestCase):
     def test_metadata_fields_pattern(self):
         """Test metadata fields pattern matching."""
         test_cases = [
-            ("**Date:** 2025-11-28", True),
-            ("**Created:** 2025-11-28", True),
-            ("**Updated:** 2025-11-28", True),
-            ("**Generated:** 2025-11-28", True),
-            ("**Report:** 2025-11-28", True),
+            ("**Date:** 2025-12-05", True),
+            ("**Created:** 2025-12-05", True),
+            ("**Updated:** 2025-12-05", True),
+            ("**Generated:** 2025-12-05", True),
+            ("**Report:** 2025-12-05", True),
         ]
         for line, expected in test_cases:
             with self.subTest(line=line):
@@ -216,8 +216,8 @@ class TestHistoricalPatternConsolidated(unittest.TestCase):
     def test_code_examples_pattern(self):
         """Test code examples pattern matching."""
         test_cases = [
-            ("`2025-01-27`", True),
-            ("date_range(\"2025-01-01\", ...)", True),
+            ("`2025-12-05`", True),
+            ("date_range(\"2025-12-05\", ...)", True),
             # Note: datetime(2025, 1, 1) format doesn't match our pattern
             # This is expected - the pattern looks for dates in quotes or backticks
             # datetime(2025, 1, 1) would need a different pattern
@@ -231,9 +231,9 @@ class TestHistoricalPatternConsolidated(unittest.TestCase):
     def test_document_structure_pattern(self):
         """Test document structure (headers) pattern matching."""
         test_cases = [
-            ("# Document - 2025-11-30", True),
-            ("## Report 2025-11-30", True),
-            ("### Entry 2025-11-30", True),
+            ("# Document - 2025-12-05", True),
+            ("## Report 2025-12-05", True),
+            ("### Entry 2025-12-05", True),
         ]
         for line, expected in test_cases:
             with self.subTest(line=line):
@@ -243,8 +243,8 @@ class TestHistoricalPatternConsolidated(unittest.TestCase):
     def test_non_historical_dates(self):
         """Test that non-historical dates are not matched."""
         test_cases = [
-            ("Updated: 2025-12-02", False),  # Should be current date, not historical
-            ("Last modified: 2025-12-02", False),
+            ("Updated: 2025-12-05", False),  # Should be current date, not historical
+            ("Last modified: 2025-12-05", False),
         ]
         for line, expected in test_cases:
             with self.subTest(line=line):

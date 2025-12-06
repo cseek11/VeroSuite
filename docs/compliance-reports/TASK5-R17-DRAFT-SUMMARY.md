@@ -1,6 +1,6 @@
 # R17: Coverage Requirements — Draft Summary
 
-**Date:** 2025-11-23  
+**Date:** 2025-12-05  
 **Rule:** R17 - Coverage Requirements  
 **Tier:** 3 (WARNING-level enforcement)  
 **Status:** DRAFT - Awaiting Review  
@@ -88,7 +88,7 @@ R17 ensures that code changes maintain and improve test coverage beyond the basi
 
 **Recommendation:** Option C (Git-based storage)
 - Store coverage history in `.coverage/history.json` (version controlled)
-- Format: `{ "file": "path/to/file.ts", "date": "2025-11-23", "coverage": { "statements": 85, "branches": 82, ... } }`
+- Format: `{ "file": "path/to/file.ts", "date": "2025-12-05", "coverage": { "statements": 85, "branches": 82, ... } }`
 - Benefits: Version controlled, no database needed, historical data available
 
 ---

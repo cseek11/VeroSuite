@@ -2,7 +2,7 @@
 title: Troubleshooting Guide
 category: Deployment
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: devops
 related:
   - docs/guides/deployment/production.md
@@ -203,7 +203,7 @@ curl -X POST https://api.yourdomain.com/auth/login \
 
 ---
 
-**Last Updated:** 2025-11-11  
+**Last Updated:** 2025-12-05  
 **Maintained By:** DevOps  
 **Review Frequency:** As needed
 

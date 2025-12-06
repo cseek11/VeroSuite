@@ -1,6 +1,6 @@
 # Phase 2 - Supabase Schema Access Setup Required
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Status:** ⚠️ **ACTION REQUIRED** - RPC Functions Need to be Deployed
 
 ---
@@ -171,7 +171,7 @@ RPC functions are created in `veroscore` schema:
 
 ---
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Next Action:** Deploy RPC functions to Supabase or configure schema exposure
 
 

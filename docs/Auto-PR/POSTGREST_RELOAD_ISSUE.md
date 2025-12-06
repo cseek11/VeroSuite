@@ -1,6 +1,6 @@
 # PostgREST Reload Issue - Troubleshooting
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Status:** ⚠️ Configuration Set But Not Active
 
 ---
@@ -108,7 +108,7 @@ result = supabase.schema("veroscore").table("sessions").select("*").execute()
 
 ---
 
-**Last Updated:** 2025-11-24  
+**Last Updated:** 2025-12-05  
 **Status:** ⏳ Waiting for PostgREST to reload or investigating Python client limitations
 
 

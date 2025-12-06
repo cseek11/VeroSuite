@@ -1,6 +1,6 @@
 # Contract Registry
 
-**Last Updated:** 2025-11-16  
+**Last Updated:** 2025-12-05  
 **Purpose:** Central registry for all API contracts, event schemas, and data transfer objects
 
 ---

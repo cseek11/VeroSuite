@@ -1,6 +1,6 @@
 # Queue Processor Verification Guide
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Purpose:** Verify the compliance queue processor is working correctly
 
 ---
@@ -239,7 +239,7 @@ AND processed_at IS NOT NULL;
 
 ---
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Status:** Queue processor is running and polling correctly
 
 

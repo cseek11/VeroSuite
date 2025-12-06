@@ -1,6 +1,6 @@
 # Best Practices: Getting AI to Follow Rules Consistently
 
-**Last Updated:** 2025-11-15  
+**Last Updated:** 2025-12-05  
 **Purpose:** Guide for ensuring AI assistant consistently follows project rules
 
 ---
@@ -413,7 +413,7 @@ You used backend/src/ but should use apps/api/src/"
 
 ---
 
-**Last Updated:** 2025-11-15  
+**Last Updated:** 2025-12-05  
 **Status:** Active Best Practices  
 **Owner:** Development Team
 

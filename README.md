@@ -40,6 +40,17 @@ npm run dev
 - **[API Documentation](docs/guides/api/README.md)** - Backend and frontend API docs
 - **[Architecture Overview](docs/architecture/system-overview.md)** - System design
 
+## 📦 Archive Directories
+
+The following directories are read-only archives and must not be modified:
+
+- `.cursor__archived_*/` — Historical Cursor configurations (if present)
+- `.cursor__disabled/` — Disabled/legacy enforcement code and rules (migrated to `.ai/`)
+
+**Active configuration and AI data live in:**
+- `.cursor/` — IDE integration and enforcement summaries
+- `.ai/` — Rules, memory bank, patterns, and AI logs
+
 ## 🚀 Current Status: **PRODUCTION READY**
 
 The system has been fully implemented with:

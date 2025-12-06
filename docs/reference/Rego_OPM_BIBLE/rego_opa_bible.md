@@ -2,7 +2,7 @@
 
 **Definitive Guide to the Rego Language and the Open Policy Agent (OPA) Ecosystem**
 
-Version: 2025-11-25 (Expanded)  
+Version: 2025-12-05 (Expanded)  
 Author: Prof. [Your Name], Ph.D.  
 Discipline: Computer Engineering, Logic Programming, Declarative Policy Systems
 
@@ -2671,7 +2671,7 @@ Example manifest (conceptual):
   "roots": ["authz", "compliance"],
   "metadata": {
     "version": "1.2.3",
-    "built_at": "2025-11-25T12:00:00Z"
+    "built_at": "2025-12-05T12:00:00Z"
   }
 }
 OPA config:
@@ -3307,7 +3307,7 @@ Minimum recommended fields:
 Conceptual log:
 {
   "decision_id": "3f7b9b1a-0ee2-4e52-9f39-4edb8b6a3a01",
-  "timestamp": "2025-11-25T10:02:45Z",
+  "timestamp": "2025-12-05T10:02:45Z",
   "path": "data.authz.allow",
   "input_hash": "sha256:abcd...",
   "result": {
@@ -3524,7 +3524,7 @@ OPA remains pure — no long-lived state, no hidden mutable variables.
 ________________________________________
 15.4 Time-Scoped Exceptions
 Sometimes you want:
-•	“Allow this temporary override until 2025-12-31.”
+•	“Allow this temporary override until 2025-12-05.”
 Pattern:
 package overrides
 
@@ -4332,7 +4332,7 @@ bundle/
 
 9.X.1 Example .manifest File
 {
-  "revision": "2025-11-25T10:00:00Z-abc123",
+  "revision": "2025-12-05T10:00:00Z-abc123",
   "roots": [
     "authz",
     "jwt",

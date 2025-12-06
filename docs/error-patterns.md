@@ -4,7 +4,7 @@ This document catalogs error patterns, their root causes, fixes, and prevention 
 
 ---
 
-## TYPESCRIPT_ANY_TYPES - 2025-11-30
+## TYPESCRIPT_ANY_TYPES - 2025-12-05
 
 ### Summary
 Components used TypeScript `any` types instead of proper types, reducing type safety and potentially causing runtime errors. This pattern was found in event handlers, type assertions, and function return types.
@@ -95,7 +95,7 @@ const getPaymentTypeColor = (type: string): 'default' | 'secondary' | 'outline' 
 
 ---
 
-## TENANT_CONTEXT_NOT_FOUND - 2025-11-30
+## TENANT_CONTEXT_NOT_FOUND - 2025-12-05
 
 ### Summary
 Backend service methods failed to retrieve tenant context when using `getCurrentTenantId()` due to Prisma connection pooling not preserving `SET LOCAL` session variables set by middleware.
@@ -178,7 +178,7 @@ async getInvoices(@Request() req: any, @Query('accountId') accountId?: string) {
 
 ---
 
-## INVALID_UUID_FORMAT - 2025-11-30
+## INVALID_UUID_FORMAT - 2025-12-05
 
 ### Summary
 Frontend passed `accountId` parameter with malformed format (leading `:` and trailing `}` characters), causing Prisma UUID parsing errors.
@@ -257,7 +257,7 @@ async getInvoices(accountId?: string, status?: InvoiceStatus, tenantId?: string)
 
 ---
 
-## TABS_COMPONENT_MISSING_CONTENT - 2025-11-30
+## TABS_COMPONENT_MISSING_CONTENT - 2025-12-05
 
 ### Summary
 Frontend component showed white page because `Tabs` component only renders navigation buttons, not the tab content. Component was missing logic to render active tab content.
@@ -340,7 +340,7 @@ export default function CustomerPaymentPortal({ customerId, onClose }: CustomerP
 
 ---
 
-## TEST_SELECTOR_MISMATCH - 2025-11-30
+## TEST_SELECTOR_MISMATCH - 2025-12-05
 
 ### Summary
 Frontend tests failed because they used incorrect selectors to find tab elements. Tests used `getByRole('button')` to find tabs, but tabs may not have `role="tab"` when using certain Tabs component implementations, or tabs may not render at all if the component uses a `tabs` prop that the Tabs component doesn't support.
@@ -424,7 +424,7 @@ if (invoicesTab) {
 
 ---
 
-## START_SCRIPT_PATH_MISMATCH - 2025-11-30
+## START_SCRIPT_PATH_MISMATCH - 2025-12-05
 
 ### Summary
 Start script in `package.json` was looking for `dist/main.js` but NestJS build outputs to `dist/apps/api/src/main.js` due to monorepo structure preservation. This caused the API server to fail to start with "Cannot find module" error.
@@ -585,7 +585,7 @@ When adding a new pattern:
 
 ---
 
-## TEST_ASYNC_TIMEOUT_MULTIPLE_ELEMENTS - 2025-11-30
+## TEST_ASYNC_TIMEOUT_MULTIPLE_ELEMENTS - 2025-12-05
 
 ### Summary
 Frontend tests failed with timeouts and "Found multiple elements" errors when testing async operations and button interactions. Tests used `getByText()` or `getByRole()` which fail when multiple elements match, and didn't properly handle async operations with appropriate timeouts and fallback strategies.
@@ -705,7 +705,7 @@ All regression tests are in place:
 
 ---
 
-## REACT_QUERY_API_FETCH_ERROR - 2025-11-30
+## REACT_QUERY_API_FETCH_ERROR - 2025-12-05
 
 ### Summary
 React Query API fetch errors in ResourceTimeline component were not properly handled, causing silent failures and poor user experience. Errors from `enhancedApi.technicians.list`, `enhancedApi.users.list`, and `enhancedApi.jobs.getByDateRange` were not being caught and displayed to users.
@@ -845,7 +845,7 @@ it('should handle job update errors gracefully', async () => {
 
 ## TYPESCRIPT_ERROR_CLEANUP - TypeScript Compilation Error Cleanup Patterns
 
-**Date:** 2025-11-30  
+**Date:** 2025-12-05  
 **Category:** Frontend/TypeScript  
 **Severity:** Medium  
 **Status:** Fixed
@@ -1071,13 +1071,13 @@ catch (error) { ... } // TS6133 error if error not used
 
 ### Related Documentation
 - `.cursor/BUG_LOG.md` - Bug log entry
-- `docs/compliance-reports/TYPESCRIPT_ERROR_FIX_AUDIT_2025-11-22.md` - Full audit report
+- `docs/compliance-reports/TYPESCRIPT_ERROR_FIX_AUDIT_2025-12-05.md` - Full audit report
 - `frontend/TYPESCRIPT_ERROR_FIX_PLAN.md` - Cleanup plan
 - `frontend/TYPESCRIPT_ERROR_FIX_QUICK_REFERENCE.md` - Quick reference guide
 
 ---
 
-## OPA_REGO_ABS_FUNCTION_SYNTAX - 2025-11-30
+## OPA_REGO_ABS_FUNCTION_SYNTAX - 2025-12-05
 
 ### Summary
 OPA Rego `abs()` function used old syntax with multiple definitions (`abs(x) := x if { x >= 0 }` and `abs(x) := -x if { x < 0 }`), causing "unexpected assign token: expected function value term" errors. Rego doesn't support multiple function definitions with conditional logic.
@@ -1129,7 +1129,7 @@ decrease_abs := file.delta.statements * -1
 
 ---
 
-## OPA_REGO_MISSING_IMPORT_IN - 2025-11-30
+## OPA_REGO_MISSING_IMPORT_IN - 2025-12-05
 
 ### Summary
 13 files (7 policy files + 6 test files) used `some x in xs` syntax without `import future.keywords.in`, causing "unexpected identifier token: expected \n or ; or }" errors. Modern Rego requires explicit import for `in` keyword.
@@ -1202,7 +1202,7 @@ import future.keywords.in
 
 ---
 
-## OPA_REGO_ENDSWITH_METHOD_SYNTAX - 2025-11-30
+## OPA_REGO_ENDSWITH_METHOD_SYNTAX - 2025-12-05
 
 ### Summary
 Used method syntax `file.path.endswith(".sql")` instead of function syntax `endswith(file.path, ".sql")`, causing "undefined function file.path.endswith" errors. Rego `endswith` is a built-in function, not a method.
@@ -1256,7 +1256,7 @@ needs_data_migration_tests(file) if {
 
 ---
 
-## OPA_REGO_WARN_RULE_SYNTAX - 2025-11-30
+## OPA_REGO_WARN_RULE_SYNTAX - 2025-12-05
 
 ### Summary
 Multiple `warn` rules used old syntax `warn contains msg if` causing "conflicting rules" and "var cannot be used for rule name" errors. Rego requires consistent rule syntax and doesn't allow multiple rules with same name using different syntax patterns.
@@ -1324,7 +1324,7 @@ warn[msg] {
 
 ---
 
-## OPA_REGO_SET_TO_ARRAY_CONVERSION - 2025-11-30
+## OPA_REGO_SET_TO_ARRAY_CONVERSION - 2025-12-05
 
 ### Summary
 Violations and warnings defined as sets (`violations[msg]`) but concatenated as arrays using `array.concat()`, causing "invalid argument(s)" type errors. `array.concat()` expects arrays, not sets.
@@ -1386,7 +1386,7 @@ warnings_str := concat("; ", warnings)  # Works correctly
 
 ---
 
-## OPA_REGO_DEPRECATED_ANY_FUNCTION - 2025-11-30
+## OPA_REGO_DEPRECATED_ANY_FUNCTION - 2025-12-05
 
 ### Summary
 Test file used deprecated `any()` function (9 occurrences) causing "deprecated built-in function calls in expression: any" errors. `rego.v1` doesn't support `any()` function - must use alternative patterns.
@@ -1449,7 +1449,7 @@ test_no_warnings if {
 
 ---
 
-## OPA_REGO_PYTHON_STYLE_CONDITIONAL - 2025-11-30
+## OPA_REGO_PYTHON_STYLE_CONDITIONAL - 2025-12-05
 
 ### Summary
 Used Python-style conditional (`3.0 if is_large_text else 4.5`) in Rego policy file, causing "unexpected if keyword" parse errors. Rego doesn't support ternary operators or Python-style conditionals.
@@ -1505,7 +1505,7 @@ required_ratio := get_required_contrast_ratio(is_large_text)
 
 ---
 
-## OPA_REGO_OR_OPERATOR - 2025-11-30
+## OPA_REGO_OR_OPERATOR - 2025-12-05
 
 ### Summary
 Used `||` (OR operator) in Rego policy file, causing "unexpected or token" parse errors. Rego doesn't support logical OR operators (`||`) or AND operators (`&&`) in expressions.
@@ -1569,7 +1569,7 @@ accessibility_warnings[msg] if {
 
 ---
 
-## OPA_REGO_EMPTY_STRING_DETECTION - 2025-11-30
+## OPA_REGO_EMPTY_STRING_DETECTION - 2025-12-05
 
 ### Summary
 Policy checked `not exemption.justification` which only detects missing fields, not empty strings (`""`). In Rego, empty strings are truthy, so missing field check fails when field exists but is empty, causing test failures.
@@ -1637,7 +1637,7 @@ accessibility_warnings[msg] if {
 
 ---
 
-## OPA_REGO_SET_ITERATION_BUG - 2025-11-30
+## OPA_REGO_SET_ITERATION_BUG - 2025-12-05
 
 ### Summary
 R21 file organization warnings were not being collected correctly in the `warn` rule. The policy used incorrect Rego syntax for iterating over set keys, causing the iteration to return `true` (the set value) instead of warning messages (the set keys). This prevented all 14 R21 warning types from being generated, causing 14 out of 19 tests to fail.
@@ -1721,7 +1721,7 @@ opa eval 'data.compliance.architecture.warn'
 
 ---
 
-## OPA_REGO_CASE_SENSITIVE_CONTAINS - 2025-11-30
+## OPA_REGO_CASE_SENSITIVE_CONTAINS - 2025-12-05
 
 ### Summary
 Test assertion failed due to case sensitivity mismatch between test string and warning message. The test checked for `contains(warning, "reusable component")` (lowercase) but the warning message used "Reusable component" (capital R). Rego's `contains()` function is case-sensitive, causing the test to fail even though the warning was generated correctly.
@@ -1819,7 +1819,7 @@ test_component_wrong_location if {
 
 ---
 
-## REGO_STRING_LITERAL_INTERPRETATION - 2025-11-30
+## REGO_STRING_LITERAL_INTERPRETATION - 2025-12-05
 
 ### Summary
 R15 tech debt policy tests failed because `\n` escape sequences in Rego test strings are treated as literal characters (backslash + 'n'), not actual newline characters, unlike JSON inputs where `\n` is decoded to actual newlines during JSON parsing. This caused regex patterns expecting newlines to fail in tests, even though the same patterns worked correctly with JSON inputs via `opa eval --input`.
@@ -1914,7 +1914,7 @@ test_todo_without_clear_action if {
 
 ---
 
-## REGO_TEST_EVALUATION_CONTEXT - 2025-11-30
+## REGO_TEST_EVALUATION_CONTEXT - 2025-12-05
 
 ### Summary
 R15 tech debt policy tests failed because `count(tech_debt.warn) >= 1 with input as mock_input` didn't correctly evaluate in test context. The `with` clause evaluation context affects how rule results are accessed, requiring explicit variable binding before operations like `count()`.
@@ -1990,7 +1990,7 @@ test_example if {
 
 ---
 
-## REGO_UNSAFE_VAR_BARE_RULE_NAMES - 2025-11-30
+## REGO_UNSAFE_VAR_BARE_RULE_NAMES - 2025-12-05
 
 ### Summary
 sample_test.rego had 6 unsafe variable errors (`rego_unsafe_var_error`) because tests used bare rule names (`deny`, `warn`, `override`, `metadata`) instead of qualified names (`sample.deny`, `sample.warn`, etc.) and performed direct operations on rules instead of binding results to variables first. Tests failed even though the import `import data.compliance.sample` was present.
@@ -2092,11 +2092,11 @@ test_metadata if {
 - **REGO_STRING_LITERAL_INTERPRETATION** - Related test input issues
 - **OPA_REGO_SET_TO_ARRAY_CONVERSION** - Related set access issues
 
-**Related:** `.cursor/BUG_LOG.md` (2025-11-30)
+**Related:** `.cursor/BUG_LOG.md` (2025-12-05)
 
 ---
 
-## SUPABASE_SCHEMA_ACCESS_OVERENGINEERING - 2025-11-30
+## SUPABASE_SCHEMA_ACCESS_OVERENGINEERING - 2025-12-05
 
 ### Summary
 When accessing tables in a non-default schema (e.g., `veroscore` instead of `public`), we attempted complex PostgREST configuration, RPC functions, and Accept-Profile headers before discovering that the Supabase Python client has a native `.schema()` method that works immediately without any configuration.
@@ -2190,7 +2190,7 @@ result = supabase.schema("veroscore").table("sessions").select("*").execute()
 
 ---
 
-## REGO_REGEX_LINE_ANCHOR_FAILURE - 2025-11-30
+## REGO_REGEX_LINE_ANCHOR_FAILURE - 2025-12-05
 
 ### Summary
 R06 breaking change policy tests failed (5/11 tests) because regex patterns used line anchors (`^`) and newline escape sequences (`\n`) which don't work as expected in Rego multiline strings. Patterns like `regex.match(".*^\\-.*export...")` failed to match breaking changes in diffs, causing policy violations to go undetected.
@@ -2296,11 +2296,11 @@ has_changelog_update(files) if {
 - **REGO_STRING_LITERAL_INTERPRETATION** - Related string literal handling issues
 - **REGO_TEST_EVALUATION_CONTEXT** - Related test structure issues
 
-**Related:** `.cursor/BUG_LOG.md` (2025-11-30)
+**Related:** `.cursor/BUG_LOG.md` (2025-12-05)
 
 ---
 
-## REGO_TEST_WITH_CLAUSE_MISSING - 2025-11-30
+## REGO_TEST_WITH_CLAUSE_MISSING - 2025-12-05
 
 ### Summary
 R06 breaking change policy tests failed because test evaluations were missing `with input as test_input` clauses. Tests used `violations := data.compliance.data_integrity.deny` without `with` clause, causing policy to evaluate with empty/default input instead of test input, resulting in 0 violations when violations were expected.
@@ -2368,12 +2368,12 @@ test_r06_violation_missing_breaking_tag if {
 - **REGO_TEST_EVALUATION_CONTEXT** - Related variable binding and evaluation context issues
 - **REGO_UNSAFE_VAR_BARE_RULE_NAMES** - Related test structure issues
 
-**Related:** `.cursor/BUG_LOG.md` (2025-11-30)
+**Related:** `.cursor/BUG_LOG.md` (2025-12-05)
 - **Missing documentation review** before implementation
 
 ---
 
-## REGO_CONTAINS_TYPE_ERROR - 2025-11-30
+## REGO_CONTAINS_TYPE_ERROR - 2025-12-05
 
 ### Summary
 `quality_r16_test.rego` had 11 type errors with `contains()` function receiving boolean instead of string. Tests used `quality.additional_testing_warnings` directly which returned boolean values instead of strings. The error persisted across multiple OPA versions and required pattern changes to use aggregated warnings.
@@ -2437,7 +2437,7 @@ test_missing_error_path_tests if {
 
 ---
 
-## REGO_POLICY_TEST_FILE_WARNINGS - 2025-11-30
+## REGO_POLICY_TEST_FILE_WARNINGS - 2025-12-05
 
 ### Summary
 Quality policy (R16) generating warnings for test files themselves (e.g., `auth.service.spec.ts`, `migration.test.sql`) because `needs_security_tests` and `needs_data_migration_tests` didn't exclude test files. Policy checked if test file paths contained "auth" or "migration" and generated warnings for test files that don't need their own tests. Required trace debugging with `--explain=full` to identify root cause.
@@ -2517,7 +2517,7 @@ is_test_file(path) if {
 
 ---
 
-## REGO_POLICY_ENUM_MATCH_FIRST_ONLY - 2025-11-30
+## REGO_POLICY_ENUM_MATCH_FIRST_ONLY - 2025-12-05
 
 ### Summary
 R05 data integrity policy only processed first enum match found in diff instead of all matches. Policy used `entity_name := entity_matches[0][1]` which only checked first match, causing missed violations when multiple stateful entities were modified in same PR. Edge case test `test_r05_edge_case_multiple_entities` failed because second entity violation was not detected.
@@ -2593,11 +2593,11 @@ not state_machine_doc_exists(entity_name)
 - REGO_POLICY_TEST_FILE_WARNINGS - Similar pattern with incomplete iteration
 - Missing iteration over array results in other policies
 
-**Related:** `.cursor/BUG_LOG.md` (2025-11-30)
+**Related:** `.cursor/BUG_LOG.md` (2025-12-05)
 
 ---
 
-## METRICS_COLLECTOR_IMPORT_ERROR - 2025-11-30
+## METRICS_COLLECTOR_IMPORT_ERROR - 2025-12-05
 
 ### Summary
 SSM Compiler failed with `NameError: name 'MetricsCollector' is not defined` when running compilation. The MetricsCollector import was added but not properly imported in the try/except block, and the check `if MetricsCollector:` was incorrect (should be `if MetricsCollector is not None:`). Additionally, the `compile_document` function didn't accept a namespace parameter and `compile_markdown_to_ssm_v3` didn't return diagnostics tuple.
@@ -2669,13 +2669,13 @@ def compile_document(
 ### Related Files
 - `docs/reference/Rego_OPM_BIBLE/opa_ssm_compiler/compiler.py`
 - `docs/reference/Rego_OPM_BIBLE/opa_ssm_compiler/runtime/metrics.py`
-- Related: `.cursor/BUG_LOG.md` (2025-11-30)
+- Related: `.cursor/BUG_LOG.md` (2025-12-05)
 
 ---
 
 ---
 
-## TABLE_EXTRACTION_ONLY_PARAGRAPHS - 2025-11-30
+## TABLE_EXTRACTION_ONLY_PARAGRAPHS - 2025-12-05
 
 ### Summary
 SSM Compiler lost 82% of tables (14 out of 17) during compilation because the table extractor only scanned paragraph nodes for tables. Markdown tables are typically standalone blocks, not embedded in paragraphs, so they weren't detected by the parser. The parser didn't create `table` node types, causing tables to be lost during AST processing.
@@ -2783,13 +2783,13 @@ while line_idx < len(lines):
 - `docs/reference/Rego_OPM_BIBLE/opa_ssm_compiler/modules/parser_markdown.py`
 - `docs/reference/Rego_OPM_BIBLE/opa_ssm_compiler/modules/extractor_tables.py`
 - `docs/reference/Rego_OPM_BIBLE/opa_ssm_compiler/COMPARISON_REPORT.md`
-- Related: `.cursor/BUG_LOG.md` (2025-11-30)
+- Related: `.cursor/BUG_LOG.md` (2025-12-05)
 
 ---
 
 ---
 
-## TABLE_EXTRACTION_EMBEDDED_TABLES - 2025-11-30
+## TABLE_EXTRACTION_EMBEDDED_TABLES - 2025-12-05
 
 ### Summary
 SSM Compiler comparison report indicated 4 tables in source document but only 3 were extracted. Investigation revealed that only 3 real markdown tables exist in the source; line 242 was incorrectly identified as a table by the comparison script. Line 242 is actually EBNF grammar syntax (the `|` character is the EBNF "or" operator, not a table separator). Enhanced table detection to handle embedded tables that appear after text without blank lines and improved scanning of paragraphs and code blocks.
@@ -2864,12 +2864,12 @@ if lang in ('markdown', 'md', 'text') or (not lang and '|' in code_text):
 ```
 
 ### Related
-- .cursor/BUG_LOG.md (2025-11-30)
+- .cursor/BUG_LOG.md (2025-12-05)
 - docs/reference/Rego_OPM_BIBLE/opa_ssm_compiler/V3_COMPARISON_REPORT.md
 
 ---
 
-## DUPLICATE_CHAPTER_CODES - 2025-11-30
+## DUPLICATE_CHAPTER_CODES - 2025-12-05
 
 ### Summary
 Chapter code "CH-03" appeared twice in SSM compiler output (legitimate chapter + diagram chapter). Diagram titles like "Evaluation Flow (Diagram)" were being detected as chapters because they matched the chapter heading pattern "Chapter X — Title". This violated V3 requirement that chapter codes must be globally unique.
@@ -2943,11 +2943,11 @@ for chapter_node in doc.get_all_chapters():
 ### Related Files
 - `docs/reference/Rego_OPM_BIBLE/opa_ssm_compiler/modules/parser_markdown.py`
 - `docs/reference/Rego_OPM_BIBLE/opa_ssm_compiler/modules/parser_ssm.py`
-- Related: `.cursor/BUG_LOG.md` (2025-11-30)
+- Related: `.cursor/BUG_LOG.md` (2025-12-05)
 
 ---
 
-## CONCEPT_SUMMARY_LIST_MARKERS - 2025-11-30
+## CONCEPT_SUMMARY_LIST_MARKERS - 2025-12-05
 
 ### Summary
 Concept block summaries were single numbers (1, 4, etc.) or bullets because summary generation used naive text splitting that captured list markers. When text started with "1. " or "- ", the summary became just the number/bullet instead of the actual content. This produced invalid summaries that didn't represent the actual concept.
@@ -3006,11 +3006,11 @@ if ". " in summary_text:
 ### Related Files
 - `docs/reference/Rego_OPM_BIBLE/opa_ssm_compiler/modules/parser_ssm.py`
 - `docs/reference/Rego_OPM_BIBLE/opa_ssm_compiler/modules/parser_markdown.py`
-- Related: `.cursor/BUG_LOG.md` (2025-11-30)
+- Related: `.cursor/BUG_LOG.md` (2025-12-05)
 
 ---
 
-## TERM_EXTRACTION_TRUNCATION - 2025-11-30
+## TERM_EXTRACTION_TRUNCATION - 2025-12-05
 
 ### Summary
 Term definitions were truncated at backticks or first period because regex pattern `([^.\n]+)` stopped at first period or newline. Definitions containing code blocks (e.g., `import rego`) or multi-sentence explanations were cut off, losing important context and making definitions incomplete.
@@ -3063,11 +3063,11 @@ TERM_DEF_RE = re.compile(r"\*\*([^*]+)\*\*:\s*(.+?)(?=\n\n|\*\*|$)", re.DOTALL)
 ### Related Files
 - `docs/reference/Rego_OPM_BIBLE/opa_ssm_compiler/modules/utils/patterns.py`
 - `docs/reference/Rego_OPM_BIBLE/opa_ssm_compiler/modules/extractor_terms.py`
-- Related: `.cursor/BUG_LOG.md` (2025-11-30)
+- Related: `.cursor/BUG_LOG.md` (2025-12-05)
 
 ---
 
-## SILENT_EXCEPTION_SWALLOWING - 2025-11-30
+## SILENT_EXCEPTION_SWALLOWING - 2025-12-05
 
 ### Summary
 Compiler silently swallowed exceptions when loading cache (compiler.py:163-164), making debugging impossible. Exception was caught with `except Exception: pass` without any logging or error reporting. This violated Python Bible anti-pattern D.13 (bare except blocks) and error handling best practices.
@@ -3134,7 +3134,7 @@ except Exception as e:
 
 ---
 
-## UNCOMPILED_REGEX_PATTERNS - 2025-11-30
+## UNCOMPILED_REGEX_PATTERNS - 2025-12-05
 
 ### Summary
 Regex patterns in summary_generator.py were compiled on every method call instead of being pre-compiled at module level, causing unnecessary performance overhead. Patterns like `r'^[\d]+\.\s+'` were compiled repeatedly in hot paths (_normalize_text, _split_sentences, etc.).
@@ -3195,7 +3195,7 @@ def _normalize_text(self, text: str) -> str:
 
 ---
 
-## MAGIC_NUMBERS_IN_CODE - 2025-11-30
+## MAGIC_NUMBERS_IN_CODE - 2025-12-05
 
 ### Summary
 Multiple files contained magic numbers (hardcoded numeric literals) without named constants, reducing code readability and maintainability. Found in summary_generator.py (3, 5, 10, 100, 150) and v3_metadata.py (1, 10, 20, 80).
@@ -3265,11 +3265,11 @@ if len(ref) == MIN_SYMBOL_LENGTH:
 
 ---
 
-**Last Updated:** 2025-11-30
+**Last Updated:** 2025-12-05
 
 ---
 
-## BARE_EXCEPT_CLAUSES - 2025-11-30
+## BARE_EXCEPT_CLAUSES - 2025-12-05
 
 ### Summary
 Two files contained bare `except:` clauses that silently swallowed all exceptions, violating Python Bible anti-pattern D.13 and error handling best practices (R07). This made debugging impossible and violated the "no silent failures" rule.
@@ -3358,11 +3358,11 @@ def chapter_sort_key(item: tuple[str, Dict[str, Any]]) -> int:
 - `.cursor/rules/06-error-resilience.mdc` (R07: Error Handling)
 
 ### Related Issues
-- `.cursor/BUG_LOG.md` (2025-11-30)
+- `.cursor/BUG_LOG.md` (2025-12-05)
 
 ---
 
-## EXCESSIVE_PRINT_STATEMENTS - 2025-11-30
+## EXCESSIVE_PRINT_STATEMENTS - 2025-12-05
 
 ### Summary
 45+ Python files contained 972+ `print()` statements instead of structured logging, violating R08 observability rules and Python Bible anti-pattern BLK-13.16. Production code used `print()` for info, progress, warnings, and errors instead of StructuredLogger, making logs unsearchable and lacking required fields (traceId, context, operation, severity).
@@ -3457,9 +3457,9 @@ logger.warn(
 - `.cursor/rules/07-observability.mdc` (R08: Structured Logging)
 
 ### Related Issues
-- `.cursor/BUG_LOG.md` (2025-11-30)
-- `.cursor/PYTHON_LEARNINGS_LOG.md` (Entry #3 - 2025-11-30)
+- `.cursor/BUG_LOG.md` (2025-12-05)
+- `.cursor/PYTHON_LEARNINGS_LOG.md` (Entry #3 - 2025-12-05)
 
 ---
 
-**Last Updated:** 2025-11-30
+**Last Updated:** 2025-12-05

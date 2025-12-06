@@ -2,7 +2,7 @@
 title: Database Schema Reference
 category: Reference
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: backend_team
 related:
   - docs/reference/tenant-context.md
@@ -129,7 +129,7 @@ GROUP BY a.id;
 
 ---
 
-**Last Updated:** 2025-11-11  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Backend Team  
 **Review Frequency:** On schema changes
 

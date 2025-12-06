@@ -1,4 +1,5 @@
 // Card types configuration
+// Last Updated: 2025-12-05
 import { logger } from '@/utils/logger';
 import DashboardMetrics from '@/components/dashboard/DashboardMetrics';
 import QuickActionsCard from '@/components/dashboard/QuickActionsCard';

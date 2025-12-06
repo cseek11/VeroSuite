@@ -1,6 +1,6 @@
 # SSM Compiler Cache - Benefits Guide
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Version:** 3.0.0
 
 ## Overview
@@ -33,9 +33,9 @@ The cache tracks content hashes for each chapter individually:
 ```json
 {
   "chapter_hashes": {
-    "CH-01": { "content_hash": "abc123...", "last_modified": "2025-01-27T10:00:00" },
-    "CH-02": { "content_hash": "def456...", "last_modified": "2025-01-27T10:00:00" },
-    "CH-05": { "content_hash": "ghi789...", "last_modified": "2025-01-27T11:30:00" }
+    "CH-01": { "content_hash": "abc123...", "last_modified": "2025-12-05T10:00:00" },
+    "CH-02": { "content_hash": "def456...", "last_modified": "2025-12-05T10:00:00" },
+    "CH-05": { "content_hash": "ghi789...", "last_modified": "2025-12-05T11:30:00" }
   }
 }
 ```
@@ -216,6 +216,22 @@ cat dist/python_bible/.biblec.state.json | python -m json.tool
 ---
 
 **Recommendation:** Always enable cache for bibles with 10+ chapters or 5,000+ lines. The performance benefits far outweigh the minimal overhead.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

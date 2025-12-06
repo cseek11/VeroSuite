@@ -2,7 +2,7 @@
 title: Design System Color Standards
 category: Architecture
 status: accepted
-date: 2025-11-11
+date: 2025-12-05
 owner: design_lead
 related:
   - docs/reference/design-system.md
@@ -12,7 +12,7 @@ related:
 # Decision: Design System Color Standards
 
 ## Status
-**Accepted** - 2025-11-11
+**Accepted** - 2025-12-05
 
 ## Context
 
@@ -67,7 +67,7 @@ Additionally, there was confusion about primary brand colors (Indigo vs Purple v
 
 ---
 
-**Last Updated:** 2025-11-11
+**Last Updated:** 2025-12-05
 
 
 

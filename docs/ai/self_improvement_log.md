@@ -2,7 +2,7 @@
 
 **Purpose:** This file serves as a version-controlled memory for the Cursor agent, logging learnings from Reward Score evaluations to improve future PR quality.
 
-**Last Updated:** 2025-11-19
+**Last Updated:** 2025-12-05
 
 ---
 

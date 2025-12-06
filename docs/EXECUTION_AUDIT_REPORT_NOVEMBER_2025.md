@@ -128,7 +128,7 @@ CREATE INDEX IF NOT EXISTS idx_regions_overlap_detection
   WHERE deleted_at IS NULL;
 ```
 
-**Status:** Documented as applied on 2025-11-14 in `MIGRATION_STATUS.md`
+**Status:** Documented as applied on 2025-12-05 in `MIGRATION_STATUS.md`
 
 **Expected Performance Improvements:**
 - Region queries: 10-50x faster
@@ -387,7 +387,7 @@ Claimed passing: 43/43 (100%)
 
 ### 4.2 Migration Application Status
 
-**Documented:** "✅ MIGRATION APPLIED - Migration successfully completed on 2025-11-14"
+**Documented:** "✅ MIGRATION APPLIED - Migration successfully completed on 2025-12-05"
 
 **Unverified:** Cannot confirm migration was actually run without database access
 

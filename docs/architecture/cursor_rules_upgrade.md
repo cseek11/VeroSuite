@@ -4,7 +4,7 @@
 This document complements `.cursor/rules.md`, capturing diagrams, rollout phases, changelog, and ownership expectations.
 
 ### Version & Changelog
-- **2025-11-17:** Initial rollout (version 1.0). Future updates must append entries here and in `.cursor/rules.md`.
+- **2025-12-05:** Initial rollout (version 1.0). Future updates must append entries here and in `.cursor/rules.md`.
 
 ### Rules Champions
 - Primary: TBA

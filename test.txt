@@ -1,9 +1,0 @@
-﻿
-> ## Chapter 9 â€” Standard Library
-  
-  ### 9.1 DOM Types
-  
-  TypeScript includes types for DOM APIs:
-  
-
-

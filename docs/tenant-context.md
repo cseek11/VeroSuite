@@ -2,7 +2,7 @@
 title: Tenant Context and Row Level Security
 category: Reference
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: backend_team
 related:
   - docs/reference/database-schema.md
@@ -114,7 +114,7 @@ Notes:
 
 ---
 
-**Last Updated:** 2025-11-11  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Backend Team  
 **Review Frequency:** On security changes
 

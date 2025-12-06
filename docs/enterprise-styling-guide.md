@@ -2,7 +2,7 @@
 title: Enterprise CRM Styling Guide v2
 category: Reference
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: design_lead
 related:
   - docs/reference/design-system.md
@@ -370,7 +370,7 @@ Use color only for **status and interactivity**. Avoid decorative saturation.
 
 ---
 
-**Last Updated:** 2025-11-11  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Design Lead  
 **Review Frequency:** Quarterly  
 **Version:** 2.0 (Enterprise Standard)

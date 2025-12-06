@@ -25442,18 +25442,18 @@ dt = datetime.now(ZoneInfo("America/New_York"))
 
 ::: concept
 id: BLK-321297c766b0718b
-summary: 9.2.3 Parsing and formatting dt = datetime.strptime("2025-01-01", "%Y-%m-%d") s = dt.strftime("%Y-%m-%d").
+summary: 9.2.3 Parsing and formatting dt = datetime.strptime("2025-12-05", "%Y-%m-%d") s = dt.strftime("%Y-%m-%d").
 digest: 3dfec2e6c57f29b8d0b7708273ea39dd9bf47ebcdb741f2c2421b00646c90340
 symbol_refs: [Parsing]
 semantic_role: concept
 embedding_hint_importance: high
 embedding_hint_scope: section
 embedding_hint_chunk: auto
-intuition: This explains that 9.2.3 Parsing and formatting dt = datetime.strptime("2025-01-01", "%Y-%m-%d") s = dt.strftime("%Y-%m-%d")..
-vector_summary: 9.2.3 Parsing and formatting dt = datetime.strptime("2025-01-01", "%Y-%m-%d") s = dt.strftime("%Y-%m-%d").
+intuition: This explains that 9.2.3 Parsing and formatting dt = datetime.strptime("2025-12-05", "%Y-%m-%d") s = dt.strftime("%Y-%m-%d")..
+vector_summary: 9.2.3 Parsing and formatting dt = datetime.strptime("2025-12-05", "%Y-%m-%d") s = dt.strftime("%Y-%m-%d").
 chapter: CH-09
 :::
-9.2.3 Parsing and formatting dt = datetime.strptime("2025-01-01", "%Y-%m-%d") s = dt.strftime("%Y-%m-%d")
+9.2.3 Parsing and formatting dt = datetime.strptime("2025-12-05", "%Y-%m-%d") s = dt.strftime("%Y-%m-%d")
 :::
 
 ::: concept
@@ -52217,18 +52217,18 @@ Every log becomes a structured object:
 
 ::: concept
 id: BLK-8fcbdd8ff002fe99
-summary: {"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-03-01T12:00:00Z"}.
+summary: {"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-12-05T12:00:00Z"}.
 digest: 5883f76ba916964e9b6a1c6a785d6774808d7e6426105d2e770bb51161f19fbd
 symbol_refs: []
 semantic_role: concept
 embedding_hint_importance: high
 embedding_hint_scope: section
 embedding_hint_chunk: auto
-intuition: This explains that {"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-03-01T12:00:00Z"}..
-vector_summary: {"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-03-01T12:00:00Z"}.
+intuition: This explains that {"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-12-05T12:00:00Z"}..
+vector_summary: {"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-12-05T12:00:00Z"}.
 chapter: CH-22
 :::
-{"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-03-01T12:00:00Z"}
+{"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-12-05T12:00:00Z"}
 :::
 
 ::: concept
@@ -104507,18 +104507,18 @@ vector_summary: Start with Chapter 0 → Chapter 1 → Chapter 2. Follow the Beg
 
 ::: concept
 id: BLK-9a0edac138ef7f15
-summary: --- title: The Python Bible — Deep-Dive Edition version: 2025-11-26 domain: python language: python ssm_version: 3 ---.
+summary: --- title: The Python Bible — Deep-Dive Edition version: 2025-12-05 domain: python language: python ssm_version: 3 ---.
 digest: 41815a045c53d11d23156e2db052254b3e95092f839bfb7ea3ba8a50973d573d
 symbol_refs: [Deep]
 semantic_role: concept
 embedding_hint_importance: high
 embedding_hint_scope: section
 embedding_hint_chunk: auto
-intuition: This explains that --- title: The Python Bible — Deep-Dive Edition version: 2025-11-26 domain: python language: python ssm_version: 3 ---..
-vector_summary: --- title: The Python Bible — Deep-Dive Edition version: 2025-11-26 domain: python language: python ssm_version: 3 ---.
+intuition: This explains that --- title: The Python Bible — Deep-Dive Edition version: 2025-12-05 domain: python language: python ssm_version: 3 ---..
+vector_summary: --- title: The Python Bible — Deep-Dive Edition version: 2025-12-05 domain: python language: python ssm_version: 3 ---.
 chapter: GLOBAL
 :::
---- title: The Python Bible — Deep-Dive Edition version: 2025-11-26 domain: python language: python ssm_version: 3 ---
+--- title: The Python Bible — Deep-Dive Edition version: 2025-12-05 domain: python language: python ssm_version: 3 ---
 :::
 
 ::: concept
@@ -104539,18 +104539,18 @@ chapter: GLOBAL
 
 ::: concept
 id: BLK-8cd3c9772e9da853
-summary: Version: 2025-11-26 Status: Living Architectural Reference Audience: Beginner → Practitioner → Expert → PhD-Level Researcher.
+summary: Version: 2025-12-05 Status: Living Architectural Reference Audience: Beginner → Practitioner → Expert → PhD-Level Researcher.
 digest: 892edc5d90ece0f7622f9d83083a50ac57ab4ec64a93b84d43c447c24fb7b5ed
 symbol_refs: [Expert, Beginner, Status, Practitioner, Version]
 semantic_role: reference
 embedding_hint_importance: high
 embedding_hint_scope: section
 embedding_hint_chunk: auto
-intuition: This explains that Version: 2025-11-26 Status: Living Architectural Reference Audience: Beginner → Practitioner → Expert → PhD-Level Researcher..
-vector_summary: Version: 2025-11-26 Status: Living Architectural Reference Audience: Beginner → Practitioner → Expert → PhD-Level Researcher.
+intuition: This explains that Version: 2025-12-05 Status: Living Architectural Reference Audience: Beginner → Practitioner → Expert → PhD-Level Researcher..
+vector_summary: Version: 2025-12-05 Status: Living Architectural Reference Audience: Beginner → Practitioner → Expert → PhD-Level Researcher.
 chapter: GLOBAL
 :::
-**Version:** 2025-11-26 **Status:** Living Architectural Reference **Audience:** Beginner → Practitioner → Expert → PhD-Level Researcher
+**Version:** 2025-12-05 **Status:** Living Architectural Reference **Audience:** Beginner → Practitioner → Expert → PhD-Level Researcher
 :::
 
 ::: concept
@@ -109424,7 +109424,7 @@ SQLAlchemy vs raw SQL:
 id: SSMMETA-33d6c5928b456d51
 compiler_version: 3.0.0
 ssm_schema_version: 1.0.0
-bible_version: 2025-11-26
+bible_version: 2025-12-05
 namespace: default
 digest: fcd7bf271256a414d5c79fd9853ecfbab41180ba657b2e386d6133baae290fe5
 symbol_refs: []

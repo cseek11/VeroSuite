@@ -117,7 +117,7 @@ To add real agreement data to customers, you can:
      account_id: 'account-uuid',
      agreement_type: 'annual_pest_control',
      start_date: '2024-01-01',
-     end_date: '2025-01-01',
+     end_date: '2025-12-05',
      monthly_amount: 150.00,
      annual_amount: 1800.00
    });

@@ -5239,7 +5239,7 @@ from zoneinfo import ZoneInfo
 dt = datetime.now(ZoneInfo("America/New_York"))
 
 9.2.3 Parsing and formatting
-dt = datetime.strptime("2025-01-01", "%Y-%m-%d")
+dt = datetime.strptime("2025-12-05", "%Y-%m-%d")
 s = dt.strftime("%Y-%m-%d")
 
 9.3 Data Structures (collections module)
@@ -16111,7 +16111,7 @@ log.addHandler(handler)
 
 Every log becomes a structured object:
 
-{"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-03-01T12:00:00Z"}
+{"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-12-05T12:00:00Z"}
 
 22.3 Correlation IDs & Request IDs
 
@@ -29640,7 +29640,7 @@ except KeyboardInterrupt:
 # Format timestamp
 timestamp = time.time()
 formatted = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(timestamp))
-print(formatted)  # 2025-11-28 14:30:00
+print(formatted)  # 2025-12-05 14:30:00
 ```
 
 **When to Use:**
@@ -31205,10 +31205,10 @@ def main():
     # Example: Load from CSV
     csv_data = """
 date,category,price,quantity
-2025-01-01,Electronics,100,2
-2025-01-02,Clothing,50,3
-2025-01-03,Electronics,150,1
-2025-01-04,Clothing,75,2
+2025-12-05,Electronics,100,2
+2025-12-05,Clothing,50,3
+2025-12-05,Electronics,150,1
+2025-12-05,Clothing,75,2
 """
     
     # Save example CSV
@@ -31229,8 +31229,8 @@ date,category,price,quantity
     
     # Example: Load from JSON
     json_data = [
-        {"date": "2025-01-01", "category": "Electronics", "price": 100, "quantity": 2},
-        {"date": "2025-01-02", "category": "Clothing", "price": 50, "quantity": 3},
+        {"date": "2025-12-05", "category": "Electronics", "price": 100, "quantity": 2},
+        {"date": "2025-12-05", "category": "Clothing", "price": 50, "quantity": 3},
     ]
     
     Path("sales.json").write_text(json.dumps(json_data, indent=2))

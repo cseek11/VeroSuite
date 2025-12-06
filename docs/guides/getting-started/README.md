@@ -2,7 +2,7 @@
 title: Getting Started
 category: Development
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: frontend_team
 related:
   - docs/guides/development/best-practices.md
@@ -69,7 +69,7 @@ npm run dev
 
 ---
 
-**Last Updated:** 2025-11-11  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Frontend Team
 
 

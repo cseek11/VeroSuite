@@ -1,6 +1,6 @@
 # Schema Access Issues - Summary
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Status:** ⚠️ **ONGOING** - PostgREST not recognizing veroscore schema
 
 ---
@@ -207,7 +207,7 @@ PostgREST is still looking for tables in the `public` schema, even though:
 
 ---
 
-**Last Updated:** 2025-11-24  
+**Last Updated:** 2025-12-05  
 **Status:** ⚠️ **INVESTIGATING** - PostgREST schema discovery issue
 
 

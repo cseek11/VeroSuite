@@ -244,7 +244,7 @@ type hints, 78
   quick reference, 641
 Changelog
 (NEW: Version history) 🆕
-Version 2025-11-26 (Current)
+Version 2025-12-05 (Current)
 ├── Added: Chapter 29 (AI-Assisted Development)
 ├── Added: Appendix I (Formal Semantics, moved from Ch 26)
 ├── Added: Appendix J (Exercises & Solutions)
@@ -255,7 +255,7 @@ Version 2025-11-26 (Current)
 ├── Enhanced: Migration guide (Appendix F)
 └── Enhanced: Code evolution examples throughout
 
-Version 2025-06-01 (Previous)
+Version 2025-12-05 (Previous)
 └── Initial comprehensive release
 Bibliography & Further Reading
 (NEW: Curated resources) 🆕

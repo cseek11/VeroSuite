@@ -2,7 +2,7 @@
 
 **Purpose:** This guide provides practical strategies to ensure the AI agent follows all VeroField development rules consistently.
 
-**Last Updated:** 2025-11-16
+**Last Updated:** 2025-12-05
 
 ---
 
@@ -149,7 +149,7 @@ Watch for these signs that rules aren't being followed:
 **Action:** Ask: "Please verify no silent failures (see docs/error-resilience.md)"
 
 ### ❌ **Red Flag 6: Hardcoded Dates**
-**Sign:** Dates like `2025-11-16` hardcoded in code/docs
+**Sign:** Dates like `2025-12-05` hardcoded in code/docs
 **Action:** Ask: "Please use current system date, not hardcoded dates"
 
 ### ❌ **Red Flag 7: No Post-Implementation Audit**
@@ -282,6 +282,6 @@ If you detect a rule violation:
 
 ---
 
-**Last Updated:** 2025-11-16
+**Last Updated:** 2025-12-05
 
 

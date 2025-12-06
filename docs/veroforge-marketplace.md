@@ -2,7 +2,7 @@
 title: VeroForge Marketplace Architecture
 category: Architecture
 status: active
-last_reviewed: 2025-11-16
+last_reviewed: 2025-12-05
 owner: platform_engineering
 related:
   - docs/architecture/veroforge-architecture.md
@@ -12,7 +12,7 @@ related:
 # VeroForge Marketplace Architecture
 
 **Status:** Strategic Initiative - Post-VeroAI  
-**Last Updated:** 2025-11-16
+**Last Updated:** 2025-12-05
 
 ---
 
@@ -498,7 +498,7 @@ Customer Payment
 
 ---
 
-**Last Updated:** 2025-11-16  
+**Last Updated:** 2025-12-05  
 **Status:** Planning - Awaiting VeroAI Completion  
 **Owner:** Platform Engineering Team
 

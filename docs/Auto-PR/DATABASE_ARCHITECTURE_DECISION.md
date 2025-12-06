@@ -1,7 +1,7 @@
 # Database Architecture Decision - VeroScore V3
 
-**Created:** 2025-11-24  
-**Last Updated:** 2025-11-24  
+**Created:** 2025-12-05  
+**Last Updated:** 2025-12-05  
 **Status:** ✅ **DECISION MADE**
 
 ---
@@ -172,7 +172,7 @@ schemas  = ["auth", "compliance", "public", "veroscore"]
 
 ---
 
-**Last Updated:** 2025-11-24  
+**Last Updated:** 2025-12-05  
 **Status:** ✅ Decision Implemented  
 **Impact:** Migration file and Prisma schema updated
 

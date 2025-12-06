@@ -1,6 +1,6 @@
 # Error Pattern Documentation Guide
 
-**Last Updated:** 2025-11-16
+**Last Updated:** 2025-12-05
 
 This guide explains how to document error patterns in `docs/error-patterns.md` and how to search and apply known patterns to prevent recurring issues.
 
@@ -93,7 +93,7 @@ Step-by-step explanation of the fix:
 ### Example Entry
 
 ```markdown
-## API_TIMEOUT_HANDLING - 2025-01-27
+## API_TIMEOUT_HANDLING - 2025-12-05
 
 ### Summary
 External API calls can hang indefinitely if no timeout is set, causing the application to become unresponsive.
@@ -305,5 +305,5 @@ When adding a new pattern, update the relevant category section.
 
 ---
 
-**Last Updated:** 2025-11-16
+**Last Updated:** 2025-12-05
 

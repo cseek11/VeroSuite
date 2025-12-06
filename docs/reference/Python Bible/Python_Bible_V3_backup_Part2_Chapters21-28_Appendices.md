@@ -1,8 +1,8 @@
-﻿ðŸ“˜ CHAPTER 21 â€” PACKAGING, DISTRIBUTION & DEPLOYMENT
+📘 CHAPTER 21 — PACKAGING, DISTRIBUTION & DEPLOYMENT
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“20
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–20
 
 21.0 Overview
 
@@ -22,9 +22,9 @@ distribution to PyPI
 
 production environments
 
-Pythonâ€™s packaging ecosystem has evolved significantly:
+Python’s packaging ecosystem has evolved significantly:
 
-Old world (2010â€“2020)
+Old world (2010–2020)
 
 setup.py
 
@@ -34,7 +34,7 @@ pip
 
 virtualenv
 
-Modern world (2020â€“2025)
+Modern world (2020–2025)
 
 pyproject.toml
 
@@ -170,14 +170,14 @@ pip-tools: requirements.lock
 
 21.3.3 Best Practices for Dependencies
 
-âœ” Pin production versions
-âœ” Use semantic versioning constraints
-âœ” Use extras for optional features
-âœ” Keep test dependencies separate
-âœ” Use virtual environments
+✔ Pin production versions
+✔ Use semantic versioning constraints
+✔ Use extras for optional features
+✔ Keep test dependencies separate
+✔ Use virtual environments
 
-âš  Do NOT use wildcard versions ("*")
-âš  Avoid mixing pip and conda in same environment
+⚠ Do NOT use wildcard versions ("*")
+⚠ Avoid mixing pip and conda in same environment
 
 21.4 Virtual Environments & Runtimes
 21.4.1 venv (built-in)
@@ -249,19 +249,19 @@ CMD ["python", "main.py"]
 
 21.7.2 Best Practices
 
-âœ” use python:slim
-âœ” avoid copying dev files
-âœ” lock dependencies
-âœ” use multi-stage builds
-âœ” use non-root user
-âœ” prefer gunicorn/uvicorn for servers
+✔ use python:slim
+✔ avoid copying dev files
+✔ lock dependencies
+✔ use multi-stage builds
+✔ use non-root user
+✔ prefer gunicorn/uvicorn for servers
 
 21.7.3 Uvicorn/Gunicorn Combo (ASGI)
 CMD ["uvicorn", "app:app", "--host=0.0.0.0", "--port=8000"]
 
 21.8 Deployment Patterns
 21.8.1 Pattern: Single-Container Microservice
-Client â†’ Load Balancer â†’ API Container â†’ DB
+Client → Load Balancer → API Container → DB
 
 21.8.2 Pattern: Multi-Container Application
 
@@ -287,7 +287,7 @@ Azure Functions
 
 Use libraries like:
 
-Mangum (ASGI â†’ Lambda adapter)
+Mangum (ASGI → Lambda adapter)
 
 AWS Lambda Powertools
 
@@ -408,16 +408,16 @@ simpler versioning
 
 21.13 Anti-Patterns
 
-âš  shipping raw source without wheels
-âš  storing secrets in Dockerfiles
-âš  committing virtualenvs
-âš  using latest versions without pinning
-âš  building wheels during production startup
-âš  multi-GB Docker images
-âš  â€œimport *â€ in CLI tools
-âš  using pip inside running containers
+⚠ shipping raw source without wheels
+⚠ storing secrets in Dockerfiles
+⚠ committing virtualenvs
+⚠ using latest versions without pinning
+⚠ building wheels during production startup
+⚠ multi-GB Docker images
+⚠ “import *” in CLI tools
+⚠ using pip inside running containers
 
-21.14 Macro Example â€” Full Production Deployment Pipeline
+21.14 Macro Example — Full Production Deployment Pipeline
 
 Includes:
 
@@ -486,7 +486,7 @@ follow best practices for versioning & reproducibility
 
 Proceed to:
 
-ðŸ‘‰ Chapter 22 â€” Logging, Monitoring & Observability
+👉 Chapter 22 — Logging, Monitoring & Observability
 
 Topics include:
 
@@ -509,15 +509,15 @@ Production health checks
 Designing observable microservices
 
 
-ðŸ“˜ CHAPTER 22 â€” LOGGING, MONITORING & OBSERVABILITY
+📘 CHAPTER 22 — LOGGING, MONITORING & OBSERVABILITY
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“21
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–21
 
 22.0 Overview
 
-In production systems, the hardest problems are rarely â€œthe code.â€
+In production systems, the hardest problems are rarely “the code.”
 
 They are:
 
@@ -551,9 +551,9 @@ Combined, these form a production-grade feedback loop.
 
 This chapter provides the complete blueprint for implementing this in Python.
 
-22.1 Logging â€” The Foundation of Observability
+22.1 Logging — The Foundation of Observability
 
-Pythonâ€™s built-in logging library supports:
+Python’s built-in logging library supports:
 
 loggers
 
@@ -613,7 +613,7 @@ log.addHandler(handler)
 
 Every log becomes a structured object:
 
-{"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-03-01T12:00:00Z"}
+{"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-12-05T12:00:00Z"}
 
 22.3 Correlation IDs & Request IDs
 
@@ -645,7 +645,7 @@ log.info("fetching user", extra={"correlation_id": cid})
 
 22.4 Logging in Async Applications
 
-âš  Pythonâ€™s logging is NOT async-safe by default.
+⚠ Python’s logging is NOT async-safe by default.
 
 Solution: aiologger or queue-based handlers.
 
@@ -658,7 +658,7 @@ queue = logging.handlers.QueueHandler()
 listener = logging.handlers.QueueListener(queue)
 listener.start()
 
-22.5 Metrics â€” Quantitative System Signals
+22.5 Metrics — Quantitative System Signals
 
 Metrics provide visibility into system performance.
 
@@ -724,7 +724,7 @@ throughput
 
 transformation latency
 
-22.6 Tracing â€” The Third Pillar
+22.6 Tracing — The Third Pillar
 
 Distributed tracing is essential when:
 
@@ -769,11 +769,11 @@ FastAPIInstrumentor.instrument_app(app)
 
 Automatically traces:
 
-âœ” request latency
-âœ” DB calls
-âœ” external HTTP calls
-âœ” background tasks
-âœ” middleware
+✔ request latency
+✔ DB calls
+✔ external HTTP calls
+✔ background tasks
+✔ middleware
 
 22.8 Distributed Tracing Architecture
 flowchart TD
@@ -829,9 +829,9 @@ performance traces
 
 Every service must expose:
 
-/healthz â€” is the app running?
+/healthz — is the app running?
 
-/readyz â€” is the app ready to serve traffic?
+/readyz — is the app ready to serve traffic?
 
 FastAPI:
 
@@ -855,7 +855,7 @@ New Relic
 
 Patterns:
 
-JSON logs â†’ log forwarder â†’ log aggregator
+JSON logs → log forwarder → log aggregator
 
 attach correlation IDs
 
@@ -880,29 +880,29 @@ retry count
 Recommended: wrap workers with OpenTelemetry spans.
 
 22.13 Observability Best Practices
-âœ” ALWAYS log in JSON
-âœ” ALWAYS include IDs (request, correlation, user, trace)
-âœ” NEVER log secrets
-âœ” keep logs structured, not free text
-âœ” use histograms for latency
-âœ” set up dashboards
-âœ” monitor P50/P95/P99 latencies
-âœ” monitor error percentages
-âœ” correlate logs â†” metrics â†” traces
+✔ ALWAYS log in JSON
+✔ ALWAYS include IDs (request, correlation, user, trace)
+✔ NEVER log secrets
+✔ keep logs structured, not free text
+✔ use histograms for latency
+✔ set up dashboards
+✔ monitor P50/P95/P99 latencies
+✔ monitor error percentages
+✔ correlate logs ↔ metrics ↔ traces
 22.14 Anti-Patterns
 
-âš  Logging too much (disk exhaustion)
-âš  Logging sensitive PII
-âš  Using print() in production
-âš  No correlation IDs
-âš  Missing or inaccurate health checks
-âš  No metrics for latency
-âš  No distributed tracing across microservices
-âš  Relying on logs alone
-âš  Using static log levels (INFO everywhere)
-âš  Missing separation of request and background task telemetry
+⚠ Logging too much (disk exhaustion)
+⚠ Logging sensitive PII
+⚠ Using print() in production
+⚠ No correlation IDs
+⚠ Missing or inaccurate health checks
+⚠ No metrics for latency
+⚠ No distributed tracing across microservices
+⚠ Relying on logs alone
+⚠ Using static log levels (INFO everywhere)
+⚠ Missing separation of request and background task telemetry
 
-22.15 Macro Example â€” Production Observability Stack
+22.15 Macro Example — Production Observability Stack
 
 Includes:
 
@@ -946,7 +946,7 @@ async def list_items():
 
 22.16 Summary & Takeaways
 
-Logging â‰  Observability
+Logging ≠ Observability
 
 Structured JSON logs are required
 
@@ -970,7 +970,7 @@ Observability is essential for scaling microservices
 
 Proceed to:
 
-ðŸ‘‰ Chapter 23 â€” Configuration, Secrets & Environment Management
+👉 Chapter 23 — Configuration, Secrets & Environment Management
 
 This next chapter covers:
 
@@ -997,11 +997,11 @@ hierarchical config loading
 container config patterns
 
 
-ðŸ“˜ CHAPTER 23 â€” CONFIGURATION, SECRETS & ENVIRONMENT MANAGEMENT
+📘 CHAPTER 23 — CONFIGURATION, SECRETS & ENVIRONMENT MANAGEMENT
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“22
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–22
 
 23.0 Overview
 
@@ -1051,7 +1051,7 @@ do store all config externally
 
 Sources of configuration:
 
-environment variables â†’ config loader â†’ app settings object
+environment variables → config loader → app settings object
 
 23.2 Environment Variables
 
@@ -1097,7 +1097,7 @@ debug = false
 
 23.4 pydantic-settings (Modern Standard)
 
-Pydanticâ€™s successor for configuration management.
+Pydantic’s successor for configuration management.
 
 Install:
 
@@ -1133,7 +1133,7 @@ class Settings(BaseSettings):
 class Settings(BaseSettings):
     port: int = 8000
 
-23.5 dynaconf â€” Multi-Environment Hierarchical Config
+23.5 dynaconf — Multi-Environment Hierarchical Config
 
 Ideal for:
 
@@ -1179,7 +1179,7 @@ defaults
 
 settings.toml
 
-23.6 python-decouple â€” Lightweight Env Management
+23.6 python-decouple — Lightweight Env Management
 
 Simple and production-safe.
 
@@ -1279,7 +1279,7 @@ data:
 
 Build-time vs runtime config:
 
-âš  Do NOT bake environment variables into the image.
+⚠ Do NOT bake environment variables into the image.
 
 Correct:
 
@@ -1354,18 +1354,18 @@ class Config(BaseSettings):
 
 23.13 Anti-Patterns
 
-âš  storing secrets in git
-âš  embedding passwords in code
-âš  committing .env to repo
-âš  inconsistent config between environments
-âš  environment-specific code logic
-âš  relying entirely on config files (without env vars)
-âš  unclear or magical config loaders
-âš  passing secrets in logs
-âš  mixing config and business logic
-âš  default configs that mask real errors
+⚠ storing secrets in git
+⚠ embedding passwords in code
+⚠ committing .env to repo
+⚠ inconsistent config between environments
+⚠ environment-specific code logic
+⚠ relying entirely on config files (without env vars)
+⚠ unclear or magical config loaders
+⚠ passing secrets in logs
+⚠ mixing config and business logic
+⚠ default configs that mask real errors
 
-23.14 Macro Example â€” Production-Grade Config System
+23.14 Macro Example — Production-Grade Config System
 
 Includes:
 
@@ -1413,7 +1413,7 @@ env:
 
 environment variables are the foundation
 
-pyproject.toml is NOT config â†’ use pydantic-settings
+pyproject.toml is NOT config → use pydantic-settings
 
 secrets must never be committed
 
@@ -1433,7 +1433,7 @@ runtime flags improve safety & rollout flexibility
 
 Proceed to:
 
-ðŸ‘‰ Chapter 24 â€” Scheduling, Background Jobs & Task Queues
+👉 Chapter 24 — Scheduling, Background Jobs & Task Queues
 
 Including:
 
@@ -1459,16 +1459,16 @@ retries & exponential backoff
 
 task orchestration (Airflow, Prefect)
 
-worker â†’ API communication
+worker → API communication
 
 failure handling & job monitoring
 
 
-ðŸ“˜ CHAPTER 24 â€” SCHEDULING, BACKGROUND JOBS & TASK QUEUES
+📘 CHAPTER 24 — SCHEDULING, BACKGROUND JOBS & TASK QUEUES
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“23
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–23
 
 24.0 Overview
 
@@ -1583,7 +1583,7 @@ not scalable
 
 no retries
 
-24.3 APScheduler â€” Local Cron & Interval Jobs
+24.3 APScheduler — Local Cron & Interval Jobs
 
 Useful for:
 
@@ -1639,7 +1639,7 @@ Code ergonomics	Complex	Simple	Simple & modern
 
 Celery is still the enterprise standard.
 
-24.5 Celery â€” The King of Python Task Queues
+24.5 Celery — The King of Python Task Queues
 
 Install:
 
@@ -1677,7 +1677,7 @@ def process(self, item_id):
     except Exception as e:
         raise self.retry(exc=e, countdown=60)
 
-24.6 Dramatiq â€” Modern, Fast Alternative
+24.6 Dramatiq — Modern, Fast Alternative
 
 Install:
 
@@ -1695,7 +1695,7 @@ Background workers:
 
 dramatiq project.tasks
 
-24.7 RQ â€” Redis Queue
+24.7 RQ — Redis Queue
 
 Simple and effective for:
 
@@ -1877,37 +1877,37 @@ JOB_DURATION.observe(duration)
 
 24.14 Anti-Patterns
 
-âš  running long jobs inside the API process
-âš  using APScheduler for distributed scheduling
-âš  using Celery without retry or timeout
-âš  running workers without concurrency limits
-âš  storing large payloads in Redis
-âš  forgetting idempotency
-âš  missing metrics on workers
-âš  mixing sync and async workers
-âš  not monitoring queue length
+⚠ running long jobs inside the API process
+⚠ using APScheduler for distributed scheduling
+⚠ using Celery without retry or timeout
+⚠ running workers without concurrency limits
+⚠ storing large payloads in Redis
+⚠ forgetting idempotency
+⚠ missing metrics on workers
+⚠ mixing sync and async workers
+⚠ not monitoring queue length
 
-24.15 Macro Example â€” Distributed Task Architecture
-                        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                        â”‚    API Service    â”‚
-                        â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                â”‚ enqueue job
-                                â–¼
-                        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                        â”‚    Message Bus   â”‚
-                        â”‚ (Redis/Kafka)    â”‚
-                        â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                â”‚ deliver message
-                                â–¼
-                â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                â”‚       Worker Cluster          â”‚
-                â”‚  Celery / Dramatiq / RQ      â”‚
-                â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                        â”‚          â”‚
-                        â–¼          â–¼
-                â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                â”‚  Worker1  â”‚  â”‚ Worker2  â”‚
-                â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+24.15 Macro Example — Distributed Task Architecture
+                        ┌──────────────────┐
+                        │    API Service    │
+                        └───────┬──────────┘
+                                │ enqueue job
+                                ▼
+                        ┌──────────────────┐
+                        │    Message Bus   │
+                        │ (Redis/Kafka)    │
+                        └───────┬──────────┘
+                                │ deliver message
+                                ▼
+                ┌──────────────────────────────┐
+                │       Worker Cluster          │
+                │  Celery / Dramatiq / RQ      │
+                └───────┬──────────┬──────────┘
+                        │          │
+                        ▼          ▼
+                ┌──────────┐  ┌──────────┐
+                │  Worker1  │  │ Worker2  │
+                └──────────┘  └──────────┘
 
 24.16 Summary & Takeaways
 
@@ -1933,7 +1933,7 @@ Avoid anti-patterns like long-running sync tasks in APIs
 
 Proceed to:
 
-ðŸ‘‰ Chapter 25 â€” Deployment Architectures & Production Topologies
+👉 Chapter 25 — Deployment Architectures & Production Topologies
 
 Including:
 
@@ -1960,11 +1960,11 @@ caching layers
 high-availability design
 
 
-ðŸ“˜ CHAPTER 25 â€” DEPLOYMENT ARCHITECTURES & PRODUCTION TOPOLOGIES
+📘 CHAPTER 25 — DEPLOYMENT ARCHITECTURES & PRODUCTION TOPOLOGIES
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“24
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–24
 
 25.0 Overview
 
@@ -2025,7 +2025,7 @@ good for MVPs and early-stage startups
 
 Cons:
 
-grows into a â€œbig ball of mudâ€
+grows into a “big ball of mud”
 
 scaling is uneven
 
@@ -2396,19 +2396,19 @@ signal.signal(signal.SIGTERM, shutdown)
 
 25.15 Deployment Anti-Patterns
 
-âš  Running apps without health checks
-âš  Single-instance database
-âš  Serving static assets from Python API
-âš  No caching layer
-âš  Too many microservices prematurely
-âš  No observability stack
-âš  Cold-start heavy Python Lambdas
-âš  Liveness/readiness misconfiguration
-âš  Tightly coupled services
-âš  No rollback plan for deployments
-âš  Missing canary / staging environments
+⚠ Running apps without health checks
+⚠ Single-instance database
+⚠ Serving static assets from Python API
+⚠ No caching layer
+⚠ Too many microservices prematurely
+⚠ No observability stack
+⚠ Cold-start heavy Python Lambdas
+⚠ Liveness/readiness misconfiguration
+⚠ Tightly coupled services
+⚠ No rollback plan for deployments
+⚠ Missing canary / staging environments
 
-25.16 Macro Example â€” Complete Production Architecture
+25.16 Macro Example — Complete Production Architecture
 flowchart TD
     Client --> CDN[CDN/Edge Cache]
     CDN --> API_GW[API Gateway]
@@ -2462,15 +2462,15 @@ gateway + mesh + K8s is the modern enterprise stack
 avoid anti-patterns early
 
 
-ðŸ“˜ CHAPTER 26 â€” FORMAL SEMANTICS & THE PYTHON EXECUTION MODEL
+📘 CHAPTER 26 — FORMAL SEMANTICS & THE PYTHON EXECUTION MODEL
 
 Depth Level: 4
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“25, strong CS background
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–25, strong CS background
 
 26.0 Overview
 
-Most Python developers learn syntax and behavior â€” but very few understand the formal semantics that define why Python behaves the way it does.
+Most Python developers learn syntax and behavior — but very few understand the formal semantics that define why Python behaves the way it does.
 
 This chapter provides:
 
@@ -2546,22 +2546,22 @@ State = (Env_global, Env_local, Stack, Heap, IP, Exception, Tasks)
 
 Each Python statement applies a transition:
 
-State â†’ State'
+State → State'
 
 26.3 Evaluation Strategy
 
 Python uses:
 
-âœ” Applicative-order (eager)
+✔ Applicative-order (eager)
 
 arguments are evaluated before the function call
 
-âœ” Strict evaluation
+✔ Strict evaluation
 
 no laziness except generators & iterators
 
-âœ” Call-by-value semantics (but values = object references)
-âœ” Left-to-right evaluation order
+✔ Call-by-value semantics (but values = object references)
+✔ Left-to-right evaluation order
 
 This is guaranteed by the language spec.
 
@@ -2571,22 +2571,22 @@ f(g(), h())
 
 Evaluation order is:
 
-evaluate g() â†’ vâ‚
+evaluate g() → v₁
 
-evaluate h() â†’ vâ‚‚
+evaluate h() → v₂
 
-call f(vâ‚, vâ‚‚)
+call f(v₁, v₂)
 
 Formally:
 
-âŸ¨f(g(), h()), ÏƒâŸ©
-  â†¦ âŸ¨g(), ÏƒâŸ© => v1
-  â†¦ âŸ¨h(), ÏƒâŸ© => v2
-  â†¦ âŸ¨f(v1, v2), ÏƒâŸ©
+⟨f(g(), h()), σ⟩
+  ↦ ⟨g(), σ⟩ => v1
+  ↦ ⟨h(), σ⟩ => v2
+  ↦ ⟨f(v1, v2), σ⟩
 
 26.4 The Python Environment Model
 
-Pythonâ€™s model is a hybrid of:
+Python’s model is a hybrid of:
 
 lexical scoping
 
@@ -2598,7 +2598,7 @@ late binding of names in closures
 
 A binding maps a name to an object:
 
-Env = { name â†¦ object_reference }
+Env = { name ↦ object_reference }
 
 
 Every function call creates a new local environment with:
@@ -2623,12 +2623,12 @@ Builtins
 
 Formally:
 
-resolve(name, Env_local âŠ• Env_enclosing âŠ• Env_global âŠ• Builtins)
+resolve(name, Env_local ⊕ Env_enclosing ⊕ Env_global ⊕ Builtins)
 
 
-âŠ• = lexical environment concatenation.
+⊕ = lexical environment concatenation.
 
-26.6 Closures â€” A Mathematical View
+26.6 Closures — A Mathematical View
 
 Given:
 
@@ -2640,12 +2640,12 @@ def outer(x):
 
 Formal closure representation:
 
-closure(inner, Env = { x â†¦ value })
+closure(inner, Env = { x ↦ value })
 
 
 Meaning:
 
-the functionâ€™s code is static
+the function’s code is static
 
 the environment captured at definition time is stored
 
@@ -2670,12 +2670,12 @@ lambda x: x + 1
 
 In lambda calculus:
 
-Î»x. x + 1
+λx. x + 1
 
 
 Function application:
 
-(Î»x. E)(v) â†’ E[x := v]
+(λx. E)(v) → E[x := v]
 
 
 Python function call semantics approximate this, but with:
@@ -2688,7 +2688,7 @@ exceptions
 
 dynamic typing
 
-26.8 Pythonâ€™s Type System: Formal View
+26.8 Python’s Type System: Formal View
 
 Python is:
 
@@ -2706,14 +2706,14 @@ sound but incomplete (type checkers only approximate truth)
 
 Formally:
 
-typing judgment: Î“ âŠ¢ e : Ï„
+typing judgment: Γ ⊢ e : τ
 
 
 Where:
 
-Î“ = typing environment
+Γ = typing environment
 
-Ï„ = type
+τ = type
 
 Type checkers (mypy, pyright, pyre) implement a partial constraint solver.
 
@@ -2733,7 +2733,7 @@ mutability
 
 Example for equality:
 
-obj.__eq__(other) â‡’ Boolean
+obj.__eq__(other) ⇒ Boolean
 
 
 Ordering is partial:
@@ -2820,11 +2820,11 @@ unwind frames
 
 search for handler
 
-if none found â†’ propagate to top level
+if none found → propagate to top level
 
 Formal rule:
 
-âŸ¨raise E, ÏƒâŸ© â†’ âŸ¨Ïƒ', Exception(E)âŸ©
+⟨raise E, σ⟩ → ⟨σ', Exception(E)⟩
 
 26.12 Function Call Semantics (Full Formal Model)
 
@@ -2835,9 +2835,9 @@ result = f(a1, a2, ..., an)
 
 Steps:
 
-evaluate function expression â†’ f
+evaluate function expression → f
 
-evaluate args â†’ v1..vn
+evaluate args → v1..vn
 
 create new frame
 
@@ -2865,7 +2865,7 @@ run until yield
 suspend state
 
 Formal model:
-âŸ¨yield v, ÏƒâŸ© â†’ âŸ¨paused(v), Ïƒ'âŸ©
+⟨yield v, σ⟩ → ⟨paused(v), σ'⟩
 
 
 This is similar to a CEK machine (Control, Environment, Kontinuation).
@@ -2888,14 +2888,14 @@ Coroutines explicitly yield control.
 
 Formal rule:
 
-await E â†’ suspend until E complete
+await E → suspend until E complete
 
 
 This forms an event loop machine.
 
 3. Multiprocessing
 
-Independent processes â†’ separate interpreter + GIL.
+Independent processes → separate interpreter + GIL.
 
 26.15 Memory Model & Object Lifetime
 
@@ -2918,14 +2918,14 @@ but objects with __del__ require special handling
 
 26.16 Bytecode Semantics (CPython)
 
-Python source â†’ AST â†’ bytecode â†’ interpreter loop.
+Python source → AST → bytecode → interpreter loop.
 
 Formal model:
 
 IP = Instruction Pointer
 Stack = Value Stack
 
-execute(bytecode[i], Stack) â†’ Stack'
+execute(bytecode[i], Stack) → Stack'
 next IP
 
 
@@ -2978,16 +2978,16 @@ This is how static analyzers reason about dynamic code.
 
 26.19 Pitfalls of Python Semantics
 
-âš  Late binding inside lambdas & loops
-âš  Mutable default arguments
-âš  Name resolution surprises
-âš  Generator close semantics
-âš  Exception shadowing
-âš  Async context schedule ordering
+⚠ Late binding inside lambdas & loops
+⚠ Mutable default arguments
+⚠ Name resolution surprises
+⚠ Generator close semantics
+⚠ Exception shadowing
+⚠ Async context schedule ordering
 
 26.20 Summary & Takeaways
 
-Pythonâ€™s semantics can be modeled using formal operational rules
+Python’s semantics can be modeled using formal operational rules
 
 execution is a sequence of state transitions
 
@@ -3008,11 +3008,11 @@ concurrency semantics vary by model (threading vs async vs processes)
 understanding formal semantics enables reliable reasoning about code behavior
 
 
-ðŸ“˜ CHAPTER 27 â€” CPython INTERNALS & MEMORY ARCHITECTURE
+📘 CHAPTER 27 — CPython INTERNALS & MEMORY ARCHITECTURE
 
 Depth Level: 4
-Python Versions: 3.8 â†’ 3.14+ (emphasis on 3.11â€“3.14)
-Prerequisites: Chapters 1â€“26, C programming familiarity highly recommended
+Python Versions: 3.8 → 3.14+ (emphasis on 3.11–3.14)
+Prerequisites: Chapters 1–26, C programming familiarity highly recommended
 
 27.0 Overview
 
@@ -3044,7 +3044,7 @@ how coroutines and generators map to C structures
 
 how exceptions propagate in native code
 
-This is the deepest reveal of â€œhow Python really works.â€
+This is the deepest reveal of “how Python really works.”
 
 27.1 CPython as a C Program
 
@@ -3080,11 +3080,11 @@ typedef struct _object {
 
 Two universal fields:
 
-1. ob_refcnt â€” reference count
+1. ob_refcnt — reference count
 
 Controls object lifetime.
 
-2. ob_type â€” pointer to type object
+2. ob_type — pointer to type object
 
 Stores:
 
@@ -3111,7 +3111,7 @@ typedef struct {
 } PyLongObject;
 
 
-Strings, lists, dicts, setsâ€¦ all have specialized layouts.
+Strings, lists, dicts, sets… all have specialized layouts.
 
 27.4 Memory Allocation in CPython
 
@@ -3129,61 +3129,61 @@ flowchart TD
 **Memory Model Diagram:**
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    Python Process                        â”‚
-â”‚                                                          â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚              Heap (obmalloc)                      â”‚  â”‚
-â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”        â”‚  â”‚
-â”‚  â”‚  â”‚ Arena 1 â”‚  â”‚ Arena 2 â”‚  â”‚ Arena 3 â”‚  ...     â”‚  â”‚
-â”‚  â”‚  â”‚ 256 KB  â”‚  â”‚ 256 KB  â”‚  â”‚ 256 KB  â”‚        â”‚  â”‚
-â”‚  â”‚  â”‚         â”‚  â”‚         â”‚  â”‚         â”‚        â”‚  â”‚
-â”‚  â”‚  â”‚ â”Œâ”€â”€â”€â”€â”€â” â”‚  â”‚ â”Œâ”€â”€â”€â”€â”€â” â”‚  â”‚ â”Œâ”€â”€â”€â”€â”€â” â”‚        â”‚  â”‚
-â”‚  â”‚  â”‚ â”‚Pool â”‚ â”‚  â”‚ â”‚Pool â”‚ â”‚  â”‚ â”‚Pool â”‚ â”‚        â”‚  â”‚
-â”‚  â”‚  â”‚ â”‚4 KB â”‚ â”‚  â”‚ â”‚4 KB â”‚ â”‚  â”‚ â”‚4 KB â”‚ â”‚        â”‚  â”‚
-â”‚  â”‚  â”‚ â””â”€â”€â”€â”€â”€â”˜ â”‚  â”‚ â””â”€â”€â”€â”€â”€â”˜ â”‚  â”‚ â””â”€â”€â”€â”€â”€â”˜ â”‚        â”‚  â”‚
-â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜        â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                                                          â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚         Large Objects (>512 bytes)               â”‚  â”‚
-â”‚  â”‚         (Direct system malloc)                 â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                                                          â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚              Stack (C stack)                     â”‚  â”‚
-â”‚  â”‚         (Local variables, frames)               â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────┐
+│                    Python Process                        │
+│                                                          │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │              Heap (obmalloc)                      │  │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐        │  │
+│  │  │ Arena 1 │  │ Arena 2 │  │ Arena 3 │  ...     │  │
+│  │  │ 256 KB  │  │ 256 KB  │  │ 256 KB  │        │  │
+│  │  │         │  │         │  │         │        │  │
+│  │  │ ┌─────┐ │  │ ┌─────┐ │  │ ┌─────┐ │        │  │
+│  │  │ │Pool │ │  │ │Pool │ │  │ │Pool │ │        │  │
+│  │  │ │4 KB │ │  │ │4 KB │ │  │ │4 KB │ │        │  │
+│  │  │ └─────┘ │  │ └─────┘ │  │ └─────┘ │        │  │
+│  │  └──────────┘  └──────────┘  └──────────┘        │  │
+│  └──────────────────────────────────────────────────┘  │
+│                                                          │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │         Large Objects (>512 bytes)               │  │
+│  │         (Direct system malloc)                 │  │
+│  └──────────────────────────────────────────────────┘  │
+│                                                          │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │              Stack (C stack)                     │  │
+│  │         (Local variables, frames)               │  │
+│  └──────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
 ```
 
 Key components:
 
-obmalloc â€” optimized allocator for small Python objects
+obmalloc — optimized allocator for small Python objects
 
-arenas â€” large chunks subdivided into "pools"
+arenas — large chunks subdivided into "pools"
 
-pools â€” collections of fixed-size blocks
+pools — collections of fixed-size blocks
 
-blocks â€” used to store PyObjects
+blocks — used to store PyObjects
 
 27.4.1 obmalloc Architecture: Arenas, Pools, Blocks
 
 Memory Allocation Hierarchy:
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  Arena (256 KiB or 1 MiB)               â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
-â”‚  â”‚  Pool 0 (4 KiB)                    â”‚ â”‚
-â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”        â”‚ â”‚
-â”‚  â”‚  â”‚Blockâ”‚Blockâ”‚Blockâ”‚ ... â”‚        â”‚ â”‚
-â”‚  â”‚  â””â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”˜        â”‚ â”‚
-â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
-â”‚  â”‚  Pool 1 (4 KiB)                    â”‚ â”‚
-â”‚  â”‚  ...                                â”‚ â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────┐
+│  Arena (256 KiB or 1 MiB)               │
+│  ┌───────────────────────────────────┐ │
+│  │  Pool 0 (4 KiB)                    │ │
+│  │  ┌─────┬─────┬─────┬─────┐        │ │
+│  │  │Block│Block│Block│ ... │        │ │
+│  │  └─────┴─────┴─────┴─────┘        │ │
+│  ├───────────────────────────────────┤ │
+│  │  Pool 1 (4 KiB)                    │ │
+│  │  ...                                │ │
+│  └───────────────────────────────────┘ │
+└─────────────────────────────────────────┘
 ```
 
 Size Classes: Blocks are organized by size (8, 16, 24, 32, ... up to 512 bytes)
@@ -3292,11 +3292,11 @@ reduced fragmentation
 
 **Pitfalls:**
 
-âš  obmalloc only manages small objects (<512 bytes)
-âš  Large objects bypass obmalloc
-âš  Memory fragmentation can still occur
-âš  Use `tracemalloc` for detailed analysis
-âš  `sys.getsizeof()` includes overhead
+⚠ obmalloc only manages small objects (<512 bytes)
+⚠ Large objects bypass obmalloc
+⚠ Memory fragmentation can still occur
+⚠ Use `tracemalloc` for detailed analysis
+⚠ `sys.getsizeof()` includes overhead
 
 27.5 Reference Counting
 
@@ -3338,7 +3338,7 @@ Objects survive promotions across generations.
 **GC Architecture:**
 
 ```
-Generation 0 (young) â†’ Generation 1 (middle) â†’ Generation 2 (old)
+Generation 0 (young) → Generation 1 (middle) → Generation 2 (old)
 ```
 
 **Collection Strategy:**
@@ -3441,22 +3441,22 @@ class Resource:
 
 **Key Functions:**
 
-- `gc.collect()` â€” Force garbage collection
-- `gc.get_count()` â€” Get collection counts
-- `gc.get_threshold()` â€” Get collection thresholds
-- `gc.set_threshold()` â€” Set collection thresholds
-- `gc.disable()` â€” Disable automatic GC
-- `gc.enable()` â€” Enable automatic GC
-- `gc.get_stats()` â€” Get collection statistics
-- `gc.set_debug()` â€” Enable GC debugging
+- `gc.collect()` — Force garbage collection
+- `gc.get_count()` — Get collection counts
+- `gc.get_threshold()` — Get collection thresholds
+- `gc.set_threshold()` — Set collection thresholds
+- `gc.disable()` — Disable automatic GC
+- `gc.enable()` — Enable automatic GC
+- `gc.get_stats()` — Get collection statistics
+- `gc.set_debug()` — Enable GC debugging
 
 **Pitfalls:**
 
-âš  GC adds overhead (pauses execution)
-âš  Objects with `__del__` can't be in cycles
-âš  Disabling GC can cause memory leaks
-âš  Use `gc.collect()` sparingly
-âš  GC doesn't free memory immediately (returns to allocator)
+⚠ GC adds overhead (pauses execution)
+⚠ Objects with `__del__` can't be in cycles
+⚠ Disabling GC can cause memory leaks
+⚠ Use `gc.collect()` sparingly
+⚠ GC doesn't free memory immediately (returns to allocator)
 
 27.7 The GIL (Global Interpreter Lock)
 
@@ -3466,27 +3466,27 @@ The GIL ensures only one thread executes Python bytecode at a time.
 
 ```
 Thread 1          Thread 2          Thread 3
-   â”‚                 â”‚                 â”‚
-   â”œâ”€ Acquire GIL â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-   â”‚                 â”‚                 â”‚
-   â”œâ”€ Execute â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-   â”‚  Bytecode       â”‚  (blocked)      â”‚  (blocked)
-   â”‚                 â”‚                 â”‚
-   â”œâ”€ Release GIL â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-   â”‚                 â”‚                 â”‚
-   â”‚              â”œâ”€ Acquire GIL â”€â”€â”€â”€â”€â”€â”¤
-   â”‚              â”‚                    â”‚
-   â”‚              â”œâ”€ Execute â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-   â”‚              â”‚  Bytecode          â”‚  (blocked)
-   â”‚              â”‚                    â”‚
-   â”‚              â”œâ”€ Release GIL â”€â”€â”€â”€â”€â”€â”¤
-   â”‚              â”‚                    â”‚
-   â”‚              â”‚                 â”œâ”€ Acquire GIL
-   â”‚              â”‚                 â”‚
-   â”‚              â”‚                 â”œâ”€ Execute
-   â”‚              â”‚                 â”‚  Bytecode
-   â”‚              â”‚                 â”‚
-   â”‚              â”‚                 â”œâ”€ Release GIL
+   │                 │                 │
+   ├─ Acquire GIL ───┼─────────────────┤
+   │                 │                 │
+   ├─ Execute ───────┼─────────────────┤
+   │  Bytecode       │  (blocked)      │  (blocked)
+   │                 │                 │
+   ├─ Release GIL ───┼─────────────────┤
+   │                 │                 │
+   │              ├─ Acquire GIL ──────┤
+   │              │                    │
+   │              ├─ Execute ──────────┤
+   │              │  Bytecode          │  (blocked)
+   │              │                    │
+   │              ├─ Release GIL ──────┤
+   │              │                    │
+   │              │                 ├─ Acquire GIL
+   │              │                 │
+   │              │                 ├─ Execute
+   │              │                 │  Bytecode
+   │              │                 │
+   │              │                 ├─ Release GIL
 ```
 
 **Why GIL Exists:**
@@ -3558,7 +3558,7 @@ new memory fences
 
 Performance cost:
 
-~10â€“15% overhead
+~10–15% overhead
 
 JIT helps reclaim performance
 
@@ -3570,7 +3570,7 @@ CPython execution pipeline:
 
 flowchart TD
     A[Source Code] --> B[Tokenizer/Lexer]
-    B --> C[Parser â†’ AST]
+    B --> C[Parser → AST]
     C --> D[Bytecode Compiler]
     D --> E[Optimizer]
     E --> F[Code Object]
@@ -3580,7 +3580,7 @@ flowchart TD
 
 **Tokenizer:**
 
-Transforms characters â†’ tokens
+Transforms characters → tokens
 
 Example tokens:
 
@@ -3605,10 +3605,10 @@ Produces an AST (Abstract Syntax Tree).
 ```
 Source Code: "x = a + b"
 
-Tokenizer â†’ Tokens:
+Tokenizer → Tokens:
 [NAME('x'), EQUAL, NAME('a'), PLUS, NAME('b'), NEWLINE]
 
-Parser â†’ AST:
+Parser → AST:
 Module(
   body=[
     Assign(
@@ -3627,14 +3627,14 @@ Module(
 
 ```
 Module
-â””â”€â”€ body: [Statement]
-    â””â”€â”€ Assign
-        â”œâ”€â”€ targets: [Name]
-        â”‚   â””â”€â”€ id: 'x'
-        â””â”€â”€ value: BinOp
-            â”œâ”€â”€ left: Name(id='a')
-            â”œâ”€â”€ op: Add()
-            â””â”€â”€ right: Name(id='b')
+└── body: [Statement]
+    └── Assign
+        ├── targets: [Name]
+        │   └── id: 'x'
+        └── value: BinOp
+            ├── left: Name(id='a')
+            ├── op: Add()
+            └── right: Name(id='b')
 ```
 
 **Inspecting AST:**
@@ -3671,7 +3671,7 @@ The bytecode compiler transforms AST into executable bytecode.
 **Compilation Pipeline:**
 
 ```
-Source Code â†’ Tokenizer â†’ Parser â†’ AST â†’ Symbol Table â†’ Bytecode â†’ Code Object
+Source Code → Tokenizer → Parser → AST → Symbol Table → Bytecode → Code Object
 ```
 
 **Steps:**
@@ -3724,32 +3724,32 @@ def add(x, y):
 
 **Bytecode Instructions:**
 
-- `LOAD_FAST` â€” Load local variable (fast array access)
-- `LOAD_NAME` â€” Load name (slower, dictionary lookup)
-- `LOAD_CONST` â€” Load constant
-- `LOAD_GLOBAL` â€” Load global variable
-- `STORE_FAST` â€” Store local variable
-- `STORE_NAME` â€” Store name
-- `BINARY_ADD` â€” Binary addition
-- `BINARY_SUBTRACT` â€” Binary subtraction
-- `BINARY_MULTIPLY` â€” Binary multiplication
-- `CALL_FUNCTION` â€” Call function
-- `RETURN_VALUE` â€” Return value
-- `POP_TOP` â€” Pop top of stack
-- `DUP_TOP` â€” Duplicate top of stack
-- `ROT_TWO` â€” Rotate top two stack items
-- `JUMP_FORWARD` â€” Jump forward
-- `JUMP_ABSOLUTE` â€” Jump to absolute address
-- `POP_JUMP_IF_FALSE` â€” Pop and jump if false
-- `SETUP_LOOP` â€” Setup loop (deprecated in 3.8+)
-- `FOR_ITER` â€” Iterate over iterable
-- `BUILD_LIST` â€” Build list
-- `BUILD_TUPLE` â€” Build tuple
-- `BUILD_SET` â€” Build set
-- `BUILD_MAP` â€” Build dictionary
-- `COMPARE_OP` â€” Comparison operation
-- `IS_OP` â€” Identity check (is/is not)
-- `CONTAINS_OP` â€” Membership check (in/not in)
+- `LOAD_FAST` — Load local variable (fast array access)
+- `LOAD_NAME` — Load name (slower, dictionary lookup)
+- `LOAD_CONST` — Load constant
+- `LOAD_GLOBAL` — Load global variable
+- `STORE_FAST` — Store local variable
+- `STORE_NAME` — Store name
+- `BINARY_ADD` — Binary addition
+- `BINARY_SUBTRACT` — Binary subtraction
+- `BINARY_MULTIPLY` — Binary multiplication
+- `CALL_FUNCTION` — Call function
+- `RETURN_VALUE` — Return value
+- `POP_TOP` — Pop top of stack
+- `DUP_TOP` — Duplicate top of stack
+- `ROT_TWO` — Rotate top two stack items
+- `JUMP_FORWARD` — Jump forward
+- `JUMP_ABSOLUTE` — Jump to absolute address
+- `POP_JUMP_IF_FALSE` — Pop and jump if false
+- `SETUP_LOOP` — Setup loop (deprecated in 3.8+)
+- `FOR_ITER` — Iterate over iterable
+- `BUILD_LIST` — Build list
+- `BUILD_TUPLE` — Build tuple
+- `BUILD_SET` — Build set
+- `BUILD_MAP` — Build dictionary
+- `COMPARE_OP` — Comparison operation
+- `IS_OP` — Identity check (is/is not)
+- `CONTAINS_OP` — Membership check (in/not in)
 
 **Using dis Module:**
 
@@ -3829,21 +3829,21 @@ if False:
 
 **Peephole Optimizations:**
 
-- `x = x + 1` â†’ `INPLACE_ADD` (when possible)
-- `x = x * 2` â†’ `INPLACE_MULTIPLY`
+- `x = x + 1` → `INPLACE_ADD` (when possible)
+- `x = x * 2` → `INPLACE_MULTIPLY`
 - Tuple unpacking optimizations
 - String concatenation (for small strings)
 
 **Key Functions:**
 
-- `compile()` â€” Compile source to code object
-- `dis.dis()` â€” Disassemble function/code
-- `dis.code_info()` â€” Get code object info
-- `dis.show_code()` â€” Show detailed code info
-- `code.co_code` â€” Raw bytecode bytes
-- `code.co_consts` â€” Constants tuple
-- `code.co_names` â€” Names tuple
-- `code.co_varnames` â€” Variable names tuple
+- `compile()` — Compile source to code object
+- `dis.dis()` — Disassemble function/code
+- `dis.code_info()` — Get code object info
+- `dis.show_code()` — Show detailed code info
+- `code.co_code` — Raw bytecode bytes
+- `code.co_consts` — Constants tuple
+- `code.co_names` — Names tuple
+- `code.co_varnames` — Variable names tuple
 
 **Use Cases:**
 
@@ -3856,11 +3856,11 @@ if False:
 
 **Pitfalls:**
 
-âš  Bytecode format changes between Python versions
-âš  Don't rely on bytecode for security
-âš  Optimizations may change bytecode
-âš  Use `dis` for analysis, not production code
-âš  Bytecode is implementation-specific (CPython)
+⚠ Bytecode format changes between Python versions
+⚠ Don't rely on bytecode for security
+⚠ Optimizations may change bytecode
+⚠ Use `dis` for analysis, not production code
+⚠ Bytecode is implementation-specific (CPython)
 
 27.12 Code Objects
 
@@ -3939,7 +3939,7 @@ Interpreter runs normally
 
 It measures runtime behavior
 
-It specializes opcodes (e.g., BINARY_ADD â†’ BINARY_ADD_INT)
+It specializes opcodes (e.g., BINARY_ADD → BINARY_ADD_INT)
 
 Writes inline caches into bytecode stream
 
@@ -3971,7 +3971,7 @@ supports free-threading
 
 Results:
 
-âš ï¸ Real-world benchmarks: The 3.13 experimental JIT typically shows 5â€“15% speedups on the standard pyperformance suite. Certain micro-benchmarks and hot loops can see larger gains (20â€“50%), but I/O-bound and extension-heavy workloads often see little change.
+⚠️ Real-world benchmarks: The 3.13 experimental JIT typically shows 5–15% speedups on the standard pyperformance suite. Certain micro-benchmarks and hot loops can see larger gains (20–50%), but I/O-bound and extension-heavy workloads often see little change.
 
 Caveats:
 
@@ -3993,7 +3993,7 @@ allocated >= size
 
 Growth strategy:
 
-roughly 1.125Ã— expansion
+roughly 1.125× expansion
 
 amortized O(1) append
 
@@ -4064,7 +4064,7 @@ stack
 
 Exception propagation is implemented by:
 
-setting threadâ€™s exception state
+setting thread’s exception state
 
 unwinding frame chain
 
@@ -4258,48 +4258,48 @@ setup(
 **Key C API Functions:**
 
 **Object Creation:**
-- `PyLong_FromLong()` â€” Create integer
-- `PyFloat_FromDouble()` â€” Create float
-- `PyUnicode_FromString()` â€” Create string
-- `PyList_New()` â€” Create list
-- `PyDict_New()` â€” Create dictionary
-- `PyTuple_New()` â€” Create tuple
-- `PySet_New()` â€” Create set
+- `PyLong_FromLong()` — Create integer
+- `PyFloat_FromDouble()` — Create float
+- `PyUnicode_FromString()` — Create string
+- `PyList_New()` — Create list
+- `PyDict_New()` — Create dictionary
+- `PyTuple_New()` — Create tuple
+- `PySet_New()` — Create set
 
 **Object Access:**
-- `PyLong_AsLong()` â€” Get integer value
-- `PyFloat_AsDouble()` â€” Get float value
-- `PyUnicode_AsUTF8()` â€” Get string bytes
-- `PyList_GetItem()` â€” Get list item
-- `PyDict_GetItem()` â€” Get dict item
-- `PyTuple_GetItem()` â€” Get tuple item
+- `PyLong_AsLong()` — Get integer value
+- `PyFloat_AsDouble()` — Get float value
+- `PyUnicode_AsUTF8()` — Get string bytes
+- `PyList_GetItem()` — Get list item
+- `PyDict_GetItem()` — Get dict item
+- `PyTuple_GetItem()` — Get tuple item
 
 **Object Manipulation:**
-- `PyList_Append()` â€” Append to list
-- `PyList_SetItem()` â€” Set list item
-- `PyDict_SetItem()` â€” Set dict item
-- `PyDict_SetItemString()` â€” Set dict item (string key)
-- `PyObject_CallObject()` â€” Call callable
-- `PyObject_GetAttrString()` â€” Get attribute
+- `PyList_Append()` — Append to list
+- `PyList_SetItem()` — Set list item
+- `PyDict_SetItem()` — Set dict item
+- `PyDict_SetItemString()` — Set dict item (string key)
+- `PyObject_CallObject()` — Call callable
+- `PyObject_GetAttrString()` — Get attribute
 
 **Reference Counting:**
-- `Py_INCREF()` â€” Increment refcount
-- `Py_DECREF()` â€” Decrement refcount
-- `Py_XDECREF()` â€” Decrement if not NULL
-- `Py_CLEAR()` â€” Clear and decrement
+- `Py_INCREF()` — Increment refcount
+- `Py_DECREF()` — Decrement refcount
+- `Py_XDECREF()` — Decrement if not NULL
+- `Py_CLEAR()` — Clear and decrement
 
 **Error Handling:**
-- `PyErr_SetString()` â€” Set exception
-- `PyErr_Occurred()` â€” Check for exception
-- `PyErr_Clear()` â€” Clear exception
-- `PyErr_Format()` â€” Format exception message
-- `PyArg_ParseTuple()` â€” Parse function arguments
+- `PyErr_SetString()` — Set exception
+- `PyErr_Occurred()` — Check for exception
+- `PyErr_Clear()` — Clear exception
+- `PyErr_Format()` — Format exception message
+- `PyArg_ParseTuple()` — Parse function arguments
 
 **GIL Management:**
-- `PyGILState_Ensure()` â€” Ensure GIL held
-- `PyGILState_Release()` â€” Release GIL
-- `PyEval_SaveThread()` â€” Save thread state
-- `PyEval_RestoreThread()` â€” Restore thread state
+- `PyGILState_Ensure()` — Ensure GIL held
+- `PyGILState_Release()` — Release GIL
+- `PyEval_SaveThread()` — Save thread state
+- `PyEval_RestoreThread()` — Restore thread state
 
 **Use Cases:**
 
@@ -4312,12 +4312,12 @@ setup(
 
 **Pitfalls:**
 
-âš  Reference counting errors cause crashes
-âš  GIL must be held for most operations
-âš  Exception handling is mandatory
-âš  Memory leaks from missing Py_DECREF
-âš  Thread safety requires GIL management
-âš  Use Cython/pybind11 for easier C API usage
+⚠ Reference counting errors cause crashes
+⚠ GIL must be held for most operations
+⚠ Exception handling is mandatory
+⚠ Memory leaks from missing Py_DECREF
+⚠ Thread safety requires GIL management
+⚠ Use Cython/pybind11 for easier C API usage
 
 27.20 Extension Modules
 
@@ -4341,7 +4341,7 @@ Python uses reference counting + generational GC
 
 the GIL exists because CPython's memory model is not thread-safe
 
-Pythonâ€™s bytecode engine is a stack-based VM
+Python’s bytecode engine is a stack-based VM
 
 3.11 introduced adaptive interpreter optimizations
 
@@ -4366,11 +4366,11 @@ reasoning about concurrency
 optimizing memory-heavy code
 
 
-ðŸ“˜ CHAPTER 28 â€” ALTERNATIVE PYTHON IMPLEMENTATIONS
+📘 CHAPTER 28 — ALTERNATIVE PYTHON IMPLEMENTATIONS
 
 Depth Level: 4
-Python Versions Covered: CPython 3.8â€“3.14, plus alternative runtimes as of ~2024â€“2025
-Prerequisites: Chapters 1â€“27
+Python Versions Covered: CPython 3.8–3.14, plus alternative runtimes as of ~2024–2025
+Prerequisites: Chapters 1–27
 
 28.0 Why Alternative Implementations Exist
 
@@ -4398,21 +4398,21 @@ PyPy
 
 So multiple Python implementations exist:
 
-CPython â€“ reference, de facto standard
+CPython – reference, de facto standard
 
-PyPy â€“ JIT-compiled, performance-focused
+PyPy – JIT-compiled, performance-focused
 
-MicroPython / CircuitPython â€“ microcontrollers / embedded
+MicroPython / CircuitPython – microcontrollers / embedded
 
-Jython â€“ Python on JVM (mostly 2.x, semi-stagnant)
+Jython – Python on JVM (mostly 2.x, semi-stagnant)
 
-IronPython â€“ Python on .NET
+IronPython – Python on .NET
 
-GraalPy (GraalPython) â€“ Python on GraalVM (JVM polyglot)
+GraalPy (GraalPython) – Python on GraalVM (JVM polyglot)
 GitHub
 +1
 
-Weâ€™ll cover:
+We’ll cover:
 
 architecture
 
@@ -4424,13 +4424,13 @@ real-world use cases
 
 how to choose between them
 
-28.1 CPython â€” The Reference Implementation (Baseline)
+28.1 CPython — The Reference Implementation (Baseline)
 
-Youâ€™ve already seen this in Ch. 27, but as a quick contrast:
+You’ve already seen this in Ch. 27, but as a quick contrast:
 
 Language support: latest Python versions first
 
-Speed: moderate, improving with 3.11â€“3.13 adaptive interpreter + JIT
+Speed: moderate, improving with 3.11–3.13 adaptive interpreter + JIT
 
 Extensions: best compatibility with C extensions (NumPy, SciPy, etc.)
 
@@ -4438,14 +4438,14 @@ Ecosystem: everything targets CPython first
 
 You should assume CPython unless you have a strong reason to choose something else.
 
-28.2 PyPy â€” High-Performance JIT Python
+28.2 PyPy — High-Performance JIT Python
 28.2.1 Overview
 
 PyPy is:
 
 a fast, compliant alternative to CPython
 
-roughly ~3Ã— faster on average for many workloads
+roughly ~3× faster on average for many workloads
 PyPy
 +1
 
@@ -4508,12 +4508,12 @@ Pure Python code: PyPy often wins
 
 Heavy NumPy/SciPy stack: CPython or GraalPy is safer (for now)
 
-28.3 MicroPython & CircuitPython â€” Python for Microcontrollers
+28.3 MicroPython & CircuitPython — Python for Microcontrollers
 28.3.1 MicroPython Overview
 
 MicroPython is:
 
-â€œa lean and efficient implementation of Python 3â€¦ optimized to run on microcontrollers and constrained environments.â€
+“a lean and efficient implementation of Python 3… optimized to run on microcontrollers and constrained environments.”
 MicroPython
 +2
 Raspberry Pi
@@ -4529,7 +4529,7 @@ implements subset of Python 3 + hardware-specific modules
 
 REPL over UART / USB for interactive development
 
-direct hardware access (GPIO, IÂ²C, SPI, UART, PWM)
+direct hardware access (GPIO, I²C, SPI, UART, PWM)
 
 Use cases:
 
@@ -4567,7 +4567,7 @@ no heavy CPython C-extensions
 
 memory constraints may require more low-level thinking
 
-28.4 Jython â€” Python on the JVM (mostly Python 2.x)
+28.4 Jython — Python on the JVM (mostly Python 2.x)
 
 Historically:
 
@@ -4595,7 +4595,7 @@ less active community than in its heyday
 
 In new projects that want JVM + Python, GraalPy is usually a better strategic choice.
 
-28.5 IronPython â€” Python on .NET
+28.5 IronPython — Python on .NET
 
 IronPython:
 
@@ -4619,7 +4619,7 @@ has Python 3 effort, but CPython/PyPy remain the mainstream for modern code
 
 if you need .NET interop and modern perf, many teams instead embed CPython via pythonnet, or use GraalPy + Java + C# interop via other means
 
-28.6 GraalPy (GraalPython) â€” High-Performance Python on GraalVM
+28.6 GraalPy (GraalPython) — High-Performance Python on GraalVM
 
 GraalPy (aka GraalPython / GraalPy):
 
@@ -4635,7 +4635,7 @@ data science workloads
 
 SciPy / NumPy compatibility
 
-polyglot interop (Python â†” Java/JS/R/â€¦ )
+polyglot interop (Python ↔ Java/JS/R/… )
 
 ahead-of-time or JIT compilation to fast machine code
 
@@ -4668,13 +4668,13 @@ performance-focused fork, formerly from Dropbox
 
 mixes CPython compatibility with JIT and other optimizations
 
-smaller community vs PyPy, but conceptually similar as a â€œfaster CPythonâ€
+smaller community vs PyPy, but conceptually similar as a “faster CPython”
 
 28.7.2 Stackless Python
 
 modified CPython with microthreads / tasklets and soft switching
 
-inspired concurrency features (e.g., influenced PyPyâ€™s stackless mode)
+inspired concurrency features (e.g., influenced PyPy’s stackless mode)
 PyPy
 +1
 
@@ -4683,46 +4683,46 @@ PyPy
 
 General-purpose apps / web backends / CLIs
 
-âœ… CPython by default
+✅ CPython by default
 
-ðŸ” Consider PyPy if CPU-bound and pure Python
+🔁 Consider PyPy if CPU-bound and pure Python
 
 High-performance, pure-Python numerical code
 
-âœ… Try PyPy first
+✅ Try PyPy first
 
-âœ… Consider GraalPy if youâ€™re in JVM world and want max performance
+✅ Consider GraalPy if you’re in JVM world and want max performance
 
 Heavy C-extension ecosystem (NumPy/SciPy/PyTorch, etc.)
 
-âœ… CPython
+✅ CPython
 
-ðŸ” GraalPy (some support, improving; still check compatibility lists)
+🔁 GraalPy (some support, improving; still check compatibility lists)
 graalvm.org
 +1
 
 JVM shop wants Python scripting & polyglot
 
-âœ… GraalPy on GraalVM
+✅ GraalPy on GraalVM
 
-ðŸ” Jython for legacy 2.x only
+🔁 Jython for legacy 2.x only
 
 .NET shop
 
-âœ… IronPython for certain scenarios
+✅ IronPython for certain scenarios
 
-ðŸ” CPython + pythonnet if you need strict CPython semantics
+🔁 CPython + pythonnet if you need strict CPython semantics
 
 Embedded & microcontrollers
 
-âœ… MicroPython or CircuitPython
+✅ MicroPython or CircuitPython
 MicroPython
 +2
 Raspberry Pi
 +2
 
 28.9 Interoperability Patterns
-28.9.1 CPython â†” C / C++
+28.9.1 CPython ↔ C / C++
 
 C-API
 
@@ -4732,7 +4732,7 @@ cffi
 
 pybind11
 
-28.9.2 PyPy â†” Native Code
+28.9.2 PyPy ↔ Native Code
 
 prefers cffi / cppyy for best performance and compatibility
 PyPy
@@ -4762,11 +4762,11 @@ object layout (tagged pointers, compressed headers, etc.)
 
 Examples:
 
-PyPy: advanced GC, no reference counting; can deliver big wins for memory-heavy workloads where CPythonâ€™s refcount overhead dominates
+PyPy: advanced GC, no reference counting; can deliver big wins for memory-heavy workloads where CPython’s refcount overhead dominates
 doc.pypy.org
 +1
 
-GraalPy: uses GraalVMâ€™s highly optimized runtime & GC; can JIT Python together with other languages in the same process
+GraalPy: uses GraalVM’s highly optimized runtime & GC; can JIT Python together with other languages in the same process
 graalvm.org
 +1
 
@@ -4776,7 +4776,7 @@ MicroPython
 
 28.11 Anti-Patterns & Gotchas
 
-âš  Assuming all Python implementations behave identically:
+⚠ Assuming all Python implementations behave identically:
 
 memory model & GC can differ
 
@@ -4784,7 +4784,7 @@ performance characteristics differ drastically
 
 C extensions may not be portable
 
-âš  Relying on CPython internals:
+⚠ Relying on CPython internals:
 
 id() assumptions about address
 
@@ -4792,13 +4792,13 @@ refcount hacks (e.g., sys.getrefcount)
 
 ctypes tricks that poke into CPython-specific data
 
-âš  Porting to PyPy / GraalPy without testing:
+⚠ Porting to PyPy / GraalPy without testing:
 
 performance may drop if most time is inside unsupported C-extensions
 
 you may hit missing or experimental APIs
 
-âš  Assuming MicroPython is â€œfull CPythonâ€:
+⚠ Assuming MicroPython is “full CPython”:
 
 missing libraries
 
@@ -4830,13 +4830,13 @@ graalvm.org
 
 Choosing an implementation is a system architecture decision, not just a runtime flag.
 
-You now have a high-level (and fairly deep) map of the Python implementation landscape â€” which closes out the theoretical section of the Bible.
+You now have a high-level (and fairly deep) map of the Python implementation landscape — which closes out the theoretical section of the Bible.
 
 
 
-ðŸ§  Chapter 29 â€” Python Programming with AI Agents
+🧠 Chapter 29 — Python Programming with AI Agents
 AI-Assisted Development, Multi-Agent Systems, LLM Engineering & Code Quality Enforcement
-29.1 â€” Introduction
+29.1 — Introduction
 
 AI agents are transforming software development. Python, with its extensive ecosystem, is the primary language for building:
 
@@ -4866,8 +4866,8 @@ integrate agents into CI/CD, testing, and developer workflows
 
 This is a Level 3 (Deep Dive) chapter designed for professionals and senior engineers.
 
-29.2 â€” AI Agents in Python: Key Concepts
-29.2.1 â€” What Is an AI Agent?
+29.2 — AI Agents in Python: Key Concepts
+29.2.1 — What Is an AI Agent?
 
 An AI agent consists of:
 
@@ -4895,7 +4895,7 @@ CrewAI multi-agent systems
 
 Custom micro-agents inside real codebases
 
-29.2.2 â€” Common Agent Architectures
+29.2.2 — Common Agent Architectures
 1. Tool-Based Agents
 
 LLM + callable Python functions.
@@ -4918,17 +4918,17 @@ Security agent
 
 3. Reflection-Based Agents
 
-Agents that reason about past actions (â€œreflection loopâ€).
+Agents that reason about past actions (“reflection loop”).
 
 4. Self-Healing Systems
 
 Agents that detect & fix bugs automatically.
 
-29.3 â€” Best Practices for Using AI in Python Development
+29.3 — Best Practices for Using AI in Python Development
 
-This section covers DOs and DONâ€™Ts for AI-assisted Python development.
+This section covers DOs and DON’Ts for AI-assisted Python development.
 
-29.3.1 â€” DO: Provide Context Before Code Generation
+29.3.1 — DO: Provide Context Before Code Generation
 
 AI-generated code quality increases dramatically when you give:
 
@@ -4946,26 +4946,26 @@ architecture rules
 
 coding standards
 
-29.3.2 â€” DO: Ask for Step-by-Step Reasoning (but not in code)
+29.3.2 — DO: Ask for Step-by-Step Reasoning (but not in code)
 
 Use:
 
-âœ” â€œExplain before codingâ€
-âœ” â€œIdentify edge cases firstâ€
-âœ” â€œPropose an API before implementing itâ€
+✔ “Explain before coding”
+✔ “Identify edge cases first”
+✔ “Propose an API before implementing it”
 
 Avoid:
 
-âœ˜ letting AI jump straight into final code with no design phase
-âœ˜ accepting code without verifying tests and patterns
+✘ letting AI jump straight into final code with no design phase
+✘ accepting code without verifying tests and patterns
 
-29.3.3 â€” DO: Use Python-Styled Prompts
+29.3.3 — DO: Use Python-Styled Prompts
 
 Examples:
 
 Bad:
 
-â€œMake a thing that loads data I guess.â€
+“Make a thing that loads data I guess.”
 
 Good:
 
@@ -4978,7 +4978,7 @@ Implement a Python module:
   - Include type hints
   - Include integration test in `tests/test_data_loader.py`
 
-29.3.4 â€” DO: Always Validate AI Code with Linters
+29.3.4 — DO: Always Validate AI Code with Linters
 
 Recommended stack:
 
@@ -4994,7 +4994,7 @@ pylint (optional)
 
 Run checks automatically via pre-commit hooks.
 
-29.3.5 â€” DONâ€™T: Trust AI to Manage State or Architecture Alone
+29.3.5 — DON’T: Trust AI to Manage State or Architecture Alone
 
 AI agents often hallucinate:
 
@@ -5018,17 +5018,17 @@ exact folder structure
 
 explicit imports
 
-29.4 â€” AI-Generated Code Cleanup & Refactoring
+29.4 — AI-Generated Code Cleanup & Refactoring
 
 AI-generated code contains predictable patterns of errors.
 
 This section shows how to detect & fix them programmatically.
 
-29.4.1 â€” Typical AI Mistakes
-ðŸš¨ 1. Incorrect imports
+29.4.1 — Typical AI Mistakes
+🚨 1. Incorrect imports
 from pandas import Dataframe   # wrong: DataFrame
 
-ðŸš¨ 2. Missing edge cases
+🚨 2. Missing edge cases
 
 empty lists
 
@@ -5038,20 +5038,20 @@ file not found
 
 type mismatches
 
-ðŸš¨ 3. Overly generic exceptions
+🚨 3. Overly generic exceptions
 except Exception:
 
-ðŸš¨ 4. Wrong async/sync mixing
+🚨 4. Wrong async/sync mixing
 async def foo():
     time.sleep(2)  # blocks event loop
 
-ðŸš¨ 5. Redundant code duplication
+🚨 5. Redundant code duplication
 
 repeating utilities
 
 multiple versions of same function
 
-29.4.2 â€” Pattern-Based Cleanup Pass
+29.4.2 — Pattern-Based Cleanup Pass
 
 A cleanup agent should perform these checks automatically:
 
@@ -5061,7 +5061,7 @@ Collapse duplicate code blocks
 
 Ensure type hints everywhere
 
-Convert magic numbers â†’ named constants
+Convert magic numbers → named constants
 
 Enforce pure functions where possible
 
@@ -5075,8 +5075,8 @@ Validate database session handling
 
 Check async await correctness
 
-29.4.3 â€” Refactor Example
-ðŸŸ¡ AI-Generated Code (Buggy)
+29.4.3 — Refactor Example
+🟡 AI-Generated Code (Buggy)
 def load_data(file):
     import json, os
     f = open(file)
@@ -5084,7 +5084,7 @@ def load_data(file):
     f.close()
     return dt
 
-ðŸŸ¢ Cleaned, Pythonic Version
+🟢 Cleaned, Pythonic Version
 from pathlib import Path
 import json
 from typing import Any
@@ -5097,20 +5097,20 @@ def load_data(path: str | Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
 
-29.5 â€” Building Python AI Agents
+29.5 — Building Python AI Agents
 
 This section covers how to build your own agents in Python.
 
-29.5.1 â€” Architecture of a Python Agent
+29.5.1 — Architecture of a Python Agent
 Agent
- â”œâ”€â”€ Planner
- â”œâ”€â”€ Memory
- â”œâ”€â”€ Tools (Python functions)
- â”œâ”€â”€ Policy / Rules
- â”œâ”€â”€ LLM
- â””â”€â”€ Environment
+ ├── Planner
+ ├── Memory
+ ├── Tools (Python functions)
+ ├── Policy / Rules
+ ├── LLM
+ └── Environment
 
-29.5.2 â€” Example: Simple Tool-Driven Agent (OpenAI)
+29.5.2 — Example: Simple Tool-Driven Agent (OpenAI)
 from openai import OpenAI
 client = OpenAI()
 
@@ -5140,21 +5140,21 @@ response = client.chat.completions.create(
     tools=tools
 )
 
-29.5.3 â€” Multi-Agent Python Architecture
+29.5.3 — Multi-Agent Python Architecture
 
 Role-based architecture:
 
-ArchitectAgent â†’ proposes design
+ArchitectAgent → proposes design
 
-ReviewerAgent â†’ enforces patterns
+ReviewerAgent → enforces patterns
 
-TesterAgent â†’ writes tests
+TesterAgent → writes tests
 
-RefactorAgent â†’ cleans up code
+RefactorAgent → cleans up code
 
-SecurityAgent â†’ checks anti-patterns
+SecurityAgent → checks anti-patterns
 
-DocsAgent â†’ updates documentation
+DocsAgent → updates documentation
 
 Use frameworks:
 
@@ -5166,7 +5166,7 @@ Autogen
 
 Custom orchestrators
 
-29.6 â€” Testing AI-Generated Code
+29.6 — Testing AI-Generated Code
 1. Snapshot testing
 
 Compare generated output against known-good versions.
@@ -5199,7 +5199,7 @@ malformed JSON
 
 network failures
 
-29.7 â€” Ensuring Safety in Agentic Python Code
+29.7 — Ensuring Safety in Agentic Python Code
 Avoid
 
 direct shell calls
@@ -5228,8 +5228,8 @@ audit logs
 
 approval gates
 
-29.8 â€” Tips, Tricks & Patterns for AI-Powered Python
-29.8.1 â€” Never let AI mutate architecture unintentionally
+29.8 — Tips, Tricks & Patterns for AI-Powered Python
+29.8.1 — Never let AI mutate architecture unintentionally
 
 Require:
 
@@ -5239,23 +5239,23 @@ exact file paths
 
 dependency mapping
 
-29.8.2 â€” Always ask for explanations of choices
+29.8.2 — Always ask for explanations of choices
 
-â€œExplain your design before coding.â€
+“Explain your design before coding.”
 
-29.8.3 â€” Use multi-step generation for correctness
+29.8.3 — Use multi-step generation for correctness
 
-Design â†’
+Design →
 
-Validate â†’
+Validate →
 
-Implement â†’
+Implement →
 
-Test â†’
+Test →
 
 Refine
 
-29.8.4 â€” Use LLMs to generate complicated boilerplate
+29.8.4 — Use LLMs to generate complicated boilerplate
 
 Examples:
 
@@ -5271,12 +5271,12 @@ Kubernetes YAML
 
 Terraform configs
 
-29.8.5 â€” But ALWAYS validate with CI
+29.8.5 — But ALWAYS validate with CI
 
 AI does not enforce linters.
 Your CI must.
 
-29.9 â€” Real-World Example: AI Agent Refactor Workflow
+29.9 — Real-World Example: AI Agent Refactor Workflow
 
 Developer writes spec
 
@@ -5300,7 +5300,7 @@ Code is merged
 
 This is top-tier modern software development.
 
-29.10 â€” Key Takeaways
+29.10 — Key Takeaways
 
 AI is a power tool, not a replacement for engineering judgment
 
@@ -5326,7 +5326,7 @@ Shows correct usage, anti-patterns, pitfalls
 
 Includes micro examples, mini examples, and real-world usage notes
 
-Uses modern Python (3.10â€“3.14) features:
+Uses modern Python (3.10–3.14) features:
 
 Structural Pattern Matching
 
@@ -5344,14 +5344,14 @@ Dependency injection patterns
 
 Concurrency-safe patterns
 
-This is Depth Level 2â€“3.
+This is Depth Level 2–3.
 
-Letâ€™s begin.
+Let’s begin.
 
-ðŸ“˜ APPENDIX A â€” PYTHON PATTERN DICTIONARY
+📘 APPENDIX A — PYTHON PATTERN DICTIONARY
 
-Depth Level: 2â€“3
-Python Versions: 3.9â€“3.14+
+Depth Level: 2–3
+Python Versions: 3.9–3.14+
 Contains micro/mini examples, best practices, and anti-patterns.
 
 A.0 Overview
@@ -5364,26 +5364,26 @@ Python has dynamic types
 
 Python favors duck typing and composability
 
-Many â€œpatternsâ€ are built into the language (e.g., iterator)
+Many “patterns” are built into the language (e.g., iterator)
 
 Simpler constructs often replace classical GOF patterns
 
 This appendix uses:
 
-Micro Examples (5â€“10 lines)
+Micro Examples (5–10 lines)
 
-Mini Examples (20â€“40 lines)
+Mini Examples (20–40 lines)
 
 Gotchas, warnings, and anti-patterns
 
 Version tags (e.g., [3.10+])
 
 A.1 Singleton Pattern
-ðŸ”§ Use With Caution (Common Anti-Pattern)
+🔧 Use With Caution (Common Anti-Pattern)
 
-Python rarely needs singletons â€” modules already act as singletons.
+Python rarely needs singletons — modules already act as singletons.
 
-âœ” Proper Pythonic Singleton (Module Singleton)
+✔ Proper Pythonic Singleton (Module Singleton)
 
 config.py:
 
@@ -5395,7 +5395,7 @@ Import anywhere:
 
 import config
 
-âœ” Class-Based Singleton (When Needed)
+✔ Class-Based Singleton (When Needed)
 class Singleton:
     _instance = None
 
@@ -5411,18 +5411,18 @@ s1 = Singleton()
 s2 = Singleton()
 assert s1 is s2
 
-âŒ Anti-Pattern
+❌ Anti-Pattern
 
 Global state magically mutated across modules.
 
-âš ï¸ Prefer Instead:
+⚠️ Prefer Instead:
 
 dependency injection
 
 passing objects explicitly
 
 A.2 Factory Pattern
-âœ” Simple Factory (Pythonic)
+✔ Simple Factory (Pythonic)
 def create_parser(kind: str):
     match kind:
         case "json": return JSONParser()
@@ -5430,9 +5430,9 @@ def create_parser(kind: str):
         case _: raise ValueError("Unknown")
 
 
-Uses pattern matching â†’ clean & readable.
+Uses pattern matching → clean & readable.
 
-âœ” Factory with Callables
+✔ Factory with Callables
 PARSERS = {
     "json": JSONParser,
     "yaml": YAMLParser,
@@ -5443,7 +5443,7 @@ parser = PARSERS[kind]()
 
 This is the most Pythonic version.
 
-âœ” Abstract Factory (with Protocols)
+✔ Abstract Factory (with Protocols)
 from typing import Protocol
 
 class Parser(Protocol):
@@ -5456,7 +5456,7 @@ A.3 Builder Pattern
 
 Used for constructing complex objects step-by-step.
 
-âœ” Idiomatic Python Builder (Fluent API)
+✔ Idiomatic Python Builder (Fluent API)
 class QueryBuilder:
     def __init__(self):
         self.parts = []
@@ -5478,7 +5478,7 @@ Usage:
 q = QueryBuilder().where("age > 20").limit(10).build()
 
 A.4 Strategy Pattern
-âœ” Functional Strategies (Most Pythonic)
+✔ Functional Strategies (Most Pythonic)
 def add(a, b): return a + b
 def mul(a, b): return a * b
 
@@ -5487,7 +5487,7 @@ def compute(strategy, x, y):
 
 compute(add, 2, 3)
 
-âœ” Class-Based Strategy
+✔ Class-Based Strategy
 
 Useful when state is required.
 
@@ -5501,7 +5501,7 @@ A.5 Adapter Pattern
 
 Wraps incompatible interfaces.
 
-âœ” Pythonic Adapter
+✔ Pythonic Adapter
 class FileAdapter:
     def __init__(self, f):
         self.f = f
@@ -5510,7 +5510,7 @@ class FileAdapter:
         return self.f.read()
 
 A.6 Observer / Pub-Sub Pattern
-âœ” Lightweight Observer
+✔ Lightweight Observer
 class Event:
     def __init__(self):
         self.handlers = []
@@ -5522,7 +5522,7 @@ class Event:
         for h in self.handlers:
             h(data)
 
-âœ” Async Observer ([asyncio])
+✔ Async Observer ([asyncio])
 class AsyncEvent:
     def __init__(self):
         self.handlers = []
@@ -5538,7 +5538,7 @@ A.7 Command Pattern
 
 Represent actions as objects.
 
-âœ” Minimal Pythonic Version
+✔ Minimal Pythonic Version
 class Command(Protocol):
     def execute(self) -> None: ...
 
@@ -5553,9 +5553,9 @@ A.8 Decorator Pattern (Python-native)
 
 Used to wrap behavior without modifying original class.
 
-Python already has decorator syntax â€” this is the OOP pattern.
+Python already has decorator syntax — this is the OOP pattern.
 
-âœ” Example
+✔ Example
 class Service:
     def run(self): return "running"
 
@@ -5571,7 +5571,7 @@ A.9 Proxy Pattern
 
 Control access to an object.
 
-âœ” Simple Proxy
+✔ Simple Proxy
 class CachedProxy:
     def __init__(self, target):
         self.target = target
@@ -5586,7 +5586,7 @@ A.10 State Pattern
 
 Great for state machines.
 
-âœ” Classic State Machine
+✔ Classic State Machine
 class State(Protocol):
     def handle(self, ctx): ...
 
@@ -5603,7 +5603,7 @@ ctx = Context()
 ctx.state.handle(ctx)
 
 A.11 Middleware Pattern (Web Frameworks)
-âœ” WSGI/ASGI-style middleware
+✔ WSGI/ASGI-style middleware
 async def middleware(request, handler):
     print("before")
     response = await handler(request)
@@ -5627,7 +5627,7 @@ A.12 Dependency Injection Pattern
 
 Python does not require DI containers, but simple versions are useful.
 
-âœ” Simple DI Container
+✔ Simple DI Container
 class Container:
     def __init__(self):
         self.providers = {}
@@ -5642,7 +5642,7 @@ A.13 Iterator Pattern (built into Python)
 
 Python is iterator-first.
 
-âœ” Custom Iterator
+✔ Custom Iterator
 class Countdown:
     def __init__(self, n): self.n = n
     def __iter__(self): return self
@@ -5652,7 +5652,7 @@ class Countdown:
         return self.n
 
 A.14 Context Manager Pattern
-âœ” Using class-based version
+✔ Using class-based version
 class FileManager:
     def __init__(self, path):
         self.path = path
@@ -5668,7 +5668,7 @@ A.15 Repository Pattern
 
 Used in backend apps to abstract DB logic.
 
-âœ” Minimal Example
+✔ Minimal Example
 class UserRepo:
     def __init__(self, db): self.db = db
 
@@ -5688,20 +5688,20 @@ class BillingService:
         ...
 
 A.17 Anti-Patterns & Warnings
-âŒ Overusing OOP patterns in Python
+❌ Overusing OOP patterns in Python
 
 Functional & simpler solutions often work better.
 
-âŒ Singleton misuse
+❌ Singleton misuse
 
 Modules already serve as singletons.
 
-âŒ Factories where simple callables suffice
-âŒ Strategy classes instead of functions
+❌ Factories where simple callables suffice
+❌ Strategy classes instead of functions
 
 Prefer higher-order functions unless stateful.
 
-âŒ Excessive class hierarchies
+❌ Excessive class hierarchies
 
 Favor dataclasses, composition, and protocols.
 
@@ -5740,17 +5740,17 @@ comments and explanations
 
 This is Depth Level 3, containing:
 
-Micro Examples (5â€“10 lines)
+Micro Examples (5–10 lines)
 
-Mini Examples (20â€“60 lines)
+Mini Examples (20–60 lines)
 
-Macro Examples (100â€“250+ lines)
+Macro Examples (100–250+ lines)
 
-Mega Examples (300â€“600+ lines)
+Mega Examples (300–600+ lines)
 
-Letâ€™s begin with the Macro & Mega examples.
+Let’s begin with the Macro & Mega examples.
 
-ðŸ“˜ APPENDIX B â€” THE PYTHON CODE LIBRARY (MACRO + MEGA EXAMPLES)
+📘 APPENDIX B — THE PYTHON CODE LIBRARY (MACRO + MEGA EXAMPLES)
 
 Depth Level: 3
 Complete runnable applications included
@@ -5759,7 +5759,7 @@ B.0 Overview
 
 This appendix contains:
 
-Macro Examples (100â€“250 lines)
+Macro Examples (100–250 lines)
 
 REST API with FastAPI (async)
 
@@ -5777,7 +5777,7 @@ Logging system with structlog
 
 Web Scraper (aiohttp + BeautifulSoup)
 
-Mega Examples (300â€“600+ lines)
+Mega Examples (300–600+ lines)
 
 Full ETL Pipeline
 
@@ -5809,11 +5809,11 @@ Distributed Task Pipeline (Celery + FastAPI + PG)
 
 We will generate ALL of these, one by one.
 
-Letâ€™s begin with:
+Let’s begin with:
 
-â­ B.1 MACRO EXAMPLE #1 â€” FastAPI REST API (Complete Application)
+⭐ B.1 MACRO EXAMPLE #1 — FastAPI REST API (Complete Application)
 
-100â€“200 lines
+100–200 lines
 Fully runnable.
 Uses:
 
@@ -5833,20 +5833,20 @@ Settings Management
 
 B.1.0 Folder Structure
 fastapi_app/
-â”‚
-â”œâ”€ app/
-â”‚   â”œâ”€ main.py
-â”‚   â”œâ”€ api/
-â”‚   â”‚   â”œâ”€ __init__.py
-â”‚   â”‚   â”œâ”€ router.py
-â”‚   â”‚   â””â”€ models.py
-â”‚   â”œâ”€ core/
-â”‚   â”‚   â”œâ”€ config.py
-â”‚   â”‚   â””â”€ logging.py
-â”‚   â””â”€ services/
-â”‚       â””â”€ users.py
-â”‚
-â””â”€ pyproject.toml
+│
+├─ app/
+│   ├─ main.py
+│   ├─ api/
+│   │   ├─ __init__.py
+│   │   ├─ router.py
+│   │   └─ models.py
+│   ├─ core/
+│   │   ├─ config.py
+│   │   └─ logging.py
+│   └─ services/
+│       └─ users.py
+│
+└─ pyproject.toml
 
 B.1.1 pyproject.toml
 [project]
@@ -5863,7 +5863,7 @@ host = "127.0.0.1"
 port = 8000
 
 
-B.1.2 app/core/config.py â€” Settings
+B.1.2 app/core/config.py — Settings
 from pydantic import BaseModel
 
 class Settings(BaseModel):
@@ -5872,7 +5872,7 @@ class Settings(BaseModel):
 
 settings = Settings()
 
-B.1.3 app/core/logging.py â€” Logging
+B.1.3 app/core/logging.py — Logging
 import logging
 
 def setup_logging():
@@ -5883,7 +5883,7 @@ def setup_logging():
 
 logger = logging.getLogger("fastapi-app")
 
-B.1.4 app/api/models.py â€” Pydantic Models
+B.1.4 app/api/models.py — Pydantic Models
 from pydantic import BaseModel, Field
 
 class UserIn(BaseModel):
@@ -5895,7 +5895,7 @@ class User(BaseModel):
     email: str
     name: str
 
-B.1.5 app/services/users.py â€” Service Layer
+B.1.5 app/services/users.py — Service Layer
 from typing import List
 from app.api.models import User, UserIn
 
@@ -5913,7 +5913,7 @@ class UserService:
     def list_users(self) -> List[User]:
         return self._users
 
-B.1.6 app/api/router.py â€” API Router
+B.1.6 app/api/router.py — API Router
 from fastapi import APIRouter, Depends
 from app.api.models import User, UserIn
 from app.services.users import UserService
@@ -5931,7 +5931,7 @@ def create_user(user: UserIn, svc: UserService = Depends(get_user_service)):
 def list_users(svc: UserService = Depends(get_user_service)):
     return svc.list_users()
 
-B.1.7 app/main.py â€” Application Entrypoint
+B.1.7 app/main.py — Application Entrypoint
 from fastapi import FastAPI
 from app.core.logging import setup_logging, logger
 from app.core.config import settings
@@ -5961,9 +5961,9 @@ POST http://127.0.0.1:8000/users
 GET  http://127.0.0.1:8000/users
 
 
-â­ B.2 MACRO EXAMPLE #2 â€” SQLAlchemy 2.0 Async ORM + FastAPI
+⭐ B.2 MACRO EXAMPLE #2 — SQLAlchemy 2.0 Async ORM + FastAPI
 
-Approx. 150â€“200 lines.
+Approx. 150–200 lines.
 
 This example shows:
 
@@ -5981,16 +5981,16 @@ Pydantic schema mapping
 
 B.2.0 Folder Structure
 sqlalchemy_app/
-â”‚
-â”œâ”€ app/
-â”‚   â”œâ”€ db.py
-â”‚   â”œâ”€ models.py
-â”‚   â”œâ”€ repositories.py
-â”‚   â”œâ”€ schemas.py
-â”‚   â”œâ”€ api.py
-â”‚   â”œâ”€ main.py
-â”‚
-â””â”€ pyproject.toml
+│
+├─ app/
+│   ├─ db.py
+│   ├─ models.py
+│   ├─ repositories.py
+│   ├─ schemas.py
+│   ├─ api.py
+│   ├─ main.py
+│
+└─ pyproject.toml
 
 B.2.1 pyproject.toml
 [project]
@@ -6002,7 +6002,7 @@ dependencies = [
     "pydantic",
 ]
 
-B.2.2 app/db.py â€” Database Engine (Async)
+B.2.2 app/db.py — Database Engine (Async)
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 DATABASE_URL = "postgresql+asyncpg://user:pass@localhost:5432/mydb"
@@ -6010,7 +6010,7 @@ DATABASE_URL = "postgresql+asyncpg://user:pass@localhost:5432/mydb"
 engine = create_async_engine(DATABASE_URL, echo=True)
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
-B.2.3 app/models.py â€” Database Models
+B.2.3 app/models.py — Database Models
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 class Base(DeclarativeBase):
@@ -6023,7 +6023,7 @@ class User(Base):
     email: Mapped[str]
     name: Mapped[str]
 
-B.2.4 app/schemas.py â€” Pydantic Models
+B.2.4 app/schemas.py — Pydantic Models
 from pydantic import BaseModel
 
 class UserCreate(BaseModel):
@@ -6035,7 +6035,7 @@ class UserOut(BaseModel):
     email: str
     name: str
 
-B.2.5 app/repositories.py â€” Repository Layer
+B.2.5 app/repositories.py — Repository Layer
 from sqlalchemy import select
 from app.models import User
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6058,7 +6058,7 @@ class UserRepository:
         users = res.scalars().all()
         return [UserOut.model_validate(u) for u in users]
 
-B.2.6 app/api.py â€” API Router
+B.2.6 app/api.py — API Router
 from fastapi import APIRouter, Depends
 from app.db import SessionLocal
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6102,7 +6102,7 @@ async def startup():
 app.include_router(router)
 
 
-ðŸ“˜ APPENDIX B â€” PYTHON CODE LIBRARY (CONTINUED)
+📘 APPENDIX B — PYTHON CODE LIBRARY (CONTINUED)
 Index (so far)
 
 B.1 FastAPI REST API (basic)
@@ -6121,21 +6121,21 @@ B.7 Async Web Scraper (aiohttp + BeautifulSoup)
 
 B.8 Configuration System (pydantic-settings)
 
-B.9 Mega Example #1 â€“ ETL Pipeline (full stack)
+B.9 Mega Example #1 – ETL Pipeline (full stack)
 
-Iâ€™ll cover B.3â€“B.8 now, then start B.9.
+I’ll cover B.3–B.8 now, then start B.9.
 
-â­ B.3 MACRO EXAMPLE â€” CLI TOOL WITH CLICK
+⭐ B.3 MACRO EXAMPLE — CLI TOOL WITH CLICK
 
 A complete, testable CLI app.
 
 B.3.0 Folder Structure
 cli_tool/
-â”‚
-â”œâ”€ cli_app/
-â”‚   â”œâ”€ __init__.py
-â”‚   â””â”€ cli.py
-â””â”€ pyproject.toml
+│
+├─ cli_app/
+│   ├─ __init__.py
+│   └─ cli.py
+└─ pyproject.toml
 
 B.3.1 pyproject.toml
 [project]
@@ -6155,7 +6155,7 @@ from typing import Optional
 
 @click.group()
 def main() -> None:
-    """CLI Tool â€“ simple task manager."""
+    """CLI Tool – simple task manager."""
 
 
 @main.command()
@@ -6180,7 +6180,7 @@ def list(project: str, show_all: bool) -> None:
     for idx, t in enumerate(tasks, start=1):
         if not show_all and t["done"]:
             continue
-        mark = "âœ”" if t["done"] else "âœ—"
+        mark = "✔" if t["done"] else "✗"
         click.echo(f"{idx}. [{mark}] {t['name']}")
 
 
@@ -6219,18 +6219,18 @@ cli-tool list
 cli-tool done 1
 cli-tool list --all
 
-â­ B.4 MACRO EXAMPLE â€” CELERY WORKER + FASTAPI TRIGGER
+⭐ B.4 MACRO EXAMPLE — CELERY WORKER + FASTAPI TRIGGER
 
 Minimal but realistic task queue pattern.
 
 B.4.0 Folder Structure
 celery_app/
-â”‚
-â”œâ”€ app/
-â”‚   â”œâ”€ main.py        # FastAPI
-â”‚   â”œâ”€ celery_app.py  # Celery config
-â”‚   â””â”€ tasks.py       # Celery tasks
-â””â”€ pyproject.toml
+│
+├─ app/
+│   ├─ main.py        # FastAPI
+│   ├─ celery_app.py  # Celery config
+│   └─ tasks.py       # Celery tasks
+└─ pyproject.toml
 
 B.4.1 pyproject.toml
 [project]
@@ -6284,7 +6284,7 @@ Run worker & API:
 celery -A app.celery_app.celery_app worker -l info
 uvicorn app.main:app --reload
 
-â­ B.5 MACRO EXAMPLE â€” ASYNC BACKGROUND TASK RUNNER (asyncio + TaskGroup)
+⭐ B.5 MACRO EXAMPLE — ASYNC BACKGROUND TASK RUNNER (asyncio + TaskGroup)
 
 Demonstrates task grouping, cancellation & error handling (Python 3.11+).
 
@@ -6326,7 +6326,7 @@ Run:
 if __name__ == "__main__":
     asyncio.run(run_pipeline([f"https://example.com/{i}" for i in range(10)]))
 
-â­ B.6 MACRO EXAMPLE â€” STRUCTURED LOGGING SYSTEM (logging + structlog)
+⭐ B.6 MACRO EXAMPLE — STRUCTURED LOGGING SYSTEM (logging + structlog)
 B.6.1 Setup
 pip install structlog
 
@@ -6366,7 +6366,7 @@ Output (JSON):
 
 {"event": "startup", "service": "billing", "version": "1.0.0", "level": "info", "timestamp": "..."}
 
-â­ B.7 MACRO EXAMPLE â€” ASYNC WEB SCRAPER (aiohttp + BeautifulSoup)
+⭐ B.7 MACRO EXAMPLE — ASYNC WEB SCRAPER (aiohttp + BeautifulSoup)
 B.7.1 Install Dependencies
 pip install aiohttp beautifulsoup4
 
@@ -6415,7 +6415,7 @@ if __name__ == "__main__":
     ]
     asyncio.run(scrape(urls))
 
-â­ B.8 MACRO EXAMPLE â€” CONFIGURATION SYSTEM (pydantic-settings)
+⭐ B.8 MACRO EXAMPLE — CONFIGURATION SYSTEM (pydantic-settings)
 B.8.1 Install
 pip install pydantic-settings
 
@@ -6455,9 +6455,9 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-â­ B.9 MEGA EXAMPLE #1 â€” COMPLETE ETL PIPELINE (API â†’ Transform â†’ DB)
+⭐ B.9 MEGA EXAMPLE #1 — COMPLETE ETL PIPELINE (API → Transform → DB)
 
-This will be a multi-file, ~300+ line â€œmini systemâ€:
+This will be a multi-file, ~300+ line “mini system”:
 
 Async extract from a fake API
 
@@ -6469,25 +6469,25 @@ Load into PostgreSQL
 
 Scheduled via an entry script (can be triggered by Cron / Kubernetes CronJob)
 
-Given the size, hereâ€™s the structure + main flows; you can drop this straight into a repo.
+Given the size, here’s the structure + main flows; you can drop this straight into a repo.
 
 B.9.0 Folder Structure
 etl_pipeline/
-â”‚
-â”œâ”€ etl/
-â”‚   â”œâ”€ __init__.py
-â”‚   â”œâ”€ config.py         # pydantic-settings
-â”‚   â”œâ”€ extract.py        # async HTTP extraction
-â”‚   â”œâ”€ transform.py      # pandas/polars transforms
-â”‚   â”œâ”€ validate.py       # pandera validation
-â”‚   â”œâ”€ load.py           # SQLAlchemy PG load
-â”‚   â”œâ”€ models.py         # ORM models
-â”‚   â”œâ”€ pipeline.py       # orchestrate entire ETL
-â”‚   â””â”€ logging.py        # structured logging
-â””â”€ pyproject.toml
+│
+├─ etl/
+│   ├─ __init__.py
+│   ├─ config.py         # pydantic-settings
+│   ├─ extract.py        # async HTTP extraction
+│   ├─ transform.py      # pandas/polars transforms
+│   ├─ validate.py       # pandera validation
+│   ├─ load.py           # SQLAlchemy PG load
+│   ├─ models.py         # ORM models
+│   ├─ pipeline.py       # orchestrate entire ETL
+│   └─ logging.py        # structured logging
+└─ pyproject.toml
 
 
-Iâ€™ll give you the core pieces (enough to run in a real project) without going completely insane on length.
+I’ll give you the core pieces (enough to run in a real project) without going completely insane on length.
 
 B.9.1 pyproject.toml
 [project]
@@ -6580,7 +6580,7 @@ async def extract_all() -> list[dict[str, Any]]:
     return items
 
 
-(For a real system, youâ€™d hit a real API; here itâ€™s logically complete.)
+(For a real system, you’d hit a real API; here it’s logically complete.)
 
 B.9.5 etl/transform.py
 from typing import Any
@@ -6731,7 +6731,7 @@ run-etl
 # or
 python -m etl.pipeline
 
-â­ B.10 MEGA EXAMPLE #2 â€” MULTIPROCESSING DATA PIPELINE
+⭐ B.10 MEGA EXAMPLE #2 — MULTIPROCESSING DATA PIPELINE
 
 Complete multiprocessing pipeline with worker pools, queues, and result aggregation.
 
@@ -6739,14 +6739,14 @@ Complete multiprocessing pipeline with worker pools, queues, and result aggregat
 
 ```
 multiprocessing_pipeline/
-â”œâ”€ pipeline/
-â”‚   â”œâ”€ __init__.py
-â”‚   â”œâ”€ config.py
-â”‚   â”œâ”€ workers.py
-â”‚   â”œâ”€ queue_manager.py
-â”‚   â”œâ”€ pipeline.py
-â”‚   â””â”€ logging.py
-â””â”€ pyproject.toml
+├─ pipeline/
+│   ├─ __init__.py
+│   ├─ config.py
+│   ├─ workers.py
+│   ├─ queue_manager.py
+│   ├─ pipeline.py
+│   └─ logging.py
+└─ pyproject.toml
 ```
 
 **B.10.1 pyproject.toml:**
@@ -6883,7 +6883,7 @@ if __name__ == "__main__":
     print(f"Processed {len(results)} items")
 ```
 
-â­ B.11 MEGA EXAMPLE #3 â€” ASYNCIO HTTP SERVER
+⭐ B.11 MEGA EXAMPLE #3 — ASYNCIO HTTP SERVER
 
 Complete asyncio HTTP server with WebSocket support, middleware, and error handling.
 
@@ -6891,14 +6891,14 @@ Complete asyncio HTTP server with WebSocket support, middleware, and error handl
 
 ```
 asyncio_server/
-â”œâ”€ server/
-â”‚   â”œâ”€ __init__.py
-â”‚   â”œâ”€ main.py
-â”‚   â”œâ”€ routes.py
-â”‚   â”œâ”€ websocket.py
-â”‚   â”œâ”€ middleware.py
-â”‚   â””â”€ config.py
-â””â”€ pyproject.toml
+├─ server/
+│   ├─ __init__.py
+│   ├─ main.py
+│   ├─ routes.py
+│   ├─ websocket.py
+│   ├─ middleware.py
+│   └─ config.py
+└─ pyproject.toml
 ```
 
 **B.11.1 pyproject.toml:**
@@ -7064,7 +7064,7 @@ async def error_middleware(request: web.Request, handler):
         )
 ```
 
-â­ B.12 MEGA EXAMPLE #4 â€” DATABASE TRANSACTION SYSTEM
+⭐ B.12 MEGA EXAMPLE #4 — DATABASE TRANSACTION SYSTEM
 
 Complete database transaction system with rollback, savepoints, and error handling.
 
@@ -7072,13 +7072,13 @@ Complete database transaction system with rollback, savepoints, and error handli
 
 ```
 db_transactions/
-â”œâ”€ db/
-â”‚   â”œâ”€ __init__.py
-â”‚   â”œâ”€ connection.py
-â”‚   â”œâ”€ transactions.py
-â”‚   â”œâ”€ models.py
-â”‚   â””â”€ config.py
-â””â”€ pyproject.toml
+├─ db/
+│   ├─ __init__.py
+│   ├─ connection.py
+│   ├─ transactions.py
+│   ├─ models.py
+│   └─ config.py
+└─ pyproject.toml
 ```
 
 **B.12.1 pyproject.toml:**
@@ -7246,7 +7246,7 @@ async def create_account_with_transaction(
     return results[0]  # Return account
 ```
 
-â­ B.13 MEGA EXAMPLE #5 â€” PATTERN-BASED ARCHITECTURE (Repository, Service, Factory, Strategy)
+⭐ B.13 MEGA EXAMPLE #5 — PATTERN-BASED ARCHITECTURE (Repository, Service, Factory, Strategy)
 
 Complete application demonstrating common design patterns in Python: Repository, Service Layer, Factory, Strategy, and Dependency Injection.
 
@@ -7254,27 +7254,27 @@ Complete application demonstrating common design patterns in Python: Repository,
 
 ```
 pattern_architecture/
-â”œâ”€ app/
-â”‚   â”œâ”€ __init__.py
-â”‚   â”œâ”€ domain/
-â”‚   â”‚   â”œâ”€ __init__.py
-â”‚   â”‚   â”œâ”€ models.py          # Domain models
-â”‚   â”‚   â””â”€ interfaces.py      # Protocol definitions
-â”‚   â”œâ”€ infrastructure/
-â”‚   â”‚   â”œâ”€ __init__.py
-â”‚   â”‚   â”œâ”€ repositories.py    # Repository implementations
-â”‚   â”‚   â”œâ”€ factories.py       # Factory pattern
-â”‚   â”‚   â””â”€ database.py        # DB connection
-â”‚   â”œâ”€ services/
-â”‚   â”‚   â”œâ”€ __init__.py
-â”‚   â”‚   â”œâ”€ user_service.py    # Service layer
-â”‚   â”‚   â””â”€ payment_service.py  # Strategy pattern
-â”‚   â”œâ”€ api/
-â”‚   â”‚   â”œâ”€ __init__.py
-â”‚   â”‚   â”œâ”€ routes.py          # API endpoints
-â”‚   â”‚   â””â”€ dependencies.py    # Dependency injection
-â”‚   â””â”€ main.py
-â””â”€ pyproject.toml
+├─ app/
+│   ├─ __init__.py
+│   ├─ domain/
+│   │   ├─ __init__.py
+│   │   ├─ models.py          # Domain models
+│   │   └─ interfaces.py      # Protocol definitions
+│   ├─ infrastructure/
+│   │   ├─ __init__.py
+│   │   ├─ repositories.py    # Repository implementations
+│   │   ├─ factories.py       # Factory pattern
+│   │   └─ database.py        # DB connection
+│   ├─ services/
+│   │   ├─ __init__.py
+│   │   ├─ user_service.py    # Service layer
+│   │   └─ payment_service.py  # Strategy pattern
+│   ├─ api/
+│   │   ├─ __init__.py
+│   │   ├─ routes.py          # API endpoints
+│   │   └─ dependencies.py    # Dependency injection
+│   └─ main.py
+└─ pyproject.toml
 ```
 
 **B.13.1 pyproject.toml:**
@@ -7689,7 +7689,7 @@ if __name__ == "__main__":
 - **Scalability**: Patterns support growth and complexity
 
 This is not a shallow glossary.
-This appendix is designed as the canonical, authoritative dictionary for all terminology used throughout the Python Bible â€” covering:
+This appendix is designed as the canonical, authoritative dictionary for all terminology used throughout the Python Bible — covering:
 
 Core language concepts
 
@@ -7721,23 +7721,23 @@ Common Python culture terms
 
 PEP references
 
-Advanced concepts (â€œdunder modelâ€, â€œdescriptor protocolâ€, â€œmeta path finderâ€, etc.)
+Advanced concepts (“dunder model”, “descriptor protocol”, “meta path finder”, etc.)
 
 Every term is:
 
-âœ” Defined precisely
-âœ” Version-aware (e.g., Python 3.12+)
-âœ” Connected to related concepts
-âœ” Illustrated with a micro example (when helpful)
-âœ” Mapped to the chapter where it appears
+✔ Defined precisely
+✔ Version-aware (e.g., Python 3.12+)
+✔ Connected to related concepts
+✔ Illustrated with a micro example (when helpful)
+✔ Mapped to the chapter where it appears
 
-This is Depth Level 1â€“2 per your spec:
-Thorough, precise, reference-ready â€” but not a textbook.
+This is Depth Level 1–2 per your spec:
+Thorough, precise, reference-ready — but not a textbook.
 
-ðŸ“˜ APPENDIX C â€” THE PYTHON GLOSSARY (Aâ€“Z)
+📘 APPENDIX C — THE PYTHON GLOSSARY (A–Z)
 
 (Part 1: A terms)
-(We will continue alphabetically per your â€œCâ€ request.)
+(We will continue alphabetically per your “C” request.)
 
 A
 Abstract Base Class (ABC)
@@ -7764,7 +7764,7 @@ Abstract Syntax Tree (AST)
 
 A tree representation of Python code after parsing but before bytecode generation.
 
-Generated by the parser â†’ consumed by the compiler.
+Generated by the parser → consumed by the compiler.
 
 Useful in:
 
@@ -7962,7 +7962,7 @@ some built-ins (append, pop, += for small ints)
 
 GIL-guarded operations
 
-CPython atomicity â‰  thread safety.
+CPython atomicity ≠ thread safety.
 
 Attribute Access Protocol
 
@@ -7970,7 +7970,7 @@ Lookup order:
 
 __getattribute__
 
-if AttributeError â†’ __getattr__
+if AttributeError → __getattr__
 
 descriptor protocol (__get__, etc.)
 
@@ -8014,15 +8014,15 @@ Not Python-specific but heavily used in Python ecosystems.
 
 
 
-ðŸ“˜ APPENDIX C â€” PYTHON GLOSSARY
-Section B (All â€œBâ€ Terms)
+📘 APPENDIX C — PYTHON GLOSSARY
+Section B (All “B” Terms)
 
 
 B
 Backoff (Exponential Backoff)
 
 A retry strategy where the delay between attempts increases exponentially
-(e.g., 1s â†’ 2s â†’ 4s â†’ 8s â†’ cap).
+(e.g., 1s → 2s → 4s → 8s → cap).
 
 Used in:
 
@@ -8079,17 +8079,17 @@ multiple inheritance
 
 Base Exception / Exception Hierarchy
 
-The root of Pythonâ€™s error model.
+The root of Python’s error model.
 
 BaseException
- â”œâ”€â”€ Exception
- â”‚    â”œâ”€â”€ ArithmeticError
- â”‚    â”œâ”€â”€ LookupError
- â”‚    â”œâ”€â”€ OSError
- â”‚    â””â”€â”€ ...
- â”œâ”€â”€ GeneratorExit
- â”œâ”€â”€ KeyboardInterrupt
- â””â”€â”€ SystemExit
+ ├── Exception
+ │    ├── ArithmeticError
+ │    ├── LookupError
+ │    ├── OSError
+ │    └── ...
+ ├── GeneratorExit
+ ├── KeyboardInterrupt
+ └── SystemExit
 
 Basic Block (Bytecode)
 
@@ -8106,7 +8106,7 @@ disassembly analysis
 BDD (Behavior-Driven Development)
 
 Testing style using natural language:
-â€œGivenâ€“Whenâ€“Thenâ€.
+“Given–When–Then”.
 
 Python libraries:
 
@@ -8231,7 +8231,7 @@ The low-level instruction set executed by the CPython VM.
 
 Generated by:
 
-source code â†’ AST â†’ bytecode â†’ execution
+source code → AST → bytecode → execution
 
 
 View with:
@@ -8449,11 +8449,11 @@ Configuration systems
 
 Compiler phases
 
-â€¦and much more.
+…and much more.
 
 Below is the complete, professional-grade C glossary section.
 
-ðŸ“˜ APPENDIX C â€” THE PYTHON GLOSSARY
+📘 APPENDIX C — THE PYTHON GLOSSARY
 Section C
 C
 Cache / Caching
@@ -8532,16 +8532,16 @@ GUI frameworks
 
 event loops
 
-Call-by-Object-Reference (Pythonâ€™s Argument Model)
+Call-by-Object-Reference (Python’s Argument Model)
 
-Pythonâ€™s model is neither pass-by-value nor pass-by-reference.
+Python’s model is neither pass-by-value nor pass-by-reference.
 Objects are passed by reference, but references are passed by value.
 
 Results:
 
 mutable arguments can be modified
 
-rebinding does not affect callerâ€™s variable
+rebinding does not affect caller’s variable
 
 C3 Linearization (MRO Algorithm)
 
@@ -8736,7 +8736,7 @@ Latin-1
 
 ASCII
 
-UTFâ€16
+UTF‐16
 
 Combinatoric Functions
 
@@ -8982,7 +8982,7 @@ import csv
 
 Curly-Brace String Formatting (f-strings)
 
-Pythonâ€™s fastest and most expressive string formatting.
+Python’s fastest and most expressive string formatting.
 
 f"Value: {x}"
 
@@ -9078,7 +9078,7 @@ marshmallow
 custom JSON handlers
 
 
-ðŸ“˜ APPENDIX C â€” PYTHON GLOSSARY
+📘 APPENDIX C — PYTHON GLOSSARY
 Section D
 D
 Daemon Thread
@@ -9106,13 +9106,13 @@ Decorator that generates __init__, __repr__, __eq__, and optionally others.
 
 Options:
 
-frozen=True â€” immutability
+frozen=True — immutability
 
-slots=True â€” faster, low-memory fields
+slots=True — faster, low-memory fields
 
-kw_only=True â€” keyword-only args (Python 3.10+)
+kw_only=True — keyword-only args (Python 3.10+)
 
-order=True â€” comparison methods
+order=True — comparison methods
 
 Example:
 
@@ -9145,7 +9145,7 @@ descriptors
 
 lifecycle
 
-The data model is the backbone of â€œPythonicâ€ behavior.
+The data model is the backbone of “Pythonic” behavior.
 
 Datagram
 
@@ -9155,11 +9155,11 @@ Relevant for:
 
 socket module
 
-asyncioâ€™s DatagramProtocol
+asyncio’s DatagramProtocol
 
 Database API (DB-API 2.0)
 
-Pythonâ€™s standard interface for SQL databases.
+Python’s standard interface for SQL databases.
 
 Defines:
 
@@ -9181,7 +9181,7 @@ mysqlclient
 
 Debug Mode
 
-Pythonâ€™s debugging environment.
+Python’s debugging environment.
 Can be activated with:
 
 python -X dev
@@ -9326,7 +9326,7 @@ Uses WSGI or ASGI (via Django Channels).
 
 Dict (Dictionary)
 
-Pythonâ€™s core associative container.
+Python’s core associative container.
 
 Properties:
 
@@ -9602,7 +9602,7 @@ A comprehension that produces a dictionary.
 
 {k: v*2 for k, v in d.items()}
 
-Difference Between â€œisâ€ and â€œ==â€
+Difference Between “is” and “==”
 
 is: identity (same object)
 
@@ -9669,7 +9669,7 @@ Duck Typing
 
 Behavior where type is determined by the presence of methods/attributes, not inheritance.
 
-â€œIf it quacks like a duckâ€¦â€
+“If it quacks like a duck…”
 
 Dynamic Language
 
@@ -9688,7 +9688,7 @@ Dynamic Memory Allocation
 Objects created on the heap; Python abstracts memory management via GC.
 
 
-ðŸ“˜ APPENDIX C â€” PYTHON GLOSSARY
+📘 APPENDIX C — PYTHON GLOSSARY
 Section E
 E
 Eager Evaluation
@@ -9775,7 +9775,7 @@ s = b.decode("utf8")
 
 Enumerate
 
-Built-in function generating indexâ€“value pairs.
+Built-in function generating index–value pairs.
 
 for i, x in enumerate(items):
     ...
@@ -9801,7 +9801,7 @@ iterable
 
 Environment Variable
 
-Keyâ€“value pairs exported by the shell, consumed by programs.
+Key–value pairs exported by the shell, consumed by programs.
 
 Access with:
 
@@ -10023,12 +10023,12 @@ Execution Model (Python)
 
 High-level view:
 
-source â†’ parser â†’ AST â†’ compiler â†’ bytecode â†’ virtual machine
+source → parser → AST → compiler → bytecode → virtual machine
 
 
 In async environment:
 
-event loop â†’ tasks â†’ coroutines
+event loop → tasks → coroutines
 
 Executor (ThreadPoolExecutor, ProcessPoolExecutor)
 
@@ -10058,7 +10058,7 @@ Exponential Backoff
 
 Retry mechanism with increasing delays:
 
-1s â†’ 2s â†’ 4s â†’ 8s â†’ cap.
+1s → 2s → 4s → 8s → cap.
 
 Used in:
 
@@ -10095,7 +10095,7 @@ x  # valid in REPL
 
 Extended Iterable Unpacking
 
-Pythonâ€™s advanced unpacking:
+Python’s advanced unpacking:
 
 a, *rest, b = [1,2,3,4,5]
 
@@ -10148,11 +10148,11 @@ Extract-Transform-Load (ETL)
 
 A data engineering workflow:
 
-Extract â€“ load from API/files/databases
+Extract – load from API/files/databases
 
-Transform â€“ clean/normalize data (pandas/polars)
+Transform – clean/normalize data (pandas/polars)
 
-Load â€“ write to target (SQL/warehouse)
+Load – write to target (SQL/warehouse)
 
 Python is heavily used for ETL.
 
@@ -10206,9 +10206,9 @@ __exit__
 Handles cleanup and exception handling.
 
 
-ðŸ“˜ APPENDIX C â€” PYTHON GLOSSARY
-Sections Fâ€“H
-ðŸ”µ F Terms
+📘 APPENDIX C — PYTHON GLOSSARY
+Sections F–H
+🔵 F Terms
 Facade Pattern
 
 A design pattern that provides a simplified interface to a complex subsystem.
@@ -10288,7 +10288,7 @@ PEP 701 full grammar (Python 3.12+)
 
 Feather Format
 
-Apache Arrowâ€™s columnar format, common in Python data engineering.
+Apache Arrow’s columnar format, common in Python data engineering.
 
 Fibonacci Sequence
 
@@ -10487,7 +10487,7 @@ list comprehensions
 
 immutability via dataclasses(frozen=True)
 
-ðŸŸ¢ G Terms
+🟢 G Terms
 GIL (Global Interpreter Lock)
 
 A mutex protecting Python objects from concurrent access in CPython.
@@ -10547,7 +10547,7 @@ dict[str, float]
 
 Callable[[A], B]
 
-Introduced in PEP 585 and improved in 3.9â€“3.12.
+Introduced in PEP 585 and improved in 3.9–3.12.
 
 Generic Alias
 
@@ -10611,7 +10611,7 @@ TensorFlow
 
 JAX
 
-Not part of standard lib, but core to Pythonâ€™s ML ecosystem.
+Not part of standard lib, but core to Python’s ML ecosystem.
 
 Graph (Data Structure)
 
@@ -10653,7 +10653,7 @@ Globally unique identifier, same as UUID.
 
 Python module: uuid.
 
-ðŸŸ¡ H Terms
+🟡 H Terms
 Hash
 
 Integer produced by hashing algorithm.
@@ -10791,9 +10791,9 @@ Hydration / Dehydration
 
 Converting between:
 
-domain objects â†’ serialized data
+domain objects → serialized data
 
-serialized data â†’ domain objects
+serialized data → domain objects
 
 Used in:
 
@@ -10821,9 +10821,9 @@ Property-based testing tool.
 Generates test cases automatically.
 
 
-ðŸ“˜ APPENDIX C â€” PYTHON GLOSSARY
-Sections Iâ€“K
-ðŸ”µ I Terms
+📘 APPENDIX C — PYTHON GLOSSARY
+Sections I–K
+🔵 I Terms
 I/O-bound Task
 
 A task limited by waiting for external input/output:
@@ -10904,7 +10904,7 @@ frozenset
 
 Import System
 
-Pythonâ€™s module loading mechanism.
+Python’s module loading mechanism.
 
 Consists of:
 
@@ -10989,7 +10989,7 @@ method calls
 
 operator dispatch
 
-Stored in bytecodeâ€™s inline cache entries.
+Stored in bytecode’s inline cache entries.
 
 Input Function (input())
 
@@ -10999,7 +10999,7 @@ Blocking call.
 
 Insertion Sort
 
-Sorting algorithm used internally by Pythonâ€™s Timsort in small partitions.
+Sorting algorithm used internally by Python’s Timsort in small partitions.
 
 Instance Method
 
@@ -11007,7 +11007,7 @@ Regular method where first argument is the instance (self).
 
 Instance Attribute
 
-Attribute stored in objectâ€™s __dict__.
+Attribute stored in object’s __dict__.
 
 Instantiation
 
@@ -11137,7 +11137,7 @@ slicing
 
 mapping lookup
 
-ðŸŸ¢ J Terms
+🟢 J Terms
 JIT (Just-In-Time Compilation)
 
 Runtime compilation to machine code.
@@ -11244,7 +11244,7 @@ Randomized delay added to retry backoff.
 
 Important for distributed systems.
 
-ðŸŸ¡ K Terms
+🟡 K Terms
 K-Means (Machine Learning)
 
 Clustering algorithm. Used in:
@@ -11255,7 +11255,7 @@ scikit-learn
 
 Not part of standard library but relevant for Python ML.
 
-K-V Store (Keyâ€“Value Store)
+K-V Store (Key–Value Store)
 
 Databases operating on key-value pairs.
 
@@ -11308,7 +11308,7 @@ In Python context:
 
 Jupyter kernel
 
-multiprocessing â€œspawnâ€ mode creating new kernels
+multiprocessing “spawn” mode creating new kernels
 
 Kernel Density Estimation (KDE)
 
@@ -11349,9 +11349,9 @@ def f(**kwargs):
     print(kwargs)
 
 
-ðŸ“˜ APPENDIX C â€” PYTHON GLOSSARY
-Sections Lâ€“N
-ðŸ”µ L Terms
+📘 APPENDIX C — PYTHON GLOSSARY
+Sections L–N
+🔵 L Terms
 L-Value
 
 Expression that can appear on left side of assignment.
@@ -11450,7 +11450,7 @@ Lexical Analysis (Tokenizer)
 
 First phase of compilation:
 
-source â†’ tokens
+source → tokens
 
 Library (Module or Package)
 
@@ -11567,7 +11567,7 @@ lock = asyncio.Lock()
 
 Logging (stdlib logging)
 
-Pythonâ€™s built-in logging framework.
+Python’s built-in logging framework.
 
 Supports:
 
@@ -11611,7 +11611,7 @@ TensorFlow
 
 Included because ML is a major Python ecosystem domain.
 
-ðŸŸ¢ M Terms
+🟢 M Terms
 
 The largest letter group in Python glossary due to:
 
@@ -11635,7 +11635,7 @@ Mutability
 
 MyPy typing concepts
 
-Letâ€™s go.
+Let’s go.
 
 Magic Method (Dunder Method)
 
@@ -11649,7 +11649,7 @@ __getitem__
 
 __enter__
 
-Defined by Pythonâ€™s data model.
+Defined by Python’s data model.
 
 Main Guard (if __name__ == "__main__":)
 
@@ -11847,7 +11847,7 @@ Python pitfall:
 def f(x, cache={}):  # BAD
     ...
 
-ðŸŸ¡ N Terms
+🟡 N Terms
 NaN (Not a Number)
 
 IEEE float representing invalid numerical value.
@@ -11955,7 +11955,7 @@ PyTorch
 
 JAX
 
-Included due to Pythonâ€™s dominance in ML.
+Included due to Python’s dominance in ML.
 
 New-Style Classes
 
@@ -12032,7 +12032,7 @@ Special return for dunder methods indicating unsupported operation.
 
 NumPy
 
-Pythonâ€™s foundational numeric computing library.
+Python’s foundational numeric computing library.
 
 Defines:
 
@@ -12062,9 +12062,9 @@ from contextlib import nullcontext
 Useful for conditionally disabling context managers.
 
 
-ðŸ“˜ APPENDIX C â€” PYTHON GLOSSARY
-Sections Oâ€“Q
-ðŸ”µ O Terms
+📘 APPENDIX C — PYTHON GLOSSARY
+Sections O–Q
+🔵 O Terms
 Object
 
 A Python data entity. Everything in Python is an object, including:
@@ -12277,7 +12277,7 @@ Using typing overloads to provide multiple call signatures.
 @overload
 def f(x: int) -> int: ...
 
-ðŸŸ¢ P Terms
+🟢 P Terms
 
 This is the largest glossary letter in Python due to:
 
@@ -12315,7 +12315,7 @@ PyPI
 
 PEP terminology
 
-Letâ€™s begin.
+Let’s begin.
 
 Package
 
@@ -12339,7 +12339,7 @@ poetry / pdm
 
 Pandas
 
-Pythonâ€™s dominant data analysis library.
+Python’s dominant data analysis library.
 
 Defines:
 
@@ -12410,13 +12410,13 @@ PEP (Python Enhancement Proposal)
 Design documents for Python.
 
 Example:
-PEP 8 â€” Style Guide
-PEP 484 â€” Type Hints
-PEP 622 â€” Pattern Matching
+PEP 8 — Style Guide
+PEP 484 — Type Hints
+PEP 622 — Pattern Matching
 
 PEP 8
 
-Pythonâ€™s official style guide.
+Python’s official style guide.
 
 Pickle
 
@@ -12605,7 +12605,7 @@ Pyright
 
 Static type checker built in TypeScript (fast alternative to MyPy).
 
-ðŸŸ¡ Q Terms
+🟡 Q Terms
 
 Shorter section, but includes important concepts.
 
@@ -12624,7 +12624,7 @@ QThread (PyQt)
 
 Thread abstraction used in Qt framework.
 
-Quadratic Time (O(nÂ²))
+Quadratic Time (O(n²))
 
 Performance classification.
 
@@ -12642,7 +12642,7 @@ Fully qualified dotted path of function, including nested context.
 
 Quantization (ML)
 
-Reducing model precision (FP32 â†’ INT8) for inference speed.
+Reducing model precision (FP32 → INT8) for inference speed.
 
 Used in PyTorch.
 
@@ -12671,20 +12671,20 @@ Selection algorithm used in partition-based operations.
 Quicksort
 
 Sorting algorithm.
-Pythonâ€™s Timsort chooses quicksort-like partitions in worst-case scenarios.
+Python’s Timsort chooses quicksort-like partitions in worst-case scenarios.
 
 Quorum
 
-Consensus requirement in distributed systems â€” relevant to Python-based distributed apps.
+Consensus requirement in distributed systems — relevant to Python-based distributed apps.
 
 Quiescence
 
 State when no tasks remain runnable (asyncio event loop).
 
 
-ðŸ“˜ APPENDIX C â€” PYTHON GLOSSARY
-Sections Râ€“T
-ðŸ”µ R Terms
+📘 APPENDIX C — PYTHON GLOSSARY
+Sections R–T
+🔵 R Terms
 Race Condition
 
 Bug where outcome depends on timing of concurrent operations.
@@ -12945,7 +12945,7 @@ Runtime Introspection
 
 Inspecting objects at runtime.
 
-ðŸŸ¢ S Terms
+🟢 S Terms
 
 This is the largest letter in the glossary due to:
 
@@ -13110,7 +13110,7 @@ Standard library module: socket.
 
 SQLAlchemy
 
-Pythonâ€™s most popular ORM and SQL toolkit.
+Python’s most popular ORM and SQL toolkit.
 
 Supports:
 
@@ -13242,7 +13242,7 @@ subprocess
 
 socket
 
-ðŸŸ¡ T Terms
+🟡 T Terms
 
 Python has many T-terms due to:
 
@@ -13334,7 +13334,7 @@ Lexical unit produced by tokenizer.
 
 Tokenizer
 
-Converts source code â†’ tokens.
+Converts source code → tokens.
 
 Python has a full tokenizer in tokenize module.
 
@@ -13465,9 +13465,9 @@ Pyre
 pylance
 
 
-ðŸ“˜ APPENDIX C â€” PYTHON GLOSSARY
-Sections Uâ€“Z
-ðŸ”µ U Terms
+📘 APPENDIX C — PYTHON GLOSSARY
+Sections U–Z
+🔵 U Terms
 UDF (User-Defined Function)
 
 Custom function defined by developer.
@@ -13595,7 +13595,7 @@ UWSGI
 
 Server often used with Django.
 
-ðŸŸ¢ V Terms
+🟢 V Terms
 Validation (Data)
 
 Ensuring data conforms to schema.
@@ -13719,7 +13719,7 @@ debugging
 
 code analysis
 
-ðŸŸ¡ W Terms
+🟡 W Terms
 WAF (Web Application Framework)
 
 Python has many:
@@ -13823,7 +13823,7 @@ WSL (Windows Subsystem for Linux)
 
 Popular environment for Python dev on Windows.
 
-ðŸ”µ X Terms
+🔵 X Terms
 
 (X is a small section but important for ML and data pipelines.)
 
@@ -13879,7 +13879,7 @@ templating engine auto-escaping (Jinja2)
 
 markupsafe
 
-ðŸŸ¢ Y Terms
+🟢 Y Terms
 YAML
 
 Data serialization format.
@@ -13894,7 +13894,7 @@ Kubernetes
 
 server configs
 
-YAGNI ("You Arenâ€™t Gonna Need It")
+YAGNI ("You Aren’t Gonna Need It")
 
 Software engineering principle to avoid over-engineering.
 
@@ -13928,7 +13928,7 @@ Y-axis Scaling (ML/Data Engineering)
 
 Scaling data vertically; used in plotting libraries.
 
-ðŸŸ¡ Z Terms
+🟡 Z Terms
 Zero-Based Indexing
 
 Python indexes start at 0.
@@ -13955,14 +13955,14 @@ String method:
 
 Zip
 
-1ï¸âƒ£ builtin function combining iterables:
+1️⃣ builtin function combining iterables:
 
 zip(a, b)
 
 
-2ï¸âƒ£ compression file format.
+2️⃣ compression file format.
 
-3ï¸âƒ£ standard library module zipfile.
+3️⃣ standard library module zipfile.
 
 Zipapp
 
@@ -13999,29 +13999,29 @@ geospatial data
 quadtree layouts
 
 
-ðŸ“˜ APPENDIX D â€” PYTHON QUICK REFERENCE
+📘 APPENDIX D — PYTHON QUICK REFERENCE
 
-D.1 â€” Standard Library Coverage Table
+D.1 — Standard Library Coverage Table
 
 This table provides semantic coverage of 100% of Python's standard library, categorizing modules by coverage status:
 
-- âœ… **Fully Covered**: Complete documentation with examples, pitfalls, and best practices
-- âš ï¸ **Partially Covered**: Basic coverage with examples; may need expansion
-- â­ï¸ **Skipped/Legacy**: Not recommended for new code; includes rationale and modern alternatives
+- ✅ **Fully Covered**: Complete documentation with examples, pitfalls, and best practices
+- ⚠️ **Partially Covered**: Basic coverage with examples; may need expansion
+- ⏭️ **Skipped/Legacy**: Not recommended for new code; includes rationale and modern alternatives
 
 **Coverage Status Legend:**
 
-- âœ… = Fully documented with examples, pitfalls, diagrams (where applicable)
-- âš ï¸ = Basic coverage; includes realistic example + "when to use" section
-- â­ï¸ = Skipped/legacy; includes "why it exists", "why not recommended", "modern replacement"
+- ✅ = Fully documented with examples, pitfalls, diagrams (where applicable)
+- ⚠️ = Basic coverage; includes realistic example + "when to use" section
+- ⏭️ = Skipped/legacy; includes "why it exists", "why not recommended", "modern replacement"
 
 ---
 
-### â­ï¸ Skipped/Legacy Modules
+### ⏭️ Skipped/Legacy Modules
 
 These modules are included in Python's stdlib for backward compatibility or legacy reasons but are not recommended for new code.
 
-#### â­ï¸ `dbm` â€” Legacy Database Interface
+#### ⏭️ `dbm` — Legacy Database Interface
 
 **Why it exists:**
 - Provides simple key-value database interface
@@ -14035,12 +14035,12 @@ These modules are included in Python's stdlib for backward compatibility or lega
 - Better alternatives available
 
 **Modern replacement:**
-- `sqlite3` â€” Cross-platform, SQL support, transactions
-- `shelve` â€” Python-native, object serialization
-- `pickle` + file I/O â€” Simple object persistence
-- `redis` (external) â€” Distributed key-value store
+- `sqlite3` — Cross-platform, SQL support, transactions
+- `shelve` — Python-native, object serialization
+- `pickle` + file I/O — Simple object persistence
+- `redis` (external) — Distributed key-value store
 
-#### â­ï¸ `shelve` â€” Persistent Dictionary
+#### ⏭️ `shelve` — Persistent Dictionary
 
 **Why it exists:**
 - Simple persistent storage for Python objects
@@ -14054,12 +14054,12 @@ These modules are included in Python's stdlib for backward compatibility or lega
 - Pickle security concerns
 
 **Modern replacement:**
-- `sqlite3` â€” Full SQL database, cross-platform
-- `pickle` + file I/O â€” Explicit control
-- `redis` (external) â€” Distributed, concurrent-safe
-- `tinydb` (external) â€” Pure Python, JSON-based
+- `sqlite3` — Full SQL database, cross-platform
+- `pickle` + file I/O — Explicit control
+- `redis` (external) — Distributed, concurrent-safe
+- `tinydb` (external) — Pure Python, JSON-based
 
-#### â­ï¸ `readline` â€” GNU Readline Interface
+#### ⏭️ `readline` — GNU Readline Interface
 
 **Why it exists:**
 - Enhanced command-line input editing
@@ -14072,11 +14072,11 @@ These modules are included in Python's stdlib for backward compatibility or lega
 - Limited use cases (interactive CLI only)
 
 **Modern replacement:**
-- `prompt_toolkit` (external) â€” Cross-platform, feature-rich
-- `click` (external) â€” CLI framework with completion
-- `argparse` + `input()` â€” Simple cross-platform input
+- `prompt_toolkit` (external) — Cross-platform, feature-rich
+- `click` (external) — CLI framework with completion
+- `argparse` + `input()` — Simple cross-platform input
 
-#### â­ï¸ `cgi` â€” Common Gateway Interface
+#### ⏭️ `cgi` — Common Gateway Interface
 
 **Why it exists:**
 - Legacy web server interface (CGI protocol)
@@ -14090,11 +14090,11 @@ These modules are included in Python's stdlib for backward compatibility or lega
 - Limited modern web support
 
 **Modern replacement:**
-- `FastAPI` / `Flask` / `Django` â€” Modern web frameworks
-- `WSGI` / `ASGI` â€” Standard interfaces
-- `aiohttp` â€” Async web framework
+- `FastAPI` / `Flask` / `Django` — Modern web frameworks
+- `WSGI` / `ASGI` — Standard interfaces
+- `aiohttp` — Async web framework
 
-#### â­ï¸ `cgitb` â€” CGI Traceback Handler
+#### ⏭️ `cgitb` — CGI Traceback Handler
 
 **Why it exists:**
 - HTML-formatted tracebacks for CGI scripts
@@ -14113,11 +14113,11 @@ These modules are included in Python's stdlib for backward compatibility or lega
 
 ---
 
-### âš ï¸ Partially Covered Modules (Need Examples + "When to Use")
+### ⚠️ Partially Covered Modules (Need Examples + "When to Use")
 
 These modules have basic coverage but need realistic examples and "when to use" guidance.
 
-#### âš ï¸ `time` â€” Time Functions
+#### ⚠️ `time` — Time Functions
 
 **Current Coverage:** Basic time operations covered
 
@@ -14142,24 +14142,24 @@ except KeyboardInterrupt:
 # Format timestamp
 timestamp = time.time()
 formatted = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(timestamp))
-print(formatted)  # 2025-11-28 14:30:00
+print(formatted)  # 2025-12-05 14:30:00
 ```
 
 **When to Use:**
-- âœ… Measuring code execution time (`time.perf_counter()`)
-- âœ… Adding delays in scripts (`time.sleep()`)
-- âœ… Getting current timestamp (`time.time()`)
-- âœ… Formatting timestamps for display (`time.strftime()`)
-- âŒ Don't use for timezone-aware operations (use `datetime`, `zoneinfo`)
-- âŒ Don't use for calendar operations (use `calendar` module)
-- âŒ Don't use `time.time()` for high-precision timing (use `time.perf_counter()`)
+- ✅ Measuring code execution time (`time.perf_counter()`)
+- ✅ Adding delays in scripts (`time.sleep()`)
+- ✅ Getting current timestamp (`time.time()`)
+- ✅ Formatting timestamps for display (`time.strftime()`)
+- ❌ Don't use for timezone-aware operations (use `datetime`, `zoneinfo`)
+- ❌ Don't use for calendar operations (use `calendar` module)
+- ❌ Don't use `time.time()` for high-precision timing (use `time.perf_counter()`)
 
 **Pitfalls:**
-âš  `time.time()` is not monotonic (can go backwards with system clock adjustments)
-âš  `time.sleep()` can be interrupted by signals
-âš  `time.strftime()` is locale-dependent
+⚠ `time.time()` is not monotonic (can go backwards with system clock adjustments)
+⚠ `time.sleep()` can be interrupted by signals
+⚠ `time.strftime()` is locale-dependent
 
-#### âš ï¸ `calendar` â€” Calendar Functions
+#### ⚠️ `calendar` — Calendar Functions
 
 **Current Coverage:** Basic calendar operations
 
@@ -14191,19 +14191,19 @@ days = calendar.monthrange(2025, 2)  # (5, 28) - weekday of 1st, days in month
 ```
 
 **When to Use:**
-- âœ… Displaying calendars in CLI/TUI applications
-- âœ… Checking leap years
-- âœ… Getting weekday information
-- âœ… Calculating days in months
-- âŒ Don't use for date arithmetic (use `datetime`, `dateutil`)
-- âŒ Don't use for timezone operations (use `zoneinfo`)
+- ✅ Displaying calendars in CLI/TUI applications
+- ✅ Checking leap years
+- ✅ Getting weekday information
+- ✅ Calculating days in months
+- ❌ Don't use for date arithmetic (use `datetime`, `dateutil`)
+- ❌ Don't use for timezone operations (use `zoneinfo`)
 
 **Pitfalls:**
-âš  `calendar` uses Monday=0, Sunday=6 (different from `datetime.weekday()`)
-âš  No timezone awareness
-âš  Limited date arithmetic capabilities
+⚠ `calendar` uses Monday=0, Sunday=6 (different from `datetime.weekday()`)
+⚠ No timezone awareness
+⚠ Limited date arithmetic capabilities
 
-#### âš ï¸ `zlib` â€” Compression
+#### ⚠️ `zlib` — Compression
 
 **Current Coverage:** Basic compression operations
 
@@ -14234,19 +14234,19 @@ compressed_stream = chunk1 + chunk2 + final
 ```
 
 **When to Use:**
-- âœ… Compressing data for storage/transmission
-- âœ… Working with gzip-compatible data
-- âœ… Reducing memory footprint
-- âœ… Network data compression
-- âŒ Don't use for files (use `gzip` module for file I/O)
-- âŒ Don't use for archives (use `zipfile`, `tarfile`)
+- ✅ Compressing data for storage/transmission
+- ✅ Working with gzip-compatible data
+- ✅ Reducing memory footprint
+- ✅ Network data compression
+- ❌ Don't use for files (use `gzip` module for file I/O)
+- ❌ Don't use for archives (use `zipfile`, `tarfile`)
 
 **Pitfalls:**
-âš  `zlib.compress()` requires bytes input
-âš  Compression level 9 is much slower for marginal size gains
-âš  Not suitable for already-compressed data (images, videos)
+⚠ `zlib.compress()` requires bytes input
+⚠ Compression level 9 is much slower for marginal size gains
+⚠ Not suitable for already-compressed data (images, videos)
 
-#### âš ï¸ `profile` / `pstats` â€” Profiling
+#### ⚠️ `profile` / `pstats` — Profiling
 
 **Current Coverage:** Basic profiling mentioned
 
@@ -14283,18 +14283,18 @@ stats.print_stats()
 ```
 
 **When to Use:**
-- âœ… Identifying performance bottlenecks
-- âœ… Comparing optimization strategies
-- âœ… Profiling production code (with overhead)
-- âŒ Don't use for micro-benchmarks (use `timeit`)
-- âŒ Don't use for memory profiling (use `tracemalloc`, `memory_profiler`)
+- ✅ Identifying performance bottlenecks
+- ✅ Comparing optimization strategies
+- ✅ Profiling production code (with overhead)
+- ❌ Don't use for micro-benchmarks (use `timeit`)
+- ❌ Don't use for memory profiling (use `tracemalloc`, `memory_profiler`)
 
 **Pitfalls:**
-âš  Profiling adds significant overhead (10-100x slower)
-âš  `cProfile` is deterministic but slow
-âš  `profile` (pure Python) is even slower
+⚠ Profiling adds significant overhead (10-100x slower)
+⚠ `cProfile` is deterministic but slow
+⚠ `profile` (pure Python) is even slower
 
-#### âš ï¸ `doctest` â€” Documentation Testing
+#### ⚠️ `doctest` — Documentation Testing
 
 **Current Coverage:** Basic doctest usage
 
@@ -14325,19 +14325,19 @@ if __name__ == "__main__":
 ```
 
 **When to Use:**
-- âœ… Testing examples in documentation
-- âœ… Quick inline tests
-- âœ… Educational code examples
-- âŒ Don't use for comprehensive testing (use `pytest`, `unittest`)
-- âŒ Don't use for complex test scenarios
-- âŒ Don't use for integration tests
+- ✅ Testing examples in documentation
+- ✅ Quick inline tests
+- ✅ Educational code examples
+- ❌ Don't use for comprehensive testing (use `pytest`, `unittest`)
+- ❌ Don't use for complex test scenarios
+- ❌ Don't use for integration tests
 
 **Pitfalls:**
-âš  Fragile (sensitive to whitespace, formatting)
-âš  Limited assertion capabilities
-âš  Hard to debug failures
+⚠ Fragile (sensitive to whitespace, formatting)
+⚠ Limited assertion capabilities
+⚠ Hard to debug failures
 
-#### âš ï¸ `types` â€” Dynamic Type Creation
+#### ⚠️ `types` — Dynamic Type Creation
 
 **Current Coverage:** Basic type utilities
 
@@ -14374,21 +14374,21 @@ DynamicClass = types.new_class('DynamicClass', (object,), {})
 ```
 
 **When to Use:**
-- âœ… Metaprogramming and code generation
-- âœ… Dynamic class/function creation
-- âœ… Plugin systems
-- âœ… Type checking utilities
-- âŒ Don't use for normal type hints (use `typing` module)
-- âŒ Don't use for runtime type checking (use `isinstance()`, `type()`)
+- ✅ Metaprogramming and code generation
+- ✅ Dynamic class/function creation
+- ✅ Plugin systems
+- ✅ Type checking utilities
+- ❌ Don't use for normal type hints (use `typing` module)
+- ❌ Don't use for runtime type checking (use `isinstance()`, `type()`)
 
 **Pitfalls:**
-âš  Complex and error-prone
-âš  Hard to debug
-âš  Limited IDE support
+⚠ Complex and error-prone
+⚠ Hard to debug
+⚠ Limited IDE support
 
 ---
 
-### âœ… Fully Covered Modules
+### ✅ Fully Covered Modules
 
 These modules have complete coverage with:
 - Mini example
@@ -14398,38 +14398,38 @@ These modules have complete coverage with:
 
 *(See Chapter 9 and other chapters for full coverage of these modules)*
 
-**Examples of âœ… Modules:**
-- `pathlib` â€” Modern path handling (Chapter 9.1.1)
-- `json` â€” JSON serialization (Chapter 9.4.1)
-- `logging` â€” Structured logging (Chapter 9.8)
-- `datetime` â€” Date/time operations (Chapter 9.5)
-- `collections` â€” Specialized containers (Chapter 9.2)
-- `re` â€” Regular expressions (Chapter 9.3)
-- `sqlite3` â€” SQLite database (Chapter 9.7)
-- `subprocess` â€” Process execution (Chapter 9.6)
-- `asyncio` â€” Async I/O (Chapter 16.7)
-- `multiprocessing` â€” Process-based parallelism (Chapter 16.6)
-- `threading` â€” Thread-based concurrency (Chapter 16.5)
-- `unittest` â€” Unit testing (Chapter 14.1)
-- `pytest` â€” Testing framework (Chapter 14.2)
-- `pydantic` â€” Data validation (Chapter 7.13)
-- `dataclasses` â€” Data classes (Chapter 7.12)
+**Examples of ✅ Modules:**
+- `pathlib` — Modern path handling (Chapter 9.1.1)
+- `json` — JSON serialization (Chapter 9.4.1)
+- `logging` — Structured logging (Chapter 9.8)
+- `datetime` — Date/time operations (Chapter 9.5)
+- `collections` — Specialized containers (Chapter 9.2)
+- `re` — Regular expressions (Chapter 9.3)
+- `sqlite3` — SQLite database (Chapter 9.7)
+- `subprocess` — Process execution (Chapter 9.6)
+- `asyncio` — Async I/O (Chapter 16.7)
+- `multiprocessing` — Process-based parallelism (Chapter 16.6)
+- `threading` — Thread-based concurrency (Chapter 16.5)
+- `unittest` — Unit testing (Chapter 14.1)
+- `pytest` — Testing framework (Chapter 14.2)
+- `pydantic` — Data validation (Chapter 7.13)
+- `dataclasses` — Data classes (Chapter 7.12)
 
 ---
 
-D.2 â€” Concurrency Decision Tree
+D.2 — Concurrency Decision Tree
 
 When to use threading vs asyncio vs multiprocessing vs distributed:
 
 ```
-I/O-bound, many connections â†’ asyncio
-CPU-bound, single machine â†’ multiprocessing
-CPU-bound, distributed â†’ Celery / Dask
-Mixed I/O + CPU â†’ ThreadPoolExecutor + ProcessPoolExecutor
-Free-threading available (3.13+) â†’ threading for CPU-bound
+I/O-bound, many connections → asyncio
+CPU-bound, single machine → multiprocessing
+CPU-bound, distributed → Celery / Dask
+Mixed I/O + CPU → ThreadPoolExecutor + ProcessPoolExecutor
+Free-threading available (3.13+) → threading for CPU-bound
 ```
 
-D.3 â€” I/O Models vs Typical Libraries
+D.3 — I/O Models vs Typical Libraries
 
 I/O Model	Library	Use Case
 Synchronous	requests, urllib	Simple scripts, CLI tools
@@ -14439,7 +14439,7 @@ WebSockets	websockets, aiohttp	Real-time communication
 Database (sync)	psycopg2, sqlite3	Traditional apps
 Database (async)	asyncpg, aiosqlite	Modern async apps
 
-D.4 â€” Web Frameworks vs Use Cases
+D.4 — Web Frameworks vs Use Cases
 
 Framework	Best For	Not Ideal For
 FastAPI	APIs, microservices, async	Full-stack apps, admin panels
@@ -14448,7 +14448,7 @@ Flask	Small apps, flexibility	Large scale, async-heavy
 Starlette	Custom ASGI apps	Quick prototyping
 Tornado	WebSockets, long polling	Standard CRUD apps
 
-D.5 â€” Test Types vs Tools
+D.5 — Test Types vs Tools
 
 Test Type	Tool	When to Use
 Unit tests	pytest, unittest	Individual functions/classes
@@ -14458,7 +14458,7 @@ Property-based	hypothesis	Edge case discovery
 Performance	locust, pytest-benchmark	Load testing, benchmarks
 Coverage	coverage.py	Code coverage metrics
 
-D.6 â€” "When to Choose X vs Y" Cheat Sheets
+D.6 — "When to Choose X vs Y" Cheat Sheets
 
 NumPy vs Polars vs pandas:
 
@@ -14474,27 +14474,27 @@ SQLAlchemy: ORM benefits, type safety, migrations, complex queries
 
 Raw SQL: Performance-critical, complex analytics, existing SQL expertise
 
-D.7 â€” Data Processing Decision Tree
+D.7 — Data Processing Decision Tree
 
 ```
-Small dataset (<1GB) â†’ pandas
-Large dataset (>1GB) â†’ Polars or Dask
-Streaming data â†’ Polars lazy or Dask
-ML/AI workloads â†’ NumPy, PyTorch, TensorFlow
-Time series â†’ pandas, Polars
+Small dataset (<1GB) → pandas
+Large dataset (>1GB) → Polars or Dask
+Streaming data → Polars lazy or Dask
+ML/AI workloads → NumPy, PyTorch, TensorFlow
+Time series → pandas, Polars
 ```
 
-D.8 â€” Package Manager Decision Tree
+D.8 — Package Manager Decision Tree
 
 ```
-New project â†’ uv
-Legacy project â†’ pip + pip-tools
-Poetry ecosystem â†’ Poetry
-Enterprise â†’ pip + requirements.txt
+New project → uv
+Legacy project → pip + pip-tools
+Poetry ecosystem → Poetry
+Enterprise → pip + requirements.txt
 ```
 
-ðŸ“˜ APPENDIX E â€” COMMON GOTCHAS & PITFALLS
-A Comprehensive Guide to Pythonâ€™s Most Dangerous Mistakes
+📘 APPENDIX E — COMMON GOTCHAS & PITFALLS
+A Comprehensive Guide to Python’s Most Dangerous Mistakes
 
 Python is easy to write but has deep semantic traps that bite developers at all levels.
 This appendix covers all major categories of pitfalls:
@@ -14539,32 +14539,32 @@ Why it matters
 
 Where it appears in real systems
 
-ðŸ”¥ D.1 â€” MUTABLE DEFAULT ARGUMENTS
+🔥 D.1 — MUTABLE DEFAULT ARGUMENTS
 The #1 Python bug of all time
-âŒ Incorrect
+❌ Incorrect
 def append_to_list(value, lst=[]):
     lst.append(value)
     return lst
 
-ðŸ” What happens?
+🔍 What happens?
 
 Default values are evaluated once at function definition time.
 
 The same list is shared across every call.
 
 Example:
-append_to_list(1) â†’ [1]
-append_to_list(2) â†’ [1, 2]
-append_to_list(3) â†’ [1, 2, 3]
+append_to_list(1) → [1]
+append_to_list(2) → [1, 2]
+append_to_list(3) → [1, 2, 3]
 
-âœ… Correct
+✅ Correct
 def append_to_list(value, lst=None):
     if lst is None:
         lst = []
     lst.append(value)
     return lst
 
-ðŸŽ¯ When it bites you
+🎯 When it bites you
 
 API parameter defaults
 
@@ -14576,22 +14576,22 @@ Caches
 
 Machine learning pipelines
 
-ðŸ”¥ D.2 â€” LATE BINDING IN CLOSURES
-â€œWhy does my lambda use the last value?!â€
-âŒ Incorrect
+🔥 D.2 — LATE BINDING IN CLOSURES
+“Why does my lambda use the last value?!”
+❌ Incorrect
 funcs = [lambda: i for i in range(3)]
-[f() for f in funcs]  # â†’ [2, 2, 2]
+[f() for f in funcs]  # → [2, 2, 2]
 
-ðŸ§  Why?
+🧠 Why?
 
 Python closures capture variables, not values.
 
-âœ… Correct
+✅ Correct
 
 Capture value explicitly:
 
 funcs = [lambda i=i: i for i in range(3)]
-[f() for f in funcs]  # â†’ [0, 1, 2]
+[f() for f in funcs]  # → [0, 1, 2]
 
 Real-world mistake locations:
 
@@ -14603,11 +14603,11 @@ List comprehension lambdas
 
 Loop-generated handlers
 
-ðŸ”¥ D.3 â€” ITERATOR EXHAUSTION
+🔥 D.3 — ITERATOR EXHAUSTION
 Iterators can only be consumed once.
 it = iter([1, 2, 3])
 list(it)
-list(it)   # â†’ []
+list(it)   # → []
 
 Why this breaks real code:
 
@@ -14629,7 +14629,7 @@ Create new generators
 
 Use itertools.tee()
 
-ðŸ”¥ D.4 â€” CIRCULAR IMPORTS
+🔥 D.4 — CIRCULAR IMPORTS
 The silent killer of Python architecture
 Scenario:
 
@@ -14642,7 +14642,7 @@ Partially initialized modules
 
 Missing functions
 
-Runtime errors only on first import (â€œWhy does it work sometimes?â€)
+Runtime errors only on first import (“Why does it work sometimes?”)
 
 Fixes:
 1. Move imports inside functions
@@ -14651,8 +14651,8 @@ def use_b():
 
 2. Extract shared logic to a third module
 3. Avoid running module-level code
-ðŸ”¥ D.5 â€” VARIABLE SHADOWING (BUILTINS & OUTER SCOPE)
-âŒ Incorrect
+🔥 D.5 — VARIABLE SHADOWING (BUILTINS & OUTER SCOPE)
+❌ Incorrect
 list = [1, 2, 3]  # destroys built-in list()
 
 Result:
@@ -14661,7 +14661,7 @@ list("abc")  # TypeError
 Correct:
 items = [1, 2, 3]
 
-ðŸ”¥ D.6 â€” BOOLEAN TRAPS
+🔥 D.6 — BOOLEAN TRAPS
 Dangerous because Python is permissive with truthiness.
 Examples:
 if []: print("no")        # empty list is False
@@ -14687,7 +14687,7 @@ if value is None:
 if value == "":
 if len(value) == 0:
 
-ðŸ”¥ D.7 â€” FLOATING POINT WEIRDNESS
+🔥 D.7 — FLOATING POINT WEIRDNESS
 Classic example:
 0.1 + 0.2 == 0.3
 # False
@@ -14701,7 +14701,7 @@ Use fractions.Fraction
 
 Tolerances: math.isclose(a, b, rel_tol=1e-9)
 
-ðŸ”¥ D.8 â€” ASYNC PITFALLS
+🔥 D.8 — ASYNC PITFALLS
 1. Blocking the event loop
 async def slow():
     time.sleep(3)   # WRONG
@@ -14717,12 +14717,12 @@ Requests, SQLAlchemy (old versions), heavy CPU-bound code.
 
 3. Creating tasks without storing references
 asyncio.create_task(worker())
-# if not referenced â†’ task may disappear
+# if not referenced → task may disappear
 
-ðŸ”¥ D.9 â€” GIL & CONCURRENCY TRAPS
+🔥 D.9 — GIL & CONCURRENCY TRAPS
 Misconception:
 
-â€œThreads run in parallel in Python.â€
+“Threads run in parallel in Python.”
 
 Only true for I/O-bound tasks.
 
@@ -14740,20 +14740,20 @@ PyPy (JIT)
 
 Python 3.13 free-threading mode
 
-ðŸ”¥ D.10 â€” TYPING PITFALLS
+🔥 D.10 — TYPING PITFALLS
 1. Type hints are not enforced at runtime
 2. Any destroys type safety
 3. Mutable default in TypedDict
 4. Wrong TypeVar constraints
 5. Using Protocol incorrectly (structural typing mismatch)
-ðŸ”¥ D.11 â€” SECURITY PITFALLS
+🔥 D.11 — SECURITY PITFALLS
 1. Using pickle with untrusted data = code execution
 2. eval/exec
 3. YAML unsafe load
 4. Hard-coded secrets
 5. SSRF via requests.get(user_input)
 6. SQL Injection with string concatenation
-ðŸ”¥ D.12 â€” PERFORMANCE TRAPS
+🔥 D.12 — PERFORMANCE TRAPS
 Common mistakes:
 
 Repeated string concatenation with +=
@@ -14772,8 +14772,8 @@ Overuse of dataclasses when tuples suffice
 
 Many tiny function calls inside hot loops
 
-ðŸ”¥ D.13 â€” ERROR HANDLING PITFALLS
-âŒ Bare except:
+🔥 D.13 — ERROR HANDLING PITFALLS
+❌ Bare except:
 try:
     ...
 except:
@@ -14791,7 +14791,7 @@ ALL errors
 Correct:
 except Exception as e:
 
-ðŸ”¥ D.14 â€” OBJECT MODEL SURPRISES
+🔥 D.14 — OBJECT MODEL SURPRISES
 1. is vs ==
 [] is []        # False
 () == ()        # True
@@ -14804,7 +14804,7 @@ except Exception as e:
 7. Inheritance MRO surprises (especially with multiple inheritance)
 
 
-ðŸ“˜ APPENDIX G â€” VISUAL DIAGRAMS & FLOWCHARTS
+📘 APPENDIX G — VISUAL DIAGRAMS & FLOWCHARTS
 
 This appendix contains visual representations of key Python concepts referenced throughout the Bible. These diagrams help visualize complex execution flows, data structures, and system architectures.
 
@@ -14824,94 +14824,94 @@ Memory layout and object structures
 
 G.2 Execution Pipeline
 
-G.2.1 Source â†’ Bytecode â†’ Execution
+G.2.1 Source → Bytecode → Execution
 
 Complete interpreter pipeline flow:
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    PYTHON EXECUTION PIPELINE                 â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│                    PYTHON EXECUTION PIPELINE                 │
+└─────────────────────────────────────────────────────────────┘
 
 Source Code (hello.py)
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 1. TOKENIZATION                                             â”‚
-â”‚    Tokenizer converts characters â†’ tokens                    â”‚
-â”‚    Example: "def" â†’ NAME, "(" â†’ LPAR, "x" â†’ NAME           â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 2. PARSING (PEG Parser)                                     â”‚
-â”‚    Tokens â†’ Abstract Syntax Tree (AST)                       â”‚
-â”‚    Example: FunctionDef(name='greet', args=[...])          â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 3. AST OPTIMIZATION                                         â”‚
-â”‚    Constant folding, dead code elimination                   â”‚
-â”‚    Example: 2 + 3 â†’ 5 (compile-time)                        â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 4. BYTECODE COMPILATION                                     â”‚
-â”‚    AST â†’ Bytecode instructions                               â”‚
-â”‚    Example: LOAD_FAST, CALL_FUNCTION, RETURN_VALUE          â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 5. BYTECODE OPTIMIZATION (Peephole)                          â”‚
-â”‚    Dead jump removal, constant tuple building               â”‚
-â”‚    Example: JUMP_IF_FALSE â†’ removed if always true          â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 6. CODE OBJECT CREATION                                     â”‚
-â”‚    Bytecode + metadata â†’ code object                        â”‚
-â”‚    Stored in: __pycache__/hello.cpython-313.pyc            â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 7. EXECUTION (CPython VM)                                    â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”‚
-â”‚    â”‚ Tier 0: Baseline Interpreter            â”‚            â”‚
-â”‚    â”‚   - Standard bytecode execution          â”‚            â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â”‚
-â”‚              â”‚ (hot code detected)                         â”‚
-â”‚              â–¼                                              â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”‚
-â”‚    â”‚ Tier 1: Adaptive Interpreter (3.11+)    â”‚            â”‚
-â”‚    â”‚   - Specialized opcodes                  â”‚            â”‚
-â”‚    â”‚   - Type-specific optimizations          â”‚            â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â”‚
-â”‚              â”‚ (very hot code, 3.13+)                     â”‚
-â”‚              â–¼                                              â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”‚
-â”‚    â”‚ Tier 2: JIT Compiler (3.13+ experimental)â”‚            â”‚
-â”‚    â”‚   - Copy-and-patch JIT                   â”‚            â”‚
-â”‚    â”‚   - Native machine code                   â”‚            â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 1. TOKENIZATION                                             │
+│    Tokenizer converts characters → tokens                    │
+│    Example: "def" → NAME, "(" → LPAR, "x" → NAME           │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 2. PARSING (PEG Parser)                                     │
+│    Tokens → Abstract Syntax Tree (AST)                       │
+│    Example: FunctionDef(name='greet', args=[...])          │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 3. AST OPTIMIZATION                                         │
+│    Constant folding, dead code elimination                   │
+│    Example: 2 + 3 → 5 (compile-time)                        │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 4. BYTECODE COMPILATION                                     │
+│    AST → Bytecode instructions                               │
+│    Example: LOAD_FAST, CALL_FUNCTION, RETURN_VALUE          │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 5. BYTECODE OPTIMIZATION (Peephole)                          │
+│    Dead jump removal, constant tuple building               │
+│    Example: JUMP_IF_FALSE → removed if always true          │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 6. CODE OBJECT CREATION                                     │
+│    Bytecode + metadata → code object                        │
+│    Stored in: __pycache__/hello.cpython-313.pyc            │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 7. EXECUTION (CPython VM)                                    │
+│    ┌─────────────────────────────────────────┐            │
+│    │ Tier 0: Baseline Interpreter            │            │
+│    │   - Standard bytecode execution          │            │
+│    └─────────────────────────────────────────┘            │
+│              │ (hot code detected)                         │
+│              ▼                                              │
+│    ┌─────────────────────────────────────────┐            │
+│    │ Tier 1: Adaptive Interpreter (3.11+)    │            │
+│    │   - Specialized opcodes                  │            │
+│    │   - Type-specific optimizations          │            │
+│    └─────────────────────────────────────────┘            │
+│              │ (very hot code, 3.13+)                     │
+│              ▼                                              │
+│    ┌─────────────────────────────────────────┐            │
+│    │ Tier 2: JIT Compiler (3.13+ experimental)│            │
+│    │   - Copy-and-patch JIT                   │            │
+│    │   - Native machine code                   │            │
+│    └─────────────────────────────────────────┘            │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
     Runtime Execution
     (Frame objects, stack, namespaces)
 ```
 
 Key Components:
 
-Tokenization: Character stream â†’ Token stream
+Tokenization: Character stream → Token stream
 
-Parsing: Token stream â†’ AST (Abstract Syntax Tree)
+Parsing: Token stream → AST (Abstract Syntax Tree)
 
-Compilation: AST â†’ Bytecode
+Compilation: AST → Bytecode
 
 Optimization: Peephole optimizer improves bytecode
 
@@ -14923,67 +14923,67 @@ G.3 Scope & Namespace Resolution
 
 G.3.1 LEGB Rule Visualization
 
-Python's name resolution follows the LEGB rule (Local â†’ Enclosing â†’ Global â†’ Built-in):
+Python's name resolution follows the LEGB rule (Local → Enclosing → Global → Built-in):
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚              NAME RESOLUTION ORDER (LEGB)                   â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│              NAME RESOLUTION ORDER (LEGB)                   │
+└─────────────────────────────────────────────────────────────┘
 
 Function Call: inner()
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 1. LOCAL SCOPE (L)                                          â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ def inner():                         â”‚                 â”‚
-â”‚    â”‚     x = "local"  â† Check here first  â”‚                 â”‚
-â”‚    â”‚     print(x)                         â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â”‚    If found â†’ use it, STOP                                 â”‚
-â”‚    If not found â†’ continue to Enclosing                    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚ (not found)
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 2. ENCLOSING SCOPE (E)                                       â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ def outer():                         â”‚                 â”‚
-â”‚    â”‚     x = "enclosing"  â† Check here   â”‚                 â”‚
-â”‚    â”‚     def inner():                     â”‚                 â”‚
-â”‚    â”‚         print(x)  # uses enclosing  â”‚                 â”‚
-â”‚    â”‚     return inner                    â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â”‚    If found â†’ use it, STOP                                 â”‚
-â”‚    If not found â†’ continue to Global                      â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚ (not found)
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 3. GLOBAL SCOPE (G)                                          â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ x = "global"  â† Module-level        â”‚                 â”‚
-â”‚    â”‚                                     â”‚                 â”‚
-â”‚    â”‚ def outer():                        â”‚                 â”‚
-â”‚    â”‚     def inner():                    â”‚                 â”‚
-â”‚    â”‚         print(x)  # uses global     â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â”‚    If found â†’ use it, STOP                                 â”‚
-â”‚    If not found â†’ continue to Built-in                    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚ (not found)
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 4. BUILT-IN SCOPE (B)                                        â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ Built-in names (len, str, int, etc.)â”‚                 â”‚
-â”‚    â”‚                                     â”‚                 â”‚
-â”‚    â”‚ import builtins                     â”‚                 â”‚
-â”‚    â”‚ print(builtins.__dict__)            â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â”‚    If found â†’ use it                                       â”‚
-â”‚    If not found â†’ NameError                                â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 1. LOCAL SCOPE (L)                                          │
+│    ┌─────────────────────────────────────┐                 │
+│    │ def inner():                         │                 │
+│    │     x = "local"  ← Check here first  │                 │
+│    │     print(x)                         │                 │
+│    └─────────────────────────────────────┘                 │
+│    If found → use it, STOP                                 │
+│    If not found → continue to Enclosing                    │
+└─────────────────────────────────────────────────────────────┘
+         │ (not found)
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 2. ENCLOSING SCOPE (E)                                       │
+│    ┌─────────────────────────────────────┐                 │
+│    │ def outer():                         │                 │
+│    │     x = "enclosing"  ← Check here   │                 │
+│    │     def inner():                     │                 │
+│    │         print(x)  # uses enclosing  │                 │
+│    │     return inner                    │                 │
+│    └─────────────────────────────────────┘                 │
+│    If found → use it, STOP                                 │
+│    If not found → continue to Global                      │
+└─────────────────────────────────────────────────────────────┘
+         │ (not found)
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 3. GLOBAL SCOPE (G)                                          │
+│    ┌─────────────────────────────────────┐                 │
+│    │ x = "global"  ← Module-level        │                 │
+│    │                                     │                 │
+│    │ def outer():                        │                 │
+│    │     def inner():                    │                 │
+│    │         print(x)  # uses global     │                 │
+│    └─────────────────────────────────────┘                 │
+│    If found → use it, STOP                                 │
+│    If not found → continue to Built-in                    │
+└─────────────────────────────────────────────────────────────┘
+         │ (not found)
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 4. BUILT-IN SCOPE (B)                                        │
+│    ┌─────────────────────────────────────┐                 │
+│    │ Built-in names (len, str, int, etc.)│                 │
+│    │                                     │                 │
+│    │ import builtins                     │                 │
+│    │ print(builtins.__dict__)            │                 │
+│    └─────────────────────────────────────┘                 │
+│    If found → use it                                       │
+│    If not found → NameError                                │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 Example:
@@ -15011,86 +15011,86 @@ Complete import system pipeline:
 
 ```
 import mymodule
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STEP 1: Check sys.modules cache                             â”‚
-â”‚    if 'mymodule' in sys.modules:                            â”‚
-â”‚        return sys.modules['mymodule']  # Already loaded    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚ (not found)
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STEP 2: Iterate sys.meta_path finders                       â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ 1. BuiltinImporter                   â”‚                 â”‚
-â”‚    â”‚    - Checks built-in modules         â”‚                 â”‚
-â”‚    â”‚    - Examples: sys, builtins         â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â”‚              â”‚ (not found)                                 â”‚
-â”‚              â–¼                                              â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ 2. FrozenImporter                    â”‚                 â”‚
-â”‚    â”‚    - Checks frozen modules           â”‚                 â”‚
-â”‚    â”‚    - Examples: _frozen_importlib     â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â”‚              â”‚ (not found)                                 â”‚
-â”‚              â–¼                                              â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ 3. PathFinder                        â”‚                 â”‚
-â”‚    â”‚    - Searches sys.path               â”‚                 â”‚
-â”‚    â”‚    - Uses SourceFileLoader, etc.     â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚ (finder returns ModuleSpec)
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STEP 3: Create ModuleSpec                                   â”‚
-â”‚    spec = ModuleSpec(                                       â”‚
-â”‚        name='mymodule',                                     â”‚
-â”‚        loader=SourceFileLoader(...),                       â”‚
-â”‚        origin='/path/to/mymodule.py',                       â”‚
-â”‚        submodule_search_locations=None                     â”‚
-â”‚    )                                                        â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STEP 4: Loader.exec_module(spec)                           â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ SourceFileLoader:                    â”‚                 â”‚
-â”‚    â”‚   1. Read .py file                   â”‚                 â”‚
-â”‚    â”‚   2. Compile to bytecode             â”‚                 â”‚
-â”‚    â”‚   3. Execute bytecode                â”‚                 â”‚
-â”‚    â”‚   4. Create module object            â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ ExtensionFileLoader:                 â”‚                 â”‚
-â”‚    â”‚   1. Load .so/.pyd file             â”‚                 â”‚
-â”‚    â”‚   2. Initialize module              â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ NamespaceLoader:                    â”‚                 â”‚
-â”‚    â”‚   1. Create namespace package      â”‚                 â”‚
-â”‚    â”‚   2. Set __path__                   â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STEP 5: Store in sys.modules                                â”‚
-â”‚    sys.modules['mymodule'] = module_object                  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STEP 6: Module code executed                                â”‚
-â”‚    - Top-level code runs                                    â”‚
-â”‚    - Functions/classes defined                              â”‚
-â”‚    - Module-level variables assigned                        â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 1: Check sys.modules cache                             │
+│    if 'mymodule' in sys.modules:                            │
+│        return sys.modules['mymodule']  # Already loaded    │
+└─────────────────────────────────────────────────────────────┘
+         │ (not found)
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 2: Iterate sys.meta_path finders                       │
+│    ┌─────────────────────────────────────┐                 │
+│    │ 1. BuiltinImporter                   │                 │
+│    │    - Checks built-in modules         │                 │
+│    │    - Examples: sys, builtins         │                 │
+│    └─────────────────────────────────────┘                 │
+│              │ (not found)                                 │
+│              ▼                                              │
+│    ┌─────────────────────────────────────┐                 │
+│    │ 2. FrozenImporter                    │                 │
+│    │    - Checks frozen modules           │                 │
+│    │    - Examples: _frozen_importlib     │                 │
+│    └─────────────────────────────────────┘                 │
+│              │ (not found)                                 │
+│              ▼                                              │
+│    ┌─────────────────────────────────────┐                 │
+│    │ 3. PathFinder                        │                 │
+│    │    - Searches sys.path               │                 │
+│    │    - Uses SourceFileLoader, etc.     │                 │
+│    └─────────────────────────────────────┘                 │
+└─────────────────────────────────────────────────────────────┘
+         │ (finder returns ModuleSpec)
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 3: Create ModuleSpec                                   │
+│    spec = ModuleSpec(                                       │
+│        name='mymodule',                                     │
+│        loader=SourceFileLoader(...),                       │
+│        origin='/path/to/mymodule.py',                       │
+│        submodule_search_locations=None                     │
+│    )                                                        │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 4: Loader.exec_module(spec)                           │
+│    ┌─────────────────────────────────────┐                 │
+│    │ SourceFileLoader:                    │                 │
+│    │   1. Read .py file                   │                 │
+│    │   2. Compile to bytecode             │                 │
+│    │   3. Execute bytecode                │                 │
+│    │   4. Create module object            │                 │
+│    └─────────────────────────────────────┘                 │
+│    ┌─────────────────────────────────────┐                 │
+│    │ ExtensionFileLoader:                 │                 │
+│    │   1. Load .so/.pyd file             │                 │
+│    │   2. Initialize module              │                 │
+│    └─────────────────────────────────────┘                 │
+│    ┌─────────────────────────────────────┐                 │
+│    │ NamespaceLoader:                    │                 │
+│    │   1. Create namespace package      │                 │
+│    │   2. Set __path__                   │                 │
+│    └─────────────────────────────────────┘                 │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 5: Store in sys.modules                                │
+│    sys.modules['mymodule'] = module_object                  │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 6: Module code executed                                │
+│    - Top-level code runs                                    │
+│    - Functions/classes defined                              │
+│    - Module-level variables assigned                        │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
     Return module object
 ```
 
@@ -15113,56 +15113,56 @@ G.5.1 Core Built-in Types
 Python's type hierarchy (simplified):
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    PYTHON TYPE HIERARCHY                    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│                    PYTHON TYPE HIERARCHY                    │
+└─────────────────────────────────────────────────────────────┘
 
                     object (base class)
-                           â”‚
-        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-        â”‚                  â”‚                  â”‚
-        â–¼                  â–¼                  â–¼
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+        ▼                  ▼                  ▼
     type (metaclass)   Exception        BaseException
-        â”‚                  â”‚                  â”‚
-        â”‚                  â”‚                  â”‚
-        â–¼                  â–¼                  â–¼
-    â”Œâ”€â”€â”€â”€â”€â”€â”€â”         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-    â”‚ class â”‚         â”‚ ValueErrorâ”‚      â”‚ Keyboard â”‚
-    â”‚       â”‚         â”‚ KeyError â”‚      â”‚ Interruptâ”‚
-    â””â”€â”€â”€â”€â”€â”€â”€â”˜         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-        â”‚
-        â”‚ (instances)
-        â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    BUILT-IN TYPES                            â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚                                                              â”‚
-â”‚  Numeric Types:          Sequence Types:                   â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                   â”‚
-â”‚  â”‚ int         â”‚         â”‚ str         â”‚                   â”‚
-â”‚  â”‚ float       â”‚         â”‚ list        â”‚                   â”‚
-â”‚  â”‚ complex     â”‚         â”‚ tuple       â”‚                   â”‚
-â”‚  â”‚ bool        â”‚         â”‚ bytes       â”‚                   â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         â”‚ bytearray   â”‚                   â”‚
-â”‚                          â”‚ range       â”‚                   â”‚
-â”‚  Mapping Types:          â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                   â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                                            â”‚
-â”‚  â”‚ dict        â”‚         Set Types:                        â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                   â”‚
-â”‚                          â”‚ set         â”‚                   â”‚
-â”‚  Callable Types:         â”‚ frozenset   â”‚                   â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                   â”‚
-â”‚  â”‚ function    â”‚                                            â”‚
-â”‚  â”‚ method      â”‚         Other Types:                      â”‚
-â”‚  â”‚ builtin     â”‚         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                   â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         â”‚ NoneType    â”‚                   â”‚
-â”‚                          â”‚ type        â”‚                   â”‚
-â”‚  Iterator Types:         â”‚ generator   â”‚                   â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”         â”‚ coroutine   â”‚                   â”‚
-â”‚  â”‚ iterator    â”‚         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                   â”‚
-â”‚  â”‚ generator   â”‚                                            â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                                            â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+        │                  │                  │
+        │                  │                  │
+        ▼                  ▼                  ▼
+    ┌───────┐         ┌──────────┐      ┌──────────┐
+    │ class │         │ ValueError│      │ Keyboard │
+    │       │         │ KeyError │      │ Interrupt│
+    └───────┘         └──────────┘      └──────────┘
+        │
+        │ (instances)
+        ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    BUILT-IN TYPES                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Numeric Types:          Sequence Types:                   │
+│  ┌─────────────┐         ┌─────────────┐                   │
+│  │ int         │         │ str         │                   │
+│  │ float       │         │ list        │                   │
+│  │ complex     │         │ tuple       │                   │
+│  │ bool        │         │ bytes       │                   │
+│  └─────────────┘         │ bytearray   │                   │
+│                          │ range       │                   │
+│  Mapping Types:          └─────────────┘                   │
+│  ┌─────────────┐                                            │
+│  │ dict        │         Set Types:                        │
+│  └─────────────┘         ┌─────────────┐                   │
+│                          │ set         │                   │
+│  Callable Types:         │ frozenset   │                   │
+│  ┌─────────────┐         └─────────────┘                   │
+│  │ function    │                                            │
+│  │ method      │         Other Types:                      │
+│  │ builtin     │         ┌─────────────┐                   │
+│  └─────────────┘         │ NoneType    │                   │
+│                          │ type        │                   │
+│  Iterator Types:         │ generator   │                   │
+│  ┌─────────────┐         │ coroutine   │                   │
+│  │ iterator    │         └─────────────┘                   │
+│  │ generator   │                                            │
+│  └─────────────┘                                            │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 Type Relationships:
@@ -15184,9 +15184,9 @@ G.6.2 MRO Resolution Path
 Method Resolution Order (MRO) using C3 linearization:
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚              METHOD RESOLUTION ORDER (MRO)                  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│              METHOD RESOLUTION ORDER (MRO)                  │
+└─────────────────────────────────────────────────────────────┘
 
 Example Inheritance Hierarchy:
 
@@ -15211,21 +15211,21 @@ F.__mro__ = [F] + merge(
 Step-by-step merge:
 
 1. Take first element of first list: D
-   - D not in tails of other lists â†’ keep D
+   - D not in tails of other lists → keep D
    - Result: [F, D]
 
 2. Remove D from all lists:
-   - MRO(D) â†’ [C, A, object]
-   - MRO(E) â†’ [E, C, B, object]
-   - [D, E] â†’ [E]
+   - MRO(D) → [C, A, object]
+   - MRO(E) → [E, C, B, object]
+   - [D, E] → [E]
 
 3. Take first element: C
-   - C in tail of MRO(E) â†’ skip, try E
-   - E not in tails â†’ keep E
+   - C in tail of MRO(E) → skip, try E
+   - E not in tails → keep E
    - Result: [F, D, E]
 
 4. Remove E, continue:
-   - Take C (not in tails) â†’ keep
+   - Take C (not in tails) → keep
    - Result: [F, D, E, C]
 
 5. Continue: A, B, object
@@ -15238,45 +15238,45 @@ Method Lookup Flow:
 
 ```
 obj.method()
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 1. Get type(obj).__mro__                                    â”‚
-â”‚    Example: [F, D, E, C, A, B, object]                     â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 2. Search in MRO order (left to right):                    â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ Check F.__dict__['method']?         â”‚                 â”‚
-â”‚    â”‚   â†’ Not found                      â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â”‚              â”‚                                              â”‚
-â”‚              â–¼                                              â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ Check D.__dict__['method']?          â”‚                 â”‚
-â”‚    â”‚   â†’ Not found                       â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â”‚              â”‚                                              â”‚
-â”‚              â–¼                                              â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ Check E.__dict__['method']?          â”‚                 â”‚
-â”‚    â”‚   â†’ Not found                       â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â”‚              â”‚                                              â”‚
-â”‚              â–¼                                              â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ Check C.__dict__['method']?          â”‚                 â”‚
-â”‚    â”‚   â†’ FOUND!                          â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â”‚              â”‚                                              â”‚
-â”‚              â–¼                                              â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚ 3. Return method (bound to obj)     â”‚                 â”‚
-â”‚    â”‚    STOP searching (first match wins)â”‚                 â”‚
-â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                 â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 1. Get type(obj).__mro__                                    │
+│    Example: [F, D, E, C, A, B, object]                     │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 2. Search in MRO order (left to right):                    │
+│    ┌─────────────────────────────────────┐                 │
+│    │ Check F.__dict__['method']?         │                 │
+│    │   → Not found                      │                 │
+│    └─────────────────────────────────────┘                 │
+│              │                                              │
+│              ▼                                              │
+│    ┌─────────────────────────────────────┐                 │
+│    │ Check D.__dict__['method']?          │                 │
+│    │   → Not found                       │                 │
+│    └─────────────────────────────────────┘                 │
+│              │                                              │
+│              ▼                                              │
+│    ┌─────────────────────────────────────┐                 │
+│    │ Check E.__dict__['method']?          │                 │
+│    │   → Not found                       │                 │
+│    └─────────────────────────────────────┘                 │
+│              │                                              │
+│              ▼                                              │
+│    ┌─────────────────────────────────────┐                 │
+│    │ Check C.__dict__['method']?          │                 │
+│    │   → FOUND!                          │                 │
+│    └─────────────────────────────────────┘                 │
+│              │                                              │
+│              ▼                                              │
+│    ┌─────────────────────────────────────┐                 │
+│    │ 3. Return method (bound to obj)     │                 │
+│    │    STOP searching (first match wins)│                 │
+│    └─────────────────────────────────────┘                 │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 Key Rules:
@@ -15330,35 +15330,35 @@ G.7.1 PyObject Structure
 Every Python object in memory:
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    PyObject HEADER                          â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚ Py_ssize_t ob_refcnt    â”‚ Reference count (4/8 bytes)      â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚ PyTypeObject *ob_type   â”‚ Pointer to type object (8 bytes)  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼ (type-specific data follows)
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚              TYPE-SPECIFIC DATA                              â”‚
-â”‚                                                              â”‚
-â”‚  PyLongObject:          PyListObject:                      â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                     â”‚
-â”‚  â”‚ ob_digit[]  â”‚        â”‚ PyObject** â”‚                     â”‚
-â”‚  â”‚ (variable)  â”‚        â”‚ ob_item    â”‚                     â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜        â”‚ Py_ssize_t â”‚                     â”‚
-â”‚                         â”‚ allocated  â”‚                     â”‚
-â”‚  PyUnicodeObject:       â”‚ Py_ssize_t â”‚                     â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”        â”‚ size       â”‚                     â”‚
-â”‚  â”‚ length      â”‚        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                     â”‚
-â”‚  â”‚ kind        â”‚                                            â”‚
-â”‚  â”‚ data[]      â”‚        PyDictObject:                       â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                     â”‚
-â”‚                         â”‚ ma_keys     â”‚                     â”‚
-â”‚                         â”‚ ma_values   â”‚                     â”‚
-â”‚                         â”‚ ma_used     â”‚                     â”‚
-â”‚                         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                     â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│                    PyObject HEADER                          │
+├─────────────────────────────────────────────────────────────┤
+│ Py_ssize_t ob_refcnt    │ Reference count (4/8 bytes)      │
+├─────────────────────────────────────────────────────────────┤
+│ PyTypeObject *ob_type   │ Pointer to type object (8 bytes)  │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼ (type-specific data follows)
+┌─────────────────────────────────────────────────────────────┐
+│              TYPE-SPECIFIC DATA                              │
+│                                                              │
+│  PyLongObject:          PyListObject:                      │
+│  ┌─────────────┐        ┌─────────────┐                     │
+│  │ ob_digit[]  │        │ PyObject** │                     │
+│  │ (variable)  │        │ ob_item    │                     │
+│  └─────────────┘        │ Py_ssize_t │                     │
+│                         │ allocated  │                     │
+│  PyUnicodeObject:       │ Py_ssize_t │                     │
+│  ┌─────────────┐        │ size       │                     │
+│  │ length      │        └─────────────┘                     │
+│  │ kind        │                                            │
+│  │ data[]      │        PyDictObject:                       │
+│  └─────────────┘        ┌─────────────┐                     │
+│                         │ ma_keys     │                     │
+│                         │ ma_values   │                     │
+│                         │ ma_used     │                     │
+│                         └─────────────┘                     │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 Key Points:
@@ -15377,7 +15377,7 @@ This appendix provides visual reference for concepts explained in detail through
 
 ---
 
-ðŸ“˜ APPENDIX H â€” GUI & DATA VISUALIZATION (SHALLOW COVERAGE)
+📘 APPENDIX H — GUI & DATA VISUALIZATION (SHALLOW COVERAGE)
 
 **Scope Note:** This appendix provides shallow but practical orientation for GUI development and data visualization. For deep coverage, see specialized resources.
 
@@ -15386,9 +15386,9 @@ This appendix provides visual reference for concepts explained in detail through
 
 ---
 
-H.1 Tkinter â€” Simple Desktop GUI
+H.1 Tkinter — Simple Desktop GUI
 
-**âš ï¸ Shallow Coverage:** This is a minimal working example, not comprehensive Tkinter documentation.
+**⚠️ Shallow Coverage:** This is a minimal working example, not comprehensive Tkinter documentation.
 
 **Why Tkinter:**
 - Included in Python stdlib (no installation needed)
@@ -15397,13 +15397,13 @@ H.1 Tkinter â€” Simple Desktop GUI
 - Good for small tools and prototypes
 
 **When to Use:**
-- âœ… Simple desktop utilities
-- âœ… Internal tools and scripts
-- âœ… Learning GUI concepts
-- âŒ Don't use for complex applications (use PyQt, wxPython, or web frameworks)
-- âŒ Don't use for production desktop apps (use modern frameworks)
+- ✅ Simple desktop utilities
+- ✅ Internal tools and scripts
+- ✅ Learning GUI concepts
+- ❌ Don't use for complex applications (use PyQt, wxPython, or web frameworks)
+- ❌ Don't use for production desktop apps (use modern frameworks)
 
-**Toy but Real Example â€” Task Manager:**
+**Toy but Real Example — Task Manager:**
 
 ```python
 import tkinter as tk
@@ -15465,8 +15465,8 @@ class TaskManager:
         if selection:
             index = selection[0]
             task = self.task_listbox.get(index)
-            if not task.startswith("âœ“"):
-                completed = f"âœ“ {task}"
+            if not task.startswith("✓"):
+                completed = f"✓ {task}"
                 self.task_listbox.delete(index)
                 self.task_listbox.insert(index, completed)
                 self.tasks[index] = completed
@@ -15485,24 +15485,24 @@ if __name__ == "__main__":
 ```
 
 **Key Tkinter Concepts:**
-- `tk.Tk()` â€” Root window
-- `ttk.Frame()` â€” Container widget
-- `ttk.Entry()` â€” Text input
-- `ttk.Button()` â€” Clickable button
-- `tk.Listbox()` â€” List display
-- `pack()` â€” Layout manager
-- `mainloop()` â€” Event loop
+- `tk.Tk()` — Root window
+- `ttk.Frame()` — Container widget
+- `ttk.Entry()` — Text input
+- `ttk.Button()` — Clickable button
+- `tk.Listbox()` — List display
+- `pack()` — Layout manager
+- `mainloop()` — Event loop
 
 **Pitfalls:**
-âš  Tkinter is single-threaded (use `threading` for background tasks)
-âš  Limited styling options (use `ttk` for better appearance)
-âš  Not suitable for complex layouts (consider PyQt, wxPython)
+⚠ Tkinter is single-threaded (use `threading` for background tasks)
+⚠ Limited styling options (use `ttk` for better appearance)
+⚠ Not suitable for complex layouts (consider PyQt, wxPython)
 
 ---
 
-H.2 curses â€” Terminal User Interface (TUI)
+H.2 curses — Terminal User Interface (TUI)
 
-**âš ï¸ Shallow Coverage:** Basic TUI example for terminal-based applications.
+**⚠️ Shallow Coverage:** Basic TUI example for terminal-based applications.
 
 **Why curses:**
 - Terminal-based interfaces (no GUI required)
@@ -15511,14 +15511,14 @@ H.2 curses â€” Terminal User Interface (TUI)
 - Good for CLI tools and system utilities
 
 **When to Use:**
-- âœ… Terminal-based applications
-- âœ… System administration tools
-- âœ… CLI tools with interactive menus
-- âœ… SSH-accessible interfaces
-- âŒ Don't use for desktop applications (use Tkinter or modern frameworks)
-- âŒ Don't use for web applications
+- ✅ Terminal-based applications
+- ✅ System administration tools
+- ✅ CLI tools with interactive menus
+- ✅ SSH-accessible interfaces
+- ❌ Don't use for desktop applications (use Tkinter or modern frameworks)
+- ❌ Don't use for web applications
 
-**Toy but Real Example â€” Interactive Menu:**
+**Toy but Real Example — Interactive Menu:**
 
 ```python
 import curses
@@ -15529,7 +15529,7 @@ def draw_menu(stdscr, selected_idx, options):
     stdscr.clear()
     h, w = stdscr.getmaxyx()
     
-    title = "Select an Option (â†‘â†“ to navigate, Enter to select, q to quit)"
+    title = "Select an Option (↑↓ to navigate, Enter to select, q to quit)"
     stdscr.addstr(0, (w - len(title)) // 2, title, curses.A_BOLD)
     
     start_y = h // 2 - len(options) // 2
@@ -15583,23 +15583,23 @@ if __name__ == "__main__":
 ```
 
 **Key curses Concepts:**
-- `curses.wrapper()` â€” Initialize and cleanup
-- `stdscr.getch()` â€” Get character input
-- `stdscr.addstr()` â€” Draw text
-- `curses.KEY_UP/DOWN` â€” Arrow keys
-- `curses.A_REVERSE` â€” Highlight text
-- `stdscr.refresh()` â€” Update screen
+- `curses.wrapper()` — Initialize and cleanup
+- `stdscr.getch()` — Get character input
+- `stdscr.addstr()` — Draw text
+- `curses.KEY_UP/DOWN` — Arrow keys
+- `curses.A_REVERSE` — Highlight text
+- `stdscr.refresh()` — Update screen
 
 **Pitfalls:**
-âš  Windows support is limited (use `windows-curses` package)
-âš  Terminal size changes can break layouts
-âš  Color support varies by terminal
+⚠ Windows support is limited (use `windows-curses` package)
+⚠ Terminal size changes can break layouts
+⚠ Color support varies by terminal
 
 ---
 
-H.3 Data Pipeline: CSV/JSON â†’ Pandas â†’ Plot
+H.3 Data Pipeline: CSV/JSON → Pandas → Plot
 
-**âš ï¸ Shallow Coverage:** Basic data processing and visualization workflow.
+**⚠️ Shallow Coverage:** Basic data processing and visualization workflow.
 
 **Why This Flow:**
 - Common data analysis pattern
@@ -15608,14 +15608,14 @@ H.3 Data Pipeline: CSV/JSON â†’ Pandas â†’ Plot
 - Foundation for data science work
 
 **When to Use:**
-- âœ… Data analysis and exploration
-- âœ… Quick data visualizations
-- âœ… CSV/JSON data processing
-- âœ… Statistical analysis
-- âŒ Don't use for large datasets (>RAM) (use Polars, Dask)
-- âŒ Don't use for production ML pipelines (use specialized frameworks)
+- ✅ Data analysis and exploration
+- ✅ Quick data visualizations
+- ✅ CSV/JSON data processing
+- ✅ Statistical analysis
+- ❌ Don't use for large datasets (>RAM) (use Polars, Dask)
+- ❌ Don't use for production ML pipelines (use specialized frameworks)
 
-**Complete Example â€” Sales Data Analysis:**
+**Complete Example — Sales Data Analysis:**
 
 ```python
 import json
@@ -15702,15 +15702,15 @@ def plot_data(df: pd.DataFrame, output_path: str = "plot.png"):
 
 # Complete pipeline
 def main():
-    """Complete data pipeline: CSV/JSON â†’ Transform â†’ Analyze â†’ Plot."""
+    """Complete data pipeline: CSV/JSON → Transform → Analyze → Plot."""
     
     # Example: Load from CSV
     csv_data = """
 date,category,price,quantity
-2025-01-01,Electronics,100,2
-2025-01-02,Clothing,50,3
-2025-01-03,Electronics,150,1
-2025-01-04,Clothing,75,2
+2025-12-05,Electronics,100,2
+2025-12-05,Clothing,50,3
+2025-12-05,Electronics,150,1
+2025-12-05,Clothing,75,2
 """
     
     # Save example CSV
@@ -15731,8 +15731,8 @@ date,category,price,quantity
     
     # Example: Load from JSON
     json_data = [
-        {"date": "2025-01-01", "category": "Electronics", "price": 100, "quantity": 2},
-        {"date": "2025-01-02", "category": "Clothing", "price": 50, "quantity": 3},
+        {"date": "2025-12-05", "category": "Electronics", "price": 100, "quantity": 2},
+        {"date": "2025-12-05", "category": "Clothing", "price": 50, "quantity": 3},
     ]
     
     Path("sales.json").write_text(json.dumps(json_data, indent=2))
@@ -15749,38 +15749,38 @@ if __name__ == "__main__":
 
 ```
 CSV/JSON File
-    â†“
+    ↓
 pandas.read_csv() / pd.DataFrame(json.load())
-    â†“
+    ↓
 DataFrame (in-memory table)
-    â†“
+    ↓
 Transform (clean, calculate, filter)
-    â†“
+    ↓
 Analyze (statistics, aggregations)
-    â†“
+    ↓
 Visualize (matplotlib plots)
-    â†“
+    ↓
 Save Plot / Export Results
 ```
 
 **Key Libraries:**
-- `pandas` â€” Data manipulation and analysis
-- `matplotlib` â€” Plotting and visualization
-- `json` â€” JSON parsing (stdlib)
-- `csv` â€” CSV parsing (stdlib)
+- `pandas` — Data manipulation and analysis
+- `matplotlib` — Plotting and visualization
+- `json` — JSON parsing (stdlib)
+- `csv` — CSV parsing (stdlib)
 
 **Pitfalls:**
-âš  Pandas loads entire dataset into memory (use `chunksize` for large files)
-âš  Matplotlib requires GUI backend or headless mode
-âš  CSV parsing can be slow for large files (use `polars` for better performance)
+⚠ Pandas loads entire dataset into memory (use `chunksize` for large files)
+⚠ Matplotlib requires GUI backend or headless mode
+⚠ CSV parsing can be slow for large files (use `polars` for better performance)
 
 **When to Use This Flow:**
-- âœ… Exploratory data analysis
-- âœ… Small to medium datasets (<1GB)
-- âœ… Quick visualizations
-- âœ… Data cleaning and transformation
-- âŒ Large datasets (use Polars, Dask)
-- âŒ Production ML pipelines (use specialized frameworks)
+- ✅ Exploratory data analysis
+- ✅ Small to medium datasets (<1GB)
+- ✅ Quick visualizations
+- ✅ Data cleaning and transformation
+- ❌ Large datasets (use Polars, Dask)
+- ❌ Production ML pipelines (use specialized frameworks)
 
 ---
 
@@ -15789,7 +15789,7 @@ Save Plot / Export Results
 This appendix provides shallow but practical orientation for:
 - **Tkinter**: Simple desktop GUI applications
 - **curses**: Terminal-based user interfaces
-- **Data Pipeline**: CSV/JSON â†’ Pandas â†’ Visualization workflow
+- **Data Pipeline**: CSV/JSON → Pandas → Visualization workflow
 
 For comprehensive coverage, see:
 - Tkinter: Official Python documentation

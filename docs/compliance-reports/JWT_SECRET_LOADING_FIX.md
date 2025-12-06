@@ -1,6 +1,6 @@
 # JWT_SECRET Loading Fix
 
-**Date:** 2025-11-22  
+**Date:** 2025-12-05  
 **Issue:** JWT_SECRET environment variable not loaded when auth.module.ts initializes
 
 ## Problem
@@ -75,7 +75,7 @@ The server should now start successfully with the `.env` file in `apps/api/.env`
 
 ---
 
-**Last Updated:** 2025-11-22
+**Last Updated:** 2025-12-05
 
 
 

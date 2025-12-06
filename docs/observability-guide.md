@@ -1,6 +1,6 @@
 # Observability Implementation Guide
 
-**Last Updated:** 2025-11-16
+**Last Updated:** 2025-12-05
 
 This guide explains how to implement observability requirements in VeroField, including structured logging, trace ID propagation, error handling, and security event logging.
 
@@ -556,5 +556,5 @@ async function getCachedData(key: string) {
 
 ---
 
-**Last Updated:** 2025-11-16
+**Last Updated:** 2025-12-05
 

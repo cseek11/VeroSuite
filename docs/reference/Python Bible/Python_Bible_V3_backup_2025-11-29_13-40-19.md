@@ -5,7 +5,7 @@ status: "STABLE"
 authors: ["VeroField"]
 target_audience: ["beginner", "intermediate", "advanced", "expert"]
 python_versions: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-last_updated: "2025-01-27"
+last_updated: "2025-12-05"
 ---
 
 <!-- SSM:PART id="part1" title="Part I: Foundations" -->
@@ -5664,11 +5664,11 @@ from datetime import datetime, timedelta, date, time
 
 # Current time
 now = datetime.now()
-print(now)  # 2025-01-27 14:30:45.123456
+print(now)  # 2025-12-05 14:30:45.123456
 
 # Specific datetime
 dt = datetime(2025, 1, 27, 14, 30, 45)
-print(dt)  # 2025-01-27 14:30:45
+print(dt)  # 2025-12-05 14:30:45
 
 # Date arithmetic
 tomorrow = now + timedelta(days=1)
@@ -5701,7 +5701,7 @@ print(dt.isoweekday()) # 1 (Monday = 1, Sunday = 7)
 ```python
 # Date only (no time)
 d = date(2025, 1, 27)
-print(d)  # 2025-01-27
+print(d)  # 2025-12-05
 
 # Time only (no date)
 t = time(14, 30, 45)
@@ -5709,7 +5709,7 @@ print(t)  # 14:30:45
 
 # Combine date and time
 dt = datetime.combine(d, t)
-print(dt)  # 2025-01-27 14:30:45
+print(dt)  # 2025-12-05 14:30:45
 ```
 
 **Timedelta Operations:**
@@ -5825,7 +5825,7 @@ def schedule_event(local_time: str, timezone: str, event_name: str):
 
 # Schedule meeting in New York
 utc_time = schedule_event(
-    "2025-01-27 14:00",
+    "2025-12-05 14:00",
     "America/New_York",
     "Team Meeting"
 )
@@ -5837,11 +5837,11 @@ utc_time = schedule_event(
 
 ```python
 # Parse ISO format (recommended)
-dt = datetime.fromisoformat("2025-01-27T14:30:45")
-dt_tz = datetime.fromisoformat("2025-01-27T14:30:45-05:00")  # With timezone
+dt = datetime.fromisoformat("2025-12-05T14:30:45")
+dt_tz = datetime.fromisoformat("2025-12-05T14:30:45-05:00")  # With timezone
 
 # Parse custom format
-dt = datetime.strptime("2025-01-27", "%Y-%m-%d")
+dt = datetime.strptime("2025-12-05", "%Y-%m-%d")
 dt = datetime.strptime("Jan 27, 2025 2:30 PM", "%b %d, %Y %I:%M %p")
 
 # Common format codes:
@@ -5864,7 +5864,7 @@ dt = datetime.now()
 
 # ISO format (recommended for APIs)
 iso_str = dt.isoformat()
-print(iso_str)  # 2025-01-27T14:30:45.123456
+print(iso_str)  # 2025-12-05T14:30:45.123456
 
 # Custom format
 formatted = dt.strftime("%Y-%m-%d")
@@ -5881,7 +5881,7 @@ formatted = dt.strftime("%A, %B %d, %Y at %I:%M %p")  # Monday, January 27, 2025
 dt = datetime.now()
 print(dt.strftime("%A, %B %d, %Y"))  # Monday, January 27, 2025
 print(dt.strftime("%I:%M %p"))        # 02:30 PM
-print(dt.strftime("%Y-%m-%d %H:%M:%S"))  # 2025-01-27 14:30:45
+print(dt.strftime("%Y-%m-%d %H:%M:%S"))  # 2025-12-05 14:30:45
 ```
 
 **Try This:** Create a date range generator:
@@ -5899,7 +5899,7 @@ def date_range(start: str, end: str, step_days: int = 1):
         current += timedelta(days=step_days)
 
 # Generate all dates in January 2025
-for date in date_range("2025-01-01", "2025-01-31"):
+for date in date_range("2025-12-05", "2025-12-05"):
     print(date.strftime("%A, %B %d, %Y"))
 ```
 
@@ -6489,7 +6489,7 @@ new_text = re.sub(r"\w+", replacer, text)
 print(new_text)  # "HELLO WORLD"
 
 # Replace with backreferences
-text = "2025-01-27"
+text = "2025-12-05"
 new_text = re.sub(r"(\d{4})-(\d{2})-(\d{2})", r"\3/\2/\1", text)
 print(new_text)  # "27/01/2025" (US format)
 ```
@@ -6630,7 +6630,7 @@ print(non_greedy)  # ['<tag>content</tag>', '<tag>more</tag>'] (two matches)
 ```python
 import re
 
-log_line = "[2025-01-27 14:30:45] ERROR: Database connection failed (code: 5001)"
+log_line = "[2025-12-05 14:30:45] ERROR: Database connection failed (code: 5001)"
 
 # Pattern with named groups
 pattern = re.compile(r"""
@@ -17303,7 +17303,7 @@ log.addHandler(handler)
 
 Every log becomes a structured object:
 
-{"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-03-01T12:00:00Z"}
+{"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-12-05T12:00:00Z"}
 
 22.3 Correlation IDs & Request IDs
 
@@ -34539,7 +34539,7 @@ This appendix provides visual reference for concepts explained in detail through
 
 # MASTER INDEX
 
-**Last Updated:** 2025-01-27
+**Last Updated:** 2025-12-05
 
 This index provides quick access to all major topics, concepts, patterns, and examples covered in the Python Bible. Use Ctrl+F (or Cmd+F) to search for specific terms.
 

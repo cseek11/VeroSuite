@@ -1,7 +1,7 @@
 The REGO & OPA Bible – Comprehensive Deep Research Edition
 
 Definitive Guide to the Rego Language and the Open Policy Agent (OPA) Ecosystem
-Version: 2025-11-25
+Version: 2025-12-05
 Author: Prof. [Your Name], Ph.D.
 Discipline: Computer Engineering, Logic Programming, Declarative Policy Systems
 

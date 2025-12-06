@@ -7,7 +7,7 @@ scope:
   - microservices
   - telemetry
 priority: high
-last_updated: 2025-11-15
+last_updated: 2025-12-05
 always_apply: true
 ---
 
@@ -278,6 +278,6 @@ await waf.blockIp(ip, 'SQL injection attempt detected');
 
 ---
 
-**Last Updated:** 2025-11-15  
+**Last Updated:** 2025-12-05  
 **Status:** Active - VeroAI Development Patterns
 

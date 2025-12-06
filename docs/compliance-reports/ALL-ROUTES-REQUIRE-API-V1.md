@@ -1,6 +1,6 @@
 # All Routes Require /api/v1 Prefix
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Issue:** All API routes require `/api/v1` prefix, but Swagger UI shows paths without it
 
 ---
@@ -143,7 +143,7 @@ Or check server selection in Swagger UI dropdown.
 
 ---
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Status:** All routes require `/api/v1` prefix
 
 

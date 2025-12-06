@@ -5,7 +5,7 @@ status: "STABLE"
 authors: ["VeroField"]
 target_audience: ["beginner", "intermediate", "advanced", "expert"]
 python_versions: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-last_updated: "2025-12-02"
+last_updated: "2025-12-05"
 ---
 
 <!-- SSM:PART id="part1" title="Part I: Foundations" -->

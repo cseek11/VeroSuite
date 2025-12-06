@@ -1,6 +1,6 @@
 # Schema Exposure Troubleshooting
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Issue:** Schema exposure configured but direct access still failing
 
 ---
@@ -130,7 +130,7 @@ SELECT COUNT(*) FROM veroscore.sessions;
 
 ---
 
-**Last Updated:** 2025-11-24  
+**Last Updated:** 2025-12-05  
 **Status:** ⏳ Waiting for schema exposure to propagate
 
 

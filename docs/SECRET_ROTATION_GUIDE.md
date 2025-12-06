@@ -1,6 +1,6 @@
 # Secret Rotation Guide
 
-**Date:** 2025-11-22  
+**Date:** 2025-12-05  
 **Purpose:** Guide for rotating exposed secrets identified in compliance audit  
 **Priority:** 🔴 CRITICAL
 
@@ -450,7 +450,7 @@ After rotation, verify:
 
 ---
 
-**Last Updated:** 2025-11-22  
+**Last Updated:** 2025-12-05  
 **Next Review:** After rotation completion  
 **Status:** 🔴 CRITICAL - Action Required  
 **Supabase API Key System:** Updated for new non-JWT keys (November 2025)

@@ -4936,7 +4936,7 @@ intuition: This explains that OPA is not just an evaluator; it has a bundle syst
 semantic_categories: [distribution]
 vector_summary: OPA is not just an evaluator; it has a bundle system for shipping policies and data
 :::
-OPA is not just an evaluator; it has a bundle system for shipping policies and data. ________________________________________ 9.1 Bundle Basics A bundle is: A .tar.gz containing: /policies/*.rego /data/*.json (or YAML, etc.) .manifest file with metadata. Example manifest (conceptual): { "revision": "git-sha-1234", "roots": ["authz", "compliance"], "metadata": { "version": "1.2.3", "built_at": "2025-11-25T12:00:00Z" } } OPA config: services: policy: url: https://opa-bundles.example.com
+OPA is not just an evaluator; it has a bundle system for shipping policies and data. ________________________________________ 9.1 Bundle Basics A bundle is: A .tar.gz containing: /policies/*.rego /data/*.json (or YAML, etc.) .manifest file with metadata. Example manifest (conceptual): { "revision": "git-sha-1234", "roots": ["authz", "compliance"], "metadata": { "version": "1.2.3", "built_at": "2025-12-05T12:00:00Z" } } OPA config: services: policy: url: https://opa-bundles.example.com
 :::
 
 ::: concept
@@ -7072,14 +7072,14 @@ A typical bundle layout on disk:
 
 ::: concept
 id: BLK-69b6a886fdd31d76
-summary: 9.X.1 Example .manifest File { "revision": "2025-11-25T10:00:00Z-abc123", "roots": [ "authz", "jwt",
+summary: 9.X.1 Example .manifest File { "revision": "2025-12-05T10:00:00Z-abc123", "roots": [ "authz", "jwt",
 embedding_hint_importance: high
 embedding_hint_scope: section
 embedding_hint_chunk: auto
-intuition: This explains that 9.X.1 Example .manifest File { "revision": "2025-11-25T10:00:00Z-abc123", "roots": [ "authz", "jwt",.
-vector_summary: 9.X.1 Example .manifest File { "revision": "2025-11-25T10:00:00Z-abc123", "roots": [ "authz", "jwt",
+intuition: This explains that 9.X.1 Example .manifest File { "revision": "2025-12-05T10:00:00Z-abc123", "roots": [ "authz", "jwt",.
+vector_summary: 9.X.1 Example .manifest File { "revision": "2025-12-05T10:00:00Z-abc123", "roots": [ "authz", "jwt",
 :::
-9.X.1 Example .manifest File { "revision": "2025-11-25T10:00:00Z-abc123", "roots": [ "authz", "jwt", "config", "tenants" ] }
+9.X.1 Example .manifest File { "revision": "2025-12-05T10:00:00Z-abc123", "roots": [ "authz", "jwt", "config", "tenants" ] }
 :::
 
 ::: concept
@@ -9493,14 +9493,14 @@ vector_summary: **Definitive Guide to the Rego Language and the Open Policy Agen
 
 ::: fact
 id: BLK-09dfc188b90c17d9
-summary: Version: 2025-11-25 (Expanded) Author: Prof
+summary: Version: 2025-12-05 (Expanded) Author: Prof
 embedding_hint_importance: high
 embedding_hint_scope: section
 embedding_hint_chunk: auto
-intuition: This explains that Version: 2025-11-25 (Expanded) Author: Prof.
-vector_summary: Version: 2025-11-25 (Expanded) Author: Prof
+intuition: This explains that Version: 2025-12-05 (Expanded) Author: Prof.
+vector_summary: Version: 2025-12-05 (Expanded) Author: Prof
 :::
-Version: 2025-11-25 (Expanded) Author: Prof. [Your Name], Ph.D. Discipline: Computer Engineering, Logic Programming, Declarative Policy Systems
+Version: 2025-12-05 (Expanded) Author: Prof. [Your Name], Ph.D. Discipline: Computer Engineering, Logic Programming, Declarative Policy Systems
 :::
 
 ::: fact
@@ -10896,7 +10896,7 @@ intuition: This explains that OPA is not only a decision engine; it’s an evide
 semantic_categories: [distribution, observability]
 vector_summary: OPA is not only a decision engine; it’s an evidence generator
 :::
-OPA is not only a decision engine; it’s an evidence generator. Observability and audit are how you prove that decisions are: • Correct • Consistent • Explainable • Compliant with regulation ________________________________________ 14.1 Decision Logs Every OPA decision should be treatable as a replayable event: Minimum recommended fields: • decision_id (UUID) • timestamp • path (e.g., data.authz.allow) • input_hash or input (with PII scrubbing) • result (decision doc: allow/deny/effects) • bundle_revision • metrics (evaluation time, rule count) • correlation_id (to tie into tracing) Conceptual log: { "decision_id": "3f7b9b1a-0ee2-4e52-9f39-4edb8b6a3a01", "timestamp": "2025-11-25T10:02:45Z", "path": "data.authz.allow", "input_hash": "sha256:abcd...", "result": { "allow": false, "effects": [ { "effect": "deny", "rule_id": "ACCT_001", "layer": "domain", "msg": "Closed accounts cannot be reopened" } ] }, "bundle_revision": "git:1234abcd", "metrics": { "eval_time_ns": 45321, "num_rules_evaluated": 37 }, "correlation_id": "trace-xyz-123" } OPA supports decision logs via configuration; your host system should stream them to: • Kafka / Kinesis • ELK / Loki • Datadog / Prometheus / Grafana ________________________________________ 14.2 Metrics and SLOs To treat OPA like a production service, track at least: • Latency: o p50 / p95 / p99 evaluation time. • Throughput: o decisions per second. • Decision deltas: o How often outcomes change after a new bundle. • Error rate: o Number of evaluation failures (e.g., built-in errors in strict mode). Define SLOs like: • 99.9% of policy decisions complete in < 10 ms. • < 0.1% of decisions result in evaluation error. • Decision delta after bundle rollout < 1% for stable inputs (in shadow mode). ________________________________________ 14.3 Correlation IDs and Tracing Policy evaluations rarely stand alone; they’re part of a larger request trace: • HTTP header: o X-Request-Id o traceparent (W3C Trace Context) • PEP should pass correlation ID in: o input.trace_id o or embed as part of input.request.headers. Then decision logs include correlation_id, which lets you: • Trace a single user’s journey across services. • Root-cause analyze unauthorized/denied requests quickly. Example pattern: package authz
+OPA is not only a decision engine; it’s an evidence generator. Observability and audit are how you prove that decisions are: • Correct • Consistent • Explainable • Compliant with regulation ________________________________________ 14.1 Decision Logs Every OPA decision should be treatable as a replayable event: Minimum recommended fields: • decision_id (UUID) • timestamp • path (e.g., data.authz.allow) • input_hash or input (with PII scrubbing) • result (decision doc: allow/deny/effects) • bundle_revision • metrics (evaluation time, rule count) • correlation_id (to tie into tracing) Conceptual log: { "decision_id": "3f7b9b1a-0ee2-4e52-9f39-4edb8b6a3a01", "timestamp": "2025-12-05T10:02:45Z", "path": "data.authz.allow", "input_hash": "sha256:abcd...", "result": { "allow": false, "effects": [ { "effect": "deny", "rule_id": "ACCT_001", "layer": "domain", "msg": "Closed accounts cannot be reopened" } ] }, "bundle_revision": "git:1234abcd", "metrics": { "eval_time_ns": 45321, "num_rules_evaluated": 37 }, "correlation_id": "trace-xyz-123" } OPA supports decision logs via configuration; your host system should stream them to: • Kafka / Kinesis • ELK / Loki • Datadog / Prometheus / Grafana ________________________________________ 14.2 Metrics and SLOs To treat OPA like a production service, track at least: • Latency: o p50 / p95 / p99 evaluation time. • Throughput: o decisions per second. • Decision deltas: o How often outcomes change after a new bundle. • Error rate: o Number of evaluation failures (e.g., built-in errors in strict mode). Define SLOs like: • 99.9% of policy decisions complete in < 10 ms. • < 0.1% of decisions result in evaluation error. • Decision delta after bundle rollout < 1% for stable inputs (in shadow mode). ________________________________________ 14.3 Correlation IDs and Tracing Policy evaluations rarely stand alone; they’re part of a larger request trace: • HTTP header: o X-Request-Id o traceparent (W3C Trace Context) • PEP should pass correlation ID in: o input.trace_id o or embed as part of input.request.headers. Then decision logs include correlation_id, which lets you: • Trace a single user’s journey across services. • Root-cause analyze unauthorized/denied requests quickly. Example pattern: package authz
 :::
 
 ::: fact
@@ -11006,7 +11006,7 @@ intuition: This explains that count(recent_failures) > 5 msg := "Too many recent
 semantic_categories: [distribution]
 vector_summary: count(recent_failures) > 5 msg := "Too many recent login failures" } OPA sees only a subset; the window is curated by your stateful event pipeline
 :::
-count(recent_failures) > 5 msg := "Too many recent login failures" } OPA sees only a subset; the window is curated by your stateful event pipeline. ________________________________________ 15.3 Event-Driven Architectures with OPA Typical pattern: 1. Events flow into Kafka / Kinesis. 2. A stream processor: o Maintains aggregates:  counts, sums, last-seen times, sliding windows. o Writes materialized state to:  Redis, DB, or data-bundles for OPA. 3. OPA uses that state to decide: o Allow or deny new events. o Trigger downstream actions/alerts. OPA remains pure — no long-lived state, no hidden mutable variables. ________________________________________ 15.4 Time-Scoped Exceptions Sometimes you want: • “Allow this temporary override until 2025-12-31.” Pattern: package overrides
+count(recent_failures) > 5 msg := "Too many recent login failures" } OPA sees only a subset; the window is curated by your stateful event pipeline. ________________________________________ 15.3 Event-Driven Architectures with OPA Typical pattern: 1. Events flow into Kafka / Kinesis. 2. A stream processor: o Maintains aggregates:  counts, sums, last-seen times, sliding windows. o Writes materialized state to:  Redis, DB, or data-bundles for OPA. 3. OPA uses that state to decide: o Allow or deny new events. o Trigger downstream actions/alerts. OPA remains pure — no long-lived state, no hidden mutable variables. ________________________________________ 15.4 Time-Scoped Exceptions Sometimes you want: • “Allow this temporary override until 2025-12-05.” Pattern: package overrides
 :::
 
 ::: fact
@@ -15636,7 +15636,7 @@ reference: BLK-bcf609f83239fab7
 id: QA-72f0efef97730665
 chapter: 
 q: What is Version in the context of Rego/OPA?
-a: Version: 2025-11-25 (Expanded) Author: Prof. [Your Name], Ph.D. Discipline: Computer Engineering, Logic Programming, Declarative Policy Systems
+a: Version: 2025-12-05 (Expanded) Author: Prof. [Your Name], Ph.D. Discipline: Computer Engineering, Logic Programming, Declarative Policy Systems
 reference: BLK-09dfc188b90c17d9
 :::
 :::
@@ -19104,7 +19104,7 @@ semantic_categories: [distribution, observability]
 id: QA-db2c409e8071371b
 chapter: 
 q: What is OPA is not just an evaluator; it has a bundle system for shipping policies and data in the context of Rego/OPA?
-a: OPA is not just an evaluator; it has a bundle system for shipping policies and data. ________________________________________ 9.1 Bundle Basics A bundle is: A .tar.gz containing: /policies/*.rego /data/*.json (or YAML, etc.) .manifest file with metadata. Example manifest (conceptual): { "revision": "git-sha-1234", "roots": ["authz", "compliance"], "metadata": { "version": "1.2.3", "built_at": "2025-11-25T12:00:00Z" } } OPA config: services: policy: url: https://opa-bundles.example.com
+a: OPA is not just an evaluator; it has a bundle system for shipping policies and data. ________________________________________ 9.1 Bundle Basics A bundle is: A .tar.gz containing: /policies/*.rego /data/*.json (or YAML, etc.) .manifest file with metadata. Example manifest (conceptual): { "revision": "git-sha-1234", "roots": ["authz", "compliance"], "metadata": { "version": "1.2.3", "built_at": "2025-12-05T12:00:00Z" } } OPA config: services: policy: url: https://opa-bundles.example.com
 reference: BLK-a027a3c2b785617c
 semantic_categories: [distribution]
 :::
@@ -19724,7 +19724,7 @@ reference: BLK-2dcad5b1fa23787f
 id: QA-e45ba921a412d0b9
 chapter: 
 q: What is OPA is not only a decision engine; it’s an evidence generator in the context of Rego/OPA?
-a: OPA is not only a decision engine; it’s an evidence generator. Observability and audit are how you prove that decisions are: • Correct • Consistent • Explainable • Compliant with regulation ________________________________________ 14.1 Decision Logs Every OPA decision should be treatable as a replayable event: Minimum recommended fields: • decision_id (UUID) • timestamp • path (e.g., data.authz.allow) • input_hash or input (with PII scrubbing) • result (decision doc: allow/deny/effects) • bundle_revision • metrics (evaluation time, rule count) • correlation_id (to tie into tracing) Conceptual log: { "decision_id": "3f7b9b1a-0ee2-4e52-9f39-4edb8b6a3a01", "timestamp": "2025-11-25T10:02:45Z", "path": "data.authz.allow", "input_hash": "sha256:abcd...", "result": { "allow": false, "effects": [ { "effect": "deny", "rule_id": "ACCT_001", "layer": "domain", "msg": "Closed accounts cannot be reopened" } ] }, "bundle_revision": "git:1234abcd", "metrics": { "eval_time_ns": 45321, "num_rules_evaluated": 37 }, "correlation_id": "trace-xyz-123" } OPA supports decision logs via configuration; your host system should stream them to: • Kafka / Kinesis • ELK / Loki • Datadog / Prometheus / Grafana ________________________________________ 14.2 Metrics and SLOs To treat OPA like a production service, track at least: • Latency: o p50 / p95 / p99 evaluation time. • Throughput: o decisions per second. • Decision deltas: o How often outcomes change after a new bundle. • Error rate: o Number of evaluation failures (e.g., built-in errors in strict mode). Define SLOs like: • 99.9% of policy decisions complete in < 10 ms. • < 0.1% of decisions result in evaluation error. • Decision delta after bundle rollout < 1% for stable inputs (in shadow mode). ________________________________________ 14.3 Correlation IDs and Tracing Policy evaluations rarely stand alone; they’re part of a larger request trace: • HTTP header: o X-Request-Id o traceparent (W3C Trace Context) • PEP should pass correlation ID in: o input.trace_id o or embed as part of input.request.headers. Then decision logs include correlation_id, which lets you: • Trace a single user’s journey across services. • Root-cause analyze unauthorized/denied requests quickly. Example pattern: package authz
+a: OPA is not only a decision engine; it’s an evidence generator. Observability and audit are how you prove that decisions are: • Correct • Consistent • Explainable • Compliant with regulation ________________________________________ 14.1 Decision Logs Every OPA decision should be treatable as a replayable event: Minimum recommended fields: • decision_id (UUID) • timestamp • path (e.g., data.authz.allow) • input_hash or input (with PII scrubbing) • result (decision doc: allow/deny/effects) • bundle_revision • metrics (evaluation time, rule count) • correlation_id (to tie into tracing) Conceptual log: { "decision_id": "3f7b9b1a-0ee2-4e52-9f39-4edb8b6a3a01", "timestamp": "2025-12-05T10:02:45Z", "path": "data.authz.allow", "input_hash": "sha256:abcd...", "result": { "allow": false, "effects": [ { "effect": "deny", "rule_id": "ACCT_001", "layer": "domain", "msg": "Closed accounts cannot be reopened" } ] }, "bundle_revision": "git:1234abcd", "metrics": { "eval_time_ns": 45321, "num_rules_evaluated": 37 }, "correlation_id": "trace-xyz-123" } OPA supports decision logs via configuration; your host system should stream them to: • Kafka / Kinesis • ELK / Loki • Datadog / Prometheus / Grafana ________________________________________ 14.2 Metrics and SLOs To treat OPA like a production service, track at least: • Latency: o p50 / p95 / p99 evaluation time. • Throughput: o decisions per second. • Decision deltas: o How often outcomes change after a new bundle. • Error rate: o Number of evaluation failures (e.g., built-in errors in strict mode). Define SLOs like: • 99.9% of policy decisions complete in < 10 ms. • < 0.1% of decisions result in evaluation error. • Decision delta after bundle rollout < 1% for stable inputs (in shadow mode). ________________________________________ 14.3 Correlation IDs and Tracing Policy evaluations rarely stand alone; they’re part of a larger request trace: • HTTP header: o X-Request-Id o traceparent (W3C Trace Context) • PEP should pass correlation ID in: o input.trace_id o or embed as part of input.request.headers. Then decision logs include correlation_id, which lets you: • Trace a single user’s journey across services. • Root-cause analyze unauthorized/denied requests quickly. Example pattern: package authz
 reference: BLK-4a7622657ab27305
 semantic_categories: [distribution, observability]
 :::
@@ -19997,7 +19997,7 @@ reference: BLK-3641c3e33c8e8566
 id: QA-8902e0ed65893c33
 chapter: 
 q: What is count(recent_failures) > 5 msg  in the context of Rego/OPA?
-a: count(recent_failures) > 5 msg := "Too many recent login failures" } OPA sees only a subset; the window is curated by your stateful event pipeline. ________________________________________ 15.3 Event-Driven Architectures with OPA Typical pattern: 1. Events flow into Kafka / Kinesis. 2. A stream processor: o Maintains aggregates:  counts, sums, last-seen times, sliding windows. o Writes materialized state to:  Redis, DB, or data-bundles for OPA. 3. OPA uses that state to decide: o Allow or deny new events. o Trigger downstream actions/alerts. OPA remains pure — no long-lived state, no hidden mutable variables. ________________________________________ 15.4 Time-Scoped Exceptions Sometimes you want: • “Allow this temporary override until 2025-12-31.” Pattern: package overrides
+a: count(recent_failures) > 5 msg := "Too many recent login failures" } OPA sees only a subset; the window is curated by your stateful event pipeline. ________________________________________ 15.3 Event-Driven Architectures with OPA Typical pattern: 1. Events flow into Kafka / Kinesis. 2. A stream processor: o Maintains aggregates:  counts, sums, last-seen times, sliding windows. o Writes materialized state to:  Redis, DB, or data-bundles for OPA. 3. OPA uses that state to decide: o Allow or deny new events. o Trigger downstream actions/alerts. OPA remains pure — no long-lived state, no hidden mutable variables. ________________________________________ 15.4 Time-Scoped Exceptions Sometimes you want: • “Allow this temporary override until 2025-12-05.” Pattern: package overrides
 reference: BLK-ddb2b91d0cd87295
 semantic_categories: [distribution]
 :::
@@ -21317,7 +21317,7 @@ semantic_categories: [distribution]
 id: QA-1ba84079afda3478
 chapter: 
 q: What is 9.X.1 Example .manifest File { "revision" in the context of Rego/OPA?
-a: 9.X.1 Example .manifest File { "revision": "2025-11-25T10:00:00Z-abc123", "roots": [ "authz", "jwt", "config", "tenants" ] }
+a: 9.X.1 Example .manifest File { "revision": "2025-12-05T10:00:00Z-abc123", "roots": [ "authz", "jwt", "config", "tenants" ] }
 reference: BLK-69b6a886fdd31d76
 :::
 :::
@@ -38290,7 +38290,7 @@ embedding_hint_chunk: auto
 id: SSMMETA-2915e11e0ff50848
 compiler_version: 3.0.0
 ssm_schema_version: 1.0.0
-bible_version: 2025-11-26
+bible_version: 2025-12-05
 namespace: rego_opa_bible
 embedding_hint_importance: low
 embedding_hint_scope: local

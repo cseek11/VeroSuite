@@ -2,7 +2,7 @@
 title: API Client Strategy
 category: Architecture
 status: accepted
-date: 2025-11-11
+date: 2025-12-05
 owner: api_lead
 related:
   - docs/guides/api/backend-api.md
@@ -12,7 +12,7 @@ related:
 # Decision: API Client Strategy
 
 ## Status
-**Accepted** - 2025-11-11
+**Accepted** - 2025-12-05
 
 ## Context
 
@@ -56,7 +56,7 @@ Multiple API clients exist (enhancedApi, secureApiClient, and others) with confl
 
 ---
 
-**Last Updated:** 2025-11-11
+**Last Updated:** 2025-12-05
 
 
 

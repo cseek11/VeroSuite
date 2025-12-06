@@ -2,7 +2,7 @@
 title: Modal vs Dialog Strategy
 category: Architecture
 status: accepted
-date: 2025-11-11
+date: 2025-12-05
 owner: frontend_team
 related:
   - docs/guides/development/best-practices.md
@@ -12,7 +12,7 @@ related:
 # Decision: Modal vs Dialog Strategy
 
 ## Status
-**Accepted** - 2025-11-11
+**Accepted** - 2025-12-05
 
 ## Context
 
@@ -56,7 +56,7 @@ Modal.tsx was still being used in card system files despite best practices recom
 
 ---
 
-**Last Updated:** 2025-11-11
+**Last Updated:** 2025-12-05
 
 
 

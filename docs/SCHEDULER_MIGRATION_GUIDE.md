@@ -1,6 +1,6 @@
 # Scheduler Migration Guide
 
-**Last Updated:** 2025-01-27  
+**Last Updated:** 2025-12-05  
 **Status:** Active Migration
 
 ## Overview
@@ -141,7 +141,7 @@ For questions or issues during migration, refer to:
 
 ---
 
-**Last Updated:** 2025-01-27
+**Last Updated:** 2025-12-05
 
 
 

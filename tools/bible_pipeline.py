@@ -526,7 +526,7 @@ def generate_cursor_markdown(
     lines.append("> Auto-generated from SSM Bible via V3 compiler + pipeline.")
     lines.append("> This file contains the COMPLETE content from the SSM Bible.")
     lines.append("")
-    lines.append("**Last Updated:** 2025-11-30")
+    lines.append("**Last Updated:** 2025-12-05")
     lines.append("")
 
     # Sort chapters by numeric code if possible (CH-01, CH-02, …)
@@ -775,7 +775,7 @@ def generate_cursor_rules_mdc(
     lines.append("")
     lines.append("> This file is generated from the SSM Bible. Edit the source Bible and re-run the pipeline instead of editing this file directly.")
     lines.append("")
-    lines.append("**Last Updated:** 2025-11-30")
+    lines.append("**Last Updated:** 2025-12-05")
     lines.append("")
 
     # Section: Anti-patterns

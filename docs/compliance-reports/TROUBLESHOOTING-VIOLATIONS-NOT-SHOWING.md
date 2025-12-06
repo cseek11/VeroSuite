@@ -1,6 +1,6 @@
 # Troubleshooting: Violations Not Showing in Dashboard
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Issue:** Compliance check created but not showing in Violations tab
 
 ---
@@ -225,7 +225,7 @@ SELECT id, email, tenant_id FROM users WHERE email = 'your-email@example.com';
 
 ---
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Status:** Use diagnostic script to identify the issue
 
 

@@ -2,7 +2,7 @@
 title: API Documentation
 category: API
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: api_lead
 related:
   - docs/guides/api/backend-api.md
@@ -35,7 +35,7 @@ Complete API documentation for VeroField backend and frontend APIs.
 
 ---
 
-**Last Updated:** 2025-11-11  
+**Last Updated:** 2025-12-05  
 **Maintained By:** API Lead
 
 

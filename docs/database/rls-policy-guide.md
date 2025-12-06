@@ -1,7 +1,7 @@
 # RLS Policy Implementation Guide
 
 **Version:** 1.0.0  
-**Last Updated:** 2025-11-23  
+**Last Updated:** 2025-12-05  
 **Purpose:** Guide for implementing Row Level Security policies in VeroField
 
 ---
@@ -374,7 +374,7 @@ When adding a new tenant-scoped table:
 
 ---
 
-**Last Updated:** 2025-11-23  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Security Team  
 **Review Frequency:** Quarterly or when RLS requirements change
 

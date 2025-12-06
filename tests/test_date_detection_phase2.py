@@ -7,7 +7,7 @@ Tests:
 2. DocumentContext historical markers detection
 3. Simplified is_file_modified_in_session() hash-only comparison
 
-Last Updated: 2025-12-02
+Last Updated: 2025-12-05
 """
 
 import unittest
@@ -130,7 +130,7 @@ class TestDocumentContextHistoricalMarkers(unittest.TestCase):
     def test_detect_date_set_per_user_request(self):
         """Test detection of 'date set per user request' marker."""
         test_file = self.temp_dir_path / "test.md"
-        test_file.write_text("# Document\n\nDate set per user request. System date: 2025-12-02")
+        test_file.write_text("# Document\n\nDate set per user request. System date: 2025-12-05")
         
         doc = DocumentContext(test_file)
         self.assertTrue(doc.historical_markers)
@@ -138,7 +138,7 @@ class TestDocumentContextHistoricalMarkers(unittest.TestCase):
     def test_detect_system_date_marker(self):
         """Test detection of 'system date:' marker."""
         test_file = self.temp_dir_path / "test.md"
-        test_file.write_text("# Document\n\nSystem date: 2025-12-02")
+        test_file.write_text("# Document\n\nSystem date: 2025-12-05")
         
         doc = DocumentContext(test_file)
         self.assertTrue(doc.historical_markers)
@@ -387,6 +387,22 @@ class TestSimplifiedFileModificationDetection(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

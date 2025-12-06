@@ -1,7 +1,7 @@
 # Rego Policy Test Report
 ## Comprehensive Testing Results
 
-**Date:** 2025-11-25  
+**Date:** 2025-12-05  
 **Tester:** AI Code Review (Cursor)  
 **Test Tools:** `opa check --strict`, `opa test`
 
@@ -297,7 +297,7 @@ bin\opa.exe eval --data policies\ --input '{"changed_files": [], "pr_body": ""}'
 
 ---
 
-**Last Updated:** 2025-11-25  
+**Last Updated:** 2025-12-05  
 **Tester:** AI Code Review (Cursor)  
-**Reference:** `docs/compliance-reports/REGO_POLICY_QUALITY_AUDIT_2025-11-25.md`
+**Reference:** `docs/compliance-reports/REGO_POLICY_QUALITY_AUDIT_2025-12-05.md`
 

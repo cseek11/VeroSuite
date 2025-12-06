@@ -1,7 +1,7 @@
 # Supabase Schema Access Solution
 
-**Created:** 2025-11-24  
-**Last Updated:** 2025-11-24  
+**Created:** 2025-12-05  
+**Last Updated:** 2025-12-05  
 **Issue:** Supabase Python client looks for tables in `public` schema, but VeroScore tables are in `veroscore` schema
 
 ---
@@ -289,7 +289,7 @@ Update `SessionManager` to use RPC functions instead of direct table access.
 
 ---
 
-**Last Updated:** 2025-11-24  
+**Last Updated:** 2025-12-05  
 **Status:** ⚠️ Solution Required - Schema Access Issue Identified
 
 

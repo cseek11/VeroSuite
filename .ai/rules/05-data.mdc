@@ -1,0 +1,387 @@
+---
+description: "Data contracts, state machines, and layer synchronization (DB ↔ API ↔ Frontend ↔ Events)"
+alwaysApply: true
+---
+<!-- @version: 2.0 @owner: data-team -->
+
+# DATA CONTRACTS & STATE INTEGRITY
+
+## PURPOSE
+Keep DB schema, DTOs, frontend types, and event contracts **perfectly synchronized**, and enforce correct state machine design.
+
+---
+
+## SOURCES OF TRUTH
+- **Database schema:** `libs/common/prisma/schema.prisma`
+- **Backend DTOs:** `apps/*/src/**/dto/*.ts`
+- **Frontend types:** `frontend/src/types/**`
+- **Events:** `docs/contracts/events/*.md`
+- **State machines:** `docs/state-machines/*.md`
+
+Any change to **one** must be reflected in the **others**.
+
+---
+
+## STATE MACHINES
+For business stateful entities (e.g., WorkOrder, Invoice, Payment):
+- Must have a state machine doc: `docs/state-machines/<entity>-state-machine.md`
+- Include:
+  - All valid states
+  - Legal transitions
+  - Illegal transitions & error behavior
+  - Side effects & audit events
+
+**Code MUST:**
+- Enforce legal transitions in the service layer.
+- Emit audit logs on transitions.
+- Reject illegal transitions with explicit errors.
+
+---
+
+## LAYER SYNCHRONIZATION RULE
+If you change:
+- `schema.prisma` → you **must**:
+  - Create Prisma migration
+  - Update DTOs
+  - Update frontend types
+  - Update validators (Zod/class-validator)
+  - Update tests
+  - Update docs/contracts and state machines
+- DTOs → you **must**:
+  - Update frontend types
+  - Update tests
+  - Update docs/contracts
+- Frontend types → you **must** verify they still match backend DTOs.
+
+---
+
+## ENFORCEMENT PIPELINE INTEGRATION
+
+**Step 1: Search**
+- Search for existing DTOs, types, state machines.
+- Search `docs/contracts/` and `docs/state-machines/`.
+
+**Step 3: Compliance Check**
+- Confirm DB ⇄ DTO ⇄ types ⇄ events are synced.
+- Confirm state transitions are documented and legal.
+
+**Step 5: Post-Implementation Audit**
+- Re-run a "layer sync" check:
+  - Does every changed contract have corresponding updates?
+  - Are tests updated to reflect constraints?
+
+---
+
+## VIOLATIONS (HARD STOP)
+- Schema changes with no migration.
+- DTOs not matching schema.
+- Frontend types not matching DTOs.
+- State transitions implemented without docs.
+- Illegal transitions left unguarded.
+
+---
+
+## Step 5: Post-Implementation Audit for Data Integrity Rules
+
+### R04: Layer Synchronization — Audit Procedures
+
+**For code changes affecting database schema, DTOs, frontend types, or event contracts:**
+
+#### Schema Change Synchronization
+- [ ] **MANDATORY:** Verify Prisma migration file exists for schema changes
+- [ ] **MANDATORY:** Verify DTOs match schema changes (field names, types, optionality)
+- [ ] **MANDATORY:** Verify frontend types match DTOs (field names, types, optionality)
+- [ ] **MANDATORY:** Verify validators updated (class-validator in DTOs, Zod in frontend)
+- [ ] **MANDATORY:** Verify tests updated to reflect schema changes
+- [ ] **MANDATORY:** Verify event contracts updated (if entity produces/consumes events)
+- [ ] **MANDATORY:** Verify state machine docs updated (if stateful entity)
+
+#### DTO Change Synchronization
+- [ ] **MANDATORY:** Verify frontend types match DTO changes
+- [ ] **MANDATORY:** Verify validators updated (both backend and frontend)
+- [ ] **MANDATORY:** Verify tests updated
+- [ ] **MANDATORY:** Verify API documentation updated (OpenAPI/Swagger)
+
+#### Contract Consistency
+- [ ] **MANDATORY:** Verify field names match across all layers
+- [ ] **MANDATORY:** Verify field types match across all layers
+- [ ] **MANDATORY:** Verify optionality matches across all layers
+- [ ] **MANDATORY:** Verify enum values match across all layers
+
+#### Automated Checks
+```bash
+# Run layer synchronization checker
+python .cursor/scripts/check-layer-sync.py --entity <EntityName>
+
+# Check all entities
+python .cursor/scripts/check-layer-sync.py --all
+
+# Expected: No violations found
+```
+
+#### OPA Policy
+- **Policy:** `services/opa/policies/data-integrity.rego` (R04 section)
+- **Enforcement:** OVERRIDE (Tier 2 MAD) - Requires justification
+- **Tests:** `services/opa/tests/data_integrity_r04_test.rego`
+
+#### Manual Verification (When Needed)
+1. **Review Schema Changes** - Verify migration file exists and is correct
+2. **Verify Layer Synchronization** - Compare schema ↔ DTO ↔ frontend types
+3. **Check Contract Documentation** - Verify docs/contracts/ updated (for event entities)
+4. **Test Integration** - Run integration tests, verify no runtime errors
+
+**Example Zod Schema Synchronization:**
+```typescript
+// frontend/src/types/user.ts
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+}
+
+// frontend/src/schemas/user.schema.ts
+import { z } from 'zod';
+
+export const userSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email().max(255),
+  firstName: z.string().min(1).max(100)
+});
+
+// Usage: Validate at runtime
+const parsed = userSchema.parse(apiResponse);
+```
+
+**Example Staged Rollout for Breaking Changes:**
+```typescript
+// ✅ CORRECT: Breaking change requires staged rollout
+// Step 1: Add nullable field to schema + DTO
+// schema.prisma: firstName String?
+// DTO: @IsOptional() firstName?: string;
+
+// Step 2: Update frontend to use new field
+// frontend/src/types/user.ts: firstName?: string;
+
+// Step 3 (later): Make field required after migration
+```
+
+**Contract Documentation Paths:**
+- Event producers/consumers: `docs/contracts/[entity].md`
+- State machines: `docs/state-machines/[entity].md`
+- API endpoints: Covered by OpenAPI/Swagger (auto-generated)
+
+---
+
+### R05: State Machine Enforcement — Audit Procedures
+
+**For code changes affecting stateful entities, state transitions, or state machine logic:**
+
+#### State Machine Documentation
+
+- [ ] **MANDATORY:** Verify state machine documentation exists for stateful entity (`docs/state-machines/[entity]-state-machine.md`)
+- [ ] **MANDATORY:** Verify documentation includes all valid states (with descriptions)
+- [ ] **MANDATORY:** Verify documentation includes legal transitions (from → to with conditions)
+- [ ] **MANDATORY:** Verify documentation includes illegal transitions (explicitly listed)
+- [ ] **MANDATORY:** Verify documentation includes side effects (events, notifications, audit logs)
+- [ ] **MANDATORY:** Verify documentation matches code implementation (states match enum/type, transitions match validation logic)
+
+#### State Transition Validation
+
+- [ ] **MANDATORY:** Verify transition validation function exists in service layer
+- [ ] **MANDATORY:** Verify validation checks current state before allowing transition
+- [ ] **MANDATORY:** Verify validation rejects illegal transitions with explicit error
+- [ ] **MANDATORY:** Verify validation checks preconditions (e.g., technician assigned, date set)
+- [ ] **MANDATORY:** Verify validation returns user-friendly error messages (no internal state values)
+
+#### Illegal Transition Prevention
+
+- [ ] **MANDATORY:** Verify terminal states cannot transition (e.g., COMPLETED → any state)
+- [ ] **MANDATORY:** Verify skipped states are prevented (e.g., DRAFT → COMPLETED)
+- [ ] **MANDATORY:** Verify backward transitions are explicitly allowed (if documented)
+- [ ] **MANDATORY:** Verify all illegal transitions are tested (unit tests)
+
+#### Audit Logging
+
+- [ ] **MANDATORY:** Verify audit log emitted on every state transition
+- [ ] **MANDATORY:** Verify audit log includes: entity, entityId, action ('state_transition'), oldState, newState, userId, timestamp
+- [ ] **MANDATORY:** Verify audit log includes metadata (reason, related entities, etc.)
+- [ ] **MANDATORY:** Verify audit logs are structured (JSON format, traceId included)
+
+#### Code-Documentation Synchronization
+
+- [ ] **MANDATORY:** Verify enum/type values match documentation (case-sensitive)
+- [ ] **MANDATORY:** Verify transition logic matches documented legal transitions
+- [ ] **MANDATORY:** Verify illegal transitions in code match documented illegal transitions
+- [ ] **MANDATORY:** Verify side effects in code match documented side effects
+
+#### Automated Checks
+
+```bash
+# Run state machine enforcement checker
+python .cursor/scripts/check-state-machines.py --entity <EntityName>
+
+# Check all stateful entities
+python .cursor/scripts/check-state-machines.py --all
+
+# Expected: No violations found
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/data-integrity.rego` (R05 section)
+- **Enforcement:** OVERRIDE (Tier 2 MAD) - Requires justification
+- **Tests:** `services/opa/tests/data_integrity_r05_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review State Machine Documentation** - Verify documentation exists and is complete
+2. **Verify Transition Validation** - Test legal and illegal transitions in code
+3. **Check Audit Logging** - Verify audit logs are emitted on transitions
+4. **Validate Code-Documentation Sync** - Compare code implementation with documentation
+
+**Example Transition Validation:**
+
+```typescript
+// apps/api/src/work-orders/work-orders.service.ts
+
+async transitionStatus(
+  id: string,
+  newStatus: WorkOrderStatus,
+  userId: string,
+  reason?: string
+): Promise<WorkOrder> {
+  const workOrder = await this.findOne(id);
+  
+  // Validate transition
+  if (!this.isValidTransition(workOrder.status, newStatus)) {
+    throw new BadRequestException(
+      `Cannot transition work order from ${workOrder.status} to ${newStatus}. ` +
+      `See docs/state-machines/workorder-state-machine.md for legal transitions.`
+    );
+  }
+  
+  // Perform transition
+  const updated = await this.prisma.workOrder.update({
+    where: { id },
+    data: { status: newStatus }
+  });
+  
+  // Emit audit log
+  await this.auditService.log({
+    entity: 'WorkOrder',
+    entityId: id,
+    action: 'state_transition',
+    oldState: workOrder.status,
+    newState: newStatus,
+    userId,
+    timestamp: new Date(),
+    metadata: { reason, traceId: this.requestContext.getTraceId() }
+  });
+  
+  return updated;
+}
+
+private isValidTransition(from: WorkOrderStatus, to: WorkOrderStatus): boolean {
+  const legalTransitions: Record<WorkOrderStatus, WorkOrderStatus[]> = {
+    [WorkOrderStatus.DRAFT]: [WorkOrderStatus.SCHEDULED, WorkOrderStatus.CANCELLED],
+    [WorkOrderStatus.SCHEDULED]: [WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.CANCELLED],
+    [WorkOrderStatus.IN_PROGRESS]: [WorkOrderStatus.COMPLETED, WorkOrderStatus.CANCELLED],
+    [WorkOrderStatus.COMPLETED]: [], // Terminal state
+    [WorkOrderStatus.CANCELLED]: [WorkOrderStatus.DRAFT] // Reactivation only
+  };
+  
+  return legalTransitions[from]?.includes(to) ?? false;
+}
+```
+
+---
+
+### R06: Breaking Change Documentation — Audit Procedures
+
+**For code changes that introduce breaking changes:**
+
+#### Breaking Change Detection
+
+- [ ] **MANDATORY:** Verify breaking change is identified (removes/changes existing behavior)
+- [ ] **MANDATORY:** Verify breaking change affects consumers (not just internal refactoring)
+- [ ] **MANDATORY:** Verify breaking change type is identified (API, Database, Configuration, Behavioral)
+
+#### PR Flagging
+
+- [ ] **MANDATORY:** Verify PR title includes `[BREAKING]` tag
+- [ ] **MANDATORY:** Verify PR description includes breaking changes section
+- [ ] **MANDATORY:** Verify PR description links to migration guide
+
+#### Migration Guide
+
+- [ ] **MANDATORY:** Verify migration guide exists in `docs/migrations/[YYYY-MM-DD]-[feature]-migration.md`
+- [ ] **MANDATORY:** Verify migration guide includes: what changed, why, who is affected, migration steps, before/after examples, rollback instructions, testing checklist
+- [ ] **MANDATORY:** Verify migration guide format matches template (`docs/migrations/README.md`)
+
+#### Version Bump
+
+- [ ] **MANDATORY:** Verify version bumped (MAJOR increment for breaking changes)
+- [ ] **MANDATORY:** Verify version bump is in `package.json`
+- [ ] **MANDATORY:** Verify version format follows semantic versioning (MAJOR.MINOR.PATCH)
+
+#### CHANGELOG Update
+
+- [ ] **MANDATORY:** Verify CHANGELOG.md updated with breaking changes section
+- [ ] **MANDATORY:** Verify breaking changes section includes: list of breaking changes, migration guide link, version number, date
+
+#### API Documentation
+
+- [ ] **MANDATORY:** Verify API documentation updated (if API changes)
+- [ ] **MANDATORY:** Verify OpenAPI/Swagger docs updated (if applicable)
+
+#### Consumer Notification
+
+- [ ] **MANDATORY:** Verify consumers notified (if external APIs)
+- [ ] **SHOULD:** Verify deprecation timeline communicated (if gradual migration)
+- [ ] **SHOULD:** Verify feature flag implemented (if immediate deployment)
+
+#### Automated Checks
+
+```bash
+# Run breaking change documentation checker
+python .cursor/scripts/check-breaking-changes.py --pr <PR_NUMBER>
+
+# Check specific files for breaking changes
+python .cursor/scripts/check-breaking-changes.py --files <file1> <file2>
+
+# Expected: No violations found
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/data-integrity.rego` (R06 section)
+- **Enforcement:** OVERRIDE (Tier 2 MAD) - Requires justification
+- **Tests:** `services/opa/tests/data_integrity_r06_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review PR Title** - Verify `[BREAKING]` tag present
+2. **Review Migration Guide** - Verify completeness and accuracy
+3. **Check Version Bump** - Verify MAJOR increment
+4. **Verify CHANGELOG** - Verify breaking changes documented
+
+**Example Breaking Change PR:**
+
+```markdown
+## [BREAKING] Remove legacy authentication endpoints (v2.0.0)
+
+**Breaking Changes:**
+- Removed `/api/v1/auth/login` endpoint
+- Removed `/api/v1/auth/token` endpoint
+- Removed `legacy_token` field from User model
+
+**Migration Guide:** See `docs/migrations/auth-v2-migration.md`
+
+**Version Bump:** 1.5.3 → 2.0.0
+```
+
+---
+
+**Last Updated:** 2025-12-04  
+**Maintained By:** Data Team  
+**Review Frequency:** Quarterly or when data integrity requirements change

@@ -142,7 +142,7 @@ markdown## 🎯 VeroScore V3 - Real-Time Governance
 
 ## 📈 Reward Score - Historical Trends
 
-**Generated:** 2025-11-22T10:30:00Z
+**Generated:** 2025-12-05T10:30:00Z
 
 **Historical Performance:**
 - Last 10 PRs: Avg 6.8/10 (improving ↗)

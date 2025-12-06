@@ -1,6 +1,6 @@
 # Auto-Enforcer Execution Flow - Complete Guide
 
-**Last Updated:** 2025-12-02  
+**Last Updated:** 2025-12-05  
 **Reference:** `.cursor/scripts/auto-enforcer.py`, `.cursor/scripts/watch-files.py`
 
 ---
@@ -58,8 +58,8 @@ File Change Detected
 - `libs/` - Shared libraries
 - `frontend/` - Frontend code
 - `VeroFieldMobile/` - Mobile app
-- `.cursor/memory-bank/` - Memory Bank files
-- `.cursor/rules/` - Rule files
+- `.ai/memory_bank/` - Memory Bank files
+- `.ai/rules/` - Rule files
 
 **File Events:**
 - `modified` - File edited
@@ -814,6 +814,11 @@ python .cursor/scripts/auto-enforcer.py --user-message "Add new feature"
 - `.cursor/scripts/watch-files.py` - File watcher
 - `when-enforcer-runs.md` - Trigger documentation
 - `docs/architecture/RULES_ENFORCEMENT_AUDIT_REPORT.md` - System architecture
+
+
+
+
+
 
 
 

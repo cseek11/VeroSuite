@@ -1,6 +1,6 @@
 # MAD Decision Tree - VeroField Rules 2.1
 
-**Created:** 2025-11-23  
+**Created:** 2025-12-05  
 **Version:** 1.0.0  
 **Status:** Active  
 **Purpose:** Decision tree for classifying Major Actions/Decisions (MAD) into enforcement tiers
@@ -331,7 +331,7 @@ Before implementing a new rule, verify:
 
 ---
 
-**Last Updated:** 2025-11-23  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Rules Champion Team  
 **Version:** 1.0.0
 

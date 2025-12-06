@@ -1104,6 +1104,6 @@ Always run `tsc --noEmit` post-AI—it's your last line of defense.
 
 ---
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **TypeScript Version Tested:** 5.9.3+  
 **Verification Status:** All code examples tested and verified to compile in strict mode

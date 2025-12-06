@@ -1,6 +1,6 @@
 # Automatic Startup Setup for Auto-PR Session Management
 
-**Last Updated:** 2025-11-19
+**Last Updated:** 2025-12-05
 
 This guide explains how to set up automatic session management that:
 1. ✅ Starts session when Cursor loads

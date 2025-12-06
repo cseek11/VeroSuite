@@ -1,6 +1,6 @@
 # GitHub Token Permissions for VeroScore V3
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Purpose:** Document required GitHub token permissions for PR creation
 
 ---
@@ -253,7 +253,7 @@ SUPABASE_SECRET_KEY=your-secret-key
 
 ---
 
-**Last Updated:** 2025-11-24  
+**Last Updated:** 2025-12-05  
 **Token Type:** Fine-grained PAT (recommended) or Classic PAT  
 **Expiration:** 90 days (with rotation reminder)
 

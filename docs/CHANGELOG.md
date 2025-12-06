@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Root-level markdown files (moved to docs/)
 - Duplicate inconsistency reports (consolidated)
 
-## [1.0.0] - 2025-11-11
+## [1.0.0] - 2025-12-05
 
 ### Added
 - Complete documentation structure

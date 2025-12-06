@@ -1,6 +1,6 @@
 # Observability Migration Guide
 
-**Last Updated:** 2025-11-16
+**Last Updated:** 2025-12-05
 
 This guide explains how to migrate existing code to meet observability requirements and create initial error-patterns.md entries.
 
@@ -87,5 +87,5 @@ Migration is an ongoing process:
 
 ---
 
-**Last Updated:** 2025-11-16
+**Last Updated:** 2025-12-05
 

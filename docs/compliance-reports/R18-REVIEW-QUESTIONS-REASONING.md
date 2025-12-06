@@ -1,6 +1,6 @@
 # R18 Review Questions — Detailed Reasoning
 
-**Date:** 2025-11-23  
+**Date:** 2025-12-05  
 **Rule:** R18 - Performance Budgets  
 **Purpose:** Explain reasoning behind recommended options for 5 review questions
 
@@ -48,7 +48,7 @@ This document provides detailed reasoning for each recommended option in the R18
 # .performance/ci-metrics.json
 {
   "endpoint": "/api/users",
-  "date": "2025-11-23T10:00:00Z",
+  "date": "2025-12-05T10:00:00Z",
   "source": "ci",
   "metrics": {
     "p50": 150,
@@ -61,7 +61,7 @@ This document provides detailed reasoning for each recommended option in the R18
 # .performance/runtime-metrics.json
 {
   "endpoint": "/api/users",
-  "date": "2025-11-23T10:00:00Z",
+  "date": "2025-12-05T10:00:00Z",
   "source": "runtime",
   "metrics": {
     "p50": 180,
@@ -180,13 +180,13 @@ def collect_performance_metrics(endpoint):
 
 **Baseline Comparison (Option B):**
 ```python
-# Baseline: Last release (2025-11-01)
+# Baseline: Last release (2025-12-05)
 baseline_performance = {
     'GET /api/users': {'p50': 150, 'p95': 250, 'p99': 300},
     'POST /api/orders': {'p50': 200, 'p95': 350, 'p99': 450}
 }
 
-# Current: Current commit (2025-11-23)
+# Current: Current commit (2025-12-05)
 current_performance = {
     'GET /api/users': {'p50': 180, 'p95': 300, 'p99': 400},  # +20% (degraded > 10%)
     'POST /api/orders': {'p50': 195, 'p95': 340, 'p99': 440}  # -2.5% (improved)
@@ -768,7 +768,7 @@ def prioritize_performance_issues(issues):
 
 ---
 
-**Last Updated:** 2025-11-23  
+**Last Updated:** 2025-12-05  
 **Prepared By:** AI Assistant  
 **Status:** Ready for Review
 

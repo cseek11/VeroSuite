@@ -2,7 +2,7 @@
 title: Keyboard Shortcuts Reference
 category: Reference
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: frontend_team
 related:
   - docs/guides/development/best-practices.md
@@ -10,7 +10,7 @@ related:
 
 # Global Search Commands - Complete Reference Guide
 
-**Date**: 2025-11-11  
+**Date**: 2025-12-05  
 **Purpose**: Complete reference for testing all global search commands
 
 ---
@@ -299,6 +299,6 @@ See full reference guide for complete list of 43 not-yet-implemented commands in
 
 ---
 
-**Last Updated:** 2025-11-11  
+**Last Updated:** 2025-12-05  
 **Total Commands:** 71 (28 Functional, 43 Not Implemented)
 

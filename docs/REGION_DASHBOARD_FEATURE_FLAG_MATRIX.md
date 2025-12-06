@@ -1,6 +1,6 @@
 ## Region Dashboard Feature Flag Matrix
 
-**Authoritative as of:** 2025-11-14  
+**Authoritative as of:** 2025-12-05  
 **Scope:** Dashboard enterprise flags relevant to Region Dashboard (frontend + backend).
 
 ### Flags in Scope

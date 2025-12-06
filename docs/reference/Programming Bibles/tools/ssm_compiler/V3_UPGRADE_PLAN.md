@@ -1,6 +1,6 @@
 # SSM Compiler Version 3 Upgrade Plan
 
-**Last Updated:** 2025-11-26  
+**Last Updated:** 2025-12-05  
 **Status:** Planning Document - Ready for Implementation
 
 ## Executive Summary
@@ -386,7 +386,7 @@ LANGUAGE_REGISTRY: Dict[str, Type[LanguagePlugin]] = {
 ::: ssm-meta
 compiler_version: 3.1.0
 ssm_schema_version: 1.0.0
-bible_version: 2025-11-27
+bible_version: 2025-12-05
 namespace: rego_opa_bible
 :::
 ```

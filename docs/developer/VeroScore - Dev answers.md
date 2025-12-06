@@ -172,8 +172,8 @@ ORDER BY created_at;
 -- Results:
 | pr_number | score | decision        | created_at          |
 |-----------|-------|-----------------|---------------------|
-| 1234      | -15.3 | auto_block      | 2025-11-21 14:30:00 |
-| 1234      |   8.2 | auto_approve    | 2025-11-21 14:45:00 |
+| 1234      | -15.3 | auto_block      | 2025-12-05 14:30:00 |
+| 1234      |   8.2 | auto_approve    | 2025-12-05 14:45:00 |
 ```
 
 **Dashboard View:**

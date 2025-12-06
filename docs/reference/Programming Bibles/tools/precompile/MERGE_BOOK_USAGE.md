@@ -1,6 +1,6 @@
 # Merge Book Script - Usage Guide
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Version:** 2.0.0
 
 ## Overview
@@ -174,7 +174,23 @@ The output is automatically organized in `dist/{book_name}/` directory.
 
 ---
 
-**Last Updated:** 2025-11-30
+**Last Updated:** 2025-12-05
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

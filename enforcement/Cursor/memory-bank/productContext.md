@@ -1,0 +1,14 @@
+# VeroField Memory Bank – Product Context
+
+This file is a placeholder for the product context Memory Bank entry.
+It is intentionally minimal and will be populated or updated by the Memory Bank/enforcement tooling as needed.
+
+
+
+
+
+
+
+
+
+

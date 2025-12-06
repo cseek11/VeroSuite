@@ -1,4 +1,5 @@
 // Date utilities
+// Last Updated: 2025-12-05
 export const formatDate = (date: string | Date, options?: Intl.DateTimeFormatOptions): string => {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   return dateObj.toLocaleDateString('en-US', {

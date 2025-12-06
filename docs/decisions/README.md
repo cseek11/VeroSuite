@@ -2,7 +2,7 @@
 title: Decision Log
 category: Architecture
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: tech_architect
 related:
   - docs/architecture/system-overview.md
@@ -37,7 +37,7 @@ Each decision record includes:
 
 ---
 
-**Last Updated:** 2025-11-11  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Tech Architect  
 **Review Frequency:** Quarterly
 

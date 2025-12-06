@@ -1,6 +1,6 @@
 # Bug and Anti-Pattern Consolidation Report
 
-**Date:** 2025-11-22  
+**Date:** 2025-12-05  
 **Purpose:** Consolidated list of all bugs and anti-patterns that need to be logged in `.cursor/BUG_LOG.md` and `.cursor/anti_patterns.md`  
 **Status:** ⚠️ **ACTION REQUIRED** - Multiple bugs and anti-patterns not logged
 
@@ -24,13 +24,13 @@
 ## Part 1: Bugs Missing from `.cursor/BUG_LOG.md`
 
 ### Bugs Already Logged ✅
-1. ✅ REACT_QUERY_API_FETCH_ERROR (2025-11-17)
-2. ✅ JWT_SECRET_LOADING_TIMING (2025-11-22)
-3. ✅ START_SCRIPT_PATH_MISMATCH (2025-11-22)
+1. ✅ REACT_QUERY_API_FETCH_ERROR (2025-12-05)
+2. ✅ JWT_SECRET_LOADING_TIMING (2025-12-05)
+3. ✅ START_SCRIPT_PATH_MISMATCH (2025-12-05)
 
 ### Bugs from `docs/error-patterns.md` - NOT LOGGED ❌
 
-#### 1. TYPESCRIPT_ANY_TYPES - 2025-11-16
+#### 1. TYPESCRIPT_ANY_TYPES - 2025-12-05
 **Area:** Frontend/TypeScript  
 **Description:** Components used TypeScript `any` types instead of proper types, reducing type safety and potentially causing runtime errors. Found in event handlers, type assertions, and function return types.  
 **Status:** Fixed  
@@ -38,7 +38,7 @@
 **Notes:** Fixed in PaymentForm.tsx (5 `any` types) and SavedPaymentMethods.tsx (1 `any` type). Added proper type imports from @stripe/react-stripe-js, replaced type assertions with type guards, fixed return types to match union types. Error pattern documented in docs/error-patterns.md.  
 **Related:** docs/error-patterns.md#TYPESCRIPT_ANY_TYPES
 
-#### 2. TENANT_CONTEXT_NOT_FOUND - 2025-11-16
+#### 2. TENANT_CONTEXT_NOT_FOUND - 2025-12-05
 **Area:** Backend/Database  
 **Description:** Backend service methods failed to retrieve tenant context when using `getCurrentTenantId()` due to Prisma connection pooling not preserving `SET LOCAL` session variables set by middleware.  
 **Status:** Fixed  
@@ -46,7 +46,7 @@
 **Notes:** Fixed by requiring `tenantId` parameter explicitly in service methods, removing `getCurrentTenantId()` fallback, and using `req.user?.tenantId || req.tenantId` pattern in controllers. Error pattern documented in docs/error-patterns.md.  
 **Related:** docs/error-patterns.md#TENANT_CONTEXT_NOT_FOUND
 
-#### 3. INVALID_UUID_FORMAT - 2025-11-16
+#### 3. INVALID_UUID_FORMAT - 2025-12-05
 **Area:** Backend/Validation  
 **Description:** Frontend passed `accountId` parameter with malformed format (leading `:` and trailing `}` characters), causing Prisma UUID parsing errors.  
 **Status:** Fixed  
@@ -54,7 +54,7 @@
 **Notes:** Fixed by adding UUID validation and cleaning logic in service methods. Removes formatting characters, validates UUID format with regex, and gracefully skips account filter if UUID is invalid. Error pattern documented in docs/error-patterns.md.  
 **Related:** docs/error-patterns.md#INVALID_UUID_FORMAT
 
-#### 4. TABS_COMPONENT_MISSING_CONTENT - 2025-11-16
+#### 4. TABS_COMPONENT_MISSING_CONTENT - 2025-12-05
 **Area:** Frontend/UI  
 **Description:** Frontend component showed white page because `Tabs` component only renders navigation buttons, not the tab content. Component was missing logic to render active tab content.  
 **Status:** Fixed  
@@ -62,7 +62,7 @@
 **Notes:** Fixed by adding loading state, fixing Tabs prop (onChange to onValueChange), and adding tab content rendering logic. Error pattern documented in docs/error-patterns.md.  
 **Related:** docs/error-patterns.md#TABS_COMPONENT_MISSING_CONTENT
 
-#### 5. TEST_SELECTOR_MISMATCH - 2025-11-16
+#### 5. TEST_SELECTOR_MISMATCH - 2025-12-05
 **Area:** Frontend/Testing  
 **Description:** Frontend tests failed because they used incorrect selectors to find tab elements. Tests used `getByRole('button')` to find tabs, but tabs may not have `role="tab"` when using certain Tabs component implementations.  
 **Status:** Fixed  
@@ -70,7 +70,7 @@
 **Notes:** Fixed by using semantic ARIA roles (`getByRole('tab')`), adding fallback selectors, and making tests flexible to handle component implementation variations. Error pattern documented in docs/error-patterns.md.  
 **Related:** docs/error-patterns.md#TEST_SELECTOR_MISMATCH
 
-#### 6. TEST_ASYNC_TIMEOUT_MULTIPLE_ELEMENTS - 2025-11-17
+#### 6. TEST_ASYNC_TIMEOUT_MULTIPLE_ELEMENTS - 2025-12-05
 **Area:** Frontend/Testing  
 **Description:** Frontend tests failed with timeouts and "Found multiple elements" errors when testing async operations and button interactions. Tests used `getByText()` or `getByRole()` which fail when multiple elements match.  
 **Status:** Fixed  
@@ -82,7 +82,7 @@
 
 ### Bugs from Compliance Reports - NOT LOGGED ❌
 
-#### 7. PENALTY_DOUBLE_APPLICATION - 2025-11-19
+#### 7. PENALTY_DOUBLE_APPLICATION - 2025-12-05
 **Area:** CI/Reward Score Calculation  
 **Description:** Penalty calculation applying both `failing_ci` (-4) and `missing_tests` (-2) penalties, resulting in -6 instead of -4. Type coercion issues in coverage percentage extraction and missing fallback logic for malformed coverage data.  
 **Status:** Fixed  
@@ -90,7 +90,7 @@
 **Notes:** Fixed in compute_reward_score.py calculate_penalties(). Made conditions mutually exclusive using if/elif. Added safe_get_percentage() helper with proper type coercion. Added fallback for missing coverage data. Improved condition logic to only apply penalties when appropriate.  
 **Related:** docs/metrics/REWARD_SCORE_FIXES.md, docs/metrics/REWARD_SCORE_FIXES_COMPLIANCE_AUDIT.md
 
-#### 8. SECURITY_REPO_WIDE_ISSUES - 2025-11-19
+#### 8. SECURITY_REPO_WIDE_ISSUES - 2025-12-05
 **Area:** CI/Security Scoring  
 **Description:** All PRs scored -3 for security, even when no new security issues were introduced. Semgrep scans entire repository, not just changed files, causing security findings from unchanged files to be counted as new issues.  
 **Status:** Fixed  
@@ -98,7 +98,7 @@
 **Notes:** Fixed by adding `result_in_changed_files()` function to filter Semgrep results. Only counts security findings in files actually changed by the PR. Added `skipped_by_diff_filter` counter for transparency. Normalized file paths for cross-platform compatibility.  
 **Related:** docs/metrics/REWARD_SCORE_FIXES.md, docs/metrics/REWARD_SCORE_FIXES_COMPLIANCE_AUDIT.md
 
-#### 9. PR_SYSTEM_ARTIFACT_PIPELINE_FAILURE - 2025-01-27
+#### 9. PR_SYSTEM_ARTIFACT_PIPELINE_FAILURE - 2025-12-05
 **Area:** CI/Workflows  
 **Description:** PR reward system had multiple silent failure points causing dashboard to never update. Scripts didn't verify file creation, verification steps didn't validate JSON, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.  
 **Status:** Fixed  
@@ -112,24 +112,24 @@
 
 ### Anti-Patterns from Low-Scoring PRs (REWARD_SCORE ≤ 0) - NOT LOGGED ❌
 
-#### 1. MODULE_LOAD_TIME_ENV_CHECK - 2025-11-22
-**Date:** 2025-11-22  
+#### 1. MODULE_LOAD_TIME_ENV_CHECK - 2025-12-05
+**Date:** 2025-12-05  
 **PR:** Phase 2 Backend Migration  
 **Description:** Checking environment variables at module load time (e.g., `process.env.JWT_SECRET` in auth.module.ts line 14) before NestJS ConfigModule loads .env file, causing "JWT_SECRET environment variable is required" error even when variable is set.  
 **Impact:** High - Prevents application startup, causes false errors  
 **Follow-up:** Fixed by using `JwtModule.registerAsync()` with ConfigService. Pattern: Always use ConfigService for environment variables in NestJS modules, never check `process.env` at module load time.  
-**Related:** docs/compliance-reports/POST_IMPLEMENTATION_AUDIT_SESSION_2025-11-22.md
+**Related:** docs/compliance-reports/POST_IMPLEMENTATION_AUDIT_SESSION_2025-12-05.md
 
-#### 2. MONOREPO_BUILD_PATH_ASSUMPTION - 2025-11-22
-**Date:** 2025-11-22  
+#### 2. MONOREPO_BUILD_PATH_ASSUMPTION - 2025-12-05
+**Date:** 2025-12-05  
 **PR:** Phase 2 Backend Migration  
 **Description:** Assuming build output path matches non-monorepo structure. Start script in package.json looking for `dist/main.js` but NestJS build outputs to `dist/apps/api/src/main.js` due to monorepo structure preservation.  
 **Impact:** High - Prevents API server from starting after build  
 **Follow-up:** Fixed by updating package.json start scripts to use correct path: `dist/apps/api/src/main.js`. Pattern: Always verify build output paths match start scripts in monorepo structures.  
-**Related:** docs/compliance-reports/POST_IMPLEMENTATION_AUDIT_SESSION_2025-11-22.md, docs/compliance-reports/PHASE_2_MIGRATION_STATUS.md
+**Related:** docs/compliance-reports/POST_IMPLEMENTATION_AUDIT_SESSION_2025-12-05.md, docs/compliance-reports/PHASE_2_MIGRATION_STATUS.md
 
-#### 3. SILENT_FAILURE_CASCADE - 2025-01-27
-**Date:** 2025-01-27  
+#### 3. SILENT_FAILURE_CASCADE - 2025-12-05
+**Date:** 2025-12-05  
 **PR:** PR System Fix  
 **Description:** Multiple silent failure points in CI workflows: scripts didn't verify file creation, verification steps didn't validate JSON, artifact downloads used continue-on-error: true, and no error propagation from scripts to workflows.  
 **Impact:** Critical - Dashboard never updates, errors go undetected  
@@ -214,12 +214,12 @@
 - `.cursor/anti_patterns.md` - Current anti-patterns log (placeholder only)
 - `docs/error-patterns.md` - Error patterns knowledge base (8+ patterns)
 - `docs/metrics/REWARD_SCORE_FIXES.md` - Reward score bug fixes
-- `docs/compliance-reports/POST_IMPLEMENTATION_AUDIT_SESSION_2025-11-22.md` - Audit report
+- `docs/compliance-reports/POST_IMPLEMENTATION_AUDIT_SESSION_2025-12-05.md` - Audit report
 - `docs/planning/PR_SYSTEM_FIX_AUDIT_REPORT.md` - PR system bug report
 
 ---
 
-**Report Generated:** 2025-11-22  
+**Report Generated:** 2025-12-05  
 **Next Review:** After BUG_LOG.md and anti_patterns.md are updated  
 **Status:** ⚠️ **ACTION REQUIRED**
 

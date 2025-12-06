@@ -2,7 +2,7 @@
 title: Production Deployment Guide
 category: Deployment
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: devops
 related:
   - docs/guides/deployment/database-migrations.md
@@ -175,7 +175,7 @@ See [Troubleshooting Guide](troubleshooting.md) for common issues and solutions.
 
 ---
 
-**Last Updated:** 2025-11-11  
+**Last Updated:** 2025-12-05  
 **Maintained By:** DevOps  
 **Review Frequency:** On deployment changes
 

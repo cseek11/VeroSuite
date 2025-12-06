@@ -1,0 +1,210 @@
+---
+description: "Fix Mode Protocol - For Brain B when applying enforcer fixes"
+alwaysApply: false
+---
+
+# Fix Mode Protocol
+
+**Trigger:** `[FOLLOW_ENFORCER_REPORT]`  
+**Purpose:** Apply fixes detected by auto-enforcer
+
+---
+
+## ⚠️ PRE-FLIGHT CHECK (MANDATORY - EVEN IN FIX MODE)
+
+**BEFORE applying any fixes, you MUST:**
+
+1. **FIRST TOOL CALL:** Read `.cursor/enforcement/ENFORCEMENT_BLOCK.md`
+2. **IF BLOCKED:** STOP immediately, display blocking message, do NOT apply fixes
+3. **IF NOT BLOCKED:** Continue with fix mode protocol below
+
+**This check takes precedence over fix mode operations.**
+
+---
+
+## When This Activates
+
+You will see a message like:
+
+```
+[FOLLOW_ENFORCER_REPORT]
+
+The auto-enforcer has detected violations.
+Here is ENFORCER_REPORT.json:
+
+{
+  "status": "BLOCKING",
+  "violations": [...]
+}
+
+Apply all fixes.
+```
+
+This means: **Stop normal work. Enter fix mode.**
+
+---
+
+## Fix Mode Behavior
+
+### 1. Read the Report
+
+The report structure:
+
+```json
+{
+  "status": "BLOCKING" | "WARNING" | "OK",
+  "session_id": "uuid",
+  "violations": [
+    {
+      "id": "VF-XXX-NNN",
+      "severity": "BLOCKING" | "WARNING",
+      "file": "path/to/file.ts",
+      "rule_ref": "03-security.mdc#R02",
+      "description": "Human-readable issue",
+      "evidence": ["Line 42: const x = ..."],
+      "fix_hint": "Specific guidance"
+    }
+  ],
+  "auto_fixes": [
+    {
+      "file": "path/to/file.ts",
+      "applied": true,
+      "note": "What was auto-fixed"
+    }
+  ],
+  "next_actions": ["Priority order of fixes"]
+}
+```
+
+### 2. Apply Fixes in Order
+
+**Priority:**
+1. Fix all `BLOCKING` violations (these prevent progress)
+2. Fix `WARNING` violations if simple
+3. Skip warnings if complex (the enforcer will log them)
+
+### 3. Use fix_hint as Guidance
+
+The `fix_hint` tells you **what** to fix, not always **exactly how**.
+
+**Example:**
+
+```json
+{
+  "fix_hint": "Add WHERE tenant_id = :tenant_id to query"
+}
+```
+
+Your implementation might be:
+
+```typescript
+// Before
+await prisma.customer.findMany({
+  where: { status: 'active' }
+})
+
+// After (your judgment on exact syntax)
+await prisma.customer.findMany({
+  where: {
+    tenant_id: currentUser.tenant_id,
+    status: 'active'
+  }
+})
+```
+
+### 4. Modify Only Listed Files
+
+**Do NOT:**
+- Rewrite files not mentioned in violations
+- Add new features
+- Refactor unrelated code
+- "Improve" things not flagged
+
+**DO:**
+- Change only the lines/blocks mentioned
+- Keep edits minimal
+- Focus on fixing the violation
+
+### 5. Output Format
+
+After applying fixes:
+
+```
+I've applied the following fixes:
+
+1. [VF-RLS-001] Added tenant_id filter to customer query
+   File: src/customers/customers.service.ts
+   
+2. [VF-DATE-001] Replaced hardcoded date with injected SYSTEM_DATE
+   File: src/billing/billing.service.ts
+
+All BLOCKING violations addressed.
+
+[FIX_COMPLETE]
+```
+
+**The `[FIX_COMPLETE]` tag is critical** — it tells the enforcer you're done.
+
+---
+
+## What Happens Next
+
+After you output `[FIX_COMPLETE]`:
+
+1. The enforcer automatically re-audits
+2. If violations remain → you'll get another report
+3. If clean → enforcer continues to next step
+
+**This loops until status = OK.**
+
+---
+
+## Special Cases
+
+### Case 1: Violation is Unclear
+
+If you don't understand a violation:
+
+```
+[FIX_INCOMPLETE]
+
+I need clarification on VF-XXX-NNN:
+- What exactly should change in line 42?
+- Should I use pattern A or B?
+
+Current code:
+
+[show relevant code]
+```
+
+The system will log this and may ask the user.
+
+### Case 2: Fix Would Break Something
+
+If applying a fix would break functionality:
+
+```
+[FIX_BLOCKED]
+
+Violation VF-XXX-NNN cannot be applied:
+- Reason: Adding tenant_id filter breaks public API
+- Suggestion: This endpoint may need RLS bypass
+
+Current implementation:
+
+[show code]
+```
+
+### Case 3: Auto-Fix Already Applied
+
+If the report shows `auto_fixes` with `applied: true`, skip those.
+
+The enforcer already fixed them. Focus on the remaining `violations`.
+
+---
+
+**End of Fix Mode Protocol**
+
+**Remember:** This mode is automatic.
+You'll only see it when the enforcer detects issues.
+Just apply the fixes and output `[FIX_COMPLETE]`.

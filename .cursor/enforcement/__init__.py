@@ -1,7 +1,0 @@
-"""
-VeroField Enforcement System Package
-"""
-
-
-
-

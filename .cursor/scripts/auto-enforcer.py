@@ -23,6 +23,8 @@ import json
 import uuid
 import subprocess
 import argparse
+from dataclasses import dataclass
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple, Set, Any
@@ -30,9 +32,12 @@ from typing import List, Dict, Optional, Tuple, Set, Any
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
-# Also add .cursor to path for enforcement module
-sys.path.insert(0, str(project_root / ".cursor"))
 
+from enforcement.config_paths import (
+    get_rules_root,
+    get_memory_bank_root,
+    get_cursor_enforcer_root,
+)
 from enforcement.core.violations import Violation, ViolationSeverity, AutoFix
 from enforcement.core.session_state import (
     EnforcementSession,
@@ -42,7 +47,9 @@ from enforcement.core.session_state import (
 )
 from enforcement.core.scope_evaluator import (
     is_historical_dir_path,
+    is_log_file,
 )
+from enforcement.core.historical import is_historical_path
 from enforcement.core.git_utils import (
     GitUtils,
     get_git_state_key,
@@ -194,6 +201,16 @@ def _use_ascii_output() -> bool:
         return True  # Default to ASCII-safe if we can't determine
 
 
+@dataclass
+class CheckerContext:
+    changed_files_all: List[str]
+    changed_files_tracked: List[str]
+    changed_files_untracked: List[str]
+    classification_map: Dict[str, str]
+    skip_non_critical: bool
+    violation_scope: str
+
+
 class VeroFieldEnforcer:
     """
     Main enforcement engine for VeroField rules.
@@ -233,8 +250,8 @@ class VeroFieldEnforcer:
     def __init__(self, project_root: Optional[Path] = None):
         """Initialize enforcer."""
         self.project_root = project_root or Path(__file__).parent.parent.parent
-        self.enforcement_dir = self.project_root / ".cursor" / "enforcement"
-        self.memory_bank_dir = self.project_root / ".cursor" / "memory-bank"
+        self.enforcement_dir = get_cursor_enforcer_root(self.project_root)
+        self.memory_bank_dir = get_memory_bank_root(self.project_root)
         self.session: Optional[EnforcementSession] = None
         self.violations: List[Violation] = []
         
@@ -259,7 +276,7 @@ class VeroFieldEnforcer:
         self.use_modular_checkers = False
         if MODULAR_CHECKERS_AVAILABLE and CheckerRouter:
             try:
-                rules_dir = self.project_root / ".cursor" / "enforcement" / "rules"
+                rules_dir = get_rules_root(self.project_root)
                 if rules_dir.exists():
                     self.checker_router = CheckerRouter(self.project_root, rules_dir)
                     self.use_modular_checkers = True
@@ -891,7 +908,7 @@ class VeroFieldEnforcer:
         
         return True
     
-    def run_all_checks(self, user_message: Optional[str] = None, scope: str = "full") -> bool:
+    def run_all_checks(self, user_message: Optional[str] = None, scope: str = "full", max_files: Optional[int] = None) -> bool:
         """
         Run all compliance checks.
         
@@ -901,6 +918,7 @@ class VeroFieldEnforcer:
         Args:
             user_message: Optional user message to pass to context recommendations
             scope: Scan scope - "full" for baseline scan (all files), "current_session" for incremental (changed files only)
+            max_files: DEBUG: Limit number of files processed (for debugging hangs)
         """
         # FIRST: generate fresh recommendations and context-id
         # This must happen BEFORE enforcement checks so agent has latest context
@@ -950,21 +968,122 @@ class VeroFieldEnforcer:
         )
         
         # Get files to check based on scope
+        def _filter_paths(paths: List[str]) -> List[str]:
+            """Filter files to exclude large files, backups, archives, and reference directories."""
+            MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+            filtered: List[str] = []
+            
+            # Patterns to exclude
+            exclude_patterns = [
+                # Archive directories
+                '/archive/',
+                '/archived/',
+                '.cursor__archived',  # Match .cursor__archived_2025-04-12 directories
+                '/.cursor__disabled/',
+                '/backup/',
+                '/backups/',
+                # Reference directories
+                '/reference/',
+                '/references/',
+                '/docs/reference/',
+            ]
+
+            auto_generated_enforcement_files = {
+                'ENFORCEMENT_BLOCK.md',
+                'VIOLATIONS.md',
+                'ACTIVE_VIOLATIONS.md',
+                'AGENT_REMINDERS.md',
+                'HISTORICAL_VIOLATIONS_REVIEW.md',
+                'ENFORCER_STATUS.md',
+            }
+            
+            for path_str in paths:
+                norm = str(path_str).replace("\\", "/")
+                
+                # Skip historical paths
+                if is_historical_dir_path(norm) or is_historical_path(norm):
+                    continue
+
+                # Skip known auto-generated enforcement artifacts
+                if norm.lower().startswith("enforcement/") and Path(norm).name in auto_generated_enforcement_files:
+                    logger.debug(
+                        "Skipping auto-generated enforcement file",
+                        operation="run_all_checks",
+                        file_path=path_str
+                    )
+                    continue
+                # Skip enforcement markdown/log docs
+                if norm.lower().startswith("enforcement/") and norm.lower().endswith(".md"):
+                    logger.debug(
+                        "Skipping enforcement markdown document",
+                        operation="run_all_checks",
+                        file_path=path_str
+                    )
+                    continue
+                # Skip .cursor__disabled remnants
+                if "/.cursor__disabled/" in norm.lower():
+                    logger.debug(
+                        "Skipping .cursor__disabled path",
+                        operation="run_all_checks",
+                        file_path=path_str
+                    )
+                    continue
+                
+                # Skip backup files
+                if norm.endswith('.backup') or '/.backup' in norm:
+                    logger.debug(
+                        "Skipping backup file",
+                        operation="run_all_checks",
+                        file_path=path_str
+                    )
+                    continue
+                
+                # Skip archive and reference directories
+                if any(pattern in norm.lower() for pattern in exclude_patterns):
+                    logger.debug(
+                        "Skipping archived/reference file",
+                        operation="run_all_checks",
+                        file_path=path_str
+                    )
+                    continue
+                
+                # Skip files larger than 10MB
+                try:
+                    file_path = self.project_root / path_str
+                    if file_path.exists() and file_path.is_file():
+                        size_bytes = file_path.stat().st_size
+                        if size_bytes >= MAX_FILE_SIZE:
+                            logger.info(
+                                "Skipping large file (>10MB)",
+                                operation="run_all_checks",
+                                file_path=str(file_path),
+                                size_bytes=size_bytes,
+                                max_bytes=MAX_FILE_SIZE
+                            )
+                            continue
+                except OSError:
+                    # If stat fails, keep the file to avoid silently dropping needed checks
+                    pass
+                
+                filtered.append(path_str)
+            return filtered
+
         if scope == "current_session":
-            # Incremental scan: only changed files since last check
-            all_changed_files = self._get_changed_files_for_session()
+            self.git_utils.clear_diff_cache()
+            tracked_files = self.git_utils.get_changed_files(include_untracked=False) or []
+            changed_with_untracked = self.git_utils.get_changed_files(include_untracked=True) or []
+            untracked_files = [f for f in changed_with_untracked if f not in tracked_files]
+            all_changed_files = changed_with_untracked
+            classification_map = self.git_utils.get_changed_file_classifications() or {}
+            changed_files_count = len(tracked_files)
+            untracked_count = len(untracked_files)
+            skip_non_critical = (changed_files_count + untracked_count) > 200
             logger.info(
                 f"Incremental scan: checking {len(all_changed_files)} changed files",
                 operation="run_all_checks",
                 files_count=len(all_changed_files)
             )
-            # For current_session scope, don't skip non-critical (always check changed files)
-            skip_non_critical = False
         else:
-            # Full scan: use existing caching logic
-            # Performance optimization: Cache changed files at start of run (Phase 1.1)
-            # Python Bible 12.7.2: Manual memoization for session-level caching
-            # Python Bible 12.7.4: Cache invalidation patterns - version tagging
             cache_key = get_git_state_key(self.project_root)
             cached_key = self.git_utils.get_cache_key()
             cached_changed_files = self.git_utils.get_cached_changed_files()
@@ -978,7 +1097,6 @@ class VeroFieldEnforcer:
                         old_key=cached_key,
                         new_key=cache_key
                     )
-                
                 logger.debug(
                     "Populating changed files cache",
                     operation="run_all_checks",
@@ -993,23 +1111,16 @@ class VeroFieldEnforcer:
                     operation="run_all_checks",
                     cache_key=cache_key
                 )
-            
+
             tracked_files = cached_changed_files['tracked']
-            untracked_files_list = cached_changed_files['untracked']
-            
-            # Combine tracked and untracked files for enforcement checks
-            # Untracked files should always be checked for violations (they're new files)
-            all_changed_files = tracked_files + untracked_files_list
+            untracked_files = cached_changed_files['untracked']
+            all_changed_files = tracked_files + untracked_files
+            classification_map = self.git_utils.get_changed_file_classifications() or {}
             changed_files_count = len(tracked_files)
-            untracked_count = len(untracked_files_list)
-            
-            # Check if there are untracked files (new files that should always be checked)
+            untracked_count = len(untracked_files)
             has_untracked = untracked_count > 0
-            
-            # Skip non-critical checks if >100 files, UNLESS there are untracked files
-            # (untracked files should always be checked for violations)
             skip_non_critical = changed_files_count > 100 and not has_untracked
-            
+
             if has_untracked:
                 logger.info(
                     f"Including {untracked_count} untracked files in enforcement checks",
@@ -1017,7 +1128,7 @@ class VeroFieldEnforcer:
                     tracked_count=changed_files_count,
                     untracked_count=untracked_count
                 )
-            
+
             if skip_non_critical:
                 logger.info(
                     f"Large number of changed files ({changed_files_count}), skipping non-critical checks",
@@ -1030,11 +1141,36 @@ class VeroFieldEnforcer:
                     operation="run_all_checks",
                     changed_files_count=changed_files_count
                 )
+
+        filtered_all = _filter_paths(all_changed_files)
+        filtered_tracked = _filter_paths(tracked_files)
+        filtered_untracked = _filter_paths(untracked_files)
+
+        checker_context = CheckerContext(
+            changed_files_all=filtered_all,
+            changed_files_tracked=filtered_tracked,
+            changed_files_untracked=filtered_untracked,
+            classification_map=classification_map or {},
+            skip_non_critical=skip_non_critical,
+            violation_scope=violation_scope,
+        )
+        
+        # DEBUG: Apply file limit if specified (for debugging hangs)
+        if max_files is not None and len(checker_context.changed_files_all) > max_files:
+            original_count = len(checker_context.changed_files_all)
+            checker_context.changed_files_all = checker_context.changed_files_all[:max_files]
+            logger.warn(
+                f"DEBUG: Limiting files to {max_files} (was {original_count})",
+                operation="run_all_checks",
+                original_count=original_count,
+                limited_count=max_files
+            )
+            print(f"[DEBUG] Limiting files to {max_files} (was {original_count})", flush=True)
         
         # Phase 4: Use modular checkers if available, otherwise fall back to legacy methods
         if self.use_modular_checkers and self.checker_router:
             try:
-                self._run_modular_checkers(all_changed_files, user_message, skip_non_critical, violation_scope=violation_scope)
+                self._run_modular_checkers(checker_context, user_message=user_message)
             except Exception as e:
                 logger.error(
                     f"Modular checkers failed, falling back to legacy methods: {e}",
@@ -1043,10 +1179,10 @@ class VeroFieldEnforcer:
                     root_cause=str(e)
                 )
                 # Fall back to legacy methods
-                self._run_legacy_checks(skip_non_critical, violation_scope=violation_scope)
+                self._run_legacy_checks(checker_context)
         else:
             # Use legacy check methods
-            self._run_legacy_checks(skip_non_critical, violation_scope=violation_scope)
+            self._run_legacy_checks(checker_context)
         
         # Update session
         self.session.last_check = datetime.now(timezone.utc).isoformat()
@@ -1088,7 +1224,7 @@ class VeroFieldEnforcer:
             context_bundle_builder = ContextBundleBuilder()
             context_bundle = context_bundle_builder.build_context_bundle(
                 violations=self.violations,
-                changed_files=all_changed_files,
+                changed_files=checker_context.changed_files_all,
                 project_root=self.project_root,
                 git_utils=self.git_utils,
             )
@@ -1159,10 +1295,8 @@ class VeroFieldEnforcer:
     
     def _run_modular_checkers(
         self,
-        changed_files: List[str],
+        checker_context: CheckerContext,
         user_message: Optional[str] = None,
-        skip_non_critical: bool = False,
-        violation_scope: str = "current_session"
     ):
         """
         Run checks using modular checker architecture.
@@ -1175,6 +1309,10 @@ class VeroFieldEnforcer:
             skip_non_critical: Whether to skip non-critical checks
             violation_scope: Scope for violations - "current_session" or "historical"
         """
+        changed_files = checker_context.changed_files_all
+        skip_non_critical = checker_context.skip_non_critical
+        violation_scope = checker_context.violation_scope
+        classification_map = checker_context.classification_map if checker_context.classification_map is not None else {}
         if not self.checker_router or not MODULAR_CHECKERS_AVAILABLE:
             return
         
@@ -1187,21 +1325,50 @@ class VeroFieldEnforcer:
             available_checkers
         )
         
+        import time
+        
         logger.info(
             f"Running {len(checkers_to_run)} modular checkers",
             operation="_run_modular_checkers",
-            total_checkers=len(checkers_to_run)
+            total_checkers=len(checkers_to_run),
+            files_count=len(changed_files)
         )
         
-        # Run each checker
-        for checker in checkers_to_run:
+        # Print to stdout for immediate visibility
+        print(f"[MODULAR_CHECKERS] Starting {len(checkers_to_run)} checkers on {len(changed_files)} files", flush=True)
+        
+        # Run each checker with detailed logging
+        for idx, checker in enumerate(checkers_to_run, 1):
+            checker_name = getattr(checker, 'rule_ref', getattr(checker, '__class__', {}).__name__ if hasattr(checker, '__class__') else 'Unknown')
+            start_time = time.perf_counter()
+            
+            # Log checker start
+            logger.info(
+                f"Starting checker {idx}/{len(checkers_to_run)}: {checker_name}",
+                operation="_run_modular_checkers",
+                checker_index=idx,
+                total_checkers=len(checkers_to_run),
+                checker_name=checker_name,
+                files_count=len(changed_files)
+            )
+            print(f"[MODULAR_CHECKERS] [{idx}/{len(checkers_to_run)}] Starting: {checker_name}", flush=True)
+            
             try:
                 # Skip non-critical checkers if requested
                 if skip_non_critical and not checker.always_apply:
+                    logger.info(
+                        f"Skipping non-critical checker: {checker_name}",
+                        operation="_run_modular_checkers",
+                        checker_name=checker_name
+                    )
+                    print(f"[MODULAR_CHECKERS] [{idx}/{len(checkers_to_run)}] SKIPPED (non-critical): {checker_name}", flush=True)
                     continue
                 
                 # Execute checker
-                result = checker.check(changed_files, user_message)
+                try:
+                    result = checker.check(changed_files, user_message, classification_map=classification_map)
+                except TypeError:
+                    result = checker.check(changed_files, user_message)
                 
                 # Convert CheckerResult violations to Violation objects
                 for violation_dict in result.violations:
@@ -1224,26 +1391,50 @@ class VeroFieldEnforcer:
                     for check_name in result.checks_failed:
                         self._report_failure(check_name)
                 
-                logger.debug(
-                    f"Checker {checker.rule_ref} completed: {result.status.value}",
+                # Calculate duration
+                duration_ms = int((time.perf_counter() - start_time) * 1000)
+                
+                logger.info(
+                    f"Finished checker {idx}/{len(checkers_to_run)}: {checker_name}",
                     operation="_run_modular_checkers",
-                    rule_ref=checker.rule_ref,
+                    checker_index=idx,
+                    total_checkers=len(checkers_to_run),
+                    checker_name=checker_name,
                     status=result.status.value,
                     violations=len(result.violations),
+                    duration_ms=duration_ms,
                     execution_time_ms=result.execution_time_ms
                 )
+                print(f"[MODULAR_CHECKERS] [{idx}/{len(checkers_to_run)}] Finished: {checker_name} ({duration_ms}ms, {len(result.violations)} violations)", flush=True)
                 
             except Exception as e:
+                duration_ms = int((time.perf_counter() - start_time) * 1000)
+                import traceback
+                error_traceback = traceback.format_exc()
+                
                 logger.error(
-                    f"Modular checker failed: {checker.rule_ref}",
+                    f"Checker {idx}/{len(checkers_to_run)} FAILED: {checker_name}",
                     operation="_run_modular_checkers",
+                    checker_index=idx,
+                    total_checkers=len(checkers_to_run),
+                    checker_name=checker_name,
                     error_code="CHECKER_EXECUTION_FAILED",
                     root_cause=str(e),
-                    rule_ref=checker.rule_ref
+                    error_type=type(e).__name__,
+                    duration_ms=duration_ms,
+                    traceback=error_traceback
                 )
-                self._report_failure(f"Modular Checker: {checker.rule_ref}")
+                print(f"[MODULAR_CHECKERS] [{idx}/{len(checkers_to_run)}] FAILED: {checker_name} ({duration_ms}ms) - {str(e)}", flush=True)
+                self._report_failure(f"Modular Checker: {checker_name}")
+        
+        logger.info(
+            f"All modular checkers completed",
+            operation="_run_modular_checkers",
+            total_checkers=len(checkers_to_run)
+        )
+        print(f"[MODULAR_CHECKERS] All {len(checkers_to_run)} checkers completed", flush=True)
     
-    def _run_legacy_checks(self, skip_non_critical: bool = False, violation_scope: str = "current_session"):
+    def _run_legacy_checks(self, checker_context: CheckerContext):
         """
         Run checks using the extracted legacy checker classes (fallback path).
         
@@ -1251,8 +1442,11 @@ class VeroFieldEnforcer:
             skip_non_critical: Whether to skip non-critical checks
             violation_scope: Scope for violations - "current_session" or "historical"
         """
-        changed_files_with_untracked = self.git_utils.get_changed_files(include_untracked=True)
-        changed_files_tracked = self.git_utils.get_changed_files(include_untracked=False)
+        skip_non_critical = checker_context.skip_non_critical
+        violation_scope = checker_context.violation_scope
+        classification_map = checker_context.classification_map
+        changed_files_with_untracked = checker_context.changed_files_all
+        changed_files_tracked = checker_context.changed_files_tracked
 
         # Ensure agent response is up to date for context checks
         self._load_agent_response_from_file()
@@ -1283,9 +1477,54 @@ class VeroFieldEnforcer:
             try:
                 violations = func()
                 if violations:
+                    # Filter out violations for log files (memory_bank files)
+                    # These files should preserve historical dates and not be flagged
+                    filtered_violations = []
                     for violation in violations:
+                        # Skip violations for log files
+                        violation_file_path = Path(violation.file_path) if violation.file_path else None
+                        if violation_file_path and violation_file_path.exists():
+                            if is_log_file(violation_file_path):
+                                logger.debug(
+                                    f"Filtering out violation for log file: {violation.file_path}",
+                                    operation="_run_legacy_checks",
+                                    check_name=check_name,
+                                    file_path=violation.file_path,
+                                    rule_ref=violation.rule_ref
+                                )
+                                continue
+                        # Also check for memory_bank in path string (defensive check)
+                        if violation.file_path:
+                            normalized_path = str(violation.file_path).replace("\\", "/").lower()
+                            if ".ai/memory_bank/" in normalized_path or ".ai/memory-bank/" in normalized_path:
+                                logger.debug(
+                                    f"Filtering out violation for memory_bank file (path check): {violation.file_path}",
+                                    operation="_run_legacy_checks",
+                                    check_name=check_name,
+                                    file_path=violation.file_path,
+                                    rule_ref=violation.rule_ref
+                                )
+                                continue
+                        filtered_violations.append(violation)
+                    
+                    # Log filtered violations
+                    if len(filtered_violations) < len(violations):
+                        logger.info(
+                            f"Filtered out {len(violations) - len(filtered_violations)} log file violations from {check_name}",
+                            operation="_run_legacy_checks",
+                            check_name=check_name,
+                            original_count=len(violations),
+                            filtered_count=len(filtered_violations)
+                        )
+                    
+                    # Only log non-filtered violations
+                    for violation in filtered_violations:
                         self._log_violation(violation)
-                    self._report_failure(check_name)
+                    
+                    if filtered_violations:
+                        self._report_failure(check_name)
+                    else:
+                        self._report_success(check_name)
                 else:
                     self._report_success(check_name)
             except Exception as exc:
@@ -1330,12 +1569,16 @@ class VeroFieldEnforcer:
                 git_utils=self.git_utils,
                 enforcement_dir=self.enforcement_dir,
                 violation_scope=violation_scope,
+                classification_map=classification_map,
+                tracked_files=checker_context.changed_files_tracked,
+                untracked_files=checker_context.changed_files_untracked,
             )),
             ("Error Handling", lambda: error_checker.check_error_handling(
                 changed_files=changed_files_tracked,
                 project_root=self.project_root,
                 git_utils=self.git_utils,
                 is_file_modified_in_session_func=is_file_modified,
+                classification_map=classification_map,
             )),
             ("Structured Logging", lambda: logging_checker.check_logging(
                 changed_files=changed_files_tracked,
@@ -1358,8 +1601,27 @@ class VeroFieldEnforcer:
             run_check(check_name, check_callable)
 
         if not skip_non_critical:
-            for check_name, check_callable in non_critical_checks:
-                run_check(check_name, check_callable)
+            max_workers = max(1, int(os.getenv("ENFORCER_MAX_WORKERS", "1") or 1))
+            if max_workers > 1:
+                with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                    future_map = {executor.submit(check_callable): check_name for check_name, check_callable in non_critical_checks}
+                    for future in as_completed(future_map):
+                        check_name = future_map[future]
+                        try:
+                            result = future.result()
+                            run_check(check_name, lambda result=result: result)
+                        except Exception as exc:
+                            logger.error(
+                                f"Non-critical check failed in parallel execution: {exc}",
+                                operation="_run_legacy_checks",
+                                error_code="NON_CRITICAL_CHECK_FAILED",
+                                check_name=check_name,
+                                root_cause=str(exc),
+                            )
+                            self._report_failure(check_name)
+            else:
+                for check_name, check_callable in non_critical_checks:
+                    run_check(check_name, check_callable)
         else:
             logger.info(
                 "Skipped non-critical checks due to large file count",
@@ -1575,7 +1837,7 @@ class VeroFieldEnforcer:
             
             # Log predictions to analytics (for accuracy tracking)
             try:
-                from context_manager.analytics import PredictionAnalytics
+                from context_manager.analytics import PredictionAnalytics  # type: ignore
                 analytics = PredictionAnalytics()
                 # Convert TaskPrediction objects to dicts for logging
                 predicted_dicts = [
@@ -1633,7 +1895,19 @@ class VeroFieldEnforcer:
             rule_changes = {}
             if PREDICTIVE_CONTEXT_AVAILABLE:
                 try:
-                    categorizer = ContextCategorizer()
+                    # Lazy import ContextCategorizer and RuleFileManager
+                    ContextCategorizerCls = _lazy_import_context_manager('ContextCategorizer')
+                    RuleFileManagerCls = _lazy_import_context_manager('RuleFileManager')
+                    
+                    if not ContextCategorizerCls or not RuleFileManagerCls:
+                        logger.warn(
+                            "ContextCategorizer or RuleFileManager not available, skipping rule file sync",
+                            operation="_update_context_recommendations",
+                            error_code="CONTEXT_MANAGER_CLASSES_UNAVAILABLE"
+                        )
+                        raise ImportError("ContextCategorizer or RuleFileManager not available")
+                    
+                    categorizer = ContextCategorizerCls()
                     
                     # ALWAYS ensure core pattern files have rule files (regardless of context lists)
                     # This ensures "basics" are always loaded at session start
@@ -1675,7 +1949,7 @@ class VeroFieldEnforcer:
                     context_plan['dynamic_files'] = dynamic_files
                     
                     # Sync rule files (create/delete/update)
-                    rule_file_manager = RuleFileManager()
+                    rule_file_manager = RuleFileManagerCls()
                     rule_changes = rule_file_manager.sync_context_files(
                         core_context=all_core_files,  # Use merged list
                         context_to_remove=context_to_remove_filtered  # Filtered to exclude CORE_PATTERNS
@@ -1771,110 +2045,113 @@ class VeroFieldEnforcer:
             return metrics
         
         metrics['available'] = True
-        
+        errors: List[str] = []
+        recommendations_ok = False
+        dashboard_ok = False
+
+        recommendations_file = self.project_root / ".cursor" / "context_manager" / "recommendations.md"
         try:
-            # Read recommendations file
-            recommendations_file = self.project_root / ".cursor" / "context_manager" / "recommendations.md"
             if not recommendations_file.exists():
-                # File doesn't exist yet - system may not have updated
-                # Try to trigger update if we have changed files
-                # Don't include untracked files for context metrics (only actual edits)
                 changed_files = self.git_utils.get_changed_files(include_untracked=False)
                 if changed_files and self.predictor:
                     try:
                         self._update_context_recommendations()
-                        # Wait a moment for file to be written
                         import time
                         time.sleep(0.1)
                     except Exception:
-                        pass  # Ignore update errors, just try to read what exists
-            
+                        pass
+
             if recommendations_file.exists():
                 with open(recommendations_file, 'r', encoding='utf-8') as f:
                     recommendations_content = f.read()
-                    
-                    # Extract active context files
-                    active_section = recommendations_content.split("### Active Context (Currently Loaded)")[1].split("###")[0] if "### Active Context (Currently Loaded)" in recommendations_content else ""
-                    active_files = [line.strip().replace('- `', '').replace('`', '').replace(' (PRIMARY)', '') 
-                                   for line in active_section.split('\n') 
-                                   if line.strip().startswith('- `')]
-                    metrics['context_usage']['active_files'] = active_files
-                    metrics['context_usage']['active_count'] = len(active_files)
-                    
-                    # Extract pre-loaded context files
-                    preload_section = recommendations_content.split("### Pre-loaded Context (Ready for Next Tasks)")[1].split("###")[0] if "### Pre-loaded Context (Ready for Next Tasks)" in recommendations_content else ""
-                    preloaded_files = [line.strip().replace('- `', '').replace('`', '').replace(' (HIGH)', '') 
-                                      for line in preload_section.split('\n') 
-                                      if line.strip().startswith('- `')]
-                    metrics['context_usage']['preloaded_files'] = preloaded_files
-                    metrics['context_usage']['preloaded_count'] = len(preloaded_files)
-                    
-                    # Extract context to unload
-                    unload_section = recommendations_content.split("### Context to Unload")[1].split("##")[0] if "### Context to Unload" in recommendations_content else ""
-                    unloaded_files = [line.strip().replace('- `', '').replace('`', '').replace(' - **REMOVE @ mention**', '') 
-                                     for line in unload_section.split('\n') 
-                                     if line.strip().startswith('- `')]
-                    metrics['context_usage']['unloaded_files'] = unloaded_files
-                    metrics['context_usage']['unloaded_count'] = len(unloaded_files)
-            
-            # Calculate token statistics
-            try:
-                from context_manager.token_estimator import TokenEstimator  # type: ignore
-                token_estimator = TokenEstimator(self.project_root)
-                
-                # Get active context tokens
-                active_metrics = token_estimator.track_context_load(metrics['context_usage']['active_files'])
-                metrics['token_statistics']['active_tokens'] = active_metrics.total_tokens
-                
-                # Get pre-loaded context tokens (30% cost for background loading)
-                preload_metrics = token_estimator.track_context_load(metrics['context_usage']['preloaded_files'])
-                preload_token_cost = int(preload_metrics.total_tokens * 0.3)  # 30% of full cost
-                metrics['token_statistics']['preloaded_tokens'] = preload_token_cost
-                
-                # Total tokens used
-                metrics['token_statistics']['total_tokens'] = active_metrics.total_tokens + preload_token_cost
-                
-                # Estimate static baseline (all context files that would be loaded without prediction)
-                # This is a simplified estimate - in practice, would need to track all possible context files
-                all_context_files = set(metrics['context_usage']['active_files'] + metrics['context_usage']['preloaded_files'])
-                static_metrics = token_estimator.track_context_load(list(all_context_files))
-                metrics['token_statistics']['static_baseline'] = static_metrics.total_tokens
-                
-                # Calculate savings
-                if metrics['token_statistics']['static_baseline'] > 0:
-                    savings = metrics['token_statistics']['static_baseline'] - metrics['token_statistics']['total_tokens']
-                    metrics['token_statistics']['savings_tokens'] = max(0, savings)  # Don't show negative savings
-                    metrics['token_statistics']['savings_percentage'] = round(
-                        (savings / metrics['token_statistics']['static_baseline'] * 100) if metrics['token_statistics']['static_baseline'] > 0 else 0.0,
-                        2
-                    )
-                
-            except Exception as e:
-                logger.debug(
-                    f"Failed to calculate token statistics: {e}",
-                    operation="get_context_metrics_for_audit",
-                    error_code="TOKEN_STATS_FAILED",
-                    root_cause=str(e)
+
+                active_section = recommendations_content.split("### Active Context (Currently Loaded)")[1].split("###")[0] if "### Active Context (Currently Loaded)" in recommendations_content else ""
+                active_files = [line.strip().replace('- `', '').replace('`', '').replace(' (PRIMARY)', '')
+                               for line in active_section.split('\n')
+                               if line.strip().startswith('- `')]
+                metrics['context_usage']['active_files'] = active_files
+                metrics['context_usage']['active_count'] = len(active_files)
+
+                preload_section = recommendations_content.split("### Pre-loaded Context (Ready for Next Tasks)")[1].split("###")[0] if "### Pre-loaded Context (Ready for Next Tasks)" in recommendations_content else ""
+                preloaded_files = [line.strip().replace('- `', '').replace('`', '').replace(' (HIGH)', '')
+                                  for line in preload_section.split('\n')
+                                  if line.strip().startswith('- `')]
+                metrics['context_usage']['preloaded_files'] = preloaded_files
+                metrics['context_usage']['preloaded_count'] = len(preloaded_files)
+
+                unload_section = recommendations_content.split("### Context to Unload")[1].split("##")[0] if "### Context to Unload" in recommendations_content else ""
+                unloaded_files = [line.strip().replace('- `', '').replace('`', '').replace(' - **REMOVE @ mention**', '')
+                                 for line in unload_section.split('\n')
+                                 if line.strip().startswith('- `')]
+                metrics['context_usage']['unloaded_files'] = unloaded_files
+                metrics['context_usage']['unloaded_count'] = len(unloaded_files)
+                recommendations_ok = True
+        except Exception as e:
+            errors.append("recommendations_read_failed")
+            logger.debug(
+                f"Failed to read recommendations: {e}",
+                operation="get_context_metrics_for_audit",
+                error_code="RECOMMENDATIONS_READ_FAILED",
+                root_cause=str(e)
+            )
+
+        try:
+            from context_manager.token_estimator import TokenEstimator  # type: ignore
+            token_estimator = TokenEstimator(self.project_root)
+
+            active_metrics = token_estimator.track_context_load(metrics['context_usage']['active_files'])
+            metrics['token_statistics']['active_tokens'] = active_metrics.total_tokens
+
+            preload_metrics = token_estimator.track_context_load(metrics['context_usage']['preloaded_files'])
+            preload_token_cost = int(preload_metrics.total_tokens * 0.3)
+            metrics['token_statistics']['preloaded_tokens'] = preload_token_cost
+
+            metrics['token_statistics']['total_tokens'] = active_metrics.total_tokens + preload_token_cost
+
+            all_context_files = set(metrics['context_usage']['active_files'] + metrics['context_usage']['preloaded_files'])
+            static_metrics = token_estimator.track_context_load(list(all_context_files))
+            metrics['token_statistics']['static_baseline'] = static_metrics.total_tokens
+
+            if metrics['token_statistics']['static_baseline'] > 0:
+                savings = metrics['token_statistics']['static_baseline'] - metrics['token_statistics']['total_tokens']
+                metrics['token_statistics']['savings_tokens'] = max(0, savings)
+                metrics['token_statistics']['savings_percentage'] = round(
+                    (savings / metrics['token_statistics']['static_baseline'] * 100) if metrics['token_statistics']['static_baseline'] > 0 else 0.0,
+                    2
                 )
-            
-            # Read dashboard for compliance status
-            dashboard_file = self.project_root / ".cursor" / "context_manager" / "dashboard.md"
+        except Exception as e:
+            errors.append("token_stats_failed")
+            logger.debug(
+                f"Failed to calculate token statistics: {e}",
+                operation="get_context_metrics_for_audit",
+                error_code="TOKEN_STATS_FAILED",
+                root_cause=str(e)
+            )
+
+        dashboard_file = self.project_root / ".cursor" / "context_manager" / "dashboard.md"
+        try:
             if dashboard_file.exists():
                 with open(dashboard_file, 'r', encoding='utf-8') as f:
                     dashboard_content = f.read()
-                    # Simple check - if dashboard has real data (not just placeholders), assume steps completed
+                    dashboard_ok = True
                     if "[Will be populated" not in dashboard_content and "[Count]" not in dashboard_content:
                         metrics['compliance']['step_0_5_completed'] = True
                         metrics['compliance']['step_4_5_completed'] = True
                         metrics['compliance']['recommendations_followed'] = True
-            
         except Exception as e:
+            errors.append("dashboard_read_failed")
             logger.debug(
-                f"Failed to get context metrics: {e}",
+                f"Failed to read dashboard: {e}",
                 operation="get_context_metrics_for_audit",
-                error_code="CONTEXT_METRICS_FAILED",
+                error_code="DASHBOARD_READ_FAILED",
                 root_cause=str(e)
             )
+
+        if not recommendations_ok and not dashboard_ok:
+            metrics['available'] = False
+
+        if errors:
+            metrics['error'] = ";".join(errors)
         
         return metrics
     
@@ -2421,10 +2698,10 @@ The following rule files have been created or deleted:
             )
     
 
-    def run(self, user_message: Optional[str] = None, scope: str = "full") -> int:
+    def run(self, user_message: Optional[str] = None, scope: str = "full", max_files: Optional[int] = None) -> int:
         """Main entry point."""
         try:
-            success = self.run_all_checks(user_message=user_message, scope=scope)
+            success = self.run_all_checks(user_message=user_message, scope=scope, max_files=max_files)
             return 0 if success else 1
         except Exception as e:
             logger.error(
@@ -2452,6 +2729,12 @@ def main():
         choices=['full', 'current_session'],
         default='full',
         help='Scan scope: "full" for baseline scan (all files), "current_session" for incremental scan (changed files only)'
+    )
+    parser.add_argument(
+        '--max-files',
+        type=int,
+        default=None,
+        help='DEBUG: Limit number of files processed (for debugging hangs)'
     )
     args = parser.parse_args()
     
@@ -2481,7 +2764,7 @@ def main():
         print()
         print("🔄 Running compliance checks...")
     
-    exit_code = enforcer.run(user_message=args.user_message, scope=args.scope)
+    exit_code = enforcer.run(user_message=args.user_message, scope=args.scope, max_files=args.max_files)
     
     print()
     if use_ascii:

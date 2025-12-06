@@ -2,7 +2,7 @@
 title: Database Migrations Guide
 category: Deployment
 status: active
-last_reviewed: 2025-11-11
+last_reviewed: 2025-12-05
 owner: backend_team
 related:
   - docs/reference/database-schema.md
@@ -166,7 +166,7 @@ npx prisma migrate dev --name add_new_field
 
 ---
 
-**Last Updated:** 2025-11-11  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Backend Team  
 **Review Frequency:** On migration changes
 

@@ -5,7 +5,7 @@ project: VeroField
 scope:
   - documentation
 priority: high
-last_updated: 2025-11-16
+last_updated: 2025-12-05
 always_apply: true
 ---
 
@@ -146,11 +146,11 @@ Use `scripts/organize-documentation.ps1` to automatically categorize and move do
 **MANDATORY PROCEDURE:**
 1. **BEFORE writing ANY date:** Check current system/device date
 2. **USE that exact date** - Never hardcode or assume
-3. **FORMAT:** ISO 8601: `YYYY-MM-DD` (e.g., `2025-11-15`)
+3. **FORMAT:** ISO 8601: `YYYY-MM-DD` (e.g., `2025-12-05`)
 4. **VERIFY:** Date must match current system date exactly
 
 **Rules:**
-- ❌ **NEVER** hardcode dates like `2025-01-27` or `2025-11-11`
+- ❌ **NEVER** hardcode dates like `2025-12-05` or `2025-12-05`
 - ✅ **ALWAYS** check device/system date first
 - ✅ **ALWAYS** use current date for "Last Updated" fields
 - ✅ **ALWAYS** update "Last Updated" when modifying documentation

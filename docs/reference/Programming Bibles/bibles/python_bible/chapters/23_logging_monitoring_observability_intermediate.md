@@ -103,7 +103,7 @@ log.addHandler(handler)
 
 Every log becomes a structured object:
 
-{"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-03-01T12:00:00Z"}
+{"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-12-05T12:00:00Z"}
 
 22.3 Correlation IDs & Request IDs
 

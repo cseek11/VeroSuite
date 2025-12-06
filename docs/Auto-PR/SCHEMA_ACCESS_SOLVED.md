@@ -1,6 +1,6 @@
 # Schema Access - SOLVED ✅
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Status:** ✅ **SOLVED** - Using `.schema('veroscore')` method
 
 ---
@@ -153,7 +153,7 @@ helper.insert_changes("test-123", [
 
 ---
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Status:** ✅ **SOLVED** - Using `.schema('veroscore')` method
 
 

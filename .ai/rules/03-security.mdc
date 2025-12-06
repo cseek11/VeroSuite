@@ -1,0 +1,868 @@
+---
+description: "Security rules: tenant isolation, RLS, authentication, secrets, input validation"
+alwaysApply: true
+---
+
+# PRIORITY: CRITICAL - Security & Tenant Isolation
+
+**⚠️ CRITICAL:** This file consolidates all security requirements for VeroField. All security rules are NON-NEGOTIABLE.
+
+---
+
+## PRIORITY: CRITICAL - Tenant Isolation & Row Level Security (RLS)
+
+### Database Operations
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** verify `tenant_id` is set before database queries
+- ✅ **ALWAYS** use RLS policies for tenant-scoped tables
+- ✅ **ALWAYS** set tenant context per request: `SET LOCAL app.tenant_id = <tenant_id>`
+- ✅ **ALWAYS** use `SET LOCAL ROLE verofield_app` for application queries
+- ✅ **ALWAYS** verify tenant isolation is maintained in all queries
+- ✅ **ALWAYS** use Prisma with RLS-aware queries (never bypass RLS)
+
+**NEVER:**
+- ❌ **NEVER** bypass tenant isolation
+- ❌ **NEVER** expose tenant data across boundaries
+- ❌ **NEVER** query without tenant_id filter
+- ❌ **NEVER** use superuser roles in application requests
+- ❌ **NEVER** disable RLS policies
+- ❌ **NEVER** trust client-provided tenant_id
+
+### Automated Enforcement (R01)
+
+**Rule IDs:**
+- **SEC-R01-001:** Missing tenant_id filter in Prisma queries on tenant-scoped tables
+- **SEC-R01-002:** Client-provided tenant_id used instead of authenticated JWT
+
+**Enforcement:** `TenantIsolationChecker` automatically scans Prisma queries for missing tenant filters.
+
+**Detection:**
+- Identifies Prisma queries on tenant-scoped tables (see `.cursor/enforcement/tenant_tables.json`)
+- Verifies `tenant_id` or `tenantId` is present in query `where` clause
+- Detects client-provided tenant_id from request body/query/params
+
+**See:** `.cursor/enforcement/rules/03-security-tenant.mdc` for detailed rule definitions.
+
+**Note:** The basic tenant isolation check in `SecurityChecker` is deprecated in favor of the comprehensive `TenantIsolationChecker`.
+
+### API Operations
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** verify tenant context in requests
+- ✅ **ALWAYS** use tenant middleware to set context
+- ✅ **ALWAYS** extract tenant_id from authenticated JWT (never from request body/params)
+- ✅ **ALWAYS** validate tenant_id matches authenticated user's tenant
+- ✅ **ALWAYS** enforce tenant isolation at controller/service layer
+
+**NEVER:**
+- ❌ **NEVER** trust client-provided tenant_id
+- ❌ **NEVER** skip authentication checks
+- ❌ **NEVER** allow cross-tenant data access
+- ❌ **NEVER** expose tenant_id in error messages
+
+---
+
+## PRIORITY: CRITICAL - Authentication & Authorization
+
+### JWT Authentication
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** validate JWT tokens on every request
+- ✅ **ALWAYS** verify token signature and expiration
+- ✅ **ALWAYS** extract tenant_id and roles from validated JWT
+- ✅ **ALWAYS** use strong JWT secrets (minimum 32 characters, randomly generated)
+- ✅ **ALWAYS** set appropriate token expiration (24h for access, 7d for refresh)
+- ✅ **ALWAYS** store tokens securely (httpOnly cookies or secure storage)
+- ✅ **ALWAYS** require HTTPS in production
+
+**NEVER:**
+- ❌ **NEVER** hardcode JWT secrets
+- ❌ **NEVER** use weak JWT secrets
+- ❌ **NEVER** skip token validation
+- ❌ **NEVER** expose JWT secrets in logs or error messages
+- ❌ **NEVER** use same secrets for dev/staging/prod
+
+### Role-Based Access Control (RBAC)
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** check permissions at controller/service layer
+- ✅ **ALWAYS** use tenant-scoped permissions
+- ✅ **ALWAYS** implement resource-level authorization
+- ✅ **ALWAYS** verify user roles before allowing actions
+- ✅ **ALWAYS** maintain audit trail for permission changes
+
+**NEVER:**
+- ❌ **NEVER** skip permission checks
+- ❌ **NEVER** trust client-provided roles
+- ❌ **NEVER** allow privilege escalation
+- ❌ **NEVER** expose permission logic to client
+
+---
+
+## PRIORITY: CRITICAL - Secrets Management
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** use environment variables for all secrets
+- ✅ **ALWAYS** exclude `.env` files from version control (`.gitignore` verified)
+- ✅ **ALWAYS** create `env.example` template files
+- ✅ **ALWAYS** validate required environment variables at startup
+- ✅ **ALWAYS** use different secrets for dev/staging/prod
+- ✅ **ALWAYS** use secret management services in production
+
+**NEVER:**
+- ❌ **NEVER** commit `.env` files
+- ❌ **NEVER** hardcode secrets in source code
+- ❌ **NEVER** use production keys in development
+- ❌ **NEVER** share secrets in chat/email
+- ❌ **NEVER** use weak secrets
+- ❌ **NEVER** expose secrets in error messages
+- ❌ **NEVER** log secrets
+
+### Automated Enforcement (R03)
+
+**Rule IDs:**
+- **SEC-R03-001:** Hardcoded secret variables (JWT_SECRET, API_KEY, etc.)
+- **SEC-R03-002:** Hardcoded secret-like strings (long random strings)
+
+**Enforcement:** `SecretScannerChecker` automatically scans code files for hardcoded secrets.
+
+**Detection:**
+- Scans for suspicious variable names with string literal values
+- Detects long random-looking strings near secret contexts
+- Verifies secrets come from environment variables (`process.env`, `ConfigService`)
+
+**See:** `.cursor/enforcement/rules/03-security-secrets.mdc` for detailed rule definitions.
+
+---
+
+## PRIORITY: CRITICAL - Input Validation & XSS Prevention
+
+### Input Validation
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** validate all user inputs on the backend
+- ✅ **ALWAYS** use shared validation constants consistently
+- ✅ **ALWAYS** enforce input size limits
+- ✅ **ALWAYS** validate file uploads (type, size, content)
+- ✅ **ALWAYS** use parameterized queries (Prisma handles this)
+- ✅ **ALWAYS** validate against schemas (DTOs, JSON Schema)
+
+**NEVER:**
+- ❌ **NEVER** trust client input
+- ❌ **NEVER** skip input validation
+- ❌ **NEVER** use SQL concatenation
+- ❌ **NEVER** allow arbitrary file uploads
+- ❌ **NEVER** expose validation errors with sensitive details
+
+### XSS Prevention
+
+**MANDATORY RULES:**
+- ✅ **ALWAYS** sanitize HTML content before storage
+- ✅ **ALWAYS** sanitize config objects recursively
+- ✅ **ALWAYS** validate for XSS vectors (script tags, javascript: protocol, event handlers, eval())
+- ✅ **ALWAYS** use React's built-in XSS protection (don't use `dangerouslySetInnerHTML` unless necessary)
+- ✅ **ALWAYS** sanitize widget configs before storage
+
+**NEVER:**
+- ❌ **NEVER** use `dangerouslySetInnerHTML` without sanitization
+- ❌ **NEVER** allow `eval()` or `Function()` constructors
+- ❌ **NEVER** trust widget configs without validation
+- ❌ **NEVER** skip sanitization for user-generated content
+
+---
+
+## Security Checklist (Quick Reference)
+
+### Before Any Database Operation:
+- [ ] Verify tenant_id is set
+- [ ] Verify RLS policies are enabled
+- [ ] Verify tenant context is set
+- [ ] Verify no cross-tenant access possible
+
+### Before Any API Endpoint:
+- [ ] Verify authentication is required
+- [ ] Verify authorization is checked
+- [ ] Verify tenant isolation is enforced
+- [ ] Verify input validation is implemented
+- [ ] Verify XSS prevention is in place
+
+### Before Any Code Change:
+- [ ] Verify no secrets are hardcoded
+- [ ] Verify environment variables are used
+- [ ] Verify `.env` files are gitignored
+- [ ] Verify security headers are configured
+- [ ] Verify audit logging is implemented
+
+---
+
+## Step 5: Post-Implementation Audit for Security Rules
+
+### R01: Tenant Isolation — Audit Procedures
+
+**For code changes affecting database queries, API endpoints, or authentication:**
+
+#### Database Operations
+- [ ] **MANDATORY:** Verify all database queries include `tenant_id` filter or use `withTenant()` wrapper
+- [ ] **MANDATORY:** Verify no raw SQL queries bypass tenant isolation
+- [ ] **MANDATORY:** Verify Prisma queries use tenant-scoped context
+- [ ] **MANDATORY:** Verify no `$queryRawUnsafe` without tenant validation
+- [ ] **MANDATORY:** Verify no cross-tenant data access in query logic
+
+#### API Endpoints
+- [ ] **MANDATORY:** Verify `tenant_id` extracted from JWT (never from request body/params)
+- [ ] **MANDATORY:** Verify tenant context set before database operations
+- [ ] **MANDATORY:** Verify tenant validation middleware applied to protected routes
+- [ ] **MANDATORY:** Verify no tenant_id exposed in error messages
+- [ ] **MANDATORY:** Verify no endpoints allow cross-tenant access
+
+#### Authentication
+- [ ] **MANDATORY:** Verify JWT payload includes `tenant_id`
+- [ ] **MANDATORY:** Verify JWT validation checks `tenant_id` presence
+- [ ] **MANDATORY:** Verify user context includes validated `tenant_id`
+- [ ] **MANDATORY:** Verify no client-provided `tenant_id` trusted without validation
+
+#### Automated Checks
+```bash
+# Run tenant isolation checker
+python .cursor/scripts/check-tenant-isolation.py [file_or_directory]
+
+# Expected: No violations found
+```
+
+#### OPA Policy
+- **Policy:** `services/opa/policies/security.rego` (R01 section)
+- **Enforcement:** BLOCK (Tier 1 MAD)
+- **Tests:** `services/opa/tests/security_r01_test.rego`
+
+#### Manual Verification (When Needed)
+1. Review query logic - trace data flow from API to database
+2. Test cross-tenant access - attempt to access Tenant A data with Tenant B credentials
+3. Review error handling - verify no tenant_id leakage
+4. Validate JWT payload - inspect token structure
+
+**Note:** `withTenant()` is a database context wrapper that sets RLS context variables before executing queries. See `apps/api/src/common/services/database.service.ts` for implementation.
+
+---
+
+### R02: RLS Enforcement — Audit Procedures
+
+**For code changes affecting database schema, migrations, or database configuration:**
+
+#### RLS Policy Configuration
+- [ ] **MANDATORY:** Verify RLS policies exist for all tenant-scoped tables
+- [ ] **MANDATORY:** Verify `ENABLE ROW LEVEL SECURITY` is set on tenant-scoped tables
+- [ ] **MANDATORY:** Verify RLS policies use `current_setting('app.tenant_id', true)`
+- [ ] **MANDATORY:** Verify RLS policies correctly filter by tenant_id
+- [ ] **MANDATORY:** Verify no `DISABLE ROW LEVEL SECURITY` statements
+
+#### Database Role Configuration
+- [ ] **MANDATORY:** Verify application uses non-superuser role (`verofield_app`)
+- [ ] **MANDATORY:** Verify superuser role never used in application code
+- [ ] **MANDATORY:** Verify role cannot disable RLS policies
+
+#### Migration Files
+- [ ] **MANDATORY:** Verify new tenant-scoped tables include RLS policies
+- [ ] **MANDATORY:** Verify migrations don't disable existing RLS policies
+- [ ] **MANDATORY:** Verify foreign keys maintain tenant isolation
+
+#### Application Code
+- [ ] **MANDATORY:** Verify no code attempts to disable RLS
+- [ ] **MANDATORY:** Verify no `SECURITY DEFINER` functions bypass RLS
+- [ ] **MANDATORY:** Verify `withTenant()` wrapper sets `app.tenant_id` correctly
+
+#### Automated Checks
+```bash
+# Run RLS enforcement checker
+python .cursor/scripts/check-rls-enforcement.py [file_or_directory]
+
+# Expected: No violations found
+```
+
+#### OPA Policy
+- **Policy:** `services/opa/policies/security.rego` (R02 section)
+- **Enforcement:** BLOCK (Tier 1 MAD)
+- **Tests:** `services/opa/tests/security_r02_test.rego`
+
+#### Manual Verification (When Needed)
+1. **Review RLS Policy Logic** - Verify policy uses `current_setting('app.tenant_id', true)`
+2. **Test RLS Enforcement** - Set tenant context and attempt cross-tenant query (should return empty)
+3. **Verify Role Permissions** - Check application role cannot disable RLS
+4. **Basic Performance Check** - Verify query with RLS completes in <1 second, uses index (not seq scan)
+
+**Example RLS Policy:**
+```sql
+-- Enable RLS on table
+ALTER TABLE "customers" ENABLE ROW LEVEL SECURITY;
+
+-- Create tenant isolation policy
+CREATE POLICY "tenant_isolation_policy" ON "customers"
+    USING (tenant_id::text = current_setting('app.tenant_id', true));
+```
+
+**Example SECURITY INVOKER Function (Respects RLS):**
+```sql
+CREATE OR REPLACE FUNCTION get_tenant_stats()
+RETURNS TABLE(total_customers bigint)
+SECURITY INVOKER  -- Respects RLS automatically
+AS $$
+    SELECT COUNT(*) FROM customers;
+    -- RLS automatically filters by tenant_id
+$$ LANGUAGE sql;
+```
+
+---
+
+### R12: Security Event Logging — Audit Procedures
+
+**For code changes affecting authentication, authorization, PII access, security policies, or admin actions:**
+
+#### Authentication Event Logging
+
+- [ ] **MANDATORY:** Verify login attempts are logged (success and failure)
+- [ ] **MANDATORY:** Verify logout events are logged
+- [ ] **MANDATORY:** Verify password changes are logged
+- [ ] **MANDATORY:** Verify token refresh events are logged (if applicable)
+- [ ] **MANDATORY:** Verify authentication failures include: userId (if known), email (hashed or partial), ipAddress, reason
+- [ ] **MANDATORY:** Verify authentication logs do NOT include passwords or tokens
+- [ ] **MANDATORY:** Verify authentication logs include tenantId
+- [ ] **RECOMMENDED:** Verify suspicious login patterns are detected and logged (multiple failures, unusual locations)
+
+#### Authorization Event Logging
+
+- [ ] **MANDATORY:** Verify permission denials are logged
+- [ ] **MANDATORY:** Verify role changes are logged (assignments, removals)
+- [ ] **MANDATORY:** Verify permission changes are logged (grants, revocations)
+- [ ] **MANDATORY:** Verify authorization logs include: userId, resourceType, resourceId, action, requiredPermission
+- [ ] **MANDATORY:** Verify authorization logs include tenantId
+- [ ] **MANDATORY:** Verify authorization logs include ipAddress and userAgent
+- [ ] **RECOMMENDED:** Verify repeated authorization failures trigger alerts
+
+#### PII Access Event Logging
+
+- [ ] **MANDATORY:** Verify PII access in privileged contexts is logged (admin, security diagnostics)
+- [ ] **MANDATORY:** Verify PII modifications are logged (create, update, delete)
+- [ ] **MANDATORY:** Verify PII exports are logged (bulk exports, data downloads)
+- [ ] **MANDATORY:** Verify PII logs include: userId, resourceType, resourceId, action, dataType (not raw PII)
+- [ ] **MANDATORY:** Verify PII logs do NOT include raw PII values (only metadata)
+- [ ] **MANDATORY:** Verify PII logs include tenantId
+- [ ] **MANDATORY:** Verify PII logs include access reason/justification (if applicable)
+- [ ] **RECOMMENDED:** Verify PII access logs include data classification level
+
+#### Security Policy Change Logging
+
+- [ ] **MANDATORY:** Verify RLS policy changes are logged
+- [ ] **MANDATORY:** Verify permission policy changes are logged
+- [ ] **MANDATORY:** Verify role definition changes are logged
+- [ ] **MANDATORY:** Verify security configuration changes are logged
+- [ ] **MANDATORY:** Verify policy change logs include: userId, policyType, policyName, beforeState, afterState
+- [ ] **MANDATORY:** Verify policy change logs include tenantId
+- [ ] **MANDATORY:** Verify policy change logs include change reason/justification
+
+#### Admin Action Logging
+
+- [ ] **MANDATORY:** Verify user impersonation is logged
+- [ ] **MANDATORY:** Verify privilege escalation is logged
+- [ ] **MANDATORY:** Verify admin user management is logged (create, update, delete, suspend)
+- [ ] **MANDATORY:** Verify admin configuration changes are logged
+- [ ] **MANDATORY:** Verify admin action logs include: adminUserId, targetUserId (if applicable), action, resourceType, resourceId
+- [ ] **MANDATORY:** Verify admin action logs include tenantId
+- [ ] **MANDATORY:** Verify admin action logs include ipAddress and userAgent
+- [ ] **RECOMMENDED:** Verify admin actions require additional approval/confirmation
+
+#### Financial Transaction Logging
+
+- [ ] **MANDATORY:** Verify payment processing is logged
+- [ ] **MANDATORY:** Verify refunds are logged
+- [ ] **MANDATORY:** Verify billing changes are logged
+- [ ] **MANDATORY:** Verify financial transaction logs include: userId, transactionType, amount, currency, transactionId
+- [ ] **MANDATORY:** Verify financial transaction logs do NOT include full credit card numbers (only last 4 digits)
+- [ ] **MANDATORY:** Verify financial transaction logs include tenantId
+- [ ] **MANDATORY:** Verify financial transaction logs include beforeState and afterState
+
+#### Audit Log Format
+
+- [ ] **MANDATORY:** Verify audit logs use AuditService.log() method
+- [ ] **MANDATORY:** Verify audit logs include required fields: tenantId, userId, action, resourceType, resourceId
+- [ ] **MANDATORY:** Verify audit logs include optional fields when applicable: beforeState, afterState, ipAddress, userAgent, requestId
+- [ ] **MANDATORY:** Verify audit logs are structured (JSON format)
+- [ ] **MANDATORY:** Verify audit logs include timestamp (ISO 8601)
+- [ ] **MANDATORY:** Verify audit logs include traceId (for correlation)
+- [ ] **RECOMMENDED:** Verify audit logs are stored in immutable storage
+
+#### Privacy Compliance
+
+- [ ] **MANDATORY:** Verify no raw PII values are logged (only metadata)
+- [ ] **MANDATORY:** Verify no passwords are logged
+- [ ] **MANDATORY:** Verify no tokens are logged (only token type/metadata)
+- [ ] **MANDATORY:** Verify no credit card numbers are logged (only last 4 digits)
+- [ ] **MANDATORY:** Verify no SSNs are logged (only metadata)
+- [ ] **MANDATORY:** Verify PII access logs comply with SOC2/privacy requirements
+- [ ] **RECOMMENDED:** Verify audit logs are encrypted at rest
+
+#### Error Handling
+
+- [ ] **MANDATORY:** Verify audit logging failures do not break main operations
+- [ ] **MANDATORY:** Verify audit logging failures are logged (structured logging)
+- [ ] **MANDATORY:** Verify audit logging uses try-catch blocks
+- [ ] **MANDATORY:** Verify audit logging failures are monitored and alerted
+- [ ] **RECOMMENDED:** Verify audit logging has retry mechanism for transient failures
+
+#### Automated Checks
+
+```bash
+# Run security event logging checker
+python .cursor/scripts/check-security-logging.py --file <file_path>
+
+# Check all changed files
+python .cursor/scripts/check-security-logging.py --pr <PR_NUMBER>
+
+# Check specific security event types
+python .cursor/scripts/check-security-logging.py --event-type auth
+
+# Expected: No violations found
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/security.rego` (R12 section)
+- **Enforcement:** OVERRIDE (Tier 2 MAD) - Requires justification
+- **Tests:** `services/opa/tests/security_r12_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review Security Events** - Identify all security events in changed code
+2. **Verify Audit Logging** - Check that all security events are logged
+3. **Check Privacy Compliance** - Verify no raw PII values are logged
+4. **Validate Log Format** - Verify audit logs include required fields
+
+**Example Authentication Event Logging (✅):**
+
+```typescript
+// ✅ CORRECT: Authentication event logged
+async login(email: string, password: string, ipAddress: string, userAgent: string) {
+  try {
+    const user = await this.validateCredentials(email, password);
+    
+    // Log successful login
+    await this.auditService.log({
+      tenantId: user.tenant_id,
+      userId: user.id,
+      action: 'USER_LOGIN_SUCCESS',
+      resourceType: 'User',
+      resourceId: user.id,
+      ipAddress,
+      userAgent,
+      requestId: this.requestContext.getRequestId()
+    });
+    
+    return this.generateToken(user);
+  } catch (error) {
+    // Log failed login (without password)
+    await this.auditService.log({
+      tenantId: null, // Unknown tenant on failed login
+      userId: null, // Unknown user on failed login
+      action: 'USER_LOGIN_FAILED',
+      resourceType: 'User',
+      resourceId: null,
+      ipAddress,
+      userAgent,
+      afterState: { reason: error.message }, // Log reason, not password
+      requestId: this.requestContext.getRequestId()
+    });
+    
+    throw error;
+  }
+}
+```
+
+**Example Missing Authentication Logging (❌):**
+
+```typescript
+// ❌ VIOLATION: Authentication event not logged
+async login(email: string, password: string) {
+  const user = await this.validateCredentials(email, password);
+  return this.generateToken(user);
+  // Missing audit log - VIOLATION
+}
+```
+
+**Example Authorization Event Logging (✅):**
+
+```typescript
+// ✅ CORRECT: Authorization event logged
+async checkPermission(userId: string, resource: string, action: string) {
+  const hasPermission = await this.permissionsService.hasPermission(userId, resource, action);
+  
+  if (!hasPermission) {
+    // Log permission denial
+    await this.auditService.log({
+      tenantId: this.requestContext.getTenantId(),
+      userId,
+      action: 'PERMISSION_DENIED',
+      resourceType: resource,
+      resourceId: null,
+      afterState: {
+        requiredPermission: `${resource}:${action}`,
+        reason: 'User does not have required permission'
+      },
+      ipAddress: this.requestContext.getIpAddress(),
+      userAgent: this.requestContext.getUserAgent(),
+      requestId: this.requestContext.getRequestId()
+    });
+    
+    throw new ForbiddenException('Permission denied');
+  }
+  
+  return true;
+}
+```
+
+**Example PII Access Logging (✅):**
+
+```typescript
+// ✅ CORRECT: PII access logged (metadata only, no raw PII)
+async getCustomerPII(customerId: string, adminUserId: string) {
+  const customer = await this.db.customer.findUnique({
+    where: { id: customerId },
+    select: {
+      id: true,
+      email: true, // PII
+      phone: true, // PII
+      ssn: true, // Sensitive PII
+    }
+  });
+  
+  // Log PII access (metadata only, not raw values)
+  await this.auditService.log({
+    tenantId: this.requestContext.getTenantId(),
+    userId: adminUserId,
+    action: 'PII_ACCESS',
+    resourceType: 'Customer',
+    resourceId: customerId,
+    afterState: {
+      dataTypes: ['email', 'phone', 'ssn'], // Types accessed, not values
+      accessReason: 'Admin security diagnostics',
+      dataClassification: 'SENSITIVE'
+    },
+    ipAddress: this.requestContext.getIpAddress(),
+    userAgent: this.requestContext.getUserAgent(),
+    requestId: this.requestContext.getRequestId()
+  });
+  
+  return customer;
+}
+```
+
+**Example Privacy Violation (❌):**
+
+```typescript
+// ❌ VIOLATION: Raw PII logged
+async updateCustomer(customerId: string, data: UpdateCustomerDto) {
+  const customer = await this.db.customer.update({
+    where: { id: customerId },
+    data
+  });
+  
+  // VIOLATION: Logging raw PII values
+  await this.auditService.log({
+    tenantId: customer.tenant_id,
+    userId: this.requestContext.getUserId(),
+    action: 'CUSTOMER_UPDATE',
+    resourceType: 'Customer',
+    resourceId: customerId,
+    afterState: {
+      email: customer.email, // VIOLATION: Raw PII
+      ssn: customer.ssn, // VIOLATION: Raw sensitive PII
+    }
+  });
+  
+  return customer;
+}
+```
+
+**Example Privacy Compliant Logging (✅):**
+
+```typescript
+// ✅ CORRECT: Metadata only, no raw PII
+async updateCustomer(customerId: string, data: UpdateCustomerDto) {
+  const customer = await this.db.customer.update({
+    where: { id: customerId },
+    data
+  });
+  
+  // CORRECT: Logging metadata only
+  await this.auditService.log({
+    tenantId: customer.tenant_id,
+    userId: this.requestContext.getUserId(),
+    action: 'CUSTOMER_UPDATE',
+    resourceType: 'Customer',
+    resourceId: customerId,
+    afterState: {
+      fieldsUpdated: Object.keys(data), // Fields changed, not values
+      dataTypes: ['email', 'phone'], // Types modified, not values
+    },
+    ipAddress: this.requestContext.getIpAddress(),
+    userAgent: this.requestContext.getUserAgent(),
+    requestId: this.requestContext.getRequestId()
+  });
+  
+  return customer;
+}
+```
+
+---
+
+### R13: Input Validation — Audit Procedures
+
+**For code changes affecting API endpoints, DTOs, file uploads, or user input handling:**
+
+#### DTO Validation
+
+- [ ] **MANDATORY:** Verify DTOs exist for all request bodies (`@Body()` parameters)
+- [ ] **MANDATORY:** Verify DTOs use `class-validator` decorators (`@IsString()`, `@IsEmail()`, etc.)
+- [ ] **MANDATORY:** Verify DTOs have no `any` types
+- [ ] **MANDATORY:** Verify DTOs validate required fields (not optional without `@IsOptional()`)
+- [ ] **MANDATORY:** Verify DTOs validate optional fields (`@IsOptional()` decorator)
+- [ ] **MANDATORY:** Verify DTOs enforce size limits (`@MaxLength()`, `@MinLength()`, `@Length()`)
+- [ ] **MANDATORY:** Verify DTOs validate formats (`@IsEmail()`, `@IsUUID()`, `@Matches()`)
+- [ ] **MANDATORY:** Verify DTOs validate ranges (`@Min()`, `@Max()`, `@IsInt()`)
+- [ ] **MANDATORY:** Verify DTOs validate enums (`@IsEnum()`)
+- [ ] **MANDATORY:** Verify DTOs validate nested objects (`@ValidateNested()`, `@Type()`)
+- [ ] **MANDATORY:** Verify DTOs validate arrays (`@IsArray()`, `@ArrayMinSize()`, `@ArrayMaxSize()`)
+- [ ] **MANDATORY:** Verify DTOs use proper validation messages (user-friendly)
+- [ ] **RECOMMENDED:** Verify DTOs use shared validation constants (from `libs/common/src/validation/`)
+
+#### Controller Validation
+
+- [ ] **MANDATORY:** Verify controllers use DTOs for `@Body()` parameters (not `any`)
+- [ ] **MANDATORY:** Verify controllers use DTOs for `@Query()` parameters (when complex)
+- [ ] **MANDATORY:** Verify controllers use DTOs for `@Param()` parameters (when complex)
+- [ ] **MANDATORY:** Verify controllers use `ValidationPipe` (global or per-route)
+- [ ] **MANDATORY:** Verify controllers validate path parameters (UUIDs, IDs)
+- [ ] **MANDATORY:** Verify controllers validate query parameters (pagination, filters)
+- [ ] **RECOMMENDED:** Verify controllers use custom validators when needed (`@Validate()`)
+
+#### File Upload Validation
+
+- [ ] **MANDATORY:** Verify file uploads validate file type (MIME type, extension)
+- [ ] **MANDATORY:** Verify file uploads validate file size (max size limit)
+- [ ] **MANDATORY:** Verify file uploads validate file content (not just extension)
+- [ ] **MANDATORY:** Verify file uploads use DTOs with `@IsFile()`, `@MaxFileSize()`, `@FileType()` decorators
+- [ ] **MANDATORY:** Verify file uploads scan for malware (if applicable)
+- [ ] **MANDATORY:** Verify file uploads store files securely (not in public directory)
+- [ ] **MANDATORY:** Verify file uploads use unique filenames (prevent overwrites)
+- [ ] **RECOMMENDED:** Verify file uploads validate image dimensions (for images)
+
+#### XSS Prevention
+
+- [ ] **MANDATORY:** Verify HTML content is sanitized before storage
+- [ ] **MANDATORY:** Verify config objects are sanitized recursively
+- [ ] **MANDATORY:** Verify XSS vectors are detected and removed:
+  - Script tags (`<script>`, `</script>`)
+  - `javascript:` protocol
+  - Event handlers (`onclick`, `onerror`, etc.)
+  - `eval()` calls
+  - `Function()` constructors
+- [ ] **MANDATORY:** Verify widget configs are sanitized before storage
+- [ ] **MANDATORY:** Verify frontend uses React's built-in XSS protection
+- [ ] **MANDATORY:** Verify `dangerouslySetInnerHTML` is not used without sanitization
+- [ ] **MANDATORY:** Verify sanitization happens on backend (not just frontend)
+- [ ] **RECOMMENDED:** Verify sanitization uses established libraries (DOMPurify, sanitize-html)
+
+#### Injection Prevention
+
+- [ ] **MANDATORY:** Verify no SQL concatenation (use Prisma parameterized queries)
+- [ ] **MANDATORY:** Verify no raw SQL queries without parameterization
+- [ ] **MANDATORY:** Verify no command injection (validate shell command inputs)
+- [ ] **MANDATORY:** Verify no NoSQL injection (validate MongoDB queries)
+- [ ] **MANDATORY:** Verify no LDAP injection (validate LDAP queries)
+- [ ] **MANDATORY:** Verify no path traversal (validate file paths)
+- [ ] **MANDATORY:** Verify no template injection (validate template inputs)
+
+#### Input Size Limits
+
+- [ ] **MANDATORY:** Verify string inputs have max length limits
+- [ ] **MANDATORY:** Verify array inputs have max size limits
+- [ ] **MANDATORY:** Verify number inputs have min/max value limits
+- [ ] **MANDATORY:** Verify request body size is limited (global middleware)
+- [ ] **MANDATORY:** Verify file upload size is limited
+- [ ] **MANDATORY:** Verify nested object depth is limited (prevent deep nesting attacks)
+
+#### Business Rule Validation
+
+- [ ] **MANDATORY:** Verify business rules are validated in service layer (not just DTOs)
+- [ ] **MANDATORY:** Verify cross-field validation is implemented (`@ValidateIf()`, custom validators)
+- [ ] **MANDATORY:** Verify conditional validation is implemented (`@ValidateIf()`)
+- [ ] **MANDATORY:** Verify business rules prevent privilege escalation
+- [ ] **MANDATORY:** Verify business rules prevent tenant_id manipulation
+- [ ] **RECOMMENDED:** Verify business rules use custom validators (`@Validate()`)
+
+#### Error Handling
+
+- [ ] **MANDATORY:** Verify validation errors return appropriate HTTP status (400 Bad Request)
+- [ ] **MANDATORY:** Verify validation errors include user-friendly messages
+- [ ] **MANDATORY:** Verify validation errors do NOT expose sensitive details (stack traces, internal paths)
+- [ ] **MANDATORY:** Verify validation errors are logged (structured logging)
+- [ ] **MANDATORY:** Verify validation errors include field names (for user feedback)
+- [ ] **RECOMMENDED:** Verify validation errors are rate-limited (prevent enumeration attacks)
+
+#### Shared Validation Constants
+
+- [ ] **MANDATORY:** Verify validation constants are used consistently (from `libs/common/src/validation/`)
+- [ ] **MANDATORY:** Verify validation constants define size limits (max length, max size)
+- [ ] **MANDATORY:** Verify validation constants define format patterns (email, phone, UUID)
+- [ ] **MANDATORY:** Verify validation constants define allowed file types
+- [ ] **RECOMMENDED:** Verify validation constants are documented
+
+#### Automated Checks
+
+```bash
+# Run input validation checker
+python .cursor/scripts/check-input-validation.py --file <file_path>
+
+# Check all changed files
+python .cursor/scripts/check-input-validation.py --pr <PR_NUMBER>
+
+# Check specific validation type
+python .cursor/scripts/check-input-validation.py --type dto
+
+# Expected: No violations found
+```
+
+#### OPA Policy
+
+- **Policy:** `services/opa/policies/security.rego` (R13 section)
+- **Enforcement:** OVERRIDE (Tier 2 MAD) - Requires justification
+- **Tests:** `services/opa/tests/security_r13_test.rego`
+
+#### Manual Verification (When Needed)
+
+1. **Review Input Sources** - Identify all user input sources (body, query, params, files, headers)
+2. **Verify Validation** - Check that all inputs are validated (DTOs, decorators, size limits)
+3. **Check Sanitization** - Verify HTML/content sanitization is applied
+4. **Validate Error Handling** - Verify validation errors are user-friendly and secure
+
+**Example DTO Validation (✅):**
+
+```typescript
+// ✅ CORRECT: Comprehensive DTO validation
+import { IsString, IsEmail, IsOptional, MaxLength, MinLength, Matches, IsEnum } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export class CreateUserDto {
+  @ApiProperty({ 
+    description: 'Email address',
+    example: 'user@example.com',
+    maxLength: 255
+  })
+  @IsEmail({}, { message: 'Please provide a valid email address' })
+  @MaxLength(255, { message: 'Email must not exceed 255 characters' })
+  email!: string;
+
+  @ApiProperty({ 
+    description: 'First name',
+    example: 'John',
+    maxLength: 100
+  })
+  @IsString({ message: 'First name must be a string' })
+  @MinLength(1, { message: 'First name is required' })
+  @MaxLength(100, { message: 'First name must not exceed 100 characters' })
+  @Matches(/^[a-zA-Z\s\-']+$/, { message: 'First name can only contain letters, spaces, hyphens, and apostrophes' })
+  first_name!: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Phone number',
+    example: '+1-412-555-0123'
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^\+?[1-9]\d{1,14}$/, { message: 'Please provide a valid phone number' })
+  phone?: string;
+}
+```
+
+**Example XSS Prevention (✅):**
+
+```typescript
+// ✅ CORRECT: HTML sanitization before storage
+import { sanitizeHtml } from '@verofield/common/sanitization';
+
+async updateDescription(userId: string, description: string) {
+  // Sanitize HTML content before storage
+  const sanitized = sanitizeHtml(description);
+  
+  return this.prisma.user.update({
+    where: { id: userId },
+    data: { description: sanitized }
+  });
+}
+```
+
+**Example File Upload Validation (✅):**
+
+```typescript
+// ✅ CORRECT: Comprehensive file upload validation
+import { IsFile, MaxFileSize, FileType } from 'nestjs-file-upload';
+
+export class UploadPhotoDto {
+  @ApiProperty({ type: 'string', format: 'binary' })
+  @IsFile()
+  @MaxFileSize(5 * 1024 * 1024, { message: 'File size must not exceed 5MB' })
+  @FileType(['image/jpeg', 'image/png', 'image/webp'], { message: 'Only JPEG, PNG, and WebP images are allowed' })
+  file!: Express.Multer.File;
+}
+
+@Post('upload')
+@UseInterceptors(FileInterceptor('file'))
+async uploadPhoto(@UploadedFile() file: Express.Multer.File, @Body() dto: UploadPhotoDto) {
+  // Additional content validation
+  if (!this.isValidImageContent(file.buffer)) {
+    throw new BadRequestException('Invalid image file');
+  }
+  
+  // Generate unique filename
+  const filename = `${uuidv4()}-${file.originalname}`;
+  
+  // Store securely (not in public directory)
+  await this.storageService.save(file.buffer, filename);
+  
+  return { filename };
+}
+```
+
+**Example Injection Prevention (✅):**
+
+```typescript
+// ✅ CORRECT: Parameterized queries (Prisma handles this)
+async findUser(email: string) {
+  // Prisma uses parameterized queries automatically
+  return this.prisma.user.findFirst({
+    where: { email } // Safe - Prisma parameterizes
+  });
+}
+
+// ✅ CORRECT: Path validation
+async getFile(filename: string) {
+  // Validate filename to prevent path traversal
+  if (!/^[a-zA-Z0-9._-]+$/.test(filename)) {
+    throw new BadRequestException('Invalid filename');
+  }
+  
+  // Resolve path safely
+  const safePath = path.join(UPLOAD_DIR, filename);
+  
+  // Verify path is within upload directory
+  if (!safePath.startsWith(path.resolve(UPLOAD_DIR))) {
+    throw new BadRequestException('Invalid file path');
+  }
+  
+  return fs.readFileSync(safePath);
+}
+```
+
+---
+
+**Last Updated:** 2025-12-04  
+**Maintained By:** Security Team  
+**Review Frequency:** Quarterly or when security requirements change

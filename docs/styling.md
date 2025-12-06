@@ -5,7 +5,7 @@ project: VeroField
 scope:
   - frontend
 priority: normal
-last_updated: 2025-11-15
+last_updated: 2025-12-05
 always_apply: true
 ---
 

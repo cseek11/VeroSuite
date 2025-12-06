@@ -1,0 +1,3735 @@
+---
+description: "Typescript Bible rules extracted from SSM"
+alwaysApply: false
+applyWhen:
+  - "**/*.ts"  # TypeScript files
+  - "**/*.tsx"  # TypeScript React files
+  - "**/tsconfig.json"  # TypeScript config
+  - "**/tsconfig.*.json"  # TypeScript config variants
+sources:
+  - bible-ssm
+severityDefault: warning
+version: 1.0.0
+---
+
+# Typescript Bible – Enforcement Rules (Auto-Generated)
+
+> This file is generated from the SSM Bible. Edit the source Bible and re-run the pipeline instead of editing this file directly.
+
+**Last Updated:** 2025-12-04
+
+## Anti-Patterns (DO NOT)
+
+### BLK-3849f8b2da7a9965
+- **Chapter:** `CH-01`
+- **Severity:** `high`
+
+**Problem:**
+
+TypeScript is less ideal for: - ❌ Simple scripts (JavaScript may be sufficient) - ❌ Performance-critical systems (consider Rust, C++) - ❌ Embedded ...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-477-3440
+- **Chapter:** `CH-01`
+- **Severity:** `medium`
+
+**Problem:**
+
+Simple scripts (JavaScript may be sufficient)
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-a2cb1f46e30747c8
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Common Pitfall - Loop Closures:.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-06e7363ff1f60d3f
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// Not assignable: Named lacks 'age' property const named2: Named = { name: "Bob" }; const person2: Person = named2; // ❌ Error - Named missing 'age'.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-f5d0b3ce96da1949
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ This doesn't work at runtime function isUser(value: unknown): value is User { return value instanceof User; // User is an interface, not a cla...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-8244daffa656883b
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// DogHandler is NOT assignable to AnimalHandler // let handler: AnimalHandler = (dog: Dog) => {}; // ❌ Error.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-544ced3de6c40d33
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ⚠️ With strictFunctionTypes: Function properties are contravariant (safer) // ❌ Error: DogWithFunc is NOT assignable to AnimalWithFunc (contrava...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-098285ef1feab8a1
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// With strictFunctionTypes: true // let dogComparerFunc: ComparerFunc = { // compare: (a: Dog, b: Dog) => 0 // ❌ Error: contravariant // };.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-042dfb60f91b26b4
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Invalid: readonly is not a valid parameter modifier function bad(readonly obj: { value: number }): void { // Syntax error: 'readonly' modifier...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-f8d92d642f914396
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Function processDeep(obj: DeepReadonly<{ nested: { value: number } }>): void { // obj.nested.value = 100; // ❌ Error: Cannot assign to readonly pro...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-b6a60073a12ed799
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Error: Method 'move' does not exist in base class // override move(): void { } // TypeScript error if base method doesn't exist.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-9d2db6f18794101e
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD: Different property order function createPoint2(x: number, y: number) { return { y, x }; // Different hidden class: {y, x} }.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-131029ce8fcd79ee
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Subgraph PackageResolution["Step 2c: Package Resolution"] PackageImport --> WalkNodeModules["Walk up directory tree<br/>checking node_modules"] Fal...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-0d46aabd0ecdcb38
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Deprecated: import assert (TypeScript 4.5-5.2) import dataOld from "./data.json" assert { type: "json" }; // Deprecated.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-7369bf084fa86113
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Import invalid from "./script.ts" with { type: "json" }; // ❌ Error: Type mismatch.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-7c913dc76841e42f
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Error: BigInt cannot be serialized directly const big = 123n; JSON.stringify({ big }); // TypeError: Do not know how to serialize a BigInt.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-85b564982dbfbd5f
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Function c() { throw new Error("Something went wrong"); }.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-42e036155e9e2792
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Try { a(); } catch (error: unknown) { if (error instanceof Error) { console.log(error.stack); // Error: Something went wrong // at c (file.ts:10:11...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-811407d1bc75cb6c
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Wrong: Infinite recursion type DeepReadonly<T> = T extends object ? { readonly [K in keyof T]: DeepReadonly<T[K]> } : T;.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-6e549ff77e9f0a2d
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Wrong: Explodes compiler type Path = /${string};.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-a6683a94e0258af2
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Wrong: Runtime bloat enum State { Loading = "loading", Error = "error", }.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-3b0d05868163b93a
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Wrong: Infinite recursion type Unwrap<T> = T extends Promise<infer U> ? Unwrap<U> : T;.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-e7af494c5db9369d
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Anti-pattern: Raw HTML injection element.innerHTML = userInput; // XSS vulnerability.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-c701d860c87b4c46
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Anti-pattern: dangerouslySetInnerHTML without sanitization <div dangerouslySetInnerHTML={{ __html: userInput }} /> // XSS risk.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-d475c908b075d8e9
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Function loadEnv(): Env { const result = EnvSchema.safeParse(process.env); if (!result.success) { console.error("❌ Invalid environment variables:",...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-017dea01db0955fc
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// packages/b/tsconfig.json { "references": [{ "path": "../a" }] // ❌ Error: Circular reference }.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-0321a4b619cc10c9
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+# shared ↔ utils (❌ Bad - circular).
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-df14db25a1d85648
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Error: Cannot find module '@shared'.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-6eeb5ba021c139b4
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Anti-pattern: Multiple responsibilities class UserService { createUser() { /* ..
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-691e0e9732f06238
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Anti-pattern: Fat interface interface CrudOperations<T> { create(entity: T): Promise<T>; read(id: string): Promise<T>; update(id: string, enti...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-2246099083d5a678
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Anti-pattern: High-level depends on low-level class OrderService { private mysql = new MySQLDatabase(); // Direct dependency.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-864988b05642fb3a
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ No widening with const const a = "hello"; // "hello" (literal type) const b = 42; // 42 (literal type).
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-a61710fdbe18e19e
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Mutable arrays are invariant type Dogs = Dog[]; type Animals = Animal[]; const mutableDogs: Dogs = [new Dog()]; // const mutableAnimals: Anima...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-41a8a40be71e0d32
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Function compatibility type F1 = (a: number) => number; type F2 = (a: number, b: string) => number; const f1: F1 = (a) => a; // const f2: F2 = f1; ...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-80f6578d864daf18
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+{ "compilerOptions": { // ❌ REMOVE: "experimentalDecorators": true, // ❌ REMOVE: "emitDecoratorMetadata": true,.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-c251e9a1c57915f4
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Legacy (experimentalDecorators: true) function Injectable(target: Function) { // target is the constructor function return target; }.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-d18c98d26e2aec21
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Legacy function Log(target: any, propertyKey: string, descriptor: PropertyDescriptor) { const originalMethod = descriptor.value; descriptor.va...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-d6738f57f32abdc4
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Legacy (experimentalDecorators: true) function Inject(token: string) { return function (target: any, propertyKey: string | symbol | undefined,...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-630858c15dd9975f
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Legacy (reflect-metadata) import "reflect-metadata";.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ed0e8c793b4587cf
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Legacy import "reflect-metadata";.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-6821948ceaf6a768
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ Legacy function MinLength(length: number) { return function (target: any, propertyKey: string) { Reflect.defineMetadata("minLength", length, t...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-2bb8f6d2dc94b66f
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+# import "reflect-metadata"; // ❌ Remove this.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-25853ca4acbcfb51
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// Usage const instance = await createTypedWasmInstance(); const sum = instance.exports.add(10, 20); // Type-safe: number // instance.exports.add("...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-1894e427d92a2b8e
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD type Shape = | { kind: "circle"; radius: number } | { kind: "square"; side: number };.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-5dc388f3a6bba2c5
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD type Handler<E extends string> = E extends "click" ? () => void : (e: MouseEvent) => void;.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ecdebd6b77f740b9
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD type DeepReadonly<T> = T extends object ? { readonly [K in keyof T]: DeepReadonly<T[K]> } : T;.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-697c22e0de4d8b99
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+UserId = postId; // Error — unique symbol prevents assignability // const invalid = "not-uuid" as UserId; // ❌ Type error (cannot bypass with asser...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-1c86bf6950d437f1
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD type UserId = string & { __brand: "UserId" }; type PostId = string & { __brand: "PostId" };.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-788d84d0daaa862a
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD type Path = /${string}; type Routes = Path | "/admin" | "/login"; // VS Code freezes.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-67abfa43c77af2c1
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD const config = { apiUrl: "https://api.com", timeout: 5000, debug: true, // Still allowed! } satisfies { apiUrl: string; timeout: number; };.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-8e89e4b49d148933
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD type PartialButKeepId<T> = Partial<T> & Pick<T, "id">;.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-087790bb5ef7514f
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD type Unwrap<T> = T extends Promise<infer U> ? U : T;.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-a94de08457ed0f8c
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD function process<const T>(value: T as const) { // T is frozen, can't infer properly }.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-7b9f68758344f7c7
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD function makeArray(...items: string[]): string[] { return items; }.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-48a86ad15d38c17e
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD function pad(n: number, length: number): string; function pad(s: string): string; function pad(x: string | number, length?: number): strin...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-e32000130e74650c
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD type Dict = { [key: string]: number; x: number }; type Keys = keyof Dict; // string | number (not just "x").
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-157371358cb2a977
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD enum Color { Red, Green, Blue, }.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-8df06417f94f76e0
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD function process(data: any) { console.log(data.id); // No error, but might crash at runtime }.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-394848a178605918
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD const data = fetchData() as User; // Might not be User const value = obj!.prop; // Might be null.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-29e062b7fb934916
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD type User = { id: string; profile: { name: string; email: string; }; };.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-ec00b9e3a971aeb6
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+// ❌ BAD type User = { id: string; email: string; };.
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-1455-3441
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+**Common Pitfall - Loop Closures:**
+
+**Preferred Alternative / Solution:**
+
+// ❌ BAD: All functions reference the same i
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-1581-3442
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD: Global variable (never garbage collected)
+
+**Preferred Alternative / Solution:**
+
+// ✅ GOOD: Local variable (garbage collected when out of scope)
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-1791-3443
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Error - Named missing 'age'
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-2192-3444
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+This doesn't work at runtime
+
+**Preferred Alternative / Solution:**
+
+(value: unknown): value is User {
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-2584-3445
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+: distributes over unions
+
+**Preferred Alternative / Solution:**
+
+type UnsafeNonNullable<T> = T extends null | undefined ? never : T; // ❌ Wrong: distributes over unions
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-2595-3446
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Unbounded: Can cause compiler to freeze
+
+**Preferred Alternative / Solution:**
+
+Bounded: Safe
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-2646-3447
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+// DogHandler is NOT assignable to AnimalHandler
+
+**Preferred Alternative / Solution:**
+
+// AnimalHandler IS assignable to DogHandler
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-2699-3448
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Error: DogWithFunc is NOT assignable to AnimalWithFunc (contravariant)
+
+**Preferred Alternative / Solution:**
+
+**Why This Matters:**
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-2730-3449
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Error: contravariant
+
+**Preferred Alternative / Solution:**
+
+**Variance Rules Summary:**
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-2807-3450
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Shallow partial
+
+**Preferred Alternative / Solution:**
+
+= Partial<User>; // address.city is still required
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-3640-3451
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Invalid: readonly is not a valid parameter modifier
+
+**Preferred Alternative / Solution:**
+
+// ✅ Valid: Use Readonly<T> utility type instead
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-3645-3452
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Error: Cannot assign to readonly property
+
+**Preferred Alternative / Solution:**
+
+Valid: Use Readonly<T> utility type instead
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-3652-3453
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Error: Cannot assign to readonly property
+
+**Preferred Alternative / Solution:**
+
+**Note**: `readonly` is not a valid parameter modifier in TypeScript. Parameters are always mutable references (call-by-sharing). Use `Readonly<T>` utility type to prevent accidental mutations:
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-3750-3454
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Error: Method 'move' does not exist in base class
+
+**Preferred Alternative / Solution:**
+
+// ✅ Valid: New method (not overriding)
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-3763-3455
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Error: Method 'speak' overrides base class method but is not marked with 'override'
+
+**Preferred Alternative / Solution:**
+
+// ✅ Correct: Explicitly marked
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-3963-3456
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD: Different property order
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-4055-3457
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Module not found"]
+
+**Preferred Alternative / Solution:**
+
+Return file"]
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-4071-3458
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+subgraph PackageResolution["Step 2c: Package Resolution"]
+
+**Preferred Alternative / Solution:**
+
+FoundPackage -->|Yes| CheckExports{Has exports<br/>field?}
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-4303-3459
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Deprecated: import assert (TypeScript 4.5-5.2)
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-4334-3460
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+import invalid from "./script.ts" with { type: "json" };
+
+**Preferred Alternative / Solution:**
+
+const element: HTMLElement = document.getElementById("app")!;
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-4926-3461
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Error: BigInt cannot be serialized directly
+
+**Preferred Alternative / Solution:**
+
+// ✅ Solution 1: Convert to string
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-5171-3462
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Cannot use 'new'
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-5189-3463
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Cannot use 'new'
+
+**Preferred Alternative / Solution:**
+
+#### 9.13.2 Global Objects
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-5390-3464
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Primitives cannot be WeakMap keys
+
+**Preferred Alternative / Solution:**
+
+Primitives cannot be WeakMap keys
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-5403-3465
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Using object as Map
+
+**Preferred Alternative / Solution:**
+
+Using object as Map
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-5924-3466
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Wrapping already-promise value
+
+**Preferred Alternative / Solution:**
+
+Wrapping already-promise value
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-5938-3467
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Unhandled rejection
+
+**Preferred Alternative / Solution:**
+
+Unhandled rejection
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-6250-3468
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Assuming WeakRef always has value
+
+**Preferred Alternative / Solution:**
+
+Assuming WeakRef always has value
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-6265-3469
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Relying on exact cleanup timing
+
+**Preferred Alternative / Solution:**
+
+Relying on exact cleanup timing
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-6604-3470
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Infinite recursion
+
+**Preferred Alternative / Solution:**
+
+// ✅ Correct: Function guard prevents recursion
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-6994-3471
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+throw - disposal should not throw
+
+**Preferred Alternative / Solution:**
+
+not throw
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-7064-3472
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Throwing in disposal
+
+**Preferred Alternative / Solution:**
+
+Throwing in disposal
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-7206-3473
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Explodes compiler
+
+**Preferred Alternative / Solution:**
+
+// ✅ Correct: Bounded and performant
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-7223-3474
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Runtime bloat
+
+**Preferred Alternative / Solution:**
+
+// ✅ Correct: Zero runtime cost
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-7261-3475
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Infinite recursion
+
+**Preferred Alternative / Solution:**
+
+// ✅ Correct: Use built-in utility
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-7625-3476
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Anti-pattern: String concatenation (SQL injection vulnerable)
+
+**Preferred Alternative / Solution:**
+
+s WHERE id = '${userId}'`;  // NEVER DO THIS
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-7678-3477
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Anti-pattern: Raw HTML injection
+
+**Preferred Alternative / Solution:**
+
+Input;  // XSS vulnerability
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-7689-3478
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Anti-pattern: dangerouslySetInnerHTML without sanitization
+
+**Preferred Alternative / Solution:**
+
+Input }} />  // XSS risk
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-7782-3479
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Anti-pattern: Hardcoded secrets
+
+**Preferred Alternative / Solution:**
+
+// ✅ Pattern: Environment variables with type safety
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-7803-3480
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Invalid environment variables:", result.error.format());
+
+**Preferred Alternative / Solution:**
+
+// ✅ Pattern: Type-safe config factory
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-9740-3481
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Error: Circular reference
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-10065-3482
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+# shared ↔ utils (❌ Bad - circular)
+
+**Preferred Alternative / Solution:**
+
+// Solution: Ensure baseUrl and paths are configured correctly
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-10071-3483
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Error: Cannot find module '@shared'
+
+**Preferred Alternative / Solution:**
+
+// Solution: Ensure baseUrl and paths are configured correctly
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-10136-3484
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Referenced project must have composite: true
+
+**Preferred Alternative / Solution:**
+
+Referenced project must have composite: true
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-10170-3485
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: composite requires declaration: true
+
+**Preferred Alternative / Solution:**
+
+composite requires declaration: true
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-11007-3486
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Event type not inferred correctly
+
+**Preferred Alternative / Solution:**
+
+Event type not inferred correctly
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-11019-3487
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Wrong options format
+
+**Preferred Alternative / Solution:**
+
+Wrong options format
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-11574-3488
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+: Unsafe type assertion
+
+**Preferred Alternative / Solution:**
+
+Unsafe type assertion
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-11593-3489
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Wrong event type
+
+**Preferred Alternative / Solution:**
+
+Wrong event type
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-13885-3490
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Mixing Node.js and DOM types
+
+**Preferred Alternative / Solution:**
+
+Mixing Node.js and DOM types
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-13908-3491
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Using DOM types in Node.js
+
+**Preferred Alternative / Solution:**
+
+Using DOM types in Node.js
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-13983-3492
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: __dirname not available in ESM
+
+**Preferred Alternative / Solution:**
+
+__dirname not available in ESM
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-14002-3493
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Wrong import path
+
+**Preferred Alternative / Solution:**
+
+Wrong import path
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-14015-3494
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Importing type as value
+
+**Preferred Alternative / Solution:**
+
+Importing type as value
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-14277-3495
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: Library has no types
+
+**Preferred Alternative / Solution:**
+
+Library has no types
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-14291-3496
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+match library version
+
+**Preferred Alternative / Solution:**
+
+Types don't match library version
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-14835-3497
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Anti-pattern: Multiple responsibilities
+
+**Preferred Alternative / Solution:**
+
+Service {
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-14918-3498
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Anti-pattern: Fat interface
+
+**Preferred Alternative / Solution:**
+
+// ✅ Pattern: Segregated interfaces
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-14944-3499
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Anti-pattern: High-level depends on low-level
+
+**Preferred Alternative / Solution:**
+
+// ✅ Pattern: Both depend on abstraction
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-15537-3500
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+No widening with const
+
+**Preferred Alternative / Solution:**
+
+// ✅ as const prevents widening
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-15645-3501
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Mutable arrays are invariant
+
+**Preferred Alternative / Solution:**
+
+// ✅ Explicit variance annotations (TypeScript 4.7+)
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-15716-3502
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+Type error: OrderId not assignable to UserId
+
+**Preferred Alternative / Solution:**
+
+OK
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-15728-3503
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+// ✅ Direct object literal: excess property checking
+
+**Preferred Alternative / Solution:**
+
+Direct object literal: excess property checking
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-15801-3504
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+f1 doesn't accept second parameter
+
+**Preferred Alternative / Solution:**
+
+### 29.7 Type Resolution Order
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-17121-3505
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+REMOVE: "experimentalDecorators": true,
+
+**Preferred Alternative / Solution:**
+
+// ✅ ADD: Standard decorators are enabled by default in TS 5.0+
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-17140-3506
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Legacy (experimentalDecorators: true)
+
+**Preferred Alternative / Solution:**
+
+// ✅ ES Decorators (TypeScript 5.0+)
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-17162-3507
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Legacy
+
+**Preferred Alternative / Solution:**
+
+// ✅ ES Decorators
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-17180-3508
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Legacy
+
+**Preferred Alternative / Solution:**
+
+descriptor or metadata
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-17203-3509
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Legacy (experimentalDecorators: true)
+
+**Preferred Alternative / Solution:**
+
+// ✅ ES Decorators (No direct parameter decorators)
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-17219-3510
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Legacy (reflect-metadata)
+
+**Preferred Alternative / Solution:**
+
+// ✅ ES Decorators (context.metadata)
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-17246-3511
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Legacy
+
+**Preferred Alternative / Solution:**
+
+class UserService {
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-17290-3512
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+Legacy
+
+**Preferred Alternative / Solution:**
+
+class User {
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-17323-3513
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+# import "reflect-metadata"; //
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-17580-3514
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+// Usage
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-17711-3515
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+: No type safety
+
+**Preferred Alternative / Solution:**
+
+No type safety
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-17733-3516
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+: Memory not freed
+
+**Preferred Alternative / Solution:**
+
+Memory not freed
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19588-3517
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+type Handler<E extends string> = [E] extends ["click"]
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19613-3518
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+vent) => void;
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19633-3519
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+// Causes "type referenced directly or indirectly" error
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19656-3520
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+Type error (cannot bypass with assertions)
+
+**Preferred Alternative / Solution:**
+
+Type error (cannot bypass with assertions)
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19679-3521
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+// Usage
+
+**Preferred Alternative / Solution:**
+
+// const invalid = createUserId("not-uuid"); // ❌ Runtime error
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19687-3522
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+Id = string & { __brand: "UserId" };
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19710-3523
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+### C.6 Exact Object Shapes
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19737-3524
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+### C.7 Partial with Required Keys
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19753-3525
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+type User = { id: string; name: string };
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19771-3526
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+### C.9 Const Assertions
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19793-3527
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+### C.10 Const Generics
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19814-3528
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+### C.11 Overloads
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19839-3529
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+### C.12 Keyof with Index Signatures
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19860-3530
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+### C.13 Enums
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19885-3531
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+### C.14 any / unknown
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19913-3532
+- **Chapter:** `CH-02`
+- **Severity:** `high`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+### C.15 Assertions
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-19930-3533
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+; // Might not be User
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### string;
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+= {
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### string;
+- **Chapter:** `CH-02`
+- **Severity:** `low`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+= {
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-20285-3536
+- **Chapter:** `CH-02`
+- **Severity:** `medium`
+
+**Problem:**
+
+BAD
+
+**Preferred Alternative / Solution:**
+
+### C.19 Complete Patterns Table
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-42373f56a3c0c074
+- **Chapter:** `GLOBAL`
+- **Severity:** `medium`
+
+**Problem:**
+
+AI-assisted development pitfalls: Common hallucinations and misunderstandings that lead to production bugs - Type system mastery: Complete coverage...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-0df14ad5508d9195
+- **Chapter:** `GLOBAL`
+- **Severity:** `medium`
+
+**Problem:**
+
+Start with Chapter 1 (Introduction) and Chapter 2 (Syntax & Language Basics) - Focus on Chapter 4 (Types & Type System) sections 4.1-4.3 (Primitive...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### BLK-813f1ba672afc9ee
+- **Chapter:** `GLOBAL`
+- **Severity:** `medium`
+
+**Problem:**
+
+Use Chapter 4 as a comprehensive type reference - Study Chapter 9 (Patterns & Anti-Patterns) for best practices - Review production war stories in ...
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-94-3438
+- **Chapter:** `GLOBAL`
+- **Severity:** `low`
+
+**Problem:**
+
+or "ANTI-PATTERN" label
+
+**Preferred Alternative / Solution:**
+
+or "PATTERN" label
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+### antipattern-101-3439
+- **Chapter:** `GLOBAL`
+- **Severity:** `medium`
+
+**Problem:**
+
+- All TypeScript code uses ```typescript language tag
+
+**Preferred Alternative / Solution:**
+
+```typescript language tag
+
+**Rule (Cursor guideline):**
+
+- Avoid this pattern when writing typescript code unless explicitly justified.
+- If existing code uses this pattern, prefer refactoring toward the recommended solution.
+
+
+## Recommended Patterns (Prefer These)
+
+### CODE-4d2de96a88c0b228
+- **Chapter:** `CH-01`
+- **Language:** `typescript`
+- **Pattern Type:** `ts-structure`
+
+**Pattern:**
+
+interface Point {
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-868381ada8141bea
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `ts-structure`
+
+**Pattern:**
+
+interface Point {
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-c3ab18867c51e8fd
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `ts-structure`
+
+**Pattern:**
+
+class Point {
+
+**Example:**
+
+```typescript
+class Point {
+  x: number;
+  y: number;
+
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+
+  distance(): number {
+    return Math.sqrt(this.x ** 2 + this.y ** 2);
+  }
+}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-b83bdc37304b48c0
+- **Chapter:** `CH-02`
+- **Language:** `mermaid`
+- **Pattern Type:** `generic`
+
+**Pattern:**
+
+flowchart TD
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-76fb2000c731800b
+- **Chapter:** `CH-02`
+- **Language:** ``
+- **Pattern Type:** `generic`
+
+**Pattern:**
+
+#### 4.2.3 Advanced Constructs
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-13883f3a19da61a0
+- **Chapter:** `CH-02`
+- **Language:** ``
+- **Pattern Type:** `sql-query`
+
+**Pattern:**
+
+#### 4.3.2 Object Construction
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-27a7a4e6afd1e307
+- **Chapter:** `CH-02`
+- **Language:** ``
+- **Pattern Type:** `generic`
+
+**Pattern:**
+
+**Type Narrowing Triggers:**
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-1350d2ef9c0a69b3
+- **Chapter:** `CH-02`
+- **Language:** ``
+- **Pattern Type:** `generic`
+
+**Pattern:**
+
+#### 9.13.2 Global Objects
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-3b5f44f2efefc937
+- **Chapter:** `CH-02`
+- **Language:** ``
+- **Pattern Type:** `generic`
+
+**Pattern:**
+
+**Reflect**: Reflection operations on objects.
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-d22eb31ac6ef5d27
+- **Chapter:** `CH-02`
+- **Language:** ``
+- **Pattern Type:** `generic`
+
+**Pattern:**
+
+**Instance Methods:**
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-74c2559c562ff66d
+- **Chapter:** `CH-02`
+- **Language:** ``
+- **Pattern Type:** `generic`
+
+**Pattern:**
+
+#### 10.4.7 Quick Reference: Error Code Lookup
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-21773a7d8b4692bf
+- **Chapter:** `CH-02`
+- **Language:** ``
+- **Pattern Type:** `sql-query`
+
+**Pattern:**
+
+**Decorator Metadata Limitations:**
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### CODE-09b1901ed279b818
+- **Chapter:** `CH-02`
+- **Language:** ``
+- **Pattern Type:** `generic`
+
+**Pattern:**
+
+**Migration Checklist:**
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-199e884c3ecd665a
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: DTO with validation decorators
+
+**Example:**
+
+```typescript
+// ✅ Pattern: DTO with validation decorators
+export class CreateUserDto {
+  @IsString()
+  @Length(1, 100)
+  name!: string;
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-9555ac116a53e95d
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ❌ Anti-pattern: String concatenation (SQL injection vulnerable)
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-2bea1426a467025d
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Prisma (safe by default)
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-46913b068f41c04e
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Drizzle ORM (type-safe and parameterized)
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-5f99ec5e733d227a
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Knex with parameterization
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-f8d27722c4262251
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Raw queries with parameters (when needed)
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-74d3737ad28408d7
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Type-safe dynamic queries
+
+**Example:**
+
+```typescript
+// ✅ Pattern: Type-safe dynamic queries
+function buildSearchQuery(
+  filters: { name?: string; email?: string; status?: "active" | "inactive" }
+): SQLWrapper {
+  const conditions: SQLWrapper[] = [];
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-54a3cfcc1626a863
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ❌ Anti-pattern: Raw HTML injection
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-6059a0290a528094
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Use textContent for text
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-8901dfc007dbfed8
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: React auto-escapes by default
+
+**Example:**
+
+```typescript
+// ✅ Pattern: React auto-escapes by default
+function UserProfile({ name }: { name: string }) {
+  return <div>{name}</div>;  // Safe: React escapes {name}
+}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-bbfa997319c5f49f
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ❌ Anti-pattern: dangerouslySetInnerHTML without sanitization
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-431540dd1e685350
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Sanitize if HTML is required
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-9669663f5a4ba744
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Type-safe CSP headers
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-e4d0cba1ec7097aa
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Type-safe CSRF token handling
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-afa43149e84f58d1
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Validate CSRF token
+
+**Example:**
+
+```typescript
+// ✅ Pattern: Validate CSRF token
+function validateCSRFToken(req: CSRFRequest): boolean {
+  const sessionToken = req.session.csrfToken;
+  const headerToken = req.headers["x-csrf-token"];
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-ffdb260a4f669048
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ❌ Anti-pattern: Hardcoded secrets
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-2d2e2e233c17df02
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Environment variables with type safety
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-0f84f999d1678594
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Type-safe config factory
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-95059a818b22f3ba
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Type-safe version constraints in package.json
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-4097b98321ad4720
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Type-safe JWT handling
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-e5d349928bc239c5
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Type-safe auth middleware
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-5504c39368dcb2a5
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Type-level assertions
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-864716a37463052a
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Type-safe service testing
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-4c40912ad40faf2d
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Vitest mocking
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-fd6383a867a2839d
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Snapshot testing with types
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### "test-id",
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Factory functions for consistent mocks
+
+**Example:**
+
+```typescript
+// ✅ Pattern: Factory functions for consistent mocks
+function createMockUser(overrides: Partial<User> = {}): User {
+  return {
+    id: "test-id",
+    name: "Test User",
+    email: "test@example.com",
+    createdAt: new Date("2025-12-04"),
+    ...overrides,
+  };
+}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-7d8d2150f974e2b1
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Mock external modules
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-792e4e0a438fdad6
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Partial module mocking
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-4b189cca0d39b0b5
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Mock Date/time
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-f1591c71567a9238
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Test database isolation
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-d973d5fd78a88f4e
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Page Object Model
+
+**Example:**
+
+```typescript
+// ✅ Pattern: Page Object Model
+class LoginPage {
+  constructor(private page: Page) {}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-97f57a28ac76e76a
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Test utilities
+
+**Example:**
+
+```typescript
+// ✅ Pattern: Test utilities
+export function createAsyncMock<T>(value: T) {
+  return vi.fn().mockResolvedValue(value);
+}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-9b3699e53e21a19e
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Custom matchers
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-050f298b19374b23
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Layer-specific types
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### user.id.value,
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Mappers between layers
+
+**Example:**
+
+```typescript
+// ✅ Pattern: Mappers between layers
+class UserMapper {
+  static toResponseDto(user: User): UserResponseDto {
+    return {
+      id: user.id.value,
+      email: user.email.value,
+      name: user.name,
+      createdAt: user.createdAt.toISOString(),
+    };
+  }
+}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-918a0bdf5b463544
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Interface-based DI
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-41b98d0b36402982
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Composition root
+
+**Example:**
+
+```typescript
+// ✅ Pattern: Composition root
+function createServices(config: AppConfig) {
+  // Infrastructure implementations
+  const db = new PrismaClient();
+  const userRepo = new PrismaUserRepository(db);
+  const emailService = new SendGridEmailService(config.sendgridApiKey);
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-b7a6672c0359edb3
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Token-based injection
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-d1106185bb6578ae
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: NestJS module-based DI
+
+**Example:**
+
+```typescript
+// ✅ Pattern: NestJS module-based DI
+@Injectable()
+class UserService {
+  constructor(
+    @Inject("USER_REPOSITORY") private userRepo: UserRepository,
+    private emailService: EmailService  // Auto-injection by type
+  ) {}
+}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-eb7ffadb6539adac
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Generic repository interface
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-7a0de3a43be9f652
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Specification pattern for queries
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-ad80a76217297672
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Port (interface)
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-1c31b1b358e81606
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Adapter (implementation)
+
+**Example:**
+
+```typescript
+// ✅ Pattern: Adapter (implementation)
+class StripePaymentAdapter implements PaymentPort {
+  constructor(private stripe: Stripe) {}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-da8208a18f463ebf
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Domain uses ports, not adapters
+
+**Example:**
+
+```typescript
+// ✅ Pattern: Domain uses ports, not adapters
+class OrderService {
+  constructor(private paymentPort: PaymentPort) {}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-2ea55a393abd4de4
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Type-safe commands
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-9c136b948fb5108d
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Type-safe queries
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-07d26409bf091ede
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Command handler
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-7936e8f065779bfc
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Query handler
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-553e7a842471cc1e
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Mediator for dispatching
+
+**Example:**
+
+```typescript
+// ✅ Pattern: Mediator for dispatching
+class Mediator {
+  private handlers = new Map<string, CommandHandler<any, any> | QueryHandler<any, any>>();
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-300fe6025d21af17
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Type-safe domain events
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-60954d1f5e98336d
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Type-safe event map
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-5953156d9aa1cc02
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Type-safe event bus
+
+**Example:**
+
+```typescript
+// ✅ Pattern: Type-safe event bus
+class TypedEventBus<E extends Record<string, DomainEvent>> {
+  private handlers = new Map<keyof E, Set<(event: E[keyof E]) => Promise<void>>>();
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-b161604966b20381
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ❌ Anti-pattern: Multiple responsibilities
+
+**Example:**
+
+```typescript
+// ❌ Anti-pattern: Multiple responsibilities
+class UserService {
+  createUser() { /* ... */ }
+  sendEmail() { /* ... */ }
+  generateReport() { /* ... */ }
+}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-31c1e8dc9e7d7f3b
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Single responsibility
+
+**Example:**
+
+```typescript
+// ✅ Pattern: Single responsibility
+class UserService {
+  constructor(
+    private userRepo: UserRepository,
+    private emailService: EmailService
+  ) {}
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-e96b830b0b376fde
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Open for extension, closed for modification
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-b59e0d6a753de6fc
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Subtypes must be substitutable
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-ee7cf5e331b886c5
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ❌ Anti-pattern: Fat interface
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-1bf7f2e60c10330c
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Segregated interfaces
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-187981c322effc51
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ❌ Anti-pattern: High-level depends on low-level
+
+**Example:**
+
+```typescript
+// ❌ Anti-pattern: High-level depends on low-level
+class OrderService {
+  private mysql = new MySQLDatabase();  // Direct dependency
+```
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-03ff1225e78d6d23
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Both depend on abstraction
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-1f256b4e582b594b
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+// ✅ Pattern: Branded types for nominal-like behavior
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+
+### PATTERN-13d701ab5e39c085
+- **Chapter:** `CH-02`
+- **Language:** `typescript`
+- **Pattern Type:** `conceptual`
+
+**Pattern:**
+
+> **Quick Answer:**
+
+**Rule (Cursor guideline):**
+
+- Prefer this pattern when solving similar problems in `typescript`.
+- When refactoring, move toward this pattern if it improves clarity, safety, or performance.
+

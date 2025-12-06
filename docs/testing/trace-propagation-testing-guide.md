@@ -2,7 +2,7 @@
 
 **Rule:** R09 - Trace Propagation  
 **Purpose:** Ensure traceId propagates across all service boundaries  
-**Last Updated:** 2025-11-23
+**Last Updated:** 2025-12-05
 
 ---
 
@@ -483,7 +483,7 @@ await this.prisma.$executeRaw`SELECT current_setting('app.trace_id', true)`;
 
 ---
 
-**Last Updated:** 2025-11-23  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Platform Core Team  
 **Review Frequency:** Quarterly or when observability requirements change
 

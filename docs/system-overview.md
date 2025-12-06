@@ -2,7 +2,7 @@
 title: System Architecture Overview
 category: Architecture
 status: active
-last_reviewed: 2025-11-16
+last_reviewed: 2025-12-05
 owner: tech_architect
 related:
   - docs/architecture/frontend-architecture.md
@@ -211,7 +211,7 @@ See [VeroForge Architecture](veroforge-architecture.md) for complete details.
 
 ---
 
-**Last Updated:** 2025-11-16  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Tech Architect  
 **Review Frequency:** Quarterly
 

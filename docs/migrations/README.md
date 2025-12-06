@@ -1,6 +1,6 @@
 # Migration Guides
 
-**Last Updated:** 2025-11-23  
+**Last Updated:** 2025-12-05  
 **Purpose:** Index of all migration guides for breaking changes
 
 ---
@@ -137,7 +137,7 @@ If you need to rollback:
 
 | Date | Version | Feature | Status | Guide |
 |------|---------|---------|--------|-------|
-| 2025-11-23 | 2.0.0 | Example Migration | Example | [Link](./2025-11-23-example-migration.md) |
+| 2025-12-05 | 2.0.0 | Example Migration | Example | [Link](./2025-12-05-example-migration.md) |
 
 ---
 
@@ -235,12 +235,12 @@ Add breaking changes section to CHANGELOG.md:
 
 ### Good Example: Comprehensive Migration Guide
 
-**File:** `docs/migrations/2025-11-23-auth-v2-migration.md`
+**File:** `docs/migrations/2025-12-05-auth-v2-migration.md`
 
 ```markdown
 # Migration Guide: Authentication v2.0
 
-**Date:** 2025-11-23  
+**Date:** 2025-12-05  
 **Version:** 1.5.3 → 2.0.0  
 **Author:** @security-team  
 **Breaking Changes:** Removed legacy authentication endpoints
@@ -325,7 +325,7 @@ If you need to rollback:
 
 ## Support
 
-- **Migration Guide:** `docs/migrations/2025-11-23-auth-v2-migration.md`
+- **Migration Guide:** `docs/migrations/2025-12-05-auth-v2-migration.md`
 - **Support Channel:** #api-support
 - **Deadline:** 2025-12-23 (30 days)
 - **Contact:** @security-team or security@company.com
@@ -342,7 +342,7 @@ If you need to rollback:
 
 ---
 
-**Last Updated:** 2025-11-23  
+**Last Updated:** 2025-12-05  
 **Maintained By:** Data Team  
 **Review Frequency:** Updated with each breaking change
 

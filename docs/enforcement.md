@@ -5,7 +5,7 @@ project: VeroField
 scope:
   - all
 priority: critical
-last_updated: 2025-11-16
+last_updated: 2025-12-05
 always_apply: true
 ---
 
@@ -180,11 +180,11 @@ always_apply: true
    - **ACTION:** Read `.cursor/rules/forms.md` and `.cursor/rules/frontend.md`
 
 6. **Date Violations** ⭐ **CRITICAL**
-   - ❌ Hardcoding dates (e.g., "2025-01-27" instead of checking current date)
+   - ❌ Hardcoding dates (e.g., "2025-12-05" instead of checking current date)
    - ❌ Using old dates in "Last Updated" fields
    - ❌ Not updating "Last Updated" when modifying documentation
    - **ACTION:** Always check device/system date before writing dates
-   - **FORMAT:** Use ISO 8601: `YYYY-MM-DD` (e.g., `2025-11-15`)
+   - **FORMAT:** Use ISO 8601: `YYYY-MM-DD` (e.g., `2025-12-05`)
    - **VERIFY:** Date must match current system date, not a hardcoded value
 
 ---
@@ -481,8 +481,8 @@ always_apply: true
 **CHECK:** `.cursor/rules/forms.md`
 
 ### Rule 6: Date Compliance ⭐ **CRITICAL**
-**WRONG:** `**Last Updated:** 2025-01-27` (hardcoded)  
-**RIGHT:** Check device date first, then use: `**Last Updated:** 2025-11-15` (current date)  
+**WRONG:** `**Last Updated:** 2025-12-05` (hardcoded)  
+**RIGHT:** Check device date first, then use: `**Last Updated:** 2025-12-05` (current date)  
 **CHECK:** `.cursor/rules/core.md` - Date & Time Handling  
 **VERIFY:** Date must match current system/device date exactly
 
@@ -531,11 +531,11 @@ always_apply: true
 ```
 ❌ VIOLATION DETECTED in file audit:
    File: docs/planning/VEROAI_DEVELOPMENT_PLAN.md
-   Violation: Hardcoded date "2025-01-27" instead of current date
+   Violation: Hardcoded date "2025-12-05" instead of current date
    Rule: .cursor/rules/core.md - Date & Time Handling
    
    STOPPING - Fixing date violation...
-   ✅ FIXED: Updated to current date 2025-11-15
+   ✅ FIXED: Updated to current date 2025-12-05
    ✅ RE-AUDITED: File now compliant
 ```
 
@@ -570,7 +570,7 @@ always_apply: true
 
 ---
 
-**Last Updated:** 2025-11-16  
+**Last Updated:** 2025-12-05  
 **Status:** Active Enforcement  
 **Priority:** CRITICAL - Must be followed for every implementation
 

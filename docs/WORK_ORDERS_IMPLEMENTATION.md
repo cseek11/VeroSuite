@@ -136,7 +136,7 @@ POST /api/work-orders
   "assigned_to": "uuid", // optional
   "status": "pending", // optional, defaults to "pending"
   "priority": "medium", // optional, defaults to "medium"
-  "scheduled_date": "2025-01-15T09:00:00Z", // optional
+  "scheduled_date": "2025-12-05T09:00:00Z", // optional
   "description": "Work order description",
   "notes": "Additional notes" // optional
 }
@@ -149,7 +149,7 @@ GET /api/work-orders/:id
 
 #### 3. List Work Orders
 ```http
-GET /api/work-orders?status=pending&priority=high&assigned_to=uuid&customer_id=uuid&start_date=2025-01-01&end_date=2025-01-31&page=1&limit=20
+GET /api/work-orders?status=pending&priority=high&assigned_to=uuid&customer_id=uuid&start_date=2025-12-05&end_date=2025-12-05&page=1&limit=20
 ```
 
 **Query Parameters:**
@@ -174,8 +174,8 @@ PUT /api/work-orders/:id
   "assigned_to": "uuid", // optional
   "status": "in-progress", // optional
   "priority": "high", // optional
-  "scheduled_date": "2025-01-15T09:00:00Z", // optional
-  "completion_date": "2025-01-15T17:00:00Z", // optional
+  "scheduled_date": "2025-12-05T09:00:00Z", // optional
+  "completion_date": "2025-12-05T17:00:00Z", // optional
   "description": "Updated description", // optional
   "notes": "Updated notes" // optional
 }
@@ -291,7 +291,7 @@ const response = await fetch('/api/work-orders', {
     customer_id: 'customer-uuid',
     description: 'Emergency pest control needed',
     priority: 'urgent',
-    scheduled_date: '2025-01-15T09:00:00Z'
+    scheduled_date: '2025-12-05T09:00:00Z'
   })
 });
 ```

@@ -1,31 +1,31 @@
 # ENFORCER STATUS
 
-**Status:** WARNINGS_ONLY  
-**Last Scan:** 2025-12-04T06:02:27.144477+00:00  
-**Session ID:** 9fa1b583-d2fb-4e56-8f44-0d34909f3033
+**Status:** REJECTED  
+**Last Scan:** 2025-12-06T02:12:16.201417+00:00  
+**Session ID:** 4850fc61-c840-4d53-9737-54a7400fcc11
 
 ---
 
 ## Summary
 
 ### Current Session
-- **Blocking Violations:** 0
-- **Warning Violations:** 123
+- **Blocking Violations:** 3
+- **Warning Violations:** 829
 
 ### Baseline (Historical)
 - **Blocking Violations:** 0
 - **Warning Violations:** 0
 
 ### Total
-- **Blocking Violations:** 0
-- **Warning Violations:** 123
+- **Blocking Violations:** 3
+- **Warning Violations:** 829
 - **Auto-Fixes Applied:** 0
 
 ---
 
 ## Status Details
 
-**Note:** Only warnings present in current session (123). System is functional but improvements recommended.
+**Note:** Blocking violations detected in current session (3). See ACTIVE_VIOLATIONS.md for details.
 
 **Gating:** Status is determined by current session violations. Baseline violations are shown for visibility but do not block task completion.
 

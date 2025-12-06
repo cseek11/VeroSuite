@@ -4398,7 +4398,7 @@ from zoneinfo import ZoneInfo
 dt = datetime.now(ZoneInfo("America/New_York"))
 
 9.2.3 Parsing and formatting
-dt = datetime.strptime("2025-01-01", "%Y-%m-%d")
+dt = datetime.strptime("2025-12-05", "%Y-%m-%d")
 s = dt.strftime("%Y-%m-%d")
 
 9.3 Data Structures (collections module)
@@ -10928,7 +10928,7 @@ log.addHandler(handler)
 
 Every log becomes a structured object:
 
-{"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-03-01T12:00:00Z"}
+{"message": "user created", "level": "INFO", "logger": "service", "ts": "2025-12-05T12:00:00Z"}
 
 22.3 Correlation IDs & Request IDs
 

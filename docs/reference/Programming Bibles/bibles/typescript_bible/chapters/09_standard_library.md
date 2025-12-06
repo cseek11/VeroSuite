@@ -439,7 +439,7 @@ Example:
 ```typescript
 const now: Date = new Date();
 const specific: Date = new Date(2025, 0, 1); // January 1, 2025
-const fromString: Date = new Date("2025-11-30");
+const fromString: Date = new Date("2025-12-05");
 const fromTimestamp: Date = new Date(1735689600000);
 
 // Methods
@@ -447,7 +447,7 @@ now.getFullYear(); // 2025
 now.getMonth(); // 0-11
 now.getDate(); // 1-31
 now.getTime(); // milliseconds since epoch
-now.toISOString(); // "2025-01-01T00:00:00.000Z"
+now.toISOString(); // "2025-12-05T00:00:00.000Z"
 ```
 
 #### 9.9.2 Intl
@@ -1894,7 +1894,7 @@ interface Temporal.Duration {
 }
 
 // Example usage (conceptual)
-// const date = Temporal.PlainDate.from("2025-11-30");
+// const date = Temporal.PlainDate.from("2025-12-05");
 // const tomorrow = date.add({ days: 1 });
 // const duration = date.until(tomorrow);
 ```

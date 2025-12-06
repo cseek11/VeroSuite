@@ -2,11 +2,11 @@
 
 **Purpose:** This file serves as a living knowledge base of engineering decisions, trade-offs, alternatives considered, and lessons learned. Every significant architectural or design decision should be documented here.
 
-**Last Updated:** 2025-11-22
+**Last Updated:** 2025-12-05
 
 ---
 
-## Backend Migration to Monorepo Structure - 2025-11-22
+## Backend Migration to Monorepo Structure - 2025-12-05
 
 ### Decision
 Migrated backend codebase from `backend/` directory to monorepo structure (`apps/api/` and `libs/common/`) to comply with VeroField Hybrid Rule System v2.0 architectural requirements.
@@ -106,7 +106,7 @@ Migrated backend codebase from `backend/` directory to monorepo structure (`apps
 
 ---
 
-## JWT Module Async Registration Pattern - 2025-11-22
+## JWT Module Async Registration Pattern - 2025-12-05
 
 ### Decision
 Changed JWT module registration from synchronous `JwtModule.register()` to asynchronous `JwtModule.registerAsync()` with ConfigService to properly load environment variables.
@@ -188,7 +188,7 @@ Changed JWT module registration from synchronous `JwtModule.register()` to async
 
 ---
 
-## Comprehensive Rule Clarity Audit Methodology - 2025-11-22
+## Comprehensive Rule Clarity Audit Methodology - 2025-12-05
 
 ### Decision
 Established comprehensive audit process for identifying rule clarity issues, enforcement gaps, and meta-patterns across the VeroField Hybrid Rule System v2.0, resulting in identification of 19 issues (1 fixed, 18 open) and 6 meta-patterns.
@@ -345,7 +345,7 @@ Comprehensive audit methodology provides:
 
 ---
 
-**Last Updated:** 2025-11-22
+**Last Updated:** 2025-12-05
 
 ---
 
@@ -448,7 +448,7 @@ Why was this approach chosen?
 
 ## Engineering Decisions
 
-## Comprehensive Codebase Compliance Audit - 2025-11-22
+## Comprehensive Codebase Compliance Audit - 2025-12-05
 
 ### Decision
 Conducted a comprehensive codebase compliance audit using the VeroField Hybrid Rule System v2.0 to identify structural violations, security issues, and compliance gaps before continued development.
@@ -557,7 +557,7 @@ Conducted a comprehensive codebase compliance audit using the VeroField Hybrid R
 
 ---
 
-### Example Decision: Structured Logging Format - 2025-01-27
+### Example Decision: Structured Logging Format - 2025-12-05
 
 **Note:** This is an example entry. Replace with actual decisions as they are made.
 
@@ -699,7 +699,7 @@ JSON format was chosen because:
 
 ---
 
-## Invoice Generation from Work Orders Pattern - 2025-11-16
+## Invoice Generation from Work Orders Pattern - 2025-12-05
 
 ### Decision
 Implemented a pattern for automatically generating invoices from completed work orders, allowing users to select work orders and create invoices with pre-populated data.
@@ -805,7 +805,7 @@ The selected approach balances automation with user control:
 
 ---
 
-## Template-Based Invoice Creation Pattern - 2025-11-16
+## Template-Based Invoice Creation Pattern - 2025-12-05
 
 ### Decision
 Implemented a template system for invoice creation, allowing users to save and reuse invoice configurations with predefined items, amounts, and settings.
@@ -920,7 +920,7 @@ Template system provides the best balance:
 
 ---
 
-## Scheduled Invoice Automation Pattern - 2025-11-16
+## Scheduled Invoice Automation Pattern - 2025-12-05
 
 ### Decision
 Implemented a scheduling system for automated invoice generation, allowing users to create recurring and one-time scheduled invoices that are automatically generated at specified intervals.
@@ -1058,7 +1058,7 @@ When adding a new decision:
 
 ---
 
-## Resource Timeline View Component - 2025-11-17
+## Resource Timeline View Component - 2025-12-05
 
 ### Decision
 Implemented a Resource Timeline View component for the Job Scheduling system, providing a visual timeline interface where technicians are displayed as lanes and jobs are shown as draggable/resizable events on a time-based grid.
@@ -1187,12 +1187,12 @@ The Resource Timeline View provides:
 
 ---
 
-**Last Updated:** 2025-11-17
+**Last Updated:** 2025-12-05
 
 
 ---
 
-## CI Automation Suite Implementation - 2025-11-17
+## CI Automation Suite Implementation - 2025-12-05
 
 ### Decision
 Implement comprehensive CI automation suite for REWARD_SCORE system using Python scripts and GitHub Actions, with metrics dashboard for visualization.
@@ -1337,4 +1337,4 @@ The CI automation suite provides:
 
 ---
 
-**Last Updated:** 2025-11-17
+**Last Updated:** 2025-12-05

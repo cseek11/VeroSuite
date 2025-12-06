@@ -1,6 +1,6 @@
 # Auto-PR Files Local Verification Report
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Status:** ✅ **ALL FILES FOUND LOCALLY**  
 **Location:** Working Directory
 
@@ -20,23 +20,23 @@ All core scripts, workflows, configuration files, and supporting files have been
 
 | File | Path | Size | Last Modified | Status |
 |------|------|------|---------------|--------|
-| `compute_reward_score.py` | `.cursor/scripts/` | 77,552 bytes | 2025-11-24 6:21 AM | ✅ **FOUND** |
-| `auto_pr_session_manager.py` | `.cursor/scripts/` | 36,970 bytes | 2025-11-22 12:37 PM | ✅ **FOUND** |
-| `analyze_reward_trends.py` | `.cursor/scripts/` | 19,602 bytes | 2025-11-22 12:37 PM | ✅ **FOUND** |
+| `compute_reward_score.py` | `.cursor/scripts/` | 77,552 bytes | 2025-12-05 6:21 AM | ✅ **FOUND** |
+| `auto_pr_session_manager.py` | `.cursor/scripts/` | 36,970 bytes | 2025-12-05 12:37 PM | ✅ **FOUND** |
+| `analyze_reward_trends.py` | `.cursor/scripts/` | 19,602 bytes | 2025-12-05 12:37 PM | ✅ **FOUND** |
 
 ### Supporting Scripts
 
 | File | Path | Size | Last Modified | Status |
 |------|------|------|---------------|--------|
-| `session_cli.py` | `.cursor/scripts/` | 11,771 bytes | 2025-11-24 6:21 AM | ✅ **FOUND** |
-| `sync_reward_score.py` | `.cursor/scripts/` | 491 bytes | 2025-11-21 11:05 AM | ✅ **FOUND** |
+| `session_cli.py` | `.cursor/scripts/` | 11,771 bytes | 2025-12-05 6:21 AM | ✅ **FOUND** |
+| `sync_reward_score.py` | `.cursor/scripts/` | 491 bytes | 2025-12-05 11:05 AM | ✅ **FOUND** |
 
 ### Log Files
 
 | File | Path | Size | Last Modified | Status |
 |------|------|------|---------------|--------|
-| `auto_pr_creation.log` | `.cursor/scripts/` | 21,350 bytes | 2025-11-21 12:35 PM | ✅ **FOUND** |
-| `auto_pr_process.log` | `.cursor/scripts/` | 3,033 bytes | 2025-11-21 12:36 PM | ✅ **FOUND** |
+| `auto_pr_creation.log` | `.cursor/scripts/` | 21,350 bytes | 2025-12-05 12:35 PM | ✅ **FOUND** |
+| `auto_pr_process.log` | `.cursor/scripts/` | 3,033 bytes | 2025-12-05 12:36 PM | ✅ **FOUND** |
 
 ---
 
@@ -44,10 +44,10 @@ All core scripts, workflows, configuration files, and supporting files have been
 
 | Workflow | Path | Size | Last Modified | Status |
 |----------|------|------|---------------|--------|
-| `swarm_compute_reward_score.yml` | `.github/workflows/` | 16,500 bytes | 2025-11-22 12:37 PM | ✅ **FOUND** |
-| `apply_reward_feedback.yml` | `.github/workflows/` | 6,980 bytes | 2025-11-22 12:37 PM | ✅ **FOUND** |
-| `auto_pr_session_manager.yml` | `.github/workflows/` | 8,065 bytes | 2025-11-21 5:43 PM | ✅ **FOUND** |
-| `session_health_check.yml` | `.github/workflows/` | 4,388 bytes | 2025-11-22 12:37 PM | ✅ **FOUND** |
+| `swarm_compute_reward_score.yml` | `.github/workflows/` | 16,500 bytes | 2025-12-05 12:37 PM | ✅ **FOUND** |
+| `apply_reward_feedback.yml` | `.github/workflows/` | 6,980 bytes | 2025-12-05 12:37 PM | ✅ **FOUND** |
+| `auto_pr_session_manager.yml` | `.github/workflows/` | 8,065 bytes | 2025-12-05 5:43 PM | ✅ **FOUND** |
+| `session_health_check.yml` | `.github/workflows/` | 4,388 bytes | 2025-12-05 12:37 PM | ✅ **FOUND** |
 
 ---
 
@@ -56,7 +56,7 @@ All core scripts, workflows, configuration files, and supporting files have been
 | File | Path | Size | Last Modified | Status |
 |------|------|------|---------------|--------|
 | `reward_rubric.yaml` | `.cursor/` | - | - | ✅ **FOUND** |
-| `session_config.yaml` | `.cursor/config/` | 707 bytes | 2025-11-20 9:41 AM | ✅ **FOUND** |
+| `session_config.yaml` | `.cursor/config/` | 707 bytes | 2025-12-05 9:41 AM | ✅ **FOUND** |
 
 ---
 
@@ -64,7 +64,7 @@ All core scripts, workflows, configuration files, and supporting files have been
 
 | File | Path | Size | Last Modified | Status |
 |------|------|------|---------------|--------|
-| `auto_pr_sessions.json` | `docs/metrics/` | 7,497 bytes | 2025-11-22 12:37 PM | ✅ **FOUND** |
+| `auto_pr_sessions.json` | `docs/metrics/` | 7,497 bytes | 2025-12-05 12:37 PM | ✅ **FOUND** |
 
 ---
 
@@ -72,7 +72,7 @@ All core scripts, workflows, configuration files, and supporting files have been
 
 Backup copies exist in:
 - `.cursor/backup_20251121/scripts/` - Contains backup copies of all scripts
-- `.cursor/backups/auto_pr_backup_2025-11-21_20-42-36/` - Additional backup location
+- `.cursor/backups/auto_pr_backup_2025-12-05_20-42-36/` - Additional backup location
 
 ---
 
@@ -106,21 +106,21 @@ Backup copies exist in:
 ### compute_reward_score.py
 - **Location:** `.cursor/scripts/compute_reward_score.py`
 - **Size:** 77,552 bytes (~76 KB)
-- **Last Modified:** 2025-11-24 6:21 AM
+- **Last Modified:** 2025-12-05 6:21 AM
 - **Purpose:** Computes REWARD_SCORE from CI artifacts
 - **Status:** ✅ Present and accessible
 
 ### auto_pr_session_manager.py
 - **Location:** `.cursor/scripts/auto_pr_session_manager.py`
 - **Size:** 36,970 bytes (~36 KB)
-- **Last Modified:** 2025-11-22 12:37 PM
+- **Last Modified:** 2025-12-05 12:37 PM
 - **Purpose:** Handles micro-PR batching and session tracking
 - **Status:** ✅ Present and accessible
 
 ### analyze_reward_trends.py
 - **Location:** `.cursor/scripts/analyze_reward_trends.py`
 - **Size:** 19,602 bytes (~19 KB)
-- **Last Modified:** 2025-11-22 12:37 PM
+- **Last Modified:** 2025-12-05 12:37 PM
 - **Purpose:** Analyzes reward score trends for feedback
 - **Status:** ✅ Present and accessible
 
@@ -217,7 +217,7 @@ docs/metrics/
 
 ---
 
-**Last Updated:** 2025-11-24  
+**Last Updated:** 2025-12-05  
 **Verified By:** Local File System Check  
 **Status:** ✅ **ALL FILES FOUND**
 

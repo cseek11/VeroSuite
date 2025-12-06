@@ -1,6 +1,6 @@
 ---
 title: The TypeScript Bible — Deep-Dive Edition
-version: 2025-11-28
+version: 2025-12-05
 status: Living Architectural Reference
 audience: Beginner → Practitioner → Expert → PhD-Level Researcher
 domain: typescript
@@ -10,7 +10,7 @@ ssm_version: 3
 
 # The TypeScript Bible — Deep-Dive Edition
 
-**Last Updated:** 2025-11-28
+**Last Updated:** 2025-12-05
 
 ## Front Matter
 
@@ -3110,7 +3110,7 @@ Example:
 ```typescript
 const now: Date = new Date();
 const specific: Date = new Date(2025, 0, 1); // January 1, 2025
-const fromString: Date = new Date("2025-01-01");
+const fromString: Date = new Date("2025-12-05");
 const fromTimestamp: Date = new Date(1735689600000);
 
 // Methods
@@ -3118,7 +3118,7 @@ now.getFullYear(); // 2025
 now.getMonth(); // 0-11
 now.getDate(); // 1-31
 now.getTime(); // milliseconds since epoch
-now.toISOString(); // "2025-01-01T00:00:00.000Z"
+now.toISOString(); // "2025-12-05T00:00:00.000Z"
 ```
 
 #### 9.9.2 Intl
@@ -7870,5 +7870,5 @@ See Chapter 34.1.1 for the complete formal grammar specification.
 
 ---
 
-**Last Updated:** 2025-11-28
+**Last Updated:** 2025-12-05
 

@@ -1,5 +1,5 @@
 # Helper Function Compliance Audit
-**Date:** 2025-11-25  
+**Date:** 2025-12-05  
 **Reference:** `docs/reference/rego_opa_bible.md`  
 **Scope:** `services/opa/policies/_shared.rego` and helper functions across all policies
 
@@ -184,6 +184,6 @@ has_override_marker(pr_body, rule) if {
 
 ---
 
-**Last Updated:** 2025-11-25  
+**Last Updated:** 2025-12-05  
 **Next Review:** After fixes applied
 

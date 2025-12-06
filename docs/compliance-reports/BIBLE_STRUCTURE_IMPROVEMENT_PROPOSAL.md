@@ -1,6 +1,6 @@
 # Bible Structure Improvement Proposal: AI Generation + opa fmt
 
-**Date:** 2025-11-25  
+**Date:** 2025-12-05  
 **Section:** Chapter 2.3 - Comments and Formatting  
 **Current Issue:** AI generation guidance is buried in a numbered list and may be missed  
 **Proposed Solution:** Add standalone fact block + enhance list item
@@ -262,7 +262,7 @@ But the standalone fact block in Chapter 2.3 is the primary location.
 
 ---
 
-**Last Updated:** 2025-11-25  
+**Last Updated:** 2025-12-05  
 **Status:** Proposal for Review
 
 

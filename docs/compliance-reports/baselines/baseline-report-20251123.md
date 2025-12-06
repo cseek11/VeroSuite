@@ -1,9 +1,9 @@
 # Performance Baseline Report
 
-**Generated:** 2025-11-23T12:57:56.299600  
+**Generated:** 2025-12-05T12:57:56.299600  
 **Environment:** staging  
 **Status:** PARTIAL - Manual CI measurement required  
-**Baseline Date:** 2025-11-23
+**Baseline Date:** 2025-12-05
 
 ---
 

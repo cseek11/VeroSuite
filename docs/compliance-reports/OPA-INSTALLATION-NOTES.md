@@ -1,6 +1,6 @@
 # OPA Installation Notes
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Purpose:** Clarify OPA installation location and usage across chat sessions
 
 ---
@@ -98,7 +98,7 @@ cd services/opa
 # Expected output:
 # Version: 1.10.1
 # Build Commit: a119f30419c83050505a44ac33ba81e7279f5178
-# Build Timestamp: 2025-11-05T09:06:03Z
+# Build Timestamp: 2025-12-05T09:06:03Z
 # Platform: windows/amd64
 # Rego Version: v1
 # WebAssembly: available

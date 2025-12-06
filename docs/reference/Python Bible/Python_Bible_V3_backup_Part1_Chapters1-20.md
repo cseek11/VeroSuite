@@ -1,50 +1,50 @@
-﻿CHAPTER 1 â€” INTRODUCTION TO PYTHON
+CHAPTER 1 — INTRODUCTION TO PYTHON
 
 Depth Level: 3 (Comprehensive)
-Python Versions Covered: 3.8â€“3.14+
+Python Versions Covered: 3.8–3.14+
 
-ðŸ“š Python Bible Learning Roadmap
+📚 Python Bible Learning Roadmap
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    BEGINNER PATH                            â”‚
-â”‚  Ch. 1 â†’ Ch. 2 â†’ Ch. 4 â†’ Ch. 5 â†’ Ch. 6 â†’ Ch. 7            â”‚
-â”‚  (Intro) (Syntax) (Types) (Control) (Functions) (OOP)      â”‚
-â”‚                                                             â”‚
-â”‚  Focus: Core language, basic data structures, functions     â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                        â†“
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                  INTERMEDIATE PATH                          â”‚
-â”‚  Ch. 8 â†’ Ch. 9 â†’ Ch. 10 â†’ Ch. 11 â†’ Ch. 14                 â”‚
-â”‚  (Modules) (Stdlib) (Errors) (Arch) (Testing)              â”‚
-â”‚                                                             â”‚
-â”‚  Focus: Project structure, error handling, testing          â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                        â†“
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    ADVANCED PATH                            â”‚
-â”‚  Ch. 12 â†’ Ch. 13 â†’ Ch. 16 â†’ Ch. 17 â†’ Ch. 19                â”‚
-â”‚  (Perf) (Security) (Concurrency) (Meta) (Web)              â”‚
-â”‚                                                             â”‚
-â”‚  Focus: Performance, security, async, metaprogramming       â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                        â†“
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                 SPECIALIST PATHS                            â”‚
-â”‚                                                             â”‚
-â”‚  Systems Programming:                                       â”‚
-â”‚    Ch. 27 (Internals) â†’ Ch. 28 (Implementations)           â”‚
-â”‚                                                             â”‚
-â”‚  Backend Development:                                       â”‚
-â”‚    Ch. 19 (Web) â†’ Ch. 20 (Data) â†’ Ch. 21 (Eng)             â”‚
-â”‚                                                             â”‚
-â”‚  Performance Engineering:                                   â”‚
-â”‚    Ch. 12 (Perf) â†’ Ch. 27 (Internals) â†’ Ch. 28 (PyPy)      â”‚
-â”‚                                                             â”‚
-â”‚  Architecture & Design:                                    â”‚
-â”‚    Ch. 11 (Arch) â†’ Ch. 17 (Meta) â†’ Appendix A (Patterns)    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│                    BEGINNER PATH                            │
+│  Ch. 1 → Ch. 2 → Ch. 4 → Ch. 5 → Ch. 6 → Ch. 7            │
+│  (Intro) (Syntax) (Types) (Control) (Functions) (OOP)      │
+│                                                             │
+│  Focus: Core language, basic data structures, functions     │
+└─────────────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────────┐
+│                  INTERMEDIATE PATH                          │
+│  Ch. 8 → Ch. 9 → Ch. 10 → Ch. 11 → Ch. 14                 │
+│  (Modules) (Stdlib) (Errors) (Arch) (Testing)              │
+│                                                             │
+│  Focus: Project structure, error handling, testing          │
+└─────────────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    ADVANCED PATH                            │
+│  Ch. 12 → Ch. 13 → Ch. 16 → Ch. 17 → Ch. 19                │
+│  (Perf) (Security) (Concurrency) (Meta) (Web)              │
+│                                                             │
+│  Focus: Performance, security, async, metaprogramming       │
+└─────────────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────────┐
+│                 SPECIALIST PATHS                            │
+│                                                             │
+│  Systems Programming:                                       │
+│    Ch. 27 (Internals) → Ch. 28 (Implementations)           │
+│                                                             │
+│  Backend Development:                                       │
+│    Ch. 19 (Web) → Ch. 20 (Data) → Ch. 21 (Eng)             │
+│                                                             │
+│  Performance Engineering:                                   │
+│    Ch. 12 (Perf) → Ch. 27 (Internals) → Ch. 28 (PyPy)      │
+│                                                             │
+│  Architecture & Design:                                    │
+│    Ch. 11 (Arch) → Ch. 17 (Meta) → Appendix A (Patterns)    │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 Quick Start: Want code immediately? Jump to Ch. 2.2.3 for your first working example, then return here for context.
@@ -90,19 +90,19 @@ operating system components, distributed systems, servers, compilers, and even e
 
 Python continues to dominate because:
 
-âœ” AI & ML ecosystem is unmatched
+✔ AI & ML ecosystem is unmatched
 
 NumPy, PyTorch, TensorFlow, JAX, Polars, Pandas, etc.
 
-âœ” Data engineering & analytics
+✔ Data engineering & analytics
 
 Polars, Pandas, DuckDB, PySpark, Apache Arrow.
 
-âœ” Web frameworks are world-class
+✔ Web frameworks are world-class
 
 FastAPI, Django, Starlette.
 
-âœ” High-performance via extensions
+✔ High-performance via extensions
 
 Cython
 
@@ -118,13 +118,13 @@ CPython 3.11+ specialization
 
 3.14+ free-threading mode
 
-âœ” Excellent for automation
+✔ Excellent for automation
 
 Scripting, DevOps, CI/CD, infra-as-code.
 
-âœ” Strong typing story
+✔ Strong typing story
 
-Python 3.10â€“3.14 introduced:
+Python 3.10–3.14 introduced:
 
 structural typing
 
@@ -138,7 +138,7 @@ new generic syntax (PEP 695)
 
 broad editor + LSP support
 
-1.3 Pythonâ€™s Design Philosophy (The Zen of Python)
+1.3 Python’s Design Philosophy (The Zen of Python)
 
 View it directly:
 
@@ -153,9 +153,9 @@ Simple is better than complex.
 
 Explicit is better than implicit.
 
-There should be oneâ€”and preferably only oneâ€”obvious way to do it.
+There should be one—and preferably only one—obvious way to do it.
 
-If the implementation is hard to explain, itâ€™s a bad idea.
+If the implementation is hard to explain, it’s a bad idea.
 
 Throughout this book, these principles guide best practices.
 
@@ -165,7 +165,7 @@ Python is:
 
 interpreted (executed by the CPython interpreter)
 
-bytecode compiled (source â†’ bytecode â†’ executed)
+bytecode compiled (source → bytecode → executed)
 
 dynamically typed (type checks at runtime)
 
@@ -175,7 +175,7 @@ object-oriented (everything is an object)
 
 Diagram Reference
 
-See Appendix G â†’ G.2.1 â€œSource â†’ Bytecode â†’ Executionâ€ for a full interpreter pipeline flow.
+See Appendix G → G.2.1 “Source → Bytecode → Execution” for a full interpreter pipeline flow.
 
 Core stages:
 
@@ -226,11 +226,11 @@ Limited stdlib
 
 1.5.4 Jython, IronPython, GraalPython
 
-Jython â†’ Java ecosystem
+Jython → Java ecosystem
 
-IronPython â†’ .NET
+IronPython → .NET
 
-GraalPython â†’ Polyglot on GraalVM, extremely fast for some workloads
+GraalPython → Polyglot on GraalVM, extremely fast for some workloads
 
 1.6 When You Should (and Shouldn't) Use Python
 
@@ -271,7 +271,7 @@ print(greet("Smith", "Dr."))
 
 Now you've written Python code! The rest of this chapter provides context for why Python works this way.
 
-âœ” Excellent Use Cases
+✔ Excellent Use Cases
 
 Data Science & ML
 
@@ -291,7 +291,7 @@ CLI utilities
 
 Education
 
-âŒ Less Ideal
+❌ Less Ideal
 
 Low-latency systems (C++/Rust preferred)
 
@@ -338,13 +338,13 @@ pip install \
 
 This section gives newcomers a taste of the syntax.
 
-1.8.1 Micro Example â€” Variables & Expressions
+1.8.1 Micro Example — Variables & Expressions
 name = "Alice"
 age = 30
 message = f"{name} is {age} years old."
 print(message)
 
-1.8.2 Mini Example â€” Working with Collections
+1.8.2 Mini Example — Working with Collections
 users = [
     {"id": 1, "active": True},
     {"id": 2, "active": False},
@@ -354,7 +354,7 @@ active_users = [u for u in users if u["active"]]
 
 print(active_users)
 
-1.8.3 Mini Example â€” Functions & Decorators
+1.8.3 Mini Example — Functions & Decorators
 from functools import lru_cache
 
 @lru_cache(maxsize=256)
@@ -365,7 +365,7 @@ def fib(n: int) -> int:
 
 print(fib(10))
 
-1.8.4 Macro Example â€” Simple CLI App
+1.8.4 Macro Example — Simple CLI App
 #!/usr/bin/env python3
 """
 Simple Task Manager CLI
@@ -441,9 +441,9 @@ Teaser for Modules (Chapter 8)
 
 Each will have deeper treatment later.
 
-1.10 Python Version Compatibility (3.8 â†’ 3.14)
+1.10 Python Version Compatibility (3.8 → 3.14)
 
-Python 3.10â€“3.14 introduced profound enhancements:
+Python 3.10–3.14 introduced profound enhancements:
 
 structural pattern matching
 
@@ -469,7 +469,7 @@ Python is a readable, expressive, versatile language.
 
 CPython is the reference implementation.
 
-Execution = tokenization â†’ AST â†’ bytecode â†’ interpreter.
+Execution = tokenization → AST → bytecode → interpreter.
 
 Everything is an object.
 
@@ -479,11 +479,11 @@ Python 3.11+ brought radical performance gains.
 
 Virtual environments are essential.
 
-Youâ€™ve now seen enough to be productive.
+You’ve now seen enough to be productive.
 
-1.12 Whatâ€™s Next
+1.12 What’s Next
 
-Proceed to Chapter 2 â€” Syntax & Semantics, where we dive into:
+Proceed to Chapter 2 — Syntax & Semantics, where we dive into:
 
 slicing
 
@@ -497,19 +497,19 @@ raw strings
 
 line continuation
 
-This is where Pythonâ€™s deeper semantics begin to matter.
+This is where Python’s deeper semantics begin to matter.
 
 
 
-ðŸ“˜ CHAPTER 2 â€” SYNTAX & SEMANTICS
+📘 CHAPTER 2 — SYNTAX & SEMANTICS
 
 Depth Level: 3 (Comprehensive)
-Python Versions Covered: 3.8â€“3.14+
+Python Versions Covered: 3.8–3.14+
 Prerequisites: Chapter 1
 
 2.0 Overview
 
-Chapter 2 establishes the full formal grammar and operational semantics of Pythonâ€™s everyday constructs.
+Chapter 2 establishes the full formal grammar and operational semantics of Python’s everyday constructs.
 
 You will learn:
 
@@ -552,7 +552,7 @@ Operators (+, -, *, //, %, ==, etc.)
 
 Delimiters ((), [], {}, ,, :)
 
-2.1.2 Keywords (3.10â€“3.14)
+2.1.2 Keywords (3.10–3.14)
 
 Keyword list:
 
@@ -583,7 +583,7 @@ Unicode allowed (but discouraged for public APIs)
 Examples:
 
 _valid_name = 10
-Ï€ = 3.14      # Allowed, but avoid in production
+π = 3.14      # Allowed, but avoid in production
 user_id = 42
 
 2.2 Significance of Whitespace
@@ -661,7 +661,7 @@ f"{expression}"        # formatted
 
 2.4.1 String Formatting Evolution
 
-Code Evolution: Simple â†’ Production-Ready
+Code Evolution: Simple → Production-Ready
 
 Stage 1: Basic % formatting (legacy)
 
@@ -743,7 +743,7 @@ Cons:
 
 verbose
 
-3. F-Strings (3.6+) â€” Use these everywhere
+3. F-Strings (3.6+) — Use these everywhere
 name = "Alice"
 age = 30
 f"{name} is {age} years old"
@@ -775,7 +775,7 @@ Windows paths
 
 literal backslashes
 
-âš ï¸ Raw strings cannot end with an odd number of backslashes.
+⚠️ Raw strings cannot end with an odd number of backslashes.
 
 Bad:
 
@@ -881,7 +881,7 @@ result = price + \
 
 Same as #1.
 
-2.10 Binding Semantics (Names â†’ Objects)
+2.10 Binding Semantics (Names → Objects)
 
 Python variables are just names pointing to objects.
 
@@ -955,7 +955,7 @@ x = f1() + f2() * f3()
 
 Order of calls is always:
 
-f1 â†’ f2 â†’ f3
+f1 → f2 → f3
 
 
 Even though multiplication binds tighter.
@@ -978,14 +978,14 @@ Chapter 21 (Data Engineering)
 
 Python's simplicity masks deep semantics.
 
-2.15 Mini Example â€” Slicing + Unpacking + f-strings
+2.15 Mini Example — Slicing + Unpacking + f-strings
 def summarize(sequence: list[int]) -> str:
     first, *middle, last = sequence
     return f"{first=} {last=} {len(middle)} items in between"
 
 print(summarize([10, 20, 30, 40, 50]))
 
-2.16 Macro Example â€” Log Parser
+2.16 Macro Example — Log Parser
 from pathlib import Path
 
 def analyze_log(path: str):
@@ -1026,17 +1026,17 @@ iteration
 
 2.17 Pitfalls & Warnings
 
-âš ï¸ Mutable default arguments
-âš ï¸ is vs ==
-âš ï¸ Modifying sequences during iteration
-âš ï¸ Late binding in closures
-âš ï¸ Raw string edge cases
-âš ï¸ Line-continuation bugs
-âš ï¸ Copying vs aliasing
+⚠️ Mutable default arguments
+⚠️ is vs ==
+⚠️ Modifying sequences during iteration
+⚠️ Late binding in closures
+⚠️ Raw string edge cases
+⚠️ Line-continuation bugs
+⚠️ Copying vs aliasing
 
 2.18 Summary & Takeaways
 
-Pythonâ€™s syntax is clean but deeply semantic
+Python’s syntax is clean but deeply semantic
 
 Indentation = structure
 
@@ -1054,7 +1054,7 @@ Evaluation order is predictable (left-to-right)
 
 Proceed to:
 
-ðŸ‘‰ Chapter 3 â€” Core Execution Model
+👉 Chapter 3 — Core Execution Model
 
 Where we deeply analyze:
 
@@ -1078,11 +1078,11 @@ JIT tiers
 
 
 
-ðŸ“˜ CHAPTER 3 â€” CORE EXECUTION MODEL
+📘 CHAPTER 3 — CORE EXECUTION MODEL
 
 Depth Level: 3 (Comprehensive)
-Python Versions Covered: 3.8â€“3.14+
-Prerequisites: Chapters 1â€“2
+Python Versions Covered: 3.8–3.14+
+Prerequisites: Chapters 1–2
 
 3.0 Overview
 
@@ -1090,7 +1090,7 @@ This chapter provides a deep, formal understanding of:
 
 How Python processes, compiles, and executes code
 
-The token â†’ AST â†’ bytecode â†’ execution cycle
+The token → AST → bytecode → execution cycle
 
 Frames, namespaces, and scope resolution mechanics
 
@@ -1135,7 +1135,7 @@ debugging and profiling
 Python executes code in a multi-stage pipeline, not line-by-line.
 
 See diagram:
-âž¡ Appendix G â†’ G.2.1 "Source â†’ Bytecode â†’ Execution"
+➡ Appendix G → G.2.1 "Source → Bytecode → Execution"
 
 Stages:
 
@@ -1162,7 +1162,7 @@ def add(a, b):
 
 This becomes:
 
-tokens: def, add, (, a, â€¦
+tokens: def, add, (, a, …
 
 AST: FunctionDef node
 
@@ -1209,7 +1209,7 @@ fewer parsing restrictions
 
 allows new syntax like pattern matching
 
-fewer â€œambiguous grammarâ€ errors
+fewer “ambiguous grammar” errors
 
 The PEG parser constructs a tree of AST nodes.
 
@@ -1222,20 +1222,20 @@ AST represents the syntactic structure of Python code as a tree of nodes.
 ```
 Source Code: "x = 1 + 2"
 
-Tokenizer â†’ Tokens:
+Tokenizer → Tokens:
 [NAME('x'), EQUAL, NUMBER(1), PLUS, NUMBER(2), NEWLINE]
 
-Parser â†’ AST Tree:
+Parser → AST Tree:
                     Module
-                      â”‚
-                      â””â”€â”€ body: [Assign]
-                                  â”‚
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚                           â”‚
+                      │
+                      └── body: [Assign]
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │                           │
               targets: [Name]              value: BinOp
-                    â”‚                           â”‚
-                  id='x'              â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                                      â”‚         â”‚         â”‚
+                    │                           │
+                  id='x'              ┌─────────┼─────────┐
+                                      │         │         │
                                   left:    op: Add()  right:
                                   Constant(1)         Constant(2)
 ```
@@ -1244,13 +1244,13 @@ Parser â†’ AST Tree:
 
 ```
 Module
-â””â”€â”€ body: [Statement]
-    â””â”€â”€ Assign
-        â”œâ”€â”€ targets: [Name(id='x', ctx=Store())]
-        â””â”€â”€ value: BinOp
-            â”œâ”€â”€ left: Constant(value=1)
-            â”œâ”€â”€ op: Add()
-            â””â”€â”€ right: Constant(value=2)
+└── body: [Statement]
+    └── Assign
+        ├── targets: [Name(id='x', ctx=Store())]
+        └── value: BinOp
+            ├── left: Constant(value=1)
+            ├── op: Add()
+            └── right: Constant(value=2)
 ```
 
 **Example Code:**
@@ -1289,23 +1289,23 @@ def add(a, b):
 
 AST Tree:
                     Module
-                      â”‚
-                      â””â”€â”€ body: [FunctionDef]
-                                  â”‚
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚             â”‚             â”‚
+                      │
+                      └── body: [FunctionDef]
+                                  │
+                    ┌─────────────┼─────────────┐
+                    │             │             │
                   name='add'   args: Arguments  body: [Return]
-                                  â”‚               â”‚
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”         â”‚
-                    â”‚                   â”‚         â”‚
-              args: [arg]          defaults: []    â”‚
-                    â”‚                               â”‚
-            â”Œâ”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”                       â”‚
-            â”‚               â”‚                       â”‚
+                                  │               │
+                    ┌─────────────┴─────┐         │
+                    │                   │         │
+              args: [arg]          defaults: []    │
+                    │                               │
+            ┌───────┴───────┐                       │
+            │               │                       │
         arg('a')        arg('b')              value: BinOp
-                                                  â”‚
-                                        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                                        â”‚         â”‚         â”‚
+                                                  │
+                                        ┌─────────┼─────────┐
+                                        │         │         │
                                     left:    op: Add()  right:
                                     Name('a')          Name('b')
 ```
@@ -1337,7 +1337,7 @@ for name, code in code_examples.items():
 import ast
 
 class ConstantFolding(ast.NodeTransformer):
-    """Fold constant expressions (e.g., 1 + 2 â†’ 3)."""
+    """Fold constant expressions (e.g., 1 + 2 → 3)."""
     
     def visit_BinOp(self, node):
         # Recursively visit children
@@ -1358,7 +1358,7 @@ class ConstantFolding(ast.NodeTransformer):
         
         return node
 
-# Transform: "x = 1 + 2" â†’ "x = 3"
+# Transform: "x = 1 + 2" → "x = 3"
 code = "x = 1 + 2"
 tree = ast.parse(code)
 transformer = ConstantFolding()
@@ -1395,13 +1395,13 @@ print(collector.variables)  # {'x', 'y', 'z'}
 
 **AST Used By:**
 
-- **Linters** (pylint, flake8, ruff) â€” Static analysis
-- **Formatters** (black, autopep8) â€” Code formatting
-- **Transpilers** â€” Convert Python to other languages
-- **JIT Optimizers** â€” Runtime optimization
-- **Static Analysis Tools** â€” Type checkers, security scanners
-- **Code Generators** â€” Generate code from AST
-- **Refactoring Tools** â€” Automated code refactoring
+- **Linters** (pylint, flake8, ruff) — Static analysis
+- **Formatters** (black, autopep8) — Code formatting
+- **Transpilers** — Convert Python to other languages
+- **JIT Optimizers** — Runtime optimization
+- **Static Analysis Tools** — Type checkers, security scanners
+- **Code Generators** — Generate code from AST
+- **Refactoring Tools** — Automated code refactoring
 
 3.5 Bytecode Compilation
 
@@ -1504,7 +1504,7 @@ async/await internals
 
 3.8 The Import System (Critical Topic)
 
-Pythonâ€™s module loader is one of its most misunderstood subsystems.
+Python’s module loader is one of its most misunderstood subsystems.
 
 Import phases:
 
@@ -1520,7 +1520,7 @@ Import returns the module object
 
 Import flow diagram
 
-âž¡ Appendix G â†’ G.4.1 â€œImport Machineryâ€
+➡ Appendix G → G.4.1 “Import Machinery”
 
 3.8.1 Module Search Path (sys.path)
 
@@ -1648,7 +1648,7 @@ removes docstrings
 
 creates .opt-1.pyc / .opt-2.pyc
 
-âš ï¸ Do not rely on assert for production validation.
+⚠️ Do not rely on assert for production validation.
 
 3.13 CPython 3.11+ Performance Model
 
@@ -1667,13 +1667,13 @@ faster function calls
 drastically faster async execution
 
 Performance gain:
-10%â€“60% faster without changing code.
+10%–60% faster without changing code.
 
-3.14 CPython 3.13â€“3.14+ JIT & Free-Threading
+3.14 CPython 3.13–3.14+ JIT & Free-Threading
 
 3.13: Tier 2 JIT (Copy-and-Patch, Experimental)
 
-âš ï¸ Important: Python 3.13 introduces an optional, experimental JIT compiler enabled at build time (`--enable-experimental-jit`). The implementation is a copy-and-patch JIT (PEP 744), not LLVM-based.
+⚠️ Important: Python 3.13 introduces an optional, experimental JIT compiler enabled at build time (`--enable-experimental-jit`). The implementation is a copy-and-patch JIT (PEP 744), not LLVM-based.
 
 Architecture:
 
@@ -1693,17 +1693,17 @@ The JIT patches constants, jump targets, and metadata at runtime.
 
 This design minimizes compile overhead and complexity, in exchange for more modest optimization compared with full SSA/LLVM-style JITs.
 
-No IR â†’ machine code pipeline like LLVM; instead, templates are copied and patched.
+No IR → machine code pipeline like LLVM; instead, templates are copied and patched.
 
 Adaptive thresholds determine when to promote code to JIT tier.
 
-Performance: Real-world benchmarks show 5â€“15% speedups on pyperformance, with larger gains on tight numeric/control-flow heavy code and negligible benefits for I/O-bound or extension-heavy workloads.
+Performance: Real-world benchmarks show 5–15% speedups on pyperformance, with larger gains on tight numeric/control-flow heavy code and negligible benefits for I/O-bound or extension-heavy workloads.
 
 Enable with: `PYTHON_JIT=1 python script.py`
 
 3.14: Free-threading Mode
 
-âš ï¸ Experimental: Free-threading is a build-time optional feature in 3.13+ (e.g., `python3.13t`, or `--disable-gil` when building from source).
+⚠️ Experimental: Free-threading is a build-time optional feature in 3.13+ (e.g., `python3.13t`, or `--disable-gil` when building from source).
 
 Use:
 
@@ -1738,7 +1738,7 @@ Don't assume drop-in gains; measure with pyperformance & your own load tests
 
 This will eventually reshape Python's performance landscape.
 
-3.15 Mini Example â€” Inspecting Execution
+3.15 Mini Example — Inspecting Execution
 import dis
 
 def compute(x):
@@ -1753,7 +1753,7 @@ how to read bytecode
 
 what optimizations Python performs
 
-3.16 Mini Example â€” Import Behavior
+3.16 Mini Example — Import Behavior
 
 Directory:
 
@@ -1785,7 +1785,7 @@ util imported
 Second import does not re-execute code.
 It returns the cached module.
 
-3.17 Macro Example â€” Simple Module Loader
+3.17 Macro Example — Simple Module Loader
 import importlib
 import sys
 from pathlib import Path
@@ -1816,13 +1816,13 @@ This is how plugin systems work.
 
 3.18 Pitfalls & Warnings
 
-âš ï¸ Circular imports
-âš ï¸ Mutable module-level state
-âš ï¸ Overusing import *
-âš ï¸ Confusing script vs module execution
-âš ï¸ Using assert for runtime checks
-âš ï¸ Modifying sys.path directly
-âš ï¸ Relying on bytecode-only releases
+⚠️ Circular imports
+⚠️ Mutable module-level state
+⚠️ Overusing import *
+⚠️ Confusing script vs module execution
+⚠️ Using assert for runtime checks
+⚠️ Modifying sys.path directly
+⚠️ Relying on bytecode-only releases
 
 Full treatment in Appendix D.
 
@@ -1846,9 +1846,9 @@ Understanding execution model leads to better debugging, testing, and performanc
 
 Proceed to:
 
-ðŸ‘‰ Chapter 4 â€” Types & Type System
+👉 Chapter 4 — Types & Type System
 
-Where youâ€™ll learn:
+Where you’ll learn:
 
 data model
 
@@ -1873,17 +1873,17 @@ the entire Python type lattice
 
 
 Depth Level: 3 (Comprehensive)
-Length Equivalent: 10â€“15 pages
-Versions Covered: 3.8 â†’ 3.14+
+Length Equivalent: 10–15 pages
+Versions Covered: 3.8 → 3.14+
 
-ðŸ“˜ CHAPTER 4 â€” TYPES & TYPE SYSTEM
+📘 CHAPTER 4 — TYPES & TYPE SYSTEM
 
 Depth Level: 3
-Python Versions: 3.8â€“3.14+
+Python Versions: 3.8–3.14+
 
 4.0 Overview
 
-Pythonâ€™s type system is:
+Python’s type system is:
 
 Dynamic at runtime
 
@@ -1919,7 +1919,7 @@ Literal types
 
 Type narrowing & guards
 
-Pythonâ€™s conceptual type lattice
+Python’s conceptual type lattice
 
 Practical examples for real-world engineering
 
@@ -1929,7 +1929,7 @@ In Python:
 
 Every value is an object.
 Every object has a type.
-The type determines the objectâ€™s behavior.
+The type determines the object’s behavior.
 
 Examples:
 
@@ -1948,7 +1948,7 @@ type(C)     # type
 
 4.2 Built-In Types (Full Inventory)
 
-Pythonâ€™s built-in types fall into categories:
+Python’s built-in types fall into categories:
 
 Scalars:
 
@@ -2043,18 +2043,18 @@ True if values compare equal.
 
 4.3.3 Mutability Table
 Type	Mutable?
-int	âŒ
-float	âŒ
-str	âŒ
-tuple	âŒ (but may contain mutable values)
-bytes	âŒ
-bool	âŒ
-list	âœ”ï¸
-dict	âœ”ï¸
-set	âœ”ï¸
-bytearray	âœ”ï¸
-custom classes (default)	âœ”ï¸
-âš  Pitfall: Mutable Defaults
+int	❌
+float	❌
+str	❌
+tuple	❌ (but may contain mutable values)
+bytes	❌
+bool	❌
+list	✔️
+dict	✔️
+set	✔️
+bytearray	✔️
+custom classes (default)	✔️
+⚠ Pitfall: Mutable Defaults
 def f(x=[]):   # bad
     x.append(1)
     return x
@@ -2069,9 +2069,9 @@ def f(x=None):
 4.4 The Type Hierarchy & Lattice
 Diagram Reference
 
-âž¡ Appendix G â†’ G.5.1 (â€œCore Built-in Typesâ€)
+➡ Appendix G → G.5.1 (“Core Built-in Types”)
 
-Pythonâ€™s type model is:
+Python’s type model is:
 
 not a single inheritance hierarchy
 
@@ -2128,7 +2128,7 @@ def greet(name: str | None) -> str:
     return f"Hello, {name}!"
 
 
-Optional means â€œvalue may be Noneâ€.
+Optional means “value may be None”.
 
 4.5.4 Literal Types
 def move(direction: Literal["up", "down"]): ...
@@ -2319,7 +2319,7 @@ from typing import TypeGuard
 def is_int_list(v: list[object]) -> TypeGuard[list[int]]:
     return all(isinstance(x, int) for x in v)
 
-4.10 Real-World Mini Example â€” Typed Repository
+4.10 Real-World Mini Example — Typed Repository
 from typing import Protocol, TypeVar, Generic
 
 T = TypeVar("T")
@@ -2353,7 +2353,7 @@ TypeVar
 
 Structural typing
 
-4.11 Macro Example â€” Fluent Builder with Self + Protocols
+4.11 Macro Example — Fluent Builder with Self + Protocols
 from __future__ import annotations
 from typing import Self, Protocol
 
@@ -2382,16 +2382,16 @@ print(cfg)
 
 4.12 Type System Pitfalls
 
-âš ï¸ List[Any] allows anything
-âš ï¸ Optional[T] â‰  nullable by default
-âš ï¸ dict is not ordered in older Python (<3.7)
-âš ï¸ misuse of Protocol can lead to false positives
-âš ï¸ forgetting deep immutability (tuple with list inside)
-âš ï¸ mixing mutable + immutable types in hash keys
+⚠️ List[Any] allows anything
+⚠️ Optional[T] ≠ nullable by default
+⚠️ dict is not ordered in older Python (<3.7)
+⚠️ misuse of Protocol can lead to false positives
+⚠️ forgetting deep immutability (tuple with list inside)
+⚠️ mixing mutable + immutable types in hash keys
 
 4.13 Summary & Takeaways
 
-Pythonâ€™s type model is extremely flexible
+Python’s type model is extremely flexible
 
 Static typing dramatically improves reliability
 
@@ -2411,7 +2411,7 @@ Understanding identity vs equality avoids subtle bugs
 
 Proceed to:
 
-ðŸ‘‰ Chapter 5 â€” Control Flow
+👉 Chapter 5 — Control Flow
 
 Where we cover:
 
@@ -2433,11 +2433,11 @@ real-world flows in production code
 
 
 
-ðŸ“˜ CHAPTER 5 â€” CONTROL FLOW
+📘 CHAPTER 5 — CONTROL FLOW
 
 Depth Level: 3
-Python Versions: 3.8â€“3.14+
-Prerequisites: Chapters 1â€“4
+Python Versions: 3.8–3.14+
+Prerequisites: Chapters 1–4
 
 5.0 Overview
 
@@ -2487,7 +2487,7 @@ Empty sequences are false
 
 Non-empty sequences are true
 
-Numbers: 0 â†’ False, otherwise True
+Numbers: 0 → False, otherwise True
 
 None is always False
 
@@ -2515,7 +2515,7 @@ for item in items:
     print(item)
 
 
-Pythonâ€™s for loops are iterator-based, not C-style counter loops.
+Python’s for loops are iterator-based, not C-style counter loops.
 
 Under the hood:
 
@@ -2586,9 +2586,9 @@ When side effects occur
 
 When mutation is required
 
-5.4 Pattern Matching (match / case) â€” Python 3.10+
+5.4 Pattern Matching (match / case) — Python 3.10+
 
-Introduced in PEP 634â€“636.
+Introduced in PEP 634–636.
 
 Pattern matching is not a switch-case.
 It is a mini declarative matching language inside Python.
@@ -2724,7 +2724,7 @@ class Timer:
 with Timer() as t:
     heavy()
 
-5.7 Putting It All Together â€” Mini Example
+5.7 Putting It All Together — Mini Example
 
 (loops + comprehensions + pattern matching)
 
@@ -2738,7 +2738,7 @@ def process(records):
             case _:
                 print("unknown")
 
-5.8 Macro Example â€” Log Routing System
+5.8 Macro Example — Log Routing System
 from datetime import datetime
 
 def route(record):
@@ -2788,12 +2788,12 @@ guards and patterns
 
 5.9 Pitfalls & Warnings
 
-âš  Using eval (never safe)
-âš  Complex nested comprehensions
-âš  Misusing else on loops
-âš  Wrong exception order (broad then narrow)
-âš  Overusing exceptions for flow control
-âš  match-case fall-through misunderstanding (it doesnâ€™t fall through like switch)
+⚠ Using eval (never safe)
+⚠ Complex nested comprehensions
+⚠ Misusing else on loops
+⚠ Wrong exception order (broad then narrow)
+⚠ Overusing exceptions for flow control
+⚠ match-case fall-through misunderstanding (it doesn’t fall through like switch)
 
 5.10 Summary & Takeaways
 
@@ -2815,7 +2815,7 @@ Best engineers write small, clear, predictable control-flow blocks
 
 Proceed to:
 
-ðŸ‘‰ Chapter 6 â€” Functions & Functional Concepts
+👉 Chapter 6 — Functions & Functional Concepts
 
 Where we cover:
 
@@ -2839,11 +2839,11 @@ advanced decorator typing with ParamSpec
 
 
 
-ðŸ“˜ CHAPTER 6 â€” FUNCTIONS & FUNCTIONAL CONCEPTS
+📘 CHAPTER 6 — FUNCTIONS & FUNCTIONAL CONCEPTS
 
 Depth Level: 3
-Python Versions: 3.8â€“3.14+
-Prerequisites: Chapters 1â€“5
+Python Versions: 3.8–3.14+
+Prerequisites: Chapters 1–5
 
 6.0 Overview
 
@@ -2882,7 +2882,7 @@ Iterators & iterable protocol
 
 Generators & coroutines
 
-Decorators (simple â†’ advanced)
+Decorators (simple → advanced)
 
 functools (lru_cache, partial, singledispatch)
 
@@ -2963,7 +2963,7 @@ def add(a, b, /):
 Callers must supply positional args:
 
 add(1, 2)   # OK
-add(a=1, b=2)  # âŒ
+add(a=1, b=2)  # ❌
 
 6.3.2 Positional-or-keyword (normal)
 def f(x, y): ...
@@ -3007,7 +3007,7 @@ Enclosing	outer function
 Global	module
 Built-in	len, range
 
-Diagram (from Appendix G â†’ G.3.1) applies.
+Diagram (from Appendix G → G.3.1) applies.
 
 6.5.1 global
 count = 0
@@ -3041,7 +3041,7 @@ plus_10 = make_adder(10)
 print(plus_10(5))   # 15
 
 
-â— Important:
+❗ Important:
 
 Closures capture references, not copies.
 
@@ -3231,7 +3231,7 @@ Python does not perform TCO.
 
 Never rely on tail recursion.
 
-6.14 Mini Example â€” Pipeline Generator
+6.14 Mini Example — Pipeline Generator
 def read_lines(path):
     with open(path) as f:
         for line in f:
@@ -3247,7 +3247,7 @@ pipeline = filter_errors(read_lines("app.log"))
 for line in pipeline:
     print(line)
 
-6.15 Macro Example â€” Decorator + Cache + Iterators
+6.15 Macro Example — Decorator + Cache + Iterators
 from functools import lru_cache, wraps
 import itertools
 
@@ -3261,7 +3261,7 @@ def logged(fn):
 @logged
 @lru_cache(maxsize=128)
 def prime(n: int) -> int:
-    # Fisherâ€“Yates prime generator demo
+    # Fisher–Yates prime generator demo
     count = 0
     for x in itertools.count(2):
         if all(x % p for p in range(2, int(x**0.5) + 1)):
@@ -3285,13 +3285,13 @@ prime computation pipeline
 
 6.16 Pitfalls & Warnings
 
-âš  Late binding closures
-âš  Forgetting @wraps
-âš  Using recursion for deep loops
-âš  Misusing *args (debug difficulty)
-âš  combining yield with try/finally incorrectly
-âš  forgetting to close resources (use with)
-âš  Non-deterministic iteration order pre-3.7
+⚠ Late binding closures
+⚠ Forgetting @wraps
+⚠ Using recursion for deep loops
+⚠ Misusing *args (debug difficulty)
+⚠ combining yield with try/finally incorrectly
+⚠ forgetting to close resources (use with)
+⚠ Non-deterministic iteration order pre-3.7
 
 6.17 Summary & Takeaways
 
@@ -3315,7 +3315,7 @@ Recursion is supported but limited
 
 Proceed to:
 
-ðŸ‘‰ Chapter 7 â€” Classes & Object-Oriented Programming
+👉 Chapter 7 — Classes & Object-Oriented Programming
 
 This is one of the largest chapters in the entire book and covers:
 
@@ -3339,22 +3339,22 @@ pydantic
 
 
 
-ðŸ“˜ CHAPTER 7 â€” CLASSES & OBJECT-ORIENTED PROGRAMMING
+📘 CHAPTER 7 — CLASSES & OBJECT-ORIENTED PROGRAMMING
 
 Depth Level: 3
-Python Versions: 3.8â€“3.14+
+Python Versions: 3.8–3.14+
 
 7.0 Overview
 
 Python OOP sits on three pillars:
 
-âœ” Everything is an object
+✔ Everything is an object
 
 Classes are objects.
 Instances are objects.
 Functions, methods, modules: all objects.
 
-âœ” OOP is optional
+✔ OOP is optional
 
 Python supports:
 
@@ -3368,7 +3368,7 @@ data-centric structural design
 
 protocol-based design
 
-âœ” Deep integration with the Data Model
+✔ Deep integration with the Data Model
 
 The Data Model (from Chapter 4) determines how:
 
@@ -3444,7 +3444,7 @@ class Counter:
         self.value = 0
 
 
-Backing storage is the instanceâ€™s __dict__.
+Backing storage is the instance’s __dict__.
 
 7.1.5 Class attributes
 
@@ -3593,56 +3593,56 @@ class C(A, B): ...
 
 MRO:
 
-C â†’ A â†’ B â†’ object
+C → A → B → object
 
 7.6.1 MRO Resolution Algorithm Visualization
 
 C3 Linearization Algorithm:
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  MRO Resolution for: C(A, B)            â”‚
-â”‚                                         â”‚
-â”‚  Step 1: Build inheritance graph       â”‚
-â”‚      C                                 â”‚
-â”‚     / \                                â”‚
-â”‚    A   B                               â”‚
-â”‚     \ /                                â”‚
-â”‚    object                              â”‚
-â”‚                                         â”‚
-â”‚  Step 2: C3 Linearization              â”‚
-â”‚  MRO(C) = [C] + merge(                â”‚
-â”‚      MRO(A),                           â”‚
-â”‚      MRO(B),                           â”‚
-â”‚      [A, B]                            â”‚
-â”‚  )                                     â”‚
-â”‚                                         â”‚
-â”‚  Result: [C, A, B, object]            â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────┐
+│  MRO Resolution for: C(A, B)            │
+│                                         │
+│  Step 1: Build inheritance graph       │
+│      C                                 │
+│     / \                                │
+│    A   B                               │
+│     \ /                                │
+│    object                              │
+│                                         │
+│  Step 2: C3 Linearization              │
+│  MRO(C) = [C] + merge(                │
+│      MRO(A),                           │
+│      MRO(B),                           │
+│      [A, B]                            │
+│  )                                     │
+│                                         │
+│  Result: [C, A, B, object]            │
+└─────────────────────────────────────────┘
 ```
 
 Method Lookup Flow:
 
 ```
 obj.method()
-         â†“
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 1. Check type(obj).__mro__             â”‚
-â”‚    [C, A, B, object]                 â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â†“
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 2. Search in order:                 â”‚
-â”‚    - C.__dict__['method']?          â”‚
-â”‚    - A.__dict__['method']?          â”‚
-â”‚    - B.__dict__['method']?          â”‚
-â”‚    - object.__dict__['method']?     â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â†“
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 3. First match wins                 â”‚
-â”‚    (stops at first found)           â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         ↓
+┌─────────────────────────────────────┐
+│ 1. Check type(obj).__mro__             │
+│    [C, A, B, object]                 │
+└─────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────┐
+│ 2. Search in order:                 │
+│    - C.__dict__['method']?          │
+│    - A.__dict__['method']?          │
+│    - B.__dict__['method']?          │
+│    - object.__dict__['method']?     │
+└─────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────┐
+│ 3. First match wins                 │
+│    (stops at first found)           │
+└─────────────────────────────────────┘
 ```
 
 Try This: Explore MRO with multiple inheritance:
@@ -3679,11 +3679,11 @@ print(d.method())
 
 Diagram Reference
 
-âž¡ Appendix G â†’ G.6.2 ("MRO Resolution Path")
+➡ Appendix G → G.6.2 ("MRO Resolution Path")
 
 7.7 super() (How It Really Works)
 
-super() is not â€œparent classâ€.
+super() is not “parent class”.
 It is a dynamic MRO-aware forwarder.
 
 Simplified view:
@@ -3742,7 +3742,7 @@ easier refactoring
 
 7.9 The Data Model (Dunder Methods) in Detail
 
-Extends Chapter 4â€™s overview â€” now with deeper examples.
+Extends Chapter 4’s overview — now with deeper examples.
 
 7.9.1 Representation Methods
 __repr__
@@ -3833,7 +3833,7 @@ Usually implemented via generators.
 
 7.10 Properties & Descriptors
 
-Descriptors are Pythonâ€™s deepest mechanism.
+Descriptors are Python’s deepest mechanism.
 
 A descriptor is any object implementing:
 
@@ -3888,7 +3888,7 @@ class Point: ...
 
 Improves memory and speed.
 
-7.12 attrs â€” A More Powerful dataclass Alternative
+7.12 attrs — A More Powerful dataclass Alternative
 import attr
 
 @attr.define
@@ -3971,7 +3971,7 @@ interfaces/protocol validation
 
 automatic registration systems
 
-7.15 Mini Example â€” Vector Class
+7.15 Mini Example — Vector Class
 @dataclass
 class Vec:
     x: int
@@ -3984,7 +3984,7 @@ v1 = Vec(1, 2)
 v2 = Vec(3, 4)
 print(v1 + v2)
 
-7.16 Macro Example â€” Plugin System with Metaclass + Registry
+7.16 Macro Example — Plugin System with Metaclass + Registry
 class PluginMeta(type):
     registry = {}
 
@@ -4006,7 +4006,7 @@ class Notifier(Plugin):
         print("notifying")
 
 for name, cls in PluginMeta.registry.items():
-    print(name, "â†’", cls().run())
+    print(name, "→", cls().run())
 
 
 Demonstrates:
@@ -4021,24 +4021,24 @@ plugin architecture
 
 7.17 Pitfalls & Warnings
 
-âš  misunderstanding self
-âš  confusing class vs instance attributes
-âš  overriding __getattribute__ without care
-âš  multiple inheritance diamonds
-âš  descriptor mistakes
-âš  misuse of metaclasses (overkill)
-âš  dataclass mutable default fields
-âš  mismatched type annotations
+⚠ misunderstanding self
+⚠ confusing class vs instance attributes
+⚠ overriding __getattribute__ without care
+⚠ multiple inheritance diamonds
+⚠ descriptor mistakes
+⚠ misuse of metaclasses (overkill)
+⚠ dataclass mutable default fields
+⚠ mismatched type annotations
 
 7.18 Summary & Takeaways
 
-Pythonâ€™s OOP is flexible and dynamic
+Python’s OOP is flexible and dynamic
 
 Classes, instances, and functions are all objects
 
 MRO enables safe multiple inheritance
 
-super() is MRO-aware, not â€œparent classâ€
+super() is MRO-aware, not “parent class”
 
 Data Model powers operators, iteration, context managers
 
@@ -4054,7 +4054,7 @@ Metaclasses allow deep framework construction
 
 Proceed to:
 
-ðŸ‘‰ Chapter 8 â€” Modules, Packages & Project Structure
+👉 Chapter 8 — Modules, Packages & Project Structure
 Where we cover:
 
 modules
@@ -4074,11 +4074,11 @@ pyproject.toml
 layout for modern Python projects
 
 
-ðŸ“˜ CHAPTER 8 â€” MODULES, PACKAGES & PROJECT STRUCTURE
+📘 CHAPTER 8 — MODULES, PACKAGES & PROJECT STRUCTURE
 
 Depth Level: 3
-Python Versions: 3.8â€“3.14+
-Prerequisites: Chapters 1â€“7
+Python Versions: 3.8–3.14+
+Prerequisites: Chapters 1–7
 
 8.0 Overview
 
@@ -4144,35 +4144,35 @@ Everything in utils.py becomes namespaced under utils.
 
 ```
 import mymodule
-         â†“
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 1. Check sys.modules cache          â”‚  â† Already imported?
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â†“ (not found)
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 2. Iterate sys.meta_path finders   â”‚
-â”‚    - BuiltinImporter                 â”‚
-â”‚    - FrozenImporter                  â”‚
-â”‚    - PathFinder                      â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â†“ (finder returns spec)
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 3. ModuleSpec created               â”‚
-â”‚    - name, loader, origin            â”‚
-â”‚    - submodule_search_locations     â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â†“
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 4. Loader.exec_module(spec)         â”‚
-â”‚    - SourceFileLoader                â”‚
-â”‚    - ExtensionFileLoader              â”‚
-â”‚    - NamespaceLoader                 â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â†“
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 5. Module added to sys.modules      â”‚
-â”‚ 6. Module code executed              â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         ↓
+┌─────────────────────────────────────┐
+│ 1. Check sys.modules cache          │  ← Already imported?
+└─────────────────────────────────────┘
+         ↓ (not found)
+┌─────────────────────────────────────┐
+│ 2. Iterate sys.meta_path finders   │
+│    - BuiltinImporter                 │
+│    - FrozenImporter                  │
+│    - PathFinder                      │
+└─────────────────────────────────────┘
+         ↓ (finder returns spec)
+┌─────────────────────────────────────┐
+│ 3. ModuleSpec created               │
+│    - name, loader, origin            │
+│    - submodule_search_locations     │
+└─────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────┐
+│ 4. Loader.exec_module(spec)         │
+│    - SourceFileLoader                │
+│    - ExtensionFileLoader              │
+│    - NamespaceLoader                 │
+└─────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────┐
+│ 5. Module added to sys.modules      │
+│ 6. Module code executed              │
+└─────────────────────────────────────┘
 ```
 
 Try This: Explore the import system interactively:
@@ -4203,162 +4203,162 @@ for finder in sys.meta_path:
 **Import System Diagram:**
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    Import Request                        â”‚
-â”‚              "import mymodule"                           â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                     â”‚
-                     â–¼
-        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-        â”‚  Check sys.modules      â”‚ â† Module cache
-        â”‚  (Already imported?)    â”‚
-        â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                 â”‚
-        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”
-        â”‚                 â”‚
+┌─────────────────────────────────────────────────────────┐
+│                    Import Request                        │
+│              "import mymodule"                           │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+        ┌────────────────────────┐
+        │  Check sys.modules      │ ← Module cache
+        │  (Already imported?)    │
+        └────────┬─────────────────┘
+                 │
+        ┌────────┴────────┐
+        │                 │
      Found?            Not Found?
-        â”‚                 â”‚
-        â–¼                 â–¼
-   Return cached    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-   module object    â”‚  Iterate sys.meta_path  â”‚
-                    â”‚  Finders:              â”‚
-                    â”‚  - BuiltinImporter     â”‚
-                    â”‚  - FrozenImporter      â”‚
-                    â”‚  - PathFinder          â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                             â”‚
-                             â–¼
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚  Finder returns        â”‚
-                    â”‚  ModuleSpec            â”‚
-                    â”‚  (name, loader, origin)â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                             â”‚
-                             â–¼
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚  Loader.exec_module()  â”‚
-                    â”‚  - SourceFileLoader    â”‚
-                    â”‚  - ExtensionFileLoader â”‚
-                    â”‚  - NamespaceLoader    â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                             â”‚
-                             â–¼
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚  Execute module code   â”‚
-                    â”‚  (top to bottom)       â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                             â”‚
-                             â–¼
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚  Add to sys.modules    â”‚
-                    â”‚  (cache for future)    â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                             â”‚
-                             â–¼
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚  Return module object  â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+        │                 │
+        ▼                 ▼
+   Return cached    ┌────────────────────────┐
+   module object    │  Iterate sys.meta_path  │
+                    │  Finders:              │
+                    │  - BuiltinImporter     │
+                    │  - FrozenImporter      │
+                    │  - PathFinder          │
+                    └────────┬───────────────┘
+                             │
+                             ▼
+                    ┌────────────────────────┐
+                    │  Finder returns        │
+                    │  ModuleSpec            │
+                    │  (name, loader, origin)│
+                    └────────┬───────────────┘
+                             │
+                             ▼
+                    ┌────────────────────────┐
+                    │  Loader.exec_module()  │
+                    │  - SourceFileLoader    │
+                    │  - ExtensionFileLoader │
+                    │  - NamespaceLoader    │
+                    └────────┬───────────────┘
+                             │
+                             ▼
+                    ┌────────────────────────┐
+                    │  Execute module code   │
+                    │  (top to bottom)       │
+                    └────────┬───────────────┘
+                             │
+                             ▼
+                    ┌────────────────────────┐
+                    │  Add to sys.modules    │
+                    │  (cache for future)    │
+                    └────────┬───────────────┘
+                             │
+                             ▼
+                    ┌────────────────────────┐
+                    │  Return module object  │
+                    └────────────────────────┘
 ```
 
 **Module Lifecycle Diagram:**
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  1. Import Request: "import mymodule"                      â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                     â”‚
-                     â–¼
-        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-        â”‚ 2. Check sys.modules   â”‚ â† Module cache lookup
-        â”‚    (Already imported?) â”‚
-        â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                 â”‚
-        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”
-        â”‚                 â”‚
+┌─────────────────────────────────────────────────────────────┐
+│  1. Import Request: "import mymodule"                      │
+└────────────────────┬──────────────────────────────────────┘
+                     │
+                     ▼
+        ┌────────────────────────┐
+        │ 2. Check sys.modules   │ ← Module cache lookup
+        │    (Already imported?) │
+        └────────┬────────────────┘
+                 │
+        ┌────────┴────────┐
+        │                 │
      Found?            Not Found?
-        â”‚                 â”‚
-        â–¼                 â–¼
-   Return cached    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-   module object    â”‚ 3. Search sys.path     â”‚
-   (skip to end)    â”‚    - Script directory  â”‚
-                    â”‚    - PYTHONPATH        â”‚
-                    â”‚    - Site-packages     â”‚
-                    â”‚    - Standard library  â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                             â”‚
-                             â–¼
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚ 4. Find Module File    â”‚
-                    â”‚    - mymodule.py       â”‚
-                    â”‚    - mymodule/__init__.pyâ”‚
-                    â”‚    - mymodule.so (C ext)â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                             â”‚
-                             â–¼
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚ 5. Check __pycache__  â”‚
-                    â”‚    - mymodule.cpython-â”‚
-                    â”‚      312.pyc          â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                             â”‚
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚                 â”‚
+        │                 │
+        ▼                 ▼
+   Return cached    ┌────────────────────────┐
+   module object    │ 3. Search sys.path     │
+   (skip to end)    │    - Script directory  │
+                    │    - PYTHONPATH        │
+                    │    - Site-packages     │
+                    │    - Standard library  │
+                    └────────┬───────────────┘
+                             │
+                             ▼
+                    ┌────────────────────────┐
+                    │ 4. Find Module File    │
+                    │    - mymodule.py       │
+                    │    - mymodule/__init__.py│
+                    │    - mymodule.so (C ext)│
+                    └────────┬───────────────┘
+                             │
+                             ▼
+                    ┌────────────────────────┐
+                    │ 5. Check __pycache__  │
+                    │    - mymodule.cpython-│
+                    │      312.pyc          │
+                    └────────┬───────────────┘
+                             │
+                    ┌────────┴────────┐
+                    │                 │
               Found?            Not Found?
-                    â”‚                 â”‚
-                    â–¼                 â–¼
-            Load bytecode    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-            (skip to 8)      â”‚ 6. Tokenizer           â”‚
-                             â”‚    Source â†’ Tokens     â”‚
-                             â”‚    [NAME, EQUAL, ...]  â”‚
-                             â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                      â”‚
-                                      â–¼
-                             â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                             â”‚ 7. Parser (PEG)        â”‚
-                             â”‚    Tokens â†’ AST        â”‚
-                             â”‚    Module(body=[...])  â”‚
-                             â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                      â”‚
-                                      â–¼
-                             â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                             â”‚ 8. Compiler            â”‚
-                             â”‚    AST â†’ Bytecode      â”‚
-                             â”‚    Code Object         â”‚
-                             â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                      â”‚
-                                      â–¼
-                             â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                             â”‚ 9. Save to __pycache__â”‚
-                             â”‚    (for next import)   â”‚
-                             â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                      â”‚
-                                      â–¼
-                             â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                             â”‚ 10. Create Module     â”‚
-                             â”‚     Object            â”‚
-                             â”‚     (empty dict)      â”‚
-                             â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                      â”‚
-                                      â–¼
-                             â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                             â”‚ 11. Add to sys.modulesâ”‚
-                             â”‚     (before execution)â”‚
-                             â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                      â”‚
-                                      â–¼
-                             â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                             â”‚ 12. Execute Bytecode  â”‚
-                             â”‚     (top to bottom)   â”‚
-                             â”‚     - Define functions â”‚
-                             â”‚     - Run statements   â”‚
-                             â”‚     - Populate module  â”‚
-                             â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                      â”‚
-                                      â–¼
-                             â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                             â”‚ 13. Return Module     â”‚
-                             â”‚     Object            â”‚
-                             â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                    │                 │
+                    ▼                 ▼
+            Load bytecode    ┌────────────────────────┐
+            (skip to 8)      │ 6. Tokenizer           │
+                             │    Source → Tokens     │
+                             │    [NAME, EQUAL, ...]  │
+                             └────────┬───────────────┘
+                                      │
+                                      ▼
+                             ┌────────────────────────┐
+                             │ 7. Parser (PEG)        │
+                             │    Tokens → AST        │
+                             │    Module(body=[...])  │
+                             └────────┬───────────────┘
+                                      │
+                                      ▼
+                             ┌────────────────────────┐
+                             │ 8. Compiler            │
+                             │    AST → Bytecode      │
+                             │    Code Object         │
+                             └────────┬───────────────┘
+                                      │
+                                      ▼
+                             ┌────────────────────────┐
+                             │ 9. Save to __pycache__│
+                             │    (for next import)   │
+                             └────────┬───────────────┘
+                                      │
+                                      ▼
+                             ┌────────────────────────┐
+                             │ 10. Create Module     │
+                             │     Object            │
+                             │     (empty dict)      │
+                             └────────┬───────────────┘
+                                      │
+                                      ▼
+                             ┌────────────────────────┐
+                             │ 11. Add to sys.modules│
+                             │     (before execution)│
+                             └────────┬───────────────┘
+                                      │
+                                      ▼
+                             ┌────────────────────────┐
+                             │ 12. Execute Bytecode  │
+                             │     (top to bottom)   │
+                             │     - Define functions │
+                             │     - Run statements   │
+                             │     - Populate module  │
+                             └────────┬───────────────┘
+                                      │
+                                      ▼
+                             ┌────────────────────────┐
+                             │ 13. Return Module     │
+                             │     Object            │
+                             └────────────────────────┘
 ```
 
 **Detailed Lifecycle Steps:**
@@ -4533,12 +4533,12 @@ b imports a
 
 Solution strategies:
 
-âœ” Move imports inside functions
+✔ Move imports inside functions
 def use_db():
     from .db import connect
 
-âœ” Refactor into common module (common.py)
-âœ” Use type-checkâ€“only imports
+✔ Refactor into common module (common.py)
+✔ Use type-check–only imports
 from __future__ import annotations
 
 
@@ -4653,13 +4653,13 @@ Upload:
 twine upload dist/*
 
 8.11 Import Style Guide & Best Practices
-âœ” Use absolute imports
-âœ” Prefer explicit exports via __all__
-âœ” Do not put top-level code in modules
-âœ” Keep packages small and focused
-âœ” Avoid circular imports by design
-âœ” Group related modules into subpackages
-8.12 Mini Example â€” Utilities Package
+✔ Use absolute imports
+✔ Prefer explicit exports via __all__
+✔ Do not put top-level code in modules
+✔ Keep packages small and focused
+✔ Avoid circular imports by design
+✔ Group related modules into subpackages
+8.12 Mini Example — Utilities Package
 myproj/
   utils/
     __init__.py
@@ -4673,7 +4673,7 @@ Use:
 from utils.math import add
 from utils.strings import slugify
 
-8.13 Macro Example â€” Production-Ready Package
+8.13 Macro Example — Production-Ready Package
 myservice/
   myservice/
     __init__.py
@@ -4712,12 +4712,12 @@ python -m myservice
 
 8.14 Pitfalls & Warnings
 
-âš  Circular imports
-âš  Name shadowing (json.py shadowing stdlib json)
-âš  Multiple namespace packages conflicting
-âš  Accidental re-execution via relative paths
-âš  Adding directories to sys.path (avoid)
-âš  Having both src/ and root code (use src layout)
+⚠ Circular imports
+⚠ Name shadowing (json.py shadowing stdlib json)
+⚠ Multiple namespace packages conflicting
+⚠ Accidental re-execution via relative paths
+⚠ Adding directories to sys.path (avoid)
+⚠ Having both src/ and root code (use src layout)
 
 8.15 Summary & Takeaways
 
@@ -4727,7 +4727,7 @@ Packages are module directories
 
 Namespace packages allow multi-repo organization
 
-Imports follow sys.modules â†’ sys.path â†’ file loading
+Imports follow sys.modules → sys.path → file loading
 
 pyproject.toml is the modern packaging standard
 
@@ -4739,7 +4739,7 @@ Proper import strategy prevents circular dependencies
 
 Proceed to:
 
-ðŸ‘‰ Chapter 9 â€” Standard Library Essentials
+👉 Chapter 9 — Standard Library Essentials
 Covers:
 
 os, sys, pathlib
@@ -4757,17 +4757,17 @@ subprocess
 logging
 
 
-ðŸ“˜ CHAPTER 9 â€” STANDARD LIBRARY ESSENTIALS
+📘 CHAPTER 9 — STANDARD LIBRARY ESSENTIALS
 
 Depth Level: 3
-Python Versions: 3.8â€“3.14+
-Prerequisites: Chapters 1â€“8
+Python Versions: 3.8–3.14+
+Prerequisites: Chapters 1–8
 
 9.0 Overview
 
-Pythonâ€™s standard library is enormous and often referred to as:
+Python’s standard library is enormous and often referred to as:
 
-â€œBatteries Included.â€
+“Batteries Included.”
 
 This chapter covers the most essential 80% of modules used in:
 
@@ -4901,21 +4901,21 @@ print(python_path)  # /usr/bin/python3
 
 **Key Functions:**
 
-- `copy()`, `copy2()` â€” Copy files (copy2 preserves metadata)
-- `copytree()` â€” Recursive directory copy
-- `move()` â€” Move/rename files or directories
-- `rmtree()` â€” Remove directory tree
-- `make_archive()` â€” Create archives (zip, tar, gztar, bztar, xztar)
-- `unpack_archive()` â€” Extract archives
-- `disk_usage()` â€” Get disk space statistics
-- `which()` â€” Find executable in PATH
+- `copy()`, `copy2()` — Copy files (copy2 preserves metadata)
+- `copytree()` — Recursive directory copy
+- `move()` — Move/rename files or directories
+- `rmtree()` — Remove directory tree
+- `make_archive()` — Create archives (zip, tar, gztar, bztar, xztar)
+- `unpack_archive()` — Extract archives
+- `disk_usage()` — Get disk space statistics
+- `which()` — Find executable in PATH
 
 **Pitfalls:**
 
-âš  `shutil.rmtree()` is destructive â€” no undo
-âš  `copytree()` fails if destination exists (use `dirs_exist_ok=True` in 3.8+)
-âš  `move()` may copy then delete on different filesystems
-âš  `move()` across filesystems can be slow for large files
+⚠ `shutil.rmtree()` is destructive — no undo
+⚠ `copytree()` fails if destination exists (use `dirs_exist_ok=True` in 3.8+)
+⚠ `move()` may copy then delete on different filesystems
+⚠ `move()` across filesystems can be slow for large files
 
 9.1.4 tempfile: Secure Temporary Files
 
@@ -4989,28 +4989,28 @@ with tempfile.NamedTemporaryFile(mode='w', delete_on_close=True) as f:
 
 **Key Functions:**
 
-- `TemporaryFile()` â€” Temporary file (auto-deleted)
-- `NamedTemporaryFile()` â€” Named temporary file
-- `TemporaryDirectory()` â€” Temporary directory (auto-deleted)
-- `mkstemp()` â€” Create temp file, returns (fd, path)
-- `mkdtemp()` â€” Create temp directory, returns path
-- `gettempdir()` â€” Get system temp directory
-- `gettempprefix()` â€” Get temp file prefix
+- `TemporaryFile()` — Temporary file (auto-deleted)
+- `NamedTemporaryFile()` — Named temporary file
+- `TemporaryDirectory()` — Temporary directory (auto-deleted)
+- `mkstemp()` — Create temp file, returns (fd, path)
+- `mkdtemp()` — Create temp directory, returns path
+- `gettempdir()` — Get system temp directory
+- `gettempprefix()` — Get temp file prefix
 
 **Best Practices:**
 
-âœ” Use context managers (`with` statements) for automatic cleanup
-âœ” Use `delete=False` with `NamedTemporaryFile()` if you need the file to persist
-âœ” Always clean up manually created temp files/dirs
-âœ” Use `suffix` and `prefix` for identifiable temp files
-âœ” Prefer `TemporaryDirectory()` over manual `mkdtemp()` + cleanup
+✔ Use context managers (`with` statements) for automatic cleanup
+✔ Use `delete=False` with `NamedTemporaryFile()` if you need the file to persist
+✔ Always clean up manually created temp files/dirs
+✔ Use `suffix` and `prefix` for identifiable temp files
+✔ Prefer `TemporaryDirectory()` over manual `mkdtemp()` + cleanup
 
 **Pitfalls:**
 
-âš  `mktemp()` is deprecated â€” use `NamedTemporaryFile()` or `mkstemp()`
-âš  Temp files in `/tmp` may be world-readable â€” use proper permissions
-âš  Windows temp files may not auto-delete if process crashes
-âš  Race conditions possible with `mktemp()` â€” use `mkstemp()` instead
+⚠ `mktemp()` is deprecated — use `NamedTemporaryFile()` or `mkstemp()`
+⚠ Temp files in `/tmp` may be world-readable — use proper permissions
+⚠ Windows temp files may not auto-delete if process crashes
+⚠ Race conditions possible with `mktemp()` — use `mkstemp()` instead
 
 9.1.5 glob & fnmatch: Pattern Matching
 
@@ -5036,11 +5036,11 @@ files = glob.glob("*.TXT", root_dir=".", case_sensitive=False)
 
 **Pattern Syntax:**
 
-- `*` â€” Matches any sequence of characters
-- `?` â€” Matches any single character
-- `[seq]` â€” Matches any character in seq
-- `[!seq]` â€” Matches any character not in seq
-- `**` â€” Matches zero or more directories (recursive)
+- `*` — Matches any sequence of characters
+- `?` — Matches any single character
+- `[seq]` — Matches any character in seq
+- `[!seq]` — Matches any character not in seq
+- `**` — Matches zero or more directories (recursive)
 
 **Examples:**
 
@@ -5095,11 +5095,11 @@ pattern = fnmatch.translate("*.txt")
 
 **Key Functions:**
 
-- `glob.glob()` â€” Find files matching pattern (returns list)
-- `glob.iglob()` â€” Find files matching pattern (returns iterator)
-- `fnmatch.fnmatch()` â€” Test if filename matches pattern
-- `fnmatch.filter()` â€” Filter list of filenames
-- `fnmatch.translate()` â€” Convert pattern to regex
+- `glob.glob()` — Find files matching pattern (returns list)
+- `glob.iglob()` — Find files matching pattern (returns iterator)
+- `fnmatch.fnmatch()` — Test if filename matches pattern
+- `fnmatch.filter()` — Filter list of filenames
+- `fnmatch.translate()` — Convert pattern to regex
 
 **Use Cases:**
 
@@ -5110,10 +5110,10 @@ pattern = fnmatch.translate("*.txt")
 
 **Pitfalls:**
 
-âš  `glob.glob()` loads all matches into memory â€” use `iglob()` for large directories
-âš  Patterns are not full regex â€” use `re` module for complex patterns
-âš  `**` requires `recursive=True` in `glob.glob()`
-âš  Case sensitivity depends on filesystem (Windows is case-insensitive)
+⚠ `glob.glob()` loads all matches into memory — use `iglob()` for large directories
+⚠ Patterns are not full regex — use `re` module for complex patterns
+⚠ `**` requires `recursive=True` in `glob.glob()`
+⚠ Case sensitivity depends on filesystem (Windows is case-insensitive)
 
 9.1.6 filecmp: File Comparison
 
@@ -5197,9 +5197,9 @@ compare_dirs("backup1", "backup2")
 
 **Key Functions:**
 
-- `cmp()` â€” Compare two files
-- `cmpfiles()` â€” Compare files in two directories
-- `dircmp` â€” Directory comparison class
+- `cmp()` — Compare two files
+- `cmpfiles()` — Compare files in two directories
+- `dircmp` — Directory comparison class
 
 **Use Cases:**
 
@@ -5210,10 +5210,10 @@ compare_dirs("backup1", "backup2")
 
 **Pitfalls:**
 
-âš  `shallow=True` only compares metadata, not contents
-âš  `dircmp` doesn't recursively compare by default â€” use `report_full_closure()`
-âš  Large directory comparisons can be slow
-âš  Symbolic links are followed, not compared as links
+⚠ `shallow=True` only compares metadata, not contents
+⚠ `dircmp` doesn't recursively compare by default — use `report_full_closure()`
+⚠ Large directory comparisons can be slow
+⚠ Symbolic links are followed, not compared as links
 
 9.2 Date and Time
 
@@ -5239,7 +5239,7 @@ from zoneinfo import ZoneInfo
 dt = datetime.now(ZoneInfo("America/New_York"))
 
 9.2.3 Parsing and formatting
-dt = datetime.strptime("2025-01-01", "%Y-%m-%d")
+dt = datetime.strptime("2025-12-05", "%Y-%m-%d")
 s = dt.strftime("%Y-%m-%d")
 
 9.3 Data Structures (collections module)
@@ -5380,7 +5380,7 @@ import xml.etree.ElementTree as ET
 tree = ET.parse("file.xml")
 root = tree.getroot()
 
-9.6.5 pickle (âš  dangerous)
+9.6.5 pickle (⚠ dangerous)
 
 Never unpickle untrusted data.
 
@@ -5472,14 +5472,14 @@ print(parser.get_text())
 
 **Key Methods:**
 
-- `feed()` â€” Feed HTML data to parser
-- `handle_starttag()` â€” Called for start tags
-- `handle_endtag()` â€” Called for end tags
-- `handle_data()` â€” Called for text data
-- `handle_comment()` â€” Called for comments
-- `handle_decl()` â€” Called for DOCTYPE
-- `handle_pi()` â€” Called for processing instructions
-- `close()` â€” Close parser
+- `feed()` — Feed HTML data to parser
+- `handle_starttag()` — Called for start tags
+- `handle_endtag()` — Called for end tags
+- `handle_data()` — Called for text data
+- `handle_comment()` — Called for comments
+- `handle_decl()` — Called for DOCTYPE
+- `handle_pi()` — Called for processing instructions
+- `close()` — Close parser
 
 **Use Cases:**
 
@@ -5491,10 +5491,10 @@ print(parser.get_text())
 
 **Pitfalls:**
 
-âš  Not a full HTML5 parser (use BeautifulSoup for complex HTML)
-âš  Doesn't handle malformed HTML well
-âš  No built-in CSS selector support
-âš  Use `html.entities` for entity decoding
+⚠ Not a full HTML5 parser (use BeautifulSoup for complex HTML)
+⚠ Doesn't handle malformed HTML well
+⚠ No built-in CSS selector support
+⚠ Use `html.entities` for entity decoding
 
 9.6.7 html.entities: HTML Entity Definitions
 
@@ -5543,15 +5543,15 @@ def decode_entities(text):
 from html import unescape
 text = "&copy; 2024 &amp; Company"
 decoded = unescape(text)
-print(decoded)  # Â© 2024 & Company
+print(decoded)  # © 2024 & Company
 ```
 
 **Key Functions:**
 
-- `name2codepoint` â€” Dictionary mapping entity names to code points
-- `codepoint2name` â€” Dictionary mapping code points to entity names
-- `entitydefs` â€” Legacy entity definitions (deprecated)
-- `html.unescape()` â€” Decode HTML entities (recommended)
+- `name2codepoint` — Dictionary mapping entity names to code points
+- `codepoint2name` — Dictionary mapping code points to entity names
+- `entitydefs` — Legacy entity definitions (deprecated)
+- `html.unescape()` — Decode HTML entities (recommended)
 
 **Use Cases:**
 
@@ -5562,10 +5562,10 @@ print(decoded)  # Â© 2024 & Company
 
 **Pitfalls:**
 
-âš  Use `html.unescape()` instead of manual decoding
-âš  `entitydefs` is deprecated
-âš  Numeric entities need separate handling
-âš  Always use `html.unescape()` for production code
+⚠ Use `html.unescape()` instead of manual decoding
+⚠ `entitydefs` is deprecated
+⚠ Numeric entities need separate handling
+⚠ Always use `html.unescape()` for production code
 
 9.6.8 xmlrpc: XML-RPC Client and Server
 
@@ -5640,10 +5640,10 @@ except Exception as e:
 
 **Key Classes:**
 
-- `ServerProxy()` â€” XML-RPC client
-- `SimpleXMLRPCServer()` â€” Simple XML-RPC server
-- `SimpleXMLRPCRequestHandler()` â€” Request handler
-- `Fault` â€” XML-RPC fault exception
+- `ServerProxy()` — XML-RPC client
+- `SimpleXMLRPCServer()` — Simple XML-RPC server
+- `SimpleXMLRPCRequestHandler()` — Request handler
+- `Fault` — XML-RPC fault exception
 
 **Use Cases:**
 
@@ -5654,10 +5654,10 @@ except Exception as e:
 
 **Pitfalls:**
 
-âš  XML-RPC is legacy (use REST/GraphQL for new APIs)
-âš  Security concerns (use HTTPS)
-âš  Limited data types (no datetime, binary data)
-âš  Use modern alternatives (FastAPI, gRPC) for new projects
+⚠ XML-RPC is legacy (use REST/GraphQL for new APIs)
+⚠ Security concerns (use HTTPS)
+⚠ Limited data types (no datetime, binary data)
+⚠ Use modern alternatives (FastAPI, gRPC) for new projects
 
 9.6.9 plistlib: Property List Files
 
@@ -5725,12 +5725,12 @@ with open('data.plist', 'wb') as f:
 
 **Key Functions:**
 
-- `load()` â€” Load plist from file
-- `loads()` â€” Load plist from bytes
-- `dump()` â€” Write plist to file
-- `dumps()` â€” Write plist to bytes
-- `FMT_XML` â€” XML format
-- `FMT_BINARY` â€” Binary format (default)
+- `load()` — Load plist from file
+- `loads()` — Load plist from bytes
+- `dump()` — Write plist to file
+- `dumps()` — Write plist to bytes
+- `FMT_XML` — XML format
+- `FMT_BINARY` — Binary format (default)
 
 **Use Cases:**
 
@@ -5741,10 +5741,10 @@ with open('data.plist', 'wb') as f:
 
 **Pitfalls:**
 
-âš  Binary format is platform-specific
-âš  Use XML format for cross-platform compatibility
-âš  Limited type support compared to JSON
-âš  Primarily for Apple ecosystem
+⚠ Binary format is platform-specific
+⚠ Use XML format for cross-platform compatibility
+⚠ Limited type support compared to JSON
+⚠ Primarily for Apple ecosystem
 
 9.6.10 marshal: Internal Python Object Serialization
 
@@ -5805,11 +5805,11 @@ except ValueError as e:
 
 **Key Functions:**
 
-- `dumps()` â€” Serialize to bytes
-- `loads()` â€” Deserialize from bytes
-- `dump()` â€” Serialize to file
-- `load()` â€” Deserialize from file
-- `version` â€” Current marshal version
+- `dumps()` — Serialize to bytes
+- `loads()` — Deserialize from bytes
+- `dump()` — Serialize to file
+- `load()` — Deserialize from file
+- `version` — Current marshal version
 
 **Use Cases:**
 
@@ -5819,29 +5819,29 @@ except ValueError as e:
 
 **Pitfalls:**
 
-âš  Internal use only â€” not for general serialization
-âš  Not secure â€” can execute arbitrary code
-âš  Version-dependent â€” may break across Python versions
-âš  Limited type support
-âš  Use `pickle` or `json` for general serialization
-âš  Never load untrusted marshal data
+⚠ Internal use only — not for general serialization
+⚠ Not secure — can execute arbitrary code
+⚠ Version-dependent — may break across Python versions
+⚠ Limited type support
+⚠ Use `pickle` or `json` for general serialization
+⚠ Never load untrusted marshal data
 
 **When to Use:**
 
-- âŒ General serialization â†’ Use `pickle` or `json`
-- âŒ Cross-version compatibility â†’ Use `pickle` or `json`
-- âŒ Security-sensitive data â†’ Use `json` or `msgpack`
-- âœ… Internal Python bytecode â†’ Use `marshal`
-- âœ… Performance-critical internal use â†’ Use `marshal` (with caution)
+- ❌ General serialization → Use `pickle` or `json`
+- ❌ Cross-version compatibility → Use `pickle` or `json`
+- ❌ Security-sensitive data → Use `json` or `msgpack`
+- ✅ Internal Python bytecode → Use `marshal`
+- ✅ Performance-critical internal use → Use `marshal` (with caution)
 
 9.6.11 Pitfalls & Warnings
 
-âš  `pickle` is unsafe â€” never unpickle untrusted data
-âš  `marshal` is internal-only â€” use `pickle` or `json` instead
-âš  HTML parsing â€” use BeautifulSoup for complex HTML
-âš  XML-RPC is legacy â€” use modern APIs (REST, GraphQL, gRPC)
-âš  plistlib is Apple-specific â€” use JSON for cross-platform
-âš  Always validate and sanitize parsed data
+⚠ `pickle` is unsafe — never unpickle untrusted data
+⚠ `marshal` is internal-only — use `pickle` or `json` instead
+⚠ HTML parsing — use BeautifulSoup for complex HTML
+⚠ XML-RPC is legacy — use modern APIs (REST, GraphQL, gRPC)
+⚠ plistlib is Apple-specific — use JSON for cross-platform
+⚠ Always validate and sanitize parsed data
 
 9.7 System Interaction
 
@@ -5972,7 +5972,7 @@ import inspect
 inspect.signature(func)
 inspect.getsource(func)
 
-9.11 Mini Example â€” CSV â†’ JSON Converter
+9.11 Mini Example — CSV → JSON Converter
 import csv, json
 from pathlib import Path
 
@@ -5985,7 +5985,7 @@ def csv_to_json(path):
 
 csv_to_json("input.csv")
 
-9.12 Macro Example â€” Log Monitoring Utility
+9.12 Macro Example — Log Monitoring Utility
 
 Uses:
 
@@ -6022,13 +6022,13 @@ for ts, lvl, msg in parse_log(Path("logs/app.log.gz")):
 
 9.13 Pitfalls & Warnings
 
-âš  pickle security issues
-âš  incorrect timezone handling
-âš  regex catastrophic backtracking
-âš  binary/text mode confusion
-âš  sys.path modification
-âš  subprocess shell=True (avoid)
-âš  encoding mismatches (use UTF-8 explicitly)
+⚠ pickle security issues
+⚠ incorrect timezone handling
+⚠ regex catastrophic backtracking
+⚠ binary/text mode confusion
+⚠ sys.path modification
+⚠ subprocess shell=True (avoid)
+⚠ encoding mismatches (use UTF-8 explicitly)
 
 9.14 Summary & Takeaways
 
@@ -6065,7 +6065,7 @@ import math
 
 print(math.pi)    # 3.141592653589793
 print(math.e)     # 2.718281828459045
-print(math.tau)   # 6.283185307179586 (2Ï€)
+print(math.tau)   # 6.283185307179586 (2π)
 print(math.inf)   # inf (infinity)
 print(math.nan)   # nan (not a number)
 ```
@@ -6097,7 +6097,7 @@ power = math.pow(2, 3)  # 8.0
 # Or use ** operator: 2 ** 3
 
 # Exponential
-exp = math.exp(1)  # e^1 â‰ˆ 2.718
+exp = math.exp(1)  # e^1 ≈ 2.718
 
 # Natural logarithm
 ln = math.log(math.e)  # 1.0
@@ -6129,7 +6129,7 @@ acos_val = math.acos(0.5)
 atan_val = math.atan(1.0)
 
 # atan2 (two-argument arctangent)
-angle = math.atan2(y, x)  # Returns angle in [-Ï€, Ï€]
+angle = math.atan2(y, x)  # Returns angle in [-π, π]
 
 # Hyperbolic functions
 sinh_val = math.sinh(1.0)
@@ -6141,7 +6141,7 @@ tanh_val = math.tanh(1.0)
 
 ```python
 # Degrees to radians
-rad = math.radians(90)  # Ï€/2
+rad = math.radians(90)  # π/2
 
 # Radians to degrees
 deg = math.degrees(math.pi)  # 180.0
@@ -6211,11 +6211,11 @@ next_val = math.nextafter(1.0, 2.0)  # 1.0000000000000002
 
 **Pitfalls:**
 
-âš  All trigonometric functions use radians, not degrees
-âš  `math.pow()` returns float even for integer inputs
-âš  `math.factorial()` raises `ValueError` for negative numbers
-âš  Floating-point precision limits apply to all functions
-âš  Use `decimal` module for exact decimal arithmetic
+⚠ All trigonometric functions use radians, not degrees
+⚠ `math.pow()` returns float even for integer inputs
+⚠ `math.factorial()` raises `ValueError` for negative numbers
+⚠ Floating-point precision limits apply to all functions
+⚠ Use `decimal` module for exact decimal arithmetic
 
 9.15.2 statistics: Statistical Functions
 
@@ -6305,10 +6305,10 @@ slope, intercept = statistics.linear_regression(x, y)
 
 **Pitfalls:**
 
-âš  `mode()` raises `StatisticsError` if no unique mode exists
-âš  Population vs sample variance/stdev â€” use correct function
-âš  `quantiles()` requires Python 3.8+
-âš  All functions work with iterables, not just lists
+⚠ `mode()` raises `StatisticsError` if no unique mode exists
+⚠ Population vs sample variance/stdev — use correct function
+⚠ `quantiles()` requires Python 3.8+
+⚠ All functions work with iterables, not just lists
 
 9.15.3 fractions: Rational Numbers
 
@@ -6370,7 +6370,7 @@ denominator = f.denominator  # 4
 float_val = float(f)  # 0.75
 
 # Limit denominator
-f_limited = f.limit_denominator(10)  # Closest fraction with denom â‰¤ 10
+f_limited = f.limit_denominator(10)  # Closest fraction with denom ≤ 10
 ```
 
 **Use Cases:**
@@ -6382,10 +6382,10 @@ f_limited = f.limit_denominator(10)  # Closest fraction with denom â‰¤ 10
 
 **Pitfalls:**
 
-âš  Converting from float may lose precision
-âš  Large denominators can cause performance issues
-âš  Use `limit_denominator()` to control denominator size
-âš  Fractions are immutable
+⚠ Converting from float may lose precision
+⚠ Large denominators can cause performance issues
+⚠ Use `limit_denominator()` to control denominator size
+⚠ Fractions are immutable
 
 9.15.4 decimal: Decimal Arithmetic
 
@@ -6494,11 +6494,11 @@ Decimal('NaN').is_nan()  # True
 
 **Pitfalls:**
 
-âš  Always create from strings to avoid float precision issues
-âš  Context precision affects all operations
-âš  Quantize for specific decimal places
-âš  Slower than float arithmetic
-âš  Use `quantize()` for rounding to specific places
+⚠ Always create from strings to avoid float precision issues
+⚠ Context precision affects all operations
+⚠ Quantize for specific decimal places
+⚠ Slower than float arithmetic
+⚠ Use `quantize()` for rounding to specific places
 
 9.15.5 random: Random Number Generation
 
@@ -6622,11 +6622,11 @@ secure_url = secrets.token_urlsafe(16)
 
 **Pitfalls:**
 
-âš  Not cryptographically secure â€” use `secrets` module for security
-âš  `shuffle()` modifies list in place
-âš  `sample()` requires k â‰¤ len(population)
-âš  Seeding for reproducibility in testing
-âš  Distribution parameters must be valid (e.g., sigma > 0)
+⚠ Not cryptographically secure — use `secrets` module for security
+⚠ `shuffle()` modifies list in place
+⚠ `sample()` requires k ≤ len(population)
+⚠ Seeding for reproducibility in testing
+⚠ Distribution parameters must be valid (e.g., sigma > 0)
 
 9.15.6 array: Efficient Arrays
 
@@ -6736,11 +6736,11 @@ with open('data.bin', 'rb') as f:
 
 **Pitfalls:**
 
-âš  Type codes are platform-dependent for some types
-âš  Less flexible than lists (only one type)
-âš  Use NumPy for advanced array operations
-âš  `fromfile()` requires knowing element count
-âš  Arrays are mutable but type-restricted
+⚠ Type codes are platform-dependent for some types
+⚠ Less flexible than lists (only one type)
+⚠ Use NumPy for advanced array operations
+⚠ `fromfile()` requires knowing element count
+⚠ Arrays are mutable but type-restricted
 
 **Comparison with Lists and NumPy:**
 
@@ -6758,13 +6758,13 @@ np_arr = np.array([1, 2, 3, 4, 5], dtype=np.int32)
 
 **When to Use:**
 
-- âœ” Memory-constrained environments
-- âœ” Binary file I/O
-- âœ” C library interfacing
-- âœ— Complex array operations (use NumPy)
-- âœ— Mixed types (use list)
+- ✔ Memory-constrained environments
+- ✔ Binary file I/O
+- ✔ C library interfacing
+- ✗ Complex array operations (use NumPy)
+- ✗ Mixed types (use list)
 
-9.15.7 Mini Example â€” Statistical Analysis
+9.15.7 Mini Example — Statistical Analysis
 
 ```python
 import statistics
@@ -6801,14 +6801,14 @@ print(f"Average price: ${avg_price}")
 
 9.15.8 Pitfalls & Warnings
 
-âš  `math` functions use radians, not degrees
-âš  `statistics.mode()` raises error if no unique mode
-âš  `fractions` from float may lose precision
-âš  `decimal` should be created from strings
-âš  `random` is not cryptographically secure
-âš  `array` type codes are platform-dependent
-âš  Floating-point precision limits in all modules
-âš  Use `secrets` module for security-sensitive random numbers
+⚠ `math` functions use radians, not degrees
+⚠ `statistics.mode()` raises error if no unique mode
+⚠ `fractions` from float may lose precision
+⚠ `decimal` should be created from strings
+⚠ `random` is not cryptographically secure
+⚠ `array` type codes are platform-dependent
+⚠ Floating-point precision limits in all modules
+⚠ Use `secrets` module for security-sensitive random numbers
 
 9.15.9 Summary & Takeaways
 
@@ -6970,15 +6970,15 @@ name, addr = parseaddr('John Doe <john@example.com>')
 
 **Key Modules:**
 
-- `email.message` â€” Base message classes
-- `email.mime.text` â€” Text messages
-- `email.mime.multipart` â€” Multipart messages
-- `email.mime.base` â€” Base MIME classes
-- `email.parser` â€” Message parsing
-- `email.generator` â€” Message generation
-- `email.utils` â€” Utility functions
-- `email.header` â€” Header encoding/decoding
-- `email.encoders` â€” Content encoding
+- `email.message` — Base message classes
+- `email.mime.text` — Text messages
+- `email.mime.multipart` — Multipart messages
+- `email.mime.base` — Base MIME classes
+- `email.parser` — Message parsing
+- `email.generator` — Message generation
+- `email.utils` — Utility functions
+- `email.header` — Header encoding/decoding
+- `email.encoders` — Content encoding
 
 **Use Cases:**
 
@@ -6990,11 +6990,11 @@ name, addr = parseaddr('John Doe <john@example.com>')
 
 **Pitfalls:**
 
-âš  Headers must be ASCII or properly encoded
-âš  Use `email.utils.formataddr()` for addresses with names
-âš  Multipart messages require proper MIME structure
-âš  Attachments must be base64 encoded for binary data
-âš  Date parsing can be complex â€” use `email.utils.parsedate()`
+⚠ Headers must be ASCII or properly encoded
+⚠ Use `email.utils.formataddr()` for addresses with names
+⚠ Multipart messages require proper MIME structure
+⚠ Attachments must be base64 encoded for binary data
+⚠ Date parsing can be complex — use `email.utils.parsedate()`
 
 9.16.2 smtplib: SMTP Client
 
@@ -7084,13 +7084,13 @@ except Exception as e:
 
 **Key Functions:**
 
-- `SMTP()` â€” Create SMTP client
-- `SMTP_SSL()` â€” Create SMTP client with SSL
-- `starttls()` â€” Start TLS encryption
-- `login()` â€” Authenticate
-- `send_message()` â€” Send EmailMessage
-- `sendmail()` â€” Send raw message
-- `quit()` â€” Close connection
+- `SMTP()` — Create SMTP client
+- `SMTP_SSL()` — Create SMTP client with SSL
+- `starttls()` — Start TLS encryption
+- `login()` — Authenticate
+- `send_message()` — Send EmailMessage
+- `sendmail()` — Send raw message
+- `quit()` — Close connection
 
 **Use Cases:**
 
@@ -7101,15 +7101,15 @@ except Exception as e:
 
 **Pitfalls:**
 
-âš  Use TLS/SSL for security
-âš  Store credentials securely (use environment variables or keyring)
-âš  Handle SMTP exceptions properly
-âš  Some providers require app-specific passwords
-âš  Rate limiting may apply
+⚠ Use TLS/SSL for security
+⚠ Store credentials securely (use environment variables or keyring)
+⚠ Handle SMTP exceptions properly
+⚠ Some providers require app-specific passwords
+⚠ Rate limiting may apply
 
 9.16.3 imaplib & poplib: Email Retrieval
 
-**imaplib â€” IMAP Client:**
+**imaplib — IMAP Client:**
 
 ```python
 import imaplib
@@ -7148,7 +7148,7 @@ with imaplib.IMAP4_SSL('imap.gmail.com') as mail:
         print(body.decode())
 ```
 
-**poplib â€” POP3 Client:**
+**poplib — POP3 Client:**
 
 ```python
 import poplib
@@ -7180,25 +7180,25 @@ with poplib.POP3_SSL('pop.gmail.com') as mail:
 
 **Key Functions (IMAP):**
 
-- `IMAP4_SSL()` â€” Create IMAP client with SSL
-- `login()` â€” Authenticate
-- `select()` â€” Select mailbox
-- `search()` â€” Search for messages
-- `fetch()` â€” Fetch message
-- `store()` â€” Store flags
-- `close()` â€” Close mailbox
-- `logout()` â€” Logout
+- `IMAP4_SSL()` — Create IMAP client with SSL
+- `login()` — Authenticate
+- `select()` — Select mailbox
+- `search()` — Search for messages
+- `fetch()` — Fetch message
+- `store()` — Store flags
+- `close()` — Close mailbox
+- `logout()` — Logout
 
 **Key Functions (POP3):**
 
-- `POP3_SSL()` â€” Create POP3 client with SSL
-- `user()` â€” Set username
-- `pass_()` â€” Set password
-- `stat()` â€” Get mailbox stats
-- `list()` â€” List messages
-- `retr()` â€” Retrieve message
-- `dele()` â€” Delete message
-- `quit()` â€” Close connection
+- `POP3_SSL()` — Create POP3 client with SSL
+- `user()` — Set username
+- `pass_()` — Set password
+- `stat()` — Get mailbox stats
+- `list()` — List messages
+- `retr()` — Retrieve message
+- `dele()` — Delete message
+- `quit()` — Close connection
 
 **Use Cases:**
 
@@ -7209,15 +7209,15 @@ with poplib.POP3_SSL('pop.gmail.com') as mail:
 
 **Pitfalls:**
 
-âš  IMAP is more feature-rich than POP3
-âš  POP3 typically deletes messages after retrieval
-âš  Use SSL/TLS for security
-âš  Handle connection errors
-âš  Some providers require app-specific passwords
+⚠ IMAP is more feature-rich than POP3
+⚠ POP3 typically deletes messages after retrieval
+⚠ Use SSL/TLS for security
+⚠ Handle connection errors
+⚠ Some providers require app-specific passwords
 
 9.16.4 http.client & http.server: HTTP Implementation
 
-**http.client â€” HTTP Client:**
+**http.client — HTTP Client:**
 
 ```python
 import http.client
@@ -7244,7 +7244,7 @@ data = response.read()
 conn.close()
 ```
 
-**http.server â€” HTTP Server:**
+**http.server — HTTP Server:**
 
 ```python
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -7295,18 +7295,18 @@ server.serve_forever()
 
 **Key Functions (http.client):**
 
-- `HTTPConnection()` â€” Create HTTP connection
-- `HTTPSConnection()` â€” Create HTTPS connection
-- `request()` â€” Send request
-- `getresponse()` â€” Get response
-- `close()` â€” Close connection
+- `HTTPConnection()` — Create HTTP connection
+- `HTTPSConnection()` — Create HTTPS connection
+- `request()` — Send request
+- `getresponse()` — Get response
+- `close()` — Close connection
 
 **Key Classes (http.server):**
 
-- `BaseHTTPRequestHandler` â€” Base request handler
-- `SimpleHTTPRequestHandler` â€” Simple file server
-- `HTTPServer` â€” HTTP server
-- `ThreadingHTTPServer` â€” Threaded HTTP server (3.7+)
+- `BaseHTTPRequestHandler` — Base request handler
+- `SimpleHTTPRequestHandler` — Simple file server
+- `HTTPServer` — HTTP server
+- `ThreadingHTTPServer` — Threaded HTTP server (3.7+)
 
 **Use Cases:**
 
@@ -7318,11 +7318,11 @@ server.serve_forever()
 
 **Pitfalls:**
 
-âš  `http.client` is low-level â€” use `requests` or `httpx` for production
-âš  `http.server` is for development only â€” not production-ready
-âš  No built-in authentication
-âš  No request routing framework
-âš  Use proper web frameworks (FastAPI, Django, Flask) for production
+⚠ `http.client` is low-level — use `requests` or `httpx` for production
+⚠ `http.server` is for development only — not production-ready
+⚠ No built-in authentication
+⚠ No request routing framework
+⚠ Use proper web frameworks (FastAPI, Django, Flask) for production
 
 9.16.5 wsgiref: WSGI Reference Implementation
 
@@ -7375,10 +7375,10 @@ def application(environ, start_response):
 
 **Key Modules:**
 
-- `wsgiref.simple_server` â€” Simple WSGI server
-- `wsgiref.util` â€” WSGI utilities
-- `wsgiref.validate` â€” WSGI validator
-- `wsgiref.headers` â€” Header handling
+- `wsgiref.simple_server` — Simple WSGI server
+- `wsgiref.util` — WSGI utilities
+- `wsgiref.validate` — WSGI validator
+- `wsgiref.headers` — Header handling
 
 **Use Cases:**
 
@@ -7389,10 +7389,10 @@ def application(environ, start_response):
 
 **Pitfalls:**
 
-âš  Reference implementation only â€” not for production
-âš  Single-threaded â€” use proper WSGI servers (gunicorn, uvicorn) for production
-âš  No async support â€” use ASGI for async applications
-âš  Limited features compared to production servers
+⚠ Reference implementation only — not for production
+⚠ Single-threaded — use proper WSGI servers (gunicorn, uvicorn) for production
+⚠ No async support — use ASGI for async applications
+⚠ Limited features compared to production servers
 
 9.16.6 urllib.robotparser: robots.txt Parser
 
@@ -7421,11 +7421,11 @@ print(sitemaps)  # List of sitemap URLs
 
 **Key Functions:**
 
-- `set_url()` â€” Set robots.txt URL
-- `read()` â€” Read and parse robots.txt
-- `can_fetch()` â€” Check if URL can be fetched
-- `crawl_delay()` â€” Get crawl delay for user agent
-- `site_maps()` â€” Get sitemap URLs
+- `set_url()` — Set robots.txt URL
+- `read()` — Read and parse robots.txt
+- `can_fetch()` — Check if URL can be fetched
+- `crawl_delay()` — Get crawl delay for user agent
+- `site_maps()` — Get sitemap URLs
 
 **Use Cases:**
 
@@ -7436,10 +7436,10 @@ print(sitemaps)  # List of sitemap URLs
 
 **Pitfalls:**
 
-âš  Must respect robots.txt for ethical scraping
-âš  Some sites may block aggressive crawlers
-âš  `crawl_delay()` may return None
-âš  Always use appropriate user agent strings
+⚠ Must respect robots.txt for ethical scraping
+⚠ Some sites may block aggressive crawlers
+⚠ `crawl_delay()` may return None
+⚠ Always use appropriate user agent strings
 
 9.16.7 mailbox: Mailbox Formats
 
@@ -7473,11 +7473,11 @@ mbox.close()
 
 **Supported Formats:**
 
-- `mailbox.mbox` â€” Unix mbox format
-- `mailbox.Maildir` â€” Maildir format
-- `mailbox.MH` â€” MH format
-- `mailbox.Babyl` â€” Babyl format
-- `mailbox.MMDF` â€” MMDF format
+- `mailbox.mbox` — Unix mbox format
+- `mailbox.Maildir` — Maildir format
+- `mailbox.MH` — MH format
+- `mailbox.Babyl` — Babyl format
+- `mailbox.MMDF` — MMDF format
 
 **Use Cases:**
 
@@ -7488,20 +7488,20 @@ mbox.close()
 
 **Pitfalls:**
 
-âš  Different formats have different APIs
-âš  Mailbox files may be locked during access
-âš  Always close mailboxes properly
-âš  Large mailboxes can be slow to process
+⚠ Different formats have different APIs
+⚠ Mailbox files may be locked during access
+⚠ Always close mailboxes properly
+⚠ Large mailboxes can be slow to process
 
 9.16.8 Pitfalls & Warnings
 
-âš  Email headers must be properly encoded
-âš  Use TLS/SSL for SMTP/IMAP/POP3
-âš  Store email credentials securely
-âš  `http.server` is for development only
-âš  `wsgiref` is reference implementation, not production
-âš  Respect robots.txt for web crawling
-âš  Handle email encoding properly (UTF-8)
+⚠ Email headers must be properly encoded
+⚠ Use TLS/SSL for SMTP/IMAP/POP3
+⚠ Store email credentials securely
+⚠ `http.server` is for development only
+⚠ `wsgiref` is reference implementation, not production
+⚠ Respect robots.txt for web crawling
+⚠ Handle email encoding properly (UTF-8)
 
 9.16.9 Summary & Takeaways
 
@@ -7567,12 +7567,12 @@ secrets.compare_digest(b'password', b'wrong')  # False
 
 **Key Functions:**
 
-- `token_urlsafe()` â€” Generate URL-safe random token
-- `token_hex()` â€” Generate hexadecimal random token
-- `token_bytes()` â€” Generate random bytes
-- `choice()` â€” Choose random element
-- `randbelow()` â€” Random integer below n
-- `compare_digest()` â€” Constant-time string comparison
+- `token_urlsafe()` — Generate URL-safe random token
+- `token_hex()` — Generate hexadecimal random token
+- `token_bytes()` — Generate random bytes
+- `choice()` — Choose random element
+- `randbelow()` — Random integer below n
+- `compare_digest()` — Constant-time string comparison
 
 **Use Cases:**
 
@@ -7584,10 +7584,10 @@ secrets.compare_digest(b'password', b'wrong')  # False
 
 **Pitfalls:**
 
-âš  Always use `secrets` for security-sensitive random numbers
-âš  `random` module is NOT cryptographically secure
-âš  `compare_digest()` prevents timing attacks
-âš  Store tokens securely (never in logs or version control)
+⚠ Always use `secrets` for security-sensitive random numbers
+⚠ `random` module is NOT cryptographically secure
+⚠ `compare_digest()` prevents timing attacks
+⚠ Store tokens securely (never in logs or version control)
 
 **Example: Password Generation:**
 
@@ -7691,12 +7691,12 @@ print(guaranteed)
 
 **Key Functions:**
 
-- `md5()`, `sha1()`, `sha256()`, `sha512()` â€” Create hash objects
-- `sha3_256()`, `sha3_512()` â€” SHA-3 algorithms
-- `blake2b()`, `blake2s()` â€” BLAKE2 algorithms
-- `new()` â€” Create hash with algorithm name
-- `algorithms_available` â€” Available algorithms
-- `algorithms_guaranteed` â€” Guaranteed algorithms
+- `md5()`, `sha1()`, `sha256()`, `sha512()` — Create hash objects
+- `sha3_256()`, `sha3_512()` — SHA-3 algorithms
+- `blake2b()`, `blake2s()` — BLAKE2 algorithms
+- `new()` — Create hash with algorithm name
+- `algorithms_available` — Available algorithms
+- `algorithms_guaranteed` — Guaranteed algorithms
 
 **Use Cases:**
 
@@ -7708,11 +7708,11 @@ print(guaranteed)
 
 **Pitfalls:**
 
-âš  MD5 and SHA-1 are cryptographically broken â€” use SHA-256 or better
-âš  Always use salt for password hashing
-âš  Use `hmac` for keyed hashing (HMAC)
-âš  Hash algorithms are one-way â€” cannot reverse
-âš  Use proper key derivation (PBKDF2, Argon2) for passwords
+⚠ MD5 and SHA-1 are cryptographically broken — use SHA-256 or better
+⚠ Always use salt for password hashing
+⚠ Use `hmac` for keyed hashing (HMAC)
+⚠ Hash algorithms are one-way — cannot reverse
+⚠ Use proper key derivation (PBKDF2, Argon2) for passwords
 
 **Example: Password Hashing:**
 
@@ -7831,10 +7831,10 @@ print(is_valid)  # True
 
 **Key Functions:**
 
-- `new()` â€” Create HMAC object
-- `compare_digest()` â€” Constant-time comparison
-- `digest()` â€” Get binary digest
-- `hexdigest()` â€” Get hexadecimal digest
+- `new()` — Create HMAC object
+- `compare_digest()` — Constant-time comparison
+- `digest()` — Get binary digest
+- `hexdigest()` — Get hexadecimal digest
 
 **Use Cases:**
 
@@ -7846,11 +7846,11 @@ print(is_valid)  # True
 
 **Pitfalls:**
 
-âš  Always use `compare_digest()` to prevent timing attacks
-âš  Keep secret keys secure (never in code)
-âš  Use strong hash algorithms (SHA-256 or better)
-âš  Include timestamp/nonce to prevent replay attacks
-âš  HMAC provides authentication, not encryption
+⚠ Always use `compare_digest()` to prevent timing attacks
+⚠ Keep secret keys secure (never in code)
+⚠ Use strong hash algorithms (SHA-256 or better)
+⚠ Include timestamp/nonce to prevent replay attacks
+⚠ HMAC provides authentication, not encryption
 
 9.17.4 base64: Base64 Encoding
 
@@ -7963,11 +7963,11 @@ with open('image_copy.jpg', 'wb') as f:
 
 **Key Functions:**
 
-- `b64encode()`, `b64decode()` â€” Base64 encoding/decoding
-- `urlsafe_b64encode()`, `urlsafe_b64decode()` â€” URL-safe Base64
-- `b32encode()`, `b32decode()` â€” Base32 encoding/decoding
-- `b16encode()`, `b16decode()` â€” Base16 (hex) encoding/decoding
-- `standard_b64encode()`, `standard_b64decode()` â€” Standard Base64
+- `b64encode()`, `b64decode()` — Base64 encoding/decoding
+- `urlsafe_b64encode()`, `urlsafe_b64decode()` — URL-safe Base64
+- `b32encode()`, `b32decode()` — Base32 encoding/decoding
+- `b16encode()`, `b16decode()` — Base16 (hex) encoding/decoding
+- `standard_b64encode()`, `standard_b64decode()` — Standard Base64
 
 **Use Cases:**
 
@@ -7979,11 +7979,11 @@ with open('image_copy.jpg', 'wb') as f:
 
 **Pitfalls:**
 
-âš  Base64 is encoding, NOT encryption â€” data is not secure
-âš  Base64 increases data size by ~33%
-âš  Use URL-safe encoding for URLs and filenames
-âš  Padding may be required depending on use case
-âš  Always handle encoding errors
+⚠ Base64 is encoding, NOT encryption — data is not secure
+⚠ Base64 increases data size by ~33%
+⚠ Use URL-safe encoding for URLs and filenames
+⚠ Padding may be required depending on use case
+⚠ Always handle encoding errors
 
 **Example: Data URL:**
 
@@ -7998,7 +7998,7 @@ with open('logo.png', 'rb') as f:
     print(f'<img src="{data_url}" />')
 ```
 
-9.17.5 Mini Example â€” Secure Token Generation
+9.17.5 Mini Example — Secure Token Generation
 
 ```python
 import secrets
@@ -8065,14 +8065,14 @@ print(f"Valid: {is_valid}, User: {user_id}")
 
 9.17.6 Pitfalls & Warnings
 
-âš  `secrets` module is for security â€” `random` is NOT secure
-âš  MD5 and SHA-1 are broken â€” use SHA-256 or better
-âš  Always use salt for password hashing
-âš  HMAC provides authentication, not encryption
-âš  Base64 is encoding, NOT encryption
-âš  Use `compare_digest()` to prevent timing attacks
-âš  Store secrets securely (environment variables, keyring)
-âš  Never log secrets or tokens
+⚠ `secrets` module is for security — `random` is NOT secure
+⚠ MD5 and SHA-1 are broken — use SHA-256 or better
+⚠ Always use salt for password hashing
+⚠ HMAC provides authentication, not encryption
+⚠ Base64 is encoding, NOT encryption
+⚠ Use `compare_digest()` to prevent timing attacks
+⚠ Store secrets securely (environment variables, keyring)
+⚠ Never log secrets or tokens
 
 9.17.7 Summary & Takeaways
 
@@ -8090,19 +8090,19 @@ Always use `compare_digest()` for constant-time comparisons
 
 Never use MD5 or SHA-1 for security purposes
 
-Store secrets securely â€” never in code or version control
+Store secrets securely — never in code or version control
 
 Use proper key derivation (PBKDF2, Argon2) for password hashing
 
-Base64 is encoding, not encryption â€” data is not secure
+Base64 is encoding, not encryption — data is not secure
 
 
 
-ðŸ“˜ CHAPTER 10 â€” ERROR HANDLING & EXCEPTIONS
+📘 CHAPTER 10 — ERROR HANDLING & EXCEPTIONS
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“9
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–9
 
 10.0 Overview
 
@@ -8139,16 +8139,16 @@ This chapter explores all required concepts thoroughly.
 All exceptions derive from:
 
 BaseException
-    â”œâ”€â”€ Exception
-    â”‚     â”œâ”€â”€ ArithmeticError
-    â”‚     â”œâ”€â”€ LookupError
-    â”‚     â”œâ”€â”€ ValueError
-    â”‚     â”œâ”€â”€ TypeError
-    â”‚     â”œâ”€â”€ RuntimeError
-    â”‚     â””â”€â”€ ...
-    â”œâ”€â”€ SystemExit
-    â”œâ”€â”€ KeyboardInterrupt
-    â””â”€â”€ GeneratorExit
+    ├── Exception
+    │     ├── ArithmeticError
+    │     ├── LookupError
+    │     ├── ValueError
+    │     ├── TypeError
+    │     ├── RuntimeError
+    │     └── ...
+    ├── SystemExit
+    ├── KeyboardInterrupt
+    └── GeneratorExit
 
 
 Only catch subclasses of Exception unless you have a very good reason not to.
@@ -8263,8 +8263,8 @@ grouping
 catch-all for system errors
 
 10.7 Error Codes vs Exceptions
-âœ” Prefer exceptions inside Python code
-âœ” Convert to error codes only at boundaries:
+✔ Prefer exceptions inside Python code
+✔ Convert to error codes only at boundaries:
 
 CLI tools
 
@@ -8318,7 +8318,7 @@ migration guidance
 
 10.10 Error Handling Anti-Patterns
 
-âš  Catching Exception blindly
+⚠ Catching Exception blindly
 
 try:
     ...
@@ -8326,7 +8326,7 @@ except Exception:
     ...
 
 
-âš  Swallowing errors silently
+⚠ Swallowing errors silently
 
 try:
     ...
@@ -8334,10 +8334,10 @@ except:
     pass
 
 
-âš  Using exceptions for flow control
+⚠ Using exceptions for flow control
 (Except in iterator stop semantics)
 
-âš  Ignoring chained exceptions
+⚠ Ignoring chained exceptions
 
 10.11 Retry Patterns & Backoff
 
@@ -8376,7 +8376,7 @@ Used to avoid hammering unhealthy dependencies.
 
 State machine:
 
-closed â†’ open â†’ half-open â†’ closed
+closed → open → half-open → closed
 
 
 Generic implementation:
@@ -8435,7 +8435,7 @@ async def main():
 10.14.2 asyncio.gather with return_exceptions=True
 results = await asyncio.gather(*tasks, return_exceptions=True)
 
-10.15 Mini Example â€” Robust File Loader
+10.15 Mini Example — Robust File Loader
 from pathlib import Path
 
 def load_file(path):
@@ -8447,7 +8447,7 @@ def load_file(path):
     except UnicodeDecodeError as e:
         raise ValueError(f"invalid encoding: {path}") from e
 
-10.16 Macro Example â€” API Client with Retry + Logging + Chaining
+10.16 Macro Example — API Client with Retry + Logging + Chaining
 import logging
 import time
 import requests
@@ -8487,14 +8487,14 @@ custom exceptions
 
 10.17 Pitfalls & Warnings
 
-âš  ignore exception chaining
-âš  broad except catching
-âš  except: pass
-âš  leaking resources (forgetting finally)
-âš  retries without backoff
-âš  mixing exception types improperly
-âš  not using logger.exception
-âš  suppressing exceptions incorrectly
+⚠ ignore exception chaining
+⚠ broad except catching
+⚠ except: pass
+⚠ leaking resources (forgetting finally)
+⚠ retries without backoff
+⚠ mixing exception types improperly
+⚠ not using logger.exception
+⚠ suppressing exceptions incorrectly
 
 10.18 Summary & Takeaways
 
@@ -8515,11 +8515,11 @@ async exceptions require careful handling
 exception groups (3.11+) simplify parallel error aggregation
 
 
-ðŸ“˜ CHAPTER 11 â€” ARCHITECTURE & APPLICATION DESIGN
+📘 CHAPTER 11 — ARCHITECTURE & APPLICATION DESIGN
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“10
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–10
 
 11.0 Overview
 
@@ -8535,7 +8535,7 @@ module responsibilities
 
 the shape of your system
 
-Pythonâ€™s flexibility enables multiple architectural styles:
+Python’s flexibility enables multiple architectural styles:
 
 procedural
 
@@ -8571,7 +8571,7 @@ Packaging and feature boundaries
 
 11.1 Why Architecture Matters in Python
 
-Pythonâ€™s dynamic nature creates both benefits and risks:
+Python’s dynamic nature creates both benefits and risks:
 
 Benefits
 
@@ -8601,7 +8601,7 @@ Architecture mitigates these risks by enforcing structure and discipline.
 
 11.2 Layered Architecture
 
-Classic 3â€“4 layer structure:
+Classic 3–4 layer structure:
 
 Presentation Layer (HTTP, CLI, UI)
 Service Layer (Use cases)
@@ -8711,7 +8711,7 @@ class Container:
 
 11.6 DI Frameworks (Optional)
 
-FastAPIâ€™s dependency system
+FastAPI’s dependency system
 
 Lagom (FP-style)
 
@@ -8725,11 +8725,11 @@ Most Python shops use manual DI for clarity and speed.
 
 Python has multiple patterns for config:
 
-âœ” Environment variables
-âœ” configparser / JSON / YAML
-âœ” pydantic models
-âœ” dynaconf
-âœ” python-decouple
+✔ Environment variables
+✔ configparser / JSON / YAML
+✔ pydantic models
+✔ dynaconf
+✔ python-decouple
 
 Example using pydantic:
 
@@ -8770,8 +8770,8 @@ fragmentation
 
 Recommended:
 
-For Python microservices â†’ multirepo
-For large libraries/frameworks â†’ monorepo
+For Python microservices → multirepo
+For large libraries/frameworks → monorepo
 
 11.9 Plugin Architectures
 
@@ -8815,7 +8815,7 @@ APScheduler
 
 Pattern:
 
-Publisher â†’ Broker â†’ Consumers
+Publisher → Broker → Consumers
 
 
 Event loop + tasks integration covered in Chapter 16 (Concurrency).
@@ -8850,10 +8850,10 @@ circular imports from bad folder design
 
 Architectural fixes:
 
-âœ” Move shared interfaces to domain/ports
-âœ” Move DTOs to domain layer
-âœ” Use dependency inversion
-âœ” Use local imports only when appropriate
+✔ Move shared interfaces to domain/ports
+✔ Move DTOs to domain layer
+✔ Use dependency inversion
+✔ Use local imports only when appropriate
 
 11.13 Testing Architecture (Forward Reference)
 
@@ -8887,7 +8887,7 @@ graceful shutdown
 
 Handled in more detail in Chapters 12, 13, 16.
 
-11.15 Mini Example â€” Hexagonal Task Service
+11.15 Mini Example — Hexagonal Task Service
 class TaskRepo:
     def save(self, task): raise NotImplementedError
 
@@ -8906,7 +8906,7 @@ repo = MemoryTaskRepo()
 service = TaskService(repo)
 service.create("Ship product")
 
-11.16 Macro Example â€” Clean Architecture Web Service
+11.16 Macro Example — Clean Architecture Web Service
 
 Folder:
 
@@ -8980,15 +8980,15 @@ API as outer layer
 
 11.17 Pitfalls & Warnings
 
-âš  designing architecture around frameworks, not domain
-âš  circular imports from bad folder layouts
-âš  overusing inheritance
-âš  leaking database logic into services
-âš  configuration mixed with business logic
-âš  DI frameworks adding unnecessary complexity
-âš  God-classes/modules
-âš  dynamically importing untrusted plugins
-âš  mixing sync and async layers incorrectly
+⚠ designing architecture around frameworks, not domain
+⚠ circular imports from bad folder layouts
+⚠ overusing inheritance
+⚠ leaking database logic into services
+⚠ configuration mixed with business logic
+⚠ DI frameworks adding unnecessary complexity
+⚠ God-classes/modules
+⚠ dynamically importing untrusted plugins
+⚠ mixing sync and async layers incorrectly
 
 11.18 Summary & Takeaways
 
@@ -9014,7 +9014,7 @@ Avoid circular imports through inversion & structure
 
 Proceed to:
 
-ðŸ‘‰ Chapter 12 â€” Performance & Optimization
+👉 Chapter 12 — Performance & Optimization
 
 This chapter includes:
 
@@ -9038,17 +9038,17 @@ optimizing IO-bound workloads
 
 
 
-ðŸ“˜ CHAPTER 12 â€” PERFORMANCE & OPTIMIZATION
+📘 CHAPTER 12 — PERFORMANCE & OPTIMIZATION
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“11
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–11
 
 12.0 Overview
 
 Python performance involves three major bottleneck areas:
 
-1ï¸âƒ£ CPU-bound work
+1️⃣ CPU-bound work
 
 Python is not fast at raw loops
 
@@ -9056,13 +9056,13 @@ GIL limits multi-threaded speed
 
 Use vectorization / C-extension escape hatches
 
-2ï¸âƒ£ IO-bound workloads
+2️⃣ IO-bound workloads
 
 Python is exceptionally good here
 
 async/await, threading, multiprocessing, TaskGroups
 
-3ï¸âƒ£ Memory-bound workloads
+3️⃣ Memory-bound workloads
 
 object overhead
 
@@ -9078,13 +9078,13 @@ This chapter presents a complete performance engineering toolkit.
 
 Python performance is shaped by:
 
-âœ” CPython interpreter
-âœ” GIL (3.12 and earlier)
-âœ” Tiered LLVM JIT (3.13+)
-âœ” Optional free-threading mode (3.14+)
-âœ” Huge object overhead (~48â€“72 bytes per Python object)
-âœ” Dynamic dispatch on attribute access
-âœ” Dictionaries powering everything (classes, objects, scopes)
+✔ CPython interpreter
+✔ GIL (3.12 and earlier)
+✔ Tiered LLVM JIT (3.13+)
+✔ Optional free-threading mode (3.14+)
+✔ Huge object overhead (~48–72 bytes per Python object)
+✔ Dynamic dispatch on attribute access
+✔ Dictionaries powering everything (classes, objects, scopes)
 
 To optimize Python code, you must understand:
 
@@ -9186,11 +9186,11 @@ def profile_function(func, *args, **kwargs):
 
 **Key Functions:**
 
-- `cProfile.run()` â€” Profile statement
-- `cProfile.Profile()` â€” Profile object
-- `pstats.Stats()` â€” Statistics object
-- `Stats.sort_stats()` â€” Sort statistics
-- `Stats.print_stats()` â€” Print statistics
+- `cProfile.run()` — Profile statement
+- `cProfile.Profile()` — Profile object
+- `pstats.Stats()` — Statistics object
+- `Stats.sort_stats()` — Sort statistics
+- `Stats.print_stats()` — Print statistics
 
 **Use Cases:**
 
@@ -9201,10 +9201,10 @@ def profile_function(func, *args, **kwargs):
 
 **Pitfalls:**
 
-âš  Profiling adds overhead (~10-30%)
-âš  Use `pstats` for detailed analysis
-âš  Sort by different metrics (cumulative, time, calls)
-âš  Profile representative workloads
+⚠ Profiling adds overhead (~10-30%)
+⚠ Use `pstats` for detailed analysis
+⚠ Sort by different metrics (cumulative, time, calls)
+⚠ Profile representative workloads
 
 12.3.2 timeit: Timing Small Code Snippets
 
@@ -9283,10 +9283,10 @@ print(f"Min: {min(times):.6f}s, Max: {max(times):.6f}s")
 
 **Key Functions:**
 
-- `timeit()` â€” Time statement
-- `repeat()` â€” Repeat timing multiple times
-- `Timer()` â€” Timer class for advanced usage
-- `default_timer()` â€” Best available timer
+- `timeit()` — Time statement
+- `repeat()` — Repeat timing multiple times
+- `Timer()` — Timer class for advanced usage
+- `default_timer()` — Best available timer
 
 **Use Cases:**
 
@@ -9297,10 +9297,10 @@ print(f"Min: {min(times):.6f}s, Max: {max(times):.6f}s")
 
 **Pitfalls:**
 
-âš  Only times execution, not setup
-âš  Use `number` parameter for accurate results
-âš  Warm-up effects may affect first run
-âš  Use `repeat()` for statistical significance
+⚠ Only times execution, not setup
+⚠ Use `number` parameter for accurate results
+⚠ Warm-up effects may affect first run
+⚠ Use `repeat()` for statistical significance
 
 12.3.3 line_profiler (line-by-line CPU)
 
@@ -9446,12 +9446,12 @@ for stat in top_stats[:5]:
 
 **Key Functions:**
 
-- `start()` â€” Start tracing
-- `stop()` â€” Stop tracing
-- `get_traced_memory()` â€” Get current/peak memory
-- `take_snapshot()` â€” Take memory snapshot
-- `get_traceback_limit()` â€” Get traceback limit
-- `get_object_traceback()` â€” Get traceback for object
+- `start()` — Start tracing
+- `stop()` — Stop tracing
+- `get_traced_memory()` — Get current/peak memory
+- `take_snapshot()` — Take memory snapshot
+- `get_traceback_limit()` — Get traceback limit
+- `get_object_traceback()` — Get traceback for object
 
 **Use Cases:**
 
@@ -9462,10 +9462,10 @@ for stat in top_stats[:5]:
 
 **Pitfalls:**
 
-âš  Tracing adds overhead (~10-20%)
-âš  Use snapshots for detailed analysis
-âš  Filter traces to focus on relevant code
-âš  Compare snapshots to find leaks
+⚠ Tracing adds overhead (~10-20%)
+⚠ Use snapshots for detailed analysis
+⚠ Filter traces to focus on relevant code
+⚠ Compare snapshots to find leaks
 
 12.3.5 faulthandler: Dump Python Traceback
 
@@ -9528,11 +9528,11 @@ PYTHONFAULTHANDLER=1 python script.py
 
 **Key Functions:**
 
-- `enable()` â€” Enable faulthandler
-- `disable()` â€” Disable faulthandler
-- `register()` â€” Register signal handler
-- `dump_traceback()` â€” Dump traceback manually
-- `dump_traceback_later()` â€” Dump traceback after delay
+- `enable()` — Enable faulthandler
+- `disable()` — Disable faulthandler
+- `register()` — Register signal handler
+- `dump_traceback()` — Dump traceback manually
+- `dump_traceback_later()` — Dump traceback after delay
 
 **Use Cases:**
 
@@ -9543,10 +9543,10 @@ PYTHONFAULTHANDLER=1 python script.py
 
 **Pitfalls:**
 
-âš  Only works for fatal errors
-âš  May not work for all crashes
-âš  Use with signal handlers for hangs
-âš  Enable early in program startup
+⚠ Only works for fatal errors
+⚠ May not work for all crashes
+⚠ Use with signal handlers for hangs
+⚠ Enable early in program startup
 
 **Example: Debugging Hang:**
 
@@ -9574,7 +9574,7 @@ thread.start()
 ```
 
 12.4 Common Python Performance Rules
-âœ” Rule 1: Avoid Python loops for numeric work
+✔ Rule 1: Avoid Python loops for numeric work
 
 Use:
 
@@ -9586,19 +9586,19 @@ Cython
 
 PyPy
 
-âœ” Rule 2: Prefer list comprehensions over manual loops
+✔ Rule 2: Prefer list comprehensions over manual loops
 
 Comprehensions execute in C, faster than Python loops.
 
-âœ” Rule 3: Prefer local variables to globals
+✔ Rule 3: Prefer local variables to globals
 
 Global/name resolution is slower (LOAD_GLOBAL vs LOAD_FAST).
 
-âœ” Rule 4: Avoid excessive abstraction in hot paths
+✔ Rule 4: Avoid excessive abstraction in hot paths
 
 Function calls are slow vs inlined operations.
 
-âœ” Rule 5: Prefer tuples over lists for fixed data
+✔ Rule 5: Prefer tuples over lists for fixed data
 
 Tuples are:
 
@@ -9635,7 +9635,7 @@ for chunk in read_chunks(path): ...
 
 12.5.5 Avoid large dicts / objects when possible
 
-A Python dict entry costs ~72â€“140 bytes.
+A Python dict entry costs ~72–140 bytes.
 
 Alternatives:
 
@@ -9651,10 +9651,10 @@ dataclass(slots=True)
 
 CPython uses:
 
-âœ” Reference counting
-âœ” Generational GC (for cycles)
-âœ” Immortal objects (3.12+)
-âœ” Free-threading support (3.14+)
+✔ Reference counting
+✔ Generational GC (for cycles)
+✔ Immortal objects (3.12+)
+✔ Free-threading support (3.14+)
 
 Disable GC in high-performance numeric code:
 
@@ -9706,13 +9706,13 @@ key namespacing
 
 IO-bound optimization patterns:
 
-âœ” use asyncio
-âœ” use buffered IO
-âœ” use multiprocessing for parallel IO
-âœ” use mmap for large files
-âœ” use aiofiles (file IO)
-âœ” use httpx/asynchttpx for async HTTP
-âœ” batch operations
+✔ use asyncio
+✔ use buffered IO
+✔ use multiprocessing for parallel IO
+✔ use mmap for large files
+✔ use aiofiles (file IO)
+✔ use httpx/asynchttpx for async HTTP
+✔ batch operations
 
 Example:
 
@@ -9736,17 +9736,17 @@ result = [i * 2 for i in range(1_000_000)]
 
 Performance by Array Size:
 
-For large, numeric workloads, vectorized NumPy operations are typically 10â€“100Ã— faster than equivalent pure-Python loops, because the heavy lifting happens in optimized C code and uses contiguous, typed memory.
+For large, numeric workloads, vectorized NumPy operations are typically 10–100× faster than equivalent pure-Python loops, because the heavy lifting happens in optimized C code and uses contiguous, typed memory.
 
-âš ï¸ Important: On very small arrays (â‰¤1e3 elements), the overhead of NumPy can actually make pure Python faster. Always benchmark your specific use case.
+⚠️ Important: On very small arrays (≤1e3 elements), the overhead of NumPy can actually make pure Python faster. Always benchmark your specific use case.
 
 Size Thresholds:
 
-small N (â‰¤1e3): Python list comps often comparable or faster
+small N (≤1e3): Python list comps often comparable or faster
 
-medium N (1e4â€“1e6): NumPy ~10â€“50Ã—
+medium N (1e4–1e6): NumPy ~10–50×
 
-huge N (â‰¥1e7): NumPy often 50â€“100Ã—, constrained by memory bandwidth
+huge N (≥1e7): NumPy often 50–100×, constrained by memory bandwidth
 
 Try This: Benchmark NumPy vs Python for your array sizes:
 
@@ -9770,9 +9770,9 @@ numpy_vectorized(n)
 np_time = time.perf_counter() - start
 
 print(f"Python: {py_time:.4f}s, NumPy: {np_time:.4f}s")
-print(f"Speedup: {py_time / np_time:.1f}Ã—")
+print(f"Speedup: {py_time / np_time:.1f}×")
 # Output: Python: 0.1234s, NumPy: 0.0045s
-# Output: Speedup: 27.4Ã—
+# Output: Speedup: 27.4×
 ```
 
 12.9.2 Numba (JIT compiler)
@@ -9805,7 +9805,7 @@ baseline JIT
 
 optimizing tier
 
-20â€“50% faster for many workloads
+20–50% faster for many workloads
 
 Requires:
 
@@ -9850,7 +9850,7 @@ class Lazy:
         return self._data
 
 12.13 Extreme Optimization Patterns
-âœ” avoid attribute lookups in hot loops
+✔ avoid attribute lookups in hot loops
 
 Move:
 
@@ -9861,11 +9861,11 @@ for x in data:
 
 Significant speedup.
 
-âœ” avoid try/except inside hot loops
+✔ avoid try/except inside hot loops
 
 Move exception handling outside loop.
 
-âœ” consider PyPy
+✔ consider PyPy
 
 Useful for:
 
@@ -9873,7 +9873,7 @@ pure Python loops
 
 long-running computations
 
-12.14 Mini Example â€” Fast Numeric Pipeline
+12.14 Mini Example — Fast Numeric Pipeline
 import numpy as np
 
 def pipeline():
@@ -9884,7 +9884,7 @@ def pipeline():
 
 print(pipeline())
 
-12.15 Macro Example â€” Log Analyzer (Optimized)
+12.15 Macro Example — Log Analyzer (Optimized)
 
 Uses:
 
@@ -9913,13 +9913,13 @@ for ts, lvl, msg in read_large("logs.bin"):
 
 12.16 Pitfalls & Warnings
 
-âš  Python loops are slow
-âš  dicts are expensive memory-wise
-âš  exception-heavy code becomes slow
-âš  premature optimization is harmful
-âš  pickle may degrade performance & adds security risks
-âš  GIL prevents parallel CPU-bound threads (â‰¤3.12)
-âš  free-threading is not a magic bullet
+⚠ Python loops are slow
+⚠ dicts are expensive memory-wise
+⚠ exception-heavy code becomes slow
+⚠ premature optimization is harmful
+⚠ pickle may degrade performance & adds security risks
+⚠ GIL prevents parallel CPU-bound threads (≤3.12)
+⚠ free-threading is not a magic bullet
 
 12.17 Summary & Takeaways
 
@@ -9943,7 +9943,7 @@ Effective performance requires architecture + tooling
 
 Proceed to:
 
-ðŸ‘‰ Chapter 13 â€” Security
+👉 Chapter 13 — Security
 Including:
 
 OWASP Top 10 for Python
@@ -9966,17 +9966,17 @@ common vulnerabilities
 
 
 
-ðŸ“˜ CHAPTER 13 â€” SECURITY
+📘 CHAPTER 13 — SECURITY
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“12
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–12
 
 13.0 Overview
 
 Security in Python requires understanding:
 
-Pythonâ€™s dynamic nature
+Python’s dynamic nature
 
 insecure standard library APIs (pickle, eval, input)
 
@@ -10014,7 +10014,7 @@ Python can open network sockets
 
 Python can spawn system processes
 
-Thereforeâ€¦
+Therefore…
 
 Do NOT run untrusted Python code.
 
@@ -10036,9 +10036,9 @@ unsafe YAML loading
 
 Examples:
 
-os.system(f"rm -rf {user_input}")          # âŒ
-subprocess.run(user_input, shell=True)     # âŒ
-yaml.load(data)                            # âŒ Use safe_load
+os.system(f"rm -rf {user_input}")          # ❌
+subprocess.run(user_input, shell=True)     # ❌
+yaml.load(data)                            # ❌ Use safe_load
 
 13.2.2 Broken Authentication
 
@@ -10228,18 +10228,18 @@ should be encrypted
 13.5 Secure Serialization
 Avoid:
 
-âŒ pickle
-âŒ shelve
-âŒ marshal
-âŒ PyYAML load()
+❌ pickle
+❌ shelve
+❌ marshal
+❌ PyYAML load()
 
 Prefer:
 
-âœ” JSON
-âœ” ormsgpack
-âœ” msgpack
-âœ” protobuf
-âœ” pydantic JSON models
+✔ JSON
+✔ ormsgpack
+✔ msgpack
+✔ protobuf
+✔ pydantic JSON models
 
 13.6 Secure Filesystem & Path Handling
 13.6.1 Use pathlib to prevent path traversal
@@ -10274,11 +10274,11 @@ class TokenBucket:
 
 Tools:
 
-âœ” pip-audit
-âœ” safety
-âœ” npm audit for frontend
-âœ” osv-scanner
-âœ” pipdeptree
+✔ pip-audit
+✔ safety
+✔ npm audit for frontend
+✔ osv-scanner
+✔ pipdeptree
 
 Scan regularly.
 
@@ -10357,15 +10357,15 @@ Create mitigations
 8. HTTPS only
 13.13 Secure Web Development Anti-Patterns
 
-âŒ manual SQL queries
-âŒ storing plaintext passwords
-âŒ trusting user-supplied IDs
-âŒ rendering raw HTML
-âŒ returning internal error messages
-âŒ disabling SSL verification
-âŒ using "pickle" for sessions
+❌ manual SQL queries
+❌ storing plaintext passwords
+❌ trusting user-supplied IDs
+❌ rendering raw HTML
+❌ returning internal error messages
+❌ disabling SSL verification
+❌ using "pickle" for sessions
 
-13.14 Mini Example â€” Safe Config Loader
+13.14 Mini Example — Safe Config Loader
 from pydantic import BaseModel, ValidationError
 from pathlib import Path
 import json
@@ -10381,7 +10381,7 @@ def load_config(path):
     except ValidationError as e:
         raise RuntimeError("Invalid config") from e
 
-13.15 Macro Example â€” Secure FastAPI App
+13.15 Macro Example — Secure FastAPI App
 
 Features:
 
@@ -10423,20 +10423,20 @@ def create_item(item: Item, token: str = Depends(oauth2)):
 
 13.16 Pitfalls & Warnings
 
-âš  pickle is unsafe
-âš  eval/exec are unsafe
-âš  PyYAML load() is unsafe
-âš  secrets in logs
-âš  debug mode enabled in production
-âš  weak password hashing
-âš  bare exceptions hide vulnerabilities
-âš  unsanitized user input in file paths
-âš  insecure subprocess usage
-âš  relying solely on client-side validation
+⚠ pickle is unsafe
+⚠ eval/exec are unsafe
+⚠ PyYAML load() is unsafe
+⚠ secrets in logs
+⚠ debug mode enabled in production
+⚠ weak password hashing
+⚠ bare exceptions hide vulnerabilities
+⚠ unsanitized user input in file paths
+⚠ insecure subprocess usage
+⚠ relying solely on client-side validation
 
 13.17 Summary & Takeaways
 
-Python has no built-in sandbox â†’ avoid untrusted code
+Python has no built-in sandbox → avoid untrusted code
 
 Use pydantic for data validation
 
@@ -10460,7 +10460,7 @@ Error messages must not leak internal data
 
 Proceed to:
 
-ðŸ‘‰ Chapter 14 â€” Testing & Quality Engineering
+👉 Chapter 14 — Testing & Quality Engineering
 Includes:
 
 pytest
@@ -10485,11 +10485,11 @@ doctest
 
 
 
-ðŸ“˜ CHAPTER 14 â€” TESTING & QUALITY ENGINEERING
+📘 CHAPTER 14 — TESTING & QUALITY ENGINEERING
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“13
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–13
 
 14.0 Overview
 
@@ -10563,12 +10563,12 @@ Property-based test generation.
 Examples embedded in docstrings.
 
 14.2 Testing Philosophy
-âœ” Write tests close to the behavior, not implementation
-âœ” Test the contract, not private details
-âœ” Use fixtures for shared setup
-âœ” Use mocks only when needed
-âœ” Integration > unit tests for Python
-âœ” Prioritize readability and maintainability
+✔ Write tests close to the behavior, not implementation
+✔ Test the contract, not private details
+✔ Use fixtures for shared setup
+✔ Use mocks only when needed
+✔ Integration > unit tests for Python
+✔ Prioritize readability and maintainability
 14.3 Test Organization & Folder Structure
 
 Recommended:
@@ -10626,11 +10626,11 @@ if __name__ == "__main__":
 
 Python supports the following doubles:
 
-âœ” Mock â€” tracks calls, faked behavior
-âœ” Stub â€” provides fixed behavior
-âœ” Fake â€” working simplified implementation
-âœ” Spy â€” wrapper around real logic
-âœ” Dummy â€” unused placeholder argument
+✔ Mock — tracks calls, faked behavior
+✔ Stub — provides fixed behavior
+✔ Fake — working simplified implementation
+✔ Spy — wrapper around real logic
+✔ Dummy — unused placeholder argument
 14.6.1 unittest.mock
 from unittest.mock import Mock
 
@@ -10779,10 +10779,10 @@ Component	Recommended
 domain layer	90%+
 services	80%
 adapters	60%
-API	50â€“80%
+API	50–80%
 E2E	behavior-based
 
-Coverage is not a goal â€” correctness is.
+Coverage is not a goal — correctness is.
 
 14.13 Mocking External Services
 
@@ -10822,7 +10822,7 @@ Run:
 
 python -m doctest file.py
 
-14.15 Mini Example â€” Testing a Service with Mocks
+14.15 Mini Example — Testing a Service with Mocks
 def test_service_calls_repo():
     repo = Mock()
     repo.save.return_value = True
@@ -10832,7 +10832,7 @@ def test_service_calls_repo():
 
     repo.save.assert_called_once()
 
-14.16 Macro Example â€” Full Test Suite
+14.16 Macro Example — Full Test Suite
 
 Includes:
 
@@ -10868,14 +10868,14 @@ def test_create(memory_repo):
 
 14.17 Pitfalls & Warnings
 
-âš  using too many mocks â†’ tests lie
-âš  brittle tests that mirror implementation
-âš  skipping integration tests â†’ hidden failures
-âš  not isolating the DB state
-âš  relying on real network in tests
-âš  test order dependence
-âš  global state shared between tests
-âš  mocking time incorrectly
+⚠ using too many mocks → tests lie
+⚠ brittle tests that mirror implementation
+⚠ skipping integration tests → hidden failures
+⚠ not isolating the DB state
+⚠ relying on real network in tests
+⚠ test order dependence
+⚠ global state shared between tests
+⚠ mocking time incorrectly
 
 14.18 Summary & Takeaways
 
@@ -10899,7 +10899,7 @@ property-based testing uncovers edge cases automatically
 
 Proceed to:
 
-ðŸ‘‰ Chapter 15 â€” Tooling & Development Workflow
+👉 Chapter 15 — Tooling & Development Workflow
 including:
 
 modern build systems: hatch, pdm
@@ -10920,9 +10920,9 @@ documentation generation (Sphinx, MkDocs)
 
 
 
-ðŸ“˜ CHAPTER 15 â€” TOOLING & DEVELOPMENT WORKFLOW
+📘 CHAPTER 15 — TOOLING & DEVELOPMENT WORKFLOW
 
-âš ï¸ Scope Note: This Bible focuses on backend/systems Python development. While we cover NumPy, Pandas, and Polars basics, we do not provide deep-dive workflows for:
+⚠️ Scope Note: This Bible focuses on backend/systems Python development. While we cover NumPy, Pandas, and Polars basics, we do not provide deep-dive workflows for:
 
 Machine Learning (scikit-learn, PyTorch, TensorFlow workflows)
 
@@ -10943,8 +10943,8 @@ CPython internals
 System architecture
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“14
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–14
 
 15.0 Overview
 
@@ -11000,7 +11000,7 @@ Ensures fully reproducible builds.
 
 15.2 Modern Build Systems
 
-Pythonâ€™s packaging ecosystem evolved dramatically:
+Python’s packaging ecosystem evolved dramatically:
 
 Legacy:
 
@@ -11037,7 +11037,7 @@ hatch publish
 
 15.2.2 PDM
 
-PEP 582 support (â€œpypackagesâ€)
+PEP 582 support (“pypackages”)
 
 15.2.3 Poetry
 poetry init
@@ -11071,7 +11071,7 @@ no config by default
 
 15.3.2 Ruff (Linter + formatter)
 
-(Most popular in 2024â€“2025)
+(Most popular in 2024–2025)
 
 ruff check .
 ruff format .
@@ -11182,13 +11182,13 @@ pdoc --html mypackage
 
 Avoid:
 
-âŒ python:latest
-âŒ python:3.12-slim with no pinned version
+❌ python:latest
+❌ python:3.12-slim with no pinned version
 
 Prefer:
 
-âœ” python:3.12.3-slim
-âœ” python:3.12.3-alpine (for small runtime)
+✔ python:3.12.3-slim
+✔ python:3.12.3-alpine (for small runtime)
 
 15.6.2 Multi-Stage Build Example
 FROM python:3.12-slim as builder
@@ -11299,7 +11299,7 @@ Docker images
 
 test matrix for Python versions
 
-15.11 Mini Example â€” Complete Tooling Setup
+15.11 Mini Example — Complete Tooling Setup
 project/
   pyproject.toml
   .pre-commit-config.yaml
@@ -11321,7 +11321,7 @@ build system
 
 dependencies
 
-15.12 Macro Example â€” Full CI/CD Pipeline
+15.12 Macro Example — Full CI/CD Pipeline
 
 Your full workflow:
 
@@ -11353,14 +11353,14 @@ deploy:
 
 15.13 Pitfalls & Warnings
 
-âš  Using global Python installations
-âš  Running tests against system Python
-âš  Missing lock files
-âš  Unpinned versions cause breakages
-âš  Using outdated build tools
-âš  Relying on Makefiles alone
-âš  Skipping CI checks
-âš  Running Flask dev server in production
+⚠ Using global Python installations
+⚠ Running tests against system Python
+⚠ Missing lock files
+⚠ Unpinned versions cause breakages
+⚠ Using outdated build tools
+⚠ Relying on Makefiles alone
+⚠ Skipping CI checks
+⚠ Running Flask dev server in production
 
 15.14 Summary & Takeaways
 
@@ -11382,7 +11382,7 @@ Keep CI/CD pipelines fast and modular
 
 Proceed to:
 
-ðŸ‘‰ Chapter 16 â€” Concurrency & Parallelism
+👉 Chapter 16 — Concurrency & Parallelism
 This chapter includes:
 
 threading
@@ -11412,17 +11412,17 @@ real benchmark examples
 diagrams showing event loop and threading model
 
 
-ðŸ“˜ CHAPTER 16 â€” CONCURRENCY & PARALLELISM
+📘 CHAPTER 16 — CONCURRENCY & PARALLELISM
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“15
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–15
 
 16.0 Overview
 
 Concurrency in Python involves three major execution models:
 
-1ï¸âƒ£ Threading (concurrency for IO-bound tasks)
+1️⃣ Threading (concurrency for IO-bound tasks)
 
 Lightweight OS threads
 
@@ -11430,7 +11430,7 @@ Blocked by GIL for CPU tasks
 
 Excellent for network I/O, file I/O, HTTP clients, proxies
 
-2ï¸âƒ£ Multiprocessing (parallelism for CPU-bound tasks)
+2️⃣ Multiprocessing (parallelism for CPU-bound tasks)
 
 True parallel CPU usage
 
@@ -11438,7 +11438,7 @@ No GIL limitation
 
 Costs: process spawn time, IPC overhead
 
-3ï¸âƒ£ AsyncIO (single-threaded concurrency)
+3️⃣ AsyncIO (single-threaded concurrency)
 
 Cooperative multitasking
 
@@ -11448,7 +11448,7 @@ Cannot parallelize CPU work
 
 Best for async HTTP clients/servers
 
-Modern Python (3.11â€“3.14) adds:
+Modern Python (3.11–3.14) adds:
 
 TaskGroups for structured concurrency
 
@@ -11480,15 +11480,15 @@ lack of sandboxing
 
 To use concurrency safely:
 
-âœ” design for immutability
-âœ” minimize shared state
-âœ” use queues
-âœ” isolate CPU tasks into processes
-âœ” use async for high-concurrency I/O
+✔ design for immutability
+✔ minimize shared state
+✔ use queues
+✔ isolate CPU tasks into processes
+✔ use async for high-concurrency I/O
 
 16.2 The GIL (Global Interpreter Lock)
 
-(Non-internals versionâ€”full internals in Part V)
+(Non-internals version—full internals in Part V)
 
 Purpose of the GIL:
 
@@ -11500,7 +11500,7 @@ simplifies C-extension thread safety
 
 Effects:
 
-ðŸŸ¢ Good for:
+🟢 Good for:
 
 simple threading safety
 
@@ -11508,9 +11508,9 @@ extension authors
 
 IO-bound concurrency
 
-ðŸ”´ Bad for:
+🔴 Bad for:
 
-CPU-bound parallelism â€” only one thread runs Python bytecode at a time
+CPU-bound parallelism — only one thread runs Python bytecode at a time
 
 high-performance numerical code without C extensions
 
@@ -11529,15 +11529,15 @@ reference-counting replaced with atomic ops
 
 CPython becomes truly parallel
 
-performance cost for single-thread workloads (~5â€“15% slower)
+performance cost for single-thread workloads (~5–15% slower)
 
 Warning: Not all C extensions support free-threading yet.
 
 16.4 Concurrency Comparison (the famous table)
 Model	Parallel?	Best For	Worst For
-Threads	âŒ (â‰¤3.12) / âœ… (3.14 FT)	Network IO, HTTP clients, websockets	CPU-bound work
-Multiprocessing	âœ…	CPU-heavy tasks, ML preprocessing	High IPC overhead
-AsyncIO	âŒ	100k+ network connections	CPU-bound work
+Threads	❌ (≤3.12) / ✅ (3.14 FT)	Network IO, HTTP clients, websockets	CPU-bound work
+Multiprocessing	✅	CPU-heavy tasks, ML preprocessing	High IPC overhead
+AsyncIO	❌	100k+ network connections	CPU-bound work
 ThreadPoolExecutor	Limited (GIL)	mixed I/O tasks	heavy CPU work
 ProcessPoolExecutor	Yes	batch CPU tasks	small tasks (overhead)
 16.5 THREADING
@@ -11624,12 +11624,12 @@ print(t.is_alive())  # False (completed)
 
 **Key Functions:**
 
-- `Thread()` â€” Create thread object
-- `start()` â€” Start thread execution
-- `join()` â€” Wait for thread to complete
-- `is_alive()` â€” Check if thread is running
-- `name` â€” Thread name (for debugging)
-- `daemon` â€” Daemon flag (exits with main program)
+- `Thread()` — Create thread object
+- `start()` — Start thread execution
+- `join()` — Wait for thread to complete
+- `is_alive()` — Check if thread is running
+- `name` — Thread name (for debugging)
+- `daemon` — Daemon flag (exits with main program)
 
 16.5.2 Thread Synchronization Primitives
 
@@ -11809,13 +11809,13 @@ timer.start()
 
 **Key Synchronization Primitives:**
 
-- `Lock()` â€” Basic mutual exclusion lock
-- `RLock()` â€” Reentrant lock (same thread can acquire multiple times)
-- `Event()` â€” Simple event signaling
-- `Condition()` â€” Wait/notify pattern
-- `Semaphore()` â€” Resource limiting
-- `Barrier()` â€” Synchronization point
-- `Timer()` â€” Delayed execution
+- `Lock()` — Basic mutual exclusion lock
+- `RLock()` — Reentrant lock (same thread can acquire multiple times)
+- `Event()` — Simple event signaling
+- `Condition()` — Wait/notify pattern
+- `Semaphore()` — Resource limiting
+- `Barrier()` — Synchronization point
+- `Timer()` — Delayed execution
 
 16.5.3 Race Conditions
 
@@ -11881,13 +11881,13 @@ print(counter)  # Always 500000
 **Common Race Condition Patterns:**
 
 ```python
-# âŒ BAD: Shared mutable state without protection
+# ❌ BAD: Shared mutable state without protection
 shared_list = []
 
 def append_item(item: int) -> None:
     shared_list.append(item)  # Race condition!
 
-# âœ… GOOD: Use lock
+# ✅ GOOD: Use lock
 lock = threading.Lock()
 shared_list = []
 
@@ -11895,7 +11895,7 @@ def append_item(item: int) -> None:
     with lock:
         shared_list.append(item)
 
-# âœ… BETTER: Use queue (thread-safe)
+# ✅ BETTER: Use queue (thread-safe)
 from queue import Queue
 q = Queue()
 
@@ -12040,15 +12040,15 @@ except Empty:
 
 **Queue Methods:**
 
-- `put()` â€” Add item (blocks if full)
-- `get()` â€” Remove item (blocks if empty)
-- `put_nowait()` â€” Add without blocking
-- `get_nowait()` â€” Remove without blocking
-- `empty()` â€” Check if empty
-- `full()` â€” Check if full
-- `qsize()` â€” Get approximate size
-- `task_done()` â€” Mark task as done
-- `join()` â€” Wait for all tasks to complete
+- `put()` — Add item (blocks if full)
+- `get()` — Remove item (blocks if empty)
+- `put_nowait()` — Add without blocking
+- `get_nowait()` — Remove without blocking
+- `empty()` — Check if empty
+- `full()` — Check if full
+- `qsize()` — Get approximate size
+- `task_done()` — Mark task as done
+- `join()` — Wait for all tasks to complete
 
 **Producer-Consumer Pattern:**
 
@@ -12097,10 +12097,10 @@ for t in consumers:
 
 **Key Functions:**
 
-- `Queue()` â€” FIFO queue
-- `LifoQueue()` â€” LIFO queue (stack)
-- `PriorityQueue()` â€” Priority queue
-- `SimpleQueue()` â€” Simpler queue (3.7+)
+- `Queue()` — FIFO queue
+- `LifoQueue()` — LIFO queue (stack)
+- `PriorityQueue()` — Priority queue
+- `SimpleQueue()` — Simpler queue (3.7+)
 
 **Use Cases:**
 
@@ -12111,11 +12111,11 @@ for t in consumers:
 
 **Pitfalls:**
 
-âš  `qsize()` is approximate and not reliable
-âš  `empty()` and `full()` are not thread-safe for decision-making
-âš  Always use `task_done()` with `join()` for proper synchronization
-âš  Use sentinel values (None) to signal completion
-âš  Queue size limits prevent memory issues
+⚠ `qsize()` is approximate and not reliable
+⚠ `empty()` and `full()` are not thread-safe for decision-making
+⚠ Always use `task_done()` with `join()` for proper synchronization
+⚠ Use sentinel values (None) to signal completion
+⚠ Queue size limits prevent memory issues
 
 16.5.6 ThreadPoolExecutor
 
@@ -12210,13 +12210,13 @@ with ThreadPoolExecutor() as executor:
 
 **Key Functions:**
 
-- `ThreadPoolExecutor()` â€” Create thread pool
-- `submit()` â€” Submit single task, returns Future
-- `map()` â€” Submit multiple tasks, returns iterator
-- `shutdown()` â€” Shutdown executor (automatic with context manager)
-- `Future.result()` â€” Get result (blocks until ready)
-- `Future.done()` â€” Check if task completed
-- `as_completed()` â€” Iterate over completed futures
+- `ThreadPoolExecutor()` — Create thread pool
+- `submit()` — Submit single task, returns Future
+- `map()` — Submit multiple tasks, returns iterator
+- `shutdown()` — Shutdown executor (automatic with context manager)
+- `Future.result()` — Get result (blocks until ready)
+- `Future.done()` — Check if task completed
+- `as_completed()` — Iterate over completed futures
 
 **Use Cases:**
 
@@ -12228,32 +12228,32 @@ with ThreadPoolExecutor() as executor:
 
 **Pitfalls:**
 
-âš  GIL limits CPU-bound parallelism
-âš  Too many threads cause context switching overhead
-âš  Use `max_workers` to limit thread count
-âš  Always handle exceptions from futures
-âš  Use `as_completed()` for processing results as they arrive
+⚠ GIL limits CPU-bound parallelism
+⚠ Too many threads cause context switching overhead
+⚠ Use `max_workers` to limit thread count
+⚠ Always handle exceptions from futures
+⚠ Use `as_completed()` for processing results as they arrive
 
 16.5.7 Thread Safety Best Practices
 
 **DO:**
 
-âœ” Use queues for thread communication
-âœ” Use locks for shared mutable state
-âœ” Minimize shared state
-âœ” Use thread-local storage when possible
-âœ” Use ThreadPoolExecutor for I/O-bound tasks
-âœ” Always join threads
-âœ” Use context managers for locks
+✔ Use queues for thread communication
+✔ Use locks for shared mutable state
+✔ Minimize shared state
+✔ Use thread-local storage when possible
+✔ Use ThreadPoolExecutor for I/O-bound tasks
+✔ Always join threads
+✔ Use context managers for locks
 
 **DON'T:**
 
-âŒ Share mutable state without protection
-âŒ Use too many threads (context switching overhead)
-âŒ Use threads for CPU-bound tasks (use multiprocessing)
-âŒ Forget to join threads
-âŒ Use global variables for thread communication
-âŒ Assume operations are atomic
+❌ Share mutable state without protection
+❌ Use too many threads (context switching overhead)
+❌ Use threads for CPU-bound tasks (use multiprocessing)
+❌ Forget to join threads
+❌ Use global variables for thread communication
+❌ Assume operations are atomic
 
 **Example: Thread-Safe Counter:**
 
@@ -12299,14 +12299,14 @@ print(counter.get_value())  # 10000
 
 16.5.8 Pitfalls & Warnings
 
-âš  Race conditions from shared mutable state
-âš  Deadlocks from multiple locks
-âš  GIL prevents CPU-bound parallelism
-âš  Too many threads cause overhead
-âš  Forgetting to join threads
-âš  Daemon threads may not clean up properly
-âš  Thread-local storage requires careful initialization
-âš  Queue operations can block indefinitely
+⚠ Race conditions from shared mutable state
+⚠ Deadlocks from multiple locks
+⚠ GIL prevents CPU-bound parallelism
+⚠ Too many threads cause overhead
+⚠ Forgetting to join threads
+⚠ Daemon threads may not clean up properly
+⚠ Thread-local storage requires careful initialization
+⚠ Queue operations can block indefinitely
 
 16.6 MULTIPROCESSING
 
@@ -12342,15 +12342,15 @@ shared_dict = manager.dict()
 
 16.6.5 Multiprocessing Pitfalls
 
-âš  pickling overhead
-âš  process startup cost
-âš  cannot use lambdas
-âš  must guard main block with
+⚠ pickling overhead
+⚠ process startup cost
+⚠ cannot use lambdas
+⚠ must guard main block with
 
 if __name__ == "__main__":
 
 
-âš  cannot share large objects cheaply
+⚠ cannot share large objects cheaply
 
 **Expanded Coverage:**
 
@@ -12447,19 +12447,19 @@ if __name__ == "__main__":
 
 **Type Codes for Array:**
 
-- `'i'` â€” signed int
-- `'I'` â€” unsigned int
-- `'f'` â€” float
-- `'d'` â€” double
-- `'c'` â€” char
-- `'b'` â€” signed char
-- `'B'` â€” unsigned char
-- `'h'` â€” signed short
-- `'H'` â€” unsigned short
-- `'l'` â€” signed long
-- `'L'` â€” unsigned long
-- `'q'` â€” signed long long
-- `'Q'` â€” unsigned long long
+- `'i'` — signed int
+- `'I'` — unsigned int
+- `'f'` — float
+- `'d'` — double
+- `'c'` — char
+- `'b'` — signed char
+- `'B'` — unsigned char
+- `'h'` — signed short
+- `'H'` — unsigned short
+- `'l'` — signed long
+- `'L'` — unsigned long
+- `'q'` — signed long long
+- `'Q'` — unsigned long long
 
 16.6.7 ProcessPoolExecutor (Expanded)
 
@@ -12509,8 +12509,8 @@ if __name__ == "__main__":
 
 **Comparison: ThreadPoolExecutor vs ProcessPoolExecutor:**
 
-- `ThreadPoolExecutor` â€” I/O-bound tasks, limited by GIL
-- `ProcessPoolExecutor` â€” CPU-bound tasks, true parallelism
+- `ThreadPoolExecutor` — I/O-bound tasks, limited by GIL
+- `ProcessPoolExecutor` — CPU-bound tasks, true parallelism
 - Both have same API (`submit()`, `map()`, `as_completed()`)
 - ProcessPoolExecutor requires `if __name__ == "__main__"` guard
 
@@ -12559,13 +12559,13 @@ scheduler.run()
 
 **Key Functions:**
 
-- `scheduler()` â€” Create scheduler
-- `enter()` â€” Schedule event (delay, priority, function, args)
-- `enterabs()` â€” Schedule event at absolute time
-- `cancel()` â€” Cancel scheduled event
-- `run()` â€” Run scheduler (blocks until empty)
-- `empty()` â€” Check if queue is empty
-- `queue` â€” Get list of scheduled events
+- `scheduler()` — Create scheduler
+- `enter()` — Schedule event (delay, priority, function, args)
+- `enterabs()` — Schedule event at absolute time
+- `cancel()` — Cancel scheduled event
+- `run()` — Run scheduler (blocks until empty)
+- `empty()` — Check if queue is empty
+- `queue` — Get list of scheduled events
 
 **Use Cases:**
 
@@ -12576,10 +12576,10 @@ scheduler.run()
 
 **Pitfalls:**
 
-âš  Single-threaded â€” blocks during execution
-âš  Not suitable for high-frequency events
-âš  Use `threading.Timer` or `asyncio` for better concurrency
-âš  Events execute in priority order, then time order
+⚠ Single-threaded — blocks during execution
+⚠ Not suitable for high-frequency events
+⚠ Use `threading.Timer` or `asyncio` for better concurrency
+⚠ Events execute in priority order, then time order
 
 16.7 ASYNCIO
 
@@ -12594,42 +12594,42 @@ The event loop is the core of asyncio, managing and executing coroutines.
 **Asyncio Timeline Diagram:**
 
 ```
-Time â†’
+Time →
 
-Coroutine 1:  [â”€â”€â”€â”€â”€â”€await I/Oâ”€â”€â”€â”€â”€â”€] [â”€â”€â”€â”€workâ”€â”€â”€â”€]
-Coroutine 2:        [â”€â”€â”€â”€workâ”€â”€â”€â”€] [â”€â”€await I/Oâ”€â”€]
-Coroutine 3:  [work] [â”€â”€await I/Oâ”€â”€] [â”€â”€â”€â”€workâ”€â”€â”€â”€]
+Coroutine 1:  [──────await I/O──────] [────work────]
+Coroutine 2:        [────work────] [──await I/O──]
+Coroutine 3:  [work] [──await I/O──] [────work────]
 
 Event Loop:   [run][select][run][select][run][select]
-              â”‚    â”‚       â”‚    â”‚       â”‚    â”‚
-              â””â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â†’
+              │    │       │    │       │    │
+              └────┴───────┴────┴───────┴────┴──────→
 
-I/O Ready:    [â”€â”€â”€][â”€â”€â”€â”€â”€â”€][â”€â”€â”€][â”€â”€â”€â”€â”€â”€][â”€â”€â”€][â”€â”€â”€â”€â”€â”€]
-              â”‚    â”‚       â”‚    â”‚       â”‚    â”‚
-              â””â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â†’
+I/O Ready:    [───][──────][───][──────][───][──────]
+              │    │       │    │       │    │
+              └────┴───────┴────┴───────┴────┴──────→
 ```
 
 **Event Loop States:**
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚   Created   â”‚
-â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜
-       â”‚
-       â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚   Running   â”‚ â† Executing coroutines
-â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜
-       â”‚
-       â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚   Waiting   â”‚ â† Waiting for I/O
-â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜
-       â”‚
-       â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚   Closed    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────┐
+│   Created   │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│   Running   │ ← Executing coroutines
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│   Waiting   │ ← Waiting for I/O
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│   Closed    │
+└─────────────┘
 ```
 
 **Getting the Event Loop:**
@@ -12710,15 +12710,15 @@ policy = asyncio.get_event_loop_policy()
 
 **Key Event Loop Functions:**
 
-- `get_event_loop()` â€” Get current event loop
-- `new_event_loop()` â€” Create new event loop
-- `set_event_loop()` â€” Set event loop
-- `run()` â€” Run coroutine (3.7+, recommended)
-- `run_until_complete()` â€” Run until coroutine completes
-- `run_forever()` â€” Run forever
-- `close()` â€” Close event loop
-- `is_running()` â€” Check if loop is running
-- `is_closed()` â€” Check if loop is closed
+- `get_event_loop()` — Get current event loop
+- `new_event_loop()` — Create new event loop
+- `set_event_loop()` — Set event loop
+- `run()` — Run coroutine (3.7+, recommended)
+- `run_until_complete()` — Run until coroutine completes
+- `run_forever()` — Run forever
+- `close()` — Close event loop
+- `is_running()` — Check if loop is running
+- `is_closed()` — Check if loop is closed
 
 16.7.2 Basic Coroutine
 
@@ -12863,18 +12863,18 @@ asyncio.run(main())
 
 **Task States:**
 
-- `pending` â€” Task created but not started
-- `running` â€” Task is executing
-- `done` â€” Task completed (success or failure)
-- `cancelled` â€” Task was cancelled
+- `pending` — Task created but not started
+- `running` — Task is executing
+- `done` — Task completed (success or failure)
+- `cancelled` — Task was cancelled
 
 **Key Functions:**
 
-- `create_task()` â€” Create and schedule task
-- `Task()` â€” Create task (lower-level)
-- `gather()` â€” Wait for multiple coroutines/tasks
-- `wait()` â€” Wait for tasks with more control
-- `as_completed()` â€” Iterate over completed tasks
+- `create_task()` — Create and schedule task
+- `Task()` — Create task (lower-level)
+- `gather()` — Wait for multiple coroutines/tasks
+- `wait()` — Wait for tasks with more control
+- `as_completed()` — Iterate over completed tasks
 
 16.7.4 TaskGroup (Python 3.11+)
 
@@ -12934,7 +12934,7 @@ asyncio.run(main())
 
 **Key Methods:**
 
-- `create_task()` â€” Create task in group
+- `create_task()` — Create task in group
 - Automatic cleanup on exit
 - ExceptionGroup for error handling
 
@@ -12994,8 +12994,8 @@ asyncio.run(main())
 
 **Key Parameters:**
 
-- `return_exceptions=False` â€” Raise exception on first error
-- `return_exceptions=True` â€” Return exceptions in results
+- `return_exceptions=False` — Raise exception on first error
+- `return_exceptions=True` — Return exceptions in results
 
 **Use Cases:**
 
@@ -13131,11 +13131,11 @@ asyncio.run(main())
 
 **Key Synchronization Primitives:**
 
-- `Lock()` â€” Mutual exclusion lock
-- `Event()` â€” Event signaling
-- `Condition()` â€” Wait/notify pattern
-- `Semaphore()` â€” Resource limiting
-- `Barrier()` â€” Synchronization point
+- `Lock()` — Mutual exclusion lock
+- `Event()` — Event signaling
+- `Condition()` — Wait/notify pattern
+- `Semaphore()` — Resource limiting
+- `Barrier()` — Synchronization point
 
 16.7.7 Streams
 
@@ -13194,12 +13194,12 @@ asyncio.run(tcp_client('Hello, Server!'))
 
 **Key Stream Functions:**
 
-- `start_server()` â€” Create TCP server
-- `open_connection()` â€” Open TCP connection
-- `StreamReader.read()` â€” Read data
-- `StreamWriter.write()` â€” Write data
-- `StreamWriter.drain()` â€” Wait for data to be sent
-- `StreamWriter.close()` â€” Close connection
+- `start_server()` — Create TCP server
+- `open_connection()` — Open TCP connection
+- `StreamReader.read()` — Read data
+- `StreamWriter.write()` — Write data
+- `StreamWriter.drain()` — Wait for data to be sent
+- `StreamWriter.close()` — Close connection
 
 16.7.8 Transports and Protocols
 
@@ -13238,10 +13238,10 @@ asyncio.run(main())
 
 **Key Protocol Methods:**
 
-- `connection_made()` â€” Called when connection established
-- `data_received()` â€” Called when data received
-- `connection_lost()` â€” Called when connection closed
-- `eof_received()` â€” Called when EOF received
+- `connection_made()` — Called when connection established
+- `data_received()` — Called when data received
+- `connection_lost()` — Called when connection closed
+- `eof_received()` — Called when EOF received
 
 **Use Cases:**
 
@@ -13266,14 +13266,14 @@ asyncio.run(main())
 
 **Best Practices:**
 
-âœ” Use `asyncio.run()` for entry point
-âœ” Use `async`/`await` consistently
-âœ” Use `asyncio.gather()` for parallel operations
-âœ” Use `TaskGroup()` for structured concurrency (3.11+)
-âœ” Use async context managers for resources
-âœ” Handle exceptions properly
-âœ” Use `asyncio.create_task()` for fire-and-forget
-âœ” Avoid blocking calls in async code
+✔ Use `asyncio.run()` for entry point
+✔ Use `async`/`await` consistently
+✔ Use `asyncio.gather()` for parallel operations
+✔ Use `TaskGroup()` for structured concurrency (3.11+)
+✔ Use async context managers for resources
+✔ Handle exceptions properly
+✔ Use `asyncio.create_task()` for fire-and-forget
+✔ Avoid blocking calls in async code
 
 **Common Patterns:**
 
@@ -13364,29 +13364,29 @@ await loop.run_in_executor(
 
 If task is CPU-bound:
 
-â†’ Use multiprocessing or Rust/C extensions
+→ Use multiprocessing or Rust/C extensions
 
 If task is IO-bound and high-throughput:
 
-â†’ Use asyncio
+→ Use asyncio
 
 If task is IO-bound and simple:
 
-â†’ Use threads / ThreadPool
+→ Use threads / ThreadPool
 
 If you need 100k+ connections:
 
-â†’ asyncio + uvloop
+→ asyncio + uvloop
 
 If you need strict concurrency structure:
 
-â†’ TaskGroups
+→ TaskGroups
 
 If using Python 3.14+ and want parallel threading:
 
-â†’ Use free-threading mode (experimental)
+→ Use free-threading mode (experimental)
 
-16.14 Mini Example â€” Async Web Scraper
+16.14 Mini Example — Async Web Scraper
 import httpx, asyncio
 
 async def fetch(url):
@@ -13404,7 +13404,7 @@ asyncio.run(main())
 
 Handles thousands of requests easily.
 
-16.15 Macro Example â€” Concurrency Pipeline
+16.15 Macro Example — Concurrency Pipeline
 
 Real-world: ETL + CPU-bound parsing + async upload.
 
@@ -13434,16 +13434,16 @@ This pattern is industry-standard.
 
 16.16 Pitfalls & Warnings
 
-âš  async code mixed with blocking functions
-âš  using requests instead of httpx in asyncio
-âš  CPU-bound tasks inside coroutines
-âš  deadlocks from locks inside threads
-âš  race conditions from shared state
-âš  forgetting to use await
-âš  overusing multiprocessing â†’ massive overhead
-âš  using too many threads â†’ context switching
-âš  relying on free-threading with unsupported libraries
-âš  event loop misuse
+⚠ async code mixed with blocking functions
+⚠ using requests instead of httpx in asyncio
+⚠ CPU-bound tasks inside coroutines
+⚠ deadlocks from locks inside threads
+⚠ race conditions from shared state
+⚠ forgetting to use await
+⚠ overusing multiprocessing → massive overhead
+⚠ using too many threads → context switching
+⚠ relying on free-threading with unsupported libraries
+⚠ event loop misuse
 
 16.17 Summary & Takeaways
 
@@ -13467,7 +13467,7 @@ Use ProcessPool to offload CPU-bound functions
 
 Proceed to:
 
-ðŸ‘‰ Chapter 17 â€” Advanced Architecture & Patterns
+👉 Chapter 17 — Advanced Architecture & Patterns
 Includes:
 
 metaprogramming
@@ -13493,11 +13493,11 @@ CQRS & event sourcing
 service boundaries
 
 
-ðŸ“˜ CHAPTER 17 â€” ADVANCED ARCHITECTURE & DESIGN PATTERNS
+📘 CHAPTER 17 — ADVANCED ARCHITECTURE & DESIGN PATTERNS
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“16
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–16
 
 17.0 Overview
 
@@ -13525,9 +13525,9 @@ large-scale dependency graph modeling
 
 This chapter is practical, production-focused, and integrates core Python features into enterprise architecture.
 
-17.1 Understanding Pythonâ€™s Meta-Object Protocol (MOP)
+17.1 Understanding Python’s Meta-Object Protocol (MOP)
 
-Pythonâ€™s object system is built on a meta-object protocol, defining how objects:
+Python’s object system is built on a meta-object protocol, defining how objects:
 
 are created
 
@@ -13559,7 +13559,7 @@ decorators wrap objects
 
 import machinery loads modules
 
-17.2 Metaclasses â€” The Top of Pythonâ€™s Type System
+17.2 Metaclasses — The Top of Python’s Type System
 
 Metaclasses define how classes are constructed.
 
@@ -13604,13 +13604,13 @@ Marshmallow schemas
 
 17.2.3 Metaclass Anti-Patterns
 
-âš  Overengineering
-âš  Introducing magical behavior
-âš  Reducing code clarity
+⚠ Overengineering
+⚠ Introducing magical behavior
+⚠ Reducing code clarity
 
 Rule: Use descriptors unless you truly need metaclasses.
 
-17.3 Descriptors â€” The REAL Power Behind Properties
+17.3 Descriptors — The REAL Power Behind Properties
 
 Descriptors implement:
 
@@ -13652,11 +13652,11 @@ SQLAlchemy mapped columns
 attrs and dataclasses field transformations
 
 17.4 Advanced Decorator Patterns
-âœ” Function decorators
-âœ” Class decorators
-âœ” Decorators with parameters
-âœ” Decorators returning classes
-âœ” Combining decorators and descriptors
+✔ Function decorators
+✔ Class decorators
+✔ Decorators with parameters
+✔ Decorators returning classes
+✔ Combining decorators and descriptors
 17.4.1 Decorator with State
 def memoize(fn):
     cache = {}
@@ -13721,9 +13721,9 @@ API-driven code-loading (dangerous!)
 
 17.5.3 Import Hook Warnings
 
-âš  Can load malicious code
-âš  Very difficult to debug
-âš  Bypass visibility of dependency graphs
+⚠ Can load malicious code
+⚠ Very difficult to debug
+⚠ Bypass visibility of dependency graphs
 
 17.6 Registry Patterns
 
@@ -13812,7 +13812,7 @@ auditability
 
 State is derived from events:
 
-event1 â†’ event2 â†’ ... â†’ current state
+event1 → event2 → ... → current state
 
 
 Python implementation:
@@ -13915,7 +13915,7 @@ dependency inversion
 
 local imports
 
-17.13 Mini Example â€” FRP-Style Event Bus in Python
+17.13 Mini Example — FRP-Style Event Bus in Python
 class EventBus:
     def __init__(self):
         self.handlers = {}
@@ -13927,7 +13927,7 @@ class EventBus:
         for fn in self.handlers.get(type(event), []):
             fn(event)
 
-17.14 Macro Example â€” Full Plugin System with Registries
+17.14 Macro Example — Full Plugin System with Registries
 app/
   core/
     registry.py
@@ -13965,14 +13965,14 @@ class PluginA:
 
 17.15 Pitfalls & Warnings
 
-âš  Metaclasses make debugging harder
-âš  Import hooks can load malicious code
-âš  Plugin systems can break dependency graphs
-âš  State machines become spaghetti without discipline
-âš  CQRS adds write latency & complexity
-âš  Event sourcing requires complete replay safety
-âš  Circular imports disaster without architecture discipline
-âš  Dynamic module loading bypasses static analysis
+⚠ Metaclasses make debugging harder
+⚠ Import hooks can load malicious code
+⚠ Plugin systems can break dependency graphs
+⚠ State machines become spaghetti without discipline
+⚠ CQRS adds write latency & complexity
+⚠ Event sourcing requires complete replay safety
+⚠ Circular imports disaster without architecture discipline
+⚠ Dynamic module loading bypasses static analysis
 
 17.16 Summary & Takeaways
 
@@ -13998,7 +13998,7 @@ State machines formalize lifecycle logic
 
 Proceed to:
 
-ðŸ‘‰ Chapter 18 â€” Database Integration & Persistence
+👉 Chapter 18 — Database Integration & Persistence
 Including:
 
 DB-API 2.0
@@ -14026,11 +14026,11 @@ performance tuning
 connection lifecycle management
 
 
-ðŸ“˜ CHAPTER 18 â€” DATABASE INTEGRATION & PERSISTENCE
+📘 CHAPTER 18 — DATABASE INTEGRATION & PERSISTENCE
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“17
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–17
 
 18.0 Overview
 
@@ -14062,7 +14062,7 @@ ACID, isolation levels, locking
 
 security and reliability patterns
 
-Pythonâ€™s database ecosystem is dominated by:
+Python’s database ecosystem is dominated by:
 
 SQLAlchemy 2.0 (industry standard)
 
@@ -14072,7 +14072,7 @@ Tortoise ORM (async Django-like)
 
 We start with the foundation.
 
-18.1 DB-API 2.0 â€” The Foundation of Python SQL
+18.1 DB-API 2.0 — The Foundation of Python SQL
 
 The standard API for Python database drivers.
 
@@ -14106,7 +14106,7 @@ cur.execute("SELECT * FROM users WHERE id=?", (user_id,))
 
 Never do:
 
-cur.execute(f"SELECT * FROM users WHERE id={user_id}")  # âŒ SQL injection
+cur.execute(f"SELECT * FROM users WHERE id={user_id}")  # ❌ SQL injection
 
 18.2 SQLAlchemy 2.0 (Core API)
 
@@ -14198,9 +14198,9 @@ async with async_session() as session:
     result = await session.execute(users.select())
     rows = result.fetchall()
 
-18.5 asyncpg â€” Fast Native Async Driver
+18.5 asyncpg — Fast Native Async Driver
 
-Faster than SQLAlchemyâ€™s ORM for raw queries.
+Faster than SQLAlchemy’s ORM for raw queries.
 
 18.5.1 Basic asyncpg Example
 import asyncpg
@@ -14302,12 +14302,12 @@ alembic upgrade head
 
 Key Python/SQLAlchemy bottlenecks:
 
-âœ” N+1 queries
-âœ” inefficient ORM relationship loading
-âœ” unindexed columns
-âœ” using ORM where raw SQL is needed
-âœ” small transactions
-âœ” lack of batching
+✔ N+1 queries
+✔ inefficient ORM relationship loading
+✔ unindexed columns
+✔ using ORM where raw SQL is needed
+✔ small transactions
+✔ lack of batching
 18.11.1 Eager Loading
 session.query(User).options(selectinload(User.posts))
 
@@ -14332,21 +14332,21 @@ Config:
 create_engine(..., isolation_level="SERIALIZABLE")
 
 18.13 Security Considerations for Databases
-âœ” Always use parameterized queries
-âœ” Never construct SQL with f-strings
-âœ” Validate input (pydantic)
-âœ” Manage credentials securely
-âœ” Use TLS connections
-âœ” Limit permissions per service
-âœ” Avoid exposing DB ports
-18.14 Mini Example â€” Async CRUD Service
+✔ Always use parameterized queries
+✔ Never construct SQL with f-strings
+✔ Validate input (pydantic)
+✔ Manage credentials securely
+✔ Use TLS connections
+✔ Limit permissions per service
+✔ Avoid exposing DB ports
+18.14 Mini Example — Async CRUD Service
 async def create_user(session, name: str):
     user = User(name=name)
     session.add(user)
     await session.commit()
     return user
 
-18.15 Macro Example â€” Complete Async Repository + UoW + API
+18.15 Macro Example — Complete Async Repository + UoW + API
 
 Directory:
 
@@ -14380,14 +14380,14 @@ async def register(name: str):
 
 18.16 Anti-Patterns
 
-âš  using ORM for heavy ETL
-âš  unnecessary joins
-âš  unbounded sessions
-âš  mixing sync & async DB access
-âš  ignoring pooling
-âš  repeating migrations manually
-âš  building SQL manually with string concatenation
-âš  reusing connections across requests
+⚠ using ORM for heavy ETL
+⚠ unnecessary joins
+⚠ unbounded sessions
+⚠ mixing sync & async DB access
+⚠ ignoring pooling
+⚠ repeating migrations manually
+⚠ building SQL manually with string concatenation
+⚠ reusing connections across requests
 
 18.17 Summary & Takeaways
 
@@ -14413,7 +14413,7 @@ async DB access enables high-throughput services
 
 Proceed to:
 
-ðŸ‘‰ Chapter 19 â€” Async Web Development & APIs
+👉 Chapter 19 — Async Web Development & APIs
 Including:
 
 ASGI vs WSGI
@@ -14439,18 +14439,18 @@ HTTP performance
 high scalability patterns
 
 
-ðŸ“˜ CHAPTER 19 â€” ASYNC WEB DEVELOPMENT & APIs
+📘 CHAPTER 19 — ASYNC WEB DEVELOPMENT & APIs
 
 Depth Level: 3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“18
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–18
 
 19.0 Overview
 
 Modern Python web development has shifted from:
 
 WSGI (sync era)
-â†’ ASGI (async era)
+→ ASGI (async era)
 
 Frameworks built on ASGI enable:
 
@@ -14513,14 +14513,14 @@ Litestar
 
 Capabilities:
 
-âœ” async/await
-âœ” WebSockets
-âœ” background tasks
-âœ” connection pooling
-âœ” long-lived connections
-âœ” high concurrency (10k+ clients)
-âœ” HTTP/2 friendly
-âœ” cloud-native scalability
+✔ async/await
+✔ WebSockets
+✔ background tasks
+✔ connection pooling
+✔ long-lived connections
+✔ high concurrency (10k+ clients)
+✔ HTTP/2 friendly
+✔ cloud-native scalability
 
 19.2 ASGI Architecture Diagram
 flowchart LR
@@ -14531,7 +14531,7 @@ flowchart LR
     Endpoint -->|await| HTTPClient[Async HTTP Client]
     Endpoint --> Response
 
-19.3 FastAPI â€” The Modern Standard
+19.3 FastAPI — The Modern Standard
 
 FastAPI is built on:
 
@@ -14602,7 +14602,7 @@ async def stream():
 async def get_stream():
     return StreamingResponse(stream())
 
-19.4 Starlette (FastAPIâ€™s Core)
+19.4 Starlette (FastAPI’s Core)
 
 Starlette provides:
 
@@ -14733,7 +14733,7 @@ async def rate_limit(ip):
 
 19.10 CORS, Security, and HTTPS
 
-Use FastAPIâ€™s built-in CORS middleware.
+Use FastAPI’s built-in CORS middleware.
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -14789,8 +14789,8 @@ logs
 spans
 
 19.13 Enterprise Design Patterns for Async Web Apps
-19.13.1 Pattern: API Layer â†’ Service Layer â†’ Repo Layer
-[API] â†’ [Service] â†’ [Repository] â†’ [DB]
+19.13.1 Pattern: API Layer → Service Layer → Repo Layer
+[API] → [Service] → [Repository] → [DB]
 
 19.13.2 Pattern: Request-Scoped DB Sessions
 
@@ -14818,7 +14818,7 @@ event-driven workflows
 
 async background processing
 
-19.14 Mini Example â€” FastAPI + SQLAlchemy Async
+19.14 Mini Example — FastAPI + SQLAlchemy Async
 @app.post("/users")
 async def create_user(user: UserIn, session=Depends(get_session)):
     u = User(name=user.name)
@@ -14826,9 +14826,9 @@ async def create_user(user: UserIn, session=Depends(get_session)):
     await session.commit()
     return u
 
-19.15 Macro Example â€” Complete Async Web Service
+19.15 Macro Example — Complete Async Web Service
 
-19.15.0 Code Evolution: Simple â†’ Production-Ready
+19.15.0 Code Evolution: Simple → Production-Ready
 
 Stage 1: Simple FastAPI endpoint (beginner)
 
@@ -14924,14 +14924,14 @@ Try This: Start with Stage 1, then progressively add features from Stages 2-4. T
 
 19.16 Pitfalls & Warnings
 
-âš  mixing async and sync DB calls
-âš  blocking code inside async handlers
-âš  using requests inside async code (use httpx)
-âš  creating sessions per query instead of per request
-âš  global sessions
-âš  forgetting to close WebSocket connections
-âš  synchronous file operations inside async apps
-âš  unbounded concurrency (thundering herd)
+⚠ mixing async and sync DB calls
+⚠ blocking code inside async handlers
+⚠ using requests inside async code (use httpx)
+⚠ creating sessions per query instead of per request
+⚠ global sessions
+⚠ forgetting to close WebSocket connections
+⚠ synchronous file operations inside async apps
+⚠ unbounded concurrency (thundering herd)
 
 19.17 Summary & Takeaways
 
@@ -14955,7 +14955,7 @@ enterprise systems require good architecture boundaries
 
 Proceed to:
 
-ðŸ‘‰ Chapter 20 â€” Data Engineering with Python
+👉 Chapter 20 — Data Engineering with Python
 Topics include:
 
 NumPy
@@ -14980,11 +14980,11 @@ streaming data
 
 performance optimization
 
-ðŸ“˜ CHAPTER 20 â€” DATA ENGINEERING WITH PYTHON
+📘 CHAPTER 20 — DATA ENGINEERING WITH PYTHON
 
-Depth Level: 2.5â€“3
-Python Versions: 3.8 â†’ 3.14+
-Prerequisites: Chapters 1â€“19
+Depth Level: 2.5–3
+Python Versions: 3.8 → 3.14+
+Prerequisites: Chapters 1–19
 
 20.0 Overview
 
@@ -15030,7 +15030,7 @@ Real-world data pipeline examples
 
 20.1 The Core Tools of Python Data Engineering
 
-Pythonâ€™s data stack includes:
+Python’s data stack includes:
 
 Foundational
 
@@ -15082,7 +15082,7 @@ Pandera
 
 Great Expectations
 
-20.2 NumPy â€” Foundation of Numerical Data
+20.2 NumPy — Foundation of Numerical Data
 
 NumPy powers:
 
@@ -15115,7 +15115,7 @@ Vectorization eliminates the Python loop overhead.
 x = np.array([1,2,3])
 x + 10
 
-20.3 Pandas â€” Pythonâ€™s Most Used Data Engineering Tool
+20.3 Pandas — Python’s Most Used Data Engineering Tool
 
 Pandas is not the fastest tool, but it is:
 
@@ -15145,13 +15145,13 @@ df.groupby("city")["price"].mean()
 
 20.3.5 Pitfalls
 
-âš  Pandas copies data often
-âš  df.apply() is slow
-âš  loops inside DataFrame operations kill performance
-âš  32-bit integers silently convert to float
-âš  memory usage can explode on large tables
+⚠ Pandas copies data often
+⚠ df.apply() is slow
+⚠ loops inside DataFrame operations kill performance
+⚠ 32-bit integers silently convert to float
+⚠ memory usage can explode on large tables
 
-20.4 Polars â€” The Modern Pandas Replacement (Rust Backend)
+20.4 Polars — The Modern Pandas Replacement (Rust Backend)
 
 Polars is:
 
@@ -15199,7 +15199,7 @@ table = pq.read_table("data.parquet")
 df = table.to_pandas()
 pl_df = pl.from_arrow(table)
 
-20.6 The ETL (Extract â†’ Transform â†’ Load) Lifecycle
+20.6 The ETL (Extract → Transform → Load) Lifecycle
 
 ETL is the heart of data engineering.
 
@@ -15290,7 +15290,7 @@ Used for enterprise pipelines.
 
 20.8 Multiprocessing for Data Pipelines
 
-Pythonâ€™s GIL limits heavy CPU work; use multiprocessing.
+Python’s GIL limits heavy CPU work; use multiprocessing.
 
 20.8.1 Chunk Processing Example
 from multiprocessing import Pool
@@ -15345,7 +15345,7 @@ spark = SparkSession.builder.appName("pipeline").getOrCreate()
 df = spark.read.parquet("s3://bucket/data/")
 df.groupBy("user_id").sum("amount").show()
 
-20.12 DuckDB â€” In-Process OLAP Engine
+20.12 DuckDB — In-Process OLAP Engine
 
 Use SQL directly on Parquet/Arrow files:
 
@@ -15353,9 +15353,9 @@ import duckdb
 df = duckdb.query("SELECT * FROM 'data.parquet' WHERE amount > 0").to_df()
 
 20.13 Columnar Formats: Parquet, Feather, ORC
-Parquet â€” best for analytics
-Feather â€” super fast for Python I/O
-ORC â€” similar to Parquet (Hadoop world)
+Parquet — best for analytics
+Feather — super fast for Python I/O
+ORC — similar to Parquet (Hadoop world)
 df.to_parquet("data.parquet")
 
 20.14 Performance Optimization
@@ -15369,7 +15369,7 @@ for chunk in pd.read_csv("big.csv", chunksize=100_000):
 
 20.14.3 Prefer Arrow-backed formats
 
-10Ã— faster
+10× faster
 
 columnar
 
@@ -15438,15 +15438,15 @@ This is a real-world ETL structure.
 
 20.16 Pitfalls & Warnings
 
-âš  using Pandas for >10M rows (switch to Polars/DuckDB)
-âš  using CSV for data lakes
-âš  using df.apply() everywhere
-âš  forgetting schema validation
-âš  mixing async and sync DB access
-âš  loading huge datasets into memory at once
-âš  relying on Python loops for heavy transforms
-âš  missing data lineage documentation
-âš  storing sensitive data in raw logs
+⚠ using Pandas for >10M rows (switch to Polars/DuckDB)
+⚠ using CSV for data lakes
+⚠ using df.apply() everywhere
+⚠ forgetting schema validation
+⚠ mixing async and sync DB access
+⚠ loading huge datasets into memory at once
+⚠ relying on Python loops for heavy transforms
+⚠ missing data lineage documentation
+⚠ storing sensitive data in raw logs
 
 20.17 Summary & Takeaways
 
@@ -15468,20 +15468,20 @@ DuckDB enables SQL-on-files with amazing speed
 
 PySpark scales to clusters
 
-A real ETL pipeline integrates: extract â†’ transform â†’ validate â†’ store
+A real ETL pipeline integrates: extract → transform → validate → store
 
 20.18 Next Chapter
 
 Proceed to:
 
-ðŸ‘‰ Chapter 21 â€” Packaging, Distribution & Deployment
+👉 Chapter 21 — Packaging, Distribution & Deployment
 This chapter covers:
 
 Python packaging formats (wheel, sdist)
 
 pyproject.toml
 
-Pythonâ€™s packaging ecosystem
+Python’s packaging ecosystem
 
 versioning
 

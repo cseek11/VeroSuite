@@ -1,6 +1,6 @@
 # Authentication API v1 vs v2
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Purpose:** Explain the difference between Authentication API v1 and v2
 
 ---
@@ -61,7 +61,7 @@
   },
   "meta": {
     "version": "2.0",
-    "timestamp": "2025-11-24T16:57:19.000Z"
+    "timestamp": "2025-12-05T16:57:19.000Z"
   }
 }
 ```
@@ -118,7 +118,7 @@ curl -X POST \
   },
   "meta": {
     "version": "2.0",
-    "timestamp": "2025-11-24T16:57:19.000Z"
+    "timestamp": "2025-12-05T16:57:19.000Z"
   }
 }
 ```
@@ -221,7 +221,7 @@ const { access_token, user } = data;
 
 ---
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Status:** V2 is recommended, V1 is deprecated
 
 

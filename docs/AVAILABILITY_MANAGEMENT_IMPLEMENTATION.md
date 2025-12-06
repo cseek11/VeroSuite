@@ -199,12 +199,12 @@ Enhancements:
 
 2. **Test getting available technicians:**
    ```bash
-   GET /api/v1/technicians/available?date=2025-01-15&start_time=09:00&end_time=11:00
+   GET /api/v1/technicians/available?date=2025-12-05&start_time=09:00&end_time=11:00
    ```
 
 3. **Test technician availability:**
    ```bash
-   GET /api/v1/technicians/{id}/availability?start_date=2025-01-01&end_date=2025-01-31
+   GET /api/v1/technicians/{id}/availability?start_date=2025-12-05&end_date=2025-12-05
    ```
 
 ### Frontend Testing
@@ -212,7 +212,7 @@ Enhancements:
 1. Test API calls from browser console:
    ```javascript
    await enhancedApi.technicians.list()
-   await enhancedApi.technicians.getAvailable('2025-01-15', '09:00', '11:00')
+   await enhancedApi.technicians.getAvailable('2025-12-05', '09:00', '11:00')
    ```
 
 ---

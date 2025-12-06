@@ -1,6 +1,6 @@
 # GitHub Secrets Setup for OPA Integration
 
-**Date:** 2025-11-24  
+**Date:** 2025-12-05  
 **Purpose:** Configure GitHub Actions to send OPA compliance results to the Compliance API
 
 ---
@@ -136,7 +136,7 @@ For production, consider creating a dedicated service account:
 
 ---
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2025-12-05  
 **Next Review:** After initial deployment
 
 

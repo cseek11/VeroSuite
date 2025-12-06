@@ -291,7 +291,7 @@ export default function VeroFieldArchitecture() {
 Complete Supabase Schema SQL
 -- VeroField Governance v3.0 - Complete Database Schema
 -- Target: Supabase (PostgreSQL 15+)
--- Created: 2025-11-21
+-- Created: 2025-12-05
 
 -- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -685,7 +685,7 @@ COMMENT ON TABLE pr_scores IS 'Hybrid scoring results for all PRs';
 COMMENT ON TABLE detection_results IS 'Individual violations and warnings found by detectors';
 COMMENT ON TABLE idempotency_keys IS 'Prevents duplicate operations (e.g., double PR creation)';
 COMMENT ON TABLE system_metrics IS 'Operational metrics for monitoring';
-COMMENT ON TABLE audit_log IS 'Full audit trail of all system actions';-- VeroField Governance v3.0 - Complete Database Schema -- Target: Supabase (PostgreSQL 15+) -- Created: 2025-11-21 -- Enable required extensions CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; CREATE EXTENSION IF NOT EXISTS "pg_cron"; -- =============
+COMMENT ON TABLE audit_log IS 'Full audit trail of all system actions';-- VeroField Governance v3.0 - Complete Database Schema -- Target: Supabase (PostgreSQL 15+) -- Created: 2025-12-05 -- Enable required extensions CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; CREATE EXTENSION IF NOT EXISTS "pg_cron"; -- =============
 2.2 ER Diagram
 ┌─────────────────┐         ┌──────────────────┐         ┌─────────────────┐
 │   SESSIONS      │1      N │  CHANGES_QUEUE   │         │   PR_SCORES     │

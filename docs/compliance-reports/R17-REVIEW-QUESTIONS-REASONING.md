@@ -1,6 +1,6 @@
 # R17 Review Questions — Detailed Reasoning
 
-**Date:** 2025-11-23  
+**Date:** 2025-12-05  
 **Rule:** R17 - Coverage Requirements  
 **Purpose:** Explain reasoning behind recommended options for 5 review questions
 
@@ -48,7 +48,7 @@ This document provides detailed reasoning for each recommended option in the R17
 [
   {
     "file": "apps/api/src/users/users.service.ts",
-    "date": "2025-11-01",
+    "date": "2025-12-05",
     "coverage": {
       "statements": 80,
       "branches": 78,
@@ -58,7 +58,7 @@ This document provides detailed reasoning for each recommended option in the R17
   },
   {
     "file": "apps/api/src/users/users.service.ts",
-    "date": "2025-11-15",
+    "date": "2025-12-05",
     "coverage": {
       "statements": 82,
       "branches": 80,
@@ -68,7 +68,7 @@ This document provides detailed reasoning for each recommended option in the R17
   },
   {
     "file": "apps/api/src/users/users.service.ts",
-    "date": "2025-11-23",
+    "date": "2025-12-05",
     "coverage": {
       "statements": 85,
       "branches": 82,
@@ -186,13 +186,13 @@ def update_coverage_history(file_path, coverage_data):
 
 **Baseline Comparison (Option B):**
 ```python
-# Baseline: Last release (2025-11-01)
+# Baseline: Last release (2025-12-05)
 baseline_coverage = {
     'users.service.ts': 85,
     'orders.service.ts': 90
 }
 
-# Current: Current commit (2025-11-23)
+# Current: Current commit (2025-12-05)
 current_coverage = {
     'users.service.ts': 87,  # +2% (improved)
     'orders.service.ts': 82  # -8% (degraded > 5% threshold)
@@ -307,7 +307,7 @@ def detect_coverage_degradation(file_path, current_coverage):
 |------|----------|---------------|------------|------------|--------|
 | legacy-migration-helper.ts | 45% | Legacy code, removal planned Q2 2026 | 2026-06-30 | Remove in Q2 2026 migration | Active |
 | experimental-feature.ts | 70% | Experimental, under active development | 2026-01-15 | Increase coverage as feature stabilizes | Active |
-| deprecated-utils.ts | 60% | Deprecated, replacement in progress | 2025-12-31 | Replace with new implementation | Active |
+| deprecated-utils.ts | 60% | Deprecated, replacement in progress | 2025-12-05 | Replace with new implementation | Active |
 ```
 
 **Benefits:**
@@ -693,7 +693,7 @@ def prioritize_coverage_gaps(gaps):
 
 ---
 
-**Last Updated:** 2025-11-23  
+**Last Updated:** 2025-12-05  
 **Prepared By:** AI Assistant  
 **Status:** Ready for Review
 

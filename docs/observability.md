@@ -8,7 +8,7 @@ scope:
   - mobile
   - microservices
 priority: critical
-last_updated: 2025-11-16
+last_updated: 2025-12-05
 always_apply: true
 ---
 
@@ -486,7 +486,7 @@ it('should include trace ID in logs', async () => {
 
 ---
 
-**Last Updated:** 2025-11-16  
+**Last Updated:** 2025-12-05  
 **Status:** Active Enforcement  
 **Priority:** CRITICAL - Must be followed for every implementation
 

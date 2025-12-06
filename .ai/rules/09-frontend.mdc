@@ -1,0 +1,305 @@
+---
+description: "Frontend architecture: React/React Native, hooks, components, design system, and UX coherence"
+globs: "frontend/**/*.{ts,tsx},VeroFieldMobile/**/*.{ts,tsx}"
+alwaysApply: false
+---
+<!-- @version: 2.0 @owner: frontend-team -->
+
+# FRONTEND & UX ARCHITECTURE
+
+## PURPOSE
+Define React/React Native structure, enforce design system usage, and maintain consistent UX across the app.
+
+---
+
+## DIRECTORY STRUCTURE
+- `frontend/src/components/ui/` – design system components
+- `frontend/src/components/features/` – feature-level components
+- `frontend/src/hooks/` – shared hooks (data fetching, state)
+- `frontend/src/types/` – UI types and DTO mirrors
+
+---
+
+## DATA FETCHING
+- Use React Query (TanStack) in hooks, not directly in components:
+  - ✅ `useWorkOrders()`, `useCustomer(id)`
+  - ❌ `fetch`/`axios` inside React components
+
+Components should consume hooks, not manage data fetching themselves.
+
+---
+
+## DESIGN SYSTEM USAGE (MANDATORY)
+- Buttons, inputs, dialogs, alerts, etc. **must** use `components/ui` primitives.
+- No ad-hoc HTML elements with custom Tailwind for productized UI unless you are building the design system itself.
+
+---
+
+## UX CONSISTENCY RULES
+- **Spacing:**
+  - Use consistent padding (e.g., `p-6` for pages), `space-y-*` for vertical rhythm.
+- **Typography:**
+  - Standardize headings/body sizes (`text-xl`, `text-base`, `text-sm`, etc.).
+- **Error patterns:**
+  - Consistent error display (e.g., `text-red-600 text-sm mt-1`).
+- **Loading states:**
+  - Prefer skeletons/placeholders over raw "Loading...".
+  - Reuse standard loading components.
+
+---
+
+## ACCESSIBILITY
+- Use proper `role`, `aria-*` attributes on interactive elements.
+- Keyboard navigation must work for dialogs, menus, and buttons.
+- Sufficient contrast and accessible focus states.
+
+---
+
+## ENFORCEMENT PIPELINE INTEGRATION
+
+**Step 1:** Search for existing components, hooks, and UX patterns:
+- Component catalog docs
+- Existing implementation of similar flows
+
+**Step 3:** Check:
+- Design system components used where possible.
+- Spacing/typo consistent with existing screens.
+- Error/loading patterns aligned with existing UX.
+
+**Step 5:** Audit new/changed UI for:
+- Rogue ad-hoc components
+- Inconsistent spacing/typography
+- Missing accessibility attributes
+
+---
+
+## VIOLATIONS (HARD STOP)
+- Not using design system for standard UI elements.
+- New one-off buttons/forms when equivalents exist.
+- Inconsistent spacing/typography.
+- "Loading…" text instead of standard loading pattern.
+
+---
+
+## R24: Cross-Platform Compatibility — Step 5 Audit Procedures
+
+**For code changes affecting shared code used by web + mobile, platform-specific APIs, file system operations, date/time handling, network requests, or feature flags:**
+
+### Rule Scope
+
+**R24 applies to:**
+- ✅ `libs/common/` (always cross-platform)
+- ✅ Code imported by multiple platforms (web + mobile)
+- ✅ Shared utilities used by both web and mobile
+
+**R24 does NOT apply to:**
+- ❌ Platform-specific directories (`frontend/`, `VeroFieldMobile/` unless shared)
+- ❌ Web-only code (e.g., `frontend/src/components/ui/Button.tsx` using `localStorage`)
+- ❌ Mobile-only code (e.g., `VeroFieldMobile/src/screens/` using `AsyncStorage`)
+
+### Platform Detection Compliance
+
+- [ ] **MANDATORY:** Verify platform-specific code is detected and abstracted (web vs mobile vs server)
+- [ ] **MANDATORY:** Verify platform checks are used before accessing platform-specific APIs
+- [ ] **MANDATORY:** Verify platform detection logic is correct (typeof window, typeof process, navigator.product)
+- [ ] **MANDATORY:** Verify platform-specific code is isolated in separate files when appropriate
+- [ ] **RECOMMENDED:** Verify platform requirements are documented in code comments
+
+### Platform-Specific API Compliance
+
+- [ ] **MANDATORY:** Verify browser-only APIs are not used in shared code without platform checks:
+  - `window`, `document`, `localStorage`, `sessionStorage`
+  - `navigator`, `location`, `history`
+  - DOM APIs (`querySelector`, `addEventListener`)
+- [ ] **MANDATORY:** Verify Node.js-only APIs are not used in frontend/mobile code:
+  - `fs`, `path`, `os`, `crypto` (Node.js crypto)
+  - `process`, `Buffer`, `__dirname`, `__filename`
+- [ ] **MANDATORY:** Verify React Native-only APIs are not used in web code without platform checks:
+  - `AsyncStorage`, `Platform`, `Linking`
+  - Native modules, device APIs
+- [ ] **MANDATORY:** Verify platform-abstracted APIs are used (localStorage vs AsyncStorage abstraction)
+- [ ] **RECOMMENDED:** Verify platform-specific code is in separate files (`.web.ts`, `.mobile.ts`, `.server.ts`)
+
+### File System Operations Compliance
+
+- [ ] **MANDATORY:** Verify path separators are handled correctly (use `path.join()` or platform-agnostic utilities)
+- [ ] **MANDATORY:** Verify case sensitivity is handled correctly (Windows vs Linux/Mac)
+- [ ] **MANDATORY:** Verify file paths are normalized before use
+- [ ] **MANDATORY:** Verify no hardcoded path separators:
+  - No hardcoded backslashes: `"src\\components\\Button"` (Windows-specific)
+  - No hardcoded forward slashes in Node.js: `"src/components/Button"` (should use `path.join()`)
+  - No case-sensitive path references: `import ... from './Button'` when file is `button.tsx`
+- [ ] **RECOMMENDED:** Verify file system operations use shared utilities from `libs/common/`
+
+### Date/Time Handling Compliance
+
+- [ ] **MANDATORY:** Verify timezone handling is consistent across platforms
+- [ ] **MANDATORY:** Verify locale handling is consistent across platforms
+- [ ] **MANDATORY:** Verify date formatting uses shared utilities from `libs/common/`
+- [ ] **MANDATORY:** Verify date parsing handles platform differences (ISO 8601 format preferred)
+- [ ] **RECOMMENDED:** Verify date/time utilities are tested on both web and mobile platforms
+
+### Network Request Compliance
+
+- [ ] **MANDATORY:** Verify connectivity checks are implemented (online/offline detection)
+- [ ] **MANDATORY:** Verify offline handling is implemented (caching, retry logic)
+- [ ] **MANDATORY:** Verify API retry logic is consistent across platforms
+- [ ] **MANDATORY:** Verify network error handling is consistent across platforms
+- [ ] **RECOMMENDED:** Verify network utilities use shared libraries from `libs/common/`
+
+### Shared Library Usage Compliance
+
+- [ ] **MANDATORY:** Verify shared code uses libraries from `libs/common/` when:
+  - Code is reusable across ≥2 apps/services within `apps/`
+  - Logic is domain-agnostic (auth, validation, types, utilities)
+  - Pattern already exists in `libs/common/` for similar functionality
+  - NOT applicable for: app-specific business logic, UI components, one-off features
+- [ ] **MANDATORY:** Verify business logic is not duplicated across platforms
+- [ ] **MANDATORY:** Verify shared libraries are used for:
+  - Type definitions (`libs/common/src/types/`)
+  - Utility functions (`libs/common/src/utils/`)
+  - Date/time formatting
+  - Validation logic
+- [ ] **MANDATORY:** Verify function names match existing shared library functions (heuristic-based detection):
+  - Check if `libs/common/` already has similar utility (by name/path)
+  - Flag only if: function name matches existing shared library function, file is in cross-platform context, no import from `libs/common/` exists
+- [ ] **RECOMMENDED:** Verify extraction criteria are met when creating new shared libraries (used by 2+ platforms)
+
+### Feature Flag Compliance
+
+- [ ] **MANDATORY:** Verify feature flags are consistent across platforms (same flag names, same behavior)
+- [ ] **MANDATORY:** Verify feature flag evaluation is platform-agnostic
+- [ ] **RECOMMENDED:** Verify feature flags are documented for cross-platform usage
+
+### Push Notification Compliance (Mobile-Specific)
+
+- [ ] **MANDATORY:** Verify push notification logic is isolated to mobile platform
+- [ ] **MANDATORY:** Verify push notification code doesn't break web platform
+- [ ] **RECOMMENDED:** Verify push notification utilities are in platform-specific files
+
+### Automated Checks
+
+```bash
+# Run cross-platform compatibility checker
+python .cursor/scripts/check-cross-platform.py --file <file_path>
+
+# Check all changed files
+python .cursor/scripts/check-cross-platform.py --pr <PR_NUMBER>
+
+# Check specific platform compatibility
+python .cursor/scripts/check-cross-platform.py --platform web
+python .cursor/scripts/check-cross-platform.py --platform mobile
+
+# Expected: Warnings for cross-platform violations (does not block)
+```
+
+### OPA Policy
+
+- **Policy:** `services/opa/policies/frontend.rego` (R24 section)
+- **Enforcement:** WARNING (Tier 3 MAD) - Logged but doesn't block PRs
+- **Tests:** `services/opa/tests/frontend_r24_test.rego`
+
+### Manual Verification (When Needed)
+
+1. **Review Platform-Specific Code** - Identify all platform-specific APIs and code
+2. **Verify Platform Checks** - Ensure platform checks are present before using platform-specific APIs
+3. **Check Shared Libraries** - Verify shared code uses libraries from `libs/common/`
+4. **Validate File System Operations** - Verify path handling is cross-platform compatible
+5. **Test Date/Time Handling** - Verify timezone/locale handling is consistent
+
+**Example Platform-Specific API (❌):**
+
+```typescript
+// ❌ VIOLATION: Browser-only API in shared code
+function getStorage(key: string) {
+  return localStorage.getItem(key); // Only works in browser
+}
+```
+
+**Example Cross-Platform API (✅):**
+
+```typescript
+// ✅ CORRECT: Platform-abstracted API
+function getStorage(key: string): string | null | Promise<string | null> {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    return localStorage.getItem(key); // Browser
+  } else if (typeof AsyncStorage !== 'undefined') {
+    return AsyncStorage.getItem(key); // React Native
+  } else {
+    return null; // Server-side fallback
+  }
+}
+```
+
+**Example Shared Library Usage (✅):**
+
+```typescript
+// ✅ CORRECT: Using shared library
+import { formatDate } from '@verofield/common/utils/dateUtils';
+
+// Used by both web and mobile
+const formatted = formatDate(new Date());
+```
+
+**Example Shared Library Violation (❌):**
+
+```typescript
+// ❌ VIOLATION: Duplicating function that already exists in shared library
+// File: frontend/src/utils/dateUtils.ts
+// Check: Does libs/common/src/utils/dateUtils.ts exist? ✅ YES
+// Check: Does it export formatDate()? ✅ YES
+// Check: Is file in cross-platform context? ✅ YES
+// Check: Is import from libs/common/ missing? ✅ YES
+// Result: ⚠️ WARNING - "formatDate already exists in @verofield/common/utils/dateUtils, use it instead"
+
+export function formatDate(date: Date): string {
+  return date.toISOString().split('T')[0]; // ⚠️ Should import from shared library
+}
+```
+
+**Example File System Path Handling (✅):**
+
+```typescript
+// ✅ CORRECT: Cross-platform path handling
+import { join } from 'path'; // Node.js path module (server-side only)
+const safePath = join('path', 'to', 'file'); // Uses path.join()
+
+// Or use platform-agnostic utility
+import { normalizePath } from '@verofield/common/utils/pathUtils';
+const safePath = normalizePath('path/to/file');
+```
+
+**Example File System Path Violations (❌):**
+
+```typescript
+// ❌ VIOLATION: Hardcoded backslashes (Windows-specific)
+const filePath = 'src\\components\\Button';
+
+// ❌ VIOLATION: Hardcoded forward slashes in Node.js (should use path.join())
+const filePath = 'src/components/Button'; // In Node.js code
+
+// ❌ VIOLATION: Case-sensitive path reference
+import { Button } from './Button'; // When file is actually button.tsx
+```
+
+**Example Scope Detection (✅):**
+
+```typescript
+// ✅ CORRECT: R24 does NOT apply (web-only code)
+// File: frontend/src/components/ui/Button.tsx
+export const Button = () => {
+  localStorage.setItem('key', 'value'); // ✅ OK - web-only component
+};
+
+// ❌ VIOLATION: R24 applies (shared code in libs/common/)
+// File: libs/common/src/utils/storage.ts
+export function getStorage() {
+  return localStorage.getItem('key'); // ❌ VIOLATION - no platform check
+}
+```
+
+---
+
+**Last Updated:** 2025-12-04  
+**Maintained By:** Frontend Team  
+**Review Frequency:** Quarterly or when cross-platform requirements change
