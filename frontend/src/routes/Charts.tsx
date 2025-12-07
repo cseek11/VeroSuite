@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area,
@@ -26,8 +26,48 @@ const COLORS = {
   violet: '#8B5CF6'
 };
 
+type FunnelStage = { stage: string; value: number; color: string };
+type TicketSegment = { name: string; value: number; color: string };
+type IssueItem = { issue: string; count: number; priority: 'high' | 'medium' | 'low' };
+type DealByRep = { name: string; deals: number; value: number };
+type RevenuePoint = { name: string; revenue: number };
+type ResolutionTrendPoint = { name: string; avg: number };
+type LeadSource = { name: string; value: number };
+type Campaign = { name: string; roas: number };
+
+interface AnalyticsData {
+  kpis: {
+    revenue: number;
+    pipeline: number;
+    newCustomers: number;
+    retention: number;
+    avgCloseDays: number;
+    deltas: { revenue: number; pipeline: number; newCustomers: number; retention: number };
+  };
+  sales: {
+    revenueTrend: RevenuePoint[];
+    dealsByRep: DealByRep[];
+    funnel: FunnelStage[];
+  };
+  support: {
+    tickets: TicketSegment[];
+    resolutionTrend: ResolutionTrendPoint[];
+    topIssues: IssueItem[];
+  };
+  customers: {
+    segments: TicketSegment[];
+    nps: number;
+    atRisk: number;
+  };
+  marketing: {
+    leadSources: LeadSource[];
+    topCampaign: Campaign;
+    cpa: number;
+  };
+}
+
 // Default data structure for charts
-const defaultData = {
+const defaultData: AnalyticsData = {
   kpis: {
     revenue: 0,
     pipeline: 0,
@@ -61,10 +101,9 @@ const defaultData = {
 const ChartsPage: React.FC = () => {
   const [dateRange, setDateRange] = useState('30d');
   const [teamFilter, setTeamFilter] = useState('all');
-  const [exportFormat, setExportFormat] = useState('csv');
 
   // Fetch analytics data from API
-  const { data: analyticsData = defaultData, isLoading } = useQuery({
+  const { data: analyticsData = defaultData } = useQuery<AnalyticsData>({
     queryKey: ['analytics', dateRange, teamFilter],
     queryFn: async () => {
       // TODO: Replace with actual API calls when analytics endpoints are available
@@ -94,9 +133,9 @@ const ChartsPage: React.FC = () => {
     );
   };
 
-  const getDeltaColor = (delta: number) => {
-    return delta >= 0 ? 'text-emerald-600' : 'text-rose-600';
-  };
+
+  const funnelStages = useMemo(() => analyticsData.sales?.funnel ?? [], [analyticsData.sales?.funnel]);
+  const topIssues = useMemo(() => analyticsData.support?.topIssues ?? [], [analyticsData.support?.topIssues]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3">
@@ -392,7 +431,7 @@ const ChartsPage: React.FC = () => {
               Sales Pipeline
             </h2>
             <div className="space-y-3">
-              {analyticsData.sales.funnel.map((stage, index) => (
+              {funnelStages.map((stage, index) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-gradient-to-r from-slate-50 to-white rounded-lg border border-slate-100">
                   <div className="flex items-center gap-3">
                     <div 
@@ -409,8 +448,8 @@ const ChartsPage: React.FC = () => {
                         className="h-6 rounded-full transition-all duration-500 shadow-md"
                         style={{ 
                           backgroundColor: stage.color,
-                          width: `${analyticsData.sales.funnel.length > 0 && analyticsData.sales.funnel[0]?.value > 0 
-                            ? (stage.value / analyticsData.sales.funnel[0].value) * 100 
+                          width: `${funnelStages.length > 0 && funnelStages[0] && funnelStages[0].value > 0 
+                            ? (stage.value / funnelStages[0].value) * 100 
                             : 0}%`
                         }}
                       />
@@ -425,8 +464,8 @@ const ChartsPage: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-base font-semibold text-slate-700">Conversion Rate:</span>
                   <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                    {analyticsData.sales.funnel.length > 0 && analyticsData.sales.funnel[0]?.value > 0 
-                      ? ((analyticsData.sales.funnel[analyticsData.sales.funnel.length - 1]?.value / analyticsData.sales.funnel[0].value) * 100).toFixed(1)
+                    {funnelStages.length > 0 && funnelStages[0] && funnelStages[0].value > 0 && funnelStages[funnelStages.length - 1]
+                      ? ((funnelStages[funnelStages.length - 1].value / funnelStages[0].value) * 100).toFixed(1)
                       : '0.0'
                     }%
                   </span>
@@ -657,7 +696,7 @@ const ChartsPage: React.FC = () => {
             <div className="mt-6">
               <h3 className="text-base font-semibold text-slate-700 mb-3">Top Support Issues</h3>
               <div className="space-y-2">
-                {analyticsData.support.topIssues.slice(0, 3).map((issue, index) => (
+                {topIssues.slice(0, 3).map((issue, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-gradient-to-r from-slate-50 to-white rounded-lg border border-slate-100">
                     <span className="text-sm font-medium text-slate-700">{issue.issue}</span>
                     <span className={`text-xs px-2 py-1 rounded-full font-semibold ${

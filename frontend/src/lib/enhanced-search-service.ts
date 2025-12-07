@@ -4,7 +4,7 @@
 // This service uses Postgres functions for weighted full-text search,
 // fuzzy matching, and vector search capabilities.
 
-import supabase from '@/lib/supabase-client';
+import { supabase } from '@/lib/supabase-client';
 import type { SearchFilters, Account } from '@/types/enhanced-types';
 import { logger } from '@/utils/logger';
 
@@ -46,6 +46,14 @@ interface VectorSearchResult {
   created_at: string;
   updated_at: string;
 }
+
+// Accounts enriched with relevance/similarity metadata used for analytics/logging
+type SearchAccount = Account & {
+  _relevance_score?: number;
+  _match_type?: string;
+  _similarity_score?: number;
+  segment_id?: string;
+};
 
 // ============================================================================
 // UTILITY FUNCTIONS
@@ -195,7 +203,7 @@ export const enhancedSearch = {
       if (error) throw error;
 
       // Convert enhanced search results to Account format
-      const results = (searchResults as EnhancedSearchResult[]).map(result => ({
+      const results: SearchAccount[] = (searchResults as EnhancedSearchResult[]).map(result => ({
         id: result.id,
         name: result.name,
         email: result.email,
@@ -204,14 +212,17 @@ export const enhancedSearch = {
         city: result.city,
         state: result.state,
         zip_code: result.zip_code,
-        status: result.status,
-        account_type: result.account_type,
+        status: result.status as 'active' | 'inactive' | 'suspended',
+        account_type: (result.account_type as Account['account_type']) ?? 'residential',
         created_at: result.created_at,
         updated_at: result.updated_at,
+        tenant_id: (result as any).tenant_id ?? tenantId,
+        ar_balance: (result as any).ar_balance ?? 0,
+        segment_id: (result as any).segment_id,
         // Add relevance metadata
         _relevance_score: result.relevance_score,
         _match_type: result.match_type
-      })) as Account[];
+      }));
 
       // Apply additional filters
       let filteredResults = results;
@@ -298,7 +309,7 @@ export const enhancedSearch = {
         return [];
       }
 
-      const results = (searchResults as VectorSearchResult[]).map(result => ({
+      const results: SearchAccount[] = (searchResults as VectorSearchResult[]).map(result => ({
         id: result.id,
         name: result.name,
         email: result.email,
@@ -307,13 +318,16 @@ export const enhancedSearch = {
         city: result.city,
         state: result.state,
         zip_code: result.zip_code,
-        status: result.status,
-        account_type: result.account_type,
+        status: result.status as 'active' | 'inactive' | 'suspended',
+        account_type: (result.account_type as Account['account_type']) ?? 'residential',
         created_at: result.created_at,
         updated_at: result.updated_at,
+        tenant_id: (result as any).tenant_id ?? tenantId,
+        ar_balance: (result as any).ar_balance ?? 0,
+        segment_id: (result as any).segment_id,
         // Add similarity metadata
         _similarity_score: result.similarity_score
-      })) as Account[];
+      }));
 
       const endTime = performance.now();
       const timeTakenMs = Math.round(endTime - startTime);
@@ -435,13 +449,21 @@ export const searchCorrections = {
   async updateCorrection(originalQuery: string, correctedQuery: string, success: boolean): Promise<void> {
     try {
       const tenantId = await getTenantId();
+      // Get current values first
+      const { data: existing } = await supabase
+        .from('search_corrections')
+        .select('success_count, total_attempts')
+        .eq('tenant_id', tenantId)
+        .eq('original_query', originalQuery.toLowerCase())
+        .eq('corrected_query', correctedQuery)
+        .single();
       
       if (success) {
         await supabase
           .from('search_corrections')
           .update({ 
-            success_count: supabase.sql`success_count + 1`,
-            total_attempts: supabase.sql`total_attempts + 1`
+            success_count: (existing?.success_count || 0) + 1,
+            total_attempts: (existing?.total_attempts || 0) + 1
           })
           .eq('tenant_id', tenantId)
           .eq('original_query', originalQuery.toLowerCase())
@@ -450,7 +472,7 @@ export const searchCorrections = {
         await supabase
           .from('search_corrections')
           .update({ 
-            total_attempts: supabase.sql`total_attempts + 1`
+            total_attempts: (existing?.total_attempts || 0) + 1
           })
           .eq('tenant_id', tenantId)
           .eq('original_query', originalQuery.toLowerCase())

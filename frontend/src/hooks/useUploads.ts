@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 // TODO: Update to use enhanced API for file uploads
 // import { enhancedApi } from '@/lib/enhanced-api';
 import { queryKeys, invalidateQueries } from '@/lib/queryClient';
@@ -18,8 +18,6 @@ export const usePresignedUpload = (filename: string, contentType: string) => {
 
 // Hook to upload file
 export const useUploadFile = () => {
-  const queryClient = useQueryClient();
-  
   return useMutation({
     mutationFn: async (fileData: FileUploadData) => {
       try {
@@ -56,7 +54,6 @@ export const useUploadFile = () => {
 
 // Hook to upload multiple files
 export const useUploadMultipleFiles = () => {
-  const queryClient = useQueryClient();
   
   return useMutation({
     mutationFn: async (files: FileUploadData[]) => {

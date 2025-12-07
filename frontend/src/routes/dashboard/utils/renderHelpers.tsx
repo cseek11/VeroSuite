@@ -163,6 +163,12 @@ export const createRenderVirtualCard = (
       }));
     };
     
+    const navigationMode: 'resize' | 'select' | 'move' = (
+      ['resize', 'select', 'move'] as const
+    ).includes(keyboardNavigation.navigationMode as any)
+      ? (keyboardNavigation.navigationMode as 'resize' | 'select' | 'move')
+      : 'select';
+
     return (
       <CardContainer
         key={card.id}
@@ -174,7 +180,7 @@ export const createRenderVirtualCard = (
         isResizing={resizingCardId === card.id}
         isFocused={keyboardNavigation.focusedCardId === card.id}
         isNavigating={keyboardNavigation.isNavigating}
-        navigationMode={keyboardNavigation.navigationMode}
+        navigationMode={navigationMode}
         searchTerm={searchTerm}
         isInFilteredResults={isInFilteredResults}
         cardGroup={cardGroup}

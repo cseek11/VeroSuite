@@ -1,8 +1,8 @@
-import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FileText } from 'lucide-react';
 import WorkOrderDetail from '@/components/work-orders/WorkOrderDetail';
 import { WorkOrder, WorkOrderStatus } from '@/types/work-orders';
+import { logger } from '@/utils/logger';
 
 export default function WorkOrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -27,18 +27,20 @@ export default function WorkOrderDetailPage() {
     );
   }
 
-  const handleEdit = (workOrder: WorkOrder) => {
-    navigate(`/work-orders/${workOrder.id}/edit`);
+  const handleEdit = (_workOrder: WorkOrder) => {
+    if (id) {
+      navigate(`/work-orders/${id}/edit`);
+    }
   };
 
-  const handleDelete = (workOrder: WorkOrder) => {
+  const handleDelete = (_workOrder: WorkOrder) => {
     // Navigate back to work orders list after deletion
     navigate('/work-orders');
   };
 
   const handleStatusChange = (workOrder: WorkOrder, newStatus: WorkOrderStatus) => {
     // Status change is handled by the component, just log for now
-    console.log(`Work order ${workOrder.id} status changed to ${newStatus}`);
+    logger.debug('Work order status changed', { workOrderId: workOrder.id, newStatus }, 'WorkOrderDetailPage');
   };
 
   const handleClose = () => {

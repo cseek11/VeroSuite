@@ -103,9 +103,11 @@ class AuthService {
    */
   isTokenExpired(token: string): boolean {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const parts = token.split('.');
+      if (parts.length < 2) return true;
+      const payload = JSON.parse(atob(parts[1]!));
       const currentTime = Math.floor(Date.now() / 1000);
-      return payload.exp < currentTime;
+      return (payload.exp as number) < currentTime;
     } catch {
       return true; // If we can't parse the token, consider it expired
     }
@@ -244,12 +246,16 @@ class AuthService {
       const parts = token.split('.');
       if (parts.length !== 3) return token;
 
-      const payload = JSON.parse(atob(parts[1]));
+      const payload = JSON.parse(atob(parts[1]!));
       // Extend expiration by 24 hours
       payload.exp = Math.floor(Date.now() / 1000) + (24 * 60 * 60);
       
       // Re-encode the payload (this is just for development)
-      const newPayload = btoa(JSON.stringify(payload));
+      const payloadString = JSON.stringify(payload);
+      if (!payloadString) {
+        throw new Error('Failed to stringify payload');
+      }
+      const newPayload = btoa(payloadString);
       const newToken = `${parts[0]}.${newPayload}.${parts[2]}`;
       
       // Update stored token

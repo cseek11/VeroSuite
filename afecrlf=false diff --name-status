@@ -1,0 +1,24 @@
+warning: in the working copy of '.cursor/rules/minimal-context-enforcer.mdc', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.cursor/rules/minimal-context.mdc', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.cursor/rules/two-brain-minimal.mdc', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/test/performance/jobs-smoke.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/test/performance/load-testing.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/migration/performance-baseline.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/typescript-error-plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/components/billing/CustomerPaymentHistory.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/components/billing/InvoiceForm.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/components/billing/OverdueAlerts.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/lib/enhanced-intent-service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/routes/compliance/components/ComplianceOverview.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/routes/compliance/components/ComplianceScore.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/services/layoutStorage.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/services/offline-api-wrapper.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/test-utils/observability-helpers.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/test/utils/apiMocks.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/test/utils/componentTestUtils.tsx', LF will be replaced by CRLF the next time Git touches it
+ apps/api/test/performance/auth-accounts-smoke.js | 1 [32m+[m
+ apps/api/test/performance/invoice-smoke.js       | 1 [32m+[m
+ apps/api/test/performance/kpi-smoke.js           | 1 [32m+[m
+ frontend/src/lib/upload-service.ts               | 1 [32m+[m
+ frontend/src/vite-env.d.ts                       | 1 [32m+[m
+ 5 files changed, 5 insertions(+)

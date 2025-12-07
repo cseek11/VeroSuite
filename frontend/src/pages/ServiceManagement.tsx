@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Settings, FileText, Clock, Map } from 'lucide-react';
 import ServiceTypeManagement from '@/components/services/ServiceTypeManagement';
 import ServiceTemplates from '@/components/services/ServiceTemplates';

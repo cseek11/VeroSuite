@@ -17,7 +17,11 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ commands, onOpen
     filteredCommands,
     selectedIndex,
     executeCommand
-  } = useCommandPalette({ commands, onOpen, onClose });
+  } = useCommandPalette({ 
+    commands, 
+    ...(onOpen !== undefined && { onOpen }), 
+    ...(onClose !== undefined && { onClose }) 
+  });
 
   if (!isOpen) return null;
 

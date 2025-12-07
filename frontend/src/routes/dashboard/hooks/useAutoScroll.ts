@@ -117,7 +117,7 @@ export const useAutoScroll = ({
   }, [getScrollableContainer, boundaryZone, scrollSpeed, stopAutoScroll]);
 
   // Auto-scroll during drag operations - smooth continuous scrolling
-  const handleAutoScroll = useCallback((cardId: string, mouseY: number) => {
+  const handleAutoScroll = useCallback((_cardId: string, mouseY: number) => {
     if (!enableAutoScroll) {
       stopAutoScroll();
       return;

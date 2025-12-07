@@ -1,8 +1,8 @@
-import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useWorkOrder, useUpdateWorkOrder } from '@/hooks/useWorkOrders';
 import { UpdateWorkOrderRequest } from '@/types/work-orders';
 import WorkOrderForm from '@/components/work-orders/WorkOrderForm';
+import { logger } from '@/utils/logger';
 import { ArrowLeft, Edit } from 'lucide-react';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
@@ -13,7 +13,7 @@ export default function EditWorkOrderPage() {
 
   // Only call useWorkOrder if id exists and is valid
   // This prevents "Validation failed (uuid is expected)" error
-  const { data: workOrder, isLoading, error } = useWorkOrder(id || '');
+  const { data: workOrder, isLoading, error } = useWorkOrder(id ?? '');
 
   const handleSubmit = async (data: UpdateWorkOrderRequest) => {
     if (!id) return;
@@ -23,7 +23,7 @@ export default function EditWorkOrderPage() {
       // Navigate to work order detail page
       navigate(`/work-orders/${id}`);
     } catch (error) {
-      console.error('Failed to update work order:', error);
+      logger.error('Failed to update work order', error, 'EditWorkOrderPage');
       // TODO: Show error toast
     }
   };
@@ -67,16 +67,16 @@ export default function EditWorkOrderPage() {
   // Convert work order to form data
   const initialData: UpdateWorkOrderRequest = {
     customer_id: workOrder.customer_id,
-    assigned_to: workOrder.assigned_to,
+    ...(workOrder.assigned_to !== undefined && { assigned_to: workOrder.assigned_to }),
     status: workOrder.status,
     priority: workOrder.priority,
-    scheduled_date: workOrder.scheduled_date,
+    ...(workOrder.scheduled_date !== undefined && { scheduled_date: workOrder.scheduled_date }),
     completion_date: workOrder.completion_date,
     description: workOrder.description,
     notes: workOrder.notes,
     service_type: workOrder.service_type,
     estimated_duration: workOrder.estimated_duration,
-    service_price: workOrder.service_price,
+    ...(workOrder.service_price !== undefined && { service_price: workOrder.service_price }),
   };
 
   return (

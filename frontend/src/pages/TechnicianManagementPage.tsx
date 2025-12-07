@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTechnicians } from '@/hooks/useTechnicians';
 import { TechnicianProfile } from '@/types/technician';
 import TechnicianList from '@/components/technicians/TechnicianList';
@@ -18,24 +18,21 @@ type ViewMode = 'list' | 'assignment' | 'calendar' | 'dashboard';
 
 export default function TechnicianManagementPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
-  const [selectedTechnician, setSelectedTechnician] = useState<TechnicianProfile | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>('');
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<{ start: string; end: string } | null>(null);
+  const [selectedTechnician, setSelectedTechnician] = useState<TechnicianProfile | undefined>(undefined);
+  const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<{ start: string; end: string } | undefined>(undefined);
 
   const { data: techniciansData } = useTechnicians({ limit: 20 });
   const technicians = techniciansData?.technicians || [];
 
   const handleTechnicianSelect = (technician: TechnicianProfile) => {
     setSelectedTechnician(technician);
-    // You could navigate to a detailed view or open a modal
-    console.log('Selected technician:', technician);
   };
 
-  const handleAssignmentComplete = (assignment: any) => {
-    console.log('Assignment completed:', assignment);
+  const handleAssignmentComplete = () => {
     // Handle assignment completion
     setSelectedDate('');
-    setSelectedTimeSlot(null);
+    setSelectedTimeSlot(undefined);
   };
 
   const handleTimeSlotSelect = (technician: TechnicianProfile, date: Date, timeSlot: string) => {
@@ -46,7 +43,7 @@ export default function TechnicianManagementPage() {
   };
 
   const addTime = (time: string, hours: number): string => {
-    const [hour, minute] = time.split(':').map(Number);
+    const [hour = 0, minute = 0] = time.split(':').map(Number);
     const newHour = (hour + hours) % 24;
     return `${newHour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
   };
@@ -187,7 +184,7 @@ export default function TechnicianManagementPage() {
           <div className="space-y-6">
             {viewMode === 'dashboard' && (
               <TechnicianDashboard
-                selectedTechnician={selectedTechnician}
+                {...(selectedTechnician ? { selectedTechnician } : {})}
                 onTechnicianSelect={handleTechnicianSelect}
               />
             )}
@@ -198,7 +195,7 @@ export default function TechnicianManagementPage() {
 
             {viewMode === 'calendar' && (
               <TechnicianAvailabilityCalendar
-                selectedTechnician={selectedTechnician}
+                {...(selectedTechnician ? { selectedTechnician } : {})}
                 onTechnicianSelect={handleTechnicianSelect}
                 onTimeSlotSelect={handleTimeSlotSelect}
               />
@@ -206,8 +203,8 @@ export default function TechnicianManagementPage() {
 
             {viewMode === 'assignment' && (
               <TechnicianAssignmentInterface
-                selectedDate={selectedDate}
-                selectedTimeSlot={selectedTimeSlot}
+                {...(selectedDate ? { selectedDate } : {})}
+                {...(selectedTimeSlot ? { selectedTimeSlot } : {})}
                 onTechnicianSelect={handleTechnicianSelect}
                 onAssignmentComplete={handleAssignmentComplete}
               />

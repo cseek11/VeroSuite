@@ -40,19 +40,21 @@ export default function PaymentAnalytics({
   );
 
   // Fetch payment analytics
-  const { data: analyticsData, isLoading, error } = useQuery<{
-    paymentMethodBreakdown?: Record<string, number>;
-    summary?: {
-      successRate: number;
-      totalPayments?: number;
-      totalAmount?: number;
-      averagePaymentAmount?: number;
-    };
-    failureReasons?: Record<string, number>;
-    monthlyTrends?: Record<string, number>;
-  }>({
+  const { data: analyticsData, isLoading, error } = useQuery({
     queryKey: ['payment-analytics', dateRangeStart, dateRangeEnd],
-    queryFn: () => billing.getPaymentAnalytics(dateRangeStart ?? '', dateRangeEnd ?? ''),
+    queryFn: async (): Promise<{
+      paymentMethodBreakdown?: Record<string, number>;
+      summary?: {
+        successRate: number;
+        totalPayments?: number;
+        totalAmount?: number;
+        averagePaymentAmount?: number;
+      };
+      failureReasons?: Record<string, number>;
+      monthlyTrends?: Record<string, number>;
+    }> => {
+      return await billing.getPaymentAnalytics(dateRangeStart || '', dateRangeEnd || '');
+    },
   });
 
   const formatCurrency = (amount: number) => {
@@ -69,8 +71,8 @@ export default function PaymentAnalytics({
   };
 
   const handleDateRangeChange = () => {
-    const newStartDate = new Date(dateRangeStart);
-    const newEndDate = new Date(dateRangeEnd);
+    const newStartDate = dateRangeStart ? new Date(dateRangeStart) : new Date();
+    const newEndDate = dateRangeEnd ? new Date(dateRangeEnd) : new Date();
     if (onDateRangeChange) {
       onDateRangeChange(newStartDate, newEndDate);
     }
@@ -284,7 +286,6 @@ export default function PaymentAnalytics({
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={(entry: { method: string; count: number }) => `${entry.method}: ${entry.count}`}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="count"

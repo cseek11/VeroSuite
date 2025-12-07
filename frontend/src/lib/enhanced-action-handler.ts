@@ -390,7 +390,9 @@ class EnhancedActionHandler {
       // Reverse operations in reverse order
       for (let i = transaction.operations.length - 1; i >= 0; i--) {
         const operation = transaction.operations[i];
-        await this.rollbackOperation(operation);
+        if (operation) {
+          await this.rollbackOperation(operation);
+        }
       }
       
       transaction.status = 'rolled_back';
@@ -450,20 +452,20 @@ class EnhancedActionHandler {
   }
 
   // Placeholder methods for other operations
-  private async validateDeleteCustomer(intentResult: EnhancedIntentResult, errors: string[], suggestions: string[]): Promise<void> {
+  private async validateDeleteCustomer(_intentResult: EnhancedIntentResult, _errors: string[], _suggestions: string[]): Promise<void> {
     // Implement delete validation
   }
 
-  private async validateCreateCustomer(intentResult: EnhancedIntentResult, errors: string[], suggestions: string[]): Promise<void> {
+  private async validateCreateCustomer(_intentResult: EnhancedIntentResult, _errors: string[], _suggestions: string[]): Promise<void> {
     // Implement create validation
   }
 
-  private async executeDeleteCustomer(intentResult: EnhancedIntentResult, transaction: TransactionContext): Promise<EnhancedActionResult> {
+  private async executeDeleteCustomer(_intentResult: EnhancedIntentResult, _transaction: TransactionContext): Promise<EnhancedActionResult> {
     // Implement delete operation
     throw new Error('Delete customer not implemented');
   }
 
-  private async executeCreateCustomer(intentResult: EnhancedIntentResult, transaction: TransactionContext): Promise<EnhancedActionResult> {
+  private async executeCreateCustomer(_intentResult: EnhancedIntentResult, _transaction: TransactionContext): Promise<EnhancedActionResult> {
     // Implement create operation
     throw new Error('Create customer not implemented');
   }

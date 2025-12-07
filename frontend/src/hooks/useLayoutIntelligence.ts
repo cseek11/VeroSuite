@@ -76,8 +76,7 @@ export function useLayoutIntelligence({
     let currentCol = 0;
     const maxCols = 4;
 
-    return optimized.map((region, index) => {
-      const _index = index;
+    return optimized.map((region) => {
       const newRegion = { ...region };
       
       // Calculate grid position

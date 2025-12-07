@@ -26,7 +26,7 @@ export const DashboardOnboarding: React.FC<DashboardOnboardingProps> = ({
   onSelectTemplate
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [_completedSteps, setCompletedSteps] = useState<Set<number>>(new Set<number>());
 
   const steps: OnboardingStep[] = [
     {
@@ -73,7 +73,7 @@ export const DashboardOnboarding: React.FC<DashboardOnboardingProps> = ({
       id: 'templates',
       title: 'Choose a Template',
       description: 'Start with a pre-configured template or build from scratch. You can always customize later.',
-      component: <TemplateSelector onSelect={onSelectTemplate} />
+      component: <TemplateSelector {...(onSelectTemplate !== undefined ? { onSelect: onSelectTemplate } : {})} />
     },
     {
       id: 'interactions',
@@ -137,7 +137,7 @@ export const DashboardOnboarding: React.FC<DashboardOnboardingProps> = ({
   }, [onSkip]);
 
   const currentStepData = steps[currentStep];
-  const progress = ((currentStep + 1) / steps.length) * 100;
+  const _progress = steps.length > 0 ? ((currentStep + 1) / steps.length) * 100 : 0;
 
   return (
     <AnimatePresence>
@@ -191,12 +191,12 @@ export const DashboardOnboarding: React.FC<DashboardOnboardingProps> = ({
               transition={{ duration: 0.3 }}
             >
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {currentStepData.title}
+                {currentStepData?.title ?? ''}
               </h2>
               <p className="text-gray-600 mb-6">
-                {currentStepData.description}
+                {currentStepData?.description ?? ''}
               </p>
-              {currentStepData.component}
+              {currentStepData?.component}
             </motion.div>
           </div>
 

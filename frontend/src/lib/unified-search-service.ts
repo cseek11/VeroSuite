@@ -36,7 +36,7 @@ class UnifiedSearchService {
    */
   async searchCustomers(
     query: string,
-    filters?: SearchFilters,
+    _filters?: SearchFilters,
     options?: SearchOptions
   ): Promise<SearchResult> {
     const startTime = Date.now();
@@ -73,7 +73,7 @@ class UnifiedSearchService {
               searchQuery,
               result.data.length,
               executionTime,
-              { tenantId, method }
+              { tenantId }
             );
             
             return {
@@ -372,6 +372,3 @@ class UnifiedSearchService {
 
 // Export singleton instance
 export const unifiedSearchService = new UnifiedSearchService();
-
-// Export types
-export type { SearchResult, SearchOptions };

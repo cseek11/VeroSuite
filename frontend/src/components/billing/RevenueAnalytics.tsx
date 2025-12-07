@@ -38,8 +38,6 @@ interface RevenueAnalyticsProps {
   endDate?: string;
 }
 
-const _COLORS = ['#7c3aed', '#a855f7', '#10b981', '#f59e0b', '#ef4444', '#3b82f6'];
-
 export default function RevenueAnalytics({
   startDate: propStartDate,
   endDate: propEndDate,

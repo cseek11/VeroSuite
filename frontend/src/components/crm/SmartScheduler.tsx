@@ -143,17 +143,6 @@ export default function SmartScheduler({ customerId }: SmartSchedulerProps) {
     return stars;
   };
 
-  const _getSkillColor = (skill: string) => {
-    switch (skill.toLowerCase()) {
-      case 'termite': return 'red';
-      case 'rodent': return 'brown';
-      case 'ant': return 'orange';
-      case 'spider': return 'purple';
-      case 'mosquito': return 'blue';
-      default: return 'gray';
-    }
-  };
-
   const handleSchedule = () => {
     if (selectedDate && selectedTime && selectedService && selectedTechnician) {
       scheduleService.mutate({
@@ -263,7 +252,7 @@ export default function SmartScheduler({ customerId }: SmartSchedulerProps) {
                 }}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <Heading level={5} className="text-slate-900">
+                  <Heading level={4} className="text-slate-900">
                     {tech.name}
                   </Heading>
                   <div className="flex items-center gap-1">
@@ -308,10 +297,10 @@ export default function SmartScheduler({ customerId }: SmartSchedulerProps) {
                 }}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <Heading level={5} className="text-slate-900">
+                  <Heading level={4} className="text-slate-900">
                     {service.name}
                   </Heading>
-                  <Heading level={5} className="text-green-600 font-semibold">
+                  <Heading level={4} className="text-green-600 font-semibold">
                     ${service.estimatedCost}
                   </Heading>
                 </div>

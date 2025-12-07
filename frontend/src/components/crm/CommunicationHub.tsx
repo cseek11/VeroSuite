@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -93,10 +93,6 @@ export default function CommunicationHub({ customerId: _customerId }: Communicat
     }
   };
 
-  const _getDirectionColor = (direction: string) => {
-    return direction === 'inbound' ? 'blue' : 'green';
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -163,7 +159,7 @@ export default function CommunicationHub({ customerId: _customerId }: Communicat
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Heading level={5} className="text-slate-900">
+                      <Heading level={4} className="text-slate-900">
                         {log.communication_type.charAt(0).toUpperCase() + log.communication_type.slice(1)}
                       </Heading>
                       <Badge variant={log.direction === 'inbound' ? 'default' : 'secondary'}>
@@ -182,7 +178,7 @@ export default function CommunicationHub({ customerId: _customerId }: Communicat
                   </div>
 
                   {log.subject && (
-                    <Heading level={6} className="text-slate-800 mb-2">
+                  <Heading level={4} className="text-slate-800 mb-2">
                       {log.subject}
                     </Heading>
                   )}
@@ -329,7 +325,7 @@ export default function CommunicationHub({ customerId: _customerId }: Communicat
                   </Text>
                   <Input
                     value={subject}
-                    onChange={(e) => setSubject(e)}
+                    onChange={(e) => setSubject((e as unknown as React.ChangeEvent<HTMLInputElement>).target.value)}
                     placeholder="Enter subject..."
                   />
                 </div>
@@ -342,7 +338,7 @@ export default function CommunicationHub({ customerId: _customerId }: Communicat
                 </Text>
                 <Textarea
                   value={message}
-                  onChange={(e) => setMessage(e)}
+                  onChange={(e) => setMessage((e as unknown as React.ChangeEvent<HTMLTextAreaElement>).target.value)}
                   placeholder={`Enter your ${selectedCommunicationType} message...`}
                   rows={6}
                 />

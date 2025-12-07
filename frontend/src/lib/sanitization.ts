@@ -2,7 +2,7 @@
  * Sanitize HTML content to prevent XSS attacks
  * Note: For production, install and use DOMPurify: npm install isomorphic-dompurify
  */
-export function sanitizeHtml(dirty: string): string {
+export function sanitizeHtml(dirty?: string | null): string {
   if (!dirty || typeof dirty !== 'string') {
     return '';
   }
@@ -51,7 +51,7 @@ export function sanitizeConfig(config: Record<string, any>): Record<string, any>
 /**
  * Sanitize region title/description
  */
-export function sanitizeText(text: string): string {
+export function sanitizeText(text?: string | null): string {
   // Remove HTML tags and dangerous characters
   return sanitizeHtml(text)
     .replace(/<[^>]*>/g, '') // Remove any remaining HTML tags
@@ -61,13 +61,15 @@ export function sanitizeText(text: string): string {
 /**
  * Validate and sanitize color value
  */
-export function sanitizeColor(color: string): string | null {
+export function sanitizeColor(color?: string | null): string | null {
+  if (!color) return null;
+  const value = color;
   // Only allow hex colors or rgb() format
   const hexPattern = /^#[0-9A-Fa-f]{6}$/;
   const rgbPattern = /^rgb\(\d{1,3},\s?\d{1,3},\s?\d{1,3}\)$/;
 
-  if (hexPattern.test(color) || rgbPattern.test(color)) {
-    return color;
+  if (hexPattern.test(value) || rgbPattern.test(value)) {
+    return value;
   }
 
   return null;
@@ -80,9 +82,9 @@ function hexToRgb(hex: string): string | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   if (!result) return null;
   
-  const r = parseInt(result[1], 16);
-  const g = parseInt(result[2], 16);
-  const b = parseInt(result[3], 16);
+  const r = parseInt(result[1] ?? '0', 16);
+  const g = parseInt(result[2] ?? '0', 16);
+  const b = parseInt(result[3] ?? '0', 16);
   
   return `rgb(${r},${g},${b})`;
 }
@@ -92,7 +94,7 @@ function hexToRgb(hex: string): string | null {
  * Backend expects: #rrggbb OR rgb(\d{1,3},\s?\d{1,3},\s?\d{1,3})
  * We'll normalize to rgb(r,g,b) format (no spaces) for consistency
  */
-export function normalizeColor(color: string | undefined | null): string | undefined {
+export function normalizeColor(color?: string | null): string | undefined {
   if (!color) return undefined;
   
   // Remove whitespace
@@ -107,9 +109,10 @@ export function normalizeColor(color: string | undefined | null): string | undef
   // Already in rgb format - normalize to rgb(r,g,b) without spaces
   const rgbMatch = cleaned.match(/rgb\(?\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)?/i);
   if (rgbMatch) {
-    const r = parseInt(rgbMatch[1], 10);
-    const g = parseInt(rgbMatch[2], 10);
-    const b = parseInt(rgbMatch[3], 10);
+    const [, rStr, gStr, bStr] = rgbMatch;
+    const r = parseInt(rStr ?? '0', 10);
+    const g = parseInt(gStr ?? '0', 10);
+    const b = parseInt(bStr ?? '0', 10);
     // Ensure values are in valid range
     if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
       return `rgb(${r},${g},${b})`;

@@ -21,7 +21,7 @@ export const useModalManagement = () => {
     isOpen: false,
     title: '',
     message: '',
-    onConfirm: (value: string) => {},
+    onConfirm: (_value: string) => {},
     placeholder: '',
     defaultValue: '',
     type: 'info'

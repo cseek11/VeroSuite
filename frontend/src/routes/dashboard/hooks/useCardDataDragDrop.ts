@@ -297,7 +297,7 @@ export function useCardDataDragDrop(props: UseCardDataDragDropProps = {}) {
                           rect.x + rect.width <= window.innerWidth && 
                           rect.y + rect.height <= window.innerHeight;
       
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development' && payload.dragPreview) {
         logger.debug('Drag preview created', { 
           title: payload.dragPreview.title,
           inDOM: document.body.contains(preview),
@@ -341,8 +341,9 @@ export function useCardDataDragDrop(props: UseCardDataDragDropProps = {}) {
     // This is the primary visual feedback since native drag image may not work
     const updatePreview = (e: MouseEvent | DragEvent) => {
       if (preview && preview.parentNode) {
-        const clientX = 'clientX' in e ? e.clientX : e.clientX;
-        const clientY = 'clientY' in e ? e.clientY : e.clientY;
+        const evt = e as MouseEvent;
+        const clientX = evt.clientX;
+        const clientY = evt.clientY;
         
         // Update position using setProperty for consistency and !important
         preview.style.setProperty('left', `${clientX}px`, 'important');
@@ -402,7 +403,7 @@ export function useCardDataDragDrop(props: UseCardDataDragDropProps = {}) {
   /**
    * Start dragging data from a card
    */
-  const handleContentDragStart = useCallback((cardId: string, payload: DragPayload, e: React.MouseEvent | React.DragEvent) => {
+  const handleContentDragStart = useCallback((_cardId: string, payload: DragPayload, e: React.MouseEvent | React.DragEvent) => {
     if (!enabled || !registry.isEnabled()) {
       if (process.env.NODE_ENV === 'development') {
         logger.debug('Drag disabled or registry not enabled', { enabled, registryEnabled: registry.isEnabled() }, 'useCardDataDragDrop');
@@ -474,8 +475,9 @@ export function useCardDataDragDrop(props: UseCardDataDragDropProps = {}) {
       return;
     }
 
-    const clientX = 'clientX' in e ? e.clientX : e.clientX;
-    const clientY = 'clientY' in e ? e.clientY : e.clientY;
+    const evt = e as MouseEvent;
+    const clientX = evt.clientX;
+    const clientY = evt.clientY;
 
     // Find card element under cursor
     const elementUnderCursor = document.elementFromPoint(clientX, clientY);
@@ -498,7 +500,7 @@ export function useCardDataDragDrop(props: UseCardDataDragDropProps = {}) {
         
         if (canAccept) {
           const dropZones = registry.getDropZonesForCard(targetCardId);
-          const availableActions = registry.getAvailableActions(targetCardId, currentState.payload);
+          // keep availableActions for future use; currently we highlight by targetCardId
           
           registry.setDragState({
             dropTarget: targetCardId,
@@ -566,6 +568,12 @@ export function useCardDataDragDrop(props: UseCardDataDragDropProps = {}) {
     } else if (availableActions.length === 1) {
       // Single action - execute directly
       const action = availableActions[0];
+      if (!action) {
+        return {
+          success: false,
+          error: 'No action available for this drop'
+        };
+      }
       for (const zone of dropZones) {
         if (zone.actions[action.actionId]) {
           actionToExecute = zone.actions[action.actionId];

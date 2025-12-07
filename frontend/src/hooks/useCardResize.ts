@@ -231,6 +231,7 @@ export function useCardResize({ onUpdateSize, cards, onResizeEnd, getCardGroup, 
         document.removeEventListener('mouseup', handleResizeEnd);
       };
     }
+    return undefined;
   }, [resizeState.isResizing, handleResizeMove, handleResizeEnd]);
 
   return {

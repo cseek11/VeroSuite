@@ -3,6 +3,7 @@ import { availableKpiFields } from './utils/constants';
 import { createRenderVirtualCard } from './utils/renderHelpers';
 import { normalizeKpiForDisplay } from './utils/cardHelpers';
 import { AUTO_CREATE_FROM_USER_KPIS } from './utils/constants';
+import type { DashboardCard } from './types';
 
 export const useVeroCardsRender = (props: any) => {
   const {
@@ -254,7 +255,7 @@ export const useVeroCardsRender = (props: any) => {
     dashboardState.setSearchTerm(query);
   }, []);
 
-  const handleToggleMobileView = useCallback((_view: 'grid' | 'list') => {
+  const handleToggleMobileView = useCallback((_view?: 'grid' | 'list') => {
     // Handle view mode toggle logic here
   }, []);
 
@@ -278,7 +279,7 @@ export const useVeroCardsRender = (props: any) => {
   }, [props.loadLayoutFromData, props.setZoom, props.setPan]);
 
   // Memoized filtered cards - now only for highlighting, not hiding
-  const filteredCards = useMemo(() => {
+  const filteredCards: DashboardCard[] = useMemo(() => {
     if (!dashboardState.searchTerm.trim()) {
       return [];
     }
@@ -302,7 +303,7 @@ export const useVeroCardsRender = (props: any) => {
              kpiName.toLowerCase().includes(term) ||
              kpiDescription.toLowerCase().includes(term) ||
              kpiCategory.toLowerCase().includes(term);
-    });
+    }) as DashboardCard[];
   }, [layout.cards, dashboardState.searchTerm, cardTypes, kpiData]);
 
   // Auto-scroll to first matching card when search results change

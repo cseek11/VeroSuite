@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -116,7 +116,7 @@ export default function KpiTemplateEditor({
   });
 
   // API hooks
-  const { data: existingTemplate, isLoading } = useKpiTemplate(templateId || '');
+  const { data: existingTemplate, isLoading: _isLoading } = useKpiTemplate(templateId || '');
   const createMutation = useCreateKpiTemplate();
   const updateMutation = useUpdateKpiTemplate();
 
@@ -617,10 +617,12 @@ export default function KpiTemplateEditor({
                     <Input
                       type="number"
                       value={formData.threshold_config.green}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        threshold_config: { ...prev.threshold_config, green: Number(e.target.value) }
-                      }))}
+                      onChange={(e) =>
+                        setValue('threshold_config', {
+                          ...formData.threshold_config,
+                          green: Number(e.target.value)
+                        })
+                      }
                     />
                   </div>
                   <div>
@@ -630,10 +632,12 @@ export default function KpiTemplateEditor({
                     <Input
                       type="number"
                       value={formData.threshold_config.yellow}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        threshold_config: { ...prev.threshold_config, yellow: Number(e.target.value) }
-                      }))}
+                      onChange={(e) =>
+                        setValue('threshold_config', {
+                          ...formData.threshold_config,
+                          yellow: Number(e.target.value)
+                        })
+                      }
                     />
                   </div>
                   <div>
@@ -643,10 +647,12 @@ export default function KpiTemplateEditor({
                     <Input
                       type="number"
                       value={formData.threshold_config.red}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        threshold_config: { ...prev.threshold_config, red: Number(e.target.value) }
-                      }))}
+                      onChange={(e) =>
+                        setValue('threshold_config', {
+                          ...formData.threshold_config,
+                          red: Number(e.target.value)
+                        })
+                      }
                     />
                   </div>
                   <div>
@@ -655,10 +661,12 @@ export default function KpiTemplateEditor({
                     </label>
                     <Input
                       value={formData.threshold_config.unit || ''}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        threshold_config: { ...prev.threshold_config, unit: e.target.value }
-                      }))}
+                      onChange={(e) =>
+                        setValue('threshold_config', {
+                          ...formData.threshold_config,
+                          unit: e.target.value
+                        })
+                      }
                       placeholder="e.g., %, $, count"
                     />
                   </div>
@@ -677,10 +685,12 @@ export default function KpiTemplateEditor({
                     return (
                       <button
                         key={chart.id}
-                        onClick={() => setFormData(prev => ({
-                          ...prev,
-                          chart_config: { ...prev.chart_config, type: chart.id }
-                        }))}
+                        onClick={() =>
+                          setValue('chart_config', {
+                            ...formData.chart_config,
+                            type: chart.id
+                          })
+                        }
                         className={`p-4 rounded-lg border-2 transition-colors ${
                           formData.chart_config.type === chart.id
                             ? "border-purple-500 bg-purple-50"

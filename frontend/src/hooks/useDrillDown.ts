@@ -38,7 +38,6 @@ interface UseDrillDownProps {
 
 export function useDrillDown({
   initialData = [],
-  onDataChange,
   onLevelChange,
   maxLevels = 5
 }: UseDrillDownProps) {
@@ -67,7 +66,9 @@ export function useDrillDown({
       }));
       
       const level = state.levels[levelIndex];
-      onLevelChange?.(level);
+      if (level && onLevelChange) {
+        onLevelChange(level);
+      }
     }
   }, [state.levels, onLevelChange]);
 

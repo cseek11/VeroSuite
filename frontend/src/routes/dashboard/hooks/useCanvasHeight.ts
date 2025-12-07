@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { debounce } from '@/utils/debounce';
 import { CARD_CONSTANTS } from '../utils/cardConstants';
 
 interface UseCanvasHeightProps {
@@ -110,15 +109,6 @@ export const useCanvasHeight = ({
     setCanvasHeight(newHeight);
     setPreviousHeight(newHeight);
   }, [calculateCanvasHeight, previousHeight, cards, autoScrollToCard, enableAutoScroll, containerRef, isDragging]);
-
-  // Debounced canvas height update to prevent excessive recalculations
-  const _debouncedUpdateCanvasHeight = useCallback(
-    debounce(() => {
-      const newHeight = calculateCanvasHeight();
-      setCanvasHeight(newHeight);
-    }, 100), // 100ms debounce
-    [calculateCanvasHeight]
-  );
 
   // Function to manually update canvas height (useful for external triggers)
   const updateCanvasHeight = useCallback(() => {

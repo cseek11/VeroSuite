@@ -54,22 +54,19 @@ export default function PaymentMethodManager({
   const queryClient = useQueryClient();
 
   // Fetch payment methods
-  const { data: paymentMethods = [], isLoading, error } = useQuery({
+  const { data: paymentMethods = [], isLoading, error } = useQuery<PaymentMethod[]>({
     queryKey: ['billing', 'payment-methods', customerId],
     queryFn: () => billing.getPaymentMethods(customerId),
     enabled: !!customerId,
-    onError: (error: unknown) => {
-      logger.error('Failed to fetch payment methods', error, 'PaymentMethodManager');
-      toast.error('Failed to load payment methods. Please try again.');
-    },
   });
 
   // Create payment method mutation
   const createMutation = useMutation({
-    mutationFn: (data: { account_id: string; payment_type: string; payment_name: string; [key: string]: unknown }) => billing.createPaymentMethod({
-      account_id: customerId,
-      ...data,
-    }),
+    mutationFn: (data: { payment_type: PaymentMethod['payment_type']; payment_name: string; [key: string]: unknown }) =>
+      billing.createPaymentMethod({
+        account_id: customerId,
+        ...data,
+      }),
     onSuccess: (_data) => {
       queryClient.invalidateQueries({ queryKey: ['billing', 'payment-methods'] });
       setShowAddModal(false);
@@ -346,7 +343,12 @@ export default function PaymentMethodManager({
                 </label>
                 <Select
                   value={formData.payment_type}
-                  onChange={(e) => setFormData({ ...formData, payment_type: e.target.value as PaymentMethod['payment_type'] })}
+                  onChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      payment_type: (typeof value === 'string' ? value : '') as PaymentMethod['payment_type']
+                    })
+                  }
                   options={[
                     { value: 'credit_card', label: 'Credit Card' },
                     { value: 'debit_card', label: 'Debit Card' },
@@ -377,7 +379,12 @@ export default function PaymentMethodManager({
                     </label>
                     <Select
                       value={formData.card_type}
-                      onChange={(e) => setFormData({ ...formData, card_type: e.target.value })}
+                      onChange={(value) =>
+                        setFormData({
+                          ...formData,
+                          card_type: typeof value === 'string' ? value : ''
+                        })
+                      }
                       options={[
                         { value: 'visa', label: 'Visa' },
                         { value: 'mastercard', label: 'Mastercard' },

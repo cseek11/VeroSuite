@@ -2,7 +2,7 @@
  * Invoice View Component
  * Comprehensive invoice viewing interface with list, detail, and actions
  * 
- * Last Updated: 2025-12-06
+ * Last Updated: 2025-12-07
  */
 
 import { useState, useEffect, useMemo } from 'react';
@@ -46,9 +46,12 @@ export default function InvoiceView({
   const [searchTerm, setSearchTerm] = useState('');
 
   // Fetch invoices
-  const { data: invoicesData, isLoading, error, refetch } = useQuery<Invoice[]>({
+  const { data: invoicesData, isLoading, error, refetch } = useQuery({
     queryKey: ['billing', 'invoices', customerId || 'all'],
-    queryFn: () => billing.getInvoices(customerId),
+    queryFn: async (): Promise<Invoice[]> => {
+      const result = await billing.getInvoices(customerId);
+      return Array.isArray(result) ? result : [];
+    },
   });
 
   if (error) {

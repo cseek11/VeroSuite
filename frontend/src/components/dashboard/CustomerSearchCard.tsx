@@ -139,13 +139,16 @@ export default function CustomerSearchCard({
                 key={customer.id}
                 cardId={cardId}
                 dataType="customer"
-                data={customer}
+                data={customer as unknown as Record<string, unknown> & { id?: string; _id?: string; name?: string; title?: string }}
                 className="cursor-grab active:cursor-grabbing"
-                getDragPreview={(customer: Account) => ({
-                  title: customer.name || 'Customer',
-                  icon: '👤',
-                  color: '#3b82f6'
-                })}
+                getDragPreview={(data: Record<string, unknown>) => {
+                  const customer = data as Account;
+                  return {
+                    title: customer.name || 'Customer',
+                    icon: '👤',
+                    color: '#3b82f6'
+                  };
+                }}
               >
                 <div
                   onClick={(e) => {

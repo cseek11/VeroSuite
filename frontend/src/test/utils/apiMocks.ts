@@ -7,8 +7,8 @@
 
 import { vi } from 'vitest';
 import type { Account } from '@/types/enhanced-types';
-import type { TechnicianProfile, EmploymentType, TechnicianStatus } from '@/types/technician';
-import type { WorkOrder, WorkOrderStatus, WorkOrderPriority } from '@/types/work-orders';
+import { TechnicianProfile, EmploymentType, TechnicianStatus } from '@/types/technician';
+import { WorkOrder, WorkOrderStatus, WorkOrderPriority } from '@/types/work-orders';
 
 /**
  * Mock technicians API responses
@@ -157,8 +157,8 @@ export const mockWorkOrdersApi = () => {
       work_order_number: 'WO-001',
       tenant_id: 'tenant-123',
       customer_id: 'account-1',
-      status: 'pending',
-      priority: 'medium',
+      status: WorkOrderStatus.PENDING,
+      priority: WorkOrderPriority.MEDIUM,
       scheduled_date: new Date(Date.now() + 86400000).toISOString(),
       description: 'Test work order 1',
       created_at: new Date().toISOString(),

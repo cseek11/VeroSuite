@@ -57,8 +57,8 @@ function reportWebVital(metric: WebVitalsMetric) {
   });
   
   // Send to monitoring service (Sentry, Analytics, etc.)
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', metric.name, {
+  if (typeof window !== 'undefined' && 'gtag' in window && typeof (window as { gtag?: (...args: unknown[]) => void }).gtag === 'function') {
+    (window as { gtag: (...args: unknown[]) => void }).gtag('event', metric.name, {
       value: Math.round(metric.value),
       metric_id: metric.id,
       metric_value: metric.value,
@@ -67,8 +67,8 @@ function reportWebVital(metric: WebVitalsMetric) {
   }
   
   // Report to Sentry if available
-  if (typeof window !== 'undefined' && (window as any).Sentry) {
-    (window as any).Sentry.metrics.distribution(metric.name, metric.value, {
+  if (typeof window !== 'undefined' && 'Sentry' in window && typeof (window as { Sentry?: { metrics?: { distribution?: (name: string, value: number, options?: unknown) => void } } }).Sentry?.metrics?.distribution === 'function') {
+    (window as { Sentry: { metrics: { distribution: (name: string, value: number, options?: unknown) => void } } }).Sentry.metrics.distribution(metric.name, metric.value, {
       tags: {
         rating: metric.rating,
         status,
@@ -132,13 +132,16 @@ function measureTTFB() {
  */
 export function useWebVitals(enabled: boolean = true) {
   useEffect(() => {
-    if (!enabled || typeof window === 'undefined') return;
+    if (!enabled || typeof window === 'undefined') return undefined;
     
     // Measure TTFB on page load
     if (document.readyState === 'complete') {
       measureTTFB();
     } else {
       window.addEventListener('load', measureTTFB);
+      return () => {
+        window.removeEventListener('load', measureTTFB);
+      };
     }
     
     // Load Web Vitals library if available
@@ -224,6 +227,7 @@ export function useWebVitals(enabled: boolean = true) {
     // Monitor FID (First Input Delay) - requires user interaction
     // This is handled separately when user interacts with the page
     
+    return undefined;
   }, [enabled]);
   
   return webVitalsReport;

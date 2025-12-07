@@ -79,6 +79,7 @@ export interface Customer {
   ar_balance: number;
   created_at: string;
   updated_at: string;
+  notes?: string;
   customer_profiles?: CustomerProfile[];
   customer_contacts?: CustomerContact[];
 }

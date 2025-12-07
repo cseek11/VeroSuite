@@ -257,6 +257,3 @@ class SearchErrorLogger {
 
 // Export singleton instance
 export const searchErrorLogger = new SearchErrorLogger();
-
-// Export types for use in other modules
-export type { SearchError, SearchErrorContext };

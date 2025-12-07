@@ -53,8 +53,8 @@ export default function PageCardTemplate({
     <PageCardManager
       cardId={cardId || ''}
       cardType={cardType}
-      onClose={onClose}
-      className={className}
+      {...(onClose !== undefined ? { onClose } : {})}
+      {...(className !== undefined ? { className } : {})}
     >
       {children}
     </PageCardManager>

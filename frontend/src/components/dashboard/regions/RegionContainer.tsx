@@ -1,6 +1,6 @@
-import React, { ReactNode, useState, useCallback, useRef, useEffect } from 'react';
+import { ReactNode, useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type MotionStyle } from 'framer-motion';
 import { Settings, ChevronDown, ChevronUp, Lock, Unlock, GripVertical, MoreVertical, Copy, Trash2 } from 'lucide-react';
 import { DashboardRegion } from '@/routes/dashboard/types/region.types';
 import { RegionContent } from './RegionContent';
@@ -26,8 +26,8 @@ interface RegionContainerProps {
 export const RegionContainer: React.FC<RegionContainerProps> = React.memo(({
   region,
   children,
-  onResize,
-  onMove,
+  onResize: _onResize,
+  onMove: _onMove,
   onToggleCollapse,
   onToggleLock,
   onDelete,
@@ -36,36 +36,11 @@ export const RegionContainer: React.FC<RegionContainerProps> = React.memo(({
   className = '',
   style = {}
 }) => {
-  const [isResizing, setIsResizing] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const [isDuplicating, setIsDuplicating] = useState(false);
-  const [positionValidity, setPositionValidity] = useState<boolean | null>(null);
-  const resizeStartRef = useRef<{ rowSpan: number; colSpan: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const handleResizeStart = useCallback(() => {
-    setIsResizing(true);
-    resizeStartRef.current = { rowSpan: region.row_span, colSpan: region.col_span };
-  }, [region.row_span, region.col_span]);
-
-  const handleResize = useCallback((deltaX: number, deltaY: number) => {
-    if (!resizeStartRef.current || !onResize) return;
-
-    // Calculate new size based on delta (approximate: 100px per grid unit)
-    const gridUnitSize = 100;
-    const newColSpan = Math.max(1, Math.round((resizeStartRef.current.colSpan * gridUnitSize + deltaX) / gridUnitSize));
-    const newRowSpan = Math.max(1, Math.round((resizeStartRef.current.rowSpan * gridUnitSize + deltaY) / gridUnitSize));
-
-    onResize(region.id, newRowSpan, newColSpan);
-  }, [region.id, onResize]);
-
-  const handleResizeEnd = useCallback(() => {
-    setIsResizing(false);
-    resizeStartRef.current = null;
-  }, []);
 
   // Context menu handler
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
@@ -137,7 +112,6 @@ export const RegionContainer: React.FC<RegionContainerProps> = React.memo(({
     overflow-hidden
     ${region.is_collapsed ? 'collapsed' : ''} 
     ${region.is_locked ? 'locked border-red-400 bg-red-50/30' : 'hover:border-slate-300'} 
-    ${isResizing ? 'resizing border-blue-400' : ''}
   `.trim().replace(/\s+/g, ' ');
 
   return (
@@ -145,7 +119,7 @@ export const RegionContainer: React.FC<RegionContainerProps> = React.memo(({
       <motion.div
         ref={containerRef}
         className={`${baseClasses} ${className}`}
-        style={gridStyle}
+        style={gridStyle as MotionStyle}
         role="region"
         aria-label={`Region: ${region.region_type}`}
         aria-expanded={!region.is_collapsed}

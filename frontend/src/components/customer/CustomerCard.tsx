@@ -128,7 +128,7 @@ export const CustomerCard: React.FC<CustomerCardProps> = ({
             <Calendar className="w-4 h-4 text-gray-400" />
             <div>
               <div className="font-medium text-gray-900">
-                {formatDate(customer.next_service_date || '')}
+                {formatDate((customer as Account & { next_service_date?: string }).next_service_date || '')}
               </div>
               <div className="text-xs text-gray-500">Next Service</div>
             </div>

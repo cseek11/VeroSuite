@@ -92,7 +92,7 @@ const EnhancedDrillDownModal: React.FC<EnhancedDrillDownModalProps> = ({
           field: key,
           label: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
           type: uniqueValues.length <= 10 ? 'select' : 'text',
-          options: uniqueValues.length <= 10 ? uniqueValues : undefined
+          ...(uniqueValues.length <= 10 ? { options: uniqueValues } : {})
         });
       }
     });
@@ -115,8 +115,9 @@ const EnhancedDrillDownModal: React.FC<EnhancedDrillDownModalProps> = ({
     }
   };
 
-  const _getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
-    switch (trend) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _getTrendIcon = (_trend: 'up' | 'down' | 'stable') => {
+    switch (_trend) {
       case 'up':
         return <TrendingUp className="w-4 h-4 text-green-500" />;
       case 'down':
@@ -297,7 +298,7 @@ const EnhancedDrillDownModal: React.FC<EnhancedDrillDownModalProps> = ({
             >
               <Filter className="w-4 h-4" />
               <span>Filters</span>
-              {drillDown.levelStats?.filterCount > 0 && (
+              {drillDown.levelStats && drillDown.levelStats.filterCount > 0 && (
                 <span className="bg-purple-600 text-white text-xs rounded-full px-2 py-0.5">
                   {drillDown.levelStats.filterCount}
                 </span>

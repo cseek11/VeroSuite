@@ -1,4 +1,5 @@
 import { DashboardMetric } from '@/types';
+import type { ComponentType } from 'react';
 
 export interface ModalState<T = void> {
   isOpen: boolean;
@@ -14,12 +15,6 @@ export interface GroupDeleteModalState {
   isOpen: boolean;
   groupId: string;
   groupName: string;
-}
-
-export interface CardType {
-  id: string;
-  name: string;
-  component: any;
 }
 
 export interface CardSize {
@@ -127,8 +122,8 @@ export interface Collaborator {
 export interface CardType {
   id: string;
   name: string;
-  component: React.ComponentType<any>;
-  icon?: React.ComponentType<any>;
+  component: ComponentType<any>;
+  icon?: ComponentType<any>;
 }
 
 export interface Group {

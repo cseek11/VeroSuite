@@ -14,19 +14,19 @@ const QuickActionsCard: React.FC<QuickActionsCardProps> = ({
   title = "Quick Actions",
   compact = false 
 }) => {
-  const [selectedItems, setSelectedItems] = useState<any[]>([]);
-  const [activeFilters, setActiveFilters] = useState<Record<string, any>>({});
+  const [selectedItems, _setSelectedItems] = useState<unknown[]>([]);
+  const [activeFilters, _setActiveFilters] = useState<Record<string, unknown>>({});
 
   // Mock card context - in real implementation, this would come from parent
   const cardContext: CardContext = {
-    selectedItems,
-    activeFilters,
+    selectedItems: selectedItems as unknown[],
+    activeFilters: activeFilters as Record<string, unknown>,
     userRole: 'dispatcher', // This would come from auth store
     permissions: ['jobs:assign', 'technicians:message', 'jobs:update'],
     cardId: 'quick-actions'
   };
 
-  const { availableActions, actionsByCategory } = useRoleBasedActions(cardContext);
+  const { availableActions: _availableActions, actionsByCategory } = useRoleBasedActions(cardContext);
 
   const getActionCount = () => {
     return Object.values(actionsByCategory).reduce((total, actions) => total + actions.length, 0);

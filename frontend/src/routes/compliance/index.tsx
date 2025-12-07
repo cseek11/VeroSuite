@@ -2,7 +2,7 @@
  * Compliance Dashboard Route
  * Main compliance dashboard page with tabs for overview and violations
  * 
- * Last Updated: 2025-11-24
+ * Last Updated: 2025-12-07
  */
 
 import { useState } from 'react';
@@ -70,7 +70,11 @@ export default function ComplianceDashboard() {
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              <ComplianceScore prNumber={selectedPR} />
+              {selectedPR !== undefined ? (
+                <ComplianceScore prNumber={selectedPR} />
+              ) : (
+                <ComplianceScore />
+              )}
             </div>
           </TabsContent>
         </Tabs>

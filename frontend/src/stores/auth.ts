@@ -13,12 +13,11 @@ interface AuthState {
   refreshUser: () => Promise<void>;
 }
 
-// Add tenant resolution logic
-const _resolveTenantId = (user: any): string | null => {
+// Add tenant resolution logic (unused but kept for reference)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _resolveTenantId = (_user: any): string | null => {
   // Try multiple sources for tenant ID
-  return user?.user_metadata?.tenant_id || 
-         user?.app_metadata?.tenant_id || 
-         null;
+  return null;
 };
 
 function loadPersisted(): Pick<AuthState, 'token' | 'tenantId' | 'user' | 'isAuthenticated'> {

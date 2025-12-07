@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDashboardTelemetry } from '@/hooks/useDashboardTelemetry';
 
 export const DashboardAnalytics: React.FC = () => {
-  const { getMetrics, trackEvent } = useDashboardTelemetry({ enabled: true });
+  const { getMetrics } = useDashboardTelemetry({ enabled: true });
   const [metrics, setMetrics] = useState(getMetrics());
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d'>('7d');
 

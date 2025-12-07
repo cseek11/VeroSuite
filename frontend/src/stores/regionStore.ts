@@ -54,6 +54,7 @@ interface RegionStoreState {
   // State
   regions: Map<string, VersionedRegion>;
   layouts: Map<string, { regions: string[]; loading: boolean }>;
+  layoutVersions: Map<string, number>;
   loading: Set<string>;
   errors: Map<string, Error>;
   conflicts: Map<string, ConflictData>;
@@ -255,6 +256,7 @@ export const useRegionStore = create<RegionStoreState>()(
           // Initial state
           regions: new Map(),
           layouts: new Map(),
+          layoutVersions: new Map(),
           loading: new Set(),
           errors: new Map(),
           conflicts: new Map(),
@@ -466,7 +468,6 @@ export const useRegionStore = create<RegionStoreState>()(
                 newRegions.set(versionedRegion.id, versionedRegion);
                 
                 const newLayouts = new Map(state.layouts);
-                const layout = newLayouts.get(layoutId);
                 const currentLayout = newLayouts.get(layoutId);
                 if (currentLayout) {
                   newLayouts.set(layoutId, {
@@ -556,7 +557,6 @@ export const useRegionStore = create<RegionStoreState>()(
                     version: (result as any).version || (currentRegion.version || 1) + 1,
                     optimistic: false
                   };
-                  // pendingUpdate is optional, don't set to undefined
                   
                   set((state) => {
                     const newRegions = new Map(state.regions);
@@ -566,8 +566,6 @@ export const useRegionStore = create<RegionStoreState>()(
                   
                   // Save snapshot after successful update
                   get().saveLayoutSnapshot(layoutId);
-                  
-                  return updated;
                 } catch (error: any) {
                   // Handle conflict
                   if (error?.status === 409 || error?.code === 'CONFLICT') {
@@ -608,8 +606,7 @@ export const useRegionStore = create<RegionStoreState>()(
                         newRegions.set(id, {
                           ...current,
                           ...region, // Revert to original
-                          optimistic: false,
-                          pendingUpdate: undefined
+                          optimistic: false
                         });
                         return { ...state, regions: newRegions };
                       }
@@ -875,9 +872,8 @@ export const useRegionStore = create<RegionStoreState>()(
             // Create deep copy of regions for snapshot
             const snapshot = regions.map(region => ({
               ...region,
-              // Remove optimistic flags and pending updates from snapshot
-              optimistic: false,
-              pendingUpdate: undefined
+              // Remove optimistic flags from snapshot
+              optimistic: false
             }));
             
             set((state) => {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle, XCircle, Clock, User, MapPin } from 'lucide-react';
 import { enhancedApi } from '@/lib/enhanced-api';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -14,13 +14,8 @@ import {
   DialogHeader, 
   DialogTitle 
 } from '@/components/ui/Dialog';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/Select';
+import Select from '@/components/ui/Select';
+import type { Job } from '@/types/enhanced-types';
 
 // Types
 interface Conflict {
@@ -35,40 +30,13 @@ interface Conflict {
   resolved_by?: string;
 }
 
-interface Job {
-  id: string;
-  status: 'unassigned' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  scheduled_date: string;
-  scheduled_start_time?: string;
-  scheduled_end_time?: string;
-  technician_id?: string;
-  customer: {
-    id: string;
-    name: string;
-    phone?: string;
-  };
-  location: {
-    id: string;
-    name: string;
-    address: string;
-    coordinates: { lat: number; lng: number };
-  };
-  service: {
-    type: string;
-    description: string;
-    estimated_duration: number;
-    price?: number;
-  };
-}
+// Extended Job type with populated relations
+type JobWithRelations = Job & {
+  customer?: { id: string; name: string; phone?: string };
+  location?: { id: string; name: string; address: string; coordinates?: { lat: number; lng: number } };
+  service?: { type: string; description: string; estimated_duration: number; price?: number };
+};
 
-interface Technician {
-  id: string;
-  first_name: string;
-  last_name: string;
-  phone?: string;
-  is_active: boolean;
-}
 
 interface ConflictDetectorProps {
   selectedDate: Date;
@@ -87,17 +55,13 @@ export const ConflictDetector: React.FC<ConflictDetectorProps> = ({
   const [resolutionMethod, setResolutionMethod] = useState<string>('');
   const [isScanning, setIsScanning] = useState(false);
 
-  const queryClient = useQueryClient();
-
   // Fetch jobs for conflict detection
-  const { data: jobs = [], isLoading: jobsLoading } = useQuery({
+  const { data: jobs = [], isLoading: jobsLoading } = useQuery<JobWithRelations[]>({
     queryKey: ['jobs', 'conflict-detection', selectedDate],
     queryFn: async () => {
-      return enhancedApi.jobs.list({
-        start_date: selectedDate.toISOString().split('T')[0],
-        end_date: selectedDate.toISOString().split('T')[0],
-        status: 'scheduled'
-      });
+      const dateStr: string = selectedDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0];
+      const result = await enhancedApi.jobs.getByDateRange(dateStr, dateStr);
+      return result as JobWithRelations[];
     },
     staleTime: 1 * 60 * 1000, // 1 minute for real-time conflict detection
   });
@@ -105,10 +69,7 @@ export const ConflictDetector: React.FC<ConflictDetectorProps> = ({
   // Fetch technicians
   const { data: technicians = [] } = useQuery({
     queryKey: ['technicians', 'active'],
-    queryFn: () => enhancedApi.users.list({ 
-      roles: ['technician'], 
-      status: 'active' 
-    }),
+    queryFn: () => enhancedApi.users.list(),
     staleTime: 10 * 60 * 1000,
   });
 
@@ -154,13 +115,15 @@ export const ConflictDetector: React.FC<ConflictDetectorProps> = ({
   });
 
   // Detect time overlap conflicts
-  const detectTimeOverlapConflicts = (jobs: Job[]): Conflict[] => {
+  const detectTimeOverlapConflicts = (jobs: JobWithRelations[]): Conflict[] => {
     const conflicts: Conflict[] = [];
     
     for (let i = 0; i < jobs.length; i++) {
       for (let j = i + 1; j < jobs.length; j++) {
         const job1 = jobs[i];
         const job2 = jobs[j];
+        
+        if (!job1 || !job2) continue;
         
         // Check if jobs are on the same date and have overlapping times
         if (job1.scheduled_date === job2.scheduled_date &&
@@ -178,7 +141,7 @@ export const ConflictDetector: React.FC<ConflictDetectorProps> = ({
               id: `time-overlap-${job1.id}-${job2.id}`,
               type: 'time_overlap',
               severity: 'high',
-              description: `Time overlap between ${job1.customer.name} and ${job2.customer.name}`,
+              description: `Time overlap between ${job1.customer?.name || 'Unknown'} and ${job2.customer?.name || 'Unknown'}`,
               conflicting_jobs: [job1.id, job2.id],
               detected_at: new Date().toISOString()
             });
@@ -191,7 +154,7 @@ export const ConflictDetector: React.FC<ConflictDetectorProps> = ({
   };
 
   // Detect technician double booking conflicts
-  const detectTechnicianDoubleBookingConflicts = (jobs: Job[]): Conflict[] => {
+  const detectTechnicianDoubleBookingConflicts = (jobs: JobWithRelations[]): Conflict[] => {
     const conflicts: Conflict[] = [];
     const technicianJobs = new Map<string, Job[]>();
     
@@ -212,6 +175,8 @@ export const ConflictDetector: React.FC<ConflictDetectorProps> = ({
           const job1 = techJobs[i];
           const job2 = techJobs[j];
           
+          if (!job1 || !job2) continue;
+          
           if (job1.scheduled_date === job2.scheduled_date &&
               job1.scheduled_start_time && job1.scheduled_end_time &&
               job2.scheduled_start_time && job2.scheduled_end_time) {
@@ -222,12 +187,12 @@ export const ConflictDetector: React.FC<ConflictDetectorProps> = ({
             const end2 = new Date(`${job2.scheduled_date}T${job2.scheduled_end_time}`);
             
             if (start1 < end2 && start2 < end1) {
-              const technician = technicians.find(t => t.id === technicianId);
+              const technician = technicians.find((t: any) => t.id === technicianId);
               conflicts.push({
                 id: `double-booking-${job1.id}-${job2.id}`,
                 type: 'technician_double_booking',
                 severity: 'critical',
-                description: `Technician ${technician?.first_name} ${technician?.last_name} double booked`,
+                description: `Technician ${technician?.first_name || ''} ${technician?.last_name || ''} double booked`,
                 conflicting_jobs: [job1.id, job2.id],
                 detected_at: new Date().toISOString()
               });
@@ -241,25 +206,29 @@ export const ConflictDetector: React.FC<ConflictDetectorProps> = ({
   };
 
   // Detect location conflicts
-  const detectLocationConflicts = (jobs: Job[]): Conflict[] => {
+  const detectLocationConflicts = (jobs: JobWithRelations[]): Conflict[] => {
     const conflicts: Conflict[] = [];
-    const locationJobs = new Map<string, Job[]>();
+    const locationJobs = new Map<string, JobWithRelations[]>();
     
     // Group jobs by location
     jobs.forEach(job => {
-      if (!locationJobs.has(job.location.id)) {
-        locationJobs.set(job.location.id, []);
+      const locId = job.location?.id || job.location_id;
+      if (!locId) return;
+      if (!locationJobs.has(locId)) {
+        locationJobs.set(locId, []);
       }
-      locationJobs.get(job.location.id)!.push(job);
+      locationJobs.get(locId)!.push(job);
     });
     
     // Check for location conflicts
-    locationJobs.forEach((locJobs, locationId) => {
+    locationJobs.forEach((locJobs) => {
       if (locJobs.length > 1) {
         for (let i = 0; i < locJobs.length; i++) {
           for (let j = i + 1; j < locJobs.length; j++) {
             const job1 = locJobs[i];
             const job2 = locJobs[j];
+            
+            if (!job1 || !job2) continue;
             
             if (job1.scheduled_date === job2.scheduled_date &&
                 job1.scheduled_start_time && job1.scheduled_end_time &&
@@ -275,7 +244,7 @@ export const ConflictDetector: React.FC<ConflictDetectorProps> = ({
                   id: `location-conflict-${job1.id}-${job2.id}`,
                   type: 'location_conflict',
                   severity: 'medium',
-                  description: `Location conflict at ${job1.location.address}`,
+                  description: `Location conflict at ${job1.location?.address || 'Unknown location'}`,
                   conflicting_jobs: [job1.id, job2.id],
                   detected_at: new Date().toISOString()
                 });
@@ -379,9 +348,9 @@ export const ConflictDetector: React.FC<ConflictDetectorProps> = ({
                 <div className="text-sm font-medium text-gray-700">Conflicting Jobs:</div>
                 {conflictingJobs.map(job => (
                   <div key={job.id} className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                    <div className="font-medium">{job.customer.name}</div>
+                    <div className="font-medium">{job.customer?.name || 'Unknown Customer'}</div>
                     <div className="text-xs text-gray-500">
-                      {job.scheduled_start_time} - {job.scheduled_end_time} | {job.service.type}
+                      {job.scheduled_start_time} - {job.scheduled_end_time} | {job.service?.type || 'Unknown Service'}
                     </div>
                   </div>
                 ))}
@@ -531,17 +500,17 @@ export const ConflictDetector: React.FC<ConflictDetectorProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Resolution Method
               </label>
-              <Select value={resolutionMethod} onValueChange={setResolutionMethod}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select resolution method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="reschedule_job">Reschedule Job</SelectItem>
-                  <SelectItem value="reassign_technician">Reassign Technician</SelectItem>
-                  <SelectItem value="split_job">Split Job</SelectItem>
-                  <SelectItem value="manual_resolution">Manual Resolution</SelectItem>
-                </SelectContent>
-              </Select>
+              <Select
+                value={resolutionMethod}
+                onChange={setResolutionMethod}
+                options={[
+                  { value: 'reschedule_job', label: 'Reschedule Job' },
+                  { value: 'reassign_technician', label: 'Reassign Technician' },
+                  { value: 'split_job', label: 'Split Job' },
+                  { value: 'manual_resolution', label: 'Manual Resolution' }
+                ]}
+                placeholder="Select resolution method"
+              />
             </div>
             
             {selectedConflict && (

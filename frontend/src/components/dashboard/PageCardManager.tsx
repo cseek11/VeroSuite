@@ -18,8 +18,9 @@ export default function PageCardManager({
   cardType, 
   children, 
   className = '',
-  onClose
+  ...rest
 }: PageCardManagerProps) {
+  const { onClose: _onClose } = rest;
   
   // Just render the content - no special minimize logic
   // The global system (VeroCardsV3 + renderHelpers) handles everything

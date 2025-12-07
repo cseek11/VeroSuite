@@ -53,6 +53,7 @@ export const TemplateLoadingIndicator: React.FC<TemplateLoadingIndicatorProps> =
         clearInterval(countdownInterval);
       };
     }
+    return undefined;
   }, [isLoading, error, templatesCount, autoHideDelay]);
 
   // Reset visibility when loading starts or error occurs

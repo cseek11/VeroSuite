@@ -1,8 +1,8 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCreateWorkOrder } from '@/hooks/useWorkOrders';
 import { CreateWorkOrderRequest } from '@/types/work-orders';
 import WorkOrderForm from '@/components/work-orders/WorkOrderForm';
+import { logger } from '@/utils/logger';
 import { ArrowLeft, Plus } from 'lucide-react';
 
 export default function CreateWorkOrderPage() {
@@ -15,7 +15,7 @@ export default function CreateWorkOrderPage() {
       // Navigate back to work orders list
       navigate('/work-orders');
     } catch (error) {
-      console.error('Failed to create work order:', error);
+      logger.error('Failed to create work order', error, 'CreateWorkOrderPage');
       // TODO: Show error toast
     }
   };

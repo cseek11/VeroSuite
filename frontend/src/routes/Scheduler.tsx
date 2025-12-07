@@ -40,13 +40,13 @@ const SchedulerPage: React.FC = () => {
     queryKey: ['scheduler-jobs', selectedDate],
     queryFn: () => {
       const dateStr = selectedDate.toISOString().split('T')[0];
-      return enhancedApi.jobs.list({ scheduled_date: dateStr });
+      return enhancedApi.jobs.list(dateStr ? { scheduled_date: dateStr } : {});
     },
   });
 
   const { data: technicians = [] } = useQuery({
     queryKey: ['scheduler-technicians'],
-    queryFn: () => enhancedApi.users.list({ roles: ['technician'], status: 'active' }),
+    queryFn: () => enhancedApi.users.list(),
   });
 
   const tabs = [
@@ -81,24 +81,6 @@ const SchedulerPage: React.FC = () => {
       case 'scheduled': return 'bg-blue-100 text-blue-800';
       case 'overdue': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const _getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'scheduled': return <Clock className="h-4 w-4 text-blue-600" />;
-      case 'overdue': return <AlertTriangle className="h-4 w-4 text-red-600" />;
-      default: return <Clock className="h-4 w-4 text-gray-600" />;
-    }
-  };
-
-  const _getMarkerColor = (status: string) => {
-    switch (status) {
-      case 'completed': return '#22c55e';
-      case 'scheduled': return '#3b82f6';
-      case 'overdue': return '#ef4444';
-      default: return '#6b7280';
     }
   };
 

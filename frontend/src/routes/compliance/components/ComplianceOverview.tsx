@@ -2,7 +2,7 @@
  * Compliance Overview Component
  * Displays all 25 rules with compliance status
  * 
- * Last Updated: 2025-12-06
+ * Last Updated: 2025-12-07
  */
 
 import { useMemo, useState } from 'react';
@@ -213,13 +213,14 @@ export default function ComplianceOverview({ className = '' }: ComplianceOvervie
               </label>
               <Select
                 value={tierFilter}
-                onValueChange={(value) => setTierFilter(value as RuleTier | 'all')}
-              >
-                <option value="all">All Tiers</option>
-                <option value="BLOCK">BLOCK</option>
-                <option value="OVERRIDE">OVERRIDE</option>
-                <option value="WARNING">WARNING</option>
-              </Select>
+                onChange={(value) => setTierFilter((value as RuleTier) || 'all')}
+                options={[
+                  { value: 'all', label: 'All Tiers' },
+                  { value: 'BLOCK', label: 'BLOCK' },
+                  { value: 'OVERRIDE', label: 'OVERRIDE' },
+                  { value: 'WARNING', label: 'WARNING' }
+                ]}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -228,15 +229,12 @@ export default function ComplianceOverview({ className = '' }: ComplianceOvervie
               </label>
               <Select
                 value={categoryFilter}
-                onValueChange={(value) => setCategoryFilter(value)}
-              >
-                <option value="all">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </Select>
+                onChange={(value) => setCategoryFilter(value)}
+                options={[
+                  { value: 'all', label: 'All Categories' },
+                  ...categories.map((cat) => ({ value: cat, label: cat }))
+                ]}
+              />
             </div>
           </div>
         </Card>

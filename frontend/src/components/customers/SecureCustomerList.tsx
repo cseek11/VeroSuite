@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Customer, CustomerSegment } from '@/types/customer';
+import { Customer } from '@/types/customer';
 import { Search, Eye, Pencil, Plus } from 'lucide-react';
 import { useSecureAccounts, useSearchAccounts } from '@/hooks/useSecureAccounts';
 
@@ -10,8 +10,9 @@ interface CustomerListProps {
 }
 
 export default function SecureCustomerList({ onViewCustomer, onEditCustomer, onCreateCustomer }: CustomerListProps) {
+  type SegmentType = 'new' | 'active' | 'veteran';
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSegment, setSelectedSegment] = useState<string>('all');
+  const [selectedSegment, setSelectedSegment] = useState<SegmentType | 'all'>('all');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('name');
@@ -23,12 +24,12 @@ export default function SecureCustomerList({ onViewCustomer, onEditCustomer, onC
   const { data: searchResults } = useSearchAccounts(searchTerm);
 
   // Use search results if searching, otherwise use all customers
-  const customers = searchTerm ? searchResults : allCustomers;
+  const customers: Customer[] = Array.isArray(searchTerm ? searchResults : allCustomers) 
+    ? (searchTerm ? searchResults : allCustomers) as Customer[]
+    : [];
 
   // Filter and sort customers
   const filteredAndSortedCustomers = useMemo(() => {
-    if (!customers) return [];
-
     const filtered = customers.filter((customer: Customer) => {
       // Filter by segment
       if (selectedSegment !== 'all') {
@@ -79,10 +80,11 @@ export default function SecureCustomerList({ onViewCustomer, onEditCustomer, onC
   );
 
   // Customer segment calculation
-  function getCustomerSegment(customer: Customer): CustomerSegment {
-    const monthsActive = customer.created_at 
-      ? Math.floor((Date.now() - new Date(customer.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30))
-      : 0;
+  function getCustomerSegment(customer: Customer): SegmentType {
+    const createdDate = customer.created_at;
+    if (!createdDate) return 'new';
+    
+    const monthsActive = Math.floor((Date.now() - new Date(createdDate).getTime()) / (1000 * 60 * 60 * 24 * 30));
 
     if (monthsActive < 6) return 'new';
     if (monthsActive < 24) return 'active';
@@ -179,7 +181,7 @@ export default function SecureCustomerList({ onViewCustomer, onEditCustomer, onC
             <select
               value={selectedSegment}
               onChange={(e) => {
-                setSelectedSegment(e.target.value);
+                setSelectedSegment(e.target.value as SegmentType | 'all');
                 setCurrentPage(1);
               }}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
@@ -288,7 +290,7 @@ export default function SecureCustomerList({ onViewCustomer, onEditCustomer, onC
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      customer.status === 'active' 
+                      (customer.status === 'active' as string)
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}>

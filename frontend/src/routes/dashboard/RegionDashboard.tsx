@@ -33,7 +33,7 @@ interface RegionDashboardProps {
 
 export const RegionDashboard: React.FC<RegionDashboardProps> = ({
   layoutId,
-  userId
+  userId: _userId
 }) => {
   const [currentLayoutId, setCurrentLayoutId] = useState<string | null>(null);
   const [loadingLayout, setLoadingLayout] = useState(true);
@@ -72,11 +72,9 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
     removeRegion,
     updateRegionPosition,
     updateRegionSize,
-    reorderRegions,
     toggleCollapse,
     toggleLock,
     loadRoleDefaults,
-    reload: reloadRegions,
     updateRegion: updateRegionInStore
   } = useRegionLayout({
     layoutId: currentLayoutId || '',
@@ -85,28 +83,24 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
   });
 
   const {
-    versions,
-    loading: versionsLoading,
-    currentVersion,
-    createVersion,
-    publishVersion,
-    revertToVersion,
-    loadVersions
+    versions: _versions,
+    loading: _versionsLoading,
+    currentVersion: _currentVersion,
+    createVersion: _createVersion,
+    publishVersion: _publishVersion,
+    revertToVersion: _revertToVersion,
+    loadVersions: _loadVersions
   } = useLayoutVersioning({
     layoutId: currentLayoutId || ''
   });
 
   const [showAddRegionDialog, setShowAddRegionDialog] = useState(false);
-  const [isMobileFullscreen, setIsMobileFullscreen] = useState(false);
   const [minimizedRegions, _setMinimizedRegions] = useState<Map<string, { row: number; col: number }>>(new Map());
-  const [isCollabConnected, setIsCollabConnected] = useState(false);
-  const [connectionStatus, _setConnectionStatus] = useState('disconnected');
-  const [collaborators, _setCollaborators] = useState<Array<{ id: string; name: string; avatar?: string }>>([]);
   const [utilityDockVisible, _setUtilityDockVisible] = useState(true);
   const [inspectorOpen, setInspectorOpen] = useState(false);
-  const [inspectorContent, _setInspectorContent] = useState<React.ReactNode>(null);
+  const [inspectorContent, setInspectorContent] = useState<React.ReactNode>(null);
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
-  const [advancedFilters, _setAdvancedFilters] = useState<{
+  const [advancedFilters, setAdvancedFilters] = useState<{
     types: RegionType[];
     status: 'all' | 'active' | 'locked' | 'collapsed';
     dateRange: 'all' | 'today' | 'week' | 'month';
@@ -146,7 +140,6 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
   // Virtualization feature flag and threshold
   const virtualizationEnabled = useFeatureFlag('DASHBOARD_VIRTUALIZATION') as boolean;
   const VIRTUALIZATION_THRESHOLD = 50; // Use virtualization when > 50 regions
-  const shouldUseVirtualization = virtualizationEnabled && filteredRegions.length > VIRTUALIZATION_THRESHOLD;
   
   useEffect(() => {
     const checkMobile = () => {
@@ -172,17 +165,8 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
   
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Check if fullscreen is active
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsMobileFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   // Zoom and pan functionality
-  const { containerRef, zoom, zoomIn, zoomOut, resetView, handlePanStart, getTransformStyle, canZoomIn, canZoomOut, pan, calculateCanvasSize } = useZoomPan();
+  const { containerRef, zoom, zoomIn, zoomOut, resetView, handlePanStart, getTransformStyle, calculateCanvasSize } = useZoomPan();
   
   // Track scroll state from the scroll container
   useEffect(() => {
@@ -281,11 +265,13 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
     });
   }, [regions, searchTerm, activeFilters, advancedFilters]);
 
+  const shouldUseVirtualization = virtualizationEnabled && filteredRegions.length > VIRTUALIZATION_THRESHOLD;
+
   // Undo/Redo functionality
   // Use store's undo/redo methods (already defined above)
 
   // Layout Intelligence
-  const { mode, setMode, suggestedLayout, optimizeLayout, getContextualBehavior } = useLayoutIntelligence({
+  const { mode: _mode, setMode: _setMode, suggestedLayout: _suggestedLayout, optimizeLayout: _optimizeLayout, getContextualBehavior: _getContextualBehavior } = useLayoutIntelligence({
     regions,
     userRole: 'user', // TODO: Get from auth store
     currentTime: new Date(),
@@ -298,12 +284,13 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
 
   // Save state to history when regions change (debounced)
   useEffect(() => {
-    if (regions.length > 0 && currentLayoutId) {
-      const timer = setTimeout(() => {
-        saveLayoutSnapshot(currentLayoutId);
-      }, 500); // Debounce snapshot saving
-      return () => clearTimeout(timer);
+    if (!(regions.length > 0 && currentLayoutId)) {
+      return;
     }
+    const timer = setTimeout(() => {
+      saveLayoutSnapshot(currentLayoutId);
+    }, 500); // Debounce snapshot saving
+    return () => clearTimeout(timer);
   }, [regions, currentLayoutId, saveLayoutSnapshot]);
 
   // Handle undo/redo using store methods
@@ -357,23 +344,6 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
         toast.error('Failed to reset dashboard');
       }
     }
-  };
-
-  const handleFullscreenToggle = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(err => {
-        logger.error('Error attempting to enable fullscreen', { error: err }, 'RegionDashboard');
-      });
-      setIsMobileFullscreen(true);
-    } else {
-      document.exitFullscreen();
-      setIsMobileFullscreen(false);
-    }
-  };
-
-  const onToggleConnection = () => {
-    setIsCollabConnected(!isCollabConnected);
-    setConnectionStatus(isCollabConnected ? 'disconnected' : 'connected');
   };
 
   const handleAddRegion = async (type?: RegionType | string, position?: { row: number; col: number }) => {
@@ -504,15 +474,23 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
           if (validRegions.length > 0) {
             // Clear existing regions and import new ones
             for (const region of regions) {
-              await removeRegion(region.id);
+              try {
+                await removeRegion(region.id);
+              } catch (error) {
+                logger.error('Failed to remove region during import', { error, regionId: region.id }, 'RegionDashboard');
+              }
             }
             
             // Add imported regions
             for (const regionData of validRegions) {
-              await addRegion(regionData.region_type as RegionType, {
-                row: regionData.grid_row,
-                col: regionData.grid_col
-              });
+              try {
+                await addRegion(regionData.region_type as RegionType, {
+                  row: regionData.grid_row,
+                  col: regionData.grid_col
+                });
+              } catch (error) {
+                logger.error('Failed to add imported region', { error, regionData }, 'RegionDashboard');
+              }
             }
           } else {
             alert('Invalid layout file: No valid regions found');
@@ -539,8 +517,13 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
         const originalPos = minimizedRegions.get(id);
         if (originalPos) {
           // First restore position, then toggle collapse state
-          await updateRegionPosition(id, originalPos.row, originalPos.col);
-          await toggleCollapse(id);
+              try {
+                await updateRegionPosition(id, originalPos.row, originalPos.col);
+                await toggleCollapse(id);
+              } catch (error) {
+                logger.error('Failed to restore collapsed region', { error, regionId: id }, 'RegionDashboard');
+                toast.error('Failed to restore region position');
+              }
           _setMinimizedRegions(prev => {
             const next = new Map(prev);
             next.delete(id);
@@ -548,7 +531,11 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
           });
         } else {
           // Just toggle if no stored position
-          await toggleCollapse(id);
+              try {
+                await toggleCollapse(id);
+              } catch (error) {
+                logger.error('Failed to toggle collapse (restore path)', { error, regionId: id }, 'RegionDashboard');
+              }
         }
       } else {
         // Minimize: store original position first, then toggle
@@ -558,9 +545,14 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
           return next;
         });
         // Toggle collapse state first, then move off-screen
-        await toggleCollapse(id);
-        // Do not move region out of valid bounds; keep original position to respect server validation
-        await updateRegionPosition(id, region.grid_row, region.grid_col);
+            try {
+              await toggleCollapse(id);
+              // Do not move region out of valid bounds; keep original position to respect server validation
+              await updateRegionPosition(id, region.grid_row, region.grid_col);
+            } catch (error) {
+              logger.error('Failed to minimize region', { error, regionId: id }, 'RegionDashboard');
+              toast.error('Failed to minimize region');
+            }
       }
     } catch (error) {
       logger.error('Failed to toggle collapse', { error, regionId: id }, 'RegionDashboard');
@@ -569,7 +561,8 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
 
   const handleRestoreRegion = async (id: string) => {
     const originalPos = minimizedRegions.get(id);
-    if (originalPos) {
+    if (!originalPos) return;
+    try {
       await updateRegionPosition(id, originalPos.row, originalPos.col);
       _setMinimizedRegions(prev => {
         const next = new Map(prev);
@@ -577,6 +570,9 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
         return next;
       });
       await toggleCollapse(id);
+    } catch (error) {
+      logger.error('Failed to restore region', { error, regionId: id }, 'RegionDashboard');
+      toast.error('Failed to restore region');
     }
   };
 
@@ -679,34 +675,62 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
         <MobileDashboard
           regions={regions}
           onResize={async (id, rowSpan, colSpan) => {
-            const region = regions.find(r => r.id === id);
-            if (region) {
-              await updateRegionSize(id, rowSpan, colSpan);
+            try {
+              const region = regions.find(r => r.id === id);
+              if (region) {
+                await updateRegionSize(id, rowSpan, colSpan);
+              }
+            } catch (error) {
+              logger.error('Mobile: failed to resize region', { error, id, rowSpan, colSpan }, 'RegionDashboard');
             }
           }}
           onMove={async (id, row, col) => {
-            const region = regions.find(r => r.id === id);
-            if (region) {
-              await updateRegionPosition(id, row, col);
+            try {
+              const region = regions.find(r => r.id === id);
+              if (region) {
+                await updateRegionPosition(id, row, col);
+              }
+            } catch (error) {
+              logger.error('Mobile: failed to move region', { error, id, row, col }, 'RegionDashboard');
             }
           }}
           onToggleCollapse={async (id) => {
-            await toggleCollapse(id);
+            try {
+              await toggleCollapse(id);
+            } catch (error) {
+              logger.error('Mobile: failed to toggle collapse', { error, id }, 'RegionDashboard');
+            }
           }}
           onToggleLock={async (id) => {
-            await toggleLock(id);
+            try {
+              await toggleLock(id);
+            } catch (error) {
+              logger.error('Mobile: failed to toggle lock', { error, id }, 'RegionDashboard');
+            }
           }}
           onDelete={async (id) => {
-            await removeRegion(id);
+            try {
+              await removeRegion(id);
+            } catch (error) {
+              logger.error('Mobile: failed to delete region', { error, id }, 'RegionDashboard');
+            }
           }}
           onUpdate={async (id, updates) => {
-            if (currentLayoutId) {
-              await updateRegionInStore(id, updates);
+            try {
+              if (currentLayoutId) {
+                await updateRegionInStore(id, updates);
+              }
+            } catch (error) {
+              logger.error('Mobile: failed to update region', { error, id, updates }, 'RegionDashboard');
             }
           }}
           onAddRegion={async (type) => {
-            if (currentLayoutId) {
-              await addRegion(type as RegionType);
+            try {
+              if (currentLayoutId) {
+                await addRegion(type as RegionType);
+              }
+            } catch (error) {
+              logger.error('Mobile: failed to add region', { error, type }, 'RegionDashboard');
             }
           }}
         />
@@ -936,7 +960,7 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
             localStorage.setItem('dashboard_onboarding_complete', 'true');
             setShowOnboarding(false);
           }}
-          onSelectTemplate={async (templateId) => {
+          onSelectTemplate={async (_templateId) => {
             localStorage.setItem('dashboard_onboarding_complete', 'true');
             setShowOnboarding(false);
             setShowTemplateManager(true);
@@ -949,11 +973,16 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
         <EmptyDashboard
           onAddRegion={async (type) => {
             if (currentLayoutId) {
-              await addRegion(type);
-              setShowEmptyState(false);
+              try {
+                await addRegion(type);
+                setShowEmptyState(false);
+              } catch (error) {
+                logger.error('Failed to add region from empty state', { error, type }, 'RegionDashboard');
+                toast.error('Failed to add region');
+              }
             }
           }}
-          onSelectTemplate={async (templateId) => {
+          onSelectTemplate={async (_templateId) => {
             setShowTemplateManager(true);
           }}
           onStartOnboarding={() => {
@@ -982,7 +1011,9 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
         <div className="flex flex-col items-center justify-center h-full min-h-[calc(100vh-200px)] bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
           <p className="text-gray-600 text-lg mb-4">No regions configured</p>
           <button
-            onClick={() => setShowAddRegionDialog(true)}
+            onClick={() => {
+              setShowAddRegionDialog(true);
+            }}
             className="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
@@ -998,7 +1029,6 @@ export const RegionDashboard: React.FC<RegionDashboardProps> = ({
             minHeight: '100%',
             position: 'relative',
             imageRendering: 'crisp-edges' as const,
-            WebkitImageRendering: 'crisp-edges' as const,
             willChange: 'transform',
             ...getTransformStyle()
           }}

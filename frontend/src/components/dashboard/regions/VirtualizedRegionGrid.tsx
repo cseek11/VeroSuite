@@ -45,7 +45,7 @@ export const VirtualizedRegionGrid: React.FC<VirtualizedRegionGridProps> = ({
 
   const rows = maxRow + 1;
   const gridWidth = containerSize.width || 1200;
-  const gridHeight = rows * rowHeight;
+  const _gridHeight = rows * rowHeight;
 
   // Create a map of regions by position for quick lookup
   const regionMap = useMemo(() => {
@@ -104,12 +104,12 @@ export const VirtualizedRegionGrid: React.FC<VirtualizedRegionGridProps> = ({
       <div style={regionStyle}>
         <RegionContainer
           region={region}
-          onResize={onResize}
-          onMove={onMove}
-          onToggleCollapse={onToggleCollapse}
-          onToggleLock={onToggleLock}
-          onDelete={onDelete}
-          onUpdate={onUpdate}
+          {...(onResize ? { onResize } : {})}
+          {...(onMove ? { onMove } : {})}
+          {...(onToggleCollapse ? { onToggleCollapse } : {})}
+          {...(onToggleLock ? { onToggleLock } : {})}
+          {...(onDelete ? { onDelete } : {})}
+          {...(onUpdate ? { onUpdate } : {})}
         />
       </div>
     );

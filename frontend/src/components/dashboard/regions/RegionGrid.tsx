@@ -48,7 +48,6 @@ export const RegionGrid: React.FC<RegionGridProps> = ({
   // Convert regions to React Grid Layout format
   const layouts = useMemo(() => {
     const breakpoints = { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 };
-    const colsMap = { lg: cols, md: cols, sm: cols, xs: cols, xxs: cols };
     
     const layout: { [key: string]: Layout[] } = {};
     
@@ -89,7 +88,7 @@ export const RegionGrid: React.FC<RegionGridProps> = ({
   }, [regions, rows, cols, isDraggable, isResizable]);
 
   // Handle drag stop - validate before committing
-  const handleDragStop = useCallback((layout: Layout[], oldItem: Layout, newItem: Layout, placeholder: Layout, e: MouseEvent, element: HTMLElement) => {
+  const handleDragStop = useCallback((_layout: Layout[], _oldItem: Layout, newItem: Layout, _placeholder: Layout, _e: MouseEvent, _element: HTMLElement) => {
     const region = regions.find((r) => r.id === newItem.i);
     if (!region) return;
 
@@ -161,7 +160,7 @@ export const RegionGrid: React.FC<RegionGridProps> = ({
   }, [regions, cols, onMove]);
 
   // Handle resize stop - validate before committing
-  const handleResizeStop = useCallback((layout: Layout[], oldItem: Layout, newItem: Layout, placeholder: Layout, e: MouseEvent, element: HTMLElement) => {
+  const handleResizeStop = useCallback((_layout: Layout[], _oldItem: Layout, newItem: Layout, _placeholder: Layout, _e: MouseEvent, _element: HTMLElement) => {
     const region = regions.find((r) => r.id === newItem.i);
     if (!region) return;
 
@@ -233,7 +232,7 @@ export const RegionGrid: React.FC<RegionGridProps> = ({
   }, [regions, cols, onResize]);
 
   // Handle layout change (for other updates, not drag/resize)
-  const handleLayoutChange = useCallback((currentLayout: Layout[], allLayouts: { [key: string]: Layout[] }) => {
+  const handleLayoutChange = useCallback((_currentLayout: Layout[], _allLayouts: { [key: string]: Layout[] }) => {
     // This is called for all layout changes, but we handle drag/resize in onDragStop/onResizeStop
     // This can be used for other layout updates if needed
   }, []);
@@ -263,7 +262,6 @@ export const RegionGrid: React.FC<RegionGridProps> = ({
         preventCollision={true}
         useCSSTransforms={true}
         allowOverlap={false}
-        swapOnDrag={true}
         isBounded={true}
         style={{ height: '100%' }}
       >
@@ -271,13 +269,13 @@ export const RegionGrid: React.FC<RegionGridProps> = ({
           <div key={region.id} className="region-grid-item">
             <RegionContainer
               region={region}
-              onResize={onResize}
-              onMove={onMove}
-              onToggleCollapse={onToggleCollapse}
-              onToggleLock={onToggleLock}
-              onDelete={onDelete}
-              onUpdate={onUpdate}
-              onAddRegion={onAddRegion}
+              {...(onResize ? { onResize } : {})}
+              {...(onMove ? { onMove } : {})}
+              {...(onToggleCollapse ? { onToggleCollapse } : {})}
+              {...(onToggleLock ? { onToggleLock } : {})}
+              {...(onDelete ? { onDelete } : {})}
+              {...(onUpdate ? { onUpdate } : {})}
+              {...(onAddRegion ? { onAddRegion } : {})}
             >
               {renderRegion ? renderRegion(region) : null}
             </RegionContainer>

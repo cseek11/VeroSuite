@@ -189,15 +189,15 @@ const AutoPRSessionManager: React.FC = () => {
                       >
                         {status}
                       </span>
-                      <span className="text-sm text-gray-600">by {session.author}</span>
+                      <span className="text-sm text-gray-600">by {session.author || 'Unknown'}</span>
                     </div>
                     <div className="flex items-center gap-6 text-sm text-gray-600">
                       <span className="flex items-center gap-1">
                         <GitPullRequest size={16} />
-                        {session.prs.length} PRs: {session.prs.join(', ')}
+                        {session.prs?.length || 0} PRs: {session.prs?.join(', ') || 'None'}
                       </span>
-                      <span>{session.total_files_changed} files</span>
-                      <span>{session.test_files_added} tests</span>
+                      <span>{session.total_files_changed || 0} files</span>
+                      <span>{session.test_files_added || 0} tests</span>
                       <span className="flex items-center gap-1">
                         <Clock size={16} />
                         {formatDuration(session.started)}
@@ -236,7 +236,7 @@ const AutoPRSessionManager: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="font-semibold text-gray-900">{session.session_id}</span>
-                    <span className="text-sm text-gray-600">by {session.author}</span>
+                    <span className="text-sm text-gray-600">by {session.author || 'Unknown'}</span>
                     {session.final_score !== undefined && (
                       <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
                         Score: {session.final_score}
@@ -246,10 +246,10 @@ const AutoPRSessionManager: React.FC = () => {
                   <div className="flex items-center gap-6 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <GitPullRequest size={16} />
-                      {session.prs.length} PRs
+                      {session.prs?.length || 0} PRs
                     </span>
-                    <span>{session.total_files_changed} files</span>
-                    <span>{session.test_files_added} tests</span>
+                    <span>{session.total_files_changed || 0} files</span>
+                    <span>{session.test_files_added || 0} tests</span>
                     {session.completed && (
                       <span className="flex items-center gap-1">
                         <Clock size={16} />
@@ -506,12 +506,14 @@ const AutoPRSessionManager: React.FC = () => {
   const AnalyticsView = () => {
     const sessionsByAuthor = [...sessions.completed_sessions].reduce(
       (acc, session) => {
-        if (!acc[session.author]) {
-          acc[session.author] = { count: 0, totalScore: 0, totalPRs: 0 };
+        const author = session?.author;
+        if (!author) return acc;
+        if (!acc[author]) {
+          acc[author] = { count: 0, totalScore: 0, totalPRs: 0 };
         }
-        acc[session.author].count++;
-        acc[session.author].totalScore += session.final_score || 0;
-        acc[session.author].totalPRs += session.prs.length;
+        acc[author].count++;
+        acc[author].totalScore += session?.final_score ?? 0;
+        acc[author].totalPRs += session?.prs?.length ?? 0;
         return acc;
       },
       {} as Record<string, { count: number; totalScore: number; totalPRs: number }>,

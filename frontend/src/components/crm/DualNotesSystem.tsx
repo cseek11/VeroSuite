@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Textarea from '@/components/ui/Textarea';
@@ -63,33 +63,12 @@ export default function DualNotesSystem({ notes, customerId: _customerId, isLoad
     is_internal: true
   });
 
-  const _getNoteTypeColor = (type: string) => {
-    switch (type.toLowerCase()) {
-      case 'internal': return 'slate';
-      case 'technician': return 'blue';
-      case 'safety': return 'red';
-      case 'preference': return 'green';
-      case 'property': return 'purple';
-      case 'general': return 'slate';
-      default: return 'slate';
-    }
-  };
-
   const getNoteSourceIcon = (source: string) => {
     switch (source.toLowerCase()) {
       case 'office': return User;
       case 'field': return MapPin;
       case 'mobile_app': return Smartphone;
       default: return FileText;
-    }
-  };
-
-  const _getPriorityColor = (priority: string) => {
-    switch (priority.toLowerCase()) {
-      case 'high': return 'red';
-      case 'medium': return 'yellow';
-      case 'low': return 'green';
-      default: return 'slate';
     }
   };
 
@@ -355,7 +334,7 @@ export default function DualNotesSystem({ notes, customerId: _customerId, isLoad
             </Text>
             <Textarea
               value={newNote.note_content}
-              onChange={(e) => setNewNote({ ...newNote, note_content: e })}
+              onChange={(e) => setNewNote({ ...newNote, note_content: (e as unknown as React.ChangeEvent<HTMLTextAreaElement>).target.value })}
               placeholder="Enter your note content..."
               rows={6}
             />

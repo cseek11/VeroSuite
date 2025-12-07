@@ -8,6 +8,7 @@ import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import { logger } from '@/utils/logger';
 import { ScheduleCalendar } from './ScheduleCalendar';
+import type { Job } from '@/types/enhanced-types';
 import { 
   Dialog, 
   DialogContent, 
@@ -17,35 +18,12 @@ import {
   DialogTitle 
 } from '@/components/ui/Dialog';
 
-
-
-// Types
-interface Job {
-  id: string;
-  status: 'unassigned' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  scheduled_date: string;
-  scheduled_start_time?: string;
-  scheduled_end_time?: string;
-  technician_id?: string;
-  customer: {
-    id: string;
-    name: string;
-    phone?: string;
-  };
-  location: {
-    id: string;
-    name: string;
-    address: string;
-    coordinates: { lat: number; lng: number };
-  };
-  service: {
-    type: string;
-    description: string;
-    estimated_duration: number;
-    price?: number;
-  };
-}
+// Extended Job type with populated relations
+type JobWithRelations = Job & {
+  customer?: { id: string; name: string; phone?: string };
+  location?: { id: string; name: string; address: string; coordinates?: { lat: number; lng: number } };
+  service?: { type: string; description: string; estimated_duration: number; price?: number };
+};
 
 interface Technician {
   id: string;
@@ -66,18 +44,17 @@ interface Technician {
 interface TechnicianSchedulerProps {
   selectedDate: Date;
   onTechnicianSelect?: (technician: Technician) => void;
-  onJobAssign?: (job: Job, technician: Technician) => void;
-  onBulkAssign?: (jobs: Job[], technician: Technician) => void;
+  onJobAssign?: (job: JobWithRelations, technician: Technician) => void;
+  onBulkAssign?: (jobs: JobWithRelations[], technician: Technician) => void;
 }
 
 export const TechnicianScheduler: React.FC<TechnicianSchedulerProps> = ({
   selectedDate,
   onTechnicianSelect,
-  onJobAssign,
+  onJobAssign: _onJobAssign,
   onBulkAssign
 }) => {
   const [selectedTechnician, setSelectedTechnician] = useState<string>('');
-  const [unassignedJobs, setUnassignedJobs] = useState<Job[]>([]);
   const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
   const [showAssignmentDialog, setShowAssignmentDialog] = useState(false);
   const [assignmentReason, setAssignmentReason] = useState('');
@@ -88,13 +65,10 @@ export const TechnicianScheduler: React.FC<TechnicianSchedulerProps> = ({
   const { data: technicians = [], isLoading: techniciansLoading } = useQuery({
     queryKey: ['technicians', 'with-metrics'],
     queryFn: async () => {
-      const techs = await enhancedApi.users.list({ 
-        roles: ['technician'], 
-        status: 'active' 
-      });
+      const techs = await enhancedApi.users.list();
       
       // TODO: Fetch performance metrics for each technician
-      return techs.map(tech => ({
+      return techs.map((tech: any) => ({
         ...tech,
         performance_metrics: {
           completion_rate: Math.random() * 100,
@@ -109,32 +83,33 @@ export const TechnicianScheduler: React.FC<TechnicianSchedulerProps> = ({
   });
 
   // Fetch unassigned jobs for the selected date
-  const { data: jobs = [], isLoading: jobsLoading } = useQuery({
+  const { data: jobs = [], isLoading: jobsLoading } = useQuery<JobWithRelations[]>({
     queryKey: ['jobs', 'unassigned', selectedDate],
     queryFn: async () => {
-      const allJobs = await enhancedApi.jobs.list({
-        start_date: selectedDate.toISOString().split('T')[0],
-        end_date: selectedDate.toISOString().split('T')[0],
-        status: 'unassigned'
-      });
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      if (!dateStr) return [];
       
-      return allJobs.filter(job => !job.technician_id);
+      const allJobs = await enhancedApi.jobs.getByDateRange(dateStr, dateStr);
+      
+      return allJobs.filter(job => !job.technician_id) as JobWithRelations[];
     },
     staleTime: 2 * 60 * 1000,
   });
 
   // Assign job mutation
   const assignJobMutation = useMutation({
-    mutationFn: async ({ jobId, technicianId, reason }: { 
+    mutationFn: async ({ jobId, technicianId }: { 
       jobId: string; 
       technicianId: string; 
-      reason?: string 
     }) => {
-      return enhancedApi.jobs.assign(jobId, {
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      if (!dateStr) throw new Error('Invalid date');
+      
+      return enhancedApi.jobs.update(jobId, {
         technician_id: technicianId,
-        scheduled_date: selectedDate.toISOString().split('T')[0],
-        time_window_start: '09:00',
-        time_window_end: '17:00'
+        scheduled_date: dateStr,
+        scheduled_start_time: '09:00',
+        scheduled_end_time: '17:00'
       });
     },
     onSuccess: () => {
@@ -150,17 +125,19 @@ export const TechnicianScheduler: React.FC<TechnicianSchedulerProps> = ({
 
   // Bulk assign jobs mutation
   const bulkAssignMutation = useMutation({
-    mutationFn: async ({ jobIds, technicianId, reason }: { 
+    mutationFn: async ({ jobIds, technicianId }: { 
       jobIds: string[]; 
       technicianId: string; 
-      reason?: string 
     }) => {
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      if (!dateStr) throw new Error('Invalid date');
+      
       const promises = jobIds.map(jobId => 
-        enhancedApi.jobs.assign(jobId, {
+        enhancedApi.jobs.update(jobId, {
           technician_id: technicianId,
-          scheduled_date: selectedDate.toISOString().split('T')[0],
-          time_window_start: '09:00',
-          time_window_end: '17:00'
+          scheduled_date: dateStr,
+          scheduled_start_time: '09:00',
+          scheduled_end_time: '17:00'
         })
       );
       
@@ -178,28 +155,30 @@ export const TechnicianScheduler: React.FC<TechnicianSchedulerProps> = ({
   });
 
   // Skill matching algorithm
-  const getSkillMatchScore = (job: Job, technician: Technician): number => {
+  const getSkillMatchScore = (_job: JobWithRelations, _technician: Technician): number => {
     // TODO: Implement skill matching logic
     // For now, return a random score
     return Math.random() * 100;
   };
 
   // Workload calculation
-  const getTechnicianWorkload = (technicianId: string): number => {
+  const getTechnicianWorkload = (_technicianId: string): number => {
     // TODO: Calculate current workload for technician
     return Math.random() * 100;
   };
 
   // Get assignment recommendations
-  const getAssignmentRecommendations = (job: Job) => {
+  const getAssignmentRecommendations = (job: JobWithRelations) => {
     return technicians
-      .map(tech => ({
-        technician: tech,
-        score: getSkillMatchScore(job, tech),
-        workload: getTechnicianWorkload(tech.id),
-        recommendation: getSkillMatchScore(job, tech) > 80 ? 'high' : 
-                       getSkillMatchScore(job, tech) > 60 ? 'medium' : 'low'
-      }))
+      .map(tech => {
+        const score = getSkillMatchScore(job, tech);
+        return {
+          technician: tech,
+          score,
+          workload: getTechnicianWorkload(tech.id),
+          recommendation: score > 80 ? 'high' : score > 60 ? 'medium' : 'low'
+        };
+      })
       .sort((a, b) => b.score - a.score)
       .slice(0, 3);
   };
@@ -211,14 +190,6 @@ export const TechnicianScheduler: React.FC<TechnicianSchedulerProps> = ({
         ? prev.filter(id => id !== jobId)
         : [...prev, jobId]
     );
-  };
-
-  // Handle single job assignment
-  const handleAssignJob = (job: Job, technician: Technician) => {
-    setSelectedJobs([job.id]);
-    setSelectedTechnician(technician.id);
-    setShowAssignmentDialog(true);
-    onJobAssign?.(job, technician);
   };
 
   // Handle bulk assignment
@@ -235,17 +206,19 @@ export const TechnicianScheduler: React.FC<TechnicianSchedulerProps> = ({
 
   // Handle assignment confirmation
   const handleAssignmentConfirm = () => {
+    if (!selectedTechnician) return;
+    
     if (selectedJobs.length === 1) {
+      const jobId = selectedJobs[0];
+      if (!jobId) return;
       assignJobMutation.mutate({
-        jobId: selectedJobs[0],
-        technicianId: selectedTechnician,
-        reason: assignmentReason
+        jobId,
+        technicianId: selectedTechnician
       });
     } else {
       bulkAssignMutation.mutate({
         jobIds: selectedJobs,
-        technicianId: selectedTechnician,
-        reason: assignmentReason
+        technicianId: selectedTechnician
       });
     }
   };
@@ -256,10 +229,10 @@ export const TechnicianScheduler: React.FC<TechnicianSchedulerProps> = ({
     const isSelected = selectedTechnician === technician.id;
     
     return (
-      <Card
+      <div
         key={technician.id}
-        className={`p-4 cursor-pointer transition-all ${
-          isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:shadow-md'
+        className={`p-4 cursor-pointer transition-all rounded-lg border ${
+          isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:shadow-md border-gray-200'
         }`}
         onClick={() => {
           setSelectedTechnician(technician.id);
@@ -332,27 +305,27 @@ export const TechnicianScheduler: React.FC<TechnicianSchedulerProps> = ({
             />
           </div>
         </div>
-      </Card>
+      </div>
     );
   };
 
   // Render job card
-  const renderJobCard = (job: Job) => {
+  const renderJobCard = (job: JobWithRelations) => {
     const isSelected = selectedJobs.includes(job.id);
     const recommendations = getAssignmentRecommendations(job);
     
     return (
-      <Card
+      <div
         key={job.id}
-        className={`p-4 cursor-pointer transition-all ${
-          isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:shadow-md'
+        className={`p-4 cursor-pointer transition-all rounded-lg border ${
+          isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:shadow-md border-gray-200'
         }`}
         onClick={() => handleJobSelect(job.id)}
       >
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="font-medium text-gray-900">{job.customer.name}</h3>
-            <p className="text-sm text-gray-500">{job.service.type}</p>
+            <h3 className="font-medium text-gray-900">{job.customer?.name || 'Unknown'}</h3>
+            <p className="text-sm text-gray-500">{job.service?.type || 'Unknown'}</p>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -374,12 +347,12 @@ export const TechnicianScheduler: React.FC<TechnicianSchedulerProps> = ({
         <div className="space-y-2 text-sm">
           <div className="flex items-center text-gray-600">
             <Clock className="h-4 w-4 mr-2" />
-            <span>{job.service.estimated_duration} min</span>
+            <span>{job.service?.estimated_duration || 0} min</span>
           </div>
           
           <div className="flex items-center text-gray-600">
             <span className="mr-2">📍</span>
-            <span className="truncate">{job.location.address}</span>
+            <span className="truncate">{job.location?.address || 'Unknown'}</span>
           </div>
         </div>
         
@@ -387,7 +360,7 @@ export const TechnicianScheduler: React.FC<TechnicianSchedulerProps> = ({
         <div className="mt-3 pt-3 border-t border-gray-200">
           <div className="text-xs text-gray-500 mb-2">Recommended Technicians:</div>
           <div className="flex space-x-2">
-            {recommendations.map((rec, index) => (
+            {recommendations.map((rec) => (
               <div
                 key={rec.technician.id}
                 className={`px-2 py-1 rounded text-xs ${
@@ -401,15 +374,12 @@ export const TechnicianScheduler: React.FC<TechnicianSchedulerProps> = ({
             ))}
           </div>
         </div>
-      </Card>
+      </div>
     );
   };
 
-  const [bulkSelectedJobIds, setBulkSelectedJobIds] = useState<string[]>([]);
-
   // Handle bulk selection from ScheduleCalendar
   const handleBulkSelect = (jobIds: string[]) => {
-    setBulkSelectedJobIds(jobIds);
     setSelectedJobs(jobIds);
   };
 
@@ -483,7 +453,7 @@ export const TechnicianScheduler: React.FC<TechnicianSchedulerProps> = ({
                 No unassigned jobs for this date.
               </div>
             ) : (
-              jobs.map(renderJobCard)
+              jobs.map((job) => renderJobCard(job))
             )}
           </div>
         </div>

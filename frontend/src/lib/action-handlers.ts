@@ -97,16 +97,20 @@ class ActionExecutorService {
     const tokens: { streetNumber?: string; street?: string; city?: string; state?: string; zip?: string } = {};
     if (trailing) {
       const streetNumMatch = trailing.match(/^(\d+[A-Za-z]?)/);
-      if (streetNumMatch) tokens.streetNumber = streetNumMatch[1];
+      if (streetNumMatch && streetNumMatch[1]) {
+        tokens.streetNumber = streetNumMatch[1];
+      }
 
       // Common street suffixes
       const streetSuffixes = ['st', 'street', 'ave', 'avenue', 'rd', 'road', 'blvd', 'lane', 'ln', 'dr', 'drive', 'ct', 'court', 'cir', 'circle', 'way', 'terrace', 'ter'];
       const streetMatch = trailing.match(new RegExp(String.raw`^\d+[A-Za-z]?\s+([A-Za-z]+(?:\s+[A-Za-z]+)*\s+(?:${streetSuffixes.join('|')})\b)`, 'i'));
-      if (streetMatch) tokens.street = streetMatch[1];
+      if (streetMatch && streetMatch[1]) {
+        tokens.street = streetMatch[1];
+      }
 
       // State as 2-letter code
       const stateMatch = trailing.match(/\b([A-Za-z]{2})\b(?!.*\b\1\b)/);
-      if (stateMatch) tokens.state = stateMatch[1].toUpperCase();
+      if (stateMatch && stateMatch[1]) tokens.state = stateMatch[1].toUpperCase();
 
       // ZIP code (5 digits)
       const zipMatch = trailing.match(/\b\d{5}\b/);
@@ -609,10 +613,10 @@ class ActionExecutorService {
 
       // Check if the response contains a materialized view permission error
       // This is a non-critical error that occurs after successful customer creation
-      if (result && typeof result === 'object' && 'error' in result && 
-          typeof (result as Record<string, unknown>).error === 'string' && 
-          (result as Record<string, unknown>).error.toString().includes('permission denied for materialized view')) {
-        logger.warn('Materialized view permission error (non-critical)', (result as Record<string, unknown>).error, 'action-handlers');
+      const resultError = result && typeof result === 'object' && 'error' in result ? (result as Record<string, unknown>).error : null;
+      if (resultError && typeof resultError === 'string' && 
+          resultError.includes('permission denied for materialized view')) {
+        logger.warn('Materialized view permission error (non-critical)', { error: resultError }, 'action-handlers');
         return {
           success: true,
           message: `Customer "${customerData.name}" created successfully`,
@@ -695,7 +699,9 @@ class ActionExecutorService {
     try {
       logger.debug('confirmDeleteCustomer - processing intent', { intent: intentResult.intent }, 'action-handlers');
       
-      const { customerId, customerName } = intentResult.actionData || intentResult as Record<string, unknown>;
+      const actionData = intentResult.actionData as Record<string, unknown> | undefined;
+      const customerId = actionData?.customerId;
+      const customerName = actionData?.customerName;
       
       if (!customerId || !customerName) {
         throw new Error('Customer ID or name not found in confirmation data');
@@ -704,9 +710,9 @@ class ActionExecutorService {
       logger.debug('confirmDeleteCustomer - deleting customer', { customerId, customerName }, 'action-handlers');
 
       // Delete customer via backend API
-      const result = await secureApiClient.deleteAccount(customerId as string);
+      await secureApiClient.deleteAccount(customerId as string);
       
-      logger.debug('confirmDeleteCustomer - API response received', { success: !!result }, 'action-handlers');
+      logger.debug('confirmDeleteCustomer - API response received', { success: true }, 'action-handlers');
 
       // Invalidate customer-related queries to refresh the UI
       await Promise.all([

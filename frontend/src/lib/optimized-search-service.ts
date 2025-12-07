@@ -88,10 +88,11 @@ class OptimizedSearchService {
     if (useCache) {
       const cached = this.getCachedResults(query, options);
       if (cached) {
+        const cachedSuggestion = cached.results[0]?.suggested_correction;
         return {
           results: cached.results,
           metrics: { ...cached.metrics, totalTime: performance.now() - startTime },
-          suggestion: cached.results[0]?.suggested_correction
+          ...(cachedSuggestion ? { suggestion: cachedSuggestion } : {})
         };
       }
     }
@@ -118,8 +119,8 @@ class OptimizedSearchService {
         if (results.length < 3 && enableTypoTolerance && query.length >= 3) {
           const typoResults = await this.executeTypoTolerantSearch(query, tenantId, typoTolerance, Math.max(5, maxResults - results.length));
           
-          // Check if we got a correction suggestion
-          if (typoResults.length > 0 && typoResults[0].suggested_correction) {
+          const firstTypoResult = typoResults[0];
+          if (firstTypoResult?.suggested_correction) {
             correctionSuggested = true;
           }
           
@@ -145,10 +146,11 @@ class OptimizedSearchService {
         this.cacheResults(query, options, results, metrics, cacheTimeout);
       }
 
+      const suggestion = results.find(r => r.suggested_correction)?.suggested_correction;
       return {
         results: results.slice(0, maxResults),
         metrics,
-        suggestion: results.find(r => r.suggested_correction)?.suggested_correction
+        ...(suggestion ? { suggestion } : {})
       };
 
     } catch (error: unknown) {
@@ -223,7 +225,7 @@ class OptimizedSearchService {
   private async executeTypoTolerantSearch(
     query: string,
     tenantId: string,
-    tolerance: number,
+    _tolerance: number,
     limit: number
   ): Promise<OptimizedSearchResult[]> {
     const { data, error } = await supabase
@@ -342,8 +344,10 @@ class OptimizedSearchService {
 
     // Clean up old cache entries (simple LRU)
     if (this.cache.size > 100) {
-      const oldestKey = this.cache.keys().next().value;
-      this.cache.delete(oldestKey);
+      const oldest = this.cache.keys().next();
+      if (!oldest.done) {
+        this.cache.delete(oldest.value);
+      }
     }
   }
 
@@ -397,9 +401,6 @@ class OptimizedSearchService {
 
 // Export singleton instance
 export const optimizedSearch = new OptimizedSearchService();
-
-// Export types
-export type { SearchOptions, SearchPerformanceMetrics };
 
 
 

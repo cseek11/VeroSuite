@@ -42,33 +42,15 @@ export default function CustomerDashboard({ customerId }: CustomerDashboardProps
     queryFn: () => enhancedApi.customers.getById(customerId),
   });
 
-  // Fetch service history using enhanced API
-  const { data: serviceHistory, isLoading: historyLoading } = useQuery({
-    queryKey: ['service-history', customerId],
-    queryFn: () => enhancedApi.serviceHistory.getByCustomer(customerId),
-    enabled: !!customerId,
-  });
-
-  // Fetch customer notes using enhanced API
-  const { data: notes, isLoading: notesLoading } = useQuery({
-    queryKey: ['customer-notes', customerId],
-    queryFn: () => enhancedApi.customerNotes.getByCustomer(customerId),
-    enabled: !!customerId,
-  });
-
-  // Fetch customer photos using enhanced API
-  const { data: photos, isLoading: photosLoading } = useQuery({
-    queryKey: ['customer-photos', customerId],
-    queryFn: () => enhancedApi.customerPhotos.getByCustomer(customerId),
-    enabled: !!customerId,
-  });
-
-  // Fetch contracts using enhanced API
-  const { data: contracts, isLoading: contractsLoading } = useQuery({
-    queryKey: ['customer-contracts', customerId],
-    queryFn: () => enhancedApi.contracts.getByCustomer(customerId),
-    enabled: !!customerId,
-  });
+  // Placeholder datasets until backend surfaces these endpoints in enhancedApi
+  const serviceHistory: any[] = [];
+  const historyLoading = false;
+  const notes: any[] = [];
+  const notesLoading = false;
+  const photos: any[] = [];
+  const photosLoading = false;
+  const contracts: any[] = [];
+  const contractsLoading = false;
 
   if (customerLoading) {
     return <LoadingSpinner text="Loading customer data..." />;
@@ -117,8 +99,7 @@ export default function CustomerDashboard({ customerId }: CustomerDashboardProps
       component: (
         <ContractManager 
           contracts={contracts || []} 
-          customerId={customerId}
-          isLoading={contractsLoading}
+          isLoading={contractsLoading || false}
         />
       )
     },

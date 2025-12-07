@@ -118,8 +118,7 @@ export function registerSchedulerCard(): void {
         cardId: 'scheduler',
         cardType: 'scheduler',
         accepts: {
-          dataTypes: ['customer', 'job', 'workorder'],
-          maxItems: undefined // Can accept multiple
+          dataTypes: ['customer', 'job', 'workorder']
         },
         actions: {
           'create-appointment': {
@@ -135,7 +134,7 @@ export function registerSchedulerCard(): void {
             label: 'Reschedule Existing',
             icon: '🔄',
             description: 'Reschedule an existing appointment',
-            handler: async (payload: DragPayload) => {
+            handler: async (_payload: DragPayload) => {
               // TODO: Implement reschedule logic
               return {
                 success: false,

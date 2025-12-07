@@ -222,12 +222,12 @@ export interface ActionData {
 class IntentClassificationService {
   
   // Intent patterns with regex and keywords
-  private readonly intentPatterns: Record<IntentType, {
+  private readonly intentPatterns: Partial<Record<IntentType, {
     patterns: RegExp[];
     keywords: string[];
     examples: string[];
     confidence: number;
-  }> = {
+  }>> = {
     search: {
       patterns: [
         /find\s+(.+)/i,

@@ -25,7 +25,7 @@ export const WidgetSandbox: React.FC<WidgetSandboxProps> = ({
   // Strict CSP for iframe - Note: CSP should be enforced via meta tag in widget HTML or server headers
   // This is a reference CSP that widgets should implement
   // Using nonce for script and style to avoid 'unsafe-inline'
-  const csp = [
+  const _csp = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}'`, // Use nonce instead of 'unsafe-inline'
     `style-src 'self' 'nonce-${nonce}'`, // Use nonce instead of 'unsafe-inline'

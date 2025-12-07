@@ -53,9 +53,9 @@ export default function TechnicianDispatchCard({
   cardId = 'technician-dispatch',
   className = '' 
 }: TechnicianDispatchCardProps): React.ReactElement {
-  const { user } = useAuthStore();
+  const { user: _user } = useAuthStore();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [isAssigning, setIsAssigning] = useState(false);
+  const [_isAssigning, setIsAssigning] = useState(false);
   const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
   const [pendingAssignment, setPendingAssignment] = useState<{ job: Record<string, unknown>; technician: Technician } | null>(null);
   const [conflictData, setConflictData] = useState<{ conflicts: Array<Record<string, unknown>>; canProceed: boolean } | null>(null);

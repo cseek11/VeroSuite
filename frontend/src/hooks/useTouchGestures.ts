@@ -99,7 +99,7 @@ export function useTouchGestures({
   // Helper function to calculate center point
   const getCenter = useCallback((points: TouchPoint[]): { x: number; y: number } => {
     if (points.length === 0) return { x: 0, y: 0 };
-    if (points.length === 1) return { x: points[0].x, y: points[0].y };
+    if (points.length === 1 && points[0]) return { x: points[0].x, y: points[0].y };
     
     const sumX = points.reduce((sum, p) => sum + p.x, 0);
     const sumY = points.reduce((sum, p) => sum + p.y, 0);
@@ -211,7 +211,7 @@ export function useTouchGestures({
       }
 
       // Handle pinch gesture
-      if (gestureType === 'pinch' && points.length === 2) {
+      if (gestureType === 'pinch' && points.length === 2 && prev.startPoints[0] && prev.startPoints[1] && points[0] && points[1]) {
         const startDistance = getDistance(prev.startPoints[0], prev.startPoints[1]);
         const currentDistance = getDistance(points[0], points[1]);
         const newScale = currentDistance / startDistance;
@@ -222,13 +222,15 @@ export function useTouchGestures({
         }
 
         // Handle rotation
-        const startAngle = getAngle(prev.startPoints[0], prev.startPoints[1]);
-        const currentAngle = getAngle(points[0], points[1]);
-        const angleDelta = currentAngle - startAngle;
-        
-        if (Math.abs(angleDelta) > 0.1 && onRotate) {
-          rotation = angleDelta;
-          onRotate(rotation, center);
+        if (prev.startPoints[0] && prev.startPoints[1] && points[0] && points[1]) {
+          const startAngle = getAngle(prev.startPoints[0], prev.startPoints[1]);
+          const currentAngle = getAngle(points[0], points[1]);
+          const angleDelta = currentAngle - startAngle;
+          
+          if (Math.abs(angleDelta) > 0.1 && onRotate) {
+            rotation = angleDelta;
+            onRotate(rotation, center);
+          }
         }
       }
 

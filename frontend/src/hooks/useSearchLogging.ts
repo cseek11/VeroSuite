@@ -80,7 +80,7 @@ export const useSearchLogging = (options: UseSearchLoggingOptions = {}) => {
   }, [enableLogging]);
 
   // Complete logging a search
-  const completeSearchLog = useCallback(async (query: string, resultsCount: number, searchFilters?: Record<string, any>) => {
+  const completeSearchLog = useCallback(async (query: string, resultsCount: number, searchFilters?: Record<string, any> | undefined) => {
     if (!enableLogging || !searchStartTime.current) return;
 
     try {
@@ -90,7 +90,7 @@ export const useSearchLogging = (options: UseSearchLoggingOptions = {}) => {
         query,
         resultsCount,
         timeTakenMs,
-        searchFilters
+        ...(searchFilters !== undefined ? { searchFilters } : {}),
       });
 
       setCurrentLogId(logId);

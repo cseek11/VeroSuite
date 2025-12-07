@@ -303,6 +303,7 @@ export function useBulkOperations({
     if (operationHistory.length === 0) return false;
 
     const lastOperation = operationHistory[0];
+    if (!lastOperation) return false;
     
     switch (lastOperation.type) {
       case 'delete': {

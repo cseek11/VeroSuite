@@ -2,7 +2,7 @@
  * Compliance Types
  * TypeScript types for compliance dashboard
  * 
- * Last Updated: 2025-11-24
+ * Last Updated: 2025-12-07
  */
 
 export enum RuleTier {
@@ -93,6 +93,17 @@ export interface ComplianceCheckFilters {
   filePath?: string;
   startDate?: string;
   endDate?: string;
+}
+
+export interface CreateComplianceCheckDto {
+  pr_number: number;
+  rule_id: string;
+  status: ComplianceStatus;
+  severity: ComplianceSeverity;
+  description?: string;
+  file_path?: string;
+  line_number?: number;
+  context?: Record<string, any>;
 }
 
 

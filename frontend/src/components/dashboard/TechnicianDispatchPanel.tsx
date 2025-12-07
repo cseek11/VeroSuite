@@ -12,7 +12,7 @@ import { enhancedApi } from '@/lib/enhanced-api';
 
 const TechnicianDispatchPanel: React.FC = () => {
   // Fetch technicians data from API
-  const { data: technicians = [], isLoading } = useQuery({
+  const { data: technicians = [], isLoading: _isLoading } = useQuery({
     queryKey: ['technicians', 'dispatch'],
     queryFn: () => enhancedApi.users.list({ roles: ['technician'] }),
   });

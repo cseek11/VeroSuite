@@ -165,7 +165,7 @@ class GlobalSearchIntegrationService {
           'Use full customer names',
           'Include clear field names (phone, email, etc.)'
         ],
-        debugInfo: config.debug ? { intentResult, actionResult: null as any, apiHealth: apiHealth! } : undefined
+        ...(config.debug && apiHealth ? { debugInfo: { intentResult, actionResult: null as any, apiHealth } } : {})
       };
     }
 
@@ -206,11 +206,13 @@ class GlobalSearchIntegrationService {
         ...(intentResult.suggestions || []),
         ...(actionResult.suggestions || [])
       ],
-      debugInfo: config.debug ? { 
-        intentResult, 
-        actionResult, 
-        apiHealth: apiHealth! 
-      } : undefined
+      ...(config.debug && apiHealth ? {
+        debugInfo: {
+          intentResult,
+          actionResult,
+          apiHealth
+        }
+      } : {})
     };
   }
 

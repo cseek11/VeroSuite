@@ -33,17 +33,16 @@ export const useAccounts = (search?: string) => {
 export const useAccount = (id: string) => {
   return useQuery({
     queryKey: queryKeys.accounts.detail(id),
-    queryFn: () => crmApi.accounts().then(accounts => 
-      accounts.find(account => account.id === id)
-    ),
+    queryFn: async () => {
+      const accounts = await crmApi.accounts();
+      return accounts.find(account => account.id === id) ?? null;
+    },
     enabled: !!id,
   });
 };
 
 // Hook to create a new account
 export const useCreateAccount = () => {
-  const _queryClient = useQueryClient();
-  
   return useMutation({
     mutationFn: (accountData: Partial<Account>) => crmApi.createAccount(accountData),
     onSuccess: () => {
@@ -54,7 +53,6 @@ export const useCreateAccount = () => {
 
 // Hook to update an account
 export const useUpdateAccount = () => {
-  const _queryClient = useQueryClient();
   
   return useMutation({
     mutationFn: (data: { id: string; accountData: Partial<Account> }) => 

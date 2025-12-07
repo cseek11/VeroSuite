@@ -1,5 +1,5 @@
 
-import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { Spinner } from '@/ui/Spinner';
@@ -78,9 +78,7 @@ export default function App() {
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
   const clearAuth = useAuthStore((s) => s.clear);
-  const refreshUser = useAuthStore((s) => s.refreshUser);
   const hasInitialized = useRef(false);
-  const location = useLocation();
   
   // Monitor Web Vitals for performance tracking
   useWebVitals(process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'development');

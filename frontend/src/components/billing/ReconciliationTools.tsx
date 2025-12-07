@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, type ChangeEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -30,34 +30,79 @@ interface ReconciliationRecord {
   notes?: string;
 }
 
+interface PaymentRecord {
+  id?: string;
+  payment_date?: string;
+  amount?: number | string;
+  reference_number?: string;
+  notes?: string;
+  Invoice?: {
+    invoice_number?: string;
+    accounts?: { name?: string };
+  };
+  payment_methods?: {
+    payment_name?: string;
+  };
+}
+
+interface PaymentTrackingData {
+  payments?: PaymentRecord[];
+}
+
 export default function ReconciliationTools() {
+  const now = new Date();
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const [startDate, setStartDate] = useState<string>(
-    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    thirtyDaysAgo.toISOString().split('T')[0] ?? ''
   );
   const [endDate, setEndDate] = useState<string>(
-    new Date().toISOString().split('T')[0]
+    now.toISOString().split('T')[0] ?? ''
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'matched' | 'unmatched' | 'disputed'>('all');
   const [selectedRecords, setSelectedRecords] = useState<Set<string>>(new Set());
 
+  const defaultTrackingData: PaymentTrackingData = {
+    payments: []
+  };
+
+  const handleDateChange =
+    (setter: (value: string) => void) =>
+    (value: string | ChangeEvent<HTMLInputElement>) => {
+      if (typeof value === 'string') {
+        setter(value);
+        return;
+      }
+      setter(value?.target?.value ?? '');
+    };
+
   // Fetch payment tracking data for reconciliation
-  const { data: trackingData, isLoading, error, refetch } = useQuery({
+  const {
+    data = defaultTrackingData,
+    isLoading,
+    error,
+    refetch
+  } = useQuery<PaymentTrackingData>({
     queryKey: ['billing', 'payment-tracking', startDate, endDate],
     queryFn: () => billing.getPaymentTracking(startDate, endDate),
-    onError: (error: unknown) => {
+    initialData: defaultTrackingData,
+    placeholderData: defaultTrackingData
+  });
+
+  useEffect(() => {
+    if (error) {
       logger.error('Failed to fetch payment tracking data', error, 'ReconciliationTools');
       toast.error('Failed to load payment data. Please try again.');
-    },
-  });
+    }
+  }, [error]);
 
   // Convert payment data to reconciliation records
   const reconciliationRecords = useMemo(() => {
-    if (!trackingData?.payments) {
+    if (!data?.payments) {
       return [];
     }
 
-    return trackingData.payments.map((payment: unknown) => {
+    return data.payments.map((payment: PaymentRecord) => {
       const p = payment as {
         id?: string;
         payment_date?: string;
@@ -85,7 +130,7 @@ export default function ReconciliationTools() {
         notes: p.notes
       } as ReconciliationRecord;
     });
-  }, [trackingData?.payments]);
+  }, [data?.payments]);
 
   // Filter and search records
   const filteredRecords = useMemo(() => {
@@ -351,7 +396,7 @@ export default function ReconciliationTools() {
               <Input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={handleDateChange(setStartDate)}
               />
             </div>
             <div>
@@ -361,7 +406,7 @@ export default function ReconciliationTools() {
               <Input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={handleDateChange(setEndDate)}
               />
             </div>
             <div>

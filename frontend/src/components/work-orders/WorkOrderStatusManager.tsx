@@ -156,14 +156,14 @@ export default function WorkOrderStatusManager({
         onStatusChange?.(workOrder, transition.to);
       } else if (mode === 'bulk' && workOrderIds.length > 0) {
         // Bulk update
-        const notes = statusNotes.trim() 
+        const notesText = statusNotes.trim() 
           ? `Bulk status change to ${getStatusLabel(transition.to)}: ${statusNotes.trim()}`
           : undefined;
 
         await bulkUpdateStatusMutation.mutateAsync({
           workOrderIds,
           newStatus: transition.to,
-          notes
+          ...(notesText ? { notes: notesText } : {})
         });
 
         onBulkStatusChange?.(workOrderIds, transition.to);
@@ -315,7 +315,7 @@ export default function WorkOrderStatusManager({
             <Button
               variant="primary"
               onClick={() => selectedTransition && handleStatusChange(selectedTransition)}
-              disabled={isSubmitting || (selectedTransition?.requiresNotes && !statusNotes.trim())}
+              disabled={isSubmitting || (selectedTransition?.requiresNotes ? !statusNotes.trim() : false)}
               className="flex items-center gap-2"
             >
               {isSubmitting ? (

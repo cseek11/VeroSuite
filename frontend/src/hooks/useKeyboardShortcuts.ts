@@ -7,6 +7,13 @@ export interface KeyboardShortcut {
   category: string;
 }
 
+export interface KeyboardShortcutsMap {
+  [action: string]: {
+    description: string;
+    keys: string[];
+  };
+}
+
 interface UseKeyboardShortcutsProps {
   onAddCard: (type: string) => void;
   onDuplicateCards: (cardIds: string[]) => void;
@@ -211,5 +218,12 @@ export function useKeyboardShortcuts({
     { key: '?', description: 'Show Help', action: 'Show keyboard shortcuts', category: 'Help' }
   ];
 
-  return { shortcuts };
+  const shortcutMap: KeyboardShortcutsMap = shortcuts.reduce((acc, shortcut) => {
+    const existing = acc[shortcut.action];
+    const keys = existing ? [...existing.keys, shortcut.key] : [shortcut.key];
+    acc[shortcut.action] = { description: shortcut.description, keys };
+    return acc;
+  }, {} as KeyboardShortcutsMap);
+
+  return { shortcuts: shortcutMap };
 }

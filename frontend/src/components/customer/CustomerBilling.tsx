@@ -51,38 +51,6 @@ interface Customer {
   updated_at?: string;
 }
 
-interface Invoice {
-  id: string;
-  invoice_number: string;
-  issue_date: string;
-  due_date: string;
-  amount: number;
-  paid_amount: number;
-  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
-  description: string;
-  items: InvoiceItem[];
-}
-
-interface InvoiceItem {
-  id: string;
-  description: string;
-  quantity: number;
-  unit_price: number;
-  total: number;
-}
-
-interface PaymentMethod {
-  id: string;
-  type: 'card' | 'ach' | 'check';
-  name: string;
-  last4?: string;
-  brand?: string;
-  expiry?: string;
-  account?: string;
-  bank?: string;
-  is_default: boolean;
-}
-
 interface CustomerBillingProps {
   customer: Customer;
 }
@@ -111,11 +79,11 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
           enhancedApi.billing.getPaymentMethods(customer.id)
         ]);
 
-        setInvoices(invoicesData);
+        setInvoices(invoicesData as Invoice[]);
         setPayments(paymentsData.filter(payment => 
           invoicesData.some(invoice => invoice.id === payment.invoice_id)
-        ));
-        setPaymentMethods(paymentMethodsData);
+        ) as Payment[]);
+        setPaymentMethods(paymentMethodsData as PaymentMethod[]);
       } catch (err) {
         logger.error('Error loading customer billing data', err, 'CustomerBilling');
         setError(err instanceof Error ? err.message : 'Failed to load billing data');
@@ -131,14 +99,14 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
 
   // Calculate billing statistics
   const billingStats = useMemo(() => {
-    const totalInvoiced = invoices.reduce((sum, inv) => sum + inv.total_amount, 0);
+    const totalInvoiced = invoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
     const totalPaid = payments.reduce((sum, payment) => sum + payment.amount, 0);
     const outstanding = totalInvoiced - totalPaid;
     const overdue = invoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => {
       const paidForInvoice = payments
         .filter(p => p.invoice_id === inv.id)
         .reduce((sum, p) => sum + p.amount, 0);
-      return sum + (inv.total_amount - paidForInvoice);
+      return sum + ((inv.total_amount || 0) - paidForInvoice);
     }, 0);
     const paidInvoices = invoices.filter(inv => inv.status === 'paid').length;
     const overdueInvoices = invoices.filter(inv => inv.status === 'overdue').length;
@@ -409,7 +377,7 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
                           await enhancedApi.billing.deletePaymentMethod(method.id);
                           // Refresh payment methods
                           const updatedMethods = await enhancedApi.billing.getPaymentMethods(customer.id);
-                          setPaymentMethods(updatedMethods);
+                          setPaymentMethods(updatedMethods as PaymentMethod[]);
                         } catch (err) {
                           logger.error('Error deleting payment method', err, 'CustomerBilling');
                         }
@@ -459,37 +427,38 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
                 
                 <div>
                   <label className="text-sm font-medium text-gray-600">Total Amount</label>
-                  <div className="mt-1 font-semibold text-lg">{formatCurrency(selectedInvoice.amount)}</div>
+                  <div className="mt-1 font-semibold text-lg">{formatCurrency(selectedInvoice.total_amount || 0)}</div>
                 </div>
                 
                 <div>
                   <label className="text-sm font-medium text-gray-600">Paid Amount</label>
-                  <div className="mt-1">{formatCurrency(selectedInvoice.paid_amount)}</div>
+                  <div className="mt-1">{formatCurrency(
+                    payments
+                      .filter(p => p.invoice_id === selectedInvoice.id)
+                      .reduce((sum, p) => sum + p.amount, 0)
+                  )}</div>
                 </div>
               </div>
               
-              <div>
-                <label className="text-sm font-medium text-gray-600">Description</label>
-                <div className="mt-1">{selectedInvoice.description}</div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium text-gray-600">Invoice Items</label>
-                <div className="mt-2 space-y-2">
-                  {selectedInvoice.items.map((item) => (
-                    <div key={item.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <div className="font-medium">{item.description}</div>
-                        <div className="text-sm text-gray-600">Qty: {item.quantity}</div>
+              {selectedInvoice.InvoiceItem && selectedInvoice.InvoiceItem.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Invoice Items</label>
+                  <div className="mt-2 space-y-2">
+                    {selectedInvoice.InvoiceItem.map((item) => (
+                      <div key={item.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <div className="font-medium">{item.description}</div>
+                          <div className="text-sm text-gray-600">Qty: {item.quantity}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-medium">{formatCurrency(item.unit_price)}</div>
+                          <div className="text-sm text-gray-600">Total: {formatCurrency(item.total_price)}</div>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-medium">{formatCurrency(item.unit_price)}</div>
-                        <div className="text-sm text-gray-600">Total: {formatCurrency(item.total)}</div>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
               
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowInvoiceDetails(false)}>
@@ -573,3 +542,4 @@ const CustomerBilling: React.FC<CustomerBillingProps> = ({ customer }) => {
 };
 
 export default CustomerBilling;
+

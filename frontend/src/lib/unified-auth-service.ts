@@ -51,12 +51,15 @@ class UnifiedAuthService {
           this.currentSession = null;
         }
       });
-    } catch (error) {
-      searchErrorLogger.logError({
-        operation: 'auth_initialization',
-        error: error as Error,
-        context: { timestamp: new Date().toISOString() }
-      });
+    } catch (error: unknown) {
+      searchErrorLogger.logError(
+        error as Error,
+        {
+          operation: 'auth_initialization',
+          timestamp: new Date()
+        },
+        'low'
+      );
     }
   }
 
@@ -85,14 +88,15 @@ class UnifiedAuthService {
         logger.debug('User authenticated', { email: this.currentUser.email, tenantId: this.currentUser.tenant_id }, 'unified-auth-service');
       }
     } catch (error: unknown) {
-      searchErrorLogger.logError({
-        operation: 'set_current_user',
-        error: error as Error,
-        context: { 
+      searchErrorLogger.logError(
+        error as Error,
+        {
+          operation: 'set_current_user',
           userId: user?.id,
-          timestamp: new Date().toISOString()
-        }
-      });
+          timestamp: new Date()
+        },
+        'low'
+      );
     }
   }
 
@@ -113,12 +117,15 @@ class UnifiedAuthService {
 
       await this.setCurrentUser(data.user);
       return this.currentUser!;
-    } catch (error) {
-      searchErrorLogger.logError({
-        operation: 'sign_in',
-        error: error as Error,
-        context: { email, timestamp: new Date().toISOString() }
-      });
+    } catch (error: unknown) {
+      searchErrorLogger.logError(
+        error as Error,
+        {
+          operation: 'sign_in',
+          timestamp: new Date()
+        },
+        'high'
+      );
       throw error;
     }
   }
@@ -145,12 +152,16 @@ class UnifiedAuthService {
 
       await this.setCurrentUser(data.user);
       return this.currentUser!;
-    } catch (error) {
-      searchErrorLogger.logError({
-        operation: 'sign_up',
-        error: error as Error,
-        context: { email, tenantId, timestamp: new Date().toISOString() }
-      });
+    } catch (error: unknown) {
+      searchErrorLogger.logError(
+        error as Error,
+        {
+          operation: 'sign_up',
+          tenantId,
+          timestamp: new Date()
+        },
+        'high'
+      );
       throw error;
     }
   }
@@ -165,12 +176,15 @@ class UnifiedAuthService {
 
       this.currentUser = null;
       this.currentSession = null;
-    } catch (error) {
-      searchErrorLogger.logError({
-        operation: 'sign_out',
-        error: error as Error,
-        context: { timestamp: new Date().toISOString() }
-      });
+    } catch (error: unknown) {
+      searchErrorLogger.logError(
+        error as Error,
+        {
+          operation: 'sign_out',
+          timestamp: new Date()
+        },
+        'medium'
+      );
       throw error;
     }
   }
@@ -205,12 +219,15 @@ class UnifiedAuthService {
       }
 
       return null;
-    } catch (error) {
-      searchErrorLogger.logError({
-        operation: 'refresh_session',
-        error: error as Error,
-        context: { timestamp: new Date().toISOString() }
-      });
+    } catch (error: unknown) {
+      searchErrorLogger.logError(
+        error as Error,
+        {
+          operation: 'refresh_session',
+          timestamp: new Date()
+        },
+        'medium'
+      );
       return null;
     }
   }
@@ -237,11 +254,14 @@ class UnifiedAuthService {
         }
       }
     } catch (error: unknown) {
-      searchErrorLogger.logError({
-        operation: 'test_auth',
-        error: error as Error,
-        context: { timestamp: new Date().toISOString() }
-      });
+      searchErrorLogger.logError(
+        error as Error,
+        {
+          operation: 'test_auth',
+          timestamp: new Date()
+        },
+        'low'
+      );
       return false;
     }
   }

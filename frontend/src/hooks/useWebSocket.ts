@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 import { useAuthStore } from '@/stores/auth';
 import { logger } from '@/utils/logger';
 
@@ -107,13 +108,13 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
       reconnectAttemptsRef.current = 0;
     });
 
-    socket.on('connected', (data) => {
+    socket.on('connected', (_data: unknown) => {
       if (process.env.NODE_ENV === 'development') {
-        logger.debug('WebSocket authenticated', { data }, 'useWebSocket');
+        logger.debug('WebSocket authenticated', {}, 'useWebSocket');
       }
     });
 
-    socket.on('disconnect', (reason) => {
+    socket.on('disconnect', (reason: string) => {
       if (process.env.NODE_ENV === 'development') {
         logger.debug('WebSocket disconnected', { reason }, 'useWebSocket');
       }
@@ -133,7 +134,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
       }
     });
 
-    socket.on('connect_error', (error) => {
+    socket.on('connect_error', (error: Error) => {
       logger.warn('WebSocket connection error (graceful degradation)', { error: error.message }, 'useWebSocket');
       setLastError(`WebSocket unavailable: ${error.message}`);
       setConnectionStatus('disconnected');
@@ -144,7 +145,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
       }
     });
 
-    socket.on('error', (error) => {
+    socket.on('error', (error: Error) => {
       logger.error('WebSocket error', error, 'useWebSocket');
       setLastError(error.message || 'Unknown WebSocket error');
     });
@@ -171,15 +172,15 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
       setConnectionStats(stats);
     });
 
-    socket.on('heartbeat', (data) => {
+    socket.on('heartbeat', (_data: unknown) => {
       if (process.env.NODE_ENV === 'development') {
-        logger.debug('Heartbeat received', { data }, 'useWebSocket');
+        logger.debug('Heartbeat received', {}, 'useWebSocket');
       }
     });
 
-    socket.on('pong', (data) => {
+    socket.on('pong', (_data: unknown) => {
       if (process.env.NODE_ENV === 'development') {
-        logger.debug('Pong received', { data }, 'useWebSocket');
+        logger.debug('Pong received', {}, 'useWebSocket');
       }
     });
 

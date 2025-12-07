@@ -55,7 +55,7 @@ export function MobileNavigation({
   const [activeTab, setActiveTab] = useState('main');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
-  const { densityMode, isMobile, isTablet } = useDensityMode();
+  const { densityMode, isMobile } = useDensityMode();
 
   // Navigation items
   const navigationItems = [

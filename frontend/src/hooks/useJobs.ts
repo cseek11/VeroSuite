@@ -113,8 +113,11 @@ class JobsApiService {
 
   async getTodayJobs(technicianId?: string): Promise<Job[]> {
     const today = new Date().toISOString().split('T')[0];
-    const filters: JobFilters = { start_date: today, end_date: today };
-    if (technicianId) filters.technician_id = technicianId;
+    const filters: JobFilters = { 
+      start_date: today, 
+      end_date: today,
+      ...(technicianId ? { technician_id: technicianId } : {})
+    };
     
     const response = await this.getJobs(filters);
     return response.data;
@@ -268,7 +271,7 @@ export const useStartJob = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, gps }: { id: string; gps: { lat: number; lng: number } }) =>
+    mutationFn: ({ id }: { id: string; gps: { lat: number; lng: number } }) =>
       jobsApi.updateJob(id, { 
         status: 'in_progress' as any,
         actual_start_time: new Date().toISOString()
@@ -292,7 +295,7 @@ export const useCompleteJob = () => {
       jobsApi.updateJob(id, { 
         status: 'completed' as any,
         actual_end_time: new Date().toISOString(),
-        notes: notes
+        ...(notes ? { notes } : {})
       }),
     onSuccess: (updatedJob) => {
       // Update the job in cache

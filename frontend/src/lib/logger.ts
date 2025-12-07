@@ -15,7 +15,8 @@ interface LogEntry {
   level: LogLevel;
   message: string;
   timestamp: string;
-  context?: string; // Context identifier (service, module, component name)
+  // Context can be a simple string or an object carrying a type discriminator
+  context?: string | { type?: string; [key: string]: any };
   operation?: string; // Operation name (function, endpoint, action)
   severity: 'info' | 'warn' | 'error' | 'debug' | 'verbose';
   errorCode?: string; // Error classification code
@@ -84,25 +85,19 @@ export class Logger {
     const userContext = this.getUserContext();
     
     // Handle context as string (context identifier) or object (legacy support)
-    const contextString = typeof context === 'string' ? context : 'Application';
+    const contextValue: LogEntry['context'] = typeof context === 'string' ? context : (context || 'Application');
     const additionalData = typeof context === 'object' ? context : {};
     
     // Get or generate trace ID
     const finalTraceId = traceId || this.getOrGenerateTraceId();
     const finalRequestId = requestId || this.getOrGenerateRequestId();
     
-    return {
+    const entry: LogEntry = {
       level,
       message,
       timestamp: new Date().toISOString(),
-      context: contextString,
-      operation,
+      context: contextValue,
       severity: this.getSeverityFromLevel(level),
-      ...(errorCode && { errorCode }),
-      ...(rootCause && { rootCause }),
-      ...(finalTraceId && { traceId: finalTraceId }),
-      ...(spanId && { spanId }),
-      ...(finalRequestId && { requestId: finalRequestId }),
       additionalData: {
         ...additionalData,
         ...userContext,
@@ -110,11 +105,20 @@ export class Logger {
         environment: config.app.environment,
         version: config.app.version,
       },
-      error,
       userId: userContext.userId,
       tenantId: userContext.tenantId,
       sessionId: this.sessionId,
     };
+
+    if (operation) entry.operation = operation;
+    if (errorCode) entry.errorCode = errorCode;
+    if (rootCause) entry.rootCause = rootCause;
+    if (finalTraceId) entry.traceId = finalTraceId;
+    if (spanId) entry.spanId = spanId;
+    if (finalRequestId) entry.requestId = finalRequestId;
+    if (error) entry.error = error;
+
+    return entry;
   }
 
   // Get severity string from log level
@@ -175,32 +179,9 @@ export class Logger {
   }
 
   // Console output with formatting
-  private consoleOutput(entry: LogEntry) {
-    const timestamp = new Date(entry.timestamp).toLocaleTimeString();
-    const level = LogLevel[entry.level];
-    const prefix = `[${timestamp}] [${level}]`;
-    
-    const logData = {
-      message: entry.message,
-      context: entry.context,
-      ...(entry.error && { error: entry.error }),
-    };
-
-    switch (entry.level) {
-      case LogLevel.DEBUG:
-        console.debug(prefix, logData);
-        break;
-      case LogLevel.INFO:
-        console.info(prefix, logData);
-        break;
-      case LogLevel.WARN:
-        console.warn(prefix, logData);
-        break;
-      case LogLevel.ERROR:
-      case LogLevel.FATAL:
-        console.error(prefix, logData);
-        break;
-    }
+  private consoleOutput(_entry: LogEntry) {
+    // Direct console output disabled to enforce structured logging policy.
+    // Logs are stored in memory, optionally sent to Sentry, and retrievable via getLogs().
   }
 
   // Log methods with structured format support
@@ -368,8 +349,11 @@ export class Logger {
         const entryTime = new Date(entry.timestamp).getTime();
         return now - entryTime < filter.timeRange;
       }
-      if (filter?.type && entry.context?.type !== filter.type) {
-        return false;
+      if (filter?.type) {
+        const ctxType = typeof entry.context === 'object' ? entry.context?.type : undefined;
+        if (ctxType !== filter.type) {
+          return false;
+        }
       }
       if (filter?.userId && entry.userId !== filter.userId) {
         return false;
@@ -400,7 +384,7 @@ export class Logger {
       const level = LogLevel[entry.level];
       stats.byLevel[level] = (stats.byLevel[level] || 0) + 1;
       
-      const type = entry.context?.type || 'general';
+      const type = typeof entry.context === 'object' ? entry.context?.type || 'general' : 'general';
       stats.byType[type] = (stats.byType[type] || 0) + 1;
     });
 

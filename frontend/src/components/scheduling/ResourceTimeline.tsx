@@ -7,7 +7,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import { logger } from '@/utils/logger';
-import { getOrCreateTraceContext } from '@/lib/trace-propagation';
+import type { Job } from '@/types/enhanced-types';
 import {
   Dialog,
   DialogContent,
@@ -17,51 +17,21 @@ import {
   DialogTitle
 } from '@/components/ui/Dialog';
 
-// Types
-interface Job {
-  id: string;
-  status: 'unassigned' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  scheduled_date: string;
-  scheduled_start_time?: string;
-  scheduled_end_time?: string;
-  technician_id?: string;
-  customer: {
-    id: string;
-    name: string;
-    phone?: string;
-  };
-  location: {
-    id: string;
-    name: string;
-    address: string;
-    coordinates: { lat: number; lng: number };
-  };
-  service: {
-    type: string;
-    description: string;
-    estimated_duration: number;
-    price?: number;
-  };
-}
-
-interface Technician {
-  id: string;
-  first_name: string;
-  last_name: string;
-  phone?: string;
-  is_active: boolean;
-  skills?: string[];
-}
+// Extended Job type with populated relations
+type JobWithRelations = Job & {
+  customer?: { id: string; name: string; phone?: string };
+  location?: { id: string; name: string; address: string; coordinates?: { lat: number; lng: number } };
+  service?: { type: string; description: string; estimated_duration: number; price?: number };
+};
 
 interface ResourceTimelineProps {
   selectedDate?: Date;
   onDateChange?: (date: Date) => void;
-  onJobSelect?: (job: Job) => void;
-  onJobUpdate?: (jobId: string, updates: Partial<Job>) => void;
+  onJobSelect?: (job: JobWithRelations) => void;
+  onJobUpdate?: (jobId: string, updates: Partial<JobWithRelations>) => void;
 }
 
-interface TimelineJob extends Job {
+interface TimelineJob extends JobWithRelations {
   startTime: number; // Minutes from start of day
   endTime: number; // Minutes from start of day
   duration: number; // Minutes
@@ -69,9 +39,7 @@ interface TimelineJob extends Job {
   width: number; // Percentage width
 }
 
-const HOURS_PER_DAY = 24;
 const MINUTES_PER_HOUR = 60;
-const MINUTES_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR;
 const DEFAULT_START_HOUR = 6; // 6 AM
 const DEFAULT_END_HOUR = 22; // 10 PM
 const VISIBLE_HOURS = DEFAULT_END_HOUR - DEFAULT_START_HOUR;
@@ -83,10 +51,10 @@ export const ResourceTimeline: React.FC<ResourceTimelineProps> = ({
   onJobUpdate
 }) => {
   const [viewDate, setViewDate] = useState(selectedDate);
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [selectedJob, setSelectedJob] = useState<JobWithRelations | null>(null);
   const [showJobDialog, setShowJobDialog] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1); // 1 = day view, 0.5 = half day, 2 = 2 days
-  const [timeRange, setTimeRange] = useState({ start: DEFAULT_START_HOUR, end: DEFAULT_END_HOUR });
+  const [timeRange] = useState({ start: DEFAULT_START_HOUR, end: DEFAULT_END_HOUR });
 
   const queryClient = useQueryClient();
 
@@ -107,13 +75,9 @@ export const ResourceTimeline: React.FC<ResourceTimelineProps> = ({
         if (enhancedApi.technicians && typeof enhancedApi.technicians.list === 'function') {
           return await enhancedApi.technicians.list();
         }
-        return await enhancedApi.users.list({
-          roles: ['technician'],
-          status: 'active'
-        });
+        return await enhancedApi.users.list();
       } catch (error) {
-        const traceContext = getOrCreateTraceContext();
-        logger.error('Failed to fetch technicians', 'ResourceTimeline', error as Error, undefined, undefined, undefined, traceContext.traceId, traceContext.spanId, traceContext.requestId);
+        logger.error('Failed to fetch technicians', error as Error, 'ResourceTimeline');
         throw error;
       }
     },
@@ -121,16 +85,19 @@ export const ResourceTimeline: React.FC<ResourceTimelineProps> = ({
   });
 
   // Fetch jobs for date range
-  const { data: jobs = [], isLoading: jobsLoading, error: jobsError } = useQuery({
+  const { data: jobs = [], isLoading: jobsLoading, error: jobsError } = useQuery<JobWithRelations[]>({
     queryKey: ['jobs', 'timeline', dateRange.start.toISOString(), dateRange.end.toISOString()],
     queryFn: async () => {
       try {
         const startDateStr = dateRange.start.toISOString().split('T')[0];
         const endDateStr = dateRange.end.toISOString().split('T')[0];
-        return await enhancedApi.jobs.getByDateRange(startDateStr, endDateStr);
+        if (!startDateStr || !endDateStr) {
+          throw new Error('Invalid date range');
+        }
+        const result = await enhancedApi.jobs.getByDateRange(startDateStr, endDateStr);
+        return result as JobWithRelations[];
       } catch (error) {
-        const traceContext = getOrCreateTraceContext();
-        logger.error('Failed to fetch jobs for timeline', 'ResourceTimeline', error as Error, undefined, undefined, undefined, traceContext.traceId, traceContext.spanId, traceContext.requestId);
+        logger.error('Failed to fetch jobs for timeline', error as Error, 'ResourceTimeline');
         throw error;
       }
     },
@@ -141,7 +108,7 @@ export const ResourceTimeline: React.FC<ResourceTimelineProps> = ({
   const timelineJobs = useMemo(() => {
     const processed: Map<string, TimelineJob[]> = new Map();
 
-    technicians.forEach(tech => {
+    technicians.forEach((tech: any) => {
       processed.set(tech.id, []);
     });
 
@@ -150,9 +117,17 @@ export const ResourceTimeline: React.FC<ResourceTimelineProps> = ({
         return;
       }
 
-      const jobDate = new Date(job.scheduled_date);
-      const [startHour, startMinute] = job.scheduled_start_time.split(':').map(Number);
-      const [endHour, endMinute] = job.scheduled_end_time.split(':').map(Number);
+      const startParts = job.scheduled_start_time.split(':');
+      const endParts = job.scheduled_end_time.split(':');
+      
+      const startHour = startParts[0] ? Number(startParts[0]) : undefined;
+      const startMinute = startParts[1] ? Number(startParts[1]) : undefined;
+      const endHour = endParts[0] ? Number(endParts[0]) : undefined;
+      const endMinute = endParts[1] ? Number(endParts[1]) : undefined;
+
+      if (startHour === undefined || startMinute === undefined || endHour === undefined || endMinute === undefined) {
+        return;
+      }
 
       const startTime = startHour * MINUTES_PER_HOUR + startMinute;
       const endTime = endHour * MINUTES_PER_HOUR + endMinute;
@@ -168,6 +143,9 @@ export const ResourceTimeline: React.FC<ResourceTimelineProps> = ({
 
       const timelineJob: TimelineJob = {
         ...job,
+        customer: job.customer || { id: '', name: 'Unknown' },
+        location: job.location || { id: '', name: 'Unknown', address: 'Unknown' },
+        service: job.service || { type: 'Unknown', description: '', estimated_duration: 0 },
         startTime,
         endTime,
         duration,
@@ -194,19 +172,20 @@ export const ResourceTimeline: React.FC<ResourceTimelineProps> = ({
 
   // Update job mutation
   const updateJobMutation = useMutation({
-    mutationFn: async ({ jobId, updates }: { jobId: string; updates: Partial<Job> }) => {
-      return enhancedApi.jobs.update(jobId, updates);
+    mutationFn: async ({ jobId, updates }: { jobId: string; updates: Partial<JobWithRelations> }) => {
+      return enhancedApi.jobs.update(jobId, updates as Partial<Job>);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
       setShowJobDialog(false);
+      const jobId = selectedJob?.id;
       setSelectedJob(null);
-      const traceContext = getOrCreateTraceContext();
-      logger.info('Job updated successfully', { jobId: selectedJob?.id }, 'ResourceTimeline', traceContext.traceId, traceContext.spanId, traceContext.requestId);
+      if (jobId) {
+        logger.info('Job updated successfully', { jobId }, 'ResourceTimeline');
+      }
     },
     onError: (error: unknown) => {
-      const traceContext = getOrCreateTraceContext();
-      logger.error('Failed to update job', 'ResourceTimeline', error as Error, undefined, undefined, undefined, traceContext.traceId, traceContext.spanId, traceContext.requestId);
+      logger.error('Failed to update job', error as Error, 'ResourceTimeline');
     }
   });
 
@@ -240,14 +219,14 @@ export const ResourceTimeline: React.FC<ResourceTimelineProps> = ({
   };
 
   // Job click handler
-  const handleJobClick = (job: Job) => {
+  const handleJobClick = (job: JobWithRelations) => {
     setSelectedJob(job);
     setShowJobDialog(true);
     onJobSelect?.(job);
   };
 
   // Get job color based on status and priority
-  const getJobColor = (job: Job): string => {
+  const getJobColor = (job: JobWithRelations): string => {
     if (job.status === 'completed') return 'bg-green-500';
     if (job.status === 'in_progress') return 'bg-blue-500';
     if (job.status === 'cancelled') return 'bg-gray-400';
@@ -259,7 +238,7 @@ export const ResourceTimeline: React.FC<ResourceTimelineProps> = ({
   };
 
   // Get job border color based on priority
-  const getJobBorderColor = (job: Job): string => {
+  const getJobBorderColor = (job: JobWithRelations): string => {
     if (job.priority === 'urgent') return 'border-red-800';
     if (job.priority === 'high') return 'border-orange-700';
     if (job.priority === 'medium') return 'border-yellow-600';
@@ -430,14 +409,14 @@ export const ResourceTimeline: React.FC<ResourceTimelineProps> = ({
                                   width: `${job.width}%`,
                                   minWidth: '60px'
                                 }}
-                                title={`${job.customer.name} - ${job.service.type} (${job.scheduled_start_time} - ${job.scheduled_end_time})`}
+                                title={`${job.customer?.name || 'Unknown'} - ${job.service?.type || 'Unknown'} (${job.scheduled_start_time} - ${job.scheduled_end_time})`}
                               >
                                 <div className="p-2 h-full flex flex-col justify-between text-white text-xs">
                                   <div className="font-semibold truncate">
-                                    {job.customer.name}
+                                    {job.customer?.name || 'Unknown'}
                                   </div>
                                   <div className="text-xs opacity-90 truncate">
-                                    {job.service.type}
+                                    {job.service?.type || 'Unknown'}
                                   </div>
                                   <div className="flex items-center gap-1 text-xs opacity-75">
                                     <Clock className="h-3 w-3" />
@@ -484,8 +463,8 @@ export const ResourceTimeline: React.FC<ResourceTimelineProps> = ({
             {selectedJob && (
               <div className="space-y-4">
                 <div>
-                  <h3 className="font-semibold text-lg">{selectedJob.customer.name}</h3>
-                  <p className="text-sm text-gray-600">{selectedJob.service.type}</p>
+                  <h3 className="font-semibold text-lg">{selectedJob.customer?.name || 'Unknown'}</h3>
+                  <p className="text-sm text-gray-600">{selectedJob.service?.type || 'Unknown'}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>

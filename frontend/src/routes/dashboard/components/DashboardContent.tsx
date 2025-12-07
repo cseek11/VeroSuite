@@ -25,24 +25,32 @@ import KPIBuilder from '@/components/kpi/KPIBuilder';
 import KpiTemplateLibraryModal from '@/components/kpi/KpiTemplateLibraryModal';
 import { TemplateLoadingIndicator } from './TemplateLoadingIndicator';
 import { handleKpiBuilderUseTemplate, handleTemplateLibraryUseTemplate, handleKpiBuilderSave } from '../utils/kpiHandlers';
+import { logger } from '@/utils/logger';
 import {
   DashboardState,
   ErrorHandling,
   VirtualScrolling,
-  SmartKPIs,
   TemplateLoading,
   Layout,
   Collaborator,
   CardType,
-  Group,
   Preset,
-  KeyboardShortcuts,
   KpiData,
   DashboardCard,
 } from '../types';
-import { ReturnType } from '../hooks/useModalManagement';
+import type { CardLayout } from '@/hooks/useDashboardLayout';
+import { useModalManagement } from '../hooks/useModalManagement';
+import type { CardGroup } from '@/hooks/useCardGrouping';
+import type { useServerPersistence } from '../hooks/useServerPersistence';
+import type { useSmartKPIs } from '@/hooks/useSmartKPIs';
+import type { KeyboardShortcutsMap } from '@/hooks/useKeyboardShortcuts';
+
+type ServerPersistence = ReturnType<typeof useServerPersistence>;
+type SmartKPIsResult = ReturnType<typeof useSmartKPIs>;
 
 export interface DashboardContentProps {
+  // Layout toggles
+  showHeader?: boolean;
   // User
   user: {
     name?: string;
@@ -63,7 +71,7 @@ export interface DashboardContentProps {
     lastSynced: Date | null;
     errorMessage: string | null;
   };
-  smartKPIs: SmartKPIs;
+  smartKPIs: SmartKPIsResult;
   templateLoading: TemplateLoading;
   layout: Layout;
   canvasHeight: number;
@@ -75,9 +83,7 @@ export interface DashboardContentProps {
   onToggleConnection: () => void;
   
   // Actions
-  autoArrange: (type: 'grid' | 'list' | 'compact') => void;
   applyTemplate: (template: string) => void;
-  autoArrangeCards: () => void;
   undo: () => void;
   redo: () => void;
   canUndo: boolean;
@@ -89,21 +95,23 @@ export interface DashboardContentProps {
   canZoomIn: boolean;
   canZoomOut: boolean;
   resetView: () => void;
+  autoArrange: (mode: 'grid' | 'list' | 'compact') => void;
+  autoArrangeCards: () => void;
   handleResetAll: () => void;
   handleFullscreenToggle: () => void;
   handleMobileNavigate: (page: string) => void;
   handleMobileSearch: (query: string) => void;
-  handleToggleMobileView: () => void;
+  handleToggleMobileView: (view?: 'grid' | 'list') => void;
   handleLoadPreset: (preset: Preset) => void;
   handleGroupDeleteConfirm: () => void;
   handlePanStart: (e: React.MouseEvent) => void;
   getTransformStyle: () => React.CSSProperties;
   
   // Groups
-  groups: Record<string, Group>;
+  groups: Record<string, CardGroup>;
   selectedGroupId: string | null;
   setSelectedGroupId: (id: string | null) => void;
-  updateGroup: (groupId: string, updates: Partial<Group>) => void;
+  updateGroup: (groupId: string, updates: Partial<CardGroup>) => void;
   deleteGroup: (groupId: string) => void;
   ungroupCards: (groupId: string) => void;
   handleGroupDragStart: (groupId: string, e: React.MouseEvent) => void;
@@ -121,17 +129,15 @@ export interface DashboardContentProps {
   availableKpiFields: Array<{ id: string; name: string; type: string }>;
   
   // Server persistence
-  serverPersistence: {
-    addCard: (type: string) => Promise<string>;
-    currentLayoutId: string;
-  };
+  serverPersistence: ServerPersistence;
   localAddCard: (type: string, position?: { x: number; y: number }) => string;
   
   // Shortcuts
-  shortcuts: KeyboardShortcuts;
+  shortcuts: KeyboardShortcutsMap;
 }
 
 export const DashboardContent: React.FC<DashboardContentProps> = ({
+  showHeader = true,
   user,
   scrollableContainerRef,
   containerRef,
@@ -147,9 +153,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   connectionStatus,
   collaborators,
   onToggleConnection,
-  autoArrange,
   applyTemplate,
-  autoArrangeCards,
   undo,
   redo,
   canUndo,
@@ -192,34 +196,35 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   return (
     <div className="w-full h-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative flex flex-col">
       {/* Dashboard FAB - Always visible at top left */}
-      <DashboardFAB
-        showCardSelector={dashboardState.showCardSelector}
-        setShowCardSelector={dashboardState.setShowCardSelector}
-        isCollabConnected={isCollabConnected}
-        connectionStatus={connectionStatus}
-        collaborators={collaborators}
-        onToggleConnection={onToggleConnection}
-        autoArrange={(type: string) => autoArrange(type as 'grid' | 'list' | 'compact')}
-        applyTemplate={applyTemplate}
-        autoArrangeCards={autoArrangeCards}
-        undo={undo}
-        redo={redo}
-        canUndo={canUndo}
-        canRedo={canRedo}
-        searchTerm={dashboardState.searchTerm}
-        setSearchTerm={dashboardState.setSearchTerm}
-        setShowLayoutManager={dashboardState.setShowLayoutManager}
-        zoom={zoom}
-        zoomIn={zoomIn}
-        zoomOut={zoomOut}
-        canZoomIn={canZoomIn}
-        canZoomOut={canZoomOut}
-        resetView={resetView}
-        cardsCount={Object.keys(layout.cards).length}
-        handleResetAll={handleResetAll}
-        handleFullscreenToggle={handleFullscreenToggle}
-        isMobileFullscreen={dashboardState.isMobileFullscreen}
-      />
+      {showHeader && (
+        <DashboardFAB
+          showCardSelector={dashboardState.showCardSelector}
+          setShowCardSelector={dashboardState.setShowCardSelector}
+          isCollabConnected={isCollabConnected}
+          connectionStatus={connectionStatus}
+          collaborators={collaborators.map(c => ({
+            id: c.id,
+            name: c.name,
+            ...(c.avatar_url ? { avatar: c.avatar_url } : {})
+          }))}
+          onToggleConnection={onToggleConnection}
+          undo={undo}
+          redo={redo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          setShowLayoutManager={dashboardState.setShowLayoutManager}
+          zoom={zoom}
+          zoomIn={zoomIn}
+          zoomOut={zoomOut}
+          canZoomIn={canZoomIn}
+          canZoomOut={canZoomOut}
+          resetView={resetView}
+          cardsCount={Object.keys(layout.cards).length}
+          handleResetAll={handleResetAll}
+          handleFullscreenToggle={handleFullscreenToggle}
+          isMobileFullscreen={dashboardState.isMobileFullscreen}
+        />
+      )}
 
       {/* Mobile Navigation */}
       {dashboardState.showMobileNavigation && (
@@ -233,7 +238,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
           user={{
             name: user?.name || 'User',
             email: user?.email || 'user@example.com',
-            avatar: user?.avatar_url
+            ...(user?.avatar_url ? { avatar: user.avatar_url } : {})
           }}
           onLogout={() => {}}
         />
@@ -246,15 +251,17 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
         style={{ minHeight: `${Math.max(600, canvasHeight)}px` }}
       >
         {/* Keyboard Shortcuts Help Button - Top Right */}
-        <div className="absolute top-4 right-4 z-40">
-          <button
-            onClick={() => dashboardState.setShowKeyboardHelp(true)}
-            className="p-2 rounded-lg shadow-md transition-all duration-200 hover:scale-105 bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
-            title="Keyboard Shortcuts (?)"
-          >
-            <HelpCircle className="w-4 h-4" />
-          </button>
-        </div>
+        {showHeader && (
+          <div className="absolute top-4 right-4 z-40">
+            <button
+              onClick={() => dashboardState.setShowKeyboardHelp(true)}
+              className="p-2 rounded-lg shadow-md transition-all duration-200 hover:scale-105 bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+              title="Keyboard Shortcuts (?)"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         <div className="max-w-full mx-auto">
           <DashboardCanvas
@@ -279,23 +286,32 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
             setShowCardSelector={dashboardState.setShowCardSelector}
           />
 
-          <StatusBar
-            searchTerm={dashboardState.searchTerm}
-            filteredCardsLength={filteredCards.length}
-            totalCardsLength={Object.keys(layout.cards).length}
-            isVirtualScrolling={virtualScrolling.isVirtualScrolling}
-            virtualScrollingThreshold={dashboardState.virtualScrollingThreshold}
-            currentLayout={layout.currentLayout || 'custom'}
-            applyTemplate={applyTemplate}
-            syncStatus={syncStatus.status}
-            lastSynced={syncStatus.lastSynced}
-            syncErrorMessage={syncStatus.errorMessage}
-          />
+          {showHeader && (
+            <StatusBar
+              searchTerm={dashboardState.searchTerm}
+              filteredCardsLength={filteredCards.length}
+              totalCardsLength={Object.keys(layout.cards).length}
+              isVirtualScrolling={virtualScrolling.isVirtualScrolling}
+              virtualScrollingThreshold={dashboardState.virtualScrollingThreshold}
+              currentLayout={layout.currentLayout || 'custom'}
+              applyTemplate={applyTemplate}
+              syncStatus={syncStatus.status}
+              lastSynced={syncStatus.lastSynced}
+              syncErrorMessage={syncStatus.errorMessage}
+            />
+          )}
         </div>
 
         {/* Error Display */}
         <ErrorDisplay
-          errors={errorHandling.errors}
+          errors={errorHandling.errors.map(err => ({
+            id: err.id,
+            message: err.message,
+            operation: 'unknown',
+            timestamp: err.timestamp,
+            retryable: err.retryable || false,
+            retryCount: 0
+          }))}
           onDismiss={errorHandling.clearError}
           onRetry={(errorId) => {
             errorHandling.retryOperation(errorId);
@@ -305,7 +321,14 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
         <KeyboardShortcutsModal
           showKeyboardHelp={dashboardState.showKeyboardHelp}
           setShowKeyboardHelp={dashboardState.setShowKeyboardHelp}
-          shortcuts={shortcuts}
+          shortcuts={Object.entries(shortcuts).flatMap(([key, value]) => 
+            value.keys.map(k => ({
+              key: k,
+              description: value.description,
+              action: key,
+              category: 'general'
+            }))
+          )}
         />
 
         <CardSelector
@@ -320,18 +343,46 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
         />
 
         <LayoutManager
-          currentLayout={layout}
+          currentLayout={{
+            cards: Object.fromEntries(
+              Object.entries(layout.cards).map(([id, card]) => [
+                id,
+                {
+                  id: card.id,
+                  x: card.x,
+                  y: card.y,
+                  width: card.width,
+                  height: card.height,
+                  type: card.type,
+                  visible: true
+                }
+              ])
+            ) as Record<string, CardLayout>,
+            canvasHeight,
+            theme: 'light' as const,
+            ...(layout.currentLayout ? { currentLayout: layout.currentLayout as 'grid' | 'dashboard' | 'sidebar' | 'custom' } : { currentLayout: 'custom' as const })
+          }}
           currentZoom={zoom}
           currentPan={pan}
           isOpen={dashboardState.showLayoutManager}
           onClose={() => dashboardState.setShowLayoutManager(false)}
-          onLoadLayout={handleLoadPreset}
+          onLoadLayout={(dashboardLayout) => {
+            const layoutType = dashboardLayout.currentLayout || 'custom';
+            handleLoadPreset({
+              id: layoutType,
+              name: layoutType === 'custom' ? 'Custom' : layoutType.charAt(0).toUpperCase() + layoutType.slice(1),
+              layout: {
+                cards: dashboardLayout.cards,
+                currentLayout: layoutType as 'grid' | 'dashboard' | 'sidebar' | 'custom'
+              }
+            });
+          }}
         />
 
         {/* Modals */}
         <AlertDialog
           open={modalManagement.alertModal.isOpen}
-          onOpenChange={(open) => modalManagement.setAlertModal((prev) => ({ ...prev, isOpen: open }))}
+          onOpenChange={(open) => modalManagement.setAlertModal((prev: typeof modalManagement.alertModal) => ({ ...prev, isOpen: open }))}
           title={modalManagement.alertModal.title}
           message={modalManagement.alertModal.message}
           type={modalManagement.alertModal.type as 'info' | 'warning' | 'error' | 'success'}
@@ -339,7 +390,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
         
         <ConfirmDialog
           open={modalManagement.confirmModal.isOpen}
-          onOpenChange={(open) => modalManagement.setConfirmModal((prev) => ({ ...prev, isOpen: open }))}
+          onOpenChange={(open) => modalManagement.setConfirmModal((prev: typeof modalManagement.confirmModal) => ({ ...prev, isOpen: open }))}
           onConfirm={() => {
             if (modalManagement.confirmModal.onConfirm) {
               modalManagement.confirmModal.onConfirm();
@@ -353,7 +404,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
 
         <PromptDialog
           open={modalManagement.promptModal.isOpen}
-          onOpenChange={(open) => modalManagement.setPromptModal((prev) => ({ ...prev, isOpen: open }))}
+          onOpenChange={(open) => modalManagement.setPromptModal((prev: typeof modalManagement.promptModal) => ({ ...prev, isOpen: open }))}
           onConfirm={modalManagement.promptModal.onConfirm || ((_value: string) => {})}
           title={modalManagement.promptModal.title}
           message={modalManagement.promptModal.message}
@@ -364,13 +415,27 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
         <DrillDownModal
           isOpen={smartKPIs.isDrillDownOpen}
           onClose={() => smartKPIs.setIsDrillDownOpen(false)}
-          kpi={smartKPIs.selectedKPI}
-          data={smartKPIs.drillDownData}
+          kpi={smartKPIs.selectedKPI ? {
+            id: smartKPIs.selectedKPI.id,
+            metric: smartKPIs.selectedKPI.metric,
+            value: 0,
+            threshold: {
+              green: smartKPIs.selectedKPI.threshold.green,
+              yellow: smartKPIs.selectedKPI.threshold.yellow,
+              red: smartKPIs.selectedKPI.threshold.yellow * 1.5,
+              unit: smartKPIs.selectedKPI.threshold.unit ?? ''
+            },
+            trend: 'stable' as const,
+            lastUpdated: new Date().toISOString(),
+            category: (smartKPIs.selectedKPI.category as 'financial' | 'operational' | 'customer' | 'compliance') || 'operational',
+            realTime: smartKPIs.selectedKPI.realTime ?? false
+          } : null}
+          data={smartKPIs.drillDownData || {}}
         />
 
         <ConfirmDialog
           open={modalManagement.groupDeleteModal.isOpen}
-          onOpenChange={(open) => modalManagement.setGroupDeleteModal((prev) => ({ ...prev, isOpen: open }))}
+          onOpenChange={(open) => modalManagement.setGroupDeleteModal((prev: typeof modalManagement.groupDeleteModal) => ({ ...prev, isOpen: open }))}
           onConfirm={handleGroupDeleteConfirm}
           title="Delete Group"
           message={`Delete group "${modalManagement.groupDeleteModal.groupName}" and all cards inside?`}
@@ -385,22 +450,30 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
           isEditingTemplate={false}
           onSaveTemplate={async (_template) => {}}
           onUseTemplate={async (template) => {
-            await handleKpiBuilderUseTemplate(
-              template,
-              localAddCard,
-              serverPersistence.currentLayoutId,
-              setKpiData,
-              dashboardState.setShowKPIBuilder
-            );
+            try {
+              await handleKpiBuilderUseTemplate(
+                template,
+                localAddCard,
+                serverPersistence.currentLayoutId,
+                (data: Record<string, any>) => setKpiData(data as Record<string, KpiData>),
+                dashboardState.setShowKPIBuilder
+              );
+            } catch (error) {
+              logger.error('Failed to use KPI builder template', error as Error, 'DashboardContent');
+            }
           }}
           onSave={async (kpi) => {
-            await handleKpiBuilderSave(
-              kpi,
-              serverPersistence.addCard,
-              serverPersistence.currentLayoutId,
-              setKpiData,
-              dashboardState.setShowKPIBuilder
-            );
+            try {
+              await handleKpiBuilderSave(
+                kpi,
+                serverPersistence.addCard,
+                serverPersistence.currentLayoutId,
+                (data: Record<string, any>) => setKpiData(data as Record<string, KpiData>),
+                dashboardState.setShowKPIBuilder
+              );
+            } catch (error) {
+              logger.error('Failed to save KPI', error as Error, 'DashboardContent');
+            }
           }}
           onTest={async (_kpi) => {
             return new Promise((resolve) => {
@@ -413,31 +486,45 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
               }, 1000);
             });
           }}
-          availableFields={availableKpiFields}
+          availableFields={availableKpiFields.map(field => ({
+            id: field.id,
+            name: field.name,
+            type: field.type as 'number' | 'text' | 'date' | 'boolean',
+            table: '',
+            column: ''
+          }))}
         />
 
         <KpiTemplateLibraryModal
-          isOpen={dashboardState.showTemplateLibrary}
-          onClose={() => dashboardState.setShowTemplateLibrary(false)}
+          isOpen={(dashboardState as any).showTemplateLibrary || false}
+          onClose={() => {
+            if ((dashboardState as any).setShowTemplateLibrary) {
+              (dashboardState as any).setShowTemplateLibrary(false);
+            }
+          }}
           onUseTemplate={async (template) => {
-            await handleTemplateLibraryUseTemplate(
-              template,
-              localAddCard,
-              serverPersistence.currentLayoutId,
-              setKpiData,
-              dashboardState.setShowTemplateLibrary
-            );
+            try {
+              await handleTemplateLibraryUseTemplate(
+                template,
+                localAddCard,
+                serverPersistence.currentLayoutId,
+                (data: Record<string, any>) => setKpiData(data as Record<string, KpiData>),
+                (dashboardState as any).setShowTemplateLibrary || (() => {})
+              );
+            } catch (error) {
+              logger.error('Failed to use KPI template library item', error as Error, 'DashboardContent');
+            }
           }}
         />
 
         {/* Template Loading Indicator */}
         <TemplateLoadingIndicator
           isLoading={templateLoading.isLoading}
-          error={templateLoading.error}
-          templatesCount={templateLoading.templates.length}
-          onRetry={templateLoading.retry}
-          onDismiss={templateLoading.clearError}
-          canRetry={templateLoading.canRetry}
+          error={(templateLoading as any).error || null}
+          templatesCount={(templateLoading as any).templates?.length || 0}
+          onRetry={(templateLoading as any).retry || (() => {})}
+          onDismiss={(templateLoading as any).clearError || (() => {})}
+          canRetry={(templateLoading as any).canRetry || false}
           autoHideDelay={4000}
         />
       </div>

@@ -44,24 +44,26 @@ export default function PaymentDashboard() {
   );
 
   // Fetch payment tracking data
-  const { data: trackingData, isLoading: isLoadingTracking, error: trackingError, refetch: refetchTracking } = useQuery<{
-    dailyTrends?: Record<string, number>;
-    summary?: {
-      averagePayment: number;
-      paymentCount: number;
-    };
-    payments?: Array<{
-      id?: string | number;
-      payment_date?: string;
-      amount?: number | string;
-      Invoice?: {
-        invoice_number?: string;
-        accounts?: { name?: string };
-      };
-    }>;
-  }>({
+  const { data: trackingData, isLoading: isLoadingTracking, error: trackingError, refetch: refetchTracking } = useQuery({
     queryKey: ['billing', 'payment-tracking', startDate, endDate],
-    queryFn: () => billing.getPaymentTracking(startDate ?? '', endDate ?? ''),
+    queryFn: async (): Promise<{
+      dailyTrends?: Record<string, number>;
+      summary?: {
+        averagePayment: number;
+        paymentCount: number;
+      };
+      payments?: Array<{
+        id?: string | number;
+        payment_date?: string;
+        amount?: number | string;
+        Invoice?: {
+          invoice_number?: string;
+          accounts?: { name?: string };
+        };
+      }>;
+    }> => {
+      return await billing.getPaymentTracking(startDate ?? '', endDate ?? '');
+    },
   });
 
   if (trackingError) {
@@ -70,14 +72,16 @@ export default function PaymentDashboard() {
   }
 
   // Fetch payment analytics
-  const { data: analyticsData, isLoading: isLoadingAnalytics, error: analyticsError } = useQuery<{
-    paymentMethodBreakdown?: Record<string, number>;
-    summary?: {
-      successRate: number;
-    };
-  }>({
+  const { data: analyticsData, isLoading: isLoadingAnalytics, error: analyticsError } = useQuery({
     queryKey: ['payment-analytics', startDate, endDate],
-    queryFn: () => billing.getPaymentAnalytics(startDate ?? '', endDate ?? ''),
+    queryFn: async (): Promise<{
+      paymentMethodBreakdown?: Record<string, number>;
+      summary?: {
+        successRate: number;
+      };
+    }> => {
+      return await billing.getPaymentAnalytics(startDate ?? '', endDate ?? '');
+    },
   });
 
   if (analyticsError) {
@@ -86,13 +90,15 @@ export default function PaymentDashboard() {
   }
 
   // Fetch AR summary
-  const { data: arSummaryData, isLoading: isLoadingAR } = useQuery<{
-    totalAR?: number;
-    overdueAR?: number;
-    currentAR?: number;
-  }>({
+  const { data: arSummaryData, isLoading: isLoadingAR } = useQuery({
     queryKey: ['billing', 'ar-summary'],
-    queryFn: () => billing.getARSummary(),
+    queryFn: async (): Promise<{
+      totalAR?: number;
+      overdueAR?: number;
+      currentAR?: number;
+    }> => {
+      return await billing.getARSummary();
+    },
   });
 
   const arSummary = arSummaryData;
@@ -102,7 +108,7 @@ export default function PaymentDashboard() {
     if (!trackingData?.dailyTrends) {
       return [];
     }
-    return Object.entries(trackingData.dailyTrends)
+    return Object.entries(trackingData.dailyTrends!)
       .map(([date, amount]) => ({
         date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         amount: Number(amount),
@@ -116,7 +122,7 @@ export default function PaymentDashboard() {
     if (!analyticsData?.paymentMethodBreakdown) {
       return [];
     }
-    return Object.entries(analyticsData.paymentMethodBreakdown).map(([name, value]) => ({
+    return Object.entries(analyticsData.paymentMethodBreakdown!).map(([name, value]) => ({
       name,
       value: Number(value)
     }));

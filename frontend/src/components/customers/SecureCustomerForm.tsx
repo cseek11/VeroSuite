@@ -58,7 +58,7 @@ export default function SecureCustomerForm({ customer, onSave, onCancel }: Custo
       city: customer?.city || '',
       state: customer?.state || '',
       zip_code: customer?.zip_code || '',
-      notes: customer?.notes || '',
+      notes: (customer as Customer & { notes?: string })?.notes || '',
     },
   });
 
@@ -75,7 +75,7 @@ export default function SecureCustomerForm({ customer, onSave, onCancel }: Custo
         city: customer.city || '',
         state: customer.state || '',
         zip_code: customer.zip_code || '',
-        notes: customer.notes || '',
+        notes: (customer as Customer & { notes?: string }).notes || '',
       });
     }
   }, [customer, reset]);

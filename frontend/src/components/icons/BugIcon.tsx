@@ -9,7 +9,7 @@ interface BugIconProps {
 export const BugIcon: React.FC<BugIconProps> = ({ 
   className = "", 
   size = 40, 
-  color = "currentColor" 
+  color: _color = "currentColor" 
 }) => {
   return (
     <svg 

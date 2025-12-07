@@ -43,17 +43,22 @@ export const MobileDashboard: React.FC<MobileDashboardProps> = ({
 
   // Swipe handlers using native touch events
   const handleSwipeStart = useCallback((e: React.TouchEvent) => {
-    swipeStartRef.current = {
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY
-    };
+    const touch = e.touches[0];
+    if (touch) {
+      swipeStartRef.current = {
+        x: touch.clientX,
+        y: touch.clientY
+      };
+    }
   }, []);
 
   const handleSwipeMove = useCallback((e: React.TouchEvent) => {
     if (!swipeStartRef.current) return;
+    const touch = e.touches[0];
+    if (!touch) return;
     
-    const currentX = e.touches[0].clientX;
-    const currentY = e.touches[0].clientY;
+    const currentX = touch.clientX;
+    const currentY = touch.clientY;
     const deltaX = currentX - swipeStartRef.current.x;
     const deltaY = currentY - swipeStartRef.current.y;
 
@@ -88,7 +93,10 @@ export const MobileDashboard: React.FC<MobileDashboardProps> = ({
   // Pull to refresh
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (containerRef.current?.scrollTop === 0) {
-      startYRef.current = e.touches[0].clientY;
+      const touch = e.touches[0];
+      if (touch) {
+        startYRef.current = touch.clientY;
+      }
     }
   }, []);
 
@@ -259,12 +267,12 @@ export const MobileDashboard: React.FC<MobileDashboardProps> = ({
             >
               <RegionContainer
                 region={region}
-                onResize={onResize}
-                onMove={onMove}
-                onToggleCollapse={onToggleCollapse}
-                onToggleLock={onToggleLock}
-                onDelete={onDelete}
-                onUpdate={onUpdate}
+                {...(onResize ? { onResize } : {})}
+                {...(onMove ? { onMove } : {})}
+                {...(onToggleCollapse ? { onToggleCollapse } : {})}
+                {...(onToggleLock ? { onToggleLock } : {})}
+                {...(onDelete ? { onDelete } : {})}
+                {...(onUpdate ? { onUpdate } : {})}
               />
             </div>
           ))}

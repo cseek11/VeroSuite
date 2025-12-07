@@ -47,7 +47,7 @@ export function ResponsiveCard({
   style = {},
   isLocked = false,
   isSelected = false,
-  isResizable = true,
+  isResizable: _isResizable = true,
   isDraggable = true,
   minWidth = 200,
   minHeight = 150,
@@ -56,14 +56,14 @@ export function ResponsiveCard({
   x = 0,
   y = 0,
   onDragStart,
-  onResize,
+  onResize: _onResize,
   onSelect,
   onLock,
   onMinimize,
   onMaximize,
   onReset,
   onMenuClick,
-  responsiveMode = 'auto',
+  responsiveMode: _responsiveMode = 'auto',
   cardType = 'custom'
 }: ResponsiveCardProps) {
   const [isMinimized, setIsMinimized] = useState(false);

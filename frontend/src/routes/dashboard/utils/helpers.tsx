@@ -122,7 +122,13 @@ export const getCardTypes = (onOpenKPIBuilder: () => void): CardType[] => [
   { id: 'routing', name: 'Routing', component: () => <div className="p-4 text-gray-600">Routing - Coming Soon</div> },
   { id: 'team-overview', name: 'Team Overview', component: () => <div className="p-4 text-gray-600">Team Overview - Coming Soon</div> },
   { id: 'financial-summary', name: 'Financial Summary', component: () => <div className="p-4 text-gray-600">Financial Summary - Coming Soon</div> },
-  { id: 'kpi-display', name: 'KPI Display', component: 'kpi-display' },
+  {
+    id: 'kpi-display',
+    name: 'KPI Display',
+    component: ({ cardId }: { cardId?: string }) => (
+      <KpiDisplayCard cardId={cardId ?? 'kpi-display'} kpiData={{}} />
+    )
+  },
   { id: 'kpi-template', name: 'KPI Template', component: ({ cardId, onOpenTemplateLibrary }: { cardId?: string; onOpenTemplateLibrary: () => void }) => <KpiTemplateCard cardId={cardId as string | undefined} onOpenTemplateLibrary={onOpenTemplateLibrary} /> }
 ];
 
@@ -250,6 +256,7 @@ export const createRenderVirtualCard = (
         height: card.height
       }}
       onFocus={(e) => {
+        if (!e || !e.target) return;
         // Only navigate if the focus didn't come from a button click
         if (e.target === e.currentTarget || !e.target.closest('button')) {
           keyboardNavigation.navigateToCard(card.id);

@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
 import { Customer } from '@/types/customer';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ArrowLeft, Pencil, Phone, Mail, MapPin, Calendar, Tag as TagIcon } from 'lucide-react';
 
 interface CustomerDetailProps {
@@ -341,7 +342,13 @@ export default function CustomerDetail({ customerId, onBack, onEdit }: CustomerD
               </div>
               <div className="px-6 py-4">
                 <div className="space-y-3">
-                  {contacts.map((contact) => (
+                  {contacts.map((contact: {
+                    id: string;
+                    first_name: string;
+                    last_name: string;
+                    contact_type: string;
+                    is_primary?: boolean;
+                  }) => (
                     <div key={contact.id} className="border-l-4 border-purple-400 pl-3">
                       <div className="text-sm font-medium text-gray-900">
                         {contact.first_name} {contact.last_name}

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { userApi } from '@/lib/user-api';
 import { User } from '@/types/enhanced-types';
@@ -18,15 +17,16 @@ interface UserDetailProps {
 }
 
 export default function UserDetail({ userId, onBack, onEdit }: UserDetailProps) {
-  const { data: usersResponse, isLoading, error } = useQuery({
+  const { data: users = [], isLoading, error } = useQuery<User[]>({
     queryKey: ['users'],
     queryFn: async () => {
-      return await userApi.getUsers();
+      const response = await userApi.getUsers();
+      return response.users;
     },
   });
 
   // Find the specific user from the list
-  const user = usersResponse?.users?.find((u: User) => u.id === userId);
+  const user = users.find((u: User) => u.id === userId);
 
   if (isLoading) {
     return (
@@ -117,7 +117,7 @@ export default function UserDetail({ userId, onBack, onEdit }: UserDetailProps) 
             <div className="flex items-center space-x-2">
               <Shield className="h-4 w-4 text-gray-400" />
               <div className="flex flex-wrap gap-1">
-                {user.roles?.map((role) => (
+                {user.roles?.map((role: string) => (
                   <span
                     key={role}
                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(role)}`}
@@ -319,7 +319,7 @@ export default function UserDetail({ userId, onBack, onEdit }: UserDetailProps) 
                   <dt className="text-sm font-medium text-gray-500">Roles</dt>
                   <dd className="mt-1">
                     <div className="flex flex-wrap gap-1">
-                      {user.roles?.map((role) => (
+                      {user.roles?.map((role: string) => (
                         <span
                           key={role}
                           className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(role)}`}

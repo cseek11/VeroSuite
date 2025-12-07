@@ -226,7 +226,18 @@ class RobustApiClient {
       }
     }
     
-    const response = await requestFn();
+    let response: ApiResponse<T>;
+    try {
+      response = await requestFn();
+    } catch (error: unknown) {
+      logger.error('Request failed before retry handling', { error, cacheKey }, 'robust-api-client');
+      return {
+        success: false,
+        retries: 0,
+        duration: 0,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
     
     // Cache successful responses
     if (response.success && config.enabled && response.data) {
@@ -242,8 +253,10 @@ class RobustApiClient {
   private setCache(key: string, data: any, ttl: number): void {
     // Remove oldest entries if cache is full
     if (this.cache.size >= this.defaultCacheConfig.maxSize) {
-      const oldestKey = this.cache.keys().next().value;
-      this.cache.delete(oldestKey);
+      const oldest = this.cache.keys().next();
+      if (!oldest.done) {
+        this.cache.delete(oldest.value);
+      }
     }
     
     this.cache.set(key, {
@@ -383,6 +396,7 @@ class RobustApiClient {
    */
   private invalidateCache(endpoint: string): void {
     const pattern = endpoint.split('/')[1]; // Extract resource type
+    if (!pattern) return;
     for (const key of this.cache.keys()) {
       if (key.includes(pattern)) {
         this.cache.delete(key);

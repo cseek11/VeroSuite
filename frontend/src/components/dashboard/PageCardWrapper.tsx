@@ -21,7 +21,8 @@ export default function PageCardWrapper({
   onClose,
   onResize,
   initialSize = { width: 800, height: 600 },
-  className = ''
+  className = '',
+  ...rest
 }: PageCardWrapperProps) {
   const [isMaximized, setIsMaximized] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -90,6 +91,7 @@ export default function PageCardWrapper({
       <Card
         className="bg-white shadow-2xl border-0 overflow-hidden flex flex-col"
         style={cardStyle}
+        {...rest}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">

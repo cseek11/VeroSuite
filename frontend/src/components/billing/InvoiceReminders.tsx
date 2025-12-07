@@ -58,9 +58,12 @@ export default function InvoiceReminders({ onReminderSent }: InvoiceRemindersPro
   const queryClient = useQueryClient();
 
   // Fetch overdue invoices
-  const { data: overdueInvoicesData, isLoading: invoicesLoading, error: invoicesError } = useQuery<Invoice[]>({
+  const { data: overdueInvoicesData, isLoading: invoicesLoading, error: invoicesError } = useQuery({
     queryKey: ['billing', 'overdue-invoices'],
-    queryFn: () => billing.getOverdueInvoices(),
+    queryFn: async (): Promise<Invoice[]> => {
+      const result = await billing.getOverdueInvoices();
+      return Array.isArray(result) ? result : [];
+    },
   });
 
   if (invoicesError) {
@@ -71,9 +74,9 @@ export default function InvoiceReminders({ onReminderSent }: InvoiceRemindersPro
   const overdueInvoices: Invoice[] = Array.isArray(overdueInvoicesData) ? overdueInvoicesData : [];
 
   // Fetch reminder history
-  const { data: reminderHistoryData, isLoading: historyLoading, error: historyError } = useQuery<ReminderHistory[]>({
+  const { data: reminderHistoryData, isLoading: historyLoading, error: historyError } = useQuery({
     queryKey: ['billing', 'reminder-history'],
-    queryFn: async () => {
+    queryFn: async (): Promise<ReminderHistory[]> => {
       // Mock data for now
       return [
         {
@@ -154,8 +157,8 @@ export default function InvoiceReminders({ onReminderSent }: InvoiceRemindersPro
         logger.info('Reminder sent successfully', { invoiceId, result }, 'InvoiceReminders');
         
         // Invalidate queries to refresh data
-        queryClient.invalidateQueries({ queryKey: ['billing', 'reminder-history'] });
-        queryClient.invalidateQueries({ queryKey: ['billing', 'overdue-invoices'] });
+        await queryClient.invalidateQueries({ queryKey: ['billing', 'reminder-history'] });
+        await queryClient.invalidateQueries({ queryKey: ['billing', 'overdue-invoices'] });
         
         if (onReminderSent) {
           onReminderSent();
@@ -193,8 +196,8 @@ export default function InvoiceReminders({ onReminderSent }: InvoiceRemindersPro
         setShowBulkDialog(false);
         
         // Invalidate queries
-        queryClient.invalidateQueries({ queryKey: ['billing', 'reminder-history'] });
-        queryClient.invalidateQueries({ queryKey: ['billing', 'overdue-invoices'] });
+        await queryClient.invalidateQueries({ queryKey: ['billing', 'reminder-history'] });
+        await queryClient.invalidateQueries({ queryKey: ['billing', 'overdue-invoices'] });
         
         if (onReminderSent) {
           onReminderSent();

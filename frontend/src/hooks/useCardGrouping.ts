@@ -72,7 +72,8 @@ export function useCardGrouping(onDeleteCards?: (cardIds: string[]) => void) {
   // Create new group
   const createGroup = useCallback((name: string, cardIds: string[], cards: Record<string, any>, color?: string) => {
     const groupId = `group-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const selectedColor = color || GROUP_COLORS[Object.keys(groups).length % GROUP_COLORS.length].value;
+    const colorIndex = Object.keys(groups).length % GROUP_COLORS.length;
+    const selectedColor = color || (GROUP_COLORS[colorIndex]?.value ?? GROUP_COLORS[0]?.value ?? '#3b82f6');
 
     // Calculate group bounds based on actual card positions
     const groupBounds = calculateGroupBounds(cardIds, cards);

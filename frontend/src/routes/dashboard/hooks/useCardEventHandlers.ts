@@ -22,7 +22,10 @@ interface UseCardEventHandlersProps {
     cards: Record<string, any>;
   };
   gridManager: {
-    minimizeToGrid: (cardId: string) => { position?: { x: number; y: number }; gridPosition?: { row: number; col: number } } | null;
+    minimizeToGrid: (cardId: string) => {
+      position: { x: number; y: number } | null;
+      gridPosition: { row: number; col: number } | null;
+    };
     releasePosition: (cardId: string) => void;
   };
   errorHandling: {
@@ -120,8 +123,8 @@ export function useCardEventHandlers({
       // Find next available grid position using grid manager
       const result = gridManager.minimizeToGrid(cardId);
       
-      if (!result.position || !result.gridPosition) {
-        const _errorId = errorHandling.showError(
+      if (!result || !result.position || !result.gridPosition) {
+        errorHandling.showError(
           'No available grid position found. Please restore some cards first.',
           'minimize',
           false
@@ -169,7 +172,7 @@ export function useCardEventHandlers({
         } else if (isHttp5xx || isNetworkError) {
           // Critical errors - show to user
           syncStatus.setError('Failed to save minimized position');
-          const _errorId = errorHandling.showError(
+          errorHandling.showError(
             'Failed to save minimized position. Changes are saved locally.',
             'minimize',
             true,
@@ -232,7 +235,7 @@ export function useCardEventHandlers({
         } else if (isHttp5xx || isNetworkError) {
           // Critical errors - show to user
           syncStatus.setError('Failed to save restored position');
-          const _errorId = errorHandling.showError(
+          errorHandling.showError(
             'Failed to save restored position. Changes are saved locally.',
             'restore',
             true,

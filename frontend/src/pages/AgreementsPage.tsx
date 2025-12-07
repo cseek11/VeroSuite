@@ -1,4 +1,3 @@
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { AgreementList } from '@/components/agreements/AgreementList';
@@ -127,7 +126,7 @@ export default function AgreementsPage() {
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle className="h-5 w-5 text-yellow-600" />
-            <Heading level={5} className="text-yellow-900">
+            <Heading level={4} className="text-yellow-900">
               Agreements Expiring Soon
             </Heading>
           </div>
@@ -179,7 +178,6 @@ export default function AgreementsPage() {
             className="h-20 flex flex-col items-center justify-center"
             onClick={() => {
               // TODO: Implement agreement templates
-              console.log('Agreement templates not yet implemented');
             }}
           >
             <FileText className="h-6 w-6 mb-2" />
@@ -191,7 +189,6 @@ export default function AgreementsPage() {
             className="h-20 flex flex-col items-center justify-center"
             onClick={() => {
               // TODO: Implement bulk operations
-              console.log('Bulk operations not yet implemented');
             }}
           >
             <Calendar className="h-6 w-6 mb-2" />

@@ -1,4 +1,4 @@
-import React, { Component, ReactNode } from 'react';
+import { Component, ReactNode, ErrorInfo } from 'react';
 import { AlertTriangle, RefreshCw, X } from 'lucide-react';
 import { logger } from '@/utils/logger';
 
@@ -32,7 +32,7 @@ export class TemplateErrorBoundary extends Component<Props, State> {
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Error boundary - use logger
     logger.error('Template Error Boundary caught an error', { error, errorInfo }, 'TemplateErrorBoundary');
     this.setState({
@@ -61,7 +61,7 @@ export class TemplateErrorBoundary extends Component<Props, State> {
     });
   };
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;

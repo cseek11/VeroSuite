@@ -19,7 +19,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { enhancedApi } from '@/lib/enhanced-api';
-import type { Invoice, Payment, BillingAnalytics, RevenueAnalytics } from '@/types/enhanced-types';
+import type { Invoice, Payment, BillingAnalytics } from '@/types/enhanced-types';
 import { logger } from '@/utils/logger';
 
 // Real financial data will be fetched from the API
@@ -33,7 +33,6 @@ const FinancePage: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [billingAnalytics, setBillingAnalytics] = useState<BillingAnalytics | null>(null);
-  const [revenueAnalytics, setRevenueAnalytics] = useState<RevenueAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,23 +52,37 @@ const FinancePage: React.FC = () => {
         setError(null);
 
         // Load all data in parallel with error handling
-        const [invoicesData, paymentsData, analyticsData, revenueData] = await Promise.allSettled([
+        const [invoicesData, paymentsData, analyticsData] = await Promise.allSettled([
           enhancedApi.billing.getInvoices().catch(() => []),
           enhancedApi.billing.getPayments().catch(() => []),
-          enhancedApi.billing.getBillingAnalytics().catch(() => ({ totalRevenue: 0, outstandingAmount: 0, paidAmount: 0, totalInvoices: 0, overdueInvoices: 0 })),
-          enhancedApi.billing.getRevenueAnalytics().catch(() => ({ monthlyRevenue: [], totalRevenue: 0, growthRate: 0 }))
+          enhancedApi.billing.getBillingAnalytics().catch(() => ({
+            totalRevenue: 0,
+            outstandingAmount: 0,
+            paidAmount: 0,
+            totalInvoices: 0,
+            overdueInvoices: 0,
+            averagePaymentTime: 0
+          }))
         ]);
 
         // Extract results, using fallback values for failed requests
         const invoices = invoicesData.status === 'fulfilled' ? invoicesData.value : [];
         const payments = paymentsData.status === 'fulfilled' ? paymentsData.value : [];
-        const analytics = analyticsData.status === 'fulfilled' ? analyticsData.value : { totalRevenue: 0, outstandingAmount: 0, paidAmount: 0, totalInvoices: 0, overdueInvoices: 0 };
-        const revenue = revenueData.status === 'fulfilled' ? revenueData.value : { monthlyRevenue: [], totalRevenue: 0, growthRate: 0 };
+        const analytics =
+          analyticsData.status === 'fulfilled'
+            ? analyticsData.value
+            : {
+                totalRevenue: 0,
+                outstandingAmount: 0,
+                paidAmount: 0,
+                totalInvoices: 0,
+                overdueInvoices: 0,
+                averagePaymentTime: 0
+              };
 
         setInvoices(invoices);
         setPayments(payments);
         setBillingAnalytics(analytics);
-        setRevenueAnalytics(revenue);
       } catch (err: unknown) {
         logger.error('Error loading finance data', err, 'Finance');
         setError(err instanceof Error ? err.message : 'Failed to load finance data');
@@ -87,17 +100,15 @@ const FinancePage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const [invoicesData, paymentsData, analyticsData, revenueData] = await Promise.all([
+      const [invoicesData, paymentsData, analyticsData] = await Promise.all([
         enhancedApi.billing.getInvoices(),
         enhancedApi.billing.getPayments(),
-        enhancedApi.billing.getBillingAnalytics(),
-        enhancedApi.billing.getRevenueAnalytics()
+        enhancedApi.billing.getBillingAnalytics()
       ]);
 
       setInvoices(invoicesData);
       setPayments(paymentsData);
       setBillingAnalytics(analyticsData);
-      setRevenueAnalytics(revenueData);
     } catch (err: unknown) {
       logger.error('Error refreshing finance data', err, 'Finance');
       setError(err instanceof Error ? err.message : 'Failed to refresh finance data');

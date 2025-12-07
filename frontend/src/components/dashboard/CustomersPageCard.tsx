@@ -18,8 +18,8 @@ export default function CustomersPageCard({
     <PageCardManager
       cardId={cardId || ''}
       cardType="customers-page"
-      onClose={onClose}
-      className={className}
+      {...(onClose ? { onClose } : {})}
+      {...(className ? { className } : {})}
     >
       <div className="h-full w-full flex flex-col">
         <Suspense fallback={<LoadingSpinner />}>

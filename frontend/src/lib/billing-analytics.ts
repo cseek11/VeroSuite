@@ -4,7 +4,7 @@
  * Analytics tracking for billing-related user interactions.
  * Provides insights into billing feature usage.
  * 
- * Last Updated: 2025-11-16
+ * Last Updated: 2025-12-07
  */
 
 import * as Sentry from '@sentry/react';
@@ -37,7 +37,7 @@ export function trackBillingEvent(event: BillingEvent) {
     }, 'BillingAnalytics');
 
     // Sentry tracking (if available)
-    if (typeof Sentry !== 'undefined' && Sentry.captureMessage) {
+    if (typeof Sentry !== 'undefined' && typeof Sentry.captureMessage === 'function') {
       Sentry.addBreadcrumb({
         category: 'billing',
         message: event.event,
@@ -66,7 +66,7 @@ export function trackInvoiceView(invoiceId: string, customerId?: string) {
   trackBillingEvent({
     event: 'invoice_viewed',
     invoiceId,
-    customerId,
+    ...(customerId !== undefined ? { customerId } : {}),
   });
 }
 
@@ -77,7 +77,7 @@ export function trackInvoiceDownload(invoiceId: string, customerId?: string) {
   trackBillingEvent({
     event: 'invoice_downloaded',
     invoiceId,
-    customerId,
+    ...(customerId !== undefined ? { customerId } : {}),
   });
 }
 
@@ -94,8 +94,8 @@ export function trackPaymentInitiated(
     event: 'payment_initiated',
     invoiceId,
     amount,
-    paymentMethod,
-    customerId,
+    ...(paymentMethod !== undefined ? { paymentMethod } : {}),
+    ...(customerId !== undefined ? { customerId } : {}),
   });
 }
 
@@ -112,8 +112,8 @@ export function trackPaymentCompleted(
     event: 'payment_completed',
     invoiceId,
     amount,
-    paymentMethod,
-    customerId,
+    ...(paymentMethod !== undefined ? { paymentMethod } : {}),
+    ...(customerId !== undefined ? { customerId } : {}),
   });
 }
 
@@ -127,7 +127,7 @@ export function trackPaymentMethodAdded(
   trackBillingEvent({
     event: 'payment_method_added',
     paymentMethod,
-    customerId,
+    ...(customerId !== undefined ? { customerId } : {}),
   });
 }
 
@@ -141,7 +141,7 @@ export function trackPaymentMethodDeleted(
   trackBillingEvent({
     event: 'payment_method_deleted',
     properties: { paymentMethodId },
-    customerId,
+    ...(customerId !== undefined ? { customerId } : {}),
   });
 }
 

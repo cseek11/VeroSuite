@@ -49,11 +49,11 @@ export default function InvoiceCard({
     const newInvoice: GeneratedInvoice = {
       id: invoiceId,
       invoiceNumber,
-      customerId: customer.id,
-      customerName: customer.name,
-      jobId: job?.id,
+      customerId: String(customer.id || ''),
+      customerName: String(customer.name || ''),
+      jobId: job?.id ? String(job.id) : undefined,
       status: 'draft',
-      amount: job?.total_amount || 0,
+      amount: typeof job?.total_amount === 'number' ? job.total_amount : 0,
       createdAt: new Date(),
     };
 
@@ -87,7 +87,7 @@ export default function InvoiceCard({
                 id: createdInvoice.id,
                 invoiceNumber: createdInvoice.invoice_number,
                 amount: createdInvoice.total_amount,
-                status: createdInvoice.status as any,
+                status: (createdInvoice.status || 'draft') as 'draft' | 'sent' | 'paid' | 'overdue',
                 downloadUrl: `/invoices/${createdInvoice.id}`
               }
             : inv
@@ -177,8 +177,7 @@ export default function InvoiceCard({
     cardId: cardId,
     cardType: 'invoice',
     accepts: {
-      dataTypes: ['customer', 'job'],
-      maxItems: undefined
+      dataTypes: ['customer', 'job'] as ('customer' | 'job')[]
     },
     actions: {
       'create-invoice': {

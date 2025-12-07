@@ -29,7 +29,7 @@ export interface CardContainerProps {
   isResizing: boolean;
   isFocused: boolean;
   isNavigating: boolean;
-  navigationMode: string;
+  navigationMode: 'resize' | 'select' | 'move';
   searchTerm: string;
   isInFilteredResults: boolean;
   cardGroup: any;
@@ -99,7 +99,7 @@ export const CardContainer: React.FC<CardContainerProps> = React.memo(({
     return `${baseClasses} ${selectionClasses} ${dragClasses} ${lockClasses} ${searchClasses}`;
   };
 
-  const handleFocus = (e: React.FocusEvent) => {
+  const handleFocus = (e?: React.FocusEvent) => {
     // Only navigate if the focus didn't come from a button click
     if (e && e.target && (e.target === e.currentTarget || !e.target.closest('button'))) {
       onFocus(card.id);

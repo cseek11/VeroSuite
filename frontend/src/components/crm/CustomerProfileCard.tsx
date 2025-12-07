@@ -53,15 +53,25 @@ export default function CustomerProfileCard({
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
-  // Enhanced customer stats using profile data
+  const profileMetrics = (profile ?? {}) as Partial<{
+    total_services: number;
+    active_contracts: number;
+    last_service_date: string;
+    next_service_date: string;
+    satisfaction_score: number;
+    churn_risk: string;
+    lifetime_value: number;
+  }>;
+
+  // Enhanced customer stats using optional profile data
   const customerStats = {
-    totalServices: profile?.total_services || 0,
-    activeContracts: profile?.active_contracts || 0,
-    lastVisit: profile?.last_service_date || 'N/A',
-    nextScheduled: profile?.next_service_date || 'N/A',
-    satisfactionScore: profile?.satisfaction_score || 0,
-    churnRisk: profile?.churn_risk || 'Low',
-    lifetimeValue: profile?.lifetime_value || 0
+    totalServices: profileMetrics.total_services ?? 0,
+    activeContracts: profileMetrics.active_contracts ?? 0,
+    lastVisit: profileMetrics.last_service_date ?? 'N/A',
+    nextScheduled: profileMetrics.next_service_date ?? 'N/A',
+    satisfactionScore: profileMetrics.satisfaction_score ?? 0,
+    churnRisk: profileMetrics.churn_risk ?? 'Low',
+    lifetimeValue: profileMetrics.lifetime_value ?? 0
   };
 
   // Update customer mutation
@@ -70,14 +80,6 @@ export default function CustomerProfileCard({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['enhanced-customer', customer.id] });
       setIsEditing(false);
-    },
-  });
-
-  // Update customer profile mutation
-  const _updateProfile = useMutation({
-    mutationFn: (data: Partial<CustomerProfile>) => enhancedApi.customers.update(customer.id, {}, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customer-profile', customer.id] });
     },
   });
 
@@ -105,30 +107,12 @@ export default function CustomerProfileCard({
     }
   };
 
-  const _getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'active': return 'green';
-      case 'inactive': return 'gray';
-      case 'suspended': return 'red';
-      case 'on_hold': return 'yellow';
-      case 'canceled': return 'red';
-      case 'past_due': return 'orange';
-      default: return 'gray';
-    }
-  };
-
-  const _getChurnRiskColor = (risk: string) => {
-    switch (risk.toLowerCase()) {
-      case 'low': return 'green';
-      case 'medium': return 'yellow';
-      case 'high': return 'red';
-      default: return 'gray';
-    }
-  };
-
   const customerSince = new Date(customer.created_at);
   const primaryContact = contacts.find(contact => contact.is_primary);
   const emergencyContact = contacts.find(contact => contact.is_emergency_contact);
+  const primaryContactName = primaryContact
+    ? `${primaryContact.first_name ?? ''} ${primaryContact.last_name ?? ''}`.trim() || primaryContact.email || primaryContact.phone
+    : undefined;
 
   return (
     <div className="space-y-6">
@@ -195,7 +179,7 @@ export default function CustomerProfileCard({
         {/* Contact Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="space-y-4">
-            <Heading level={6} className="text-slate-900">
+            <Heading level={4} className="text-slate-900">
               Contact Information
             </Heading>
             
@@ -238,7 +222,7 @@ export default function CustomerProfileCard({
           </div>
 
           <div className="space-y-4">
-            <Heading level={6} className="text-slate-900">
+            <Heading level={4} className="text-slate-900">
               Business Information
             </Heading>
             
@@ -260,7 +244,7 @@ export default function CustomerProfileCard({
               {primaryContact && (
                 <div className="flex items-center gap-3">
                   <User className="w-4 h-4 text-slate-500" />
-                  <span className="text-slate-700">Primary: {primaryContact.name}</span>
+                  <span className="text-slate-700">Primary: {primaryContactName}</span>
                 </div>
               )}
               
@@ -320,7 +304,7 @@ export default function CustomerProfileCard({
         <div className="mt-6 p-4 bg-slate-50 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
-              <Heading level={6} className="text-slate-900">
+            <Heading level={4} className="text-slate-900">
                 Churn Risk Assessment
               </Heading>
               <Text variant="small" className="text-slate-600">

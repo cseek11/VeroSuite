@@ -66,11 +66,26 @@ export function useDashboardKeyboardShortcuts({
         }
       });
     }, [layout.cards, serverPersistence]),
-    onSelectAll: () => dashboardState.handleSelectAll(Object.keys(layout.cards)),
-    onDeselectAll: dashboardState.handleDeselectAll,
-    onShowHelp: () => dashboardState.setShowKeyboardHelp(true),
-    onUndo: undo,
-    onRedo: redo,
+    onSelectAll: () => {
+      dashboardState.handleSelectAll(Object.keys(layout.cards));
+      return true;
+    },
+    onDeselectAll: () => {
+      dashboardState.handleDeselectAll();
+      return true;
+    },
+    onShowHelp: () => {
+      dashboardState.setShowKeyboardHelp(true);
+      return true;
+    },
+    onUndo: () => {
+      undo();
+      return true;
+    },
+    onRedo: () => {
+      redo();
+      return true;
+    },
     selectedCards: dashboardState.selectedCards
   });
 }

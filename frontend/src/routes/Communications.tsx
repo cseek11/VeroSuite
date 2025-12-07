@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import {
   MessageCircle,
   Mail,
@@ -17,20 +16,74 @@ import {
   X
 } from 'lucide-react';
 
-// Real data will be fetched from API
-import { enhancedApi } from '@/lib/enhanced-api';
-
-// Templates will be fetched from API
-const getTemplates = async () => {
-  return await enhancedApi.communicationTemplates.list();
+type CommunicationMessage = {
+  id: string;
+  subject: string;
+  content: string;
+  from: string;
+  to?: string;
+  timestamp: string;
+  type: 'email' | 'sms' | 'phone';
+  status: 'read' | 'sent' | 'completed' | 'draft';
+  priority: 'high' | 'normal' | 'low';
+  attachments: string[];
 };
+
+type CommunicationTemplate = {
+  id: string;
+  name: string;
+  type: 'email' | 'sms';
+  content: string;
+};
+
+const mockMessages: CommunicationMessage[] = [
+  {
+    id: '1',
+    subject: 'Service Confirmation',
+    content: 'Your quarterly service is confirmed for tomorrow at 2pm.',
+    from: 'support@verofield.com',
+    to: 'customer@example.com',
+    timestamp: new Date().toISOString(),
+    type: 'email',
+    status: 'read',
+    priority: 'normal',
+    attachments: [],
+  },
+  {
+    id: '2',
+    subject: 'Reminder: Technician On The Way',
+    content: 'Our technician is en route. Reply if you need to reschedule.',
+    from: 'sms@verofield.com',
+    to: 'customer@example.com',
+    timestamp: new Date().toISOString(),
+    type: 'sms',
+    status: 'sent',
+    priority: 'high',
+    attachments: [],
+  },
+];
+
+const mockTemplates: CommunicationTemplate[] = [
+  {
+    id: 'tmpl-1',
+    name: 'Service Follow-up',
+    type: 'email',
+    content: 'Thank you for choosing VeroField. We hope everything went well.',
+  },
+  {
+    id: 'tmpl-2',
+    name: 'Payment Reminder',
+    type: 'sms',
+    content: 'Your invoice is ready. Reply PAY to complete payment.',
+  },
+];
 
 const CommunicationsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('inbox');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedMessage, setSelectedMessage] = useState<any>(null);
+  const [selectedMessage, setSelectedMessage] = useState<CommunicationMessage | null>(null);
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
-  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  // const [, setShowTemplateModal] = useState(false); // Reserved for future template modal
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
 
@@ -42,16 +95,13 @@ const CommunicationsPage: React.FC = () => {
     { id: 'archived', label: 'Archived', icon: Archive }
   ];
 
-  // Messages will be fetched from API
-  const { data: messages = [] } = useQuery({
-    queryKey: ['communications', 'messages'],
-    queryFn: () => enhancedApi.communications.list(),
-  });
+  const messages: CommunicationMessage[] = mockMessages;
 
-  const filteredMessages = messages.filter(message => {
-    const matchesSearch = message.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         message.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         message.from.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredMessages = messages.filter((message) => {
+    const matchesSearch =
+      message.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      message.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      message.from.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = filterType === 'all' || message.type === filterType;
     const matchesStatus = filterStatus === 'all' || message.status === filterStatus;
     return matchesSearch && matchesType && matchesStatus;
@@ -242,7 +292,7 @@ const CommunicationsPage: React.FC = () => {
           {activeTab === 'sent' && (
             <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredMessages.filter(m => m.status === 'sent').map((message) => {
+                {filteredMessages.filter((m) => m.status === 'sent').map((message) => {
                   const MessageIcon = getMessageIcon(message.type);
                   const StatusIcon = getStatusIcon(message.status);
                   
@@ -500,7 +550,7 @@ const CommunicationsPage: React.FC = () => {
                     Attachments
                   </h4>
                   <div className="space-y-2">
-                    {selectedMessage.attachments.map((attachment, index) => (
+                    {selectedMessage.attachments.map((attachment: string, index: number) => (
                       <div key={index} className="flex items-center gap-2 p-2 bg-slate-50 rounded">
                         <FileText className="h-4 w-4 text-slate-600" />
                         <span className="text-xs text-slate-700">{attachment}</span>

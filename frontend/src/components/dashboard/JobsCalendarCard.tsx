@@ -47,6 +47,14 @@ interface Job {
   };
 }
 
+type JobWithRelations = Job & {
+  customer?: { id: string; name: string; phone?: string };
+  location?: { id: string; name: string; address: string; coordinates?: { lat: number; lng: number } };
+  service?: { type: string; description: string; estimated_duration: number; price?: number };
+  is_recurring?: boolean;
+  recurring_template_id?: string;
+};
+
 interface JobsCalendarCardProps {
   onJobSelect?: (job: Job) => void;
   onJobEdit?: (job: Job) => void;
@@ -288,15 +296,15 @@ export default function JobsCalendarCard({
   });
 
   // Handle job selection
-  const handleJobSelect = (job: Job) => {
-    setSelectedJob(job);
-    onJobSelect?.(job);
+  const handleJobSelect = (job: JobWithRelations) => {
+    setSelectedJob(job as Job);
+    onJobSelect?.(job as Job);
   };
 
   // Handle job edit
-  const handleJobEdit = (job: Job) => {
-    setSelectedJob(job);
-    onJobEdit?.(job);
+  const handleJobEdit = (job: JobWithRelations) => {
+    setSelectedJob(job as Job);
+    onJobEdit?.(job as Job);
   };
 
   // Handle job create - open a modal or navigate to job creation
@@ -366,7 +374,7 @@ export default function JobsCalendarCard({
             </div>
 
             {/* Statistics */}
-      <div className="grid grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="text-center">
           <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
           <div className="text-xs text-gray-500">Total</div>

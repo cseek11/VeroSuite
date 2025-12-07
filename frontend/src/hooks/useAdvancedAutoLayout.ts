@@ -116,7 +116,7 @@ export function useAdvancedAutoLayout({
       cardId,
       action,
       timestamp: new Date(),
-      duration,
+      ...(duration !== undefined ? { duration } : {}),
       context: {
         timeOfDay: new Date().getHours(),
         dayOfWeek: new Date().getDay(),
@@ -322,17 +322,25 @@ export function useAdvancedAutoLayout({
   const autoArrange = useCallback((mode: 'smart' | 'grid' | 'compact' = 'smart') => {
     if (mode === 'smart') {
       // Use learned patterns for intelligent arrangement
-      const changes = layoutSuggestions
+      type ChangeType = {
+        cardId: string;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        reason: string;
+      };
+      const changes: ChangeType[] = layoutSuggestions
         .filter(s => s.confidence > 0.7)
         .flatMap(s => s.changes)
-        .reduce((acc, change) => {
+        .reduce((acc: ChangeType[], change) => {
           const existing = acc.find(c => c.cardId === change.cardId);
           if (existing) {
             // Use the change with higher confidence
             return acc.map(c => c.cardId === change.cardId ? change : c);
           }
           return [...acc, change];
-        }, [] as typeof changes);
+        }, []);
 
       if (changes.length > 0) {
         onLayoutChange?.(changes);
@@ -396,7 +404,7 @@ export function useAdvancedAutoLayout({
       totalUsage,
       avgDuration,
       timeDistribution,
-      lastUsed: patterns.length > 0 ? patterns[patterns.length - 1].timestamp : null
+      lastUsed: patterns.length > 0 ? (patterns[patterns.length - 1]?.timestamp ?? null) : null
     };
   }, [usagePatterns]);
 

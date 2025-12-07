@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Calendar, TrendingUp, AlertCircle, Loader2, Edit, Check, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { enhancedApi } from '@/lib/enhanced-api';
+import { Account } from '@/types/enhanced-types';
 import {
   Typography,
   Card,
@@ -13,36 +14,22 @@ import {
 import { logger } from '@/utils/logger';
 
 
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  city: string;
-  state: string;
-  account_type: 'commercial' | 'residential';
-  ar_balance: number;
-  address?: string;
-  zip_code?: string;
-  company_name?: string;
-  contact_person?: string;
-  notes?: string;
-  status: 'active' | 'prospect' | 'inactive';
-  property_type?: string;
-  property_size?: string;
-  access_instructions?: string;
-  emergency_contact?: string;
-  preferred_contact_method?: string;
-  billing_address?: any;
-  payment_method?: string;
-  billing_cycle?: string;
-  created_at?: string;
-  updated_at?: string;
-  locations?: any[];
-  workOrders?: any[];
-  serviceHistory?: any[];
-  contracts?: any[];
-}
+type ServiceHistoryEntry = {
+  status?: string;
+  cost?: number;
+  service_date?: string;
+};
+
+type ContractEntry = {
+  status?: string;
+  value?: number;
+};
+
+type CustomerDetails = Account & {
+  status: Account['status'] | 'prospect';
+  serviceHistory?: ServiceHistoryEntry[];
+  contracts?: ContractEntry[];
+};
 
 interface CustomerOverviewPopupProps {
   customerId: string;
@@ -52,12 +39,12 @@ const CustomerOverviewPopup: React.FC<CustomerOverviewPopupProps> = ({
   customerId
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedCustomer, setEditedCustomer] = useState<Customer | null>(null);
+  const [editedCustomer, setEditedCustomer] = useState<CustomerDetails | null>(null);
   const [newTag, setNewTag] = useState('');
   const [customerTags, setCustomerTags] = useState<string[]>(['VIP', 'Quarterly Service', 'High Priority']);
 
   // Fetch customer data
-  const { data: customer, isLoading, error } = useQuery({
+  const { data: customer, isLoading, error } = useQuery<CustomerDetails | null>({
     queryKey: ['customer', customerId],
     queryFn: () => enhancedApi.customers.getById(customerId),
     enabled: !!customerId
@@ -83,15 +70,18 @@ const CustomerOverviewPopup: React.FC<CustomerOverviewPopupProps> = ({
       daysSinceLastService: null
     };
 
-    const completedServices = customer.serviceHistory?.filter(s => s.status === 'completed') || [];
+    const completedServices = (customer.serviceHistory || []).filter(
+      (s): s is ServiceHistoryEntry & { service_date: string } =>
+        s.status === 'completed' && !!s.service_date
+    );
     const totalSpend = completedServices.reduce((sum, service) => sum + (service.cost || 0), 0);
-    const lastService = completedServices.sort((a, b) => 
-      new Date(b.service_date).getTime() - new Date(a.service_date).getTime()
+    const lastService = [...completedServices].sort(
+      (a, b) => new Date(b.service_date).getTime() - new Date(a.service_date).getTime()
     )[0];
 
     const currentYear = new Date().getFullYear();
-    const servicesThisYear = completedServices.filter(s => 
-      new Date(s.service_date).getFullYear() === currentYear
+    const servicesThisYear = completedServices.filter(
+      (s) => new Date(s.service_date).getFullYear() === currentYear
     ).length;
 
     const activeContracts = customer.contracts?.filter(c => c.status === 'active').length || 0;
@@ -105,7 +95,9 @@ const CustomerOverviewPopup: React.FC<CustomerOverviewPopupProps> = ({
       servicesThisYear,
       activeContracts,
       totalContractValue,
-      daysSinceLastService: lastService ? Math.floor((Date.now() - new Date(lastService.service_date).getTime()) / (1000 * 60 * 60 * 24)) : null
+      daysSinceLastService: lastService
+        ? Math.floor((Date.now() - new Date(lastService.service_date).getTime()) / (1000 * 60 * 60 * 24))
+        : null
     };
   }, [customer]);
 
@@ -119,12 +111,7 @@ const CustomerOverviewPopup: React.FC<CustomerOverviewPopupProps> = ({
     if (!editedCustomer) return;
     
     try {
-      const { error } = await supabase
-        .from('accounts')
-        .update(editedCustomer)
-        .eq('id', customerId);
-
-      if (error) throw error;
+      await enhancedApi.customers.update(customerId, editedCustomer);
       setIsEditing(false);
     } catch (error) {
       logger.error('Error updating customer', error, 'CustomerOverviewPopup');

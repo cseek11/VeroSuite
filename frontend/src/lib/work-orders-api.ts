@@ -152,17 +152,17 @@ class WorkOrdersApiService {
     return this.handleResponse<WorkOrder[]>(response);
   }
 
-  async changeWorkOrderStatus(workOrderId: string, newStatus: string, notes?: string): Promise<WorkOrder> {
+  async changeWorkOrderStatus(workOrderId: string, newStatus: string, notes?: string | undefined): Promise<WorkOrder> {
     return this.updateWorkOrder(workOrderId, {
       status: newStatus as any,
-      notes: notes,
+      ...(notes !== undefined ? { notes } : {}),
     });
   }
 
-  async assignWorkOrder(workOrderId: string, technicianId: string, scheduledDate?: string): Promise<WorkOrder> {
+  async assignWorkOrder(workOrderId: string, technicianId: string, scheduledDate?: string | undefined): Promise<WorkOrder> {
     return this.updateWorkOrder(workOrderId, {
       assigned_to: technicianId,
-      scheduled_date: scheduledDate,
+      ...(scheduledDate !== undefined ? { scheduled_date: scheduledDate } : {}),
     });
   }
 
@@ -173,7 +173,7 @@ class WorkOrdersApiService {
     return Promise.all(promises);
   }
 
-  async searchWorkOrders(query: string, filters: WorkOrderFilters = {}): Promise<WorkOrderListResponse> {
+  async searchWorkOrders(_query: string, filters: WorkOrderFilters = {}): Promise<WorkOrderListResponse> {
     // For now, we'll use the regular getWorkOrders with additional filtering
     // In the future, this could be enhanced with a dedicated search endpoint
     const searchFilters = {

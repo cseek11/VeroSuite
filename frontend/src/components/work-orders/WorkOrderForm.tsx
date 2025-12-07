@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -38,13 +38,6 @@ const workOrderSchema = z.object({
 
 type WorkOrderFormData = z.infer<typeof workOrderSchema>;
 
-interface Customer {
-  id: string;
-  name: string;
-  account_type: string;
-  phone?: string;
-  email?: string;
-}
 
 interface Technician {
   id: string;
@@ -56,9 +49,13 @@ interface Technician {
   status: 'available' | 'in_progress' | 'off';
 }
 
+type WorkOrderSubmitHandler =
+  ((data: CreateWorkOrderRequest) => Promise<void>) |
+  ((data: UpdateWorkOrderRequest) => Promise<void>);
+
 interface WorkOrderFormProps {
   initialData?: Partial<CreateWorkOrderRequest> | Partial<UpdateWorkOrderRequest>;
-  onSubmit: (data: CreateWorkOrderRequest | UpdateWorkOrderRequest) => Promise<void>;
+  onSubmit: WorkOrderSubmitHandler;
   onCancel: () => void;
   isLoading?: boolean;
   mode?: 'create' | 'edit';
@@ -73,8 +70,6 @@ export default function WorkOrderForm({
 }: WorkOrderFormProps) {
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [loadingTechnicians, setLoadingTechnicians] = useState(true);
-  const [technicianSearch, setTechnicianSearch] = useState('');
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   const {
     control,
@@ -102,9 +97,7 @@ export default function WorkOrderForm({
     },
   });
 
-  const selectedCustomerId = watch('customer_id');
   const selectedTechnicianId = watch('assigned_to');
-  const scheduledDate = watch('scheduled_date');
 
   // Load technicians using enhancedApi
   useEffect(() => {
@@ -147,14 +140,20 @@ export default function WorkOrderForm({
         setTechnicians(transformedTechnicians);
         // Auto-select if only one technician is available and none selected
         if (transformedTechnicians.length === 1) {
-          try { setValue('assigned_to', transformedTechnicians[0].id); } catch {}
+          const firstTechId = transformedTechnicians[0]?.id;
+          if (firstTechId) {
+            try {
+              setValue('assigned_to', firstTechId);
+            } catch {}
+          }
         }
-      } catch (error) {
+      } catch (error: unknown) {
+        const err = error as { message?: string; status?: string; stack?: string };
         logger.error('Error loading technicians', { 
           error, 
-          errorMessage: error?.message, 
-          errorStatus: error?.status,
-          errorStack: error?.stack 
+          errorMessage: err?.message, 
+          errorStatus: err?.status,
+          errorStack: err?.stack 
         }, 'WorkOrderForm');
         setTechnicians([]);
       } finally {
@@ -177,14 +176,14 @@ export default function WorkOrderForm({
       // Ensure estimated_duration and service_price are numbers if present
       const submissionData = {
         ...data,
-        estimated_duration: data.estimated_duration !== undefined && data.estimated_duration !== null && data.estimated_duration !== ''
+        estimated_duration: data.estimated_duration !== undefined && data.estimated_duration !== null
           ? Number(data.estimated_duration)
           : undefined,
         service_price: data.service_price !== undefined && data.service_price !== null && data.service_price !== ''
           ? Number(data.service_price)
           : undefined,
       };
-      await onSubmit(submissionData as CreateWorkOrderRequest | UpdateWorkOrderRequest);
+      await (onSubmit as (payload: CreateWorkOrderRequest | UpdateWorkOrderRequest) => Promise<void>)(submissionData as CreateWorkOrderRequest | UpdateWorkOrderRequest);
       reset(submissionData); // Reset form with submitted data to mark as not dirty
     } catch (error) {
       logger.error('Work order form submission failed', error, 'WorkOrderForm');
@@ -217,9 +216,8 @@ export default function WorkOrderForm({
               render={({ field }) => (
                 <CustomerSearchSelector
                   value={field.value}
-                  onChange={(customerId, customer) => {
+                  onChange={(customerId) => {
                     field.onChange(customerId);
-                    setSelectedCustomer(customer as Customer | null);
                   }}
                   label="Customer"
                   required
@@ -298,7 +296,7 @@ export default function WorkOrderForm({
               )}
             />
             {errors.description && (
-              <ErrorMessage message={errors.description.message} type="error" />
+              <ErrorMessage message={errors.description.message ?? ''} type="error" />
             )}
           </div>
 
@@ -387,7 +385,7 @@ export default function WorkOrderForm({
                 )}
               />
               {errors.estimated_duration && (
-                <ErrorMessage message={errors.estimated_duration.message} type="error" />
+                <ErrorMessage message={errors.estimated_duration.message ?? ''} type="error" />
               )}
             </div>
           </div>
@@ -423,7 +421,7 @@ export default function WorkOrderForm({
               />
             </div>
             {errors.service_price && (
-              <ErrorMessage message={errors.service_price.message} type="error" />
+              <ErrorMessage message={errors.service_price.message ?? ''} type="error" />
             )}
           </div>
 
@@ -444,7 +442,7 @@ export default function WorkOrderForm({
               )}
             />
             {errors.notes && (
-              <ErrorMessage message={errors.notes.message} type="error" />
+              <ErrorMessage message={errors.notes.message ?? ''} type="error" />
             )}
           </div>
 

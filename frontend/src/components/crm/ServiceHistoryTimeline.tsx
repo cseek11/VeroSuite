@@ -297,10 +297,7 @@ export default function ServiceHistoryTimeline({ serviceHistory, isLoading }: Se
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handlePhotoClick(service.before_photos!, 0);
-                            }}
+                            onClick={() => handlePhotoClick(service.before_photos!, 0)}
                           >
                             <Camera className="h-4 w-4 mr-1" />
                             Before ({service.before_photos!.length})
@@ -310,10 +307,7 @@ export default function ServiceHistoryTimeline({ serviceHistory, isLoading }: Se
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handlePhotoClick(service.after_photos!, 0);
-                            }}
+                            onClick={() => handlePhotoClick(service.after_photos!, 0)}
                           >
                             <Camera className="h-4 w-4 mr-1" />
                             After ({service.after_photos!.length})

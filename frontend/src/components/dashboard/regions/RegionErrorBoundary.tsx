@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, X } from 'lucide-react';
 import { logger } from '@/utils/logger';
 import { motion, AnimatePresence } from 'framer-motion';

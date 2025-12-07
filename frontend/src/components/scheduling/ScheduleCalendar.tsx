@@ -36,70 +36,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/CRMComponents';
+import type { Job } from '@/types/enhanced-types';
 
 // Types
-interface Job {
-  id: string;
-  status: 'unassigned' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  scheduled_date: string;
-  scheduled_start_time?: string;
-  scheduled_end_time?: string;
-  technician_id?: string;
+// Extended Job type with populated relations
+type JobWithRelations = Job & {
+  customer?: { id: string; name: string; phone?: string };
+  location?: { id: string; name: string; address: string; coordinates?: { lat: number; lng: number } };
+  service?: { type: string; description: string; estimated_duration: number; price?: number };
   is_recurring?: boolean;
   recurring_template_id?: string;
-  customer: {
-    id: string;
-    name: string;
-    phone?: string;
-  };
-  location: {
-    id: string;
-    name: string;
-    address: string;
-    coordinates: { lat: number; lng: number };
-  };
-  service: {
-    type: string;
-    description: string;
-    estimated_duration: number;
-    price?: number;
-  };
-}
-
-interface Technician {
-  id: string;
-  first_name: string;
-  last_name: string;
-  phone?: string;
-  is_active: boolean;
-}
+};
 
 interface CalendarEvent {
   id: string;
   title: string;
   start: Date;
   end: Date;
-  technicianId?: string;
-  technicianName?: string;
+  technicianId?: string | undefined;
+  technicianName?: string | undefined;
   status: string;
   priority: string;
   customer: string;
   location: string;
   color: string;
-  job: Job;
-  hasConflict?: boolean;
-  conflictType?: 'time_overlap' | 'technician_double_booking' | 'location_conflict';
-  conflictSeverity?: 'low' | 'medium' | 'high' | 'critical';
-  availabilityIssue?: string;
-  isRecurring?: boolean;
+  job: JobWithRelations;
+  hasConflict?: boolean | undefined;
+  conflictType?: 'time_overlap' | 'technician_double_booking' | 'location_conflict' | undefined;
+  conflictSeverity?: 'low' | 'medium' | 'high' | 'critical' | undefined;
+  availabilityIssue?: string | undefined;
+  isRecurring?: boolean | undefined;
 }
 
 interface ScheduleCalendarProps {
   selectedDate?: Date;
   onDateChange?: (date: Date) => void;
-  onJobSelect?: (job: Job) => void;
-  onJobEdit?: (job: Job) => void;
+  onJobSelect?: (job: JobWithRelations) => void;
+  onJobEdit?: (job: JobWithRelations) => void;
   onJobCreate?: () => void;
   searchQuery?: string;
   filterStatus?: string;
@@ -120,7 +93,7 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
   onDateChange,
   onJobSelect,
   onJobEdit,
-  onJobCreate,
+  onJobCreate: _onJobCreate,
   searchQuery = '',
   filterStatus = 'all',
   filterPriority = 'all',
@@ -131,21 +104,21 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
   enableBulkSelection = false,
   onBulkSelect,
   filterTechnician,
-  showTechnicianMetrics = false
+  showTechnicianMetrics: _showTechnicianMetrics = false
 }) => {
   const [currentView, setCurrentView] = useState<'month' | 'week' | 'day' | 'list'>('week');
   const [selectedJobIds, setSelectedJobIds] = useState<Set<string>>(new Set());
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingJob, setEditingJob] = useState<Job | null>(null);
+  const [selectedJob, setSelectedJob] = useState<JobWithRelations | null>(null);
+  const [_isEditing, setIsEditing] = useState(false);
+  const [editingJob, setEditingJob] = useState<JobWithRelations | null>(null);
   const [showJobDialog, setShowJobDialog] = useState(false);
-  const [draggedJob, setDraggedJob] = useState<Job | null>(null);
+  const [draggedJob, setDraggedJob] = useState<JobWithRelations | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [jobConflicts, setJobConflicts] = useState<Map<string, { type: string; severity: string }>>(new Map());
   const [availabilityStatus, setAvailabilityStatus] = useState<Map<string, { is_available: boolean; reason?: string }>>(new Map());
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [isRecurring, setIsRecurring] = useState(false);
-  const [recurrencePattern, setRecurrencePattern] = useState<RecurrencePattern | null>(null);
+  const [_isRecurring, setIsRecurring] = useState(false);
+  const [_recurrencePattern, setRecurrencePattern] = useState<RecurrencePattern | null>(null);
   const [showSeriesManager, setShowSeriesManager] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
@@ -168,7 +141,7 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
   } | null>(null);
   const [pendingJobUpdate, setPendingJobUpdate] = useState<{
     jobId: string;
-    updates: Partial<Job>;
+    updates: Partial<JobWithRelations>;
   } | null>(null);
 
   const queryClient = useQueryClient();
@@ -182,7 +155,7 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
 
   // Fetch jobs for the selected date range
   // Use keepPreviousData to prevent flickering when switching views
-  const { data: jobs = [], isLoading: jobsLoading, error: jobsError } = useQuery({
+  const { data: jobs = [], isLoading: jobsLoading, error: jobsError } = useQuery<JobWithRelations[]>({
     queryKey: ['jobs', 'calendar', selectedDate, currentView],
     queryFn: async () => {
       const startDate = getDateRangeStart(selectedDate, currentView);
@@ -195,7 +168,8 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
         throw new Error('Invalid date range');
       }
       
-      return enhancedApi.jobs.getByDateRange(startDateStr, endDateStr);
+      const result = await enhancedApi.jobs.getByDateRange(startDateStr, endDateStr);
+      return result as JobWithRelations[];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     placeholderData: keepPreviousData, // Keep showing previous data while loading new data (React Query v5)
@@ -258,10 +232,7 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
       if (enhancedApi.technicians && typeof enhancedApi.technicians.list === 'function') {
         return await enhancedApi.technicians.list();
       }
-      return enhancedApi.users.list({ 
-        roles: ['technician'], 
-        status: 'active' 
-      });
+      return enhancedApi.users.list();
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
@@ -290,7 +261,7 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
       }
 
       // Perform availability checks
-      for (const [key, jobs] of uniqueChecks.entries()) {
+      for (const [_key, jobs] of uniqueChecks.entries()) {
         const job = jobs[0]; // Use first job for the check
         try {
           const available = await enhancedApi.technicians.getAvailable(
@@ -328,7 +299,7 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
 
   // Update job mutation
   const updateJobMutation = useMutation({
-    mutationFn: async ({ jobId, updates }: { jobId: string; updates: Partial<Job> }) => {
+    mutationFn: async ({ jobId, updates }: { jobId: string; updates: Partial<JobWithRelations> }) => {
       return enhancedApi.jobs.update(jobId, updates);
     },
     onSuccess: () => {
@@ -360,32 +331,36 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
               [job.id] // Exclude current job
             );
 
-            if (conflictResult.has_conflicts) {
+            if (conflictResult.has_conflicts && conflictResult.conflicts.length > 0) {
+              const firstConflict = conflictResult.conflicts[0];
+              if (!firstConflict) return;
               const highestSeverity = conflictResult.conflicts.reduce((max, c) => {
-                const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
-                return severityOrder[c.severity] < severityOrder[max.severity] ? c : max;
-              }, conflictResult.conflicts[0]);
+                const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+                return (severityOrder[c.severity] ?? 4) < (severityOrder[max.severity] ?? 4) ? c : max;
+              }, firstConflict);
 
-              conflictsMap.set(job.id, {
-                type: highestSeverity.type,
-                severity: highestSeverity.severity
-              });
-
-              // Create alert for critical/high conflicts
-              if (highestSeverity.severity === 'critical' || highestSeverity.severity === 'high') {
-                newAlerts.push({
-                  id: `conflict-${job.id}`,
-                  type: 'conflict',
-                  severity: highestSeverity.severity as any,
-                  message: `Conflict: ${highestSeverity.description}`,
-                  jobId: job.id,
-                  jobTitle: `${job.customer.name} - ${job.service.type}`,
-                  timestamp: new Date(),
-                  onClick: () => {
-                    setSelectedJob(job);
-                    setShowJobDialog(true);
-                  }
+              if (highestSeverity) {
+                conflictsMap.set(job.id, {
+                  type: highestSeverity.type,
+                  severity: highestSeverity.severity
                 });
+
+                // Create alert for critical/high conflicts
+                if (highestSeverity.severity === 'critical' || highestSeverity.severity === 'high') {
+                  newAlerts.push({
+                    id: `conflict-${job.id}`,
+                    type: 'conflict',
+                    severity: highestSeverity.severity as any,
+                    message: `Conflict: ${highestSeverity.description}`,
+                    jobId: job.id,
+                    jobTitle: `${job.customer?.name || 'Unknown'} - ${job.service?.type || 'Unknown'}`,
+                    timestamp: new Date(),
+                    onClick: () => {
+                      setSelectedJob(job);
+                      setShowJobDialog(true);
+                    }
+                  });
+                }
               }
             }
           } catch (error) {
@@ -395,7 +370,7 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
         }
 
         // Check for overdue jobs
-        if (job.status === 'scheduled' && job.scheduled_date) {
+        if ((job.status === 'assigned' || job.status === 'unassigned') && job.scheduled_date) {
           const scheduledDate = new Date(job.scheduled_date);
           const today = new Date();
           today.setHours(0, 0, 0, 0);
@@ -406,9 +381,9 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
               id: `overdue-${job.id}`,
               type: 'overdue',
               severity: 'high',
-              message: `Overdue job: ${job.customer.name}`,
+              message: `Overdue job: ${job.customer?.name || 'Unknown'}`,
               jobId: job.id,
-              jobTitle: `${job.customer.name} - ${job.service.type}`,
+              jobTitle: `${job.customer?.name || 'Unknown'} - ${job.service?.type || 'Unknown'}`,
               timestamp: new Date(),
               onClick: () => {
                 setSelectedJob(job);
@@ -433,40 +408,40 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
 
   // Convert filtered jobs to calendar events
   const calendarEvents = useMemo(() => {
-    return filteredJobs.map((job: Job): CalendarEvent => {
+    return filteredJobs.map((job: JobWithRelations): CalendarEvent => {
       const startTime = job.scheduled_start_time ? 
         new Date(`${job.scheduled_date}T${job.scheduled_start_time}`) :
         new Date(`${job.scheduled_date}T09:00:00`);
       
       const endTime = job.scheduled_end_time ? 
         new Date(`${job.scheduled_date}T${job.scheduled_end_time}`) :
-        new Date(startTime.getTime() + (job.service.estimated_duration || 60) * 60000);
+        new Date(startTime.getTime() + (job.service?.estimated_duration || 60) * 60000);
 
-      const technician = technicians.find(t => (t.id || t.user_id) === job.technician_id);
+      const technician = technicians.find((t: any) => (t.id || t.user_id) === job.technician_id);
       const conflict = jobConflicts.get(job.id);
       const availability = availabilityStatus.get(job.id);
       const hasAvailabilityIssue = availability && !availability.is_available;
       
       return {
         id: job.id,
-        title: `${job.customer.name} - ${job.service.type}`,
+        title: `${job.customer?.name || 'Unknown'} - ${job.service?.type || 'Unknown'}`,
         start: startTime,
         end: endTime,
-        technicianId: job.technician_id,
+        technicianId: job.technician_id || undefined,
         technicianName: technician 
           ? `${technician.first_name || ''} ${technician.last_name || ''}`.trim() || technician.email || 'Unknown'
           : 'Unassigned',
         status: job.status,
         priority: job.priority,
-        customer: job.customer.name,
-        location: job.location.address,
+        customer: job.customer?.name || 'Unknown',
+        location: job.location?.address || 'Unknown',
         color: getJobColor(job.status, job.priority, !!conflict || hasAvailabilityIssue),
         job,
-        hasConflict: !!conflict,
-        conflictType: conflict?.type as any,
-        conflictSeverity: conflict?.severity as any,
+        hasConflict: !!conflict || undefined,
+        conflictType: conflict?.type as any || undefined,
+        conflictSeverity: conflict?.severity as any || undefined,
         availabilityIssue: hasAvailabilityIssue ? availability.reason : undefined,
-        isRecurring: job.is_recurring || !!job.recurring_template_id
+        isRecurring: !!job.is_recurring || !!job.recurring_template_id || undefined
       };
     });
   }, [filteredJobs, technicians, jobConflicts, availabilityStatus]);
@@ -552,7 +527,7 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
   };
 
   // Handle job drag start
-  const handleDragStart = (event: DragEvent, job: Job) => {
+  const handleDragStart = (event: DragEvent, job: JobWithRelations) => {
     setDraggedJob(job);
     event.dataTransfer.effectAllowed = 'move';
   };
@@ -563,11 +538,14 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
     
     if (!draggedJob) return;
 
-    const newStartTime = new Date(`${targetDate.toISOString().split('T')[0]}T${targetTime}`);
-    const newEndTime = new Date(newStartTime.getTime() + (draggedJob.service.estimated_duration || 60) * 60000);
+    const dateStr = targetDate.toISOString().split('T')[0];
+    if (!dateStr) return;
+
+    const newStartTime = new Date(`${dateStr}T${targetTime}`);
+    const newEndTime = new Date(newStartTime.getTime() + (draggedJob.service?.estimated_duration || 60) * 60000);
     const newStartTimeStr = targetTime;
     const newEndTimeStr = newEndTime.toTimeString().split(' ')[0].substring(0, 5);
-    const newDateStr = targetDate.toISOString().split('T')[0];
+    const newDateStr: string = dateStr;
 
     // Check for conflicts if job has a technician assigned
     if (draggedJob.technician_id) {
@@ -588,7 +566,7 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
               scheduled_date: newDateStr,
               scheduled_start_time: newStartTimeStr,
               scheduled_end_time: newEndTimeStr
-            }
+            } as Partial<JobWithRelations>
           });
           setConflictData({
             conflicts: conflictResult.conflicts,
@@ -611,7 +589,7 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
         scheduled_date: newDateStr,
         scheduled_start_time: newStartTimeStr,
         scheduled_end_time: newEndTimeStr
-      }
+      } as Partial<JobWithRelations>
     });
 
     setDraggedJob(null);
@@ -1284,7 +1262,9 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700">Customer</label>
-                    <p className="text-sm text-gray-900">{selectedJob.customer.name}</p>
+                    <p className="text-sm text-gray-900">
+                      {selectedJob.customer?.name || 'Unknown'}
+                    </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700">Status</label>
@@ -1296,7 +1276,9 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700">Service Type</label>
-                    <p className="text-sm text-gray-900">{selectedJob.service.type}</p>
+                    <p className="text-sm text-gray-900">
+                      {selectedJob.service?.type || 'Unknown'}
+                    </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700">Scheduled Date</label>
@@ -1312,23 +1294,33 @@ export const ScheduleCalendar: FC<ScheduleCalendarProps> = ({
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700">Location</label>
-                    <p className="text-sm text-gray-900">{selectedJob.location.address}</p>
+                    <p className="text-sm text-gray-900">
+                      {selectedJob.location?.address || 'Unknown'}
+                    </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700">Technician</label>
                     <p className="text-sm text-gray-900">
-                      {selectedJob.technician_id ? 
-                        technicians.find(t => t.id === selectedJob.technician_id)?.first_name + ' ' +
-                        technicians.find(t => t.id === selectedJob.technician_id)?.last_name :
-                        'Unassigned'
-                      }
+                      {selectedJob.technician_id
+                        ? (() => {
+                            const tech = technicians.find(
+                              (t) => (t.id || t.user_id) === selectedJob.technician_id
+                            );
+                            const first = tech?.first_name || '';
+                            const last = tech?.last_name || '';
+                            const fullName = `${first} ${last}`.trim();
+                            return fullName || tech?.email || 'Unassigned';
+                          })()
+                        : 'Unassigned'}
                     </p>
                   </div>
                 </div>
                 
                 <div>
                   <label className="text-sm font-medium text-gray-700">Description</label>
-                  <p className="text-sm text-gray-900">{selectedJob.service.description}</p>
+                  <p className="text-sm text-gray-900">
+                    {selectedJob.service?.description || selectedJob.job_description || 'No description'}
+                  </p>
                 </div>
               </div>
             )}

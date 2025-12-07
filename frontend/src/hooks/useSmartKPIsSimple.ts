@@ -101,7 +101,7 @@ export const useSmartKPIsSimple = () => {
     setDrillDownData({
       title: kpi.drillDown.title,
       description: kpi.drillDown.description,
-      data: Array.from({ length: 10 }, (_, i) => ({
+      data: Array.from({ length: 10 }, (_: unknown, i: number) => ({
         id: i + 1,
         name: `Item ${i + 1}`,
         value: Math.floor(Math.random() * 1000),
@@ -115,10 +115,9 @@ export const useSmartKPIsSimple = () => {
     const status = getKPIStatus(kpi.value, kpi.threshold);
     const statusColor = getStatusColor(status);
     
-    return {
+    const result: EnhancedDashboardMetric = {
       title: kpi.metric,
       value: kpi.threshold.unit ? `${kpi.value}${kpi.threshold.unit}` : kpi.value.toString(),
-      change: kpi.trendValue,
       changeType: kpi.trend === 'up' ? 'increase' : kpi.trend === 'down' ? 'decrease' : undefined,
       icon: () => null, // Will be replaced with proper icon in component
       color: statusColor,
@@ -130,6 +129,10 @@ export const useSmartKPIsSimple = () => {
       trendValue: kpi.trendValue,
       lastUpdated: kpi.lastUpdated
     };
+    if (kpi.trendValue !== undefined) {
+      result.change = kpi.trendValue;
+    }
+    return result;
   }, [getKPIStatus, getStatusColor]);
 
   // Get enhanced metrics for dashboard

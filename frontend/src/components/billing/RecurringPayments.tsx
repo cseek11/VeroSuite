@@ -193,7 +193,9 @@ export default function RecurringPayments() {
                   setShowCreateForm(false);
                   setFormData({ invoice_id: '', interval: 'monthly', amount: 0 });
                 }}
-              />
+              >
+                Close
+              </Button>
             </div>
 
             <div className="space-y-4">

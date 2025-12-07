@@ -77,7 +77,7 @@ export class MockLogger {
   warn(
     message: string,
     context?: string | Record<string, any>,
-    error?: Error,
+    _error?: Error,
     operation?: string,
     errorCode?: string,
     traceId?: string,
@@ -100,7 +100,7 @@ export class MockLogger {
   error(
     message: string,
     context?: string | Record<string, any>,
-    error?: Error,
+    _error?: Error,
     operation?: string,
     errorCode?: string,
     rootCause?: string,
@@ -125,7 +125,7 @@ export class MockLogger {
   fatal(
     message: string,
     context?: string | Record<string, any>,
-    error?: Error,
+    _error?: Error,
     operation?: string,
     errorCode?: string,
     rootCause?: string,

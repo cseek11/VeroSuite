@@ -18,11 +18,13 @@ import { logger } from '@/utils/logger';
 import jsPDF from 'jspdf';
 
 export default function PLReport() {
+  const now = new Date();
+  const yearStart = new Date(now.getFullYear(), 0, 1);
   const [startDate, setStartDate] = useState<string>(
-    new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0]
+    yearStart.toISOString().split('T')[0] ?? ''
   );
   const [endDate, setEndDate] = useState<string>(
-    new Date().toISOString().split('T')[0]
+    now.toISOString().split('T')[0] ?? ''
   );
 
   const { data: _billingAnalytics, isLoading: analyticsLoading } = useQuery({
@@ -47,7 +49,6 @@ export default function PLReport() {
   const handleExportPDF = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
-    const _pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
     let yPos = margin;
 
@@ -100,9 +101,9 @@ export default function PLReport() {
       [`Period: ${startDate} to ${endDate}`],
       [],
       ['Category', 'Amount'],
-      ['Total Revenue', (revenueAnalytics?.totalRevenue || 0).toFixed(2)],
+      ['Total Revenue', ((revenueAnalytics?.totalRevenue ?? 0)).toFixed(2)],
       ['Total Expenses', '0.00'],
-      ['Net Income', ((revenueAnalytics?.totalRevenue || 0) - 0).toFixed(2)],
+      ['Net Income', ((revenueAnalytics?.totalRevenue ?? 0) - 0).toFixed(2)],
     ].map(row => row.join(',')).join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv' });

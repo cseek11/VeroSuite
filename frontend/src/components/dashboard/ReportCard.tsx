@@ -9,7 +9,7 @@ import React, { useState, useCallback } from 'react';
 import { FileText, Download, Eye, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { DropZone } from '@/routes/dashboard/components';
 import { DropZoneConfig, DragPayload, ActionResult } from '@/routes/dashboard/types/cardInteractions.types';
-import { useAuthStore } from '@/stores/auth';
+// Note: useAuthStore not currently used
 import { logger } from '@/utils/logger';
 
 interface ReportCardProps {
@@ -39,7 +39,7 @@ export default function ReportCard({
   cardId = 'report-card',
   className = '' 
 }: ReportCardProps) {
-  const { user } = useAuthStore();
+  // Note: user not currently used
   const [selectedReportType, setSelectedReportType] = useState<string | null>(null);
   const [generatedReports, setGeneratedReports] = useState<GeneratedReport[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -139,8 +139,7 @@ export default function ReportCard({
     cardId: cardId,
     cardType: 'report',
     accepts: {
-      dataTypes: ['customer'],
-      maxItems: undefined
+      dataTypes: ['customer'] as 'customer'[]
     },
     actions: {
       'generate-customer-report': {

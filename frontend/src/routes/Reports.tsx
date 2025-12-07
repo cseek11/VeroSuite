@@ -203,10 +203,10 @@ const Reports: React.FC = () => {
     });
   };
 
-  const _handleExportReport = (reportId: string, format: 'csv' | 'pdf' | 'excel') => {
+  const _handleExportReport = (_reportId: string, _format: 'csv' | 'pdf' | 'excel') => {
     // Handle report export
     if (process.env.NODE_ENV === 'development') {
-      logger.debug('Exporting report', { reportId, format }, 'Reports');
+      logger.debug('Exporting report', { reportId: _reportId, format: _format }, 'Reports');
     }
   };
 

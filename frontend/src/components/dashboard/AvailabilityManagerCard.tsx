@@ -40,8 +40,8 @@ export default function AvailabilityManagerCard({
         if (enhancedApi.technicians && typeof enhancedApi.technicians.list === 'function') {
           return await enhancedApi.technicians.list();
         } else if (enhancedApi.users && typeof enhancedApi.users.list === 'function') {
-          const users = await enhancedApi.users.list({ roles: ['technician'] });
-          return users;
+          const users = await enhancedApi.users.list();
+          return users.filter((u: any) => u.roles?.includes('technician'));
         }
         return [];
       } catch (error) {

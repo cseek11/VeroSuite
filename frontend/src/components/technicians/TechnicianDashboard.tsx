@@ -82,7 +82,7 @@ export default function TechnicianDashboard({
     end_date: getDateRange(timeRange).end
   });
 
-  const { data: calculatedDashboardStats, isLoading: statsLoading } = useTechnicianDashboardStats();
+  const { data: calculatedDashboardStatsData, isLoading: statsLoading } = useTechnicianDashboardStats();
   const { data: performanceMetrics, isLoading: performanceLoading } = useTechnicianPerformanceMetrics();
   const { data: availabilityData, isLoading: availabilityLoading } = useTechnicianAvailabilityData();
 
@@ -162,9 +162,9 @@ export default function TechnicianDashboard({
   };
 
   // Calculate dashboard stats using API data
-  const calculatedDashboardStats = useMemo((): DashboardStats => {
-    const totalTechnicians = calculatedDashboardStats?.totalTechnicians || technicians.length;
-    const activeTechnicians = calculatedDashboardStats?.activeTechnicians || technicians.filter(t => t.status === TechnicianStatus.ACTIVE).length;
+  const dashboardStats = useMemo((): DashboardStats => {
+    const totalTechnicians = calculatedDashboardStatsData?.totalTechnicians || technicians.length;
+    const activeTechnicians = calculatedDashboardStatsData?.activeTechnicians || technicians.filter(t => t.status === TechnicianStatus.ACTIVE).length;
     const totalJobs = jobs.length;
     const completedJobs = jobs.filter(job => job.status === JobStatus.COMPLETED).length;
     
@@ -227,7 +227,7 @@ export default function TechnicianDashboard({
       topPerformers,
       recentActivity
     };
-  }, [technicians, jobs, calculatedDashboardStats, performanceMetrics]);
+  }, [technicians, jobs, calculatedDashboardStatsData, performanceMetrics]);
 
   // Filter and sort technicians
   const filteredTechnicians = useMemo(() => {
@@ -334,7 +334,7 @@ export default function TechnicianDashboard({
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Technicians</p>
-              <p className="text-2xl font-semibold text-gray-900">{calculatedDashboardStats.totalTechnicians}</p>
+              <p className="text-2xl font-semibold text-gray-900">{dashboardStats.totalTechnicians}</p>
             </div>
           </div>
         </Card>
@@ -346,7 +346,7 @@ export default function TechnicianDashboard({
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Active Technicians</p>
-              <p className="text-2xl font-semibold text-gray-900">{calculatedDashboardStats.activeTechnicians}</p>
+              <p className="text-2xl font-semibold text-gray-900">{dashboardStats.activeTechnicians}</p>
             </div>
           </div>
         </Card>
@@ -359,7 +359,7 @@ export default function TechnicianDashboard({
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Completion Rate</p>
               <p className="text-2xl font-semibold text-gray-900">
-                {calculatedDashboardStats.averageCompletionRate.toFixed(1)}%
+                {dashboardStats.averageCompletionRate.toFixed(1)}%
               </p>
             </div>
           </div>
@@ -373,7 +373,7 @@ export default function TechnicianDashboard({
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Avg Utilization</p>
               <p className="text-2xl font-semibold text-gray-900">
-                {calculatedDashboardStats.averageUtilization.toFixed(1)}%
+                {dashboardStats.averageUtilization.toFixed(1)}%
               </p>
             </div>
           </div>
@@ -425,7 +425,7 @@ export default function TechnicianDashboard({
       <Card className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Performers</h3>
         <div className="space-y-4">
-          {calculatedDashboardStats.topPerformers.map((metrics, index) => (
+          {dashboardStats.topPerformers.map((metrics, index) => (
             <div key={metrics.technician.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-4">
                 <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full font-semibold">
@@ -555,7 +555,7 @@ export default function TechnicianDashboard({
       <Card className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
         <div className="space-y-3">
-          {calculatedDashboardStats.recentActivity.map((activity) => (
+          {dashboardStats.recentActivity.map((activity) => (
             <div key={activity.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
               <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
                 <span className="text-xs font-medium text-purple-600">

@@ -31,7 +31,7 @@ export const PresenceIndicator: React.FC<PresenceIndicatorProps> = ({
       {otherUsers.length > 0 && (
         <div className="flex items-center gap-1">
           <div className="flex -space-x-2">
-            {otherUsers.slice(0, 3).map((user, index) => (
+            {otherUsers.slice(0, 3).map((user) => (
               <div
                 key={user.user_id}
                 className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-medium"

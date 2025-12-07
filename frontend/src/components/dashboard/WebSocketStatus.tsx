@@ -18,7 +18,7 @@ export const WebSocketStatus: React.FC<WebSocketStatusProps> = ({
     connectionStats,
     ping,
     connect,
-    disconnect
+    disconnect: _disconnect
   } = useWebSocket({ autoConnect: true });
 
   const [pingLatency, setPingLatency] = useState<number | null>(null);
@@ -35,7 +35,7 @@ export const WebSocketStatus: React.FC<WebSocketStatusProps> = ({
 
   // Listen for pong to calculate latency
   useEffect(() => {
-    const handlePong = () => {
+    const _handlePong = () => {
       if (lastPingTime) {
         const latency = Date.now() - lastPingTime;
         setPingLatency(latency);

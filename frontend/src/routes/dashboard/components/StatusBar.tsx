@@ -72,8 +72,8 @@ export const StatusBar: React.FC<StatusBarProps> = ({
       <div className="flex items-center gap-4">
         <SyncStatus
           status={syncStatus}
-          lastSynced={lastSynced || undefined}
-          errorMessage={syncErrorMessage || undefined}
+          {...(lastSynced ? { lastSynced } : {})}
+          {...(syncErrorMessage ? { errorMessage: syncErrorMessage } : {})}
         />
         <WebSocketStatus showStats={true} />
         <VirtualCardPerformance

@@ -262,7 +262,7 @@ export default function ComplianceCenter({ customerId: _customerId }: Compliance
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-lg border border-slate-200">
               <div className="flex items-center justify-between mb-4">
-                <Heading level={5} className="text-slate-900">
+                <Heading level={4} className="text-slate-900">
                   EPA Compliance
                 </Heading>
                 {getTrendIcon(complianceData.regulatoryCompliance.epaCompliance, 95)}
@@ -282,7 +282,7 @@ export default function ComplianceCenter({ customerId: _customerId }: Compliance
             
             <div className="bg-white p-6 rounded-lg border border-slate-200">
               <div className="flex items-center justify-between mb-4">
-                <Heading level={5} className="text-slate-900">
+                <Heading level={4} className="text-slate-900">
                   State Compliance
                 </Heading>
                 {getTrendIcon(complianceData.regulatoryCompliance.stateCompliance, 90)}
@@ -302,7 +302,7 @@ export default function ComplianceCenter({ customerId: _customerId }: Compliance
             
             <div className="bg-white p-6 rounded-lg border border-slate-200">
               <div className="flex items-center justify-between mb-4">
-                <Heading level={5} className="text-slate-900">
+                <Heading level={4} className="text-slate-900">
                   Local Compliance
                 </Heading>
                 {getTrendIcon(complianceData.regulatoryCompliance.localCompliance, 85)}
@@ -331,7 +331,7 @@ export default function ComplianceCenter({ customerId: _customerId }: Compliance
           <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-lg border border-purple-200">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <Heading level={5} className="text-slate-900 mb-2">
+                <Heading level={4} className="text-slate-900 mb-2">
                   Total Applications
                 </Heading>
                 <Heading level={3} className="text-purple-900 font-bold">
@@ -343,7 +343,7 @@ export default function ComplianceCenter({ customerId: _customerId }: Compliance
               </div>
               
               <div>
-                <Heading level={5} className="text-slate-900 mb-2">
+                <Heading level={4} className="text-slate-900 mb-2">
                   Chemicals Used
                 </Heading>
                 <div className="space-y-1">
@@ -356,7 +356,7 @@ export default function ComplianceCenter({ customerId: _customerId }: Compliance
               </div>
               
               <div>
-                <Heading level={5} className="text-slate-900 mb-2">
+                <Heading level={4} className="text-slate-900 mb-2">
                   Safety Record
                 </Heading>
                 <Heading level={3} className="text-green-900 font-bold">
@@ -408,7 +408,7 @@ export default function ComplianceCenter({ customerId: _customerId }: Compliance
                       </div>
                       
                       <div>
-                        <Heading level={5} className="text-slate-900">
+                        <Heading level={4} className="text-slate-900">
                           {record.record_type}
                         </Heading>
                         <Text variant="small" className="text-slate-600">

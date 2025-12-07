@@ -2,7 +2,7 @@
  * Violation List Component
  * Displays list of compliance violations with filtering and search
  * 
- * Last Updated: 2025-12-06
+ * Last Updated: 2025-12-07
  */
 
 import { useMemo, useState } from 'react';
@@ -66,7 +66,7 @@ export default function ViolationList({ className = '' }: ViolationListProps) {
       }
 
       // PR number filter
-      if (prNumberFilter && check.pr_number.toString() !== prNumberFilter) {
+      if (prNumberFilter && String(check.pr_number ?? '') !== prNumberFilter) {
         return false;
       }
 
@@ -215,13 +215,14 @@ export default function ViolationList({ className = '' }: ViolationListProps) {
               </label>
               <Select
                 value={statusFilter}
-                onValueChange={(value) => setStatusFilter(value as ComplianceStatus | 'all')}
-              >
-                <option value="all">All Status</option>
-                <option value="VIOLATION">Violation</option>
-                <option value="PASS">Pass</option>
-                <option value="OVERRIDE">Override</option>
-              </Select>
+                onChange={(value) => setStatusFilter((value as ComplianceStatus) || 'all')}
+                options={[
+                  { value: 'all', label: 'All Status' },
+                  { value: 'VIOLATION', label: 'Violation' },
+                  { value: 'PASS', label: 'Pass' },
+                  { value: 'OVERRIDE', label: 'Override' }
+                ]}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -230,27 +231,28 @@ export default function ViolationList({ className = '' }: ViolationListProps) {
               </label>
               <Select
                 value={severityFilter}
-                onValueChange={(value) => setSeverityFilter(value as ComplianceSeverity | 'all')}
-              >
-                <option value="all">All Severity</option>
-                <option value="BLOCK">BLOCK</option>
-                <option value="OVERRIDE">OVERRIDE</option>
-                <option value="WARNING">WARNING</option>
-              </Select>
+                onChange={(value) => setSeverityFilter((value as ComplianceSeverity) || 'all')}
+                options={[
+                  { value: 'all', label: 'All Severity' },
+                  { value: 'BLOCK', label: 'BLOCK' },
+                  { value: 'OVERRIDE', label: 'OVERRIDE' },
+                  { value: 'WARNING', label: 'WARNING' }
+                ]}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Filter className="inline h-4 w-4 mr-1" />
                 Rule ID
               </label>
-              <Select value={ruleIdFilter} onValueChange={(value) => setRuleIdFilter(value)}>
-                <option value="all">All Rules</option>
-                {uniqueRuleIds.map((id) => (
-                  <option key={id} value={id}>
-                    {id}
-                  </option>
-                ))}
-              </Select>
+              <Select 
+                value={ruleIdFilter} 
+                onChange={(value) => setRuleIdFilter(value)}
+                options={[
+                  { value: 'all', label: 'All Rules' },
+                  ...uniqueRuleIds.map((id) => ({ value: id, label: id }))
+                ]}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -337,7 +339,7 @@ export default function ViolationList({ className = '' }: ViolationListProps) {
                   )}
                   <div className="flex items-center gap-2">
                     <GitBranch className="h-4 w-4" />
-                    <span>PR #{check.pr_number}</span>
+                    <span>PR #{check.pr_number ?? '—'}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />

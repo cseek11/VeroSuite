@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 
 export interface CardTemplate {
   id: string;
@@ -193,7 +193,7 @@ export function useCardTemplates({
   ], []);
 
   // Initialize with default templates
-  React.useEffect(() => {
+  useEffect(() => {
     if (templates.length === 0) {
       setTemplates(defaultTemplates);
     }

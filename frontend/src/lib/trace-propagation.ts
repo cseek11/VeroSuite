@@ -36,7 +36,6 @@ export function generateRequestId(): string {
  */
 export function getOrCreateTraceContext(): TraceContext {
   const traceKey = 'verofield_trace_id';
-  const requestKey = 'verofield_request_id';
   
   let traceId = sessionStorage.getItem(traceKey);
   if (!traceId) {

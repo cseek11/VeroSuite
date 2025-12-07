@@ -148,7 +148,7 @@ export const HelpButton: React.FC<{ topic?: string; className?: string }> = ({
       {showHelp && (
         <ContextualHelp
           topic={topic}
-          onClose={() => setShowHelp(false)}
+          {...(onClose !== undefined ? { onClose: () => setShowHelp(false) } : {})}
         />
       )}
     </>

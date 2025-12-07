@@ -77,6 +77,8 @@ export default function WorkOrdersList({
       const bValue = b[sortField];
       
       if (aValue === bValue) return 0;
+      if (aValue === undefined || aValue === null) return 1;
+      if (bValue === undefined || bValue === null) return -1;
       
       const comparison = aValue < bValue ? -1 : 1;
       return sortDirection === 'asc' ? comparison : -comparison;
@@ -122,14 +124,6 @@ export default function WorkOrdersList({
     setFilters(prev => ({ ...prev, page }));
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
   const formatDateTime = (dateString: string) => {
     return new Date(dateString).toLocaleString('en-US', {
       month: 'short',
@@ -173,10 +167,12 @@ export default function WorkOrdersList({
             {data?.pagination.total || 0} total work orders
           </p>
         </div>
-        <Button variant="primary" onClick={onCreateWorkOrder} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          New Work Order
-        </Button>
+        {onCreateWorkOrder && (
+          <Button variant="primary" onClick={onCreateWorkOrder} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Create Work Order
+          </Button>
+        )}
       </div>
 
       {/* Search and Filters */}
@@ -474,7 +470,7 @@ export default function WorkOrdersList({
                 : 'Get started by creating your first work order'
               }
             </p>
-            {!searchTerm && !Object.values(filters).some(f => f !== undefined && f !== '') && (
+            {!searchTerm && !Object.values(filters).some(f => f !== undefined && f !== '') && onCreateWorkOrder && (
               <Button variant="primary" onClick={onCreateWorkOrder}>
                 Create Work Order
               </Button>

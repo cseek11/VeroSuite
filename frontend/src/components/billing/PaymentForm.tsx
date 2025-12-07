@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { loadStripe, PaymentIntent } from '@stripe/stripe-js';
+import { loadStripe, PaymentIntent, type StripeCardElementChangeEvent } from '@stripe/stripe-js';
 import {
   Elements,
   CardElement,
@@ -60,6 +60,7 @@ function PaymentFormInner({
   const [showRetry, setShowRetry] = useState(false);
 
   const queryClient = useQueryClient();
+  const lastErrorMessage = lastError?.message ?? '';
 
   // Process Payment
   const processPaymentMutation = useMutation({
@@ -156,15 +157,15 @@ function PaymentFormInner({
     }
   };
 
-    const handleCardElementChange = (event: { error?: { message?: string } }) => {
-      if (event.error) {
-        setCardError(event.error.message || '');
-        setPaymentError(''); // Clear payment error when user fixes card
-      } else {
-        setCardError('');
-        setPaymentError(''); // Clear payment error when card is valid
-      }
-    };
+  const handleCardElementChange = (event: StripeCardElementChangeEvent) => {
+    if (event.error) {
+      setCardError(event.error.message || '');
+      setPaymentError(''); // Clear payment error when user fixes card
+    } else {
+      setCardError('');
+      setPaymentError(''); // Clear payment error when card is valid
+    }
+  };
 
     const handleRetryPayment = async () => {
       setPaymentError('');
@@ -356,9 +357,9 @@ function PaymentFormInner({
                   <p className="text-sm font-medium text-red-800 mb-1">{paymentError}</p>
                   {lastError && (
                     <p className="text-xs text-red-600 mb-3">
-                      {lastError.message?.includes('card') 
+                      {lastErrorMessage.includes('card') 
                         ? 'Please check your card details and try again.'
-                        : lastError.message?.includes('network')
+                        : lastErrorMessage.includes('network')
                         ? 'Network error. Please check your connection and try again.'
                         : 'An error occurred while processing your payment.'}
                     </p>
@@ -629,8 +630,10 @@ export default function PaymentForm({ invoice, paymentMethods, onSuccess, onCanc
     );
   }
 
+  const elementsOptions = clientSecret ? { clientSecret } : undefined;
+
   return (
-    <Elements stripe={stripePromise} options={{ clientSecret: clientSecret ?? undefined }}>
+    <Elements stripe={stripePromise} {...(elementsOptions !== undefined ? { options: elementsOptions } : {})}>
       <PaymentFormInner
         invoice={invoice}
         paymentMethods={paymentMethods}

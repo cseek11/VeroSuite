@@ -104,11 +104,14 @@ export const AdaptiveGrid: React.FC<AdaptiveGridProps> = ({
     regions.forEach((region) => {
       // Find column with minimum height
       let minCol = 0;
-      let minHeight = heights[0];
+      const firstHeight = heights[0];
+      if (firstHeight === undefined) return;
+      let minHeight = firstHeight;
       
       for (let col = 1; col < cols; col++) {
-        if (heights[col] < minHeight) {
-          minHeight = heights[col];
+        const colHeight = heights[col];
+        if (colHeight !== undefined && colHeight < minHeight) {
+          minHeight = colHeight;
           minCol = col;
         }
       }
@@ -166,7 +169,7 @@ export const AdaptiveGrid: React.FC<AdaptiveGridProps> = ({
   }, [regions, onMove, onResize, calculateSnapGuides]);
 
   // Handle drag start
-  const handleDragStart = useCallback((layout: Layout[], oldItem: Layout, newItem: Layout, placeholder: Layout, e: MouseEvent, element: HTMLElement) => {
+  const handleDragStart = useCallback((_layout: Layout[], _oldItem: Layout, newItem: Layout, _placeholder: Layout, _e: MouseEvent, _element: HTMLElement) => {
     setDragPreview({
       id: newItem.i,
       x: newItem.x,
@@ -243,12 +246,12 @@ export const AdaptiveGrid: React.FC<AdaptiveGridProps> = ({
           <div key={region.id} data-region-id={region.id}>
             <RegionContainer
               region={region}
-              onResize={onResize}
-              onMove={onMove}
-              onToggleCollapse={onToggleCollapse}
-              onToggleLock={onToggleLock}
-              onDelete={onDelete}
-              onUpdate={onUpdate}
+              {...(onResize ? { onResize } : {})}
+              {...(onMove ? { onMove } : {})}
+              {...(onToggleCollapse ? { onToggleCollapse } : {})}
+              {...(onToggleLock ? { onToggleLock } : {})}
+              {...(onDelete ? { onDelete } : {})}
+              {...(onUpdate ? { onUpdate } : {})}
             />
           </div>
         ))}

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import {
@@ -36,26 +35,13 @@ interface Contract {
 
 interface ContractManagerProps {
   contracts: Contract[];
-  customerId: string;
   isLoading: boolean;
 }
 
-export default function ContractManager({ contracts, customerId, isLoading }: ContractManagerProps) {
+export default function ContractManager({ contracts, isLoading }: ContractManagerProps) {
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [showContractModal, setShowContractModal] = useState(false);
   const [showNewContractModal, setShowNewContractModal] = useState(false);
-  const queryClient = useQueryClient();
-
-  const _updateContract = useMutation({
-    mutationFn: (_data: Partial<Contract>) => {
-      // Mock API call
-      return Promise.resolve({ success: true });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['crm', 'customer', customerId, 'contracts'] });
-      setShowContractModal(false);
-    },
-  });
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -180,7 +166,7 @@ export default function ContractManager({ contracts, customerId, isLoading }: Co
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <FileText className="h-5 w-5 text-blue-600" />
-                      <Heading level={5} className="text-slate-900">
+                      <Heading level={4} className="text-slate-900">
                         {contract.contract_type}
                       </Heading>
                     </div>

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { WorkOrder } from '@/types/work-orders';
 import WorkOrdersList from '@/components/work-orders/WorkOrdersList';
 import { useDeleteWorkOrder } from '@/hooks/useWorkOrders';
+import { logger } from '@/utils/logger';
 import { 
   Dialog, 
   DialogContent, 
@@ -16,7 +17,6 @@ import { AlertTriangle } from 'lucide-react';
 
 export default function WorkOrdersPage() {
   const navigate = useNavigate();
-  const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [workOrderToDelete, setWorkOrderToDelete] = useState<WorkOrder | null>(null);
 
@@ -47,14 +47,14 @@ export default function WorkOrdersPage() {
       setShowDeleteDialog(false);
       setWorkOrderToDelete(null);
     } catch (error) {
-      console.error('Failed to delete work order:', error);
+      logger.error('Failed to delete work order', error, 'WorkOrdersPage');
       // TODO: Show error toast
     }
   };
 
   const handleStatusChange = (workOrder: WorkOrder, newStatus: any) => {
     // TODO: Implement status change
-    console.log('Change status:', workOrder.id, 'to', newStatus);
+    logger.debug('Change status', { workOrderId: workOrder.id, newStatus }, 'WorkOrdersPage');
   };
 
   return (

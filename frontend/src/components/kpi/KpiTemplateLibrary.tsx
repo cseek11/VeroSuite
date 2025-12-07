@@ -4,7 +4,7 @@ import KpiTemplateEditor from './KpiTemplateEditor';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { Badge } from '@/components/ui';
-import { 
+import {
   Search, 
   Filter, 
   TrendingUp, 
@@ -16,10 +16,30 @@ import {
   DollarSign,
   Users,
   Settings,
+  Shield,
   Heart
 } from 'lucide-react';
 import type { KpiTemplate } from '@/types/kpi-templates';
 import { logger } from '@/utils/logger';
+
+type TemplateCreator = { first_name?: string; last_name?: string } | null | undefined;
+type TemplateLike = KpiTemplate & {
+  id?: string;
+  tags?: string[];
+  description?: string | null;
+  category?: string | null;
+  template_type?: string | null;
+  is_from_template?: boolean;
+  creator?: TemplateCreator;
+  usage_count?: number | null;
+  created_at?: string | Date | null;
+};
+
+const coerceString = (value: unknown, fallback = ''): string =>
+  typeof value === 'string' ? value : fallback;
+
+const ensureTemplateArray = (value: unknown): TemplateLike[] =>
+  Array.isArray(value) ? (value as TemplateLike[]) : [];
 
 interface KpiTemplateLibraryProps {
   onTemplateSelect?: (template: KpiTemplate) => void;
@@ -52,14 +72,14 @@ export default function KpiTemplateLibrary({
   }, [searchTerm]);
 
   // API hooks - remove server-side search to prevent excessive API calls
-  const { data: templates = [], isLoading: templatesLoading, error: templatesError } = useKpiTemplates({
+  const { data: templates = [], isLoading: templatesLoading, error: _templatesError } = useKpiTemplates({
     // Only filter by category and type on server-side, search is handled client-side
     category: selectedCategory !== 'all' ? selectedCategory : undefined,
     template_type: selectedType !== 'all' ? selectedType : undefined,
   });
   const { data: userKpis = [] } = useUserKpis();
 
-  const { data: featuredTemplates = [] } = useFeaturedKpiTemplates();
+  const { data: _featuredTemplates = [] } = useFeaturedKpiTemplates();
   const { data: popularTemplates = [] } = usePopularKpiTemplates(6);
   const trackUsageMutation = useTrackTemplateUsage();
 
@@ -88,138 +108,120 @@ export default function KpiTemplateLibrary({
   }, [favoritedTemplateIds, favoriteOverrides]);
 
   // Map user KPIs to template-like objects
-  const userTemplates = useMemo(() => {
+  const userTemplates: TemplateLike[] = useMemo(() => {
     if (!Array.isArray(userKpis)) {
       logger.warn('userKpis is not an array', { userKpis }, 'KpiTemplateLibrary');
-      return [] as Array<Record<string, unknown>>;
+      return [];
     }
-    const mapped = userKpis.map((k: Record<string, unknown>) => {
+
+    return userKpis.map((k: Record<string, unknown>) => {
+      const id = coerceString(k.template_id || k.id);
       return {
-        id: k.template_id || k.id, // Use template_id for favorites, fallback to k.id
-        userKpiId: k.id, // Keep original UserKpi ID for reference
+        id,
+        userKpiId: k.id,
         tenant_id: k.tenant_id,
-        name: k.name,
-        description: k.description || '',
-        category: k.category || 'operational',
+        name: coerceString(k.name, 'Untitled'),
+        description: coerceString(k.description, ''),
+        category: coerceString(k.category, 'operational'),
         template_type: 'user',
-        is_from_template: !!k.template_id, // Track if this is from a template or custom
-        formula_expression: k.formula_expression || '',
-        formula_fields: k.formula_fields || [],
+        is_from_template: !!k.template_id,
+        formula_expression: coerceString(k.formula_expression, ''),
+        formula_fields: Array.isArray(k.formula_fields) ? k.formula_fields : [],
         threshold_config: k.threshold_config || {},
         chart_config: k.chart_config || {},
         data_source_config: k.data_source_config || {},
-        tags: k.tags || [],
+        tags: Array.isArray(k.tags) ? (k.tags as string[]) : [],
         is_public: false,
         is_featured: false,
-        usage_count: k.usage_count || 0,
+        usage_count: typeof k.usage_count === 'number' ? k.usage_count : 0,
         status: 'published',
-        created_at: k.created_at,
-        creator: k.creator || undefined,
+        created_at: k.created_at as string | Date | null | undefined,
+        creator: k.creator as TemplateCreator,
       };
     });
-    return mapped;
   }, [userKpis]);
 
   // Combine user templates + system templates
-  const combinedTemplates = useMemo(() => {
-    const sys = Array.isArray(templates) ? templates : [];
-    const combined = [...userTemplates, ...sys];
-    return combined;
+  const combinedTemplates: TemplateLike[] = useMemo(() => {
+    const sys = ensureTemplateArray(templates);
+    return [...userTemplates, ...sys];
   }, [templates, userTemplates]);
 
   // Derive user templates (user-created templates)
   const derivedUserTemplates = useMemo(() => {
-    const source = Array.isArray(combinedTemplates) ? combinedTemplates : [];
-    const list = source.filter((t: Record<string, unknown>) => t.template_type === 'user');
-    // keep a stable order: name asc
-    const sorted = [...list].sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
-    return sorted;
+    const list = combinedTemplates.filter((t) => t.template_type === 'user');
+    return [...list].sort((a, b) => coerceString(a.name).localeCompare(coerceString(b.name)));
   }, [combinedTemplates]);
 
   // Derive favorites list for the section at the top (optimistic)
   const derivedFavoritedTemplates = useMemo(() => {
-    const source = Array.isArray(combinedTemplates) ? combinedTemplates : [];
-    
-    // For each favorited template, prefer the user version if it exists
-    const favoritedList: any[] = [];
-    
-    Array.from(effectiveFavoritedIds).forEach(favoritedId => {
-      // First, check if there's a user template with this template_id (only those from templates)
-      const userTemplate = source.find(t => 
-        t.template_type === 'user' && t.id === favoritedId && t.is_from_template
+    const favoritedList: TemplateLike[] = [];
+
+    Array.from(effectiveFavoritedIds).forEach((favoritedId) => {
+      const userTemplate = combinedTemplates.find(
+        (t) => t.template_type === 'user' && t.id === favoritedId && t.is_from_template
       );
-      
+
       if (userTemplate) {
-        // Use the user template (only if it's from a template)
         favoritedList.push(userTemplate);
-      } else {
-        // Check if there's a system template with this ID
-        const systemTemplate = source.find(t => 
-          t.template_type !== 'user' && t.id === favoritedId
-        );
-        
-        if (systemTemplate) {
-          favoritedList.push(systemTemplate);
-        }
+        return;
+      }
+
+      const systemTemplate = combinedTemplates.find(
+        (t) => t.template_type !== 'user' && t.id === favoritedId
+      );
+
+      if (systemTemplate) {
+        favoritedList.push(systemTemplate);
       }
     });
-    
-    // Keep a stable order: name asc
-    const sorted = [...favoritedList].sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
-    
-    return sorted;
+
+    return [...favoritedList].sort((a, b) => coerceString(a.name).localeCompare(coerceString(b.name)));
   }, [combinedTemplates, effectiveFavoritedIds]);
 
   // Filter and sort templates based on search, category, and favorites
   const filteredTemplates = useMemo(() => {
-    if (!Array.isArray(combinedTemplates)) {
-      logger.error('Templates is not an array', new Error(`Type: ${typeof combinedTemplates}`), 'KpiTemplateLibrary');
-      return [];
-    }
-    
-    // Always work on a copy to avoid mutating server data arrays
     let filtered = [...combinedTemplates];
 
     if (debouncedSearchTerm) {
       const search = debouncedSearchTerm.toLowerCase();
-      filtered = filtered.filter(template => 
-        template.name.toLowerCase().includes(search) ||
-        template.description?.toLowerCase().includes(search) ||
-        template.tags?.some(tag => tag.toLowerCase().includes(search))
-      );
+      filtered = filtered.filter((template) => {
+        const name = coerceString(template.name).toLowerCase();
+        const description = coerceString(template.description).toLowerCase();
+        const tags = Array.isArray(template.tags)
+          ? template.tags.filter((tag): tag is string => typeof tag === 'string')
+          : [];
+
+        return (
+          name.includes(search) ||
+          description.includes(search) ||
+          tags.some((tag) => tag.toLowerCase().includes(search))
+        );
+      });
     }
 
-    // Sort: favorited templates first, then by name
-    const sorted = filtered.sort((a, b) => {
-      const aIsFavorited = effectiveFavoritedIds.has(a.id);
-      const bIsFavorited = effectiveFavoritedIds.has(b.id);
-      
+    return filtered.sort((a, b) => {
+      const aIsFavorited = a.id ? effectiveFavoritedIds.has(a.id) : false;
+      const bIsFavorited = b.id ? effectiveFavoritedIds.has(b.id) : false;
+
       if (aIsFavorited && !bIsFavorited) return -1;
       if (!aIsFavorited && bIsFavorited) return 1;
-      
-      return a.name.localeCompare(b.name);
+
+      return coerceString(a.name).localeCompare(coerceString(b.name));
     });
-    
-    return sorted;
   }, [combinedTemplates, debouncedSearchTerm, effectiveFavoritedIds]);
 
   // Get unique categories and types for filters
   const categories = useMemo(() => {
-    if (!Array.isArray(combinedTemplates)) {
-      logger.error('Templates is not an array for categories', new Error(`Type: ${typeof combinedTemplates}`), 'KpiTemplateLibrary');
-      return ['all'];
-    }
-    const cats = ['all', ...Array.from(new Set(combinedTemplates.map((t: Record<string, unknown>) => t.category)))];
-    return cats;
+    const cats = new Set<string>(['all']);
+    combinedTemplates.forEach((t) => cats.add(coerceString(t.category, 'uncategorized')));
+    return Array.from(cats);
   }, [combinedTemplates]);
 
   const types = useMemo(() => {
-    if (!Array.isArray(templates)) {
-      logger.error('Templates is not an array for types', new Error(`Type: ${typeof templates}`), 'KpiTemplateLibrary');
-      return ['all'];
-    }
-    const types = ['all', ...Array.from(new Set(templates.map(t => t.template_type)))];
-    return types;
+    const typeSet = new Set<string>(['all']);
+    ensureTemplateArray(templates).forEach((t) => typeSet.add(coerceString(t.template_type, 'unknown')));
+    return Array.from(typeSet);
   }, [templates]);
 
   // Handle template actions
@@ -297,14 +299,17 @@ export default function KpiTemplateLibrary({
   };
 
   // Template list item component
-  const TemplateListItem = ({ template, featured = false }: { template: KpiTemplate; featured?: boolean }) => {
-    const CategoryIcon = getCategoryIcon(template.category);
+  const TemplateListItem = ({ template, featured = false }: { template: TemplateLike; featured?: boolean }) => {
+    const templateId = coerceString(template.id);
+    if (!templateId) return null;
+
+    const CategoryIcon = getCategoryIcon(coerceString(template.category, ''));
     
     // Only show favorite functionality for templates that can be favorited
     // User-created KPIs (not from templates) can't be favorited through the template system
     const canBeFavorited = template.template_type !== 'user' || template.is_from_template;
     
-    const { data: favoriteStatus } = useTemplateFavoriteStatus(template.id);
+    const { data: favoriteStatus } = useTemplateFavoriteStatus(templateId);
     const favoriteMutation = useFavoriteTemplate();
     
     return (
@@ -321,13 +326,13 @@ export default function KpiTemplateLibrary({
               <div className="flex items-center justify-between gap-2 mb-1">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <h3 className="text-base font-semibold text-gray-900 group-hover:text-purple-600 transition-colors truncate">
-                    {template.name}
+                    {coerceString(template.name, 'Untitled Template')}
                   </h3>
                   <div className="flex gap-1 flex-shrink-0">
-                    <Badge className={`text-xs ${getCategoryColor(template.category)}`}>
-                      {template.category}
+                    <Badge className={`text-xs ${getCategoryColor(coerceString(template.category, ''))}`}>
+                      {template.category || 'uncategorized'}
                     </Badge>
-                    <Badge className={`text-xs ${getTypeColor(template.template_type)}`}>
+                    <Badge className={`text-xs ${getTypeColor(coerceString(template.template_type, ''))}`}>
                       {template.template_type}
                     </Badge>
                     <Badge className="text-xs bg-green-100 text-green-700 border-green-200">
@@ -342,18 +347,20 @@ export default function KpiTemplateLibrary({
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    <span>{new Date(template.created_at).toLocaleDateString()}</span>
+                    <span>{template.created_at ? new Date(template.created_at).toLocaleDateString() : ''}</span>
                   </div>
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-600 line-clamp-1 flex-1 min-w-0 pr-2">
-                  {template.description}
+                  {coerceString(template.description)}
                 </p>
                 {template.creator && (
                   <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
                     <User className="h-3 w-3" />
-                    <span className="truncate max-w-32">{template.creator.first_name} {template.creator.last_name}</span>
+                    <span className="truncate max-w-32">
+                      {coerceString(template.creator?.first_name)} {coerceString(template.creator?.last_name)}
+                    </span>
                   </div>
                 )}
               </div>
@@ -383,21 +390,21 @@ export default function KpiTemplateLibrary({
                   e.stopPropagation();
                   const next = !favoriteStatus?.isFavorited;
                   // optimistic override
-                  setFavoriteOverrides((prev) => ({ ...prev, [template.id]: next }));
+                  setFavoriteOverrides((prev) => ({ ...prev, [templateId]: next }));
                   favoriteMutation.mutate(
-                    { templateId: template.id, isFavorited: next },
+                    { templateId, isFavorited: next },
                     {
                       onSuccess: () => {
                         // clear override after server confirms (query invalidation will refresh)
                         setFavoriteOverrides((prev) => {
-                          const { [template.id]: _omit, ...rest } = prev;
+                          const { [templateId]: _omit, ...rest } = prev;
                           return rest;
                         });
                       },
                       onError: () => {
                         // revert override on error
                         setFavoriteOverrides((prev) => {
-                          const { [template.id]: _omit, ...rest } = prev;
+                          const { [templateId]: _omit, ...rest } = prev;
                           return rest;
                         });
                       }
@@ -405,9 +412,9 @@ export default function KpiTemplateLibrary({
                   );
                 }}
                 disabled={favoriteMutation.isPending}
-                className={`px-2 ${favoriteStatus?.isFavorited || favoriteOverrides[template.id] ? "text-red-500 border-red-500" : ""}`}
+                className={`px-2 ${favoriteStatus?.isFavorited || favoriteOverrides[templateId] ? "text-red-500 border-red-500" : ""}`}
               >
-                <Heart className={`h-4 w-4 ${favoriteStatus?.isFavorited || favoriteOverrides[template.id] ? "fill-current" : ""}`} />
+                <Heart className={`h-4 w-4 ${favoriteStatus?.isFavorited || favoriteOverrides[templateId] ? "fill-current" : ""}`} />
               </Button>
             )}
           </div>
@@ -518,9 +525,11 @@ export default function KpiTemplateLibrary({
             <h3 className="text-lg font-semibold text-green-900">Your Templates</h3>
           </div>
           <div className="space-y-2">
-            {derivedUserTemplates.map(template => (
-              <TemplateListItem key={template.id} template={template} />
-            ))}
+            {derivedUserTemplates
+              .filter((template): template is TemplateLike & { id: string } => !!template.id)
+              .map((template) => (
+                <TemplateListItem key={template.id} template={template} />
+              ))}
           </div>
         </div>
       )}
@@ -533,9 +542,12 @@ export default function KpiTemplateLibrary({
             <h3 className="text-lg font-semibold text-red-900">Your Favorites</h3>
           </div>
           <div className="space-y-2">
-            {derivedFavoritedTemplates.slice(0, 6).map(template => (
-              <TemplateListItem key={template.id} template={template} featured />
-            ))}
+            {derivedFavoritedTemplates
+              .filter((template): template is TemplateLike & { id: string } => !!template.id)
+              .slice(0, 6)
+              .map((template) => (
+                <TemplateListItem key={template.id} template={template} featured />
+              ))}
           </div>
         </div>
       )}
@@ -548,9 +560,11 @@ export default function KpiTemplateLibrary({
             <h3 className="text-lg font-semibold text-gray-900">Popular Templates</h3>
           </div>
           <div className="space-y-2">
-            {popularTemplates.map(template => (
-              <TemplateListItem key={template.id} template={template} />
-            ))}
+            {popularTemplates
+              .filter((template): template is TemplateLike & { id: string } => !!template.id)
+              .map((template) => (
+                <TemplateListItem key={template.id} template={template} />
+              ))}
           </div>
         </div>
       )}
@@ -579,9 +593,11 @@ export default function KpiTemplateLibrary({
           </div>
         ) : (
           <div className="space-y-2">
-            {filteredTemplates.map(template => (
-              <TemplateListItem key={template.id} template={template} />
-            ))}
+            {filteredTemplates
+              .filter((template): template is TemplateLike & { id: string } => !!template.id)
+              .map((template) => (
+                <TemplateListItem key={template.id} template={template} />
+              ))}
           </div>
         )}
       </div>

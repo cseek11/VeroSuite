@@ -1,44 +1,93 @@
 import React from 'react';
 import Card from '@/components/ui/Card';
-import {
-  Badge,
-  Heading,
-  Text,
-} from '@/components/ui';
+import { Badge, Heading, Text } from '@/components/ui';
 import { Package, AlertTriangle, CheckCircle, Clock, Thermometer, Shield, Zap } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { enhancedApi } from '@/lib/enhanced-api';
 
+interface InventoryComplianceData {
+  totalItems: number;
+  lowStock: number;
+  outOfStock: number;
+  expiringSoon: number;
+  complianceRate: number;
+  safetyScore: number;
+}
+
+interface InventoryCategory {
+  name: string;
+  compliance: number;
+  total: number;
+  lowStock: number;
+  outOfStock: number;
+}
+
+interface ComplianceAlert {
+  id: string;
+  item: string;
+  message: string;
+  date: string | Date;
+  severity: 'high' | 'medium' | 'low' | string;
+  type: 'expiration' | 'low_stock' | 'temperature' | 'maintenance' | string;
+}
+
+interface Inspection {
+  id: string;
+  inspector: string;
+  date: string | Date;
+  score: number;
+  status: string;
+  notes: string;
+}
+
+const defaultInventoryData: InventoryComplianceData = {
+  totalItems: 0,
+  lowStock: 0,
+  outOfStock: 0,
+  expiringSoon: 0,
+  complianceRate: 0,
+  safetyScore: 0,
+};
+
 const InventoryCompliancePanel: React.FC = () => {
-  // Fetch inventory data from API
-  const { data: inventoryData = {
-    totalItems: 0,
-    lowStock: 0,
-    outOfStock: 0,
-    expiringSoon: 0,
-    complianceRate: 0,
-    safetyScore: 0
-  }, isLoading: _isLoading } = useQuery({
+  const { data: inventoryData = defaultInventoryData } = useQuery({
     queryKey: ['inventory', 'compliance'],
-    queryFn: () => enhancedApi.inventory.getComplianceData(),
+    queryFn: async (): Promise<InventoryComplianceData> => {
+      if (enhancedApi.inventory && typeof enhancedApi.inventory.getComplianceData === 'function') {
+        return await enhancedApi.inventory.getComplianceData();
+      }
+      return defaultInventoryData;
+    },
   });
 
-  // Fetch inventory categories from API
   const { data: inventoryCategories = [] } = useQuery({
     queryKey: ['inventory', 'categories'],
-    queryFn: () => enhancedApi.inventory.getCategories(),
+    queryFn: async (): Promise<InventoryCategory[]> => {
+      if (enhancedApi.inventory && typeof enhancedApi.inventory.getCategories === 'function') {
+        return await enhancedApi.inventory.getCategories();
+      }
+      return [];
+    },
   });
 
-  // Fetch compliance alerts from API
   const { data: complianceAlerts = [] } = useQuery({
     queryKey: ['inventory', 'alerts'],
-    queryFn: () => enhancedApi.inventory.getComplianceAlerts(),
+    queryFn: async (): Promise<ComplianceAlert[]> => {
+      if (enhancedApi.inventory && typeof enhancedApi.inventory.getComplianceAlerts === 'function') {
+        return await enhancedApi.inventory.getComplianceAlerts();
+      }
+      return [];
+    },
   });
 
-  // Fetch recent inspections from API
   const { data: recentInspections = [] } = useQuery({
     queryKey: ['inventory', 'inspections'],
-    queryFn: () => enhancedApi.inventory.getRecentInspections(),
+    queryFn: async (): Promise<Inspection[]> => {
+      if (enhancedApi.inventory && typeof enhancedApi.inventory.getRecentInspections === 'function') {
+        return await enhancedApi.inventory.getRecentInspections();
+      }
+      return [];
+    },
   });
 
   const getSeverityColor = (severity: string) => {
@@ -132,7 +181,7 @@ const InventoryCompliancePanel: React.FC = () => {
       {/* Inventory Categories */}
       <Card title="Inventory by Category">
         <div className="space-y-4">
-          {inventoryCategories.map((category, index) => (
+          {inventoryCategories.map((category: InventoryCategory, index: number) => (
             <div key={index} className="border rounded-lg p-4">
               <div className="flex justify-between items-center mb-3">
                 <Text variant="body" className="font-medium">
@@ -190,7 +239,7 @@ const InventoryCompliancePanel: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="Compliance Alerts">
           <div className="space-y-4">
-            {complianceAlerts.map((alert) => (
+            {complianceAlerts.map((alert: ComplianceAlert) => (
               <div key={alert.id} className="flex items-start space-x-3 p-3 border rounded-lg">
                 <div className="flex-shrink-0">
                   {getAlertIcon(alert.type)}
@@ -221,7 +270,7 @@ const InventoryCompliancePanel: React.FC = () => {
 
         <Card title="Recent Inspections">
           <div className="space-y-4">
-            {recentInspections.map((inspection) => (
+            {recentInspections.map((inspection: Inspection) => (
               <div key={inspection.id} className="border rounded-lg p-4">
                 <div className="flex justify-between items-start mb-2">
                   <div>

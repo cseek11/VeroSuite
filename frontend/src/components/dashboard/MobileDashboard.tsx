@@ -50,19 +50,19 @@ export function MobileDashboard({
     setIsPanning(true);
   }, [onPan]);
 
-  const handlePinch = useCallback((scale: number, center: { x: number; y: number }) => {
+  const handlePinch = useCallback((scale: number, _center: { x: number; y: number }) => {
     if (onZoom) {
       const newZoom = Math.max(0.5, Math.min(3, zoom * scale));
       onZoom(newZoom);
     }
   }, [onZoom, zoom]);
 
-  const handleTap = useCallback((point: { x: number; y: number }) => {
+  const handleTap = useCallback((_point: { x: number; y: number }) => {
     // Handle tap actions
-    logger.debug('Tap gesture detected', { point }, 'MobileDashboard');
+    logger.debug('Tap gesture detected', {}, 'MobileDashboard');
   }, []);
 
-  const handleDoubleTap = useCallback((point: { x: number; y: number }) => {
+  const handleDoubleTap = useCallback((_point: { x: number; y: number }) => {
     // Double tap to reset zoom
     if (onZoom && onPan && onReset) {
       onZoom(1);
@@ -213,10 +213,10 @@ export function MobileDashboard({
           isPanning ? 'cursor-grabbing' : 'cursor-grab'
         } ${densityMode === 'dense' ? 'dense-mode' : 'standard-mode'}`}
         style={deviceStyles}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchCancel}
+        onTouchStart={(e: React.TouchEvent) => handleTouchStart(e)}
+        onTouchMove={(e: React.TouchEvent) => handleTouchMove(e)}
+        onTouchEnd={(e: React.TouchEvent) => handleTouchEnd(e)}
+        onTouchCancel={(e: React.TouchEvent) => handleTouchCancel(e)}
         onMouseDown={(e) => {
           // Handle mouse events for desktop
           if (!isMobile) {

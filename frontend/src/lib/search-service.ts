@@ -4,7 +4,7 @@
 // Provides advanced search functionality with logging and relevance ranking
 
 import { config } from '@/lib/config';
-import supabase from '@/lib/supabase-client';
+import { supabase } from '@/lib/supabase-client';
 import { useAuthStore } from '@/stores/auth';
 import type { SearchFilters, Account } from '@/types/enhanced-types';
 import { logger } from '@/utils/logger';
@@ -182,7 +182,7 @@ export class EnhancedSearchUtils {
 
     // Phone number matching (highest priority for digits)
     const phoneDigits = searchTerm.replace(/\D/g, '');
-    if (phoneDigits.length > 0 && customer.phone_digits?.includes(phoneDigits)) {
+    if (phoneDigits.length > 0 && (customer as any).phone_digits?.includes(phoneDigits)) {
       relevance += 100;
       if (customer.phone?.toLowerCase().includes(searchLower)) {
         relevance += 50;
@@ -199,7 +199,7 @@ export class EnhancedSearchUtils {
 
     // Address matching
     const addressFields = [customer.address, customer.city, customer.state, customer.zip_code]
-      .filter(Boolean)
+      .filter((field): field is string => Boolean(field))
       .map(field => field.toLowerCase());
     
     if (addressFields.some(field => field.includes(searchLower))) {
@@ -288,7 +288,7 @@ export const enhancedSearch = {
       const { data, error } = await query;
       if (error) throw error;
 
-      const results = data || [];
+      const results = (data ?? []) as Account[];
       const endTime = performance.now();
       const timeTakenMs = Math.round(endTime - startTime);
 
@@ -376,12 +376,21 @@ export const searchCorrections = {
     try {
       const tenantId = await getTenantId();
       
+      // Get current values first
+      const { data: existing } = await supabase
+        .from('search_corrections')
+        .select('success_count, total_attempts')
+        .eq('tenant_id', tenantId)
+        .eq('original_query', originalQuery.toLowerCase())
+        .eq('corrected_query', correctedQuery)
+        .single();
+
       if (success) {
         await supabase
           .from('search_corrections')
           .update({ 
-            success_count: supabase.sql`success_count + 1`,
-            total_attempts: supabase.sql`total_attempts + 1`
+            success_count: (existing?.success_count || 0) + 1,
+            total_attempts: (existing?.total_attempts || 0) + 1
           })
           .eq('tenant_id', tenantId)
           .eq('original_query', originalQuery.toLowerCase())
@@ -390,7 +399,7 @@ export const searchCorrections = {
         await supabase
           .from('search_corrections')
           .update({ 
-            total_attempts: supabase.sql`total_attempts + 1`
+            total_attempts: (existing?.total_attempts || 0) + 1
           })
           .eq('tenant_id', tenantId)
           .eq('original_query', originalQuery.toLowerCase())
@@ -418,7 +427,7 @@ export class SearchService {
     return [];
   }
 
-  async globalSearch(query: string, _tenantId: string): Promise<any> {
+  async globalSearch(_query: string, _tenantId: string): Promise<any> {
     // This would need to be implemented for global search
     // For now, returning empty results to make tests pass
     return {

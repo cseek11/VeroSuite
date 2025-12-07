@@ -40,7 +40,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
     isExecuting,
     lastResult,
     executeAction,
-    executeActionWithConfirmation
+    executeActionWithConfirmation: _executeActionWithConfirmation
   } = useRoleBasedActions(context);
 
   // Icon mapping for actions

@@ -89,16 +89,17 @@ export default function SavedPaymentMethods({
   // Create payment method mutation
   const createMutation = useMutation({
     mutationFn: (data: PaymentMethodFormData) => {
-      return billing.createPaymentMethod({
+      const payload = {
         account_id: accountId,
         payment_type: data.payment_type,
-        payment_name: data.payment_name,
-        account_number: data.account_number,
-        routing_number: data.routing_number,
-        card_type: data.card_type,
-        card_last4: data.card_last4,
-        card_expiry: data.card_expiry,
-      });
+        payment_name: data.payment_name ?? '',
+        ...(data.account_number !== undefined ? { account_number: data.account_number } : {}),
+        ...(data.routing_number !== undefined ? { routing_number: data.routing_number } : {}),
+        ...(data.card_type !== undefined ? { card_type: data.card_type } : {}),
+        ...(data.card_last4 !== undefined ? { card_last4: data.card_last4 } : {}),
+        ...(data.card_expiry !== undefined ? { card_expiry: data.card_expiry } : {}),
+      };
+      return billing.createPaymentMethod(payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['billing', 'payment-methods'] });

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, type ChangeEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -32,35 +32,88 @@ import { logger } from '@/utils/logger';
 import { toast } from '@/utils/toast';
 
 export default function PaymentTracking() {
-  const [startDate, setStartDate] = useState<string>(
-    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  const [startDate, setStartDate] = useState<string>(() =>
+    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] || ''
   );
-  const [endDate, setEndDate] = useState<string>(
-    new Date().toISOString().split('T')[0]
-  );
+  const [endDate, setEndDate] = useState<string>(() => new Date().toISOString().split('T')[0] || '');
 
-  const { data: trackingData, isLoading, error, refetch } = useQuery({
+  interface Payment {
+    id?: string | number;
+    payment_date?: string;
+    amount?: number | string;
+    reference_number?: string;
+    notes?: string;
+    Invoice?: {
+      invoice_number?: string;
+      accounts?: { name?: string };
+    };
+    payment_methods?: {
+      payment_name?: string;
+    };
+  }
+
+  interface PaymentTrackingData {
+    dailyTrends?: Record<string, number>;
+    payments?: Payment[];
+    summary: {
+      totalAmount: number;
+      paymentCount: number;
+      averagePayment: number;
+    };
+  }
+
+  const defaultTrackingData: PaymentTrackingData = {
+    dailyTrends: {},
+    payments: [],
+    summary: {
+      totalAmount: 0,
+      paymentCount: 0,
+      averagePayment: 0
+    }
+  };
+
+  const handleDateChange =
+    (setter: (value: string) => void) =>
+    (value: string | ChangeEvent<HTMLInputElement>) => {
+      if (typeof value === 'string') {
+        setter(value);
+        return;
+      }
+      setter(value?.target?.value ?? '');
+    };
+
+  const {
+    data = defaultTrackingData,
+    isLoading,
+    error,
+    refetch
+  } = useQuery<PaymentTrackingData>({
     queryKey: ['billing', 'payment-tracking', startDate, endDate],
     queryFn: () => billing.getPaymentTracking(startDate, endDate),
-    onError: (error: unknown) => {
+    initialData: defaultTrackingData,
+    placeholderData: defaultTrackingData
+  });
+
+  useEffect(() => {
+    if (error) {
       logger.error('Failed to fetch payment tracking data', error, 'PaymentTracking');
       toast.error('Failed to load payment tracking data. Please try again.');
-    },
-  });
+    }
+  }, [error]);
 
   // Prepare chart data from daily trends - MUST be called before early returns (Rules of Hooks)
   const chartData = useMemo(() => {
-    if (!trackingData?.dailyTrends) {
+    if (!data?.dailyTrends) {
       return [];
     }
-    return Object.entries(trackingData.dailyTrends)
+    return Object.entries(data.dailyTrends)
       .map(([date, amount]) => ({
         date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         amount: Number(amount),
         fullDate: date
       }))
       .sort((a, b) => new Date(a.fullDate).getTime() - new Date(b.fullDate).getTime());
-  }, [trackingData?.dailyTrends]);
+  }, [data?.dailyTrends]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -101,11 +154,9 @@ export default function PaymentTracking() {
     );
   }
 
-  if (!trackingData) {
-    return null;
-  }
-
-  const { payments, summary } = trackingData;
+  const trackingData = data ?? defaultTrackingData;
+  const payments: Payment[] = trackingData.payments ?? [];
+  const summary = trackingData.summary ?? defaultTrackingData.summary;
 
   const handleExportCSV = () => {
     try {
@@ -144,7 +195,9 @@ export default function PaymentTracking() {
         `Average Payment: ${formatCurrency(summary.averagePayment)}`,
         '',
         headers.join(','),
-        ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        ...rows.map((row: (string | number)[]) =>
+          row.map((cell: string | number) => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+        )
       ].join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -198,14 +251,14 @@ export default function PaymentTracking() {
             <Input
               type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={handleDateChange(setStartDate)}
               className="w-40"
             />
             <Text>to</Text>
             <Input
               type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={handleDateChange(setEndDate)}
               className="w-40"
             />
           </div>

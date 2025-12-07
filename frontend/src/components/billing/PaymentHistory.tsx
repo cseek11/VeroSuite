@@ -123,10 +123,16 @@ export default function PaymentHistory({ payments, isLoading, customerId }: Paym
         icon: AlertCircle,
         label: 'Refunded',
         className: 'bg-blue-100 text-blue-800'
+      },
+      all: {
+        variant: 'info' as const,
+        icon: History,
+        label: 'All',
+        className: 'bg-gray-100 text-gray-800'
       }
     };
 
-    const config = statusConfig[status] || statusConfig.completed;
+    const config = status === 'all' ? statusConfig.all : statusConfig[status] || statusConfig.completed;
     const Icon = config.icon;
 
     return (

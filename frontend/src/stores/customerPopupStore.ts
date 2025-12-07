@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import React from 'react';
+import { useEffect } from 'react';
 import { enhancedApi } from '@/lib/enhanced-api';
 import { Account } from '@/types/enhanced-types';
 
@@ -43,7 +43,7 @@ export const useCustomerPopup = (customerId?: string) => {
   const { customer, isLoading, error, loadCustomer, clearCustomer } = useCustomerPopupStore();
   
   // Auto-load customer when ID changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (customerId) {
       loadCustomer(customerId);
     } else {

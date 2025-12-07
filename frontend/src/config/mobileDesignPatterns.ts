@@ -202,9 +202,10 @@ export function getTouchTarget(type: keyof MobileDesignPatterns['touchTargets'])
  * Get responsive breakpoint for a given width
  */
 export function getBreakpoint(width: number): ResponsiveBreakpoint {
-  return mobileDesignPatterns.breakpoints.find(
+  const found = mobileDesignPatterns.breakpoints.find(
     bp => width >= bp.minWidth && (!bp.maxWidth || width <= bp.maxWidth)
-  ) || mobileDesignPatterns.breakpoints[mobileDesignPatterns.breakpoints.length - 1];
+  );
+  return found ?? mobileDesignPatterns.breakpoints[mobileDesignPatterns.breakpoints.length - 1]!;
 }
 
 /**

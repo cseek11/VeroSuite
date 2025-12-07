@@ -1,5 +1,4 @@
 import * as Sentry from '@sentry/react';
-import { BrowserTracing } from '@sentry/tracing';
 import { config } from './config';
 import { logger } from '@/utils/logger';
 
@@ -12,22 +11,13 @@ export function initSentry() {
 
   Sentry.init({
     dsn: config.monitoring.sentry.dsn,
-    integrations: [
-      new BrowserTracing({
-        routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-          (history) => history,
-          [],
-          [],
-          'initial'
-        ),
-      }),
-    ],
+    integrations: (() => {
+      const tracing = (Sentry as any).browserTracingIntegration?.();
+      return tracing ? [tracing] : [];
+    })(),
     tracesSampleRate: config.monitoring.sentry.tracesSampleRate,
     environment: config.app.environment,
     release: config.app.version,
-    
-    // Performance monitoring
-    enableTracing: true,
     
     // Error filtering
     beforeSend(event: any, _hint: any) {

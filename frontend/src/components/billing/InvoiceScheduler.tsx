@@ -67,9 +67,9 @@ export default function InvoiceScheduler({ onScheduleCreated: _onScheduleCreated
   const queryClient = useQueryClient();
 
   // Mock scheduled invoices - In production, this would fetch from API
-  const { data: schedulesData, isLoading, error: schedulesError } = useQuery<ScheduledInvoice[]>({
+  const { data: schedulesData, isLoading, error: schedulesError } = useQuery({
     queryKey: ['invoice-schedules'],
-    queryFn: async () => {
+    queryFn: async (): Promise<ScheduledInvoice[]> => {
       // Mock data for now
       return [
         {
@@ -154,7 +154,7 @@ export default function InvoiceScheduler({ onScheduleCreated: _onScheduleCreated
       logger.debug('Schedule deleted', { scheduleId }, 'InvoiceScheduler');
       toast.success('Schedule deleted successfully');
       
-      queryClient.invalidateQueries({ queryKey: ['invoice-schedules'] });
+      await queryClient.invalidateQueries({ queryKey: ['invoice-schedules'] });
     } catch (error) {
       logger.error('Failed to delete schedule', error, 'InvoiceScheduler');
       toast.error('Failed to delete schedule. Please try again.');
@@ -166,7 +166,7 @@ export default function InvoiceScheduler({ onScheduleCreated: _onScheduleCreated
       logger.debug('Schedule toggled', { scheduleId: schedule.id, newStatus: !schedule.is_active }, 'InvoiceScheduler');
       toast.success(`Schedule ${!schedule.is_active ? 'activated' : 'paused'}`);
       
-      queryClient.invalidateQueries({ queryKey: ['invoice-schedules'] });
+      await queryClient.invalidateQueries({ queryKey: ['invoice-schedules'] });
     } catch (error) {
       logger.error('Failed to toggle schedule', error, 'InvoiceScheduler');
       toast.error('Failed to update schedule. Please try again.');

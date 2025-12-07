@@ -363,7 +363,7 @@ export default function WorkOrderDetail({
       {/* Status Management */}
       <WorkOrderStatusManager
         workOrder={workOrder}
-        onStatusChange={onStatusChange}
+        {...(onStatusChange ? { onStatusChange } : {})}
         mode="single"
       />
 
@@ -397,7 +397,7 @@ export default function WorkOrderDetail({
               </div>
             )}
 
-            {workOrder.service_price !== null && workOrder.service_price !== undefined && workOrder.service_price !== '' && (
+            {workOrder.service_price !== null && workOrder.service_price !== undefined && (
               <div>
                 <label className="block text-sm font-medium text-gray-700">Service Price</label>
                 <p className="mt-1 text-sm text-gray-900 flex items-center gap-1">

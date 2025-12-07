@@ -70,22 +70,22 @@ export const LazyRegion: React.FC<LazyRegionProps> = ({
         isLoading ? (
           <RegionContainer
             region={region}
-            onResize={onResize}
-            onMove={onMove}
-            onToggleCollapse={onToggleCollapse}
-            onToggleLock={onToggleLock}
-            onDelete={onDelete}
+            {...(onResize ? { onResize } : {})}
+            {...(onMove ? { onMove } : {})}
+            {...(onToggleCollapse ? { onToggleCollapse } : {})}
+            {...(onToggleLock ? { onToggleLock } : {})}
+            {...(onDelete ? { onDelete } : {})}
           >
             {renderSkeleton ? renderSkeleton() : defaultSkeleton()}
           </RegionContainer>
         ) : (
           <RegionContainer
             region={region}
-            onResize={onResize}
-            onMove={onMove}
-            onToggleCollapse={onToggleCollapse}
-            onToggleLock={onToggleLock}
-            onDelete={onDelete}
+            {...(onResize ? { onResize } : {})}
+            {...(onMove ? { onMove } : {})}
+            {...(onToggleCollapse ? { onToggleCollapse } : {})}
+            {...(onToggleLock ? { onToggleLock } : {})}
+            {...(onDelete ? { onDelete } : {})}
           >
             {children}
           </RegionContainer>
@@ -93,11 +93,11 @@ export const LazyRegion: React.FC<LazyRegionProps> = ({
       ) : (
         <RegionContainer
           region={region}
-          onResize={onResize}
-          onMove={onMove}
-          onToggleCollapse={onToggleCollapse}
-          onToggleLock={onToggleLock}
-          onDelete={onDelete}
+          {...(onResize ? { onResize } : {})}
+          {...(onMove ? { onMove } : {})}
+          {...(onToggleCollapse ? { onToggleCollapse } : {})}
+          {...(onToggleLock ? { onToggleLock } : {})}
+          {...(onDelete ? { onDelete } : {})}
         >
           {renderSkeleton ? renderSkeleton() : defaultSkeleton()}
         </RegionContainer>

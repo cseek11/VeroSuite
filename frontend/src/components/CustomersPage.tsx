@@ -188,7 +188,7 @@ export default function CustomersPage() {
     if (!Array.isArray(searchResults)) {
       return [];
     }
-    return searchResults.flatMap(result => result.data || []);
+    return searchResults.flatMap(result => (result && 'data' in result && Array.isArray(result.data)) ? result.data : []);
   }, [searchResults]);
 
   const filteredCustomers = useMemo(() => {

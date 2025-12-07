@@ -64,9 +64,9 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
   const queryClient = useQueryClient();
 
   // Mock templates - In production, this would fetch from API
-  const { data: templatesData, isLoading, error: templatesError } = useQuery<InvoiceTemplate[]>({
+  const { data: templatesData, isLoading, error: templatesError } = useQuery({
     queryKey: ['invoice-templates'],
-    queryFn: async () => {
+    queryFn: async (): Promise<InvoiceTemplate[]> => {
       // Mock data for now
       return [
         {
@@ -165,7 +165,7 @@ export default function InvoiceTemplates({ onApplyTemplate }: InvoiceTemplatesPr
       toast.success('Template deleted successfully');
       
       // Invalidate query to refetch
-      queryClient.invalidateQueries({ queryKey: ['invoice-templates'] });
+      await queryClient.invalidateQueries({ queryKey: ['invoice-templates'] });
     } catch (error) {
       logger.error('Failed to delete template', error, 'InvoiceTemplates');
       toast.error('Failed to delete template. Please try again.');

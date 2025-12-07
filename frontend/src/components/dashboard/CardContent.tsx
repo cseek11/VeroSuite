@@ -34,13 +34,13 @@ export const CardContent = forwardRef<HTMLDivElement, CardContentProps>(
     const content = responsive ? (
       <ResponsiveContent 
         breakpoint={breakpoint}
-        cardId={cardId}
+        {...(cardId !== undefined && cardId !== null ? { cardId } : {})}
         className="h-full w-full"
       >
         <ScrollableArea
           scrollbarStyle={scrollbarStyle}
           autoScroll={autoScroll}
-          onScroll={onScroll}
+          {...(onScroll !== undefined && onScroll !== null ? { onScroll } : {})}
           className="h-full w-full"
         >
           {children}
@@ -50,7 +50,7 @@ export const CardContent = forwardRef<HTMLDivElement, CardContentProps>(
       <ScrollableArea
         scrollbarStyle={scrollbarStyle}
         autoScroll={autoScroll}
-        onScroll={onScroll}
+        {...(onScroll !== undefined && onScroll !== null ? { onScroll } : {})}
         className="h-full w-full"
       >
         {children}

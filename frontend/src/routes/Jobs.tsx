@@ -1,11 +1,8 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-// TODO: Update to use enhanced API for jobs
-// import { enhancedApi } from '@/lib/enhanced-api';
+import { jobsApi } from '@/hooks/useJobs';
 
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { logger } from '@/utils/logger';
-import { toast } from '@/utils/toast';
 
 import {
   Calendar,
@@ -22,45 +19,45 @@ import {
 export default function Jobs() {
   const qc = useQueryClient();
   const [searchTechId, setSearchTechId] = useState<string | undefined>(undefined);
-  const [uploading, setUploading] = useState(false);
   const uploadedUrlRef = useRef<string | null>(null);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['jobs', 'today', searchTechId],
-    queryFn: () => jobsApi.today(searchTechId),
+    queryFn: () => jobsApi.getTodayJobs(searchTechId),
   });
 
+  type AssignPayload = {
+    job_id: string;
+    technician_id: string;
+    scheduled_date?: string;
+    time_window_start?: string;
+    time_window_end?: string;
+  };
+
   const assignMutation = useMutation({
-    mutationFn: jobsApi.assign,
+    mutationFn: async ({ job_id, technician_id, scheduled_date }: AssignPayload) =>
+      jobsApi.updateJob(job_id, {
+        technician_id,
+        ...(scheduled_date ? { scheduled_date } : {}),
+      }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['jobs', 'today'] }),
   });
 
   const startMutation = useMutation({
-    mutationFn: ({ id, gps }: { id: string; gps: { lat: number; lng: number } }) => jobsApi.start(id, gps),
+    mutationFn: async ({ id }: { id: string; gps: { lat: number; lng: number } }) =>
+      jobsApi.updateJob(id, { status: 'in_progress' as any, actual_start_time: new Date().toISOString() }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['jobs', 'today'] }),
   });
 
   const completeMutation = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: any }) => jobsApi.complete(id, payload),
+    mutationFn: async ({ id, payload }: { id: string; payload: any }) =>
+      jobsApi.updateJob(id, {
+        status: 'completed' as any,
+        actual_end_time: new Date().toISOString(),
+        notes: payload?.notes,
+      }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['jobs', 'today'] }),
   });
-
-  async function handleUpload(file: File) {
-    setUploading(true);
-    try {
-      // TODO: Implement file upload using enhanced API
-      if (process.env.NODE_ENV === 'development') {
-        logger.debug('Uploading file', { fileName: file.name }, 'Jobs');
-      }
-      uploadedUrlRef.current = 'mock-upload-url';
-      toast.success('Upload complete');
-    } catch (e: unknown) {
-      logger.error('Upload failed', e, 'Jobs');
-      toast.error('Upload failed');
-    } finally {
-      setUploading(false);
-    }
-  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {

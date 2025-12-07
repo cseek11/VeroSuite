@@ -54,10 +54,10 @@ const CardTemplateManager: React.FC<CardTemplateManagerProps> = ({
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
 
   const templates = useCardTemplates({
-    onApplyTemplate,
-    onSaveTemplate,
-    onDeleteTemplate,
-    userId
+    ...(onApplyTemplate ? { onApplyTemplate } : {}),
+    ...(onSaveTemplate ? { onSaveTemplate } : {}),
+    ...(onDeleteTemplate ? { onDeleteTemplate } : {}),
+    ...(userId !== undefined ? { userId } : {})
   });
 
   const categoryIcons = {
@@ -321,8 +321,8 @@ const CardTemplateManager: React.FC<CardTemplateManagerProps> = ({
                         <span>{template.metadata.usageCount} uses</span>
                       </div>
                       <div className="flex items-center space-x-1">
-                        {template.metadata.isPublic && (
-                          <Share2 className="w-3 h-3 text-blue-500" title="Public template" />
+                        {template.metadata?.isPublic && (
+                          <Share2 className="w-3 h-3 text-blue-500" />
                         )}
                         <span className="text-xs text-gray-500">{template.cards.length} cards</span>
                       </div>

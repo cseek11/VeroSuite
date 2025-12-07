@@ -2,7 +2,7 @@
  * Compliance Score Component
  * Displays compliance score with visualization
  * 
- * Last Updated: 2025-12-06
+ * Last Updated: 2025-12-07
  */
 
 import { useMemo } from 'react';
@@ -21,7 +21,7 @@ import {
 import type { ComplianceScore } from '@/types/compliance.types';
 
 interface ComplianceScoreProps {
-  prNumber?: number;
+  prNumber?: number | null;
   className?: string;
 }
 

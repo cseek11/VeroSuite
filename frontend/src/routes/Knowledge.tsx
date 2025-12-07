@@ -34,7 +34,7 @@ import { fetchKnowledgeArticles, fetchKnowledgeCategories, createKnowledgeArticl
 // Articles will be fetched from API
 
 const KnowledgePage: React.FC = () => {
-  const { showConfirm, DialogComponents } = useDialog();
+  const { DialogComponents } = useDialog();
   const { user } = useAuthStore();
   const isAdmin = !!(user && Array.isArray(user.roles) && user.roles.includes('admin'));
   const [activeTab, setActiveTab] = useState('articles');
@@ -44,8 +44,8 @@ const KnowledgePage: React.FC = () => {
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
   const [fetchedArticles, setFetchedArticles] = useState<any[]>([]);
   const [fetchedCategories, setFetchedCategories] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  // const [, setLoading] = useState<boolean>(false); // Reserved for future use
+  // const [, setError] = useState<string | null>(null); // Reserved for future use
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
   const [editorData, setEditorData] = useState<any>({
     id: undefined,
@@ -133,9 +133,6 @@ const KnowledgePage: React.FC = () => {
     );
   };
 
-  const getCategoryArticles = (categoryId: string) => {
-    return articles.filter((article: any) => usingFetched ? article.category_slug === categoryId : article.category === categoryId);
-  };
 
   return (
     <>

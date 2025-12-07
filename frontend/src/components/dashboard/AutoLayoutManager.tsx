@@ -173,7 +173,7 @@ export default function AutoLayoutManager({
                 <Card className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
                   <div className="flex items-center gap-3 mb-4">
                     <Brain className="w-6 h-6 text-purple-600 animate-pulse" />
-                    <Heading level={6} className="text-purple-900">
+                    <Heading level={4} className="text-purple-900">
                       Learning from Usage Patterns
                     </Heading>
                   </div>
@@ -227,7 +227,7 @@ export default function AutoLayoutManager({
               {/* Most Used Card */}
               {layoutInsights.mostUsedCard && (
                 <Card className="p-6">
-                  <Heading level={6} className="text-gray-900 mb-4">
+                  <Heading level={4} className="text-gray-900 mb-4">
                     Most Frequently Used Card
                   </Heading>
                   <div className="flex items-center gap-4">
@@ -273,7 +273,7 @@ export default function AutoLayoutManager({
               {layoutSuggestions.length === 0 ? (
                   <Card className="p-8 text-center">
                   <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <Heading level={6} className="text-gray-900 mb-2">
+                  <Heading level={4} className="text-gray-900 mb-2">
                     No Suggestions Available
                   </Heading>
                   <Text variant="small" className="text-gray-600 mb-4">
@@ -292,7 +292,7 @@ export default function AutoLayoutManager({
                           {suggestion.type === 'prioritize_frequent' && <TrendingUp className="w-5 h-5 text-green-600" />}
                           {suggestion.type === 'group_related' && <Users className="w-5 h-5 text-blue-600" />}
                           {suggestion.type === 'optimize_spacing' && <Layout className="w-5 h-5 text-orange-600" />}
-                          <Heading level={6} className="text-gray-900">
+                          <Heading level={4} className="text-gray-900">
                             {suggestion.title}
                           </Heading>
                         </div>
@@ -358,7 +358,7 @@ export default function AutoLayoutManager({
 
           {activeTab === 'optimizations' && (
             <div className="space-y-6">
-              <Heading level={6} className="text-gray-900">
+              <Heading level={4} className="text-gray-900">
                 Layout Optimization Algorithms
               </Heading>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -366,7 +366,7 @@ export default function AutoLayoutManager({
                   <Card key={optimization.id} className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <Heading level={6} className="text-gray-900 mb-2">
+                        <Heading level={4} className="text-gray-900 mb-2">
                           {optimization.name}
                         </Heading>
                         <Text variant="small" className="text-gray-600">
@@ -411,7 +411,7 @@ export default function AutoLayoutManager({
 
           {activeTab === 'analytics' && (
             <div className="space-y-6">
-              <Heading level={6} className="text-gray-900">
+              <Heading level={4} className="text-gray-900">
                 Usage Analytics
               </Heading>
               
@@ -445,7 +445,7 @@ export default function AutoLayoutManager({
               {/* Relationships */}
               {cardRelationships.length > 0 && (
                 <div>
-                  <Heading level={6} className="text-gray-900 mb-4">
+                  <Heading level={4} className="text-gray-900 mb-4">
                     Card Relationships
                   </Heading>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -494,7 +494,7 @@ export default function AutoLayoutManager({
             </div>
 
             <div className="p-6">
-              <Heading level={6} className="text-gray-900 mb-2">
+                        <Heading level={4} className="text-gray-900 mb-2">
                 {selectedSuggestion.title}
               </Heading>
               <Text variant="small" className="text-gray-600 mb-4">

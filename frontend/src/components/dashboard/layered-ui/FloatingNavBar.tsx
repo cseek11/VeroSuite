@@ -85,7 +85,7 @@ export const FloatingNavBar: React.FC<FloatingNavBarProps> = ({
       initial={{ y: inline ? 0 : -100 }}
       animate={{ y: 0 }}
       className={inline ? 'w-full' : 'fixed right-4 z-40'}
-      style={inline ? undefined : { top: offsetTop }}
+      style={inline ? undefined : (offsetTop !== undefined ? { top: offsetTop } : undefined)}
     >
       <div className={inline
         ? 'bg-white/80 backdrop-blur rounded-md border border-gray-200 overflow-hidden w-full'

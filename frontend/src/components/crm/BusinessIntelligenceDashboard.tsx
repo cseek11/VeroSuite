@@ -223,7 +223,7 @@ export default function BusinessIntelligenceDashboard({ customerId: _customerId 
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Target className="h-5 w-5 text-purple-600" />
-                <Heading level={5} className="text-slate-900">
+                <Heading level={4} className="text-slate-900">
                   Pest Pressure Prediction
                 </Heading>
               </div>
@@ -265,7 +265,7 @@ export default function BusinessIntelligenceDashboard({ customerId: _customerId 
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-emerald-600" />
-                <Heading level={5} className="text-slate-900">
+                <Heading level={4} className="text-slate-900">
                   Revenue Forecast
                 </Heading>
               </div>
@@ -300,7 +300,7 @@ export default function BusinessIntelligenceDashboard({ customerId: _customerId 
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-amber-600" />
-            <Heading level={5} className="text-slate-900">
+            <Heading level={4} className="text-slate-900">
               Service Effectiveness
             </Heading>
           </div>

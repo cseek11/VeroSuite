@@ -7,7 +7,7 @@ export type DensityMode = 'dense' | 'standard';
 export interface UserPreferences {
   viewMode: ViewMode;
   densityMode: DensityMode;
-  defaultFilters: Record<string, any>;
+  defaultFilters: Record<string, unknown>;
   sortPreferences: Record<string, 'asc' | 'desc'>;
   theme: 'light' | 'dark' | 'auto';
   notifications: {

@@ -100,8 +100,10 @@ export const useErrorHandling = (): UseErrorHandlingReturn => {
       return;
     }
 
-    // Store operation for retry
-    retryOperationsRef.current.set(errorId, operation);
+    // Store operation for retry if provided
+    if (operation) {
+      retryOperationsRef.current.set(errorId, operation);
+    }
 
     // Update retry count
     setErrors(prev => prev.map(e => 
@@ -117,7 +119,7 @@ export const useErrorHandling = (): UseErrorHandlingReturn => {
 
     try {
       await new Promise(resolve => setTimeout(resolve, delay));
-      await operation();
+      await storedOperation();
       
       // Success - clear error
       clearError(errorId);

@@ -26,7 +26,7 @@ interface WidgetRegistryItem {
 
 export const DashboardAdminControlCenter: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'templates' | 'widgets' | 'permissions' | 'audit'>('templates');
-  const [templates, setTemplates] = useState<LayoutTemplate[]>([]);
+  // const [, setTemplates] = useState<LayoutTemplate[]>([]); // Reserved for future template management
   const [widgets, setWidgets] = useState<WidgetRegistryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [showWidgetBuilder, setShowWidgetBuilder] = useState(false);
@@ -44,7 +44,7 @@ export const DashboardAdminControlCenter: React.FC = () => {
       }
       // Templates and other data would be loaded from API
     } catch (error) {
-      console.error('Failed to load data:', error);
+      // Error handling would be implemented here
     } finally {
       setLoading(false);
     }

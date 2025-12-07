@@ -256,12 +256,20 @@ const LayoutManager: React.FC<LayoutManagerProps> = ({
       setLoading(true);
       setError(null);
       
-      await layoutStorage.updateLayout(editingLayout.id, {
+      const updateData: {
+        name: string;
+        description?: string;
+        tags: string[];
+        is_public: boolean;
+      } = {
         name: editForm.name,
-        description: editForm.description || undefined,
         tags: editForm.tags.length > 0 ? editForm.tags : [],
         is_public: editForm.isPublic
-      });
+      };
+      if (editForm.description) {
+        updateData.description = editForm.description;
+      }
+      await layoutStorage.updateLayout(editingLayout.id, updateData);
       
       setEditingLayout(null);
       await loadLayouts();
@@ -478,9 +486,9 @@ const LayoutManager: React.FC<LayoutManagerProps> = ({
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-medium text-gray-900">{layout.name}</h3>
                           {layout.is_public ? (
-                            <Globe className="w-4 h-4 text-green-500" title="Public" />
+                            <Globe className="w-4 h-4 text-green-500" title="Public" aria-label="Public" />
                           ) : (
-                            <Lock className="w-4 h-4 text-gray-400" title="Private" />
+                            <Lock className="w-4 h-4 text-gray-400" title="Private" aria-label="Private" />
                           )}
                         </div>
                         

@@ -7,7 +7,8 @@ import { logger } from '@/utils/logger';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
 // Mock data for development - will be replaced with real API calls
-const mockKPIData: SmartKPI[] = [
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _mockKPIData: SmartKPI[] = [
   {
     id: 'jobs-completed',
     metric: 'Jobs Completed Today',
@@ -202,7 +203,7 @@ export const useSmartKPIs = () => {
         setDrillDownData({
           title: kpi.drillDown.title,
           description: kpi.drillDown.description,
-          data: Array.from({ length: 10 }, (_, i) => ({
+          data: Array.from({ length: 10 }, (_: unknown, i: number) => ({
             id: i + 1,
             name: `Item ${i + 1}`,
             value: Math.floor(Math.random() * 1000),
@@ -250,10 +251,9 @@ export const useSmartKPIs = () => {
     const status = getKPIStatus(kpi.value, threshold);
     const statusColor = getStatusColor(status);
     
-    return {
+    const result: EnhancedDashboardMetric = {
       title: kpi.metric,
       value: threshold.unit ? `${kpi.value}${threshold.unit}` : kpi.value.toString(),
-      change: kpi.trendValue,
       changeType: kpi.trend === 'up' ? 'increase' : kpi.trend === 'down' ? 'decrease' : undefined,
       icon: () => null, // Will be replaced with proper icon in component
       color: statusColor,
@@ -265,15 +265,19 @@ export const useSmartKPIs = () => {
       trendValue: kpi.trendValue,
       lastUpdated: kpi.lastUpdated
     };
+    if (kpi.trendValue !== undefined) {
+      result.change = kpi.trendValue;
+    }
+    return result;
   }, [getKPIStatus, getStatusColor]);
 
   // Process and combine KPI configs with data
   const processedKPIs = useMemo(() => {
     if (!kpiConfigs.length) return [];
     
-    return kpiConfigs.map(config => {
-      const data = kpiData.find(d => d.metric === config.name);
-      const trend = kpiTrends.find(t => t.metric === config.name);
+    return kpiConfigs.map((config: KPIConfig) => {
+      const data = kpiData.find((d: { metric: string; value: number; timestamp?: string }) => d.metric === config.name);
+      const trend = kpiTrends.find((t: { metric: string; trend: string; trendValue: number }) => t.metric === config.name);
       
       return {
         id: config.id,

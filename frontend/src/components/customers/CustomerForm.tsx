@@ -815,10 +815,10 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
                 control={control}
                 render={({ field }) => (
                   <Checkbox
-                    checked={field.value}
+                    checked={field.value ?? false}
                     onChange={field.onChange}
                     label="Auto Renew"
-                    error={errors.auto_renew?.message}
+                    {...(errors.auto_renew?.message !== undefined ? { error: errors.auto_renew.message } : {})}
                   />
                 )}
               />

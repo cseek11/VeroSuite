@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import React from 'react';
 import { enhancedApi } from '@/lib/enhanced-api';
 import { secureApiClient } from '@/lib/secure-api-client';
 import { Account } from '@/types/enhanced-types';

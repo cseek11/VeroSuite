@@ -26,6 +26,22 @@ const defaultRetryOptions: Required<RetryOptions> = {
   }
 };
 
+export const getAuthToken = async (): Promise<string> => {
+  try {
+    const authData = localStorage.getItem('verofield_auth');
+    if (authData) {
+      const parsed = JSON.parse(authData);
+      if (parsed?.token) {
+        return parsed.token as string;
+      }
+    }
+    throw new Error('No auth token found');
+  } catch (error) {
+    logger.error('Failed to get auth token', error, 'api-utils');
+    throw error;
+  }
+};
+
 export async function fetchWithRetry(
   url: string,
   options: RequestInit = {},
@@ -167,33 +183,36 @@ export async function enhancedApiCall<T>(
     return await apiCall<T>(url, options, retryOptions);
   } catch (error: unknown) {
     logger.error('Enhanced API call failed', { url, error }, 'api-utils');
-    
+    const err = error as { message?: string; status?: number; response?: Response; [key: string]: any };
+    const message = typeof err?.message === 'string' ? err.message : '';
+    const status = typeof err?.status === 'number' ? err.status : undefined;
+
     // Provide more specific error messages
-    if (error.message?.includes('fetch')) {
+    if (message.includes('fetch')) {
       throw new Error('Network connection failed. Please check your internet connection and try again.');
-    } else if (error.message?.includes('ECONNREFUSED')) {
+    } else if (message.includes('ECONNREFUSED')) {
       throw new Error('Backend server is not running. Please start the backend server.');
-    } else if (error.status === 401) {
+    } else if (status === 401) {
       throw new Error('Authentication failed. Please log in again.');
-    } else if (error.status === 403) {
+    } else if (status === 403) {
       throw new Error('Access denied. You do not have permission to perform this action.');
-    } else if (error.status === 404) {
+    } else if (status === 404) {
       // 404 could mean the route doesn't exist OR the user isn't authenticated
       // Check if this might be an auth issue
-      const errorMessage = error.message || '';
+      const errorMessage = message || '';
       if (errorMessage.includes('Cannot') || errorMessage.includes('GET') || errorMessage.includes('PUT')) {
         throw new Error('Endpoint not found. This may indicate an authentication issue. Please try logging in again.');
       } else {
         throw new Error('Resource not found. The requested data may have been deleted.');
       }
-    } else if (error.status === 429) {
+    } else if (status === 429) {
       // Rate limit error - extract retry information
-      const retryAfter = error.response?.headers?.get('Retry-After') || 
-                        (error as any).retryAfter || 
+      const retryAfter = err.response?.headers?.get('Retry-After') ||
+                        err.retryAfter ||
                         '60';
-      const category = error.response?.headers?.get('X-RateLimit-Category') || 'operations';
-      const limit = error.response?.headers?.get('X-RateLimit-Limit') || 'unknown';
-      const resetTime = error.response?.headers?.get('X-RateLimit-Reset');
+      const category = err.response?.headers?.get('X-RateLimit-Category') || 'operations';
+      const limit = err.response?.headers?.get('X-RateLimit-Limit') || 'unknown';
+      const resetTime = err.response?.headers?.get('X-RateLimit-Reset');
       
       const retrySeconds = parseInt(retryAfter, 10);
       const retryMinutes = Math.ceil(retrySeconds / 60);
@@ -208,10 +227,10 @@ export async function enhancedApiCall<T>(
       (rateLimitError as any).isRateLimit = true;
       
       throw rateLimitError;
-    } else if (error.status >= 500) {
+    } else if (status !== undefined && status >= 500) {
       throw new Error('Server error. Please try again later or contact support.');
     } else {
-      throw error;
+      throw error instanceof Error ? error : new Error('Unknown API error');
     }
   }
 }

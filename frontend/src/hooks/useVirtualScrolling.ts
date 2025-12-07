@@ -22,6 +22,7 @@ interface VirtualScrollingReturn extends VirtualScrollingState {
   scrollToIndex: (index: number) => void;
   getVisibleItems: <T>(items: T[]) => T[];
   getItemStyle: (index: number) => React.CSSProperties;
+  containerRef: React.RefObject<HTMLDivElement>;
 }
 
 export function useVirtualScrolling(options: VirtualScrollingOptions): VirtualScrollingReturn {
@@ -119,9 +120,10 @@ export function useVirtualScrolling(options: VirtualScrollingOptions): VirtualSc
   useEffect(() => {
     const container = containerRef.current;
     if (container) {
-      container.addEventListener('scroll', handleScroll as any);
-      return () => container.removeEventListener('scroll', handleScroll as any);
+      container.addEventListener('scroll', handleScroll as EventListener);
+      return () => container.removeEventListener('scroll', handleScroll as EventListener);
     }
+    return undefined;
   }, [handleScroll]);
 
   return {
@@ -133,6 +135,6 @@ export function useVirtualScrolling(options: VirtualScrollingOptions): VirtualSc
     getVisibleItems,
     getItemStyle,
     // Expose container ref for external use
-    containerRef: containerRef.current
+    containerRef
   };
 }

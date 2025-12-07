@@ -46,6 +46,7 @@ export const useCardFocusScroll = ({
   useEffect(() => {
     if (selectedCards.size === 1) {
       const selectedCardId = Array.from(selectedCards)[0];
+      if (!selectedCardId) return;
       
       // Only scroll if it's a new selection (not the same card)
       if (selectedCardId !== lastSelectedCard.current) {

@@ -42,7 +42,11 @@ import { useVeroCardsRender } from './VeroCardsV3Render';
 import { TemplateErrorBoundary } from './components/TemplateErrorBoundary';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
-export default function VeroCardsV3() {
+type VeroCardsV3Props = {
+  showHeader?: boolean;
+};
+
+export default function VeroCardsV3({ showHeader = true }: VeroCardsV3Props) {
   const { user } = useAuthStore();
   
   // Early returns must come before any other hooks
@@ -54,9 +58,6 @@ export default function VeroCardsV3() {
   const gridManager = useGridManager();
   const errorHandling = useErrorHandling();
   const syncStatus = useSyncStatus();
-  
-  // Track occupied grid positions (from grid manager)
-  const occupiedGridPositionsRef = gridManager.occupiedGridPositionsRef;
   
   // Custom hooks
   const dashboardState = useDashboardState();
@@ -361,6 +362,7 @@ export default function VeroCardsV3() {
   return (
     <TemplateErrorBoundary>
       <DashboardContent
+        showHeader={showHeader}
         user={user}
         scrollableContainerRef={scrollableContainerRef}
         containerRef={containerRef}

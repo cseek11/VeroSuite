@@ -65,7 +65,7 @@ class SearchLoggingService {
       throw new Error(`Failed to get tenant ID: ${error.message}`);
     }
 
-    if (!tenantId) {
+    if (typeof tenantId !== 'string' || !tenantId) {
       throw new Error('No tenant ID found for user');
     }
 
@@ -161,7 +161,7 @@ class SearchLoggingService {
       // Get popular queries
       const { data: popularData, error: popularError } = await supabase
         .from('search_logs')
-        .select('query')
+        .select('query, results_count')
         .eq('tenant_id', tenantId)
         .gte('created_at', cutoffDate);
 
@@ -172,7 +172,7 @@ class SearchLoggingService {
 
       // Calculate analytics
       const totalSearches = statsData.length;
-      const avgResultsCount = totalSearches > 0 ? statsData.reduce((sum, log) => sum + log.results_count, 0) / totalSearches : 0;
+      const avgResultsCount = totalSearches > 0 ? statsData.reduce((sum, log) => sum + (log.results_count || 0), 0) / totalSearches : 0;
       const avgTimeTakenMs = totalSearches > 0 ? statsData.reduce((sum, log) => sum + log.time_taken_ms, 0) / totalSearches : 0;
       const totalClicks = statsData.filter(log => log.clicked_record_id).length;
       const clickThroughRate = totalSearches > 0 ? totalClicks / totalSearches : 0;
@@ -367,6 +367,3 @@ class SearchLoggingService {
 
 // Export singleton instance
 export const searchLoggingService = new SearchLoggingService();
-
-// Export types
-export type { SearchLogEntry, SearchAnalytics, SearchCorrection };

@@ -238,8 +238,8 @@ export class CardInteractionRegistry {
    */
   getState(): RegistryState {
     return {
-      cards: Array.from(this.cards.values()),
-      interactions: Array.from(this.interactions.values()),
+      cards: this.cards,
+      interactions: this.interactions,
       enabled: this.enabled
     };
   }

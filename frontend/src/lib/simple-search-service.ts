@@ -3,7 +3,7 @@
 // ============================================================================
 // Direct query approach to avoid function problems
 
-import { supabase } from './supabase';
+import { supabase } from './supabase-client';
 import { getTenantId } from './enhanced-api';
 import { logger } from '@/utils/logger';
 
@@ -91,7 +91,7 @@ export class SimpleSearchService {
       }
       
       // Transform results to match expected format
-      const transformedResults: SimpleSearchResult[] = (results || []).map(account => ({
+      const transformedResults: SimpleSearchResult[] = (results || []).map((account: any) => ({
         id: account.id,
         name: account.name || '',
         email: account.email || '',

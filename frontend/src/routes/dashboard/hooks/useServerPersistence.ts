@@ -9,7 +9,7 @@ export const useServerPersistence = (
   localAddCard: (type: string, position?: { x: number; y: number }) => string,
   localRemoveCard: (cardId: string) => void,
   localUpdateMultipleCardPositions: (updates: Array<{ cardId: string; x: number; y: number }>) => void,
-  loadLayoutFromData: (layout: any) => void,
+  _loadLayoutFromData: (layout: any) => void,
   layout: any,
   kpiData: Record<string, any>,
   setKpiData: React.Dispatch<React.SetStateAction<Record<string, any>>>,

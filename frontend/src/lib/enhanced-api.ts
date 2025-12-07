@@ -46,7 +46,7 @@ import type {
 // UTILITY FUNCTIONS
 // ============================================================================
 
-const getTenantId = async (): Promise<string> => {
+export const getTenantId = async (): Promise<string> => {
   try {
     // First, try to get from Supabase auth
     const { data: { user } } = await supabase.auth.getUser();
@@ -169,7 +169,7 @@ const handleApiError = (error: unknown, context: string): never => {
   let errorDetails: any = null;
 
   if (error && typeof error === 'object') {
-    if ('response' in error) {
+    if ('response' in (error as Record<string, any>)) {
       const response = (error as { response?: any }).response;
       errorMessage = response.statusText || `HTTP ${response.status}`;
       // Try to extract error details if available
@@ -226,12 +226,14 @@ const handleApiError = (error: unknown, context: string): never => {
     fullMessage = `${errorMessage}\n\nValidation errors:\n${errorDetails.map((e, i) => `  ${i + 1}. ${e}`).join('\n')}`;
   }
 
+  const responseData = (error as any)?.response?.data;
+
   logger.error(`API Error in ${context}`, { 
     error, 
     details: errorDetails, 
     message: errorMessage,
     fullMessage,
-    responseData: error?.response?.data 
+    responseData 
   }, 'enhanced-api');
   
   // Create error with validation details if available
@@ -358,19 +360,13 @@ export const customers = {
           city: customerData.city,
           state: customerData.state,
           zip_code: customerData.zip_code,
-          country: customerData.country,
           status: customerData.status,
           account_type: customerData.account_type,
-          notes: customerData.notes,
           created_at: customerData.created_at,
           updated_at: customerData.updated_at,
-          created_by: customerData.created_by,
-          updated_by: customerData.updated_by,
           tenant_id: customerData.tenant_id,
           // Set defaults for missing fields
           ar_balance: 0,
-          company_name: customerData.company_name ?? '',
-          contact_person: customerData.contact_person ?? '',
           property_type: customerData.property_type ?? '',
           property_size: customerData.property_size ?? '',
           access_instructions: customerData.access_instructions ?? '',
@@ -388,7 +384,7 @@ export const customers = {
       logger.error('Customer not found in either table', accountError || customerError, 'enhanced-api');
       throw accountError || customerError;
     } catch (error) {
-      handleApiError(error, 'fetch customer');
+      return handleApiError(error, 'fetch customer');
       return null;
     }
   },
@@ -406,7 +402,7 @@ export const customers = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'create customer');
+      return handleApiError(error, 'create customer');
       throw error;
     }
   },
@@ -421,7 +417,7 @@ export const customers = {
       // Only include columns that exist in Supabase 'accounts' schema
       const allowedAccountColumns = [
         'name', 'email', 'phone', 'address', 'city', 'state', 'zip_code',
-        'country', 'status', 'account_type', 'notes', 'ar_balance',
+        'status', 'account_type', 'notes', 'ar_balance',
         'company_name', 'contact_person'
       ] as const;
       const filteredAccountUpdates: Record<string, any> = {};
@@ -486,19 +482,13 @@ export const customers = {
           city: customerData.city,
           state: customerData.state,
           zip_code: customerData.zip_code,
-          country: customerData.country,
           status: customerData.status,
           account_type: customerData.account_type,
-          notes: customerData.notes,
           created_at: customerData.created_at,
           updated_at: customerData.updated_at,
-          created_by: customerData.created_by,
-          updated_by: customerData.updated_by,
           tenant_id: customerData.tenant_id,
           // Set defaults for missing fields
           ar_balance: updates.ar_balance ?? 0,
-          company_name: customerData.company_name ?? '',
-          contact_person: customerData.contact_person ?? '',
           property_type: customerData.property_type ?? '',
           property_size: customerData.property_size ?? '',
           access_instructions: customerData.access_instructions ?? '',
@@ -516,7 +506,7 @@ export const customers = {
       logger.error('Customer not found in either table', accountError || customerError, 'enhanced-api');
       throw accountError || customerError;
     } catch (error) {
-      handleApiError(error, 'update customer');
+      return handleApiError(error, 'update customer');
       throw error;
     }
   },
@@ -533,7 +523,7 @@ export const customers = {
 
       if (error) throw error;
     } catch (error) {
-      handleApiError(error, 'delete customer');
+      return handleApiError(error, 'delete customer');
       throw error;
     }
   },
@@ -560,7 +550,7 @@ export const customerProfiles = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'fetch customer profile');
+      return handleApiError(error, 'fetch customer profile');
       return null;
     }
   },
@@ -595,7 +585,7 @@ export const customerProfiles = {
         testimonials: 0 // Placeholder - should come from actual testimonial data
       };
     } catch (error) {
-      handleApiError(error, 'fetch customer experience metrics');
+      return handleApiError(error, 'fetch customer experience metrics');
       return {
         totalCustomers: 0,
         satisfactionScore: 0,
@@ -624,7 +614,7 @@ export const customerProfiles = {
       // if (error) throw error;
       // return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch recent customer feedback');
+      return handleApiError(error, 'fetch recent customer feedback');
       return [];
     }
   },
@@ -640,8 +630,7 @@ export const customerProfiles = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'create customer profile');
-      throw error;
+      return handleApiError(error, 'create customer profile');
     }
   },
 
@@ -657,8 +646,7 @@ export const customerProfiles = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'update customer profile');
-      throw error;
+      return handleApiError(error, 'update customer profile');
     }
   }
 };
@@ -679,7 +667,7 @@ export const customerContacts = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch customer contacts');
+      return handleApiError(error, 'fetch customer contacts');
     }
   },
 
@@ -694,7 +682,7 @@ export const customerContacts = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'create customer contact');
+      return handleApiError(error, 'create customer contact');
     }
   },
 
@@ -710,7 +698,7 @@ export const customerContacts = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'update customer contact');
+      return handleApiError(error, 'update customer contact');
     }
   },
 
@@ -723,7 +711,7 @@ export const customerContacts = {
 
       if (error) throw error;
     } catch (error) {
-      handleApiError(error, 'delete customer contact');
+      return handleApiError(error, 'delete customer contact');
     }
   }
 };
@@ -757,7 +745,7 @@ export const workOrders = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch work orders');
+      return handleApiError(error, 'fetch work orders');
     }
   },
 
@@ -779,7 +767,7 @@ export const workOrders = {
       if (error) throw error;
       return (data as any) || [];
     } catch (error) {
-      handleApiError(error, 'fetch work orders by customer');
+      return handleApiError(error, 'fetch work orders by customer');
     }
   },
 
@@ -801,7 +789,7 @@ export const workOrders = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'fetch work order');
+      return handleApiError(error, 'fetch work order');
     }
   },
 
@@ -817,7 +805,7 @@ export const workOrders = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'create work order');
+      return handleApiError(error, 'create work order');
     }
   },
 
@@ -835,7 +823,7 @@ export const workOrders = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'update work order');
+      return handleApiError(error, 'update work order');
     }
   },
 
@@ -850,7 +838,7 @@ export const workOrders = {
 
       if (error) throw error;
     } catch (error) {
-      handleApiError(error, 'delete work order');
+      return handleApiError(error, 'delete work order');
     }
   },
 
@@ -911,7 +899,7 @@ export const jobs = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch jobs');
+      return handleApiError(error, 'fetch jobs');
     }
   },
 
@@ -986,7 +974,7 @@ export const jobs = {
       if (error) throw error;
       return (data as any) || [];
     } catch (error) {
-      handleApiError(error, 'fetch jobs by customer');
+      return handleApiError(error, 'fetch jobs by customer');
     }
   },
 
@@ -1008,7 +996,7 @@ export const jobs = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'fetch job');
+      return handleApiError(error, 'fetch job');
     }
   },
 
@@ -1024,7 +1012,7 @@ export const jobs = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'create job');
+      return handleApiError(error, 'create job');
     }
   },
 
@@ -1042,7 +1030,7 @@ export const jobs = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'update job');
+      return handleApiError(error, 'update job');
     }
   },
 
@@ -1057,7 +1045,7 @@ export const jobs = {
 
       if (error) throw error;
     } catch (error) {
-      handleApiError(error, 'delete job');
+      return handleApiError(error, 'delete job');
     }
   },
 
@@ -1136,7 +1124,7 @@ export const jobs = {
         }),
       });
     } catch (error) {
-      handleApiError(error, 'check job conflicts');
+      return handleApiError(error, 'check job conflicts');
       throw error;
     }
   },
@@ -1158,7 +1146,7 @@ export const jobs = {
           body: JSON.stringify(templateData),
         });
       } catch (error) {
-        handleApiError(error, 'create recurring job template');
+        return handleApiError(error, 'create recurring job template');
         throw error;
       }
     },
@@ -1178,7 +1166,7 @@ export const jobs = {
         });
         return data || [];
       } catch (error) {
-        handleApiError(error, 'list recurring job templates');
+        return handleApiError(error, 'list recurring job templates');
         return [];
       }
     },
@@ -1196,7 +1184,7 @@ export const jobs = {
           },
         });
       } catch (error) {
-        handleApiError(error, 'get recurring job template');
+        return handleApiError(error, 'get recurring job template');
         throw error;
       }
     },
@@ -1216,7 +1204,7 @@ export const jobs = {
           body: JSON.stringify(updates),
         });
       } catch (error) {
-        handleApiError(error, 'update recurring job template');
+        return handleApiError(error, 'update recurring job template');
         throw error;
       }
     },
@@ -1236,7 +1224,7 @@ export const jobs = {
           },
         });
       } catch (error) {
-        handleApiError(error, 'delete recurring job template');
+        return handleApiError(error, 'delete recurring job template');
         throw error;
       }
     },
@@ -1265,7 +1253,7 @@ export const jobs = {
           }
         );
       } catch (error) {
-        handleApiError(error, 'generate recurring jobs');
+        return handleApiError(error, 'generate recurring jobs');
         throw error;
       }
     },
@@ -1284,7 +1272,7 @@ export const jobs = {
           },
         });
       } catch (error) {
-        handleApiError(error, 'skip recurring job occurrence');
+        return handleApiError(error, 'skip recurring job occurrence');
         throw error;
       }
     },
@@ -1307,7 +1295,7 @@ export const locations = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch locations');
+      return handleApiError(error, 'fetch locations');
     }
   },
 
@@ -1322,7 +1310,7 @@ export const locations = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'create location');
+      return handleApiError(error, 'create location');
     }
   },
 
@@ -1338,7 +1326,7 @@ export const locations = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'update location');
+      return handleApiError(error, 'update location');
     }
   },
 
@@ -1351,7 +1339,7 @@ export const locations = {
 
       if (error) throw error;
     } catch (error) {
-      handleApiError(error, 'delete location');
+      return handleApiError(error, 'delete location');
     }
   }
 };
@@ -1376,7 +1364,7 @@ export const serviceTypes = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch service types');
+      return handleApiError(error, 'fetch service types');
     }
   },
 
@@ -1396,7 +1384,7 @@ export const serviceTypes = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'fetch service type');
+      return handleApiError(error, 'fetch service type');
     }
   },
 
@@ -1412,7 +1400,7 @@ export const serviceTypes = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'create service type');
+      return handleApiError(error, 'create service type');
     }
   },
 
@@ -1430,7 +1418,7 @@ export const serviceTypes = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'update service type');
+      return handleApiError(error, 'update service type');
     }
   },
 
@@ -1445,7 +1433,7 @@ export const serviceTypes = {
 
       if (error) throw error;
     } catch (error) {
-      handleApiError(error, 'delete service type');
+      return handleApiError(error, 'delete service type');
     }
   }
 };
@@ -1467,7 +1455,7 @@ export const serviceCategories = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch service categories');
+      return handleApiError(error, 'fetch service categories');
     }
   },
 
@@ -1483,7 +1471,7 @@ export const serviceCategories = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'create service category');
+      return handleApiError(error, 'create service category');
     }
   }
 };
@@ -1505,7 +1493,7 @@ export const customerSegments = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch customer segments');
+      return handleApiError(error, 'fetch customer segments');
     }
   },
 
@@ -1521,7 +1509,7 @@ export const customerSegments = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'create customer segment');
+      return handleApiError(error, 'create customer segment');
     }
   }
 };
@@ -1543,7 +1531,7 @@ export const pricing = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch pricing tiers');
+      return handleApiError(error, 'fetch pricing tiers');
     }
   },
 
@@ -1562,7 +1550,7 @@ export const pricing = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch service pricing');
+      return handleApiError(error, 'fetch service pricing');
     }
   }
 };
@@ -1583,7 +1571,7 @@ export const paymentMethods = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch payment methods');
+      return handleApiError(error, 'fetch payment methods');
     }
   },
 
@@ -1598,7 +1586,7 @@ export const paymentMethods = {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleApiError(error, 'create payment method');
+      return handleApiError(error, 'create payment method');
     }
   },
 
@@ -1611,7 +1599,7 @@ export const paymentMethods = {
 
       if (error) throw error;
     } catch (error) {
-      handleApiError(error, 'delete payment method');
+      return handleApiError(error, 'delete payment method');
     }
   }
 };
@@ -1633,7 +1621,7 @@ export const communication = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch communication templates');
+      return handleApiError(error, 'fetch communication templates');
     }
   },
 
@@ -1652,7 +1640,7 @@ export const communication = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch automated communications');
+      return handleApiError(error, 'fetch automated communications');
     }
   }
 };
@@ -1674,7 +1662,7 @@ export const compliance = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch compliance requirements');
+      return handleApiError(error, 'fetch compliance requirements');
     }
   },
 
@@ -1694,7 +1682,7 @@ export const compliance = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch compliance records');
+      return handleApiError(error, 'fetch compliance records');
     }
   }
 };
@@ -1716,7 +1704,7 @@ export const serviceAreas = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch service areas');
+      return handleApiError(error, 'fetch service areas');
     }
   }
 };
@@ -1741,7 +1729,7 @@ export const technicianSkills = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch technician skills');
+      return handleApiError(error, 'fetch technician skills');
     }
   }
 };
@@ -1763,7 +1751,7 @@ export const analytics = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch customer analytics');
+      return handleApiError(error, 'fetch customer analytics');
     }
   },
 
@@ -1779,7 +1767,7 @@ export const analytics = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'fetch service analytics');
+      return handleApiError(error, 'fetch service analytics');
     }
   }
 };
@@ -1818,7 +1806,7 @@ export const authApi = {
       email,
       password,
       options: {
-        data: metadata
+        data: metadata ?? {}
       }
     });
     if (error) throw error;
@@ -2085,7 +2073,7 @@ export const billing = {
       return await response.json();
     } catch (error) {
       logger.error('Failed to fetch invoices', error, 'enhanced-api');
-      handleApiError(error, 'fetch invoices');
+      return handleApiError(error, 'fetch invoices');
       return [];
     }
   },
@@ -2119,7 +2107,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'fetch invoice');
+      return handleApiError(error, 'fetch invoice');
       return null;
     }
   },
@@ -2162,7 +2150,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'create invoice');
+      return handleApiError(error, 'create invoice');
       throw error;
     }
   },
@@ -2197,7 +2185,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'update invoice');
+      return handleApiError(error, 'update invoice');
       throw error;
     }
   },
@@ -2229,7 +2217,7 @@ export const billing = {
         throw new Error(`Failed to delete invoice: ${response.statusText}`);
       }
     } catch (error) {
-      handleApiError(error, 'delete invoice');
+      return handleApiError(error, 'delete invoice');
       throw error;
     }
   },
@@ -2266,7 +2254,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'fetch payments');
+      return handleApiError(error, 'fetch payments');
       return [];
     }
   },
@@ -2301,7 +2289,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'process payment');
+      return handleApiError(error, 'process payment');
       throw error;
     }
   },
@@ -2338,7 +2326,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'fetch payment methods');
+      return handleApiError(error, 'fetch payment methods');
       return [];
     }
   },
@@ -2373,7 +2361,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'create payment method');
+      return handleApiError(error, 'create payment method');
       throw error;
     }
   },
@@ -2405,7 +2393,7 @@ export const billing = {
         throw new Error(`Failed to delete payment method: ${response.statusText}`);
       }
     } catch (error) {
-      handleApiError(error, 'delete payment method');
+      return handleApiError(error, 'delete payment method');
       throw error;
     }
   },
@@ -2439,7 +2427,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'fetch billing analytics');
+      return handleApiError(error, 'fetch billing analytics');
       return {
         totalRevenue: 0,
         outstandingAmount: 0,
@@ -2490,7 +2478,7 @@ export const billing = {
       return await response.json();
     } catch (error) {
       logger.error('Failed to fetch revenue analytics', error, 'enhanced-api');
-      handleApiError(error, 'fetch revenue analytics');
+      return handleApiError(error, 'fetch revenue analytics');
       return {
         monthlyRevenue: [],
         totalRevenue: 0,
@@ -2529,7 +2517,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'create Stripe payment intent');
+      return handleApiError(error, 'create Stripe payment intent');
       throw error;
     }
   },
@@ -2562,7 +2550,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'get Stripe payment status');
+      return handleApiError(error, 'get Stripe payment status');
       throw error;
     }
   },
@@ -2596,7 +2584,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'get AR summary');
+      return handleApiError(error, 'get AR summary');
       throw error;
     }
   },
@@ -2631,7 +2619,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'retry failed payment');
+      return handleApiError(error, 'retry failed payment');
       throw error;
     }
   },
@@ -2676,7 +2664,7 @@ export const billing = {
       return await response.json();
     } catch (error) {
       logger.error('Failed to get payment analytics', error, 'enhanced-api');
-      handleApiError(error, 'get payment analytics');
+      return handleApiError(error, 'get payment analytics');
       throw error;
     }
   },
@@ -2712,7 +2700,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'create recurring payment');
+      return handleApiError(error, 'create recurring payment');
       throw error;
     }
   },
@@ -2745,7 +2733,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'get recurring payment');
+      return handleApiError(error, 'get recurring payment');
       throw error;
     }
   },
@@ -2781,7 +2769,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'cancel recurring payment');
+      return handleApiError(error, 'cancel recurring payment');
       throw error;
     }
   },
@@ -2814,7 +2802,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'get payment retry history');
+      return handleApiError(error, 'get payment retry history');
       throw error;
     }
   },
@@ -2847,7 +2835,7 @@ export const billing = {
 
       return await response.json();
     } catch (error) {
-      handleApiError(error, 'get overdue invoices');
+      return handleApiError(error, 'get overdue invoices');
       throw error;
     }
   },
@@ -2891,7 +2879,7 @@ export const billing = {
       return await response.json();
     } catch (error) {
       logger.error('Failed to get payment tracking', error, 'enhanced-api');
-      handleApiError(error, 'get payment tracking');
+      return handleApiError(error, 'get payment tracking');
       throw error;
     }
   },
@@ -2944,7 +2932,7 @@ export const billing = {
       return await response.json();
     } catch (error) {
       logger.error('Failed to send invoice reminder', error, 'enhanced-api');
-      handleApiError(error, 'send invoice reminder');
+      return handleApiError(error, 'send invoice reminder');
       throw error;
     }
   }
@@ -2988,7 +2976,7 @@ export const inventory = {
         safetyScore: 0
       };
     } catch (error) {
-      handleApiError(error, 'fetch inventory compliance data');
+      return handleApiError(error, 'fetch inventory compliance data');
       return {
         totalItems: 0,
         lowStock: 0,
@@ -3005,7 +2993,7 @@ export const inventory = {
       // TODO: Replace with actual inventory categories when implemented
       return [];
     } catch (error) {
-      handleApiError(error, 'fetch inventory categories');
+      return handleApiError(error, 'fetch inventory categories');
       return [];
     }
   },
@@ -3015,7 +3003,7 @@ export const inventory = {
       // TODO: Replace with actual compliance alerts when implemented
       return [];
     } catch (error) {
-      handleApiError(error, 'fetch compliance alerts');
+      return handleApiError(error, 'fetch compliance alerts');
       return [];
     }
   },
@@ -3025,7 +3013,7 @@ export const inventory = {
       // TODO: Replace with actual inspection data when implemented
       return [];
     } catch (error) {
-      handleApiError(error, 'fetch recent inspections');
+      return handleApiError(error, 'fetch recent inspections');
       return [];
     }
   }
@@ -3060,7 +3048,7 @@ export const financial = {
         }
       };
     } catch (error) {
-      handleApiError(error, 'fetch financial snapshot');
+      return handleApiError(error, 'fetch financial snapshot');
       return {
         currentMonth: {
           revenue: 0,
@@ -3089,7 +3077,7 @@ export const financial = {
       // TODO: Replace with actual revenue breakdown when implemented
       return [];
     } catch (error) {
-      handleApiError(error, 'fetch revenue breakdown');
+      return handleApiError(error, 'fetch revenue breakdown');
       return [];
     }
   },
@@ -3099,7 +3087,7 @@ export const financial = {
       // TODO: Replace with actual transaction data when implemented
       return [];
     } catch (error) {
-      handleApiError(error, 'fetch recent transactions');
+      return handleApiError(error, 'fetch recent transactions');
       return [];
     }
   },
@@ -3149,7 +3137,7 @@ export const kpiTemplates = {
           }
           return result;
       } catch (error) {
-        handleApiError(error, 'fetch KPI templates');
+        return handleApiError(error, 'fetch KPI templates');
         return [];
       }
     },
@@ -3173,7 +3161,7 @@ export const kpiTemplates = {
         // Handle v2 response format: { data, meta }
         return result?.data || result;
       } catch (error) {
-        handleApiError(error, 'fetch KPI template');
+        return handleApiError(error, 'fetch KPI template');
         return null;
       }
     },
@@ -3194,7 +3182,7 @@ export const kpiTemplates = {
         if (error) throw error;
         return data;
       } catch (error) {
-        handleApiError(error, 'create KPI template');
+        return handleApiError(error, 'create KPI template');
         throw error;
       }
     },
@@ -3213,7 +3201,7 @@ export const kpiTemplates = {
         if (error) throw error;
         return data;
       } catch (error) {
-        handleApiError(error, 'update KPI template');
+        return handleApiError(error, 'update KPI template');
         throw error;
       }
     },
@@ -3229,7 +3217,7 @@ export const kpiTemplates = {
 
         if (error) throw error;
       } catch (error) {
-        handleApiError(error, 'delete KPI template');
+        return handleApiError(error, 'delete KPI template');
         throw error;
       }
     },
@@ -3245,8 +3233,8 @@ export const kpiTemplates = {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            template_id: templateId,
-            ...userKpiData
+            ...userKpiData,
+            template_id: templateId
           })
         });
 
@@ -3258,7 +3246,7 @@ export const kpiTemplates = {
         // Handle v2 response format: { data, meta }
         return result?.data || result;
       } catch (error) {
-        handleApiError(error, 'use KPI template');
+        return handleApiError(error, 'use KPI template');
         throw error;
       }
     },
@@ -3287,7 +3275,7 @@ export const kpiTemplates = {
         // Handle v2 response format: { data, meta }
         return result?.data || result;
       } catch (error) {
-        handleApiError(error, 'track template usage');
+        return handleApiError(error, 'track template usage');
         throw error;
       }
     },
@@ -3323,7 +3311,7 @@ export const kpiTemplates = {
         return Array.isArray(data) ? data : [];
       } catch (error: unknown) {
         logger.error('Favorites API network error', error, 'enhanced-api');
-        handleApiError(error, 'get favorited templates');
+        return handleApiError(error, 'get favorited templates');
         return [];
       }
     },
@@ -3348,7 +3336,7 @@ export const kpiTemplates = {
         const data = result?.data || result;
         return data?.isFavorited !== undefined ? data : { isFavorited: data?.isFavorited || false };
       } catch (error) {
-        handleApiError(error, 'get template favorite status');
+        return handleApiError(error, 'get template favorite status');
         return { isFavorited: false };
       }
     },
@@ -3373,7 +3361,7 @@ export const kpiTemplates = {
         const data = result?.data || result;
         return Array.isArray(data) ? data : [];
       } catch (error) {
-        handleApiError(error, 'fetch popular KPI templates');
+        return handleApiError(error, 'fetch popular KPI templates');
         return [];
       }
     },
@@ -3416,7 +3404,7 @@ export const kpiTemplates = {
         }
         return templates;
       } catch (error) {
-        handleApiError(error, 'fetch featured KPI templates');
+        return handleApiError(error, 'fetch featured KPI templates');
         return [];
       }
     }
@@ -3441,7 +3429,7 @@ export const userKpis = {
         const data = response?.data || response;
         return Array.isArray(data) ? data : [];
       } catch (error) {
-        handleApiError(error, 'fetch user KPIs');
+        return handleApiError(error, 'fetch user KPIs');
         return [];
       }
     },
@@ -3463,7 +3451,7 @@ export const userKpis = {
         if (error) throw error;
         return data;
       } catch (error) {
-        handleApiError(error, 'fetch user KPI');
+        return handleApiError(error, 'fetch user KPI');
         return null;
       }
     },
@@ -3495,7 +3483,7 @@ export const userKpis = {
         return result;
       } catch (error: unknown) {
         logger.error('Enhanced API error', error, 'enhanced-api');
-        handleApiError(error, 'create user KPI');
+        return handleApiError(error, 'create user KPI');
         throw error;
       }
     },
@@ -3515,7 +3503,7 @@ export const userKpis = {
         if (error) throw error;
         return data;
       } catch (error) {
-        handleApiError(error, 'update user KPI');
+        return handleApiError(error, 'update user KPI');
         throw error;
       }
     },
@@ -3532,7 +3520,7 @@ export const userKpis = {
 
         if (error) throw error;
       } catch (error) {
-        handleApiError(error, 'delete user KPI');
+        return handleApiError(error, 'delete user KPI');
         throw error;
       }
   }
@@ -3554,7 +3542,7 @@ const technicians = {
         logger.debug('Fetching technicians', { url, baseUrl }, 'enhanced-api');
       }
       
-      const response = await enhancedApiCall<{ data: any; meta: any }>(url, {
+      const response: any = await enhancedApiCall<any>(url, {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       
@@ -3608,9 +3596,9 @@ const technicians = {
       }
       return [];
     } catch (error) {
-      logger.error('Error fetching technicians', { error, message: error?.message, status: error?.status }, 'enhanced-api');
-      handleApiError(error, 'list technicians');
-      return [];
+      const anyError = error as any;
+      logger.error('Error fetching technicians', { error: anyError, message: anyError?.message, status: anyError?.status }, 'enhanced-api');
+      return handleApiError(anyError, 'list technicians');
     }
   },
 
@@ -3630,7 +3618,7 @@ const technicians = {
       const data = response?.data || response;
       return data;
     } catch (error) {
-      handleApiError(error, 'get technician availability');
+      return handleApiError(error, 'get technician availability');
       throw error;
     }
   },
@@ -3660,7 +3648,7 @@ const technicians = {
       // Handle v2 response format
       return response?.data || response;
     } catch (error) {
-      handleApiError(error, 'set technician availability');
+      return handleApiError(error, 'set technician availability');
       throw error;
     }
   },
@@ -3680,7 +3668,7 @@ const technicians = {
       const data = response?.data || response;
       return data || [];
     } catch (error) {
-      handleApiError(error, 'get available technicians');
+      return handleApiError(error, 'get available technicians');
       return [];
     }
   }
@@ -3704,7 +3692,7 @@ const routing = {
       });
       return data || [];
     } catch (error) {
-      handleApiError(error, 'get routes');
+      return handleApiError(error, 'get routes');
       return [];
     }
   },
@@ -3719,7 +3707,7 @@ const routing = {
       });
       return data;
     } catch (error) {
-      handleApiError(error, 'optimize route');
+      return handleApiError(error, 'optimize route');
       throw error;
     }
   },
@@ -3733,7 +3721,7 @@ const routing = {
       });
       return data;
     } catch (error) {
-      handleApiError(error, 'get route metrics');
+      return handleApiError(error, 'get route metrics');
       throw error;
     }
   }
@@ -3779,7 +3767,7 @@ export const enhancedApi = {
         });
         return data;
       } catch (error) {
-        handleApiError(error, 'load default dashboard layout');
+        return handleApiError(error, 'load default dashboard layout');
         return null;
       }
     },
@@ -3791,7 +3779,7 @@ export const enhancedApi = {
         });
         return data || [];
       } catch (error) {
-        handleApiError(error, 'list dashboard cards');
+        return handleApiError(error, 'list dashboard cards');
         return [];
       }
     },
@@ -3804,7 +3792,7 @@ export const enhancedApi = {
         });
         return data || [];
       } catch (error) {
-        handleApiError(error, 'list dashboard regions');
+        return handleApiError(error, 'list dashboard regions');
         return [];
       }
     },
@@ -3839,7 +3827,7 @@ export const enhancedApi = {
         });
         return data;
       } catch (error) {
-        handleApiError(error, 'create dashboard region');
+        return handleApiError(error, 'create dashboard region');
         throw error;
       }
     },
@@ -3856,7 +3844,7 @@ export const enhancedApi = {
         });
         return data;
       } catch (error) {
-        handleApiError(error, 'update dashboard region');
+        return handleApiError(error, 'update dashboard region');
         throw error;
       }
     },
@@ -3869,7 +3857,7 @@ export const enhancedApi = {
         });
         return data;
       } catch (error) {
-        handleApiError(error, 'delete dashboard region');
+        return handleApiError(error, 'delete dashboard region');
         throw error;
       }
     },
@@ -3883,7 +3871,7 @@ export const enhancedApi = {
         });
         return data;
       } catch (error) {
-        handleApiError(error, 'reorder dashboard regions');
+        return handleApiError(error, 'reorder dashboard regions');
         throw error;
       }
     },
@@ -3895,7 +3883,7 @@ export const enhancedApi = {
         });
         return data || [];
       } catch (error) {
-        handleApiError(error, 'get role defaults');
+        return handleApiError(error, 'get role defaults');
         return [];
       }
     },
@@ -3908,7 +3896,7 @@ export const enhancedApi = {
         });
         return data || [];
       } catch (error) {
-        handleApiError(error, 'get layout versions');
+        return handleApiError(error, 'get layout versions');
         return [];
       }
     },
@@ -3922,7 +3910,7 @@ export const enhancedApi = {
         });
         return data;
       } catch (error) {
-        handleApiError(error, 'create layout version');
+        return handleApiError(error, 'create layout version');
         throw error;
       }
     },
@@ -3936,7 +3924,7 @@ export const enhancedApi = {
         });
         return data;
       } catch (error) {
-        handleApiError(error, 'publish layout version');
+        return handleApiError(error, 'publish layout version');
         throw error;
       }
     },
@@ -3949,7 +3937,7 @@ export const enhancedApi = {
         });
         return data;
       } catch (error) {
-        handleApiError(error, 'revert to version');
+        return handleApiError(error, 'revert to version');
         throw error;
       }
     },
@@ -3963,7 +3951,7 @@ export const enhancedApi = {
         });
         return data;
       } catch (error) {
-        handleApiError(error, 'undo layout');
+        return handleApiError(error, 'undo layout');
         throw error;
       }
     },
@@ -3976,7 +3964,7 @@ export const enhancedApi = {
         });
         return data;
       } catch (error) {
-        handleApiError(error, 'redo layout');
+        return handleApiError(error, 'redo layout');
         throw error;
       }
     },
@@ -3988,7 +3976,7 @@ export const enhancedApi = {
         });
         return data;
       } catch (error) {
-        handleApiError(error, 'get layout history');
+        return handleApiError(error, 'get layout history');
         return { canUndo: false, canRedo: false, recentEvents: [] };
       }
     },
@@ -4001,7 +3989,7 @@ export const enhancedApi = {
         });
         return data || [];
       } catch (error) {
-        handleApiError(error, 'get approved widgets');
+        return handleApiError(error, 'get approved widgets');
         return [];
       }
     },
@@ -4015,7 +4003,7 @@ export const enhancedApi = {
         });
         return data;
       } catch (error) {
-        handleApiError(error, 'register widget');
+        return handleApiError(error, 'register widget');
         throw error;
       }
     },
@@ -4028,7 +4016,7 @@ export const enhancedApi = {
         });
         return data || [];
       } catch (error) {
-        handleApiError(error, 'get region presence');
+        return handleApiError(error, 'get region presence');
         return [];
       }
     },
@@ -4041,7 +4029,7 @@ export const enhancedApi = {
           body: JSON.stringify({ userId, sessionId, isEditing })
         });
       } catch (error) {
-        handleApiError(error, 'update region presence');
+        return handleApiError(error, 'update region presence');
       }
     },
     // Template methods
@@ -4054,7 +4042,7 @@ export const enhancedApi = {
           });
           return response?.data || [];
         } catch (error) {
-          handleApiError(error, 'list templates');
+          return handleApiError(error, 'list templates');
           return [];
         }
       },
@@ -4066,7 +4054,7 @@ export const enhancedApi = {
           });
           return response?.data;
         } catch (error) {
-          handleApiError(error, 'get template');
+          return handleApiError(error, 'get template');
           throw error;
         }
       },
@@ -4080,7 +4068,7 @@ export const enhancedApi = {
           });
           return response?.data;
         } catch (error) {
-          handleApiError(error, 'create template');
+          return handleApiError(error, 'create template');
           throw error;
         }
       },
@@ -4094,7 +4082,7 @@ export const enhancedApi = {
           });
           return response?.data;
         } catch (error) {
-          handleApiError(error, 'update template');
+          return handleApiError(error, 'update template');
           throw error;
         }
       },
@@ -4106,7 +4094,7 @@ export const enhancedApi = {
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
           });
         } catch (error) {
-          handleApiError(error, 'delete template');
+          return handleApiError(error, 'delete template');
           throw error;
         }
       }
@@ -4121,7 +4109,7 @@ export const enhancedApi = {
         });
         return data || { success: false };
       } catch (error) {
-        handleApiError(error, 'acquire region lock');
+        return handleApiError(error, 'acquire region lock');
         return { success: false };
       }
     },
@@ -4134,7 +4122,7 @@ export const enhancedApi = {
           body: JSON.stringify({ action: 'release' })
         });
       } catch (error) {
-        handleApiError(error, 'release region lock');
+        return handleApiError(error, 'release region lock');
       }
     },
     // Migration method
@@ -4148,7 +4136,7 @@ export const enhancedApi = {
         });
         return data;
       } catch (error) {
-        handleApiError(error, 'migrate cards to regions');
+        return handleApiError(error, 'migrate cards to regions');
         throw error;
       }
     },
@@ -4163,7 +4151,7 @@ export const enhancedApi = {
         });
         return data;
       } catch (error) {
-        handleApiError(error, 'upsert dashboard card');
+        return handleApiError(error, 'upsert dashboard card');
         throw error;
       }
     },
@@ -4175,7 +4163,7 @@ export const enhancedApi = {
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
       } catch (error) {
-        handleApiError(error, 'delete dashboard card');
+        return handleApiError(error, 'delete dashboard card');
         throw error;
       }
     }
@@ -4188,7 +4176,7 @@ export const enhancedApi = {
   },
   // Alias for technicians.list
   users: {
-    list: async (filters?: { roles?: string[]; status?: string }): Promise<any[]> => {
+    list: async (): Promise<any[]> => {
       return technicians.list();
     },
   }

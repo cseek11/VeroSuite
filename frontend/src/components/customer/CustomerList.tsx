@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import type { Account } from '@/types/enhanced-types';
 import { logger } from '@/utils/logger';
+import { secureApiClient } from '@/lib/secure-api-client';
+import { enhancedSearch } from '@/lib/search-service';
 
 interface CustomerListProps {
   onCustomerClick: (customer: Account) => void;
@@ -29,7 +31,7 @@ export const CustomerList: React.FC<CustomerListProps> = ({
   selectedCustomerId
 }) => {
   const { preferences, setViewMode } = useUserPreferences();
-  const { densityMode, toggleDensity, canUseDense } = useDensityMode();
+  const { densityMode } = useDensityMode();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'status' | 'balance' | 'created_at'>('name');
@@ -58,25 +60,30 @@ export const CustomerList: React.FC<CustomerListProps> = ({
   const { data: customers = [], isLoading, error } = useQuery({
     queryKey: ['customers', searchTerm, statusFilter, typeFilter],
     queryFn: async () => {
-      // Start logging the search
-      if (searchTerm.trim()) {
-        startSearchLog(searchTerm, {
-          status: statusFilter !== 'all' ? statusFilter : undefined,
-          type: typeFilter !== 'all' ? typeFilter : undefined
-        });
+      try {
+        // Start logging the search
+        if (searchTerm.trim()) {
+          startSearchLog(searchTerm, {
+            status: statusFilter !== 'all' ? statusFilter : undefined,
+            type: typeFilter !== 'all' ? typeFilter : undefined
+          });
+        }
+
+        const results = await secureApiClient.accounts.getAll();
+
+        // Complete logging the search
+        if (searchTerm.trim()) {
+          await completeSearchLog(searchTerm, results.length, {
+            status: statusFilter !== 'all' ? statusFilter : undefined,
+            type: typeFilter !== 'all' ? typeFilter : undefined
+          });
+        }
+
+        return results;
+      } catch (err) {
+        logger.error('Failed to load customers', err, 'CustomerList');
+        throw err;
       }
-
-      const results = await secureApiClient.accounts.getAll();
-
-      // Complete logging the search
-      if (searchTerm.trim()) {
-        await completeSearchLog(searchTerm, results.length, {
-          status: statusFilter !== 'all' ? statusFilter : undefined,
-          type: typeFilter !== 'all' ? typeFilter : undefined
-        });
-      }
-
-      return results;
     },
   });
 
@@ -386,6 +393,7 @@ export const CustomerList: React.FC<CustomerListProps> = ({
                 customer={customer}
                 onClick={() => handleCustomerClick(customer)}
                 isSelected={selectedCustomerId === customer.id}
+                densityMode={densityMode}
               />
             ))
           )}

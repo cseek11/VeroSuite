@@ -1,4 +1,5 @@
 import { enhancedApi } from '@/lib/enhanced-api';
+import { logger } from '@/utils/logger';
 import { transformTemplateToKpiData } from '@/utils/kpiTemplateUtils';
 import { isUserTemplate } from './cardHelpers';
 
@@ -183,7 +184,14 @@ export const handleKpiBuilderSave = async (
     };
 
     const savedKpi = await enhancedApi.userKpis.create(userKpiData);
-    const newCardId = await addCard('kpi-display', { x: 0, y: 0 });
+
+    let newCardId: string;
+    try {
+      newCardId = await addCard('kpi-display', { x: 0, y: 0 });
+    } catch (error) {
+      logger.error('Failed to add KPI display card', error, 'kpiHandlers');
+      throw error;
+    }
 
     setKpiData(prev => {
       const transformedKpiData = {
@@ -221,20 +229,22 @@ export const handleKpiBuilderSave = async (
     if (currentLayoutId) {
       try {
         await enhancedApi.dashboardLayouts.upsertCard(currentLayoutId, {
-          card_uid: newCardId,
+          id: newCardId,
           type: 'kpi-display',
           x: 0,
           y: 0,
           width: 300,
-          height: 200,
-          user_kpi_id: savedKpi.id,
-          config: {}
+          height: 200
         });
-      } catch (error) {}
+      } catch (error) {
+        logger.error('Failed to persist KPI card to layout', error, 'kpiHandlers');
+        throw error;
+      }
     }
 
     setShowKPIBuilder(false);
   } catch (error) {
-    // You could add a toast notification here
+    logger.error('Failed to save KPI from builder', error, 'kpiHandlers');
+    throw error;
   }
 };

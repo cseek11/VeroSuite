@@ -6,13 +6,13 @@ import { logger } from '@/utils/logger';
 // TODO: Implement locations API in enhanced API
 // For now, using placeholder functions
 const crmApi = {
-  accountLocations: async (accountId: string) => {
+  accountLocations: async (_accountId: string) => {
     if (process.env.NODE_ENV === 'development') {
       logger.debug('TODO: Implement locations API in enhanced API', {}, 'useLocations');
     }
     return [];
   },
-  createLocation: async (locationData: Partial<Location>) => {
+  createLocation: async (_locationData: Partial<Location>) => {
     if (process.env.NODE_ENV === 'development') {
       logger.debug('TODO: Implement locations API in enhanced API', {}, 'useLocations');
     }
@@ -43,9 +43,10 @@ export const useAccountLocations = (accountId: string) => {
 export const useLocation = (id: string) => {
   return useQuery({
     queryKey: queryKeys.locations.detail(id),
-    queryFn: () => crmApi.accountLocations('').then(locations => 
-      locations.find(location => location.id === id)
-    ),
+    queryFn: async () => {
+      const locations = await crmApi.accountLocations('');
+      return locations.find(location => location.id === id) ?? null;
+    },
     enabled: !!id,
   });
 };
@@ -59,7 +60,7 @@ export const useCreateLocation = () => {
     onSuccess: (data) => {
       invalidateQueries.locations();
       // Also invalidate the specific account's locations
-      if (data.account_id) {
+      if (data && data.account_id) {
         queryClient.invalidateQueries({ 
           queryKey: queryKeys.locations.byAccount(data.account_id) 
         });
@@ -78,7 +79,7 @@ export const useUpdateLocation = () => {
     onSuccess: (data) => {
       invalidateQueries.locations();
       // Also invalidate the specific account's locations
-      if (data.account_id) {
+      if (data && data.account_id) {
         queryClient.invalidateQueries({ 
           queryKey: queryKeys.locations.byAccount(data.account_id) 
         });
