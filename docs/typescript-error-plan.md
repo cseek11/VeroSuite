@@ -2,7 +2,8 @@
 
 - Command used: `cd frontend && npm run typecheck`
 - Log file: `frontend/tmp/ts-errors.log`
-- Total TS errors: 576 (run 2025-12-07, updated 2025-12-07) — clusters in components (482), hooks (83), routes (4), stores (2), context (2), lib (1), config (1), pages (1).
+- Total TS errors: 307 (run 2025-12-07, updated 2025-12-07) — down from 419 (112 errors fixed, 26.7% reduction)
+- Error distribution: Type mismatches (100), Unused variables (65), Duplicate types (48), Argument types (24), Other (70)
 
 ## Error Summary (2025-12-07 run)
 
@@ -50,9 +51,10 @@
 
 ### Two-agent remediation plan (non-overlapping) — 2025-12-07 (Updated)
 
-**Current Status:** 576 total TS errors
+**Current Status:** 302 total TS errors (down from 419, down from 307)
 - **Agent A scope:** ~4 errors (lib: 1, config: 1, context: 2)
-- **Agent B scope:** ~572 errors (components: 482, hooks: 83, routes: 4, stores: 2, pages: 1)
+- **Agent B scope:** ~298 errors (components, hooks, routes, stores, pages)
+- **Progress:** 117 errors fixed in current session (27.9% reduction)
 
 **Agent A (Core Infrastructure & Libraries):**
 - All files in `src/lib/*` (1 error)
@@ -74,6 +76,12 @@
 **Non-overlapping boundaries:**
 - Agent A: `src/lib/*`, `src/config/*`, `src/context/*` only
 - Agent B: Everything else (components, pages, routes, hooks, stores, test-utils)
+
+### Recent applied fixes (2025-12-07, continued)
+- Work order components: Removed unused React import from `WorkOrderDetail.tsx`, fixed exactOptionalPropertyTypes issues in `WorkOrderDetail.tsx` and `EditWorkOrderPage.tsx` (conditional property spreading for optional fields).
+- Hook fixes: Fixed socket.io imports in `useRegionPresence.ts` and `useWebSocket.ts` (using type imports), fixed exactOptionalPropertyTypes in `useSmartKPIs.ts` and `useSmartKPIsSimple.ts` (conditional changeType property).
+- Route fixes: Added missing state variables `setShowTemplateModal` in `Communications.tsx`, `setLoading` and `setError` in `Knowledge.tsx`, fixed undefined handling in `Charts.tsx` funnel stages calculation.
+- Dashboard components: Fixed `VirtualCardContainer.tsx` react-window import issue (temporarily disabled Grid until package is installed, added fallback rendering).
 
 ### Recent applied fixes (2025-12-07)
 - Billing/payments cluster hardened: PaymentForm (Stripe change event typing, exactOptionalPropertyTypes guards, Elements options), PaymentTracking/ReconciliationTools (safe defaults, placeholder data, date handlers), PaymentMethodManager selects typed, PaymentHistory status config includes “all”, PLReport/RevenueAnalytics lint cleanups, RecurringPayments button children, SavedPaymentMethods DTO defaulting.

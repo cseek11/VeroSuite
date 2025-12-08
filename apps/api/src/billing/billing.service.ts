@@ -11,7 +11,6 @@ import {
   PaymentResponseDto,
   CreatePaymentMethodDto,
   PaymentMethodResponseDto,
-  SendReminderDto,
   InvoiceStatus
 } from './dto';
 
@@ -1816,7 +1815,6 @@ export class BillingService {
       };
 
       const stripeInterval = stripeIntervalMap[createRecurringPaymentDto.interval] || 'month';
-      const intervalCount = createRecurringPaymentDto.interval === 'quarterly' ? 3 : 1;
 
       // Create Stripe price
       const price = await this.stripeService.createPrice(

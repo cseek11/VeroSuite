@@ -24,6 +24,10 @@ if (!supabaseUrl || !supabaseServiceKey) {
   process.exit(1);
 }
 
+// Type guard for TypeScript
+const SUPABASE_URL = supabaseUrl as string;
+const SUPABASE_SERVICE_KEY = supabaseServiceKey as string;
+
 async function runMigration(migrationPath: string) {
   try {
     // Resolve the migration file path
@@ -43,7 +47,7 @@ async function runMigration(migrationPath: string) {
     console.log('');
 
     // Create Supabase client
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
     // Split SQL into individual statements (handle multiple statements)
     const statements = sql
@@ -58,7 +62,7 @@ async function runMigration(migrationPath: string) {
     let failCount = 0;
 
     for (let i = 0; i < statements.length; i++) {
-      const statement = statements[i];
+      const statement = statements[i]!;
       
       // Skip comments and empty lines
       if (statement.startsWith('--') || statement.trim().length === 0) {

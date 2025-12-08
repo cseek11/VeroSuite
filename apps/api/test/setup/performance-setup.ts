@@ -5,9 +5,16 @@
 
 import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { performance } from 'perf_hooks';
 
+// Helper to safely get error message
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+}
 // Performance testing configuration
 export class PerformanceTestSuite {
   private app: INestApplication;
@@ -203,7 +210,7 @@ export class PerformanceTestSuite {
         
       } catch (error) {
         errors.push({
-          error: error.message,
+          error: getErrorMessage(error),
           timestamp: new Date().toISOString()
         });
         failureCount++;

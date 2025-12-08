@@ -11,7 +11,7 @@ A comprehensive, production-ready multi-tenant pest control operations platform 
 
 ### Backend Setup
 ```bash
-cd backend
+cd apps/api
 npm install
 cp .env.example .env
 # Configure your environment variables in .env
@@ -20,7 +20,7 @@ npm run start:dev
 
 ### Frontend Setup
 ```bash
-cd frontend
+cd apps/web
 npm install
 npm run dev
 ```
@@ -29,6 +29,34 @@ npm run dev
 - **Frontend**: http://localhost:5173
 - **Backend API**: http://localhost:3001/api
 - **API Documentation**: http://localhost:3001/api/docs
+
+## 📁 Project Structure (Phase 1)
+
+VeroField uses a monorepo structure with clear separation of concerns:
+
+```
+VeroField/
+├── apps/                    # Runtime applications
+│   ├── api/                 # Backend API (NestJS)
+│   ├── web/                 # Frontend (React)
+│   ├── mobile/              # Mobile app (React Native)
+│   └── website/             # Marketing site
+├── packages/                # Shared libraries (Phase 2+)
+│   ├── domain/              # (Reserved) Domain layer
+│   ├── application/         # (Reserved) Application layer
+│   ├── infrastructure/      # (Reserved) Infrastructure layer
+│   └── shared/              # (Reserved) Shared utilities
+├── infrastructure/          # Deployment & observability
+│   ├── docker/              # Docker Compose configs
+│   ├── kubernetes/          # K8s manifests
+│   ├── terraform/           # (Reserved) IaC
+│   └── monitoring/          # Monitoring & observability
+├── libs/                    # Legacy shared code
+├── docs/                    # Documentation
+└── ... (supporting folders)
+```
+
+**See [Phase 1 Architecture](docs/phase-1-architecture.md) for full migration details.**
 
 ## 📚 Documentation
 

@@ -14,7 +14,7 @@ export class CreateRecurringPaymentDto {
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @IsString()
-  invoice_id: string;
+  invoice_id!: string;
 
   @ApiProperty({
     description: 'Recurring payment interval',
@@ -22,7 +22,7 @@ export class CreateRecurringPaymentDto {
     example: RecurringPaymentInterval.MONTHLY,
   })
   @IsEnum(RecurringPaymentInterval)
-  interval: RecurringPaymentInterval;
+  interval!: RecurringPaymentInterval;
 
   @ApiProperty({
     description: 'Amount to charge per interval',
@@ -30,7 +30,7 @@ export class CreateRecurringPaymentDto {
   })
   @IsNumber()
   @Min(0.5)
-  amount: number;
+  amount!: number;
 
   @ApiPropertyOptional({
     description: 'Start date for recurring payments (ISO date string)',

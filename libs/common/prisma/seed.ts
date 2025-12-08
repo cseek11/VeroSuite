@@ -1,9 +1,16 @@
 import { PrismaClient } from '@prisma/client';
 
+// Simple logger for seeding script
+const logger = {
+  info: (message: string, data?: any) => {
+    console.log(`[INFO] ${message}`, data ? JSON.stringify(data, null, 2) : '');
+  }
+};
+
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting database seeding...');
+  logger.info('Starting database seeding...');
 
   // Use the existing tenant ID from the user's metadata
   const tenantId = 'fb39f15b-b382-4525-8404-1e32ca1486c9';
@@ -23,9 +30,9 @@ async function main() {
         subscription_tier: 'premium',
       },
     });
-    console.log('✅ Created tenant:', tenant.name);
+    logger.info('Created tenant', { name: tenant.name });
   } else {
-    console.log('✅ Using existing tenant:', tenant.name);
+    logger.info('Using existing tenant', { name: tenant.name });
   }
 
   // Create customer segments
@@ -82,7 +89,7 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Created customer segments:', segments.length);
+  logger.info('Created customer segments', { count: segments.length });
 
   // Create service categories
   const categories = await Promise.all([
@@ -143,7 +150,7 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Created service categories:', categories.length);
+  logger.info('Created service categories', { count: categories.length });
 
   // Create service types
   const serviceTypes = await Promise.all([
@@ -210,7 +217,7 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Created service types:', serviceTypes.length);
+  logger.info('Created service types', { count: serviceTypes.length });
 
   // Create pricing tiers
   const pricingTiers = await Promise.all([
@@ -249,7 +256,7 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Created pricing tiers:', pricingTiers.length);
+  logger.info('Created pricing tiers', { count: pricingTiers.length });
 
   // Create service pricing
   const servicePricing = await Promise.all([
@@ -301,7 +308,7 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Created service pricing:', servicePricing.length);
+  logger.info('Created service pricing', { count: servicePricing.length });
 
   // Create sample accounts
   const accounts = await Promise.all([
@@ -355,7 +362,7 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Created sample accounts:', accounts.length);
+  logger.info('Created sample accounts', { count: accounts.length });
 
   // Create customer profiles
   const customerProfiles = await Promise.all([
@@ -527,11 +534,15 @@ async function main() {
   console.log('📊 Seeding KPI Templates...');
   
   // Import comprehensive KPI templates
-  const { kpiTemplates: templateDefinitions } = await import('./kpi-templates-seed');
+  const { kpiTemplates: templateDefinitions } = await import('./kpi-templates-seed.js');
   
   const kpiTemplates = await Promise.all(
-    templateDefinitions.map(template => 
-      prisma.kpiTemplate.upsert({
+    templateDefinitions.map((template: any) => {
+      if (!template.id) {
+        throw new Error('Missing template id for KPI template seed entry');
+      }
+
+      return prisma.kpiTemplate.upsert({
         where: { id: template.id },
         update: {},
         create: {
@@ -540,8 +551,8 @@ async function main() {
           formula_fields: template.formula_fields,
           status: 'published'
         }
-      })
-    )
+      });
+    })
   );
 
   console.log('✅ Created KPI templates:', kpiTemplates.length);

@@ -21,12 +21,12 @@ async function main() {
   console.log('✅ Using existing tenant:', tenant.name);
 
   // Import comprehensive KPI templates
-  const { kpiTemplates: templateDefinitions } = await import('./kpi-templates-clean');
+  const { kpiTemplates: templateDefinitions } = await import('./kpi-templates-clean.js');
   
   console.log(`📊 Seeding ${templateDefinitions.length} KPI Templates...`);
   
   const kpiTemplates = await Promise.all(
-    templateDefinitions.map(template => 
+    templateDefinitions.map((template: any) => 
       prisma.kpiTemplate.create({
         data: {
           name: template.name,

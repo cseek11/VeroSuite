@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.frontend.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "useDefineForClassFields": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "@app/*": ["../apps/*"],
+      "@libs/*": ["../libs/*"],
+      "@common/*": ["../libs/common/src/*"],
+      "@types/*": ["../types/*"],
+      "@verofield/common": ["../libs/common/src"],
+      "@verofield/common/*": ["../libs/common/src/*"]
+    }
+  },
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

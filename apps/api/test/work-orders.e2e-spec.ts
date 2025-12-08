@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { getTestPrismaClient } from './utils/test-database';
 import { getAdminToken } from './utils/test-auth';
-import { expectV2Response, expectV2PaginatedResponse } from './utils/validate-v2';
+import { expectV2Response } from './utils/validate-v2';
 import { configureTestApp } from './utils/test-app';
 import { TEST_TENANTS } from './global-setup';
 

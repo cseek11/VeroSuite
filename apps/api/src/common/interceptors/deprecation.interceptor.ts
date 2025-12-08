@@ -1,6 +1,5 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
 
 /**
  * Interceptor to add deprecation headers to v1 API endpoints
@@ -9,7 +8,6 @@ import { tap } from 'rxjs/operators';
 @Injectable()
 export class DeprecationInterceptor implements NestInterceptor {
   private readonly sunsetDate: string;
-  private readonly baseUrl: string = '/api/v2';
 
   constructor() {
     // Set sunset date to 1 year from now

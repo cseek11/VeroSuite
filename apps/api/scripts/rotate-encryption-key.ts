@@ -45,8 +45,8 @@ if (!newKeyHex) {
 }
 
 // Convert hex keys to buffers
-const oldKey = Buffer.from(oldKeyHex, 'hex');
-const newKey = Buffer.from(newKeyHex, 'hex');
+const oldKey = Buffer.from(oldKeyHex as string, 'hex');
+const newKey = Buffer.from(newKeyHex as string, 'hex');
 
 if (oldKey.length !== keyLength) {
   throw new Error(`OLD_ENCRYPTION_KEY must be ${keyLength * 2} hex characters (${keyLength} bytes)`);

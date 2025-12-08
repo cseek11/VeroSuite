@@ -3,8 +3,8 @@ import { AuthService } from '../../src/auth/auth.service';
 import { AppModule } from '../../src/app.module';
 import { TEST_PASSWORD, TEST_USERS } from '../global-setup';
 
-let authService: AuthService;
-let moduleRef: TestingModule;
+let authService: AuthService | null = null;
+let moduleRef: TestingModule | null = null;
 
 // Token cache to avoid repeated login calls
 const tokenCache = new Map<string, { token: string, expiresAt: number }>();
@@ -42,6 +42,9 @@ export async function getTestAuthToken(email: string): Promise<string> {
   
   // Login with test credentials
   // AuthService.login() takes (email: string, password: string)
+  if (!authService) {
+    throw new Error('AuthService failed to initialize');
+  }
   const result = await authService.login(email, TEST_PASSWORD);
   
   // Cache token (expires in 50 minutes)

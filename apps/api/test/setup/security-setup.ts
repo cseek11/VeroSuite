@@ -5,7 +5,15 @@
 
 import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
+
+// Helper to safely get error message
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+}
 
 // Security testing configuration
 export class SecurityTestSuite {
@@ -83,7 +91,7 @@ export class SecurityTestSuite {
       } catch (error) {
         results.push({
           payload,
-          error: error.message,
+          error: getErrorMessage(error),
           blocked: true
         });
       }
@@ -116,7 +124,7 @@ export class SecurityTestSuite {
       } catch (error) {
         results.push({
           payload: JSON.stringify(payload),
-          error: error.message,
+          error: getErrorMessage(error),
           blocked: true
         });
       }
@@ -150,7 +158,7 @@ export class SecurityTestSuite {
       } catch (error) {
         results.push({
           payload,
-          error: error.message,
+          error: getErrorMessage(error),
           blocked: true
         });
       }
@@ -183,7 +191,7 @@ export class SecurityTestSuite {
       } catch (error) {
         results.push({
           payload,
-          error: error.message,
+          error: getErrorMessage(error),
           blocked: true
         });
       }
@@ -226,7 +234,7 @@ export class SecurityTestSuite {
       } catch (error) {
         results.push({
           password,
-          error: error.message,
+          error: getErrorMessage(error),
           blocked: true
         });
       }
@@ -259,7 +267,7 @@ export class SecurityTestSuite {
     } catch (error) {
       return {
         sessionFixation: 'error',
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -289,7 +297,7 @@ export class SecurityTestSuite {
       } catch (error) {
         results.push({
           password,
-          error: error.message,
+          error: getErrorMessage(error),
           rejected: true
         });
       }
@@ -325,7 +333,7 @@ export class SecurityTestSuite {
     } catch (error) {
       return {
         sessionTimeout: 'error',
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -377,7 +385,7 @@ export class SecurityTestSuite {
     } catch (error) {
       return {
         passwordExposure: 'error',
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -404,7 +412,7 @@ export class SecurityTestSuite {
     } catch (error) {
       return {
         creditCardExposure: 'error',
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -444,7 +452,7 @@ export class SecurityTestSuite {
       } catch (error) {
         results.push({
           payload,
-          error: error.message,
+          error: getErrorMessage(error),
           blocked: true
         });
       }
@@ -493,7 +501,7 @@ export class SecurityTestSuite {
     } catch (error) {
       return {
         securityHeaders: 'error',
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -516,7 +524,7 @@ export class SecurityTestSuite {
     } catch (error) {
       return {
         errorHandling: 'error',
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -541,7 +549,7 @@ export class SecurityTestSuite {
     } catch (error) {
       return {
         xxe: 'error',
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -561,7 +569,7 @@ export class SecurityTestSuite {
     } catch (error) {
       return {
         accessControl: 'error',
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -586,7 +594,7 @@ export class SecurityTestSuite {
     } catch (error) {
       return {
         deserialization: 'error',
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -625,7 +633,7 @@ export class SecurityTestSuite {
       } catch (error) {
         results.push({
           payload,
-          error: error.message,
+          error: getErrorMessage(error),
           blocked: true
         });
       }
@@ -649,7 +657,7 @@ export class SecurityTestSuite {
     } catch (error) {
       return {
         csrf: 'error',
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -670,7 +678,7 @@ export class SecurityTestSuite {
     } catch (error) {
       return {
         clickjacking: 'error',
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -691,7 +699,7 @@ export class SecurityTestSuite {
     } catch (error) {
       return {
         logging: 'error',
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }

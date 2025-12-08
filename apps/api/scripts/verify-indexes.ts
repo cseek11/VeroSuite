@@ -70,7 +70,8 @@ async function verifyIndexes() {
     return verifyResults(data);
 
   } catch (error) {
-    console.error('❌ Error connecting to database:', error.message);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Error connecting to database:', errorMessage);
     console.log('\n📋 Manual Verification Required:');
     console.log('   Connect to your database and run:\n');
     console.log(`

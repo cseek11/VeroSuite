@@ -79,7 +79,7 @@ jobs:
           NODE_ENV: production
       
       - name: Build frontend
-        working-directory: ./frontend
+        working-directory: ./apps/web
         run: |
           npm ci
           npm run build
@@ -95,7 +95,7 @@ jobs:
           name: build-artifacts
           path: |
             apps/api/dist
-            frontend/dist
+            apps/web/dist
           retention-days: 7
 
   validate-environment:

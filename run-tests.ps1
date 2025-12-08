@@ -5,7 +5,7 @@ Write-Host "🧪 VeroField Comprehensive Test Suite" -ForegroundColor Cyan
 Write-Host "=====================================" -ForegroundColor Cyan
 
 # Check if we're in the right directory
-if (-not (Test-Path "backend") -or -not (Test-Path "frontend")) {
+if (-not (Test-Path "apps/api") -or -not (Test-Path "apps/web")) {
     Write-Host "❌ Error: Please run this script from the VeroField root directory" -ForegroundColor Red
     exit 1
 }
@@ -51,33 +51,33 @@ Write-Host "`n📦 Backend Testing" -ForegroundColor Magenta
 Write-Host "==================" -ForegroundColor Magenta
 
 # Install backend dependencies if needed
-if (-not (Test-Path "backend/node_modules")) {
+if (-not (Test-Path "apps/api/node_modules")) {
     Write-Host "📦 Installing backend dependencies..." -ForegroundColor Yellow
-    Push-Location "backend"
+    Push-Location "apps/api"
     npm install
     Pop-Location
 }
 
 # Run backend unit tests
-$testResults.BackendUnit = Run-Tests "backend" "npm run test:unit" "Backend Unit Tests"
+$testResults.BackendUnit = Run-Tests "apps/api" "npm run test:unit" "Backend Unit Tests"
 
 # Run backend E2E tests
-$testResults.BackendE2E = Run-Tests "backend" "npm run test:e2e" "Backend E2E Tests"
+$testResults.BackendE2E = Run-Tests "apps/api" "npm run test:e2e" "Backend E2E Tests"
 
 # Frontend Tests
 Write-Host "`n🎨 Frontend Testing" -ForegroundColor Magenta
 Write-Host "===================" -ForegroundColor Magenta
 
 # Install frontend dependencies if needed
-if (-not (Test-Path "frontend/node_modules")) {
+if (-not (Test-Path "apps/web/node_modules")) {
     Write-Host "📦 Installing frontend dependencies..." -ForegroundColor Yellow
-    Push-Location "frontend"
+    Push-Location "apps/web"
     npm install
     Pop-Location
 }
 
 # Run frontend unit tests
-$testResults.FrontendUnit = Run-Tests "frontend" "npm run test:unit" "Frontend Unit Tests"
+$testResults.FrontendUnit = Run-Tests "apps/web" "npm run test:unit" "Frontend Unit Tests"
 
 # Run frontend E2E tests (if Playwright is installed)
 $testResults.FrontendE2E = Run-Tests "frontend" "npm run test:e2e" "Frontend E2E Tests"

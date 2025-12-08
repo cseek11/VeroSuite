@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["DOM", "DOM.Iterable", "ES2020"],
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["frontend/src/*"],
+      "@app/*": ["apps/*"],
+      "@libs/*": ["libs/*"],
+      "@common/*": ["libs/common/src/*"],
+      "@types/*": ["types/*"],
+      "@verofield/common": ["libs/common/src"],
+      "@verofield/common/*": ["libs/common/src/*"]
+    }
+  },
+  "include": ["frontend", "libs", "shared", "types"],
+  "exclude": ["node_modules", "dist"]
+}
+
+
+
