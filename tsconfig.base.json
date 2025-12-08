@@ -24,7 +24,11 @@
       "@common/*": ["libs/common/src/*"],
       "@types/*": ["types/*"],
       "@verofield/common": ["libs/common/src"],
-      "@verofield/common/*": ["libs/common/src/*"]
+      "@verofield/common/*": ["libs/common/src/*"],
+      "@domain/*": ["packages/domain/src/*"],
+      "@application/*": ["packages/application/src/*"],
+      "@infrastructure/*": ["packages/infrastructure/src/*"],
+      "@shared/*": ["packages/shared/src/*"]
     },
     "noEmit": true,
     "incremental": true

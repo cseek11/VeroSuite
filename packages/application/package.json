@@ -1,0 +1,14 @@
+{
+  "name": "@verofield/application",
+  "version": "1.0.0",
+  "description": "Application layer - CQRS base classes, handlers, DTOs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["application", "cqrs", "commands", "queries"],
+  "author": "",
+  "license": "ISC"
+}

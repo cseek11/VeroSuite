@@ -1,0 +1,14 @@
+{
+  "name": "@verofield/infrastructure",
+  "version": "1.0.0",
+  "description": "Infrastructure layer - repositories, external services, data access",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["infrastructure", "repositories", "services"],
+  "author": "",
+  "license": "ISC"
+}
