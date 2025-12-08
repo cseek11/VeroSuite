@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.InspectorPanel = void 0;
+var jsx_runtime_1 = require("react/jsx-runtime");
+var lucide_react_1 = require("lucide-react");
+var framer_motion_1 = require("framer-motion");
+var InspectorPanel = function (_a) {
+    var isOpen = _a.isOpen, onClose = _a.onClose, _b = _a.title, title = _b === void 0 ? 'Inspector' : _b, children = _a.children, _c = _a.position, position = _c === void 0 ? 'right' : _c, _d = _a.width, width = _d === void 0 ? 400 : _d;
+    return ((0, jsx_runtime_1.jsx)(framer_motion_1.AnimatePresence, { children: isOpen && ((0, jsx_runtime_1.jsxs)(jsx_runtime_1.Fragment, { children: [(0, jsx_runtime_1.jsx)(framer_motion_1.motion.div, { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, className: "fixed inset-0 bg-black bg-opacity-20 z-40", onClick: onClose }), (0, jsx_runtime_1.jsx)(framer_motion_1.motion.div, { initial: { x: position === 'right' ? width : -width }, animate: { x: 0 }, exit: { x: position === 'right' ? width : -width }, transition: { type: 'spring', damping: 25, stiffness: 200 }, className: "fixed top-0 ".concat(position === 'right' ? 'right-0' : 'left-0', " h-full bg-white shadow-2xl z-50"), style: { width: "".concat(width, "px") }, children: (0, jsx_runtime_1.jsxs)("div", { className: "h-full flex flex-col", children: [(0, jsx_runtime_1.jsxs)("div", { className: "flex items-center justify-between p-4 border-b border-gray-200", children: [(0, jsx_runtime_1.jsx)("h3", { className: "font-semibold text-gray-900", children: title }), (0, jsx_runtime_1.jsx)("button", { onClick: onClose, className: "p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors", children: (0, jsx_runtime_1.jsx)(lucide_react_1.X, { className: "w-5 h-5" }) })] }), (0, jsx_runtime_1.jsx)("div", { className: "flex-1 overflow-y-auto p-4", children: children || ((0, jsx_runtime_1.jsxs)("div", { className: "text-sm text-gray-500", children: [(0, jsx_runtime_1.jsx)("p", { children: "Inspector content goes here" }), (0, jsx_runtime_1.jsx)("p", { className: "mt-4", children: "Drill-downs, inline editing, detailed views, etc." })] })) })] }) })] })) }));
+};
+exports.InspectorPanel = InspectorPanel;

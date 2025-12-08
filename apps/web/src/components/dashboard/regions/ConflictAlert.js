@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ConflictAlert = void 0;
+var jsx_runtime_1 = require("react/jsx-runtime");
+var ConflictAlert = function (_a) {
+    var conflicts = _a.conflicts, onResolve = _a.onResolve, onDismiss = _a.onDismiss;
+    if (conflicts.length === 0) {
+        return null;
+    }
+    return ((0, jsx_runtime_1.jsx)("div", { className: "conflict-alert fixed top-4 right-4 z-50 max-w-md", children: (0, jsx_runtime_1.jsx)("div", { className: "bg-yellow-50 border-l-4 border-yellow-400 p-4 shadow-lg rounded", children: (0, jsx_runtime_1.jsxs)("div", { className: "flex items-start", children: [(0, jsx_runtime_1.jsx)("div", { className: "flex-shrink-0", children: (0, jsx_runtime_1.jsx)("svg", { className: "h-5 w-5 text-yellow-400", viewBox: "0 0 20 20", fill: "currentColor", children: (0, jsx_runtime_1.jsx)("path", { fillRule: "evenodd", d: "M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z", clipRule: "evenodd" }) }) }), (0, jsx_runtime_1.jsxs)("div", { className: "ml-3 flex-1", children: [(0, jsx_runtime_1.jsx)("h3", { className: "text-sm font-medium text-yellow-800", children: "Editing Conflicts Detected" }), (0, jsx_runtime_1.jsxs)("div", { className: "mt-2 text-sm text-yellow-700", children: [(0, jsx_runtime_1.jsxs)("p", { children: [conflicts.length, " ", conflicts.length === 1 ? 'region' : 'regions', " ", conflicts.length === 1 ? 'is' : 'are', " being edited by other users."] }), (0, jsx_runtime_1.jsx)("ul", { className: "mt-2 list-disc list-inside", children: conflicts.map(function (conflict, index) { return ((0, jsx_runtime_1.jsxs)("li", { children: ["Region ", conflict.region_id.slice(0, 8), ": ", conflict.conflicting_users.length, " ", conflict.conflicting_users.length === 1 ? 'user' : 'users'] }, index)); }) })] }), (0, jsx_runtime_1.jsxs)("div", { className: "mt-4 flex gap-2", children: [onResolve && ((0, jsx_runtime_1.jsx)("button", { onClick: onResolve, className: "px-3 py-1 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700", children: "Resolve Conflicts" })), onDismiss && ((0, jsx_runtime_1.jsx)("button", { onClick: onDismiss, className: "px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300", children: "Dismiss" }))] })] })] }) }) }));
+};
+exports.ConflictAlert = ConflictAlert;
