@@ -42,11 +42,23 @@ is_cross_platform_context(file) if {
 	contains(file.path, "/shared/")
 }
 
-# Helper: Check if file is platform-specific (frontend/ or VeroFieldMobile/ unless shared)
+# Helper: Check if file is platform-specific (apps/web/ or apps/mobile/ unless shared)
+is_platform_specific(file) if {
+	startswith(file.path, "apps/web/")
+	not contains(file.path, "/shared/")
+	not startswith(file.path, "apps/web/src/lib/") # Shared libs in frontend
+}
+
+# Backward compatibility: Support old frontend/ path during transition
 is_platform_specific(file) if {
 	startswith(file.path, "frontend/")
 	not contains(file.path, "/shared/")
-	not startswith(file.path, "frontend/src/lib/") # Shared libs in frontend
+	not startswith(file.path, "frontend/src/lib/")
+}
+
+is_platform_specific(file) if {
+	startswith(file.path, "apps/mobile/")
+	not contains(file.path, "/shared/")
 }
 
 is_platform_specific(file) if {

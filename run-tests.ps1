@@ -80,7 +80,7 @@ if (-not (Test-Path "apps/web/node_modules")) {
 $testResults.FrontendUnit = Run-Tests "apps/web" "npm run test:unit" "Frontend Unit Tests"
 
 # Run frontend E2E tests (if Playwright is installed)
-$testResults.FrontendE2E = Run-Tests "frontend" "npm run test:e2e" "Frontend E2E Tests"
+$testResults.FrontendE2E = Run-Tests "apps/web" "npm run test:e2e" "Frontend E2E Tests"
 
 # Generate test report
 Write-Host "`n📊 Test Results Summary" -ForegroundColor Cyan

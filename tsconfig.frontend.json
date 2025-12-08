@@ -6,7 +6,7 @@
     "lib": ["DOM", "DOM.Iterable", "ES2020"],
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["frontend/src/*"],
+      "@/*": ["apps/web/src/*"],
       "@app/*": ["apps/*"],
       "@libs/*": ["libs/*"],
       "@common/*": ["libs/common/src/*"],
@@ -15,7 +15,7 @@
       "@verofield/common/*": ["libs/common/src/*"]
     }
   },
-  "include": ["frontend", "libs", "shared", "types"],
+  "include": ["apps/web", "libs", "shared", "types"],
   "exclude": ["node_modules", "dist"]
 }
 

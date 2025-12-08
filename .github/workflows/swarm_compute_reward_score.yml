@@ -190,12 +190,12 @@ jobs:
           BACKEND_COV=""
           
           # Check for frontend coverage (prioritize artifacts from CI workflow)
-          if [ -f "artifacts/frontend/coverage-final.json" ]; then
-            FRONTEND_COV="artifacts/frontend/coverage-final.json"
+          if [ -f "artifacts/web/coverage-final.json" ]; then
+            FRONTEND_COV="artifacts/web/coverage-final.json"
             echo "Found frontend coverage in artifacts"
-          elif [ -f "frontend/coverage/coverage-final.json" ]; then
-            FRONTEND_COV="frontend/coverage/coverage-final.json"
-            echo "Found frontend coverage in frontend directory"
+          elif [ -f "apps/web/coverage/coverage-final.json" ]; then
+            FRONTEND_COV="apps/web/coverage/coverage-final.json"
+            echo "Found frontend coverage in apps/web directory"
           else
             echo "No frontend coverage found"
           fi
