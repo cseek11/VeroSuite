@@ -1,0 +1,17 @@
+# Test File for Auto-PR Workflow Trigger
+
+This is a test file created to verify the Auto-PR workflow trigger system.
+
+Created: 2025-11-18
+Purpose: End-to-end testing of workflow trigger fixes
+
+## Changes Made
+
+1. Fixed GitHub CLI authentication
+2. Fixed workflow trigger flags (-f instead of --field)
+3. Fixed branch reference (main instead of PR branch)
+4. Improved PR number extraction
+5. Enhanced error logging
+
+This file will be used to create a test PR and verify the workflow triggers successfully.
+
